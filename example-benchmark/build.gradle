@@ -1,0 +1,17 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+dependencies {
+    compile project(':nitrite')
+    compile "com.orientechnologies:orientdb-object:$orientdbVersion"
+    compile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+    compile "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    compile "org.apache.commons:commons-lang3:$commonsLang3Version"
+    compile "org.mongodb:mongo-java-driver:$mongoDriverVersion"
+    compile "org.mongodb:bson:$mongoDriverVersion"
+}
+
+mainClassName = "org.dizitart.no2.benchmark.BenchmarkSuite"

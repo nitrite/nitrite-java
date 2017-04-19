@@ -1,0 +1,65 @@
+package org.dizitart.no2.util;
+
+import lombok.experimental.UtilityClass;
+import org.dizitart.no2.Index;
+
+import java.util.*;
+
+import static org.dizitart.no2.Constants.INDEX_PREFIX;
+import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
+import static org.dizitart.no2.exceptions.ErrorCodes.VE_INDEX_NULL_INDEX;
+import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
+import static org.dizitart.no2.util.ValidationUtils.notNull;
+
+/**
+ * A utility class for nitrite {@link Index}.
+ *
+ * @since 1.0
+ * @author Anindya Chatterjee.
+ */
+@UtilityClass
+public class IndexUtils {
+    /**
+     * Gets the internal name of an {@link Index}.
+     *
+     * @param index the index
+     * @return the internal name.
+     */
+    public static String internalName(Index index) {
+        notNull(index, errorMessage("index can not be null", VE_INDEX_NULL_INDEX));
+
+        return  INDEX_PREFIX +
+                INTERNAL_NAME_SEPARATOR +
+                index.getCollectionName() +
+                INTERNAL_NAME_SEPARATOR +
+                index.getField() +
+                INTERNAL_NAME_SEPARATOR +
+                index.getIndexType();
+    }
+
+    /**
+     * Sorts a map against it values. It is used to sort a score map during
+     * full-text index search.
+     *
+     * @param <K>         the key type
+     * @param <V>         the value type
+     * @param unsortedMap the unsorted map
+     * @return sorted map based on values.
+     */
+    public static <K, V extends Comparable<V>> Map<K, V> sortByScore(Map<K, V> unsortedMap) {
+        List<Map.Entry<K, V>> list = new LinkedList<>(unsortedMap.entrySet());
+        Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
+            @Override
+            public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
+                return (e2.getValue()).compareTo(e1.getValue());
+            }
+        });
+
+        Map<K, V> result = new LinkedHashMap<>();
+        for (Map.Entry<K, V> entry : list) {
+            result.put(entry.getKey(), entry.getValue());
+        }
+
+        return result;
+    }
+}

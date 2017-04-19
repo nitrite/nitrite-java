@@ -1,0 +1,9 @@
+.root{
+    -fx-background: #333333;
+    -fx-text-fill: -text-dark;
+    -fx-prompt-text-fill: rgba(255,255,255,.3);
+
+    -text-disabled: -text-disabled-dark;
+    -background-disabled:rgba(255,255,255,.12);
+    -background-fill: -text-dark;
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Nitrite DataGate | Error </title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+    <!-- NProgress -->
+    <link rel="stylesheet"
+          th:href="@{/assets/css/nprogress.css}"
+          href="../assets/css/nprogress.css"/>
+
+    <!-- Custom Theme Style -->
+    <link rel="stylesheet"
+          th:href="@{/assets/css/custom.css}"
+          href="../assets/css/custom.css"/>
+  </head>
+
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <!-- page content -->
+        <div class="col-md-12">
+          <div class="col-middle">
+            <div class="text-center text-center">
+              <h1 class="error-number" th:text="${number}"></h1>
+              <h2 th:text="${header}"></h2>
+              <p th:text="${message}"></p>
+            </div>
+          </div>
+        </div>
+        <!-- /page content -->
+      </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="../assets/js/jquery.min.js"
+            th:src="@{/assets/js/jquery.min.js}"
+            type="text/javascript"></script>
+    <!-- Bootstrap -->
+    <script src="../assets/js/bootstrap.min.js"
+            th:src="@{/assets/js/bootstrap.min.js}"
+            type="text/javascript"></script>
+    <!-- FastClick -->
+    <script src="../assets/js/fastclick.js"
+            th:src="@{/assets/js/fastclick.js}"
+            type="text/javascript"></script>
+    <!-- NProgress -->
+    <script src="../assets/js/nprogress.js"
+            th:src="@{/assets/js/nprogress.js}"
+            type="text/javascript"></script>
+
+    <!-- Custom Theme Scripts -->
+    <script src="../assets/js/custom.js"
+            th:src="@{/assets/js/custom.js}"
+            type="text/javascript"></script>
+  </body>
+</html>

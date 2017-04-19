@@ -1,0 +1,162 @@
+package org.dizitart.no2.tool;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import org.dizitart.no2.*;
+import org.dizitart.no2.objects.ObjectRepository;
+
+import java.io.IOException;
+import java.util.Map;
+
+import static org.dizitart.no2.Constants.*;
+
+/**
+ * @author Anindya Chatterjee.
+ */
+class NitriteJsonImporter {
+    private JsonParser parser;
+    private Nitrite db;
+
+    public NitriteJsonImporter(Nitrite db) {
+        this.db = db;
+    }
+
+    public void setParser(JsonParser parser) {
+        this.parser = parser;
+    }
+
+    public void importData() throws IOException, ClassNotFoundException {
+        while (parser.nextToken() != JsonToken.END_OBJECT) {
+            String fieldName = parser.getCurrentName();
+
+            if (TAG_COLLECTIONS.equals(fieldName)) {
+                readCollection();
+            }
+
+            if (TAG_REPOSITORIES.equals(fieldName)) {
+                readRepository();
+            }
+        }
+    }
+
+    private void readRepository() throws IOException, ClassNotFoundException {
+        ObjectRepository<?> repository = null;
+        // move to [
+        parser.nextToken();
+
+        // loop till token equal to "]"
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            // loop until end of collection object
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String fieldName = parser.getCurrentName();
+
+                if (TAG_TYPE.equals(fieldName)) {
+                    // move to next token
+                    parser.nextToken();
+
+                    String typeId = parser.getText();
+                    Class<?> type = Class.forName(typeId);
+                    repository = db.getRepository(type);
+                }
+
+                if (TAG_INDICES.equals(fieldName)) {
+                    readIndices(repository);
+                }
+
+                if (TAG_DATA.equals(fieldName) && repository != null) {
+                    readCollectionData(repository.getDocumentCollection());
+                }
+            }
+        }
+    }
+
+    private void readCollection() throws IOException {
+        NitriteCollection collection = null;
+        // move to [
+        parser.nextToken();
+
+        // loop till token equal to "]"
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            // loop until end of collection object
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String fieldName = parser.getCurrentName();
+
+                if (TAG_NAME.equals(fieldName)) {
+                    // move to next token
+                    parser.nextToken();
+
+                    String collectionName = parser.getText();
+                    collection = db.getCollection(collectionName);
+                }
+
+                if (TAG_INDICES.equals(fieldName)) {
+                    readIndices(collection);
+                }
+
+                if (TAG_DATA.equals(fieldName)) {
+                    readCollectionData(collection);
+                }
+            }
+        }
+    }
+
+    private void readIndices(PersistentCollection<?> collection) throws IOException {
+        // move to [
+        parser.nextToken();
+
+        // loop till token equal to "]"
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            // loop until end of collection object
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String fieldName = parser.getCurrentName();
+
+                if (TAG_INDEX.equals(fieldName)) {
+                    parser.nextToken();
+
+                    Index index = parser.readValueAs(Index.class);
+                    if (collection != null && index != null
+                            && index.getField() != null
+                            && !collection.hasIndex(index.getField())) {
+                        collection.createIndex(index.getField(),
+                                IndexOptions.indexOptions(index.getIndexType()));
+                    }
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readCollectionData(NitriteCollection collection) throws IOException {
+        // move to [
+        parser.nextToken();
+
+        // loop till token equal to "]"
+        while (parser.nextToken() != JsonToken.END_ARRAY) {
+            // loop until end of collection object
+            Long id = null;
+            Map<String, Object> objectMap = null;
+            while (parser.nextToken() != JsonToken.END_OBJECT) {
+                String fieldName = parser.getCurrentName();
+
+                if (TAG_KEY.equals(fieldName)) {
+                    parser.nextToken();
+                    id = parser.readValueAs(Long.class);
+                }
+
+                if (TAG_VALUE.equals(fieldName)) {
+                    parser.nextToken();
+                    objectMap = (Map<String, Object>) parser.readValueAs(Map.class);
+                    objectMap.put(DOC_ID, id);
+                }
+
+                if (objectMap != null) {
+                    Document document = new Document(objectMap);
+
+                    if (collection != null) {
+                        collection.insert(document);
+                    }
+                }
+            }
+        }
+    }
+}

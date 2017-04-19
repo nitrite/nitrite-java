@@ -1,0 +1,176 @@
+Update operations modify documents/objects in a collection.
+
+.Update operations for NitriteCollection
+[source,java]
+--
+WriteResult update(Document update)
+WriteResult update(Document update, boolean upsert)
+WriteResult update(Filter filter, Document update)
+WriteResult update(Filter filter, Document update, UpdateOptions updateOptions)
+--
+
+.Update operations for ObjectRepository
+[source,java]
+--
+WriteResult update(T object)
+WriteResult update(T object, boolean upsert)
+WriteResult update(ObjectFilter filter, T update)
+WriteResult update(ObjectFilter filter, T update, UpdateOptions updateOptions)
+WriteResult update(ObjectFilter filter, Document update);
+WriteResult update(ObjectFilter filter, Document update, boolean justOnce);
+--
+
+If the `filter` is `null`, it will update all elements in the collection.
+
+
+*Update one element*
+
+[source,java]
+--
+WriteResult update(Document document)
+WriteResult update(T object)
+--
+
+It updates a single element in the collection. The `object` must have
+a field marked with `@Id` annotation.
+
+.Example
+[source,java]
+--
+Employee emp = new Employee();
+emp.setEmpId(12564);
+emp.setAddress("12 Some Street");
+employeeRepository.insert(emp);
+
+// update object
+emp.setAddress("25 New Street");
+employeeRepository.update(emp);
+
+
+
+Document doc = createDocument("name", "John Doe")
+                    .put("age", 30);
+NitriteId nitriteId = doc.getId();
+collection.insert(doc);
+
+// update the document
+Document document = collection.getById(nitriteId);
+document.put("age", 31);
+
+collection.update(document);
+
+--
+
+*Update with Upsert*
+
+[source,java]
+--
+WriteResult update(Document update, boolean upsert)
+WriteResult update(T object, boolean upsert)
+--
+Specified element must have an id. If the element is not found in the
+collection, it will be inserted only if upsert option is set to `true`.
+
+.Example
+[source,java]
+--
+emp.setAddress("25 New Street");
+// if emp object is not there in repository, it will be inserted
+employeeRepository.update(emp, true);
+
+
+Document document = createDocument("firstName", "John")
+                    .put("lastName", "Doe");
+// generates NitriteId of the document
+document.getId();
+// if filter does not find any document, it will insert 'document'
+WriteResult updateResult = collection.update(document, true);
+
+--
+
+*Update Multiple Objects*
+
+[source,java]
+--
+WriteResult update(Filter filter, Document update)
+WriteResult update(ObjectFilter filter, T update)
+WriteResult update(ObjectFilter filter, Document update)
+--
+
+Updates multiple elements in the collection. If the `filter` is
+`null`, it will update all objects in the collection.
+
+.Example
+[source,java]
+--
+Employee emp = new Employee();
+emp.setEmpId(12564);
+emp.setAddress("12 Some Street");
+emp.setCity("Kolkata");
+employeeRepository.insert(emp);
+
+// update all employees' join date whose city = Kolkata
+Employee empUpdate = new Employee();
+// id field should not be set here
+empUpdate.setJoinDate(new Date());
+
+// if emp object is not there in repository, it will not insert
+employeeRepository.update(eq("city", "Kolkata"), empUpdate);
+--
+
+*Update Multiple Objects with Options*
+[source,java]
+--
+WriteResult update(ObjectFilter filter, Document update, boolean justOnce)
+WriteResult update(ObjectFilter filter, T update, UpdateOptions updateOptions)
+WriteResult update(Filter filter, Document update, UpdateOptions updateOptions)
+--
+
+Updates multiple elements in the repository. Update operation can be customized
+with the help of `updateOptions`. If the `filter` is `null`, it will update
+all objects in the collection unless `justOnce` is set to `true` in `updateOptions`.
+
+*UpdateOptions*
+
+Update operation can be customized with the help of `updateOptions`. It provides two options:
+
+* Upsert - indicates whether the update operation will insert a new document if it
+does not find any existing document to update using the `filter` (default is `false`).
+* JustOnce - indicates whether only one document will be updated or all of them if the
+`filter` finds multiple documents (default is `false`).
+
+.Example
+[source,java]
+--
+// simple update example
+// update the documents whose firstName = fn1 with lastName = newLastName1
+WriteResult updateResult = collection.update(eq("firstName", "fn1"),
+                createDocument("lastName", "newLastName1"));
+
+
+// update with update options
+// create an update options
+UpdateOptions updateOptions = new UpdateOptions();
+updateOptions.setJustOnce(true);    // only first document will be updated
+updateOptions.setUpsert(false);     // no upsert
+
+// update the document whose firstName != fn1 with lastName = newLastName1 but no upsert
+// and it will update only 1 document
+Document document = createDocument("lastName", "newLastName1");
+WriteResult updateResult = collection.update(not(eq("firstName", "fn1")),
+                document, updateOptions);
+
+--
+
+*Error Scenario*
+
+Update operation will result in an error if:
+
+* the `update` parameter is set to `null`
+* the `updateOptions` is `null`
+* `update` object does not have any id field for `update(T, boolean)`
+and `update(T)` operations.
+* `update` object has `null` value in id field for `update(T, boolean)`
+and `update(T)` operations.
+
+NOTE: An update operation raises an *UPDATE* or *INSERT* event.

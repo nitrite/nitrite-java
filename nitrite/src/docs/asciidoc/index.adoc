@@ -1,0 +1,211 @@
+= Nitrite
+Anindya Chatterjee <anindya@dizitart.com>
+v1.0, {docdate} {doctime}
+:description: Nitrite database is an open source Nosql embedded persistent document store written in Java. It has MongoDB like API. It supports both in-memory and single file based persistent store powered by MVStore engine of h2 database. Nitrite can be used in desktop as well as mobile applications like android.
+:keywords: nitrite, nosql, embedded, embedded document store, android, android nosql database, java, key value store, document store, object store, persistent store, index, indexing, fulltext search, embedded mongo,
+:page-layout: docs
+:page-description: {description}
+:page-keywords: {keywords}
+:icons: font
+:rainbow-themes: pass:quotes[[red]##t##[green]##h##[purple]##e##[fuchsia]##m##[blue]##e##[teal]##s##]
+:toc2:
+:toclevels: 4
+:title-logo-image: image:images/nitrite-logo.svg[pdfwidth=4.25in,align=center]
+:homepage: http://nitrite.dizitart.org
+:version: 1.0
+:source-highlighter: pygments
+:pygments-style: tango
+:linkattrs:
+:sectnums:
+
+image::images/nitrite-logo.svg[Logo 200, 200,pdfwidth=40%]
+
+== What Is Nitrite?
+
+include::what-is-nitrite.adoc[]
+
+== What It Is Not?
+
+include::what-it-is-not.adoc[]
+
+<<<
+
+== Getting Started
+
+=== How To Install
+
+include::getting-started/how-to-install.adoc[]
+
+<<<
+
+=== Quick Examples
+
+include::getting-started/quick-example.adoc[]
+
+<<<
+
+== Nitrite Database
+
+include::nitrite-database.adoc[]
+
+=== Create/Open Database
+
+include::nitrite-database/create-database.adoc[]
+
+==== Security
+
+include::nitrite-database/create/security.adoc[]
+
+=== Close Database
+
+include::nitrite-database/close-database.adoc[]
+
+=== Create/Open Collections
+
+include::nitrite-database/create-collections.adoc[]
+
+=== Commit
+
+include::nitrite-database/commit.adoc[]
+
+=== Compaction
+
+include::nitrite-database/compaction.adoc[]
+
+<<<
+
+== Document
+
+include::document.adoc[]
+
+<<<
+
+== NitriteId
+
+include::nitriteid.adoc[]
+
+<<<
+
+== Collections
+
+include::db-collections.adoc[]
+
+=== NitriteCollection
+
+include::nitrite-collection.adoc[]
+
+=== ObjectRepository
+
+include::object-repository.adoc[]
+
+==== NitriteMapper
+
+include::collections/nitrite-mapper.adoc[]
+
+=== Operations
+
+include::collections/operations.adoc[]
+
+=== CRUD Operations
+
+include::collections/crud-operations.adoc[]
+
+==== WriteResult
+
+include::collections/crud-operations/write-result.adoc[]
+
+==== Insert
+
+include::collections/crud-operations/insert.adoc[]
+
+==== Update
+
+include::collections/crud-operations/update.adoc[]
+
+==== Remove
+
+include::collections/crud-operations/remove.adoc[]
+
+==== Find
+
+include::collections/crud-operations/find.adoc[]
+
+==== Projection
+
+include::collections/crud-operations/projection.adoc[]
+
+=== Events
+
+include::collections/events.adoc[]
+
+=== Indexing
+
+include::collections/indexing.adoc[]
+
+==== Text Index
+
+include::collections/text-index.adoc[]
+
+==== Index Annotations
+
+include::collections/indexing-annotation.adoc[]
+
+<<<
+
+== Filter
+
+include::filter.adoc[]
+
+=== Examples
+
+include::filter-examples.adoc[]
+
+<<<
+
+== Replication
+
+include::replication.adoc[]
+
+=== SyncHandle
+
+include::replication/synchandle.adoc[]
+
+=== Algorithm
+
+include::replication/algorithm.adoc[]
+
+<<<
+
+== Under The Hood
+
+include::under-the-hood.adoc[]
+
+=== NitriteStore
+
+include::under-the-hood/nitrite-store.adoc[]
+
+=== NitriteMap
+
+include::under-the-hood/nitrite-map.adoc[]
+
+<<<
+
+== Tools
+
+include::tools.adoc[]
+
+=== Data Exchange
+
+include::tools/importer-exporter.adoc[]
+
+==== Data Format
+
+include::tools/data-format.adoc[]
+
+=== Recovery
+
+include::tools/recovery.adoc[]
+
+=== DataGate
+
+include::tools/datagate.adoc[]

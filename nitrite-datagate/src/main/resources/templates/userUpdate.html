@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:replace="layout :: metaFragment">
+        <!-- meta blocks -->
+    </th:block>
+
+    <title id="pageTitle">Nitrite DataGate | User</title>
+
+    <th:block th:replace="layout :: styleFragment">
+        <!-- css Scripts -->
+    </th:block>
+
+    <link rel="stylesheet"
+          th:href="@{/assets/css/switchery.min.css}"
+          href="../assets/css/switchery.min.css"/>
+</head>
+
+<body class="nav-md">
+<th:block th:replace="layout :: bodyFragment">
+    <div id="pageContent">
+        <!-- page content -->
+        <div class="right_col" role="main">
+            <div class="">
+                <div class="page-title">
+                    <div class="title_left">
+                        <h3>DataGate User</h3>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+
+                <div class="row">
+
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h2>Update DataGate User</h2>
+                                <ul class="nav navbar-right panel_toolbox">
+                                    <li><a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </li>
+                                    <li><a class="close-link"><i class="fa fa-close"></i></a>
+                                    </li>
+                                </ul>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div class="x_content">
+                                <br />
+
+                                <form class="form-horizontal form-label-left" data-toggle="validator"
+                                      th:action="@{/admin/userUpdate}"
+                                      th:object="${user}" method="post">
+
+                                    <div class="item form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="userName">User Id</label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <th:block th:if="${user.userName != null}">
+                                                <input id="userName" class="form-control col-md-7 col-xs-12"
+                                                       th:value="${user.userName}" name="userName"
+                                                       readonly="readonly" required="required" type="text"/>
+                                            </th:block>
+                                            <th:block th:if="${user.userName == null}">
+                                                <input id="userName" class="form-control col-md-7 col-xs-12"
+                                                       data-validate-length="5"
+                                                       name="userName" placeholder="User Id"
+                                                       data-required-error="User Id is required"
+                                                       required="required" type="text"/>
+                                                <div class="help-block with-errors"></div>
+                                            </th:block>
+                                        </div>
+                                    </div>
+
+                                    <div class="item form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="password">Password<span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="password" id="password" name="password" th:value="${user.password}"
+                                                   class="form-control col-md-7 col-xs-12"
+                                                   data-minlength="6"
+                                                   data-minlength-error="Minimum of 6 characters"
+                                                   data-required-error=" "
+                                                   required="required"
+                                                   placeholder="Password"/>
+                                            <div class="help-block with-errors"></div>
+                                        </div>
+                                    </div>
+                                    <div class="item form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="password2">Confirm Password<span class="required">*</span>
+                                        </label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input id="password2" type="password" name="password2" th:value="${user.password}"
+                                                   class="form-control col-md-7 col-xs-12"
+                                                   data-match="#password"
+                                                   data-match-error="Whoops, Passwords don't match"
+                                                   placeholder="Password"/>
+                                            <div class="help-block with-errors"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="item form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="accountNonExpired">Not Expired</label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" id="accountNonExpired" name="accountNonExpired" class="js-switch"
+                                                   th:field="*{accountNonExpired}" th:value="${user.accountNonExpired}"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="item form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="accountNonLocked">Not Locked</label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" id="accountNonLocked" name="accountNonLocked" class="js-switch"
+                                                   th:field="*{accountNonLocked}" th:value="${!user.accountNonLocked}"/>
+                                        </div>
+                                    </div>
+
+                                    <div class="item form-group">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="enabled">Enabled</label>
+                                        <div class="col-md-6 col-sm-6 col-xs-12">
+                                            <input type="checkbox" id="enabled" name="enabled" class="js-switch"
+                                                   th:field="*{enabled}" th:value="${user.enabled}" />
+                                        </div>
+                                    </div>
+
+                                    <div class="ln_solid"></div>
+                                    <div class="form-group">
+                                        <div class="col-md-6 col-md-offset-3">
+                                            <button type="submit" class="btn btn-primary" name="action" value="cancel">Cancel</button>
+                                            <button type="submit" class="btn btn-success" name="action" value="submit">Submit</button>
+                                            <button type="submit" class="btn btn-danger" name="action" value="delete">Delete</button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</th:block>
+
+<th:block th:replace="layout :: scriptFragment">
+    <!-- Page Scripts -->
+</th:block>
+
+<script src="../assets/js/switchery.min.js"
+        th:src="@{/assets/js/switchery.min.js}"
+        type="text/javascript"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"
+        type="text/javascript"></script>
+
+<script th:inline="javascript">
+    $(function () {
+        init_sidebar();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+package org.dizitart.no2.tool;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.internals.JacksonMapper;
+
+import java.io.*;
+
+import static org.dizitart.no2.exceptions.ErrorCodes.NIOE_IMPORT_ERROR;
+import static org.dizitart.no2.exceptions.ErrorMessage.IMPORT_READER_ERROR;
+import static org.dizitart.no2.exceptions.ErrorMessage.IMPORT_READ_ERROR;
+import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
+
+/**
+ * Nitrite database import utility. It imports data from
+ * a json file. Contents of a Nitrite database can be imported
+ * using this tool.
+ *
+ * [[app-listing]]
+ * include::/src/docs/asciidoc/tools/data-format.adoc[]
+ *
+ * @since 1.0
+ * @author Anindya Chatterjee
+ */
+public class Importer {
+    private Nitrite db;
+    private JsonFactory jsonFactory;
+
+    private Importer() {
+    }
+
+    /**
+     * Creates a new {@link Importer} instance.
+     *
+     * @param db the db
+     * @return the importer instance
+     */
+    public static Importer of(Nitrite db) {
+        Importer importer = new Importer();
+        importer.db = db;
+        ObjectMapper objectMapper = new JacksonMapper().getObjectMapper();
+        importer.jsonFactory = objectMapper.getFactory();
+        return importer;
+    }
+
+    /**
+     * Imports data from a file path.
+     *
+     * @param file the file path
+     */
+    public void importFrom(String file) {
+        importFrom(new File(file));
+    }
+
+    /**
+     * Imports data from a file.
+     *
+     * @param file the file
+     * @throws NitriteIOException  if there is any low-level I/O error.
+     */
+    public void importFrom(File file) {
+        try {
+            importFrom(new FileInputStream(file));
+        } catch (IOException ioe) {
+            throw new NitriteIOException(
+                    errorMessage("I/O error while reading content from file " + file,
+                            NIOE_IMPORT_ERROR), ioe);
+        }
+    }
+
+    /**
+     * Imports data from an {@link InputStream}.
+     *
+     * @param stream the stream
+     */
+    public void importFrom(InputStream stream) {
+        importFrom(new InputStreamReader(stream));
+    }
+
+    /**
+     * Imports data from a {@link Reader}.
+     *
+     * @param reader the reader
+     * @throws NitriteIOException if there is any error while reading the data.
+     */
+    public void importFrom(Reader reader) {
+        JsonParser parser;
+        try {
+            parser = jsonFactory.createParser(reader);
+        } catch (IOException ioe) {
+            throw new NitriteIOException(IMPORT_READER_ERROR, ioe);
+        }
+
+        if (parser != null) {
+            NitriteJsonImporter jsonImporter = new NitriteJsonImporter(db);
+            jsonImporter.setParser(parser);
+            try {
+                jsonImporter.importData();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new NitriteIOException(IMPORT_READ_ERROR, e);
+            }
+        }
+    }
+}

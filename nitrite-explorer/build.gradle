@@ -1,0 +1,50 @@
+buildscript {
+    dependencies {
+        classpath "de.dynamicfiles.projects.gradle.plugins:javafx-gradle-plugin:$javafxPluginVersion"
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+apply plugin: 'java'
+apply plugin: 'javafx-gradle-plugin'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+//jfx {
+//    // minimal requirement for jfxJar-task
+//    mainClass = 'org.dizitart.no2.ui.NitriteManager'
+//
+//    // minimal requirement for jfxNative-task
+//    vendor = 'Nitrite'
+//}
+
+dependencies {
+    compile project(':nitrite')
+    compile "org.apache.commons:commons-lang3:$commonsLang3Version"
+    testCompile "junit:junit:$junitVersion"
+}
+
+shadowJar {
+    classifier = null
+    manifest {
+        attributes 'Implementation-Title': 'Nitrite Explorer',
+                'Implementation-Version': version,
+                'Built-By': 'Dizitart',
+                'Built-Date': new Date(),
+                'Built-JDK': System.getProperty('java.version'),
+                'Main-Class': 'org.dizitart.no2.ui.NitriteManager'
+    }
+    dependencies {
+        exclude(dependency('org.projectlombok:lombok'))
+    }
+}

@@ -1,0 +1,59 @@
+import io.franzbecker.gradle.lombok.task.DelombokTask
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        mavenLocal()
+    }
+    dependencies {
+        classpath "io.franzbecker:gradle-lombok:$lombokPluginVersion"
+        classpath "org.asciidoctor:asciidoctor-gradle-plugin:$asciidoctorPluginVersion"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:$errorPronePluginVersion"
+	classpath "com.github.jengelman.gradle.plugins:shadow:$shadowPluginVersion"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:$nexusStagingPlugin"
+    }
+}
+
+plugins {
+    id 'com.gradle.build-scan' version '1.0'
+}
+
+buildScan {
+    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
+    licenseAgree = 'yes'
+}
+
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'net.ltgt.errorprone'
+
+subprojects {
+    apply plugin: 'io.franzbecker.gradle-lombok'
+
+    group = 'org.dizitart'
+    version = "$nitriteVersion"
+
+    lombok {
+        version = "$lombokVersion"
+        sha256 = ""
+    }
+
+    repositories {
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        mavenLocal()
+    }
+
+    task delombok(type: DelombokTask) {
+        args "src/main/java", "-d", "build/generated-src/delombok/java"
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+configurations.errorprone {
+    resolutionStrategy.force 'com.google.errorprone:error_prone_core:$errorProneVersion'
+}

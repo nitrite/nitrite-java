@@ -1,0 +1,6 @@
+Exchange of database data follows a specific format as described below.
+
+[source,json]
+--
+include::schema.json[]
+--

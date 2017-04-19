@@ -1,0 +1,22 @@
+<Configuration status="ERROR" name="nitrite" monitorInterval="5">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d %p %c{1.} [%t] %m%n"/>
+        </Console>
+        <File name="LogFile" fileName="test.log">
+            <PatternLayout>
+                <Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+            </PatternLayout>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="ERROR">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="LogFile"/>
+        </Root>
+        <Logger name="org.dizitart" level="ERROR" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="LogFile"/>
+        </Logger>
+    </Loggers>
+</Configuration>

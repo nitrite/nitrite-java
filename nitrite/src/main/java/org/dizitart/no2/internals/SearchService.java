@@ -1,0 +1,163 @@
+package org.dizitart.no2.internals;
+
+import org.dizitart.no2.*;
+import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.dizitart.no2.store.NitriteMap;
+
+import java.util.*;
+
+import static org.dizitart.no2.exceptions.ErrorCodes.VE_SEARCH_SERVICE_NULL_NITRITE_SERVICE;
+import static org.dizitart.no2.exceptions.ErrorMessage.*;
+import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
+import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
+import static org.dizitart.no2.util.ValidationUtils.notNull;
+import static org.dizitart.no2.util.ValidationUtils.validateLimit;
+
+/**
+ * @author Anindya Chatterjee.
+ */
+class SearchService {
+    private NitriteService nitriteService;
+    private NitriteMap<NitriteId, Document> underlyingMap;
+
+    SearchService(NitriteService nitriteService, NitriteMap<NitriteId, Document> mapStore) {
+        notNull(nitriteService, errorMessage("nitriteService can not be null", VE_SEARCH_SERVICE_NULL_NITRITE_SERVICE));
+        this.nitriteService = nitriteService;
+        underlyingMap = mapStore;
+    }
+
+    Cursor find() {
+        FindResult findResult = new FindResult();
+        findResult.setHasMore(false);
+        findResult.setTotalCount(underlyingMap.size());
+        findResult.setIdSet(underlyingMap.keySet());
+        findResult.setUnderlyingMap(underlyingMap);
+
+        return new DocumentCursor(findResult);
+    }
+
+    Cursor find(Filter filter) {
+        filter.setNitriteService(nitriteService);
+        Set<NitriteId> result;
+
+        try {
+            result = filter.apply(underlyingMap);
+        } catch (FilterException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FilterException(FILTERED_FIND_OPERATION_FAILED, t);
+        }
+
+        FindResult findResult = new FindResult();
+        findResult.setUnderlyingMap(underlyingMap);
+        if (result != null) {
+            findResult.setHasMore(false);
+            findResult.setTotalCount(result.size());
+            findResult.setIdSet(result);
+        }
+
+        return new DocumentCursor(findResult);
+    }
+
+    Cursor find(FindOptions findOptions) {
+        FindResult findResult = new FindResult();
+        findResult.setUnderlyingMap(underlyingMap);
+        setUnfilteredResultSet(findOptions, findResult);
+
+        return new DocumentCursor(findResult);
+    }
+
+    Cursor find(Filter filter, FindOptions findOptions) {
+        filter.setNitriteService(nitriteService);
+        FindResult findResult = new FindResult();
+        findResult.setUnderlyingMap(underlyingMap);
+        setFilteredResultSet(filter, findOptions, findResult);
+
+        return new DocumentCursor(findResult);
+    }
+
+    private void setUnfilteredResultSet(FindOptions findOptions, FindResult findResult) {
+        validateLimit(findOptions, underlyingMap.sizeAsLong());
+
+        Set<NitriteId> resultSet;
+        if (isNullOrEmpty(findOptions.getField())) {
+            resultSet = limitIdSet(underlyingMap.keySet(), findOptions);
+        } else {
+            resultSet = sortIdSet(underlyingMap.keySet(), findOptions);
+        }
+
+        findResult.setIdSet(resultSet);
+        findResult.setTotalCount(underlyingMap.size());
+        findResult.setHasMore(underlyingMap.keySet().size() > (findOptions.getSize() + findOptions.getOffset()));
+    }
+
+    private void setFilteredResultSet(Filter filter, FindOptions findOptions, FindResult findResult) {
+        Set<NitriteId> nitriteIdSet;
+        try {
+            nitriteIdSet = filter.apply(underlyingMap);
+        } catch (FilterException fe) {
+            throw fe;
+        } catch (Throwable t) {
+            throw new FilterException(FILTERED_FIND_WITH_OPTIONS_OPERATION_FAILED, t);
+        }
+
+        if (nitriteIdSet == null || nitriteIdSet.isEmpty()) return;
+
+        validateLimit(findOptions, nitriteIdSet.size());
+        Set<NitriteId> resultSet;
+
+        if (isNullOrEmpty(findOptions.getField())) {
+            resultSet = limitIdSet(nitriteIdSet, findOptions);
+        } else {
+            resultSet = sortIdSet(nitriteIdSet, findOptions);
+        }
+
+        findResult.setIdSet(resultSet);
+        findResult.setHasMore(nitriteIdSet.size() > (findOptions.getSize() + findOptions.getOffset()));
+        findResult.setTotalCount(nitriteIdSet.size());
+    }
+
+    private Set<NitriteId> sortIdSet(Set<NitriteId> nitriteIdSet, FindOptions findOptions) {
+        String sortField = findOptions.getField();
+        NavigableMap<Object, NitriteId> sortedMap = new TreeMap<>();
+
+        for (NitriteId id : nitriteIdSet) {
+            Document document = underlyingMap.get(id);
+            Object value = getFieldValue(document, sortField);
+
+            if (value != null) {
+                if (value.getClass().isArray() || value instanceof Iterable) {
+                    throw new InvalidOperationException(UNABLE_TO_SORT_ON_ARRAY);
+                }
+                sortedMap.put(value, id);
+            }
+        }
+
+        Collection<NitriteId> sortedValues;
+        if (findOptions.getSortOrder() == SortOrder.Ascending) {
+            sortedValues = sortedMap.values();
+        } else {
+            sortedValues = sortedMap.descendingMap().values();
+        }
+
+        return limitIdSet(sortedValues, findOptions);
+    }
+
+    private Set<NitriteId> limitIdSet(Collection<NitriteId> nitriteIdSet, FindOptions findOptions) {
+        int offset = findOptions.getOffset();
+        int size = findOptions.getSize();
+        Set<NitriteId> resultSet = new LinkedHashSet<>();
+
+        int index = 0;
+        for (NitriteId nitriteId : nitriteIdSet) {
+            if (index >= offset) {
+                resultSet.add(nitriteId);
+                if (index == (offset + size - 1)) break;
+            }
+            index++;
+        }
+
+        return resultSet;
+    }
+}

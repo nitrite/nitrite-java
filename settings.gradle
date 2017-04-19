@@ -1,0 +1,7 @@
+rootProject.name = 'nitrite-database'
+include 'nitrite'
+include 'nitrite-explorer'
+include 'example-android-app'
+include	'example-benchmark'
+include 'nitrite-datagate'
+

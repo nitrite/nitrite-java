@@ -1,0 +1,53 @@
+Nitrite supports text indexing on collections. It scans documents
+and create index entries by decomposing texts of an indexed field. Text
+indexing is supported only on the field of string data type.
+
+Nitrite has its own text indexing engine for *english language*, but a
+third-party text indexing engine like lucene can also be configured.
+
+NOTE: Nitrite's own text indexing engine is case insensitive by nature.
+
+*Create Text Index*
+
+[source,java]
+--
+collection.createIndex("notes", indexOptions(IndexType.Fulltext, true));
+--
+
+*Tokenization & Stemming*
+
+Nitrite's text indexing engines only supports english language. For
+tokenization it uses below delimiters
+
+|===
+|space|\t|\n|\r|\f|+
+|*|%|&|/|(|)
+|?|'|!|,|.|;
+|-|_|#|@|\||^
+|{|}|[|]|<|>
+|`|"|=|:|~|\
+|===
+
+Nitrite drops english stop words (e.g. the, an, a, and, etc.) before
+creating text index entries.
+
+*Third-party Text Indexing Engine*
+
+Nitrite's built-in text indexing only supports english language. For
+other languages a third-party text indexing engines like lucene can be
+configured by implementing TextIndexingService
+icon:file-code-o[link="http://static.javadoc.io/org.dizitart/nitrite/{version}/org/dizitart/no2/fulltext/TextIndexingService.html", window="_blank"]
+interface like below
+
+[source,java]
+.Configuring Lucene based text indexing engine
+--
+include::../../../test/java/org/dizitart/no2/services/LuceneService.java[]
+
+// Configure third-party indexing service while opening the database
+Nitrite db = Nitrite.builder()
+            .textIndexingService(new LuceneService())
+            .filePath("/tmp/test.db")
+            .openOrCreate();
+--
+

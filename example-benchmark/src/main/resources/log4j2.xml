@@ -1,0 +1,16 @@
+<Configuration status="INFO" name="nitrite" monitorInterval="5">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%m%n"/>
+            <!--<PatternLayout pattern="%d %p %c{1.} [%t] %m%n"/>-->
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <Logger name="org.dizitart" level="info" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>

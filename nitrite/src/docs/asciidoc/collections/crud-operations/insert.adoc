@@ -1,0 +1,68 @@
+Create or insert operations add new documents/objects to a collection.
+
+*_id Field*
+
+In nitrite, each document stored in a collection requires a unique '_id' field that acts as a primary key
+and helps to identify a document within a collection. During insertion, nitrite generates a new and unique
+NitriteId for every document and saves the value of the NitriteId into the '_id' field of the documentation.
+
+*@Id Annotation*
+
+Each object in an ObjectRepository can be uniquely identified by a field marked with `@Id` annotation. Nitrite
+maintains an unique index on that field to identify the objects.
+
+NOTE: Id field of an object does not have any relation with the `_id` field of the underlying Document.
+
+.Create operations for NitriteCollection
+[source,java]
+--
+WriteResult insert(Document document, Document... documents)
+WriteResult insert(Document[] documents)
+--
+
+.Create operations for ObjectRepository
+[source,java]
+--
+WriteResult insert(T object, T... others)
+WriteResult insert(T[] objects)
+--
+
+.Example
+[source,java]
+--
+// insert one document
+collection.insert(doc1);
+
+// insert multiple documents
+collection.insert(doc1, doc2, doc3);
+
+// another way to insert multiple documents
+Document[] documents = new Document[] {doc1, doc2, doc3};
+collection.insert(documents);
+
+
+// create employee object
+Employee emp1 = new Employee();
+emp1.setEmpNumber(12548);
+emp1.setEmpName("John Doe");
+
+// insert employee object
+repository.insert(emp1);
+
+// insert multiple employee objects
+repository.insert(emp1, emp2, emp3);
+
+// another way to insert multiple objects
+Employee[] employees = new Employee[] {emp1, emp2, emp3};
+repository.insert(employees);
+--
+
+*Error Scenario*
+
+Insertion operation will result in an error if:
+
+* document/object is `null`
+* a field of the document is indexed and it violates
+the unique constraint in the collection(if any).
+
+NOTE: An insert operation raises an *INSERT* event.

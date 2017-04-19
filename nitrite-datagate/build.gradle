@@ -1,0 +1,67 @@
+buildscript {
+    repositories {
+        maven { url 'http://repo.spring.io/plugins-release' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
+        classpath "org.springframework.build.gradle:propdeps-plugin:$propDepsPluginVersion"
+    }
+}
+
+group = 'dizitart'
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-maven'
+apply plugin: 'propdeps-idea'
+apply plugin: 'propdeps-eclipse'
+
+jar {
+    baseName = 'nitrite-datagate'
+    version = "$nitriteVersion"
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    compile project(":nitrite")
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "org.apache.commons:commons-lang3:$commonsLang3Version"
+    compile ("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: 'spring-boot-starter-tomcat'
+        exclude module: 'jackson-databind'
+    }
+    compile ("org.springframework.boot:spring-boot-starter-jetty")
+    compile ("org.springframework.boot:spring-boot-starter-actuator") {
+        exclude module: 'jackson-databind'
+    }
+    compile "org.springframework.boot:spring-boot-starter-aop"
+    compile "org.springframework.boot:spring-boot-starter-security"
+    compile "org.springframework.boot:spring-boot-starter-thymeleaf"
+    compile "org.springframework.boot:spring-boot-devtools"
+
+    compile "de.codecentric:spring-boot-admin-starter-client:$springBootAdminVersion"
+    compile ("io.springfox:springfox-swagger2:$swaggerVersion") {
+        exclude module: 'jackson-annotations'
+    }
+    compile "io.springfox:springfox-swagger-ui:$swaggerVersion"
+
+    compile "org.jongo:jongo:$jongoVersion"
+    compile "org.mongodb:mongo-java-driver:$mongoDriverVersion"
+
+    optional "org.springframework.boot:spring-boot-configuration-processor"
+
+    testCompile "org.springframework.boot:spring-boot-starter-test"
+    testCompile "junit:junit:$junitVersion"
+    testCompile "org.awaitility:awaitility:$awaitilityVersion"
+}
+
+compileJava.dependsOn(processResources)

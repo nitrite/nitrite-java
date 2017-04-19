@@ -1,0 +1,114 @@
+.Create a file based database
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .openOrCreate();
+--
+
+If a file path is provided and the file does not exists, builder will create a new file
+based database. If the file exists, builder will try to open the existing database.
+
+NOTE: If the existing database file is corrupted, while opening, nitrite will try to recover
+from it by restoring the last known good version.
+
+.Create an in-memory database
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .openOrCreate();
+--
+
+If no file path is provided, builder will create an in-memory database.
+
+.Disable auto commit
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .disableAutoCommit()
+        .openOrCreate();
+
+--
+
+By default auto-commit is enabled while creating nitrite database. But it can be disabled also.
+
+.Change auto commit buffer size
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .autoCommitBufferSize(2048) // size is 2048 KB now
+        .openOrCreate();
+--
+
+If auto commit is not disabled, nitrite will commit the changes if the size of unsaved
+changes is more than the write buffer size. By default the buffer size is 1024 KB. But
+it can be customized also from builder.
+
+.Disable auto compaction
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .disableAutoCompact()
+        .openOrCreate();
+--
+
+Nitrite by default compacts the database file before close. If compaction is enabled
+chunks will be moved next to each other. Disabling compaction will increase the
+performance during database close.
+
+.Open database in read only mode
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .readOnly()
+        .openOrCreate();
+--
+
+The builder can also open a database in readonly mode. While opened in readonly mode
+nitrite will not persists any changes.
+
+NOTE: While opened in readonly mode, options like `autoCommitBufferSize(size)`,
+`compressed()` or `disableAutoCommit()` do not have any effect.
+
+.Enable compression
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .compressed()
+        .openOrCreate();
+--
+
+A nitrite database can be compressed while saving the changes to the disk. The compression
+algorithm nitrite uses is LZF. This will save about 50% of the disk space, but it will
+slow down read and write operations slightly.
+
+.Specify a custom full-text engine
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .textIndexingService(new MyTextIndexingEngine())
+        .openOrCreate();
+--
+
+Nitrite also provides some options for full-text indexing. Nitrite has its own
+full-text indexing engine, but there is a provision to supply third-party full-text
+engine implementation like lucene.
+
+.Specify a custom text tokenizer
+[source,java]
+--
+Nitrite db = Nitrite.builder()
+        .filePath("/tmp/test.db")
+        .textTokenizer(new MyBengaliTextTokenizer())
+        .openOrCreate();
+--
+
+Nitrite's own full-text index engine is for english language only. But if anyone
+wants to use the same engine for languages other than english, a custom `TextTokenizer`
+implementation for that language should be configured in the builder.

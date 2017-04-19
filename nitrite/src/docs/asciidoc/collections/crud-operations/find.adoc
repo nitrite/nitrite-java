@@ -1,0 +1,121 @@
+Finds documents/objects in a collection.
+
+.Find operations for NitriteCollection
+[source,java]
+--
+Cursor find()
+Cursor find(FindOptions findOptions)
+Cursor find(Filter filter)
+Cursor find(Filter filter, FindOptions findOptions)
+Document getById(NitriteId nitriteId);
+--
+
+.Find operations for ObjectRepository
+[source,java]
+--
+Cursor<T> find()
+Cursor<T> find(FindOptions findOptions)
+Cursor<T> find(ObjectFilter filter)
+Cursor<T> find(ObjectFilter filter, FindOptions findOptions)
+T getById(NitriteId nitriteId);
+--
+
+A find operation will take advantage of an index if it exists for the field being queried.
+Further details about find filters are discussed in section <<index.adoc#filter,Filter>>.
+
+.Example for NitriteCollection
+[source,java]
+--
+// extracts all records from the collections
+Cursor results = collection.find();
+
+// extracts paginated records from the collections
+Cursor results = collection.find(FindOptions.limit(0, 1));
+
+// extracts all records and sorts them based on the value of 'age' field
+Cursor results = collection.find(FindOptions.sort("age", SortOrder.Ascending));
+
+// extracts all records where value of 'age' field is greater than 30
+Cursor results = collection.find(Filters.gt("age", 30));
+
+// finds all records where 'age' field value is greater than 30
+// then sorts those records in ascending order and takes first 10 records
+Cursor results = collection.find(Filters.gt("age", 30), FindOptions
+                                        .sort("age", SortOrder.Ascending)
+                                        .thenLimit(0, 10));
+
+// gets a document from the collection corresponding to a NitriteId
+Document document = collection.getById(id);
+
+--
+
+.Example for ObjectRepository
+[source,java]
+--
+// extracts all objects from the repository
+org.dizitart.no2.objects.Cursor<Employee> cursor = repository.find();
+
+// extracts paginated employee records from the repository
+Cursor<Employee> cursor = repository.find(limit(0, 1));
+
+// extracts all employee records and sorts them based on the value of 'age' field
+Cursor<Employee> cursor = repository.find(sort("age", SortOrder.Ascending));
+
+// extracts all employee records where value of 'age' field is greater than 30
+Cursor<Employee> cursor = repository.find(ObjectFilters.gt("age", 30));
+
+// finds all employee records where 'age' field value is greater than 30
+// then sorts those records in ascending order and takes first 10 records
+Cursor<Employee> cursor = repository.find(ObjectFilters.gt("age", 30),
+                                        sort("age", SortOrder.Ascending)
+                                        .thenLimit(0, 10));
+
+// gets a employee from the repository corresponding to a NitriteId
+Employee employee = repository.getById(id);
+
+--
+
+
+*Cursor*
+
+A Cursor
+icon:file-code-o[link="http://static.javadoc.io/org.dizitart/nitrite/{version}/org/dizitart/no2/Cursor.html", window="_blank"]
+is a lazy record iterator. It iterates over a database search results and fetch Document from database
+on demand.
+
+.Example
+[source,java]
+--
+Cursor cursor = collection.find();
+for (Document document : cursor) {
+    //...
+}
+
+Cursor<Employee> cursor = repository.find();
+for (Employee employee : cursor) {
+    //...
+}
+
+--
+
+A Cursor is also used to project records in a different format. More in this is <<index.adoc#projection,here>>.
+
+*FindOptions*
+
+A FindOptions
+icon:file-code-o[link="http://static.javadoc.io/org.dizitart/nitrite/{version}/org/dizitart/no2/FindOptions.html", window="_blank"]
+is used to specify search options. It provides pagination as well as sorting mechanism on Cursor.
+
+.Example
+[source,java]
+--
+// sorts all records by age in ascending order then take first 10 records and return as a Cursor
+Cursor results = collection.find(sort("age", SortOrder.Ascending).thenLimit(0, 10));
+
+// sorts the records by age in ascending order
+Cursor results = collection.find(sort("age", SortOrder.Ascending));
+
+// fetch 10 records starting from offset = 2
+Cursor results = collection.find(limit(2, 10));
+
+--

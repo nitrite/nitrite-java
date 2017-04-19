@@ -1,0 +1,37 @@
+For ObjectRepositories there is another alternative for configuring indices,
+the object type can be annotated with the indexing formation. While creating a new
+ObjectRepository, Nitrite will scan the object type for indexing information
+and creates if any found.
+
+[source,java]
+--
+import org.dizitart.no2.IndexType;
+import org.dizitart.no2.objects.Id;
+import org.dizitart.no2.objects.Index;
+import org.dizitart.no2.objects.Indices;
+
+
+@Indices({
+        @Index(value = "joinDate", type = IndexType.NonUnique),
+        @Index(value = "address", type = IndexType.Fulltext),
+        @Index(value = "employeeNote.text", type = IndexType.Fulltext)
+})
+public class Employee implements Serializable {
+    @Id
+    private long empId;
+
+    private Date joinDate;
+
+    private String address;
+
+    private Note employeeNote;
+}
+
+public class Note {
+    @Id
+    private long noteId;
+
+    private String text;
+}
+
+--

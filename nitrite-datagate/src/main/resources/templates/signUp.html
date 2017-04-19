@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <title>Nitrite DataGate | Admin Sign Up</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet"
+          href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <!-- Animate.css -->
+    <link rel="stylesheet"
+          th:href="@{/assets/css/animate.min.css}"
+          href="../assets/css/animate.min.css"/>
+    <!-- Ubuntu Font -->
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet"/>
+    <!-- Custom Theme Style -->
+    <link rel="stylesheet"
+          th:href="@{/assets/css/custom.css}"
+          href="../assets/css/custom.css"/>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"
+            type="text/javascript"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js"
+            type="text/javascript"></script>
+</head>
+
+<body class="login">
+<div>
+    <div class="login_wrapper">
+        <div class="animate form">
+            <section class="login_content">
+                <form role="form" action="#" th:action="@{/signUp}"
+                      th:object="${userAccount}" method="post"
+                      data-toggle="validator">
+
+                    <h1 class="ubuntu-font">Create Admin</h1>
+                    <div class="form-group">
+                        <input type="text" name="username"
+                               id="username"
+                               class="form-control input-sm"
+                               placeholder="Username"
+                               th:field="*{userName}"
+                               data-required-error="Username is required"
+                               required="required"/>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password"
+                               id="password"
+                               class="form-control input-sm floatlabel"
+                               placeholder="Password"
+                               th:field="*{password}"
+                               required="required"
+                               data-minlength="6"
+                               data-minlength-error="Minimum of 6 characters"
+                               data-required-error=" "/>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="re-password"
+                               id="re-password"
+                               class="form-control input-sm floatlabel"
+                               placeholder="Confirm Password"
+                               data-match="#password"
+                               data-match-error="Whoops, passwords don't match"/>
+                        <div class="help-block with-errors"></div>
+                    </div>
+                    <div>
+                        <input type="submit" value="Create" class="btn btn-default submit"/>
+                    </div>
+
+                    <div class="clearfix"></div>
+
+                    <div class="separator">
+
+                        <div class="clearfix"></div>
+                        <br />
+
+                        <div>
+                            <h1 class="ubuntu-font">Nitrite DataGate</h1>
+                            <p>© 2017 Dizitart. All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </div>
+</div>
+</body>
+</html>

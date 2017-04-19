@@ -1,0 +1,143 @@
+package org.dizitart.no2;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Locale;
+
+import static org.dizitart.no2.Document.createDocument;
+import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.filters.Filters.ALL;
+
+@RunWith(value = Parameterized.class)
+public abstract class BaseCollectionTest {
+    private String fileName = getRandomTempDbFile();
+    protected Nitrite db;
+    NitriteCollection collection;
+    Document doc1, doc2, doc3;
+    SimpleDateFormat simpleDateFormat;
+
+    @Parameterized.Parameter
+    public boolean inMemory = false;
+
+    @Parameterized.Parameter(value = 1)
+    public boolean isSecured = false;
+
+    @Parameterized.Parameter(value = 2)
+    public boolean isCompressed = false;
+
+    @Parameterized.Parameter(value = 3)
+    public boolean isAutoCommit = false;
+
+    @Parameterized.Parameter(value = 4)
+    public boolean isAutoCompact = false;
+
+    @Parameterized.Parameters(name = "InMemory = {0}, Secured = {1}, " +
+            "Compressed = {2}, AutoCommit = {3}, AutoCompact = {4}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                {false, false, false, false, false},
+                {false, false, false, true, false},
+                {false, false, true, false, false},
+                {false, false, true, true, false},
+                {false, true, false, false, false},
+                {false, true, false, true, false},
+                {false, true, true, false, false},
+                {false, true, true, true, false},
+                {true, false, false, false, true},
+                {true, false, false, true, true},
+                {true, false, true, false, true},
+                {true, false, true, true, true},
+                {true, true, false, false, true},
+                {true, true, false, true, true},
+                {true, true, true, false, true},
+                {true, true, true, true, true},
+        });
+    }
+
+    @Rule
+    public Retry retry = new Retry(3);
+
+    @Before
+    public void setUp() throws ParseException {
+        openDb();
+
+        simpleDateFormat
+                = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+
+        doc1 = createDocument("firstName", "fn1")
+                .put("lastName", "ln1")
+                .put("birthDay", simpleDateFormat.parse("2012-07-01T16:02:48.440Z"))
+                .put("data", new byte[] {1, 2, 3})
+                .put("list", new ArrayList<String>() {{ add("one"); add("two"); add("three"); }})
+                .put("body", "a quick brown fox jump over the lazy dog");
+        doc2 = createDocument("firstName", "fn2")
+                .put("lastName", "ln2")
+                .put("birthDay", simpleDateFormat.parse("2010-06-12T16:02:48.440Z"))
+                .put("data", new byte[] {3, 4, 3})
+                .put("list", new ArrayList<String>() {{ add("three"); add("four"); add("three"); }})
+                .put("body", "quick hello world from nitrite");
+        doc3 = createDocument("firstName", "fn3")
+                .put("lastName", "ln2")
+                .put("birthDay", simpleDateFormat.parse("2014-04-17T16:02:48.440Z"))
+                .put("data", new byte[] {9, 4, 8})
+                .put("body", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                        "Sed nunc mi, mattis ullamcorper dignissim vitae, condimentum non lorem.");
+
+        collection = db.getCollection("test");
+        collection.remove(ALL);
+    }
+
+    @After
+    public void clear() throws IOException {
+        if (collection != null && !collection.isDropped()) {
+            collection.remove(ALL);
+            collection.close();
+        }
+        if (db != null) db.close();
+        if (!inMemory) {
+            Files.delete(Paths.get(fileName));
+        }
+    }
+
+    private void openDb() {
+        NitriteBuilder builder = new NitriteBuilder();
+
+        if (isCompressed) {
+            builder.compressed();
+        }
+
+        if (!isAutoCommit) {
+            builder.disableAutoCommit();
+        }
+
+        if (!inMemory) {
+            builder.filePath(fileName);
+        }
+
+        if (!isAutoCompact) {
+            builder.disableAutoCompact();
+        }
+
+        if (!isSecured) {
+            db = builder.openOrCreate("test-user", "test-password");
+        } else {
+            db = builder.openOrCreate();
+        }
+    }
+
+    WriteResult insert() {
+        return collection.insert(doc1, doc2, doc3);
+    }
+}

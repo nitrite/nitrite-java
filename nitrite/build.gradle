@@ -1,0 +1,113 @@
+apply plugin: 'java'
+apply plugin: 'io.codearte.nexus-staging'
+apply plugin: 'signing'
+apply plugin: 'maven'
+apply from: 'jacoco.gradle'
+apply from: 'asciidoc.gradle'
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+jar {
+    baseName = 'nitrite'
+}
+
+dependencies {
+    compile "org.slf4j:slf4j-api:$slf4jVersion"
+    compile "com.h2database:h2-mvstore:$h2Version"
+    compile "org.objenesis:objenesis:$objenesisVersion"
+    compile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion") {
+        exclude module: 'jackson-annotations'
+    }
+    compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
+    compile "org.jasypt:jasypt:$jasyptVersion"
+    compile "com.squareup.okhttp3:okhttp:$okhttpVersion"
+
+    testCompile "junit:junit:$junitVersion"
+    testCompile "org.apache.lucene:lucene-core:$luceneVersion"
+    testCompile "org.apache.lucene:lucene-analyzers-common:$luceneVersion"
+    testCompile "org.apache.lucene:lucene-queryparser:$luceneVersion"
+    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+    testCompile "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    testCompile "org.awaitility:awaitility:$awaitilityVersion"
+    testCompile "joda-time:joda-time:$jodaTimeVersion"
+    testCompile "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
+}
+
+gradle.buildFinished { BuildResult result ->
+    if (result.failure && !JavaVersion.current().isJava7Compatible()) {
+        gradle.rootProject.logger.error("\n* Warning:\nJDK ${JavaVersion.VERSION_1_7} is minimal requirement for building nitrite. " +
+                "You have ${JavaVersion.current()}.")
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+test {
+    testLogging.showStandardStreams = false
+    testLogging.exceptionFormat = 'full'
+}
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    required { project.hasProperty('release') }
+    sign configurations.archives
+}
+
+nexusStaging {
+    username = System.getenv('OSSRH_USER')
+    password = System.getenv('OSSRH_PASSWORD')
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: System.getenv('OSSRH_USER'),
+                        password: System.getenv('OSSRH_PASSWORD'))
+            }
+
+            pom.project {
+                packaging 'jar'
+                name 'Nitrite'
+                description 'An in-memory, single-file based embedded nosql persistent document store.'
+                url 'https://github.com/dizitart/nitrite-database'
+                scm {
+                    url 'git@github.com:dizitart/nitrite-database.git'
+                    connection 'scm:git:git@github.com:dizitart/nitrite-database.git'
+                    developerConnection 'scm:git:git@github.com:dizitart/nitrite-database.git'
+                }
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/license/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'anidotnet'
+                        name 'Anindya Chatterjee'
+                        email 'anidotnet@gmail.com'
+                        organization 'Dizitart'
+                    }
+                }
+            }
+        }
+    }
+}

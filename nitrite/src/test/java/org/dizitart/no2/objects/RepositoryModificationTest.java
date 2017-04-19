@@ -1,0 +1,397 @@
+package org.dizitart.no2.objects;
+
+import org.dizitart.no2.Index;
+import org.dizitart.no2.*;
+import org.dizitart.no2.objects.data.Company;
+import org.dizitart.no2.objects.data.DataGenerator;
+import org.dizitart.no2.objects.data.Employee;
+import org.dizitart.no2.objects.data.Note;
+import org.dizitart.no2.util.Iterables;
+import org.junit.Test;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Locale;
+import java.util.concurrent.Callable;
+
+import static org.awaitility.Awaitility.await;
+import static org.dizitart.no2.UpdateOptions.updateOptions;
+import static org.dizitart.no2.objects.filters.ObjectFilters.*;
+import static org.junit.Assert.*;
+
+/**
+ * @author Anindya Chatterjee.
+ */
+public class RepositoryModificationTest extends BaseObjectRepositoryTest {
+
+    @Test
+    public void testCreateIndex() {
+        assertTrue(companyRepository.hasIndex("companyName"));
+        assertFalse(companyRepository.hasIndex("dateCreated"));
+
+        companyRepository.createIndex("dateCreated", IndexOptions.indexOptions(IndexType.NonUnique));
+        assertTrue(companyRepository.hasIndex("dateCreated"));
+        assertFalse(companyRepository.isIndexing("dateCreated"));
+    }
+
+    @Test
+    public void testRebuildIndex() {
+        companyRepository.createIndex("dateCreated", IndexOptions.indexOptions(IndexType.NonUnique));
+        assertFalse(companyRepository.isIndexing("dateCreated"));
+
+        companyRepository.rebuildIndex("dateCreated", true);
+        assertTrue(companyRepository.isIndexing("dateCreated"));
+
+        await().until(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return !companyRepository.isIndexing("dateCreated");
+            }
+        });
+    }
+
+    @Test
+    public void testListIndexes() {
+        Collection<Index> indices = companyRepository.listIndices();
+        assertEquals(indices.size(), 2);
+
+        companyRepository.createIndex("dateCreated", IndexOptions.indexOptions(IndexType.NonUnique));
+        indices = companyRepository.listIndices();
+        assertEquals(indices.size(), 3);
+    }
+
+    @Test
+    public void testDropIndex() {
+        testListIndexes();
+        companyRepository.dropIndex("dateCreated");
+        Collection<Index> indices = companyRepository.listIndices();
+        assertEquals(indices.size(), 2);
+    }
+
+    @Test
+    public void testDropAllIndex() {
+        testListIndexes();
+        companyRepository.dropAllIndices();
+        Collection<Index> indices = companyRepository.listIndices();
+        assertEquals(indices.size(), 0);
+    }
+
+    @Test
+    public void testCompanyRecord() {
+        Cursor cursor = companyRepository.find();
+        assertEquals(cursor.size(), 10);
+        assertFalse(cursor.hasMore());
+    }
+
+    @Test
+    public void testInsert() {
+        Company company = DataGenerator.generateCompanyRecord();
+        Cursor cursor = companyRepository.find();
+        assertEquals(cursor.size(), 10);
+
+        companyRepository.insert(company);
+        cursor = companyRepository.find();
+        assertEquals(cursor.size(), 11);
+
+        Company company1 = DataGenerator.generateCompanyRecord();
+        Company company2 = DataGenerator.generateCompanyRecord();
+        companyRepository.insert(new Company[]{company1, company2});
+        cursor = companyRepository.find();
+        assertEquals(cursor.size(), 13);
+    }
+
+    @Test
+    public void testUpdateWithFilter() {
+        employeeRepository.remove(ALL);
+
+        Employee employee = new Employee();
+        employee.setCompany(null);
+        employee.setAddress("abcd road");
+        employee.setBlob(new byte[] {1, 2, 125});
+        employee.setEmpId(12L);
+        employee.setJoinDate(new Date());
+        Note empNote = new Note();
+        empNote.setNoteId(23L);
+        empNote.setText("sample text note");
+        employee.setEmployeeNote(empNote);
+
+        employeeRepository.insert(employee);
+        Cursor<Employee> result = employeeRepository.find();
+        assertEquals(result.size(), 1);
+        for (Employee e : result) {
+            assertEquals(e.getAddress(), "abcd road");
+        }
+
+        Employee updated = new Employee();
+        updated.setAddress("xyz road");
+        WriteResult writeResult = employeeRepository.update(eq("empId", 12L), updated);
+        assertEquals(writeResult.getAffectedCount(), 1);
+        result = employeeRepository.find();
+        assertEquals(result.size(), 1);
+        for (Employee e : result) {
+            assertEquals(e.getAddress(), "xyz road");
+        }
+    }
+
+    @Test
+    public void testUpdateWithOption() throws ParseException {
+        Date joiningDate = new Date();
+        prepareUpdateWithOptions(joiningDate);
+
+        SimpleDateFormat simpleDateFormat
+                = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+        Date newJoiningDate = simpleDateFormat.parse("2012-07-01T16:02:48.440Z");
+
+        Employee updated1 = new Employee();
+        updated1.setJoinDate(newJoiningDate);
+
+        WriteResult writeResult
+                = employeeRepository.update(eq("empId", 12L), updated1);
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        Cursor<Employee> result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 1);
+        result = employeeRepository.find(eq("joinDate", newJoiningDate));
+        assertEquals(result.size(), 1);
+
+        employeeRepository.remove(ALL);
+        prepareUpdateWithOptions(joiningDate);
+        result = employeeRepository.find();
+        assertEquals(result.size(), 2);
+
+        Employee update = new Employee();
+        update.setJoinDate(newJoiningDate);
+
+        writeResult = employeeRepository.update(eq("joinDate", joiningDate), update, updateOptions(false, false));
+        assertEquals(writeResult.getAffectedCount(), 2);
+
+        result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 0);
+
+        result = employeeRepository.find(eq("joinDate", newJoiningDate));
+        assertEquals(result.size(), 2);
+    }
+
+    @Test
+    public void testUpsertTrue() {
+        Date joiningDate = new Date();
+        Cursor result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 0);
+
+        Employee employee = new Employee();
+        employee.setCompany(null);
+        employee.setAddress("some road");
+        employee.setBlob(new byte[] {1, 2, 125});
+        employee.setEmpId(12L);
+        employee.setJoinDate(joiningDate);
+        Note empNote1 = new Note();
+        empNote1.setNoteId(23L);
+        empNote1.setText("sample text note");
+        employee.setEmployeeNote(empNote1);
+
+        WriteResult writeResult
+                = employeeRepository.update(eq("empId", 12), employee, updateOptions(true));
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 1);
+    }
+
+    @Test
+    public void testUpsertFalse() {
+        Date joiningDate = new Date();
+        Cursor result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 0);
+
+        Employee employee = new Employee();
+        employee.setCompany(null);
+        employee.setAddress("some road");
+        employee.setBlob(new byte[] {1, 2, 125});
+        employee.setEmpId(12L);
+        employee.setJoinDate(joiningDate);
+        Note empNote1 = new Note();
+        empNote1.setNoteId(23L);
+        empNote1.setText("sample text note");
+        employee.setEmployeeNote(empNote1);
+
+        WriteResult writeResult
+                = employeeRepository.update(eq("empId", 12), employee, updateOptions(false));
+        assertEquals(writeResult.getAffectedCount(), 0);
+
+        result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 0);
+    }
+
+    @Test
+    public void testDeleteFilterAndWithOutOption() {
+        Date joiningDate = new Date();
+        prepareUpdateWithOptions(joiningDate);
+
+        Cursor result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 2);
+
+        WriteResult writeResult = employeeRepository.remove(eq("joinDate", joiningDate));
+        assertEquals(writeResult.getAffectedCount(), 2);
+        result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 0);
+    }
+
+    @Test
+    public void testDeleteFilterAndWithOption() {
+        Date joiningDate = new Date();
+        prepareUpdateWithOptions(joiningDate);
+
+        Cursor result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 2);
+
+        RemoveOptions removeOptions = new RemoveOptions();
+        removeOptions.setJustOne(true);
+        WriteResult writeResult = employeeRepository.remove(eq("joinDate", joiningDate), removeOptions);
+        assertEquals(writeResult.getAffectedCount(), 1);
+        result = employeeRepository.find(eq("joinDate", joiningDate));
+        assertEquals(result.size(), 1);
+    }
+
+    @Test
+    public void testEmployeeRecord() {
+        Iterable<Employee> totalResult = employeeRepository.find();
+        int occurrence = 0;
+        for (Employee employee : totalResult) {
+            if (employee.getEmployeeNote().getText().toLowerCase().contains("class aptent")) {
+                occurrence++;
+            }
+        }
+
+        Cursor cursor = employeeRepository.find(text("employeeNote.text", "Class aptent"));
+        assertEquals(cursor.size(), occurrence);
+    }
+
+    @Test
+    public void testUpdateWithOptions() {
+        Employee employee = employeeRepository.find().firstOrDefault();
+
+        Employee update = new Employee();
+        update.setAddress("new address");
+
+        UpdateOptions options = new UpdateOptions();
+        options.setJustOnce(true);
+        options.setUpsert(false);
+        WriteResult writeResult
+                = employeeRepository.update(eq("empId", employee.getEmpId()), update, options);
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        NitriteId nitriteId = Iterables.firstOrDefault(writeResult);
+        Employee byId = employeeRepository.getById(nitriteId);
+        assertEquals(byId.getAddress(), "new address");
+        assertEquals(byId.getEmpId(), employee.getEmpId());
+
+        update.setAddress("another address");
+        writeResult
+                = employeeRepository.update(eq("empId", employee.getEmpId()), update);
+        nitriteId = Iterables.firstOrDefault(writeResult);
+        byId = employeeRepository.getById(nitriteId);
+        assertEquals(byId.getAddress(), "another address");
+        assertEquals(byId.getEmpId(), employee.getEmpId());
+    }
+
+    @Test
+    public void testUpdateWithObject() {
+        Employee employee = employeeRepository.find().firstOrDefault();
+        Employee newEmployee = new Employee(employee);
+
+        Long id = employee.getEmpId();
+        String address = employee.getAddress();
+        newEmployee.setAddress("new address");
+
+        WriteResult writeResult = employeeRepository.update(newEmployee);
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        Employee emp = employeeRepository.find(eq("empId", id)).firstOrDefault();
+        assertNotEquals(address, emp.getAddress());
+        assertEquals(employee.getEmpId(), emp.getEmpId());
+        assertEquals(employee.getJoinDate(), emp.getJoinDate());
+        assertArrayEquals(employee.getBlob(), emp.getBlob());
+    }
+
+    @Test
+    public void testUpsertWithObject() {
+        Employee employee = new Employee();
+        employee.setCompany(null);
+        employee.setAddress("some road");
+        employee.setBlob(new byte[] {1, 2, 125});
+        employee.setEmpId(12L);
+        employee.setJoinDate(new Date());
+        Note empNote = new Note();
+        empNote.setNoteId(23L);
+        empNote.setText("sample text note");
+        employee.setEmployeeNote(empNote);
+
+        WriteResult writeResult = employeeRepository.update(employee, false);
+        assertEquals(writeResult.getAffectedCount(), 0);
+        writeResult = employeeRepository.update(employee, true);
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        Employee emp = employeeRepository.find(eq("empId", 12L)).firstOrDefault();
+        assertEquals(emp, employee);
+    }
+
+    @Test
+    public void testRemoveObject() {
+        Employee employee = new Employee();
+        employee.setCompany(null);
+        employee.setAddress("some road");
+        employee.setBlob(new byte[] {1, 2, 125});
+        employee.setEmpId(12L);
+        employee.setJoinDate(new Date());
+        Note empNote = new Note();
+        empNote.setNoteId(23L);
+        empNote.setText("sample text note");
+        employee.setEmployeeNote(empNote);
+
+        long size = employeeRepository.size();
+
+        employeeRepository.insert(employee);
+        assertEquals(employeeRepository.size(), size + 1);
+
+        employeeRepository.remove(employee);
+        assertEquals(employeeRepository.size(), size);
+
+        Employee emp = employeeRepository.find(eq("empId", 12L)).firstOrDefault();
+        assertNull(emp);
+    }
+
+    private void prepareUpdateWithOptions(Date joiningDate) {
+        employeeRepository.remove(ALL);
+
+        Employee employee1 = new Employee();
+        employee1.setCompany(null);
+        employee1.setAddress("some road");
+        employee1.setBlob(new byte[] {1, 2, 125});
+        employee1.setEmpId(12L);
+        employee1.setJoinDate(joiningDate);
+        Note empNote1 = new Note();
+        empNote1.setNoteId(23L);
+        empNote1.setText("sample text note");
+        employee1.setEmployeeNote(empNote1);
+
+        Employee employee2 = new Employee();
+        employee2.setCompany(null);
+        employee2.setAddress("other road");
+        employee2.setBlob(new byte[] {10, 12, 25});
+        employee2.setEmpId(2L);
+        employee2.setJoinDate(joiningDate);
+        Note empNote2 = new Note();
+        empNote2.setNoteId(2L);
+        empNote2.setText("some random note");
+        employee2.setEmployeeNote(empNote2);
+
+        employeeRepository.insert(employee1, employee2);
+        Cursor<Employee> result = employeeRepository.find();
+        assertEquals(result.size(), 2);
+        for (Employee e : result.project(Employee.class)) {
+            assertEquals(e.getJoinDate(), joiningDate);
+        }
+    }
+}

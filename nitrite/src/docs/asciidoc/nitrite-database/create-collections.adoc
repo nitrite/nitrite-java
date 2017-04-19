@@ -1,0 +1,21 @@
+To create or open a NitriteCollection call
+
+[source,java]
+--
+NitriteCollection collection = db.getCollection("collectionName");
+--
+
+If no collection exists with the name in the database, a new
+collection with the given name will be created. But if there is
+already a collection with the same name in the database, it will
+be opened.
+
+Similarly, to create or open an ObjectRepository call
+
+[source,java]
+--
+ObjectRepository<Employee> repository = db.getRepository(Employee.class);
+--
+
+If no object repository of the given type exists in the database, a new
+one will be created; otherwise the existing one will be opened.

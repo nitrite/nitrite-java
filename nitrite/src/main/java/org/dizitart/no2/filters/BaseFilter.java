@@ -1,0 +1,52 @@
+package org.dizitart.no2.filters;
+
+import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.Filter;
+import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.internals.NitriteService;
+import org.dizitart.no2.store.NitriteMap;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+
+/**
+ * An abstract implementation of {@link Filter}.
+ *
+ * @author Anindya Chatterjee
+ * @since 1.0
+ */
+@Slf4j
+public abstract class BaseFilter implements Filter {
+    /**
+     * The Nitrite service.
+     */
+    protected NitriteService nitriteService;
+
+    @Override
+    public void setNitriteService(NitriteService nitriteService) {
+        this.nitriteService = nitriteService;
+    }
+
+    List<Callable<Set<NitriteId>>> createTasks(Filter[] filters,
+                                               final NitriteMap<NitriteId, Document> documentMap) {
+        List<Callable<Set<NitriteId>>> tasks = new ArrayList<>();
+        for (final Filter filter : filters) {
+            filter.setNitriteService(nitriteService);
+            tasks.add(new Callable<Set<NitriteId>>() {
+                @Override
+                public Set<NitriteId> call() throws Exception {
+                    try {
+                        return filter.apply(documentMap);
+                    } catch (Exception e) {
+                        log.error("Error while executing filter " + filter.toString(), e);
+                        throw e;
+                    }
+                }
+            });
+        }
+        return tasks;
+    }
+}
