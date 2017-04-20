@@ -27,6 +27,7 @@ script:
   - travis_retry . ./.ci/build.sh
 
 after_success:
+  - coveralls
   - travis_retry . ./.ci/release.sh
 
 deploy:
