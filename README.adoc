@@ -51,7 +51,7 @@ compile 'org.dizitart:nitrite:{version}'
 === Quick Examples
 
 [source,java]
-.Initialize Database
+.*Initialize Database*
 --
 Nitrite db = Nitrite.builder()
         .compressed()
@@ -59,10 +59,8 @@ Nitrite db = Nitrite.builder()
         .openOrCreate("user", "password");
 --
 
-For more options on opening a database visit <<index.adoc#create-open-database,here>>.
-
 [source,java]
-.Create a Collection
+.*Create a Collection*
 --
 // Create a Nitrite Collection
 NitriteCollection collection = db.getCollection("test");
@@ -72,11 +70,16 @@ ObjectRepository<Employee> repository = db.getRepository(Employee.class);
 
 --
 
-.CRUD Operations
+.*CRUD Operations*
 [source,java]
 --
 // create a document to populate data
-include::../examples/document.adoc[]
+Document doc = createDocument("firstName", "John")
+     .put("lastName", "Doe")
+     .put("birthDay", new Date())
+     .put("data", new byte[] {1, 2, 3})
+     .put("fruits", new ArrayList<String>() {{ add("apple"); add("orange"); add("banana"); }})
+     .put("note", "a quick brown fox jump over the lazy dog");
 
 // insert the document
 collection.insert(doc);
@@ -100,10 +103,7 @@ repository.insert(emp);
 
 --
 
-Details of CRUD operations for Nitrite Collection are <<index.adoc#crud-operations,here>>, and
-for Object Repository are <<index.adoc#crud-operations-2,here>>.
-
-.Create Indices
+*.Create Indices*
 [source,java]
 --
 // create document index
@@ -114,10 +114,8 @@ collection.createIndex("note", indexOptions(IndexType.Fulltext));
 repository.createIndex("firstName", indexOptions(IndexType.NonUnique));
 --
 
-For more details on Index operations, see <<index.adoc#indexing,here>> and <<index.adoc#indexing-2,here>>.
-
 [source,java]
-.Query a Collection
+*.Query a Collection*
 --
 Cursor cursor = collection.find(
                         // and clause
@@ -145,11 +143,8 @@ Employee emp = repository.find(eq("firstName", "John"))
                          .firstOrDefault();
 --
 
-There are several find filters available for feature-rich search operations. Please head over
-<<index.adoc#filter,here>>.
-
 [source,java]
-.Automatic Replication
+*.Automatic Replication*
 --
 // connect to a DataGate server
 DataGateClient dataGateClient = new DataGateClient("http://localhost:9898")
@@ -180,7 +175,7 @@ syncHandle.startSync();
 --
 
 [source,java]
-.Import/Export Data
+*.Import/Export Data*
 --
 // Export data to a file
 Exporter exporter = Exporter.of(db);
@@ -190,6 +185,8 @@ exporter.exportTo(schemaFile);
 Importer importer = Importer.of(db);
 importer.importFrom(schemaFile);
 --
+
+More details are available in the reference document.
 
 == Release Notes
 
