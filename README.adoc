@@ -50,8 +50,8 @@ compile 'org.dizitart:nitrite:{version}'
 
 === Quick Examples
 
+*Initialize Database*
 [source,java]
-.*Initialize Database*
 --
 Nitrite db = Nitrite.builder()
         .compressed()
@@ -59,8 +59,8 @@ Nitrite db = Nitrite.builder()
         .openOrCreate("user", "password");
 --
 
+*Create a Collection*
 [source,java]
-.*Create a Collection*
 --
 // Create a Nitrite Collection
 NitriteCollection collection = db.getCollection("test");
@@ -70,7 +70,7 @@ ObjectRepository<Employee> repository = db.getRepository(Employee.class);
 
 --
 
-.*CRUD Operations*
+*CRUD Operations*
 [source,java]
 --
 // create a document to populate data
@@ -103,7 +103,7 @@ repository.insert(emp);
 
 --
 
-*.Create Indices*
+*Create Indices*
 [source,java]
 --
 // create document index
@@ -114,8 +114,8 @@ collection.createIndex("note", indexOptions(IndexType.Fulltext));
 repository.createIndex("firstName", indexOptions(IndexType.NonUnique));
 --
 
+*Query a Collection*
 [source,java]
-*.Query a Collection*
 --
 Cursor cursor = collection.find(
                         // and clause
@@ -143,8 +143,8 @@ Employee emp = repository.find(eq("firstName", "John"))
                          .firstOrDefault();
 --
 
+*Automatic Replication*
 [source,java]
-*.Automatic Replication*
 --
 // connect to a DataGate server
 DataGateClient dataGateClient = new DataGateClient("http://localhost:9898")
@@ -174,8 +174,8 @@ SyncHandle syncHandle = Replicator.of(db)
 syncHandle.startSync();
 --
 
+*Import/Export Data*
 [source,java]
-*.Import/Export Data*
 --
 // Export data to a file
 Exporter exporter = Exporter.of(db);
