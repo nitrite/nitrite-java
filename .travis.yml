@@ -14,6 +14,10 @@ services:
   - mongodb
 
 before_install:
+  - chmod a+x gradlew
+  - chmod a+x ./.ci/build.sh
+  - chmod a+x ./.ci/prepare-travis.sh
+  - chmod a+x ./.ci/release.sh
   - . ./.ci/prepare-travis.sh
 
 before_script:
