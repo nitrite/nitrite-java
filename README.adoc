@@ -2,6 +2,7 @@
 
 image:https://travis-ci.org/dizitart/nitrite-database.svg?branch=master["Build Status", link="https://travis-ci.org/dizitart/nitrite-database"]
 image:https://coveralls.io/repos/github/dizitart/nitrite-database/badge.svg["Coverage Status", link="https://coveralls.io/github/dizitart/nitrite-database"]
+image:https://javadoc.io/badge/org.dizitart/nitrite.svg["Javadocs", link=https://javadoc.io/doc/org.dizitart/nitrite]
 image:https://badges.gitter.im/dizitart/nitrite-database.svg["Gitter", link="https://gitter.im/dizitart/nitrite-database?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge"]
 
 **NO**sql **O**bject (*NO~2~* a.k.a Nitrite) database is an open source nosql embedded
@@ -146,8 +147,8 @@ Employee emp = repository.find(eq("firstName", "John"))
 *Automatic Replication*
 [source,java]
 --
-// connect to a DataGate server
-DataGateClient dataGateClient = new DataGateClient("http://localhost:9898")
+// connect to a DataGate server running at localhost 9090 port
+DataGateClient dataGateClient = new DataGateClient("http://localhost:9090")
         .withAuth("userId", "password");
 DataGateSyncTemplate syncTemplate
         = new DataGateSyncTemplate(dataGateClient, "remote-collection@userId");

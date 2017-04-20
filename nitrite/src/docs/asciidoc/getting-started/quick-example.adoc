@@ -99,8 +99,8 @@ There are several find filters available for feature-rich search operations. Ple
 [source,java]
 .Automatic Replication
 --
-// connect to a DataGate server
-DataGateClient dataGateClient = new DataGateClient("http://localhost:9898")
+// connect to a DataGate server localhost 9090 port
+DataGateClient dataGateClient = new DataGateClient("http://localhost:9090")
         .withAuth("userId", "password");
 DataGateSyncTemplate syncTemplate
         = new DataGateSyncTemplate(dataGateClient, "remote-collection@userId");
