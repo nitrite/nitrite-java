@@ -5,4 +5,4 @@
 * Full text search capability
 * Full Android compatibility
 * Observable store
-* Both way replication
+* Both way replication via Nitrite DataGate server

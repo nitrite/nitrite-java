@@ -1,39 +1,18 @@
-/* Flot plugin for stacking data sets rather than overlyaing them.
-
-Copyright (c) 2007-2014 IOLA and Ole Laursen.
-Licensed under the MIT license.
-
-The plugin assumes the data is sorted on x (or y if stacking horizontally).
-For line charts, it is assumed that if a line has an undefined gap (from a
-null point), then the line above it should have the same gap - insert zeros
-instead of "null" if you want another behaviour. This also holds for the start
-and end of the chart. Note that stacking a mix of positive and negative values
-in most instances doesn't make sense (so it looks weird).
-
-Two or more series are stacked when their "stack" attribute is set to the same
-key (which can be any number or string or just "true"). To specify the default
-stack, you can set the stack option like this:
-
-	series: {
-		stack: null/false, true, or a key (number/string)
-	}
-
-You can also specify it for a single series, like this:
-
-	$.plot( $("#placeholder"), [{
-		data: [ ... ],
-		stack: true
-	}])
-
-The stacking order is determined by the order of the data series in the array
-(later series end up on top of the previous).
-
-Internally, the plugin modifies the datapoints in each series, adding an
-offset to the y value. For line series, extra data points are inserted through
-interpolation. If there's a second y value, it's also adjusted (e.g for bar
-charts or filled areas).
-
-*/
+/*
+ * Copyright 2017 Nitrite author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 (function ($) {
     var options = {

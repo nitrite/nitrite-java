@@ -1,0 +1,70 @@
+= Nitrite Database
+
+image:https://travis-ci.org/dizitart/nitrite-database.svg?branch=master["Build Status", link="https://travis-ci.org/dizitart/nitrite-database"]
+image:https://coveralls.io/repos/github/dizitart/nitrite-database/badge.svg["Coverage Status", link="https://coveralls.io/github/dizitart/nitrite-database"]
+image:https://badges.gitter.im/dizitart/nitrite-database.svg["Gitter", link="https://gitter.im/dizitart/nitrite-database?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge"]
+
+image::nitrite/src/docs/asciidoc/images/nitrite-logo.svg[Logo 200, 200,pdfwidth=40%]
+
+include::nitrite/src/docs/asciidoc/what-is-nitrite.adoc[]
+
+== Getting Started
+
+=== How To Install
+
+include::nitrite/src/docs/asciidoc/getting-started/how-to-install.adoc[]
+
+<<<
+
+=== Quick Examples
+
+include::nitrite/src/docs/asciidoc/getting-started/quick-example.adoc[]
+
+== Release Notes
+
+Release notes are available https://github.com/dizitart/nitrite-database/releases[here].
+
+== Documentation
+
+|===
+|Reference |API
+
+|[Document]
+|https://javadoc.io/doc/org.dizitart/nitrite[JavaDoc]
+|===
+
+
+== Build
+
+To build and test Nitrite
+
+[source,bash]
+--
+$ git clone https://github.com/dizitart/nitrite-database.git
+$ cd nitrite-database
+$ ./gradlew build
+--
+
+The test suite requires mongod to be running on localhost, listening on the default port. MongoDb is required
+to test replication using the DataGate server. Please run the below command to create the test user in mongo.
+
+[source,javascript]
+--
+db.getSiblingDB('benchmark').createUser({user: 'bench', pwd: 'bench', roles: [{role: 'readWrite', db: 'benchmark'}, {role: 'dbAdmin', db: 'benchmark'}]})
+--
+
+The test suite also requires android sdk 24.4.1 to be installed and ANDROID_HOME environment variable to be setup
+properly to test the android example.
+
+== Support / Feedback
+
+For issues with, questions about, or feedback talk to us at https://gitter.im/dizitart/nitrite-database[Gitter].
+
+== Bugs / Feature Requests
+
+Think you’ve found a bug? Want to see a new feature in the Nitrite? Please open an issue https://github.com/dizitart/nitrite-database/issues[here]. But
+before you file an issue please check if it is already existing or not.
+
+== Maintainers
+
+* Anindya Chatterjee

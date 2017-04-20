@@ -1,0 +1,46 @@
+The Nitrite uses third-party libraries or other resources that may
+be distributed under licenses different than the Nitrite software.
+
+In the event that we accidentally failed to list a required notice,
+please bring it to our attention through any of the ways detailed here:
+
+    https://gitter.im/dizitart/nitrite-database
+
+The attached notices are provided for information only.
+
+For any licenses that require disclosure of source, sources are available at
+https://github.com/dizitart/nitrite-database.
+
+1) The following files: ObjectId.java
+
+ Copyright (c) 2008-2014 MongoDB, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+ 
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+
+
+
+THE FOLLOWING SETS FORTH ATTRIBUTION NOTICES FOR THIRD PARTY SOFTWARE
+THAT MAY BE CONTAINED IN PORTIONS OF NITRITE PRODUCT.
+
+-----
+
+H2 MVStore
+
+This software contains unmodified binary redistributions for
+H2 database engine (http://www.h2database.com/),
+which is dual licensed and available under the MPL 2.0
+(Mozilla Public License) or under the EPL 1.0 (Eclipse Public License).
+An original copy of the license agreement can be found at:
+http://www.h2database.com/html/license.html
+
+------

@@ -15,7 +15,6 @@ services:
 
 before_install:
   - . ./.ci/prepare-travis.sh
-  - openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in .ci/secring.gpg.enc -out ~/secring.gpg -d
 
 before_script:
   - rm nitrite-datagate/src/main/resources/application.properties

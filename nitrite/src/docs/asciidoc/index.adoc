@@ -42,6 +42,8 @@ include::getting-started/how-to-install.adoc[]
 
 include::getting-started/quick-example.adoc[]
 
+include::getting-started/example-footer.adoc[]
+
 <<<
 
 == Nitrite Database
