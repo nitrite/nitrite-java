@@ -34,8 +34,11 @@ ext {
 
 jacocoTestReport {
     group = "Reporting"
+    executionData fileTree(project.rootDir.absolutePath).include("**/build/jacoco/*.exec")
+
     reports {
         xml.enabled true
+        xml.destination "${buildDir}/reports/jacoco/report.xml"
         csv.enabled false
         html.destination "${buildDir}/reports/coverage"
     }
@@ -43,14 +46,13 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    'org/dizitart/no2/transaction**',
                     'org/bson**'
             ])
         })
     }
 
     doLast {
-        def report = file("${jacoco.reportsDir}/test/jacocoTestReport.xml")
+        def report = file("${buildDir}/reports/jacoco/report.xml")
         logger.lifecycle("Checking coverage results: ${report}")
 
         def parser = new XmlParser()
@@ -89,7 +91,6 @@ jacocoTestReport {
                 logger.log(LogLevel.ERROR, it)
             }
             logger.log(LogLevel.ERROR, "---------------------------------------------------------------")
-//            throw new GradleException("Code coverage failed")
         } else {
             logger.quiet("Passed Code Coverage Checks")
         }

@@ -27,7 +27,7 @@ script:
   - travis_retry . ./.ci/build.sh
 
 after_success:
-  - coveralls
+  - bash <(curl -s https://codecov.io/bash)
   - travis_retry . ./.ci/release.sh
 
 deploy:
