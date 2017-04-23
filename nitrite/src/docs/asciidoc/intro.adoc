@@ -3,4 +3,4 @@ document store written in Java. It has MongoDB like API. It supports both
 in-memory and single file based persistent store powered by
 http://www.h2database.com/html/mvstore.html[MVStore] engine of h2 database.
 
-Nitrite is a server-less database ideal for desktop, mobile or small web applications.
+Nitrite is a server-less embedded database ideal for desktop, mobile or small web applications.
