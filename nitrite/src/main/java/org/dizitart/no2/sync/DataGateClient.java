@@ -112,7 +112,8 @@ public class DataGateClient {
     }
 
     /**
-     * Sets the {@link UserAgent} details.
+     * Sets the {@link UserAgent} details. The user agent details
+     * helps to generate several analytics in DataGate server.
      *
      * @param userAgent the {@link UserAgent}
      * @return the {@link DataGateClient}

@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.datagate.controllers;
 
-import org.dizitart.no2.sync.data.UserAccount;
 import org.dizitart.no2.datagate.services.UserAccountService;
+import org.dizitart.no2.sync.data.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -57,5 +57,11 @@ public class HomeController {
         } else {
             return "signUp";
         }
+    }
+
+    @GetMapping(value = "/loginError")
+    public String loginError(Model model) {
+        model.addAttribute("loginError", true);
+        return "login";
     }
 }

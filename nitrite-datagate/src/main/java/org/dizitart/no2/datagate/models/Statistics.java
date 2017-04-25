@@ -27,7 +27,7 @@ import java.util.List;
 public class Statistics {
     private int userCount;
     private int clientCount;
-    private int collectionCount;
+    private long collectionCount;
     private long documentCount;
     private Long[][] syncGraphData;
     private List<Device> deviceList;

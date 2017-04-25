@@ -54,6 +54,7 @@ public class SyncLogDataGenerator {
             userAgent.setDevice(devices[random.nextInt(6)]);
             userAgent.setAppName("App" + random.nextInt(2));
             userAgent.setAppVersion(Integer.toString(random.nextInt(5)));
+            userAgent.setClientId("Client" + random.nextInt(3));
             syncLog.setUserAgent(userAgent);
             jongo.getCollection(SYNC_LOG).insert(syncLog);
         }

@@ -22,9 +22,10 @@ import org.dizitart.no2.datagate.models.AppDetails;
 import org.dizitart.no2.datagate.models.Device;
 import org.dizitart.no2.datagate.models.Statistics;
 import org.dizitart.no2.datagate.models.SyncLog;
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.meta.Attributes;
 import org.jongo.Aggregate;
 import org.jongo.Jongo;
+import org.jongo.MongoCursor;
 import org.jongo.marshall.jackson.oid.MongoId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -82,22 +83,19 @@ public class AnalyticsService {
         return userAccountService.findUsersByAuthorities(AUTH_CLIENT).size();
     }
 
-    public int getCollectionCount() {
-        return userAccountService.findUsersByAuthorities(AUTH_USER)
-            .stream()
-            .mapToInt(userAccount -> userAccount.getCollections().size())
-            .sum();
+    public long getCollectionCount() {
+        return jongo.getCollection(ATTRIBUTE_REPO).count();
     }
 
     public long getDocumentCount() {
         long sum = 0;
-        Set<String> collNames = new HashSet<>();
-        for (UserAccount userAccount :
-            userAccountService.findUsersByAuthorities(AUTH_USER)) {
-            collNames.addAll(userAccount.getCollections());
+        Set<String> collectionNames = new HashSet<>();
+        MongoCursor<Attributes> cursor = jongo.getCollection(ATTRIBUTE_REPO).find().as(Attributes.class);
+        for (Attributes attributes : cursor) {
+            collectionNames.add(attributes.getCollection());
         }
 
-        for (String name : collNames) {
+        for (String name : collectionNames) {
             sum = sum + jongo.getCollection(name).count();
         }
         return sum;

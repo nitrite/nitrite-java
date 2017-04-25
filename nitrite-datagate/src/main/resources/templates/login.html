@@ -25,6 +25,9 @@
 
     <title>Nitrite DataGate | Admin Login</title>
 
+    <link rel="shortcut icon"
+          th:href="@{/assets/img/favicon.ico}"
+          href="../assets/img/favicon.ico"/>
     <!-- Bootstrap -->
     <link rel="stylesheet"
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
@@ -48,6 +51,7 @@
                 <form role="form" action="#" th:action="@{/login}"
                       method="post">
                     <h1 class="ubuntu-font">Admin Login</h1>
+                    <p th:if="${loginError}" class="error red">Wrong user or password</p>
                     <div class="form-group">
                         <input type="text" name="username"
                                id="username"

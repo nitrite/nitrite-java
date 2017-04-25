@@ -60,6 +60,14 @@ public class UserAgent {
     private String device;
 
     /**
+     * The client id
+     *
+     * @param clientId the client id
+     * @return the client id.
+     * */
+    private String clientId;
+
+    /**
      * Parse a user agent string.
      *
      * @param userAgentString the user agent string
@@ -80,6 +88,8 @@ public class UserAgent {
                     case 2:
                         userAgent.setDevice(split[2].trim());
                         break;
+                    case 3:
+                        userAgent.setClientId(split[3].trim());
                     default:
                         break;
                 }
@@ -92,6 +102,7 @@ public class UserAgent {
     @Override
     public String toString() {
         return appName + separator + appVersion
-                + separator + device;
+                + separator + device
+                + separator + clientId;
     }
 }

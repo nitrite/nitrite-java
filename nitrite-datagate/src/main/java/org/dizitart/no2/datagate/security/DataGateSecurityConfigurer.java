@@ -71,6 +71,7 @@ public class DataGateSecurityConfigurer extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 .loginPage("/login")
+                .failureUrl("/loginError")
                 .defaultSuccessUrl("/admin/")
                 .permitAll()
                 .and()
