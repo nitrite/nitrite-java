@@ -48,6 +48,7 @@ dependencies {
     testCompile "org.awaitility:awaitility:$awaitilityVersion"
     testCompile "joda-time:joda-time:$jodaTimeVersion"
     testCompile "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
+    testCompile "org.meanbean:meanbean:$meanbeanVersion"
 }
 
 gradle.buildFinished { BuildResult result ->
