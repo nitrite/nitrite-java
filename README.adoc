@@ -74,6 +74,31 @@ ObjectRepository<Employee> repository = db.getRepository(Employee.class);
 
 --
 
+*Annotations for POJO*
+[source,java]
+--
+// provides index information for ObjectRepository
+@Indices({
+        @Index(field = "joinDate", type = IndexType.NonUnique),
+        @Index(field = "name", type = IndexType.Unique)
+})
+public class Employee implements Serializable {
+    // provides id field to uniquely identify an object inside an ObjectRepository
+    @Id
+    private long empId;
+
+    private Date joinDate;
+
+    private String name;
+
+    private String address;
+
+    // ... public getters and setters
+}
+
+--
+
+
 *CRUD Operations*
 [source,java]
 --
@@ -114,7 +139,7 @@ repository.insert(emp);
 collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
 collection.createIndex("note", indexOptions(IndexType.Fulltext));
 
-// create object index
+// create object index. It can also be provided via annotation
 repository.createIndex("firstName", indexOptions(IndexType.NonUnique));
 --
 
