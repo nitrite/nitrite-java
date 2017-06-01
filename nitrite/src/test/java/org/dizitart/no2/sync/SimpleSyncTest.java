@@ -39,7 +39,7 @@ public class SimpleSyncTest extends BaseSyncTest {
 
     @Test
     public void testSimpleSync() {
-        // createId primary sync handle
+        // create primary sync handle
         syncHandlePrimary = Replicator.of(primaryDb)
                 .forLocal(primary)
                 .withSyncTemplate(syncTemplate)
@@ -48,7 +48,7 @@ public class SimpleSyncTest extends BaseSyncTest {
                 .withListener(new SyncTestEventListener())
                 .configure();
 
-        // createId secondary sync handle
+        // create secondary sync handle
         syncHandleSecondary = Replicator.of(secondaryDb)
                 .forLocal(secondary)
                 .withSyncTemplate(syncTemplate)

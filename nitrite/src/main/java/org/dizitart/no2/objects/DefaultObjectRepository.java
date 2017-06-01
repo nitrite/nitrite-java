@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.objects;
 
-import lombok.val;
 import org.dizitart.no2.*;
 import org.dizitart.no2.Index;
 import org.dizitart.no2.event.ChangeListener;
@@ -28,15 +27,14 @@ import org.dizitart.no2.meta.Attributes;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.Set;
 
 import static org.dizitart.no2.Constants.DOC_ID;
 import static org.dizitart.no2.IndexOptions.indexOptions;
 import static org.dizitart.no2.UpdateOptions.updateOptions;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
-import static org.dizitart.no2.util.ObjectUtils.createUniqueFilter;
-import static org.dizitart.no2.util.ObjectUtils.extractIndices;
-import static org.dizitart.no2.util.ObjectUtils.getIdField;
+import static org.dizitart.no2.util.ObjectUtils.*;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 
@@ -316,8 +314,8 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     private void createIndexes() {
         validateCollection();
-        val indexes = extractIndices(nitriteMapper, type);
-        for (val idx : indexes) {
+        Set<org.dizitart.no2.objects.Index> indexes = extractIndices(nitriteMapper, type);
+        for (org.dizitart.no2.objects.Index idx : indexes) {
             if (!collection.hasIndex(idx.value())) {
                 collection.createIndex(idx.value(), indexOptions(idx.type(), false));
             }

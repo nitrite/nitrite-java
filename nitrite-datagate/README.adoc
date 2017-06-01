@@ -1,9 +1,14 @@
+= Nitrite DataGate
+
+If you are using Nitrite Database in your applications and want to synchronize the data in
+real-time across the devices, you need DataGate.
+
 Nitrite DataGate is the replication server for Nitrite database. It comes as a separate product.
 It is available as a binary distribution or as a docker image.
 
 To get the latest binary distribution please visit the
-https://github.com/dizitart/nitrite-database/releases[Release] page of Github. The docker image
-is available at docker hub
+https://github.com/dizitart/nitrite-database/releases[Release] page of Github.
+The docker image is available at docker hub
 
 [source,bash]
 --

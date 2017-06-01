@@ -82,7 +82,7 @@ public class DocumentUtils {
      * are initialized to `null`. Such empty document is used for projection purpose.
      *
      * @param <T>           the type parameter
-     * @param nitriteMapper the {@link NitriteMapper} to createId the document.
+     * @param nitriteMapper the {@link NitriteMapper} to create the document.
      * @param type          the class definition.
      * @return the empty document
      */

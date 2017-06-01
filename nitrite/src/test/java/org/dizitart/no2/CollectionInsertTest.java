@@ -16,7 +16,6 @@
 
 package org.dizitart.no2;
 
-import lombok.val;
 import org.junit.Test;
 
 import static org.dizitart.no2.Constants.DOC_ID;
@@ -34,7 +33,7 @@ public class CollectionInsertTest extends BaseCollectionTest {
         Cursor cursor = collection.find();
         assertEquals(cursor.size(), 3);
 
-        for (val document : cursor) {
+        for (Document document : cursor) {
             assertNotNull(document.get("firstName"));
             assertNotNull(document.get("lastName"));
             assertNotNull(document.get("birthDay"));

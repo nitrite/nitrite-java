@@ -25,11 +25,11 @@ package org.dizitart.no2;
  * [source,java]
  * . Example of {@link Cursor}
  * --
- *  // createId/open a database
+ *  // create/open a database
  *  Nitrite db = Nitrite.builder()
  *         .openOrCreate("user", "password");
  *
- *  // createId a collection named - test
+ *  // create a collection named - test
  *  NitriteCollection collection = db.getCollection("test");
  *
  *  // returns all ids un-filtered
@@ -43,7 +43,7 @@ package org.dizitart.no2;
  * --
  *
  * [icon="{@docRoot}/note.png"]
- * NOTE: To createId an iterator over the documents instead of the ids,
+ * NOTE: To create an iterator over the documents instead of the ids,
  * call on the {@link Cursor}.
  *
  *  @author Anindya Chatterjee

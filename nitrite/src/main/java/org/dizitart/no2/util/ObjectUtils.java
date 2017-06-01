@@ -18,7 +18,6 @@ package org.dizitart.no2.util;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
@@ -86,7 +85,7 @@ public class ObjectUtils {
      */
     public static <T> Set<Index> extractIndices(NitriteMapper nitriteMapper, Class<T> type) {
         notNull(type, errorMessage("type can not be null", VE_INDEX_ANNOTATION_NULL_TYPE));
-        val indexes = type.getAnnotation(Indices.class);
+        Indices indexes = type.getAnnotation(Indices.class);
         Set<Index> indexSet = new LinkedHashSet<>();
         if (indexes != null) {
             Index[] indexList = indexes.value();
@@ -104,7 +103,7 @@ public class ObjectUtils {
             }
         }
 
-        val index = type.getAnnotation(Index.class);
+        Index index = type.getAnnotation(Index.class);
         if (index != null) {
             String name = index.value();
             Field field = getField(type, name);

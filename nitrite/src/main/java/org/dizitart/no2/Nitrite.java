@@ -55,7 +55,7 @@ import static org.dizitart.no2.util.ValidationUtils.validateCollectionName;
  * [NOTE]
  * ====
  *  - It does not support ACID transactions.
- *  - Use {@link NitriteBuilder} to createId a db instance.
+ *  - Use {@link NitriteBuilder} to create a db instance.
  * ====
  *
  * @author Anindya Chatterjee
@@ -78,7 +78,7 @@ public class Nitrite implements Closeable {
     }
 
     /**
-     * Provides a builder utility to createId a {@link Nitrite} database
+     * Provides a builder utility to create a {@link Nitrite} database
      * instance.
      *
      * @return a {@link NitriteBuilder} instance.

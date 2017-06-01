@@ -55,7 +55,7 @@ class SyncService {
         if (syncTemplate.isOnline()) {
             // pull all changes from remote to local, but local changes are
             // not pushed to remote.
-            // createId the last sync time of local, pull everything from remote
+            // create the last sync time of local, pull everything from remote
             // from that time and update local.
             try {
                 if (syncTemplate.trySyncLock(syncConfig.getSyncDelay(), originator)) {
