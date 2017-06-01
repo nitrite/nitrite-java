@@ -65,7 +65,7 @@ class IndexingService {
         Object fieldLock = indexMetaService.getFieldLock(field);
         synchronized (fieldLock) {
             if (!indexMetaService.hasIndex(field)) {
-                // if no index createId index
+                // if no index create index
                 index = indexMetaService.createIndexMetadata(field, indexType);
             } else {
                 // if index already there throw
@@ -110,7 +110,7 @@ class IndexingService {
                         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                                 = indexMetaService.getIndexMap(field);
 
-                        // createId the nitriteId list associated with the value
+                        // create the nitriteId list associated with the value
                         ConcurrentSkipListSet<NitriteId> nitriteIdList
                                 = indexMap.get((Comparable) fieldValue);
 
@@ -159,7 +159,7 @@ class IndexingService {
                         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                                 = indexMetaService.getIndexMap(field);
 
-                        // createId the nitriteId list associated with the value
+                        // create the nitrite list associated with the value
                         if (fieldValue instanceof Comparable) {
                             ConcurrentSkipListSet<NitriteId> nitriteIdList = indexMap.get((Comparable) fieldValue);
                             if (nitriteIdList != null) {
@@ -243,7 +243,7 @@ class IndexingService {
             indexMetaService.markDirty(field);
 
             if (index.getIndexType() != IndexType.Fulltext) {
-                // createId index map
+                // create index map
                 NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                         = indexMetaService.getIndexMap(field);
 
@@ -251,7 +251,7 @@ class IndexingService {
                 indexMap.clear();
 
                 for (Map.Entry<NitriteId, Document> entry : underlyingMap.entrySet()) {
-                    // createId the document
+                    // create the document
                     Document object = entry.getValue();
 
                     // retrieved the value from document
@@ -260,7 +260,7 @@ class IndexingService {
                     if (fieldValue == null) continue;
                     validateDocumentIndexField(fieldValue, field);
 
-                    // createId the id list associated with the value
+                    // create the id list associated with the value
                     ConcurrentSkipListSet<NitriteId> nitriteIdList = indexMap.get((Comparable) fieldValue);
                     if (nitriteIdList == null) {
                         nitriteIdList = new ConcurrentSkipListSet<>();
@@ -281,7 +281,7 @@ class IndexingService {
             } else {
                 // for update-rebuild or remove-rebuild this block will never come
                 for (Map.Entry<NitriteId, Document> entry : underlyingMap.entrySet()) {
-                    // createId the document
+                    // create the document
                     Document object = entry.getValue();
 
                     // retrieve the value from document

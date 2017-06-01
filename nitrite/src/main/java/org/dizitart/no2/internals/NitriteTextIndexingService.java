@@ -159,7 +159,7 @@ class NitriteTextIndexingService implements TextIndexingService {
         Set<NitriteId> idSet = new LinkedHashSet<>();
         String term = searchString.substring(0, searchString.length() - 1);
 
-        for (val entry : indexMap.entrySet()) {
+        for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();
             if (key.startsWith(term.toUpperCase())) {
                 idSet.addAll(entry.getValue());
@@ -173,7 +173,7 @@ class NitriteTextIndexingService implements TextIndexingService {
                 = indexMetaService.getIndexMap(field);
         Set<NitriteId> idSet = new LinkedHashSet<>();
 
-        for (val entry : indexMap.entrySet()) {
+        for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();
             if (key.contains(term.toUpperCase())) {
                 idSet.addAll(entry.getValue());
@@ -192,7 +192,7 @@ class NitriteTextIndexingService implements TextIndexingService {
         Set<NitriteId> idSet = new LinkedHashSet<>();
         String term = searchString.substring(1, searchString.length());
 
-        for (val entry : indexMap.entrySet()) {
+        for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();
             if (key.endsWith(term.toUpperCase())) {
                 idSet.addAll(entry.getValue());

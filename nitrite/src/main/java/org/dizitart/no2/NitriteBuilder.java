@@ -41,7 +41,7 @@ import static org.dizitart.no2.tool.Recovery.recover;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 
 /**
- * A builder utility to createId a {@link Nitrite} database instance.
+ * A builder utility to create a {@link Nitrite} database instance.
  *
  * === Example:
  *
@@ -106,13 +106,29 @@ public class NitriteBuilder {
 
     /**
      * Sets file name for the file based store. If `file` is `null`
-     * the builder will createId an in-memory database.
+     * the builder will create an in-memory database.
      *
      * @param path the name of the file store.
      * @return the {@link NitriteBuilder} instance.
      */
     public NitriteBuilder filePath(String path) {
         this.filePath = path;
+        return this;
+    }
+
+    /**
+     * Sets file name for the file based store. If `file` is `null`
+     * the builder will create an in-memory database.
+     *
+     * @param file the name of the file store.
+     * @return the {@link NitriteBuilder} instance.
+     */
+    public NitriteBuilder filePath(File file) {
+        if (file == null) {
+            this.filePath = null;
+        } else {
+            this.filePath = file.getPath();
+        }
         return this;
     }
 
@@ -269,8 +285,8 @@ public class NitriteBuilder {
 
     /**
      * Opens or creates a new database. If it is an in-memory store, then it
-     * will createId a new one. If it is a file based store, and if the file does not
-     * exists, then it will createId a new file store and open; otherwise it will
+     * will create a new one. If it is a file based store, and if the file does not
+     * exists, then it will create a new file store and open; otherwise it will
      * open the existing file store.
      *
      * [icon="{@docRoot}/note.png"]
@@ -288,7 +304,7 @@ public class NitriteBuilder {
      * --
      *
      * @return the nitrite database instance.
-     * @throws NitriteIOException if unable to createId a new in-memory database.
+     * @throws NitriteIOException if unable to create a new in-memory database.
      * @throws NitriteIOException if the database is corrupt and recovery fails.
      * @throws IllegalArgumentException if the directory does not exist.
      */
@@ -298,8 +314,8 @@ public class NitriteBuilder {
 
     /**
      * Opens or creates a new database. If it is an in-memory store, then it
-     * will createId a new one. If it is a file based store, and if the file does not
-     * exists, then it will createId a new file store and open; otherwise it will
+     * will create a new one. If it is a file based store, and if the file does not
+     * exists, then it will create a new file store and open; otherwise it will
      * open the existing file store.
      *
      * While creating a new database, it will use the specified user credentials.
@@ -324,7 +340,7 @@ public class NitriteBuilder {
      * @param password the password
      * @return the nitrite database instance.
      * @throws SecurityException if the user credentials are wrong or one of them is empty string.
-     * @throws NitriteIOException if unable to createId a new in-memory database.
+     * @throws NitriteIOException if unable to create a new in-memory database.
      * @throws NitriteIOException if the database is corrupt and recovery fails.
      * @throws NitriteIOException if the directory does not exist.
      */

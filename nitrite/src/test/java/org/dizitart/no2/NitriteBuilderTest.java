@@ -22,15 +22,14 @@ import org.dizitart.no2.fulltext.TextTokenizer;
 import org.dizitart.no2.services.LuceneService;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -76,5 +75,43 @@ public class NitriteBuilderTest {
         db.close();
 
         Files.delete(Paths.get(filePath));
+    }
+
+    @Test
+    public void testConfigWithFile() {
+        File file = new File(getRandomTempDbFile());
+        NitriteBuilder builder = Nitrite.builder();
+        builder.filePath(file);
+        Nitrite db = builder.openOrCreate();
+        NitriteContext context = db.getContext();
+
+        assertFalse(context.isInMemory());
+        assertFalse(isNullOrEmpty(context.getFilePath()));
+
+        NitriteCollection test = db.getCollection("test");
+        assertNotNull(test);
+
+        db.commit();
+        db.close();
+
+        assertTrue(file.delete());
+    }
+
+    @Test
+    public void testConfigWithFileNull() {
+        File file = null;
+        NitriteBuilder builder = Nitrite.builder();
+        builder.filePath(file);
+        Nitrite db = builder.openOrCreate();
+        NitriteContext context = db.getContext();
+
+        assertTrue(context.isInMemory());
+        assertTrue(isNullOrEmpty(context.getFilePath()));
+
+        NitriteCollection test = db.getCollection("test");
+        assertNotNull(test);
+
+        db.commit();
+        db.close();
     }
 }

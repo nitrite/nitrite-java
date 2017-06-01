@@ -32,7 +32,7 @@ import static org.dizitart.no2.exceptions.ErrorMessage.FAILED_TO_CREATE_AUTO_ID;
  *
  * During insertion if an unique object is supplied in the '_id' field
  * of the document, then the value of the '_id' field will be used to
- * createId a new {@link NitriteId}. If that is not supplied, then nitrite
+ * create a new {@link NitriteId}. If that is not supplied, then nitrite
  * will auto generate one and supply it in the '_id' field of the document.
  *
  *

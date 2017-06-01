@@ -1,0 +1,30 @@
+Nitrite provides a set of annotations for entity objects while using it in ObjectRepository. The
+annotations are to let Nitrite knows about various information about the ObjectRepository while
+constructing it. It also helps to reduce some boilerplate code.
+
+.Example
+[source,java]
+--
+// Employee class
+@Indices({
+        @Index(field = "joinDate", type = IndexType.NonUnique),
+        @Index(field = "name", type = IndexType.Unique)
+})
+public class Employee implements Serializable {
+    @Id
+    private long empId;
+
+    private Date joinDate;
+
+    private String name;
+
+    private String address;
+
+    // ... public getters and setters
+}
+
+--
+
+`Index` annotation is to let Nitrite knows about the field which will be indexed. `Id` annotation
+is to mark a field as id field. This id field is used to uniquely identify an object inside an
+ObjectRepository. More on these annotations will be discussed later.

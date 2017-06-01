@@ -5,6 +5,9 @@ image:https://codecov.io/gh/dizitart/nitrite-database/branch/master/graph/badge.
 image:https://javadoc.io/badge/org.dizitart/nitrite.svg["Javadocs", link=https://javadoc.io/doc/org.dizitart/nitrite]
 image:https://badges.gitter.im/dizitart/nitrite-database.svg["Gitter", link="https://gitter.im/dizitart/nitrite-database?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge"]
 
+
+image:http://www.dizitart.org/nitrite-database/doc/1.0/images/nitrite-logo.svg[Logo 200, 200]
+
 **NO**sql **O**bject (*NO~2~* a.k.a Nitrite) database is an open source nosql embedded
 document store written in Java. It has MongoDB like API. It supports both
 in-memory and single file based persistent store powered by
@@ -71,6 +74,31 @@ ObjectRepository<Employee> repository = db.getRepository(Employee.class);
 
 --
 
+*Annotations for POJO*
+[source,java]
+--
+// provides index information for ObjectRepository
+@Indices({
+        @Index(field = "joinDate", type = IndexType.NonUnique),
+        @Index(field = "name", type = IndexType.Unique)
+})
+public class Employee implements Serializable {
+    // provides id field to uniquely identify an object inside an ObjectRepository
+    @Id
+    private long empId;
+
+    private Date joinDate;
+
+    private String name;
+
+    private String address;
+
+    // ... public getters and setters
+}
+
+--
+
+
 *CRUD Operations*
 [source,java]
 --
@@ -111,7 +139,7 @@ repository.insert(emp);
 collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
 collection.createIndex("note", indexOptions(IndexType.Fulltext));
 
-// create object index
+// create object index. It can also be provided via annotation
 repository.createIndex("firstName", indexOptions(IndexType.NonUnique));
 --
 
@@ -198,7 +226,7 @@ Release notes are available https://github.com/dizitart/nitrite-database/release
 |===
 |Reference |API
 
-|[Document]
+|http://www.dizitart.org/nitrite-database[Document]
 |https://javadoc.io/doc/org.dizitart/nitrite[JavaDoc]
 |===
 

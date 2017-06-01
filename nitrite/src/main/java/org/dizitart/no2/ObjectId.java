@@ -165,7 +165,7 @@ final class ObjectId implements Serializable {
         } catch (Throwable t) {
             // exception sometimes happens with IBM JVM, use random
             machinePiece = (new SecureRandom().nextInt());
-            log.warn("Failed to createId machine identifier from network interface, using random number instead", t);
+            log.warn("Failed to create machine identifier from network interface, using random number instead", t);
         }
         machinePiece = machinePiece & LOW_ORDER_THREE_BYTES;
         return machinePiece;
@@ -185,7 +185,7 @@ final class ObjectId implements Serializable {
 
         } catch (Throwable t) {
             processId = (short) new SecureRandom().nextInt();
-            log.warn("Failed to createId process identifier from JMX, using random number instead", t);
+            log.warn("Failed to create process identifier from JMX, using random number instead", t);
         }
 
         return processId;

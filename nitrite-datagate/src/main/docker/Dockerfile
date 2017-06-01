@@ -9,7 +9,8 @@ ENV JAVA_OPTS "$JAVA_OPTS -Drun.mode=docker -Djava.security.egd=file:/dev/./uran
 # log settings
 ENV DATAGATE_LOG_FILE "/logs/datagate.log"
 
-ENV DATAGATE_SYNC_LOG_CLEANUP_DELAY "30"  #days
+# default 30 days cleanup policy
+ENV DATAGATE_SYNC_LOG_CLEANUP_DELAY "30"
 
 ## Configure below environment variables
 #ENV DATAGATE_HOST ""
@@ -26,4 +27,5 @@ ENV DATAGATE_SYNC_LOG_CLEANUP_DELAY "30"  #days
 #ENV DATAGATE_MONGO_PASSWORD ""
 #ENV DATAGATE_MONGO_DATABASE ""
 
+#RUN ["chmod", "+x", "./datagate.sh"]
 #ENTRYPOINT [ "./datagate.sh" ]

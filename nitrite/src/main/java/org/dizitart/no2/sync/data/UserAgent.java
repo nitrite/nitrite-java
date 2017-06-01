@@ -90,6 +90,7 @@ public class UserAgent {
                         break;
                     case 3:
                         userAgent.setClientId(split[3].trim());
+                    //fall through
                     default:
                         break;
                 }

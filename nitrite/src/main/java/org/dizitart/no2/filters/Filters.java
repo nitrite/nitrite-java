@@ -20,7 +20,7 @@ import lombok.experimental.UtilityClass;
 import org.dizitart.no2.Filter;
 
 /**
- * A helper class to createId all type of {@link Filter}s.
+ * A helper class to create all type of {@link Filter}s.
  *
  * @since 1.0
  * @author Anindya Chatterjee
