@@ -54,6 +54,9 @@ class SearchService {
     }
 
     Cursor find(Filter filter) {
+        if (filter == null) {
+            return find();
+        }
         filter.setNitriteService(nitriteService);
         Set<NitriteId> result;
 
@@ -85,6 +88,9 @@ class SearchService {
     }
 
     Cursor find(Filter filter, FindOptions findOptions) {
+        if (filter == null) {
+            return find(findOptions);
+        }
         filter.setNitriteService(nitriteService);
         FindResult findResult = new FindResult();
         findResult.setUnderlyingMap(underlyingMap);

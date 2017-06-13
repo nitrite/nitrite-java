@@ -173,7 +173,6 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Cursor find(Filter filter) {
         checkOpened();
         try {
-            notNull(filter, errorMessage("filter can not be null", VE_FIND_NULL_FILTER));
             return nitriteService.find(filter);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
@@ -196,7 +195,6 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Cursor find(Filter filter, FindOptions findOptions) {
         checkOpened();
         try {
-            notNull(filter, errorMessage("filter can not be null", VE_FIND_FILTERED_NULL_FILTER));
             return nitriteService.find(filter, findOptions);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);

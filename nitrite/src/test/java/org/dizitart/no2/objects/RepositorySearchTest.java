@@ -24,6 +24,7 @@ import org.dizitart.no2.RecordIterable;
 import org.dizitart.no2.SortOrder;
 import org.dizitart.no2.objects.data.Employee;
 import org.dizitart.no2.objects.data.SubEmployee;
+import org.dizitart.no2.objects.filters.ObjectFilters;
 import org.junit.Test;
 
 import java.util.Date;
@@ -335,6 +336,20 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
                 regex("$", "a"))).toList();
         assertEquals(elements.size(), 2);
     }
+
+    @Test
+    public void testFilterAll() {
+        ObjectRepository<ElemMatch> repository = db.getRepository(ElemMatch.class);
+        Cursor<ElemMatch> cursor = repository.find(ObjectFilters.ALL);
+        assertNotNull(cursor);
+        assertEquals(cursor.size(), 0);
+
+        repository.insert(new ElemMatch());
+        cursor = repository.find(ObjectFilters.ALL);
+        assertNotNull(cursor);
+        assertEquals(cursor.size(), 1);
+    }
+
 
     @Data
     private static class ElemMatch {
