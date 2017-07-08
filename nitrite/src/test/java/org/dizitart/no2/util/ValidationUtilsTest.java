@@ -19,8 +19,8 @@ package org.dizitart.no2.util;
 import org.dizitart.no2.FindOptions;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.internals.JacksonMapper;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.junit.Test;
 
 import java.util.List;

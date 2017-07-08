@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.objects.filters;
 
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.internals.NitriteService;
 import org.dizitart.no2.objects.ObjectFilter;
 

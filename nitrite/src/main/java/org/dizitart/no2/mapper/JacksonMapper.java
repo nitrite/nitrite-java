@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.internals;
+package org.dizitart.no2.mapper;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonParser;
@@ -43,11 +43,15 @@ import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
  * @since 1.0
  */
 @Slf4j
-public class JacksonMapper implements NitriteMapper {
+public class JacksonMapper extends AbstractMapper {
     private ObjectMapper objectMapper;
 
+    public JacksonMapper() {
+        getObjectMapper();
+    }
+
     @Override
-    public <T> Document asDocument(T object) {
+    public <T> Document asDocumentInternal(T object) {
         ObjectMapper objectMapper = getObjectMapper();
         try {
             JsonNode node = objectMapper.convertValue(object, JsonNode.class);
@@ -65,7 +69,7 @@ public class JacksonMapper implements NitriteMapper {
     }
 
     @Override
-    public <T> T asObject(Document document, Class<T> type) {
+    public <T> T asObjectInternal(Document document, Class<T> type) {
         try {
             return getObjectMapper().convertValue(document, type);
         } catch (IllegalArgumentException iae) {

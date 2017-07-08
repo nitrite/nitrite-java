@@ -22,7 +22,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.internals.JacksonMapper;
+import org.dizitart.no2.mapper.JacksonMapper;
 
 import java.io.*;
 

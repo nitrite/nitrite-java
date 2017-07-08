@@ -22,7 +22,7 @@ import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.meta.Attributes;
 
 import java.lang.reflect.Field;

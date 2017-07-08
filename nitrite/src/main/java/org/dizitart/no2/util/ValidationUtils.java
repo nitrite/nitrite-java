@@ -23,7 +23,7 @@ import org.dizitart.no2.exceptions.ErrorMessage;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 
 import java.lang.reflect.Modifier;
 

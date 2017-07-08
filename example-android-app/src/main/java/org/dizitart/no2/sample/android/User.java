@@ -16,10 +16,14 @@
 
 package org.dizitart.no2.sample.android;
 
+import org.dizitart.no2.Document;
+import org.dizitart.no2.mapper.Mappable;
+import org.dizitart.no2.mapper.NitriteMapper;
+
 /**
  * @author Anindya Chatterjee.
  */
-public class User {
+public class User implements Mappable {
     private String id;
     private String username;
     private String email;
@@ -55,5 +59,21 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public Document write(NitriteMapper mapper) {
+        Document document = new Document();
+        document.put("id", id);
+        document.put("username", username);
+        document.put("email", email);
+        return document;
+    }
+
+    @Override
+    public void read(NitriteMapper mapper, Document document) {
+        id = (String) document.get("id");
+        username = (String) document.get("username");
+        email = (String) document.get("email");
     }
 }

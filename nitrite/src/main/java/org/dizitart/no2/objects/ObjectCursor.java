@@ -18,7 +18,7 @@ package org.dizitart.no2.objects;
 
 import org.dizitart.no2.*;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.util.Iterables;
 
 import java.util.Iterator;

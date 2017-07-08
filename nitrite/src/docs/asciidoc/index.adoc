@@ -108,6 +108,10 @@ include::collections/annotations.adoc[]
 
 include::collections/nitrite-mapper.adoc[]
 
+==== Mappable
+
+include::collections/mappable.adoc[]
+
 === Operations
 
 include::collections/operations.adoc[]
