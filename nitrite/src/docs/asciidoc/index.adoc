@@ -176,6 +176,10 @@ include::filter-examples.adoc[]
 
 include::replication.adoc[]
 
+=== Security
+
+include::replication/security.adoc[]
+
 === SyncHandle
 
 include::replication/synchandle.adoc[]

@@ -1,0 +1,16 @@
+Replication is a secured operation. There are two sets of credentials needed to
+successfully perform replication.
+
+1. The client credential
+2. The user credential
+
+Client credential is required to create user credentials in the DataGate server.
+The user credential is required to perform several operations during the replication
+life cycle. Once a user credential is created it can be used for replication.
+
+A client credential can be created using the DataGate portal. Once it is created,
+an app can use that client credential to create further users. Those users will take
+part in the replication.
+
+NOTE: The user credential has *USER* authority and a client credential has *CLIENT*
+authority.
