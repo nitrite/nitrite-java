@@ -1,5 +1,6 @@
 = Nitrite Database
 
+image:https://cdn.rawgit.com/gratipay/gratipay-badge/2.3.0/dist/gratipay.svg["Support via Gratipay", link="https://gratipay.com/Nitrite/"]
 image:https://travis-ci.org/dizitart/nitrite-database.svg?branch=master["Build Status", link="https://travis-ci.org/dizitart/nitrite-database"]
 image:https://codecov.io/gh/dizitart/nitrite-database/branch/master/graph/badge.svg["Coverage Status", link="https://codecov.io/gh/dizitart/nitrite-database"]
 image:https://javadoc.io/badge/org.dizitart/nitrite.svg["Javadocs", link=https://javadoc.io/doc/org.dizitart/nitrite]
