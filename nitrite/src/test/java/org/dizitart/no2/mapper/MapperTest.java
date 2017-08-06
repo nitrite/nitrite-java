@@ -98,4 +98,33 @@ public class MapperTest {
         System.out.println(diff);
         assertEquals(department, dept);
     }
+
+    @Test
+    public void testNested() {
+        final MappableEmployee boss = new MappableEmployee();
+        boss.setEmpId("1");
+        boss.setName("Boss");
+        boss.setJoiningDate(new Date());
+
+        final MappableEmployee emp1 = new MappableEmployee();
+        emp1.setEmpId("abcd");
+        emp1.setName("Emp1");
+        emp1.setJoiningDate(new Date());
+        emp1.setBoss(boss);
+
+        MappableDepartment department = new MappableDepartment();
+        department.setName("Dept");
+        department.setEmployeeList(new ArrayList<MappableEmployee>() {{ add(boss); add(emp1); }});
+
+        long start = System.currentTimeMillis();
+        Document document = jacksonMapper.asDocument(department);
+        long diff = System.currentTimeMillis() - start;
+        System.out.println(diff);
+
+        start = System.currentTimeMillis();
+        MappableDepartment dept = jacksonMapper.asObject(document, MappableDepartment.class);
+        diff = System.currentTimeMillis() - start;
+        System.out.println(diff);
+        assertEquals(department, dept);
+    }
 }

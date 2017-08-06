@@ -24,6 +24,7 @@ import org.dizitart.no2.RecordIterable;
 import org.dizitart.no2.SortOrder;
 import org.dizitart.no2.objects.data.Employee;
 import org.dizitart.no2.objects.data.SubEmployee;
+import org.dizitart.no2.objects.data.WithPublicField;
 import org.dizitart.no2.objects.filters.ObjectFilters;
 import org.junit.Test;
 
@@ -105,6 +106,28 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
                 .project(Employee.class)
                 .firstOrDefault();
         assertEquals(employee, emp);
+    }
+
+    @Test
+    public void testStringEqualFilter() {
+        ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
+
+        WithPublicField object = new WithPublicField();
+        object.name = "test";
+        object.number = 1;
+        repository.insert(object);
+
+        object = new WithPublicField();
+        object.name = "test";
+        object.number = 2;
+        repository.insert(object);
+
+        object = new WithPublicField();
+        object.name = "another-test";
+        object.number = 3;
+        repository.insert(object);
+
+        assertEquals(repository.find(eq("name", "test")).size(), 2);
     }
 
     @Test

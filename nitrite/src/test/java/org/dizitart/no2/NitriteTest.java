@@ -237,4 +237,26 @@ public class NitriteTest {
         assertNotNull(repository);
         assertEquals(repository.getType(), NitriteTest.class);
     }
+
+    @Test
+    public void testMultipleGetCollection() {
+        NitriteCollection collection = db.getCollection("test-collection");
+        assertNotNull(collection);
+        assertEquals(collection.getName(), "test-collection");
+
+        NitriteCollection collection2 = db.getCollection("test-collection");
+        assertNotNull(collection2);
+        assertEquals(collection2.getName(), "test-collection");
+    }
+
+    @Test
+    public void testMultipleGetRepository() {
+        ObjectRepository<NitriteTest> repository = db.getRepository(NitriteTest.class);
+        assertNotNull(repository);
+        assertEquals(repository.getType(), NitriteTest.class);
+
+        ObjectRepository<NitriteTest> repository2 = db.getRepository(NitriteTest.class);
+        assertNotNull(repository2);
+        assertEquals(repository2.getType(), NitriteTest.class);
+    }
 }
