@@ -58,9 +58,16 @@ compile 'org.dizitart:nitrite:{version}'
 *Initialize Database*
 [source,java]
 --
+//java initialization
 Nitrite db = Nitrite.builder()
         .compressed()
         .filePath("/tmp/test.db")
+        .openOrCreate("user", "password");
+
+//android initialization
+Nitrite db = Nitrite.builder()
+        .compressed()
+        .filePath(getFilesDir().getPath() + "/test.db")
         .openOrCreate("user", "password");
 --
 
