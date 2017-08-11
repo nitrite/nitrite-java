@@ -22,7 +22,6 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import static org.dizitart.no2.FindOptions.sort;
@@ -361,5 +360,13 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 2);
     }
 
+    @Test
+    public void testFindTextWithEmptyString() {
+        insert();
+        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
+
+        Cursor cursor = collection.find(text("body", ""));
+        assertEquals(cursor.size(), 0);
+    }
 
 }

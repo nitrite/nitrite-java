@@ -50,8 +50,7 @@ class IndexMetaService {
     IndexMetaService(NitriteMap<NitriteId, Document> underlyingMap) {
         this.underlyingMap = underlyingMap;
         this.mvStore = underlyingMap.getStore();
-        String indexMetaName = getName();
-        indexMetadata = mvStore.openMap(indexMetaName);
+        indexMetadata = getIndexMetadata();
         this.fieldLock = new ConcurrentHashMap<>();
     }
 
@@ -60,16 +59,17 @@ class IndexMetaService {
     }
 
     boolean hasIndex(String field) {
-        return indexMetadata.containsKey(field);
+        return getIndexMetadata().containsKey(field)
+            && getIndexMetadata().get(field) != null;
     }
 
     boolean hasTextIndex(String field) {
-        return indexMetadata.containsKey(field)
-                && indexMetadata.get(field).index.getIndexType() == IndexType.Fulltext;
+        return getIndexMetadata().containsKey(field)
+                && getIndexMetadata().get(field).index.getIndexType() == IndexType.Fulltext;
     }
 
     Index findIndex(String field) {
-        IndexMeta meta = indexMetadata.get(field);
+        IndexMeta meta = getIndexMetadata().get(field);
         if (meta != null) {
             return meta.index;
         }
@@ -77,7 +77,7 @@ class IndexMetaService {
     }
 
     NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> getIndexMap(String field) {
-        IndexMeta meta = indexMetadata.get(field);
+        IndexMeta meta = getIndexMetadata().get(field);
         if (meta != null && meta.index != null) {
             return mvStore.openMap(meta.indexMap);
         }
@@ -85,34 +85,34 @@ class IndexMetaService {
     }
 
     void markDirty(String field) {
-        IndexMeta meta = indexMetadata.get(field);
+        IndexMeta meta = getIndexMetadata().get(field);
         if (meta != null && meta.index != null) {
             meta.isDirty.set(true);
         }
     }
 
     void unmarkDirty(String field) {
-        IndexMeta meta = indexMetadata.get(field);
+        IndexMeta meta = getIndexMetadata().get(field);
         if (meta != null && meta.index != null) {
             meta.isDirty.set(false);
         }
     }
 
     synchronized boolean isDirtyIndex(String field) {
-        IndexMeta meta = indexMetadata.get(field);
+        IndexMeta meta = getIndexMetadata().get(field);
         return meta != null && meta.isDirty.get();
     }
 
     Collection<Index> listIndexes() {
         Set<Index> indexSet = new LinkedHashSet<>();
-        for (IndexMeta indexMeta : indexMetadata.values()) {
+        for (IndexMeta indexMeta : getIndexMetadata().values()) {
             indexSet.add(indexMeta.index);
         }
         return Collections.unmodifiableSet(indexSet);
     }
 
     void dropIndex(String field) {
-        IndexMeta meta = indexMetadata.get(field);
+        IndexMeta meta = getIndexMetadata().get(field);
         if (meta != null && meta.index != null) {
             String indexMapName = meta.indexMap;
             mvStore.removeMap(mvStore.openMap(indexMapName));
@@ -120,14 +120,14 @@ class IndexMetaService {
             throw new IndexingException(errorMessage(
                     field + " is not indexed", IE_DROP_NON_EXISTING_INDEX));
         }
-        indexMetadata.remove(field);
+        getIndexMetadata().remove(field);
     }
 
     void dropAll() {
-        for (String field : indexMetadata.keySet()) {
+        for (String field : getIndexMetadata().keySet()) {
             dropIndex(field);
         }
-        mvStore.removeMap(indexMetadata);
+        mvStore.removeMap(getIndexMetadata());
     }
 
     Index createIndexMetadata(String field, IndexType indexType) {
@@ -138,7 +138,7 @@ class IndexMetaService {
         indexMeta.isDirty = new AtomicBoolean(false);
         indexMeta.indexMap = internalName(index);
 
-        indexMetadata.put(field, indexMeta);
+        getIndexMetadata().put(field, indexMeta);
 
         return index;
     }
@@ -154,6 +154,11 @@ class IndexMetaService {
 
     private String getName() {
         return INDEX_META_PREFIX + INTERNAL_NAME_SEPARATOR + underlyingMap.getName();
+    }
+
+    private NitriteMap<String, IndexMeta> getIndexMetadata() {
+        String indexMetaName = getName();
+        return mvStore.openMap(indexMetaName);
     }
 
     @EqualsAndHashCode

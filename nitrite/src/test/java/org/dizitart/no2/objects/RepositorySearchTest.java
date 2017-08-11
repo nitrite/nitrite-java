@@ -16,15 +16,10 @@
 
 package org.dizitart.no2.objects;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.dizitart.no2.FindOptions;
 import org.dizitart.no2.RecordIterable;
 import org.dizitart.no2.SortOrder;
-import org.dizitart.no2.objects.data.Employee;
-import org.dizitart.no2.objects.data.SubEmployee;
-import org.dizitart.no2.objects.data.WithPublicField;
+import org.dizitart.no2.objects.data.*;
 import org.dizitart.no2.objects.filters.ObjectFilters;
 import org.junit.Test;
 
@@ -373,24 +368,22 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         assertEquals(cursor.size(), 1);
     }
 
+    @Test
+    public void testEqualsOnTextIndex() {
+        PersonEntity p1 = new PersonEntity("jhonny");
+        PersonEntity p2 = new PersonEntity("jhonny");
+        PersonEntity p3 = new PersonEntity("jhonny");
 
-    @Data
-    private static class ElemMatch {
-        private long id;
-        private String[] strArray;
-        private ProductScore[] productScores;
+        ObjectRepository<PersonEntity> repository = db.getRepository(PersonEntity.class);
+        repository.insert(p1);
+        repository.insert(p2);
+        repository.insert(p3);
+
+        List<PersonEntity> sameNamePeople = repository.find(eq("name", "jhonny")).toList();
+        assertEquals(sameNamePeople.size(), 0);
+
+        sameNamePeople = repository.find(text("name", "jhonny")).toList();
+        assertEquals(sameNamePeople.size(), 3);
     }
 
-    @Getter @Setter
-    private static class ProductScore {
-        private String product;
-        private int score;
-
-        ProductScore() {}
-
-        ProductScore(String product, int score) {
-            this.product = product;
-            this.score = score;
-        }
-    }
 }
