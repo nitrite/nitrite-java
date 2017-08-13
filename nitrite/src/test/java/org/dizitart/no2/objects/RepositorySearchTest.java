@@ -16,14 +16,11 @@
 
 package org.dizitart.no2.objects;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import org.dizitart.no2.FindOptions;
 import org.dizitart.no2.RecordIterable;
 import org.dizitart.no2.SortOrder;
-import org.dizitart.no2.objects.data.Employee;
-import org.dizitart.no2.objects.data.SubEmployee;
+import org.dizitart.no2.objects.data.*;
+import org.dizitart.no2.objects.filters.ObjectFilters;
 import org.junit.Test;
 
 import java.util.Date;
@@ -104,6 +101,28 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
                 .project(Employee.class)
                 .firstOrDefault();
         assertEquals(employee, emp);
+    }
+
+    @Test
+    public void testStringEqualFilter() {
+        ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
+
+        WithPublicField object = new WithPublicField();
+        object.name = "test";
+        object.number = 1;
+        repository.insert(object);
+
+        object = new WithPublicField();
+        object.name = "test";
+        object.number = 2;
+        repository.insert(object);
+
+        object = new WithPublicField();
+        object.name = "another-test";
+        object.number = 3;
+        repository.insert(object);
+
+        assertEquals(repository.find(eq("name", "test")).size(), 2);
     }
 
     @Test
@@ -336,23 +355,35 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         assertEquals(elements.size(), 2);
     }
 
-    @Data
-    private static class ElemMatch {
-        private long id;
-        private String[] strArray;
-        private ProductScore[] productScores;
+    @Test
+    public void testFilterAll() {
+        ObjectRepository<ElemMatch> repository = db.getRepository(ElemMatch.class);
+        Cursor<ElemMatch> cursor = repository.find(ObjectFilters.ALL);
+        assertNotNull(cursor);
+        assertEquals(cursor.size(), 0);
+
+        repository.insert(new ElemMatch());
+        cursor = repository.find(ObjectFilters.ALL);
+        assertNotNull(cursor);
+        assertEquals(cursor.size(), 1);
     }
 
-    @Getter @Setter
-    private static class ProductScore {
-        private String product;
-        private int score;
+    @Test
+    public void testEqualsOnTextIndex() {
+        PersonEntity p1 = new PersonEntity("jhonny");
+        PersonEntity p2 = new PersonEntity("jhonny");
+        PersonEntity p3 = new PersonEntity("jhonny");
 
-        ProductScore() {}
+        ObjectRepository<PersonEntity> repository = db.getRepository(PersonEntity.class);
+        repository.insert(p1);
+        repository.insert(p2);
+        repository.insert(p3);
 
-        ProductScore(String product, int score) {
-            this.product = product;
-            this.score = score;
-        }
+        List<PersonEntity> sameNamePeople = repository.find(eq("name", "jhonny")).toList();
+        assertEquals(sameNamePeople.size(), 0);
+
+        sameNamePeople = repository.find(text("name", "jhonny")).toList();
+        assertEquals(sameNamePeople.size(), 3);
     }
+
 }

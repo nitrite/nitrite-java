@@ -23,7 +23,8 @@ import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMVStore;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.util.StringUtils;
@@ -271,12 +272,12 @@ public class NitriteBuilder {
 
     /**
      * Sets a custom {@link NitriteMapper} implementation. If not set, a default
-     * jackson based mapper {@link org.dizitart.no2.internals.JacksonMapper} will
+     * jackson based mapper {@link JacksonMapper} will
      * be used.
      *
      * @param nitriteMapper a {@link NitriteMapper} implementation
      * @return the {@link NitriteBuilder} instance.
-     * @see org.dizitart.no2.internals.JacksonMapper
+     * @see JacksonMapper
      * */
     public NitriteBuilder nitriteMapper(NitriteMapper nitriteMapper) {
         this.nitriteMapper = nitriteMapper;

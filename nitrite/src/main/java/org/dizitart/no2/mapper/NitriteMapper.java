@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.internals;
+package org.dizitart.no2.mapper;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.ObjectMappingException;

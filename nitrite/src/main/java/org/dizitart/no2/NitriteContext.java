@@ -21,8 +21,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
-import org.dizitart.no2.internals.JacksonMapper;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.util.ExecutorUtils;
 
 import java.util.List;

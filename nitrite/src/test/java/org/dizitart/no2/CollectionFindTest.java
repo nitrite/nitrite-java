@@ -16,8 +16,9 @@
 
 package org.dizitart.no2;
 
-import org.dizitart.no2.internals.JacksonMapper;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.filters.Filters;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -573,5 +574,17 @@ public class CollectionFindTest extends BaseCollectionTest {
         ).firstOrDefault();
 
         assertNull(projection);
+    }
+
+    @Test
+    public void testFilterAll() {
+        Cursor cursor = collection.find(Filters.ALL);
+        assertNotNull(cursor);
+        assertEquals(cursor.size(), 0);
+
+        insert();
+        cursor = collection.find(Filters.ALL);
+        assertNotNull(cursor);
+        assertEquals(cursor.size(), 3);
     }
 }

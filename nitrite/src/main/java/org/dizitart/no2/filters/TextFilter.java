@@ -26,7 +26,6 @@ import java.util.Set;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.IE_TEXT_FILTER_FIELD_NOT_INDEXED;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
-import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 
 @ToString
 class TextFilter extends StringFilter {
@@ -37,8 +36,7 @@ class TextFilter extends StringFilter {
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         if (nitriteService.hasIndex(field)
-                && !nitriteService.isIndexing(field)
-                && !isNullOrEmpty(value)) {
+                && !nitriteService.isIndexing(field)) {
             return nitriteService.findTextWithIndex(field, value);
         } else {
             throw new IndexingException(errorMessage(field + " is not indexed",

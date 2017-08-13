@@ -21,7 +21,7 @@ import org.dizitart.no2.Document;
 import org.dizitart.no2.Filter;
 import org.dizitart.no2.KeyValuePair;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;

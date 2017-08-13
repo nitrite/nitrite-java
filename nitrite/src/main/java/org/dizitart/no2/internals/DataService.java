@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.*;
 import org.dizitart.no2.event.*;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.ArrayList;

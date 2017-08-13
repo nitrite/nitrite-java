@@ -19,4 +19,4 @@ The default NitriteMapper:
 
 * does not allow circular reference (will throw ObjectMappingException)
 * needs POJO classes to have a public parameter-less constructor
-* ignores fields declared as `transient`
+* honors fields declared as `transient`

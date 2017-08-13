@@ -22,7 +22,7 @@ import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.meta.Attributes;
 
 import java.lang.reflect.Field;
@@ -185,7 +185,6 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     @Override
     public Cursor<T> find(ObjectFilter filter) {
         validateCollection();
-        notNull(filter, errorMessage("filter can not be null", VE_OBJ_FIND_NULL_FILTER));
         return new ObjectCursor<>(nitriteMapper,
                 collection.find(prepare(filter)), type);
     }
@@ -200,7 +199,6 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     @Override
     public Cursor<T> find(ObjectFilter filter, FindOptions findOptions) {
         validateCollection();
-        notNull(filter, errorMessage("filter can not be null", VE_OBJ_FIND_WITH_OPTIONS_NULL_FILTER));
         return new ObjectCursor<>(nitriteMapper,
                 collection.find(prepare(filter), findOptions), type);
     }

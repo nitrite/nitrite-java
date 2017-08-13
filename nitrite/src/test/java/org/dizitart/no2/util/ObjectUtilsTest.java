@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.util;
 
-import org.dizitart.no2.internals.JacksonMapper;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.objects.Index;
 import org.dizitart.no2.objects.Indices;
 import org.junit.Test;

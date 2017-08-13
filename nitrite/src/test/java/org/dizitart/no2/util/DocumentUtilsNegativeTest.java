@@ -18,8 +18,8 @@ package org.dizitart.no2.util;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.internals.JacksonMapper;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.junit.Before;
 import org.junit.Test;
 

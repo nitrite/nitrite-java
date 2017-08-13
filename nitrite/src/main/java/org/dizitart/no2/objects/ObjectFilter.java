@@ -18,7 +18,7 @@ package org.dizitart.no2.objects;
 
 import org.dizitart.no2.Filter;
 import org.dizitart.no2.NitriteId;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 
 /**
  * An interface to specify filtering criteria during {@link ObjectRepository}'s

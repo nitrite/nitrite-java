@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
-import org.dizitart.no2.internals.NitriteMapper;
+import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.objects.Id;
 import org.dizitart.no2.objects.Index;
 import org.dizitart.no2.objects.Indices;
@@ -181,7 +181,7 @@ public class ObjectUtils {
         }
     }
 
-    static <T> T newInstance(Class<T> type) {
+    public static <T> T newInstance(Class<T> type) {
         try {
             return type.newInstance();
         } catch (Exception e) {

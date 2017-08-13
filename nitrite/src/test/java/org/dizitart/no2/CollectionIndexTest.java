@@ -193,4 +193,18 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
         collection.insert(document);
     }
+
+    @Test
+    public void testDropAllAndCreateIndex() {
+        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        assertTrue(collection.hasIndex("firstName"));
+        collection.dropAllIndices();
+        assertFalse(collection.hasIndex("firstName"));
+
+        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        assertTrue(collection.hasIndex("firstName"));
+
+        collection = db.getCollection("test");
+        assertTrue(collection.hasIndex("firstName"));
+    }
 }
