@@ -20,6 +20,7 @@ import lombok.EqualsAndHashCode;
 import org.dizitart.no2.exceptions.InvalidIdException;
 
 import java.io.Serializable;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.dizitart.no2.Constants.ID_PREFIX;
 import static org.dizitart.no2.Constants.ID_SUFFIX;
@@ -43,11 +44,12 @@ import static org.dizitart.no2.exceptions.ErrorMessage.FAILED_TO_CREATE_AUTO_ID;
 @EqualsAndHashCode
 public final class NitriteId implements Comparable<NitriteId>, Serializable {
     private static final long serialVersionUID = 1477462375L;
+    private static final AtomicLong counter = new AtomicLong(System.nanoTime());
 
     private Long idValue;
 
     private NitriteId() {
-        idValue = new ObjectId().toLong();
+        idValue = counter.getAndIncrement();
     }
 
     private NitriteId(Long value) {
