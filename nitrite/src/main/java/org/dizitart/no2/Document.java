@@ -208,7 +208,6 @@ public class Document extends LinkedHashMap<String, Object> implements Iterable<
     }
 
     private boolean validId(Object value) {
-        return value instanceof Long
-            && Math.floor(Math.log10((long) value) + 1) == 19;
+        return value instanceof Long;
     }
 }

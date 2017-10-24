@@ -49,7 +49,7 @@ dependencies {
     testCompile "joda-time:joda-time:$jodaTimeVersion"
     testCompile "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
     testCompile "org.meanbean:meanbean:$meanbeanVersion"
-
+    testCompile "uk.co.jemos.podam:podam:$podamVersion"
 }
 
 gradle.buildFinished { BuildResult result ->

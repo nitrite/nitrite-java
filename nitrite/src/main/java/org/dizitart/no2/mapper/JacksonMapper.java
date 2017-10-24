@@ -57,6 +57,7 @@ public class JacksonMapper extends AbstractMapper {
             JsonNode node = objectMapper.convertValue(object, JsonNode.class);
             return loadDocument(node);
         } catch (IllegalArgumentException iae) {
+            log.error("Error while converting object to document ", iae);
             if (iae.getCause() instanceof JsonMappingException) {
                 JsonMappingException jme = (JsonMappingException) iae.getCause();
                 if (jme.getCause() instanceof StackOverflowError) {
@@ -73,12 +74,12 @@ public class JacksonMapper extends AbstractMapper {
         try {
             return getObjectMapper().convertValue(document, type);
         } catch (IllegalArgumentException iae) {
+            log.error("Error while converting document to object ", iae);
             if (iae.getCause() instanceof JsonMappingException) {
                 JsonMappingException jme = (JsonMappingException) iae.getCause();
                 if (jme.getMessage().contains("Can not construct instance")) {
                     throw new ObjectMappingException(errorMessage(
-                            "no default parameter-less constructor found for "
-                            + type.getName(), OME_NO_DEFAULT_CTOR));
+                            jme.getMessage(), OME_NO_DEFAULT_CTOR));
                 }
             }
             throw iae;
@@ -125,6 +126,7 @@ public class JacksonMapper extends AbstractMapper {
             JsonNode node = objectMapper.readValue(json, JsonNode.class);
             return loadDocument(node);
         } catch (IOException e) {
+            log.error("Error while parsing json", e);
             throw new ObjectMappingException(errorMessage("failed to parse json " + json,
                     OME_PARSE_JSON_FAILED));
         }
@@ -137,6 +139,7 @@ public class JacksonMapper extends AbstractMapper {
             getObjectMapper().writeValue(stringWriter, object);
             return stringWriter.toString();
         } catch (IOException e) {
+            log.error("Error while serializing object to json", e);
             throw new ObjectMappingException(JSON_SERIALIZATION_FAILED);
         }
     }
