@@ -40,7 +40,7 @@ public class ExecutorUtils {
      * @return the {@link ExecutorService}.
      */
     public static ExecutorService daemonExecutor() {
-        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(10, 10,
+        ThreadPoolExecutor threadPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
                 60L, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new ErrorAwareThreadFactory() {
