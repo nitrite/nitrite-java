@@ -42,7 +42,7 @@ public class ExecutorUtils {
     public static ExecutorService daemonExecutor() {
         ThreadPoolExecutor threadPool = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
                 60L, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<Runnable>(),
+                new SynchronousQueue<Runnable>(),
                 new ErrorAwareThreadFactory() {
                     @Override
                     public Thread createThread(Runnable runnable) {
