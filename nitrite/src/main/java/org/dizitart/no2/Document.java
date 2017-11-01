@@ -18,7 +18,9 @@ package org.dizitart.no2;
 
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.dizitart.no2.exceptions.ValidationException;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +30,7 @@ import static org.dizitart.no2.NitriteId.createId;
 import static org.dizitart.no2.NitriteId.newId;
 import static org.dizitart.no2.exceptions.ErrorCodes.IIE_INVALID_ID_FOUND;
 import static org.dizitart.no2.exceptions.ErrorCodes.IOE_DOC_ID_AUTO_GENERATED;
+import static org.dizitart.no2.exceptions.ErrorCodes.VE_TYPE_NOT_SERIALIZABLE;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 
@@ -90,6 +93,13 @@ public class Document extends LinkedHashMap<String, Object> implements Iterable<
                     errorMessage("document id is an auto generated value and can not be " + value,
                             IOE_DOC_ID_AUTO_GENERATED));
         }
+
+        if (value != null && !Serializable.class.isAssignableFrom(value.getClass())) {
+            throw new ValidationException(
+                    errorMessage("type " + value.getClass().getName() + " does not implement java.io.Serializable",
+                            VE_TYPE_NOT_SERIALIZABLE));
+        }
+
         super.put(key, value);
         return this;
     }
