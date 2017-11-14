@@ -81,7 +81,7 @@ artifacts {
 }
 
 signing {
-    required { project.hasProperty('release') }
+//    required { project.hasProperty('release') }
     sign configurations.archives
 }
 
@@ -98,6 +98,11 @@ uploadArchives {
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 authentication(userName: System.getenv('OSSRH_USER'),
                         password: System.getenv('OSSRH_PASSWORD'))
+            }
+
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
+                authentication(userName: System.getenv('OSSRH_USER'),
+                    password: System.getenv('OSSRH_PASSWORD'))
             }
 
             pom.project {
