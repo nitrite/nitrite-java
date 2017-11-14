@@ -58,4 +58,19 @@ public interface Cursor extends RecordIterable<Document> {
      * @return a lazy iterable of documents.
      */
     RecordIterable<Document> project(Document projection);
+
+    /**
+     * Performs a left outer join with a foreign cursor with the specified lookup parameters.
+     *
+     * It performs an equality match on the localField to the foreignField from the documents of the foreign cursor.
+     * If an input document does not contain the localField, the join treats the field as having a value of `null`
+     * for matching purposes.
+     *
+     * @param foreignCursor the foreign cursor for the join.
+     * @param lookup the lookup parameter for the join operation.
+     *
+     * @return a lazy iterable of joined documents.
+     * @since 2.1.0
+     */
+    RecordIterable<Document> join(Cursor foreignCursor, Lookup lookup);
 }

@@ -55,6 +55,11 @@ class DocumentCursor implements Cursor {
     }
 
     @Override
+    public RecordIterable<Document> join(Cursor cursor, Lookup lookup) {
+        return new JoinedDocumentIterable(findResult, cursor, lookup);
+    }
+
+    @Override
     public Iterator<Document> iterator() {
         return documentIterator;
     }

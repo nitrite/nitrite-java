@@ -1,0 +1,171 @@
+Performs a left outer join to a collection in the same database to filter in
+records from the “joined” collection. It does an equality match between a field from the
+input cursor with a field from the cursor of the “joined” collection.
+
+.Example
+[source, java]
+--
+
+Document doc1 = createDocument("firstName", "fn1")
+                .put("lastName", "ln1")
+                .put("birthDay", simpleDateFormat.parse("2012-07-01T16:02:48.440Z"))
+                .put("data", new byte[] {1, 2, 3})
+                .put("list", new ArrayList<String>() {{ add("one"); add("two"); add("three"); }})
+                .put("body", "a quick brown fox jump over the lazy dog");
+
+Document doc2 = createDocument("firstName", "fn2")
+                .put("lastName", "ln2")
+                .put("birthDay", simpleDateFormat.parse("2010-06-12T16:02:48.440Z"))
+                .put("data", new byte[] {3, 4, 3})
+                .put("list", new ArrayList<String>() {{ add("three"); add("four"); add("three"); }})
+                .put("body", "quick hello world from nitrite");
+
+Document doc3 = createDocument("firstName", "fn3")
+                .put("lastName", "ln2")
+                .put("birthDay", simpleDateFormat.parse("2014-04-17T16:02:48.440Z"))
+                .put("data", new byte[] {9, 4, 8})
+                .put("body", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                        "Sed nunc mi, mattis ullamcorper dignissim vitae, condimentum non lorem.");
+
+collection.insert(doc1, doc2, doc3);
+
+// another collection
+
+Document fdoc1 = createDocument("fName", "fn1")
+                .put("address", "ABCD Street")
+                .put("telephone", "123456789");
+
+Document fdoc2 = createDocument("fName", "fn2")
+                .put("address", "XYZ Street")
+                .put("telephone", "000000000");
+
+Document fdoc3 = createDocument("fName", "fn2")
+                .put("address", "Some other Street")
+                .put("telephone", "7893141321");
+
+foreignCollection.insert(fdoc1, fdoc2, fdoc3);
+
+// join operation
+
+Lookup lookup = new Lookup();
+lookup.setLocalField("firstName");
+lookup.setForeignField("fName");
+lookup.setTargetField("personalDetails");
+
+RecordIterable<Document> result = collection.find().join(foreignCollection.find(), lookup);
+
+--
+
+The result will look like
+
+[source,json]
+--
+{
+    firstName=fn1,
+    lastName=ln1,
+    birthDay=Sun Jul 01 16:02:48   IST 2012,
+    data=   [1, 2, 3],
+    list=   [
+         one,
+         two,
+         three
+    ],
+    body="a quick brown fox jump over the lazy dog",
+    _id=9078368118890,
+    _revision=1,
+    _modified=1510638278124,
+    personalDetails=      [
+         {
+            fName=fn1,
+            address=ABCD Street,
+            telephone=123456789,
+            _id=9078368118887,
+            _revision=1,
+            _modified=1510638278119
+         }
+    ]
+}
+
+{
+    firstName=fn2,
+    lastName=ln2,
+    birthDay=Sat Jun 12 16:02:48   IST 2010,
+    data=   [3, 4, 3],
+    list=   [
+         three,
+         four,
+         three
+    ],
+    body="quick hello world from nitrite",
+    _id=9078368118891,
+    _revision=1,
+    _modified=1510638278130,
+    personalDetails=      [
+         {
+            fName=fn2,
+            address=XYZ Street,
+            telephone=000000000,
+            _id=9078368118888,
+            _revision=1,
+            _modified=1510638278123
+         },
+         {
+            fName=fn2,
+            address=Some other Street,
+            telephone=7893141321,
+            _id=9078368118889,
+            _revision=1,
+            _modified=1510638278123
+         }
+    ]
+}
+
+{
+    firstName=fn3,
+    lastName=ln2,
+    birthDay=Thu Apr 17 16:02:48   IST 2014,
+    data=   [ 9, 4, 8],
+    body="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nunc mi, mattis ullamcorper dignissim vitae, condimentum non lorem.",
+    _id=9078368118892,
+    _revision=1,
+    _modified=1510638278130
+}
+
+--
+
+Join operation is supported in ObjectRepository also
+
+.Example
+[source,java]
+--
+import lombok.Data;
+
+@Data
+public static class Person {
+    private String id;
+    private String name;
+}
+
+@Data
+public static class Address {
+    private String personId;
+    private String street;
+}
+
+@Data
+public static class PersonDetails {
+    private String id;
+    private String name;
+    private List<Address> addresses;
+}
+
+Lookup lookup = new Lookup();
+lookup.setLocalField("id");
+lookup.setForeignField("personId");
+lookup.setTargetField("addresses");
+
+RecordIterable<PersonDetails> result
+        = personRepository.find().join(addressRepository.find(), lookup,
+        PersonDetails.class);
+
+--

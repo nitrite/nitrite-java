@@ -307,6 +307,10 @@ public class ErrorMessage {
             new ErrorMessage("remove on cursor is not supported",
                     IOE_OBJ_REMOVE_PROJECTED_OBJECT_ITERATOR);
 
+    public static final ErrorMessage OBJ_REMOVE_ON_JOINED_OBJECT_ITERATOR_NOT_SUPPORTED =
+            new ErrorMessage("remove on cursor is not supported",
+                    IOE_OBJ_REMOVE_JOINED_OBJECT_ITERATOR);
+
     public static final ErrorMessage REPLICATOR_ALREADY_RUNNING =
             new ErrorMessage("replicator is already running",
                     IOE_REPLICATOR_RUNNING);

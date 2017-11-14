@@ -134,6 +134,7 @@ public class ErrorCodes {
     public static final int IOE_COMPOUND_INDEX = 3007;
     public static final int IOE_REPLICATOR_RUNNING = 3008;
     public static final int IOE_DOC_ID_AUTO_GENERATED = 3009;
+    public static final int IOE_OBJ_REMOVE_JOINED_OBJECT_ITERATOR = 3010;
 
     /* FilterException Codes */
     public static final int FE_AND_INVALID = 4001;

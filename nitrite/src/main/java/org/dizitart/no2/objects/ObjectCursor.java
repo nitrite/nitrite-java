@@ -55,6 +55,13 @@ class ObjectCursor<T> implements Cursor<T> {
     }
 
     @Override
+    public <Foreign, Joined> RecordIterable<Joined> join(Cursor<Foreign> foreignCursor,
+                                                         Lookup lookup, Class<Joined> type) {
+        ObjectCursor<Foreign> foreignObjectCursor = (ObjectCursor<Foreign>) foreignCursor;
+        return new JoinedObjectIterable<>(nitriteMapper, cursor.join(foreignObjectCursor.cursor, lookup), type);
+    }
+
+    @Override
     public boolean hasMore() {
         return cursor.hasMore();
     }

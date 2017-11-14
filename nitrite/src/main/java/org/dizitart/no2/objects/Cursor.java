@@ -17,6 +17,7 @@
 package org.dizitart.no2.objects;
 
 import org.dizitart.no2.FindOptions;
+import org.dizitart.no2.Lookup;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.RecordIterable;
 
@@ -41,4 +42,22 @@ public interface Cursor<T> extends RecordIterable<T> {
      * @return `Iterable` of projected objects.
      */
     <P> RecordIterable<P> project(Class<P> projectionType);
+
+    /**
+     * Performs a left outer join with a foreign cursor with the specified lookup parameters.
+     *
+     * It performs an equality match on the localField to the foreignField from the objects of the foreign cursor.
+     * If an input object does not contain the localField, the join treats the field as having a value of `null`
+     * for matching purposes.
+     *
+     * @param <Foreign> the type of the foreign object.
+     * @param <Joined> the type of the joined object.
+     * @param foreignCursor the foreign cursor for the join.
+     * @param lookup the lookup parameter for the join operation.
+     * @param type the type of the joined record.
+     *
+     * @return a lazy iterable of joined objects.
+     * @since 2.1.0
+     */
+    <Foreign, Joined> RecordIterable<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type);
 }
