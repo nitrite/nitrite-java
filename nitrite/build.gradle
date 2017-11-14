@@ -81,7 +81,7 @@ artifacts {
 }
 
 signing {
-//    required { project.hasProperty('release') }
+    required { gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 

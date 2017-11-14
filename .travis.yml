@@ -14,7 +14,7 @@ services:
   - mongodb
 
 before_install:
-  - openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in .ci/secring.gpg.enc -out ~/secring.gpg -d
+  - openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out ~/secring.gpg -d
   - chmod a+x gradlew
   - chmod a+x ./.ci/build.sh
   - chmod a+x ./.ci/prepare-travis.sh
