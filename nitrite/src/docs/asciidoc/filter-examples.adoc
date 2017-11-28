@@ -74,8 +74,23 @@ collection.find(elemMatch("color", eq("$", "red"));
 [source,java]
 .text()
 --
-// matches all documents where 'address' field has value 'roads'.
+// matches all documents where 'address' field has a word 'roads'.
 collection.find(text("address", "roads"));
+
+// matches all documents where 'address' field has word that starts with '11A'.
+collection.find(text("address", "11a*"));
+
+// matches all documents where 'address' field has a word that ends with 'Road'.
+collection.find(text("address", "*road"));
+
+// matches all documents where 'address' field has a word that contains a text 'oa'.
+collection.find(text("address", "*oa*"));
+
+// matches all documents where 'address' field has words like '11a' and 'road'.
+collection.find(text("address", "11a road"));
+
+// matches all documents where 'address' field has word 'road' and another word that start with '11a'.
+collection.find(text("address", "11a* road"));
 --
 
 [source,java]

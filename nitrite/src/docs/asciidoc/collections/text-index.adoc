@@ -2,7 +2,7 @@ Nitrite supports text indexing on collections. It scans documents
 and create index entries by decomposing texts of an indexed field. Text
 indexing is supported only on the field of string data type.
 
-Nitrite has its own text indexing engine for *english language*, but a
+Nitrite has its own text indexing engine, but a
 third-party text indexing engine like lucene can also be configured.
 
 NOTE: Nitrite's own text indexing engine is case insensitive by nature.
@@ -16,8 +16,7 @@ collection.createIndex("notes", indexOptions(IndexType.Fulltext, true));
 
 *Tokenization & Stemming*
 
-Nitrite's text indexing engines only supports english language. For
-tokenization it uses below delimiters
+Nitrite's text indexing engines supports below delimiters
 
 |===
 |space|\t|\n|\r|\f|+
@@ -28,8 +27,90 @@ tokenization it uses below delimiters
 |`|"|=|:|~|\
 |===
 
-Nitrite drops english stop words (e.g. the, an, a, and, etc.) before
+By default, Nitrite drops english stop words (e.g. the, an, a, and, etc.) before
 creating text index entries.
+
+**Universal Tokenizer**
+
+Filtering stop words for other languages can also be enabled using `UniversalTextTokenizer`
+from version 2.1.0 onwards.
+
+[source,java]
+--
+UniversalTextTokenizer tokenizer = new UniversalTextTokenizer();
+// enable tokenizer for bengali, english and chinese text only
+tokenizer.loadLanguage(Languages.Bengali, Languages.English, Languages.Chinese);
+
+// or, enable tokenization for all supported languages (resource heavy, as it loads all stop words in memory)
+tokenizer.loadAllLanguages();
+
+// initialize db with the universal tokenizer
+Nitrite db = Nitrite.builder()
+            .textTokenizer(tokenizer)
+            .filePath("/tmp/test.db")
+            .openOrCreate();
+
+--
+
+**Supported Languages**
+
+ - Afrikaans
+ - Arabic
+ - Armenian
+ - Basque
+ - Bengali
+ - Breton
+ - Bulgarian
+ - Catalan
+ - Chinese
+ - Croatian
+ - Czech
+ - Danish
+ - Dutch
+ - English
+ - Esperanto
+ - Estonian
+ - Finnish
+ - French
+ - Galician
+ - German
+ - Greek
+ - Hausa
+ - Hebrew
+ - Hindi
+ - Hungarian
+ - Indonesian
+ - Irish
+ - Italian
+ - Japanese
+ - Korean
+ - Kurdish
+ - Latin
+ - Latvian
+ - Lithuanian
+ - Malay
+ - Marathi
+ - Norwegian
+ - Persian
+ - Polish
+ - Portuguese
+ - Romanian
+ - Russian
+ - Sesotho
+ - Slovak
+ - Slovenian
+ - Somali
+ - Spanish
+ - Swahili
+ - Swedish
+ - Tagalog
+ - Thai
+ - Turkish
+ - Ukrainian
+ - Urdu
+ - Vietnamese
+ - Yoruba
+ - Zulu
 
 *Third-party Text Indexing Engine*
 
@@ -50,4 +131,3 @@ Nitrite db = Nitrite.builder()
             .filePath("/tmp/test.db")
             .openOrCreate();
 --
-
