@@ -18,14 +18,20 @@
 
 package org.dizitart.no2.fulltext;
 
+import java.util.Set;
+
 /**
- * A {@link TextTokenizer} implementation for the English languages.
+ * Represents a set of stop words for a specific language.
  *
- * @since 1.0
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
+ * @since 2.1.0
  */
-public class EnglishTextTokenizer extends UniversalTextTokenizer {
-    public EnglishTextTokenizer() {
-        loadLanguage(Languages.English);
-    }
+public interface Language {
+
+    /**
+     * A set of stop words for the language.
+     *
+     * @return the set of stop words.
+     */
+    Set<String> stopWords();
 }

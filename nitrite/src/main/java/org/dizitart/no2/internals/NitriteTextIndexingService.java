@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +13,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.internals;
 
-import lombok.val;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.IndexingException;
@@ -161,7 +162,7 @@ class NitriteTextIndexingService implements TextIndexingService {
 
         for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();
-            if (key.startsWith(term.toUpperCase())) {
+            if (key.startsWith(term.toLowerCase())) {
                 idSet.addAll(entry.getValue());
             }
         }
@@ -175,7 +176,7 @@ class NitriteTextIndexingService implements TextIndexingService {
 
         for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();
-            if (key.contains(term.toUpperCase())) {
+            if (key.contains(term.toLowerCase())) {
                 idSet.addAll(entry.getValue());
             }
         }
@@ -194,7 +195,7 @@ class NitriteTextIndexingService implements TextIndexingService {
 
         for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();
-            if (key.endsWith(term.toUpperCase())) {
+            if (key.endsWith(term.toLowerCase())) {
                 idSet.addAll(entry.getValue());
             }
         }
