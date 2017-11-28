@@ -35,3 +35,26 @@ public class Note {
 }
 
 --
+
+*Index in Superclass*
+
+Generally, Nitrite only scans the immediate type for index annotations, it skips
+the superclass from scan. To enable the scanning in its superclass for index annotation,
+a class should be marked with `@InheritIndices`.
+
+[source,java]
+--
+@Indices(
+        @Index(value = "date", type = IndexType.Unique)
+)
+public class ParentClass {
+    @Id
+    public Long id;
+    public Date date;
+}
+
+@InheritIndices
+public class ChildClass extends ParentClass {
+    public String name;
+}
+--
