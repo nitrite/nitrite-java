@@ -16,10 +16,14 @@
  *
  */
 
+package org.dizitart.no2.objects.data;
+
+import org.dizitart.no2.objects.InheritIndices;
+
 /**
- * Various utility classes for database operations.
- *
- * @since 1.0
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
  */
-package org.dizitart.no2.util;
+@InheritIndices
+public class ChildClass extends ParentClass {
+    public String name;
+}

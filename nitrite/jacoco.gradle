@@ -46,7 +46,16 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories = files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    'org/bson**'
+                    'org/dizitart/no2/fulltext/languages/**',
+                    'org/dizitart/no2/sync/data/**',
+                    '**/*KeyValuePair**',
+                    '**/*FindResult**',
+                    '**/*IndexMeta**',
+                    '**/*Exception**',
+                    '**/*ErrorCodes**',
+                    '**/*Attributes**',
+                    '**/*ChangeInfo**',
+                    '**/*UserCredential**'
             ])
         })
     }

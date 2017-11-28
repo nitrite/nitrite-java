@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.util;
@@ -19,7 +21,7 @@ package org.dizitart.no2.util;
 import org.junit.Test;
 
 import static org.dizitart.no2.util.ReflectionUtils.getAnnotatedFields;
-import static org.dizitart.no2.util.ReflectionUtils.getFieldsUpTo;
+import static org.dizitart.no2.util.ReflectionUtils.getFieldsUpto;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -40,15 +42,15 @@ public class ReflectionUtilsTest {
 
     @Test
     public void testGetFieldsUpTo() {
-        assertEquals(getFieldsUpTo(A.class, B.class).size(), 3);
-        assertEquals(getFieldsUpTo(A.class, Object.class).size(), 5);
-        assertEquals(getFieldsUpTo(A.class, null).size(), 5);
+        assertEquals(getFieldsUpto(A.class, B.class).size(), 3);
+        assertEquals(getFieldsUpto(A.class, Object.class).size(), 5);
+        assertEquals(getFieldsUpto(A.class, null).size(), 5);
 
-        assertEquals(getFieldsUpTo(ClassWithAnnotatedFields.class,
+        assertEquals(getFieldsUpto(ClassWithAnnotatedFields.class,
                 Object.class).size(), 5);
-        assertEquals(getFieldsUpTo(ClassWithAnnotatedFields.class,
+        assertEquals(getFieldsUpto(ClassWithAnnotatedFields.class,
                 null).size(), 5);
-        assertEquals(getFieldsUpTo(ClassWithAnnotatedFields.class,
+        assertEquals(getFieldsUpto(ClassWithAnnotatedFields.class,
                 ClassWithNoAnnotatedFields.class).size(), 3);
     }
 

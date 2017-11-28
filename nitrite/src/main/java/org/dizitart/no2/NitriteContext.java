@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2;
@@ -25,7 +27,8 @@ import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.util.ExecutorUtils;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -126,10 +129,10 @@ public class NitriteContext {
     private NitriteMapper nitriteMapper;
 
     @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
-    private List<String> collectionRegistry;
+    private Set<String> collectionRegistry;
 
     @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
-    private List<Class<?>> repositoryRegistry;
+    private Set<Class<?>> repositoryRegistry;
 
     /**
      * Instantiates a new Nitrite context.
@@ -137,6 +140,8 @@ public class NitriteContext {
     NitriteContext() {
         workerPool = ExecutorUtils.daemonExecutor();
         scheduledWorkerPool = ExecutorUtils.scheduledExecutor();
+        collectionRegistry = new HashSet<>();
+        repositoryRegistry = new HashSet<>();
     }
 
     /**

@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2;
@@ -247,7 +249,7 @@ public class NitriteBuilder {
      * is used. The default tokenizer works on english language only.
      *
      * For non-english languages like chinese, japanese etc.,
-     * a custom {@link TextTokenizer} implementation needs to be set here.
+     * a {@link org.dizitart.no2.fulltext.UniversalTextTokenizer} needs to be set here.
      *
      * [icon="{@docRoot}/alert.png"]
      * [CAUTION]
@@ -264,6 +266,7 @@ public class NitriteBuilder {
      * @param textTokenizer the {@link TextTokenizer} implementation.
      * @return the {@link NitriteBuilder} instance.
      * @see org.dizitart.no2.fulltext.EnglishTextTokenizer
+     * @see org.dizitart.no2.fulltext.UniversalTextTokenizer
      */
     public NitriteBuilder textTokenizer(TextTokenizer textTokenizer) {
         this.textTokenizer = textTokenizer;

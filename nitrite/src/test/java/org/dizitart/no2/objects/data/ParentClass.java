@@ -16,10 +16,23 @@
  *
  */
 
+package org.dizitart.no2.objects.data;
+
+import org.dizitart.no2.IndexType;
+import org.dizitart.no2.objects.Id;
+import org.dizitart.no2.objects.Index;
+import org.dizitart.no2.objects.Indices;
+
+import java.util.Date;
+
 /**
- * Various utility classes for database operations.
- *
- * @since 1.0
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
  */
-package org.dizitart.no2.util;
+@Indices(
+        @Index(value = "date", type = IndexType.Unique)
+)
+public class ParentClass extends SuperDuperClass {
+    @Id
+    public Long id;
+    public Date date;
+}

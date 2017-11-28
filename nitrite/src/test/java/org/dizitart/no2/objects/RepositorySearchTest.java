@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.objects;
@@ -380,9 +382,21 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         repository.insert(p3);
 
         List<PersonEntity> sameNamePeople = repository.find(eq("name", "jhonny")).toList();
+        assertEquals(sameNamePeople.size(), 3);
+
+        sameNamePeople = repository.find(eq("name", "JHONNY")).toList();
         assertEquals(sameNamePeople.size(), 0);
 
         sameNamePeople = repository.find(text("name", "jhonny")).toList();
+        assertEquals(sameNamePeople.size(), 3);
+
+        sameNamePeople = repository.find(text("name", "JHONNY")).toList();
+        assertEquals(sameNamePeople.size(), 3);
+
+        sameNamePeople = repository.find(eq("name", "jhon*")).toList();
+        assertEquals(sameNamePeople.size(), 0);
+
+        sameNamePeople = repository.find(text("name", "jhon*")).toList();
         assertEquals(sameNamePeople.size(), 3);
     }
 

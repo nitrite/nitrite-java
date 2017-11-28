@@ -16,10 +16,15 @@
  *
  */
 
+package org.dizitart.no2.objects.data;
+
+import org.dizitart.no2.IndexType;
+import org.dizitart.no2.objects.Index;
+
 /**
- * Various utility classes for database operations.
- *
- * @since 1.0
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
  */
-package org.dizitart.no2.util;
+@Index(value = "text", type = IndexType.Fulltext)
+public class SuperDuperClass {
+    public String text;
+}

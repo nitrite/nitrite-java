@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2;
@@ -40,7 +42,7 @@ public class NitriteIdTest {
         NitriteId nitriteId = NitriteId.newId();
         assertNotNull(nitriteId);
         assertNotNull(nitriteId.toString());
-        List<Field> fields = ReflectionUtils.getFieldsUpTo(NitriteId.class, Object.class);
+        List<Field> fields = ReflectionUtils.getFieldsUpto(NitriteId.class, Object.class);
         for (Field f : fields) {
             if (f.getName().equals("identifier")) {
                 f.setAccessible(true);
@@ -60,7 +62,7 @@ public class NitriteIdTest {
         assertNotNull(nitriteId);
         assertNotNull(nitriteId.toString());
 
-        List<Field> fields = ReflectionUtils.getFieldsUpTo(NitriteId.class, Object.class);
+        List<Field> fields = ReflectionUtils.getFieldsUpto(NitriteId.class, Object.class);
         for (Field f : fields) {
             if (f.getName().equals("objectId")) {
                 f.setAccessible(true);

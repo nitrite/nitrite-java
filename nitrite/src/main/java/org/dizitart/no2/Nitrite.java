@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2;
@@ -27,15 +29,12 @@ import org.dizitart.no2.store.NitriteStore;
 import java.io.Closeable;
 import java.nio.channels.NonWritableChannelException;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.Constants.USER_MAP;
 import static org.dizitart.no2.Security.validateUserPassword;
-import static org.dizitart.no2.util.ObjectUtils.findObjectTypeName;
-import static org.dizitart.no2.util.ObjectUtils.findObjectStoreName;
-import static org.dizitart.no2.util.ObjectUtils.isObjectStore;
+import static org.dizitart.no2.util.ObjectUtils.*;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.util.ValidationUtils.isValidCollectionName;
 import static org.dizitart.no2.util.ValidationUtils.validateCollectionName;
@@ -114,7 +113,9 @@ public class Nitrite implements Closeable {
         validateCollectionName(name);
         if (store != null) {
             NitriteMap<NitriteId, Document> mapStore = store.openMap(name);
-            return CollectionFactory.open(mapStore, context);
+            NitriteCollection collection = CollectionFactory.open(mapStore, context);
+            context.getCollectionRegistry().add(name);
+            return collection;
         } else {
             log.error("Underlying store is null. Nitrite has not been initialized properly.");
         }
@@ -139,7 +140,9 @@ public class Nitrite implements Closeable {
             String name = findObjectStoreName(type);
             NitriteMap<NitriteId, Document> mapStore = store.openMap(name);
             NitriteCollection collection = CollectionFactory.open(mapStore, context);
-            return RepositoryFactory.open(type, collection, context);
+            ObjectRepository<T> repository = RepositoryFactory.open(type, collection, context);
+            context.getRepositoryRegistry().add(type);
+            return repository;
         } else {
             log.error("Underlying store is null. Nitrite has not been initialized properly.");
         }
@@ -342,7 +345,7 @@ public class Nitrite implements Closeable {
     }
 
     private void closeCollections() {
-        List<String> collections = context.getCollectionRegistry();
+        Set<String> collections = context.getCollectionRegistry();
         if (collections != null) {
             for (String name : collections) {
                 NitriteCollection collection = getCollection(name);
@@ -353,7 +356,7 @@ public class Nitrite implements Closeable {
             collections.clear();
         }
 
-        List<Class<?>> repositories = context.getRepositoryRegistry();
+        Set<Class<?>> repositories = context.getRepositoryRegistry();
         if (repositories != null) {
             for (Class<?> type : repositories) {
                 ObjectRepository<?> repository = getRepository(type);
