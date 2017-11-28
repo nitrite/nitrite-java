@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.util;
 
 import lombok.experimental.UtilityClass;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.objects.InheritIndices;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -41,6 +44,46 @@ import static org.dizitart.no2.util.ValidationUtils.notNull;
  */
 @UtilityClass
 public class ReflectionUtils {
+
+    /**
+     * Gets the class hierarchy.
+     *
+     * @param startClass      the start class
+     * @param exclusiveParent the exclusive parent
+     * @return all declared fields in the specified class hierarchy.
+     */
+    public static List<Field> getFieldsUpto(Class<?> startClass, Class<?> exclusiveParent) {
+        notNull(startClass, errorMessage("startClass can not be null", VE_REFLECT_FIELD_NULL_START_CLASS));
+        List<Field> currentClassFields = new ArrayList<>(Arrays.asList(startClass.getDeclaredFields()));
+        filterSynthetics(currentClassFields);
+        Class<?> parentClass = startClass.getSuperclass();
+
+        if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+            List<Field> parentClassFields = getFieldsUpto(parentClass, exclusiveParent);
+            currentClassFields.addAll(parentClassFields);
+        }
+
+        return currentClassFields;
+    }
+
+    static <T extends Annotation> List<T> getAnnotationUpto(Class<T> annotation, Class<?> startClass, Class<?> exclusiveParent) {
+        notNull(startClass, errorMessage("startClass can not be null", VE_REFLECT_NULL_START_CLASS));
+        notNull(annotation, errorMessage("annotationClass can not be null", VE_REFLECT_NULL_ANNOT_CLASS));
+        List<T> annotations = new ArrayList<>();
+
+        T t = startClass.getAnnotation(annotation);
+        if (t != null) annotations.add(t);
+
+        Class<?> parentClass = startClass.getSuperclass();
+        if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+            List<T> list = getAnnotationUpto(annotation, parentClass, exclusiveParent);
+            annotations.addAll(list);
+        }
+
+        return annotations;
+    }
+
+
     /**
      * Gets all annotated fields in the entire class hierarchy.
      *
@@ -48,10 +91,10 @@ public class ReflectionUtils {
      * @param annotationClass the annotation class
      * @return the annotated fields
      */
-    public static List<Field> getAnnotatedFields(Class<?> startClass, Class<? extends Annotation> annotationClass) {
+    static List<Field> getAnnotatedFields(Class<?> startClass, Class<? extends Annotation> annotationClass) {
         notNull(startClass, errorMessage("startClass can not be null", VE_REFLECT_NULL_START_CLASS));
         notNull(annotationClass, errorMessage("annotationClass can not be null", VE_REFLECT_NULL_ANNOT_CLASS));
-        Iterable<Field> fields = getFieldsUpTo(startClass, Object.class);
+        Iterable<Field> fields = getFieldsUpto(startClass, Object.class);
         List<Field> filtered = new ArrayList<>();
         for (Field field : fields) {
             Object annotation = field.getAnnotation(annotationClass);
@@ -62,33 +105,16 @@ public class ReflectionUtils {
         return filtered;
     }
 
-    /**
-     * Gets the class hierarchy.
-     *
-     * @param startClass      the start class
-     * @param exclusiveParent the exclusive parent
-     * @return all declared fields in the specified class hierarchy.
-     */
-    public static List<Field> getFieldsUpTo(Class<?> startClass, Class<?> exclusiveParent) {
-        notNull(startClass, errorMessage("startClass can not be null", VE_REFLECT_FIELD_NULL_START_CLASS));
-        List<Field> currentClassFields = new ArrayList<>(Arrays.asList(startClass.getDeclaredFields()));
-        filterSynthetics(currentClassFields);
-        Class<?> parentClass = startClass.getSuperclass();
-
-        if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
-            List<Field> parentClassFields = getFieldsUpTo(parentClass, exclusiveParent);
-            currentClassFields.addAll(parentClassFields);
-        }
-
-        return currentClassFields;
-    }
-
     static <T> Field getField(Class<T> type, String name) {
         if (name.contains(FIELD_SEPARATOR)) {
             return getEmbeddedField(type, name);
         } else {
             try {
-                return type.getDeclaredField(name);
+                if (type.isAnnotationPresent(InheritIndices.class)) {
+                    return type.getField(name);
+                } else {
+                    return type.getDeclaredField(name);
+                }
             } catch (NoSuchFieldException nsfe) {
                 throw new ValidationException(errorMessage(
                         "no such value \'" + name + "\' for type " + type.getName(),
