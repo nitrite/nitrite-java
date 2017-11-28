@@ -31,12 +31,8 @@ import java.nio.channels.NonWritableChannelException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
-import static org.dizitart.no2.Constants.USER_MAP;
 import static org.dizitart.no2.Security.validateUserPassword;
-import static org.dizitart.no2.util.ObjectUtils.*;
-import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.util.ValidationUtils.isValidCollectionName;
+import static org.dizitart.no2.util.ObjectUtils.findObjectStoreName;
 import static org.dizitart.no2.util.ValidationUtils.validateCollectionName;
 
 
@@ -155,17 +151,7 @@ public class Nitrite implements Closeable {
      * @return the set of all collections' names.
      */
     public Set<String> listCollectionNames() {
-        Set<String> collectionNames = new LinkedHashSet<>();
-        if (store != null) {
-            for (String name : store.getMapNames()) {
-                if (isValidCollectionName(name) && !isObjectStore(name)) {
-                    collectionNames.add(name);
-                }
-            }
-        } else {
-            log.error("Underlying store is null. Nitrite has not been initialized properly.");
-        }
-        return collectionNames;
+        return context.getCollectionRegistry();
     }
 
     /**
@@ -176,18 +162,8 @@ public class Nitrite implements Closeable {
      */
     public Set<String> listRepositories() {
         Set<String> repositoryNames = new LinkedHashSet<>();
-        if (store != null) {
-            for (String name : store.getMapNames()) {
-                if (!name.contains(INTERNAL_NAME_SEPARATOR)
-                        && !name.contains(USER_MAP)) {
-                    String objectType = findObjectTypeName(name);
-                    if (!isNullOrEmpty(objectType)) {
-                        repositoryNames.add(objectType);
-                    }
-                }
-            }
-        } else {
-            log.error("Underlying store is null. Nitrite has not been initialized properly.");
+        for (Class<?> clazz : context.getRepositoryRegistry()) {
+            repositoryNames.add(clazz.getName());
         }
         return repositoryNames;
     }
@@ -199,7 +175,7 @@ public class Nitrite implements Closeable {
      * @return `true` if the collection exists; otherwise `false`.
      */
     public boolean hasCollection(String name) {
-        return listCollectionNames().contains(name);
+        return context.getCollectionRegistry().contains(name);
     }
 
     /**
@@ -210,7 +186,7 @@ public class Nitrite implements Closeable {
      * @return `true` if the repository exists; otherwise `false`.
      */
     public <T> boolean hasRepository(Class<T> type) {
-        return listRepositories().contains(type.getName());
+        return context.getRepositoryRegistry().contains(type);
     }
 
     /**

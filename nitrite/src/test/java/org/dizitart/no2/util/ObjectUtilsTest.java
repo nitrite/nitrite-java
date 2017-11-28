@@ -43,13 +43,6 @@ public class ObjectUtilsTest {
     }
 
     @Test
-    public void testObjectName() {
-        assertEquals(findObjectTypeName(String.class.getName()), String.class.getName());
-        assertNull(findObjectTypeName(""));
-        assertNull(findObjectTypeName(null));
-    }
-
-    @Test
     public void testObjectStoreName() {
         assertEquals(findObjectStoreName(String.class), "java.lang.String");
         assertEquals(findObjectStoreName(TestObject.class), "org.dizitart.no2.util.ObjectUtilsTest$TestObject");

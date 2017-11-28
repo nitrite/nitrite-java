@@ -50,19 +50,6 @@ import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
 public class ObjectUtils {
 
     /**
-     * Gets the object type from the collection name.
-     *
-     * @param collectionName the collection name
-     * @return the object type
-     */
-    public static String findObjectTypeName(String collectionName) {
-        if (isObjectStore(collectionName)) {
-            return collectionName;
-        }
-        return null;
-    }
-
-    /**
      * Generates the name of an {@link org.dizitart.no2.objects.ObjectRepository}.
      *
      * @param <T>           the type parameter
