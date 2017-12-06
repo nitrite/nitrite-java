@@ -79,7 +79,7 @@ public class JacksonMapper extends AbstractMapper {
             log.error("Error while converting document to object ", iae);
             if (iae.getCause() instanceof JsonMappingException) {
                 JsonMappingException jme = (JsonMappingException) iae.getCause();
-                if (jme.getMessage().contains("Can not construct instance")) {
+                if (jme.getMessage().contains("Cannot construct instance")) {
                     throw new ObjectMappingException(errorMessage(
                             jme.getMessage(), OME_NO_DEFAULT_CTOR));
                 }
