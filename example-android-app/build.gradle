@@ -16,17 +16,24 @@
 
 buildscript {
     repositories {
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+        jcenter()
         maven { url "https://plugins.gradle.org/m2/" }
+        maven { url 'https://maven.google.com' }
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0'
+        classpath 'com.android.tools.build:gradle:2.3.0'
     }
 }
 
 apply plugin: 'com.android.application'
+
+repositories {
+    jcenter()
+    maven { url 'https://maven.google.com' }
+    mavenCentral()
+}
 
 android {
     packagingOptions {
@@ -42,13 +49,13 @@ android {
         exclude 'META-INF/LGPL2.1'
     }
 
-    compileSdkVersion 24
-    buildToolsVersion '24'
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
 
     defaultConfig {
         applicationId "org.dizitart.no2.sample.android"
         minSdkVersion 15
-        targetSdkVersion 24
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         multiDexEnabled true    //required
@@ -64,11 +71,12 @@ android {
     dexOptions {
         jumboMode true          // required
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7
         targetCompatibility JavaVersion.VERSION_1_7
     }
-
+    
     lintOptions {
         abortOnError false
     }
@@ -80,6 +88,7 @@ targetCompatibility = JavaVersion.VERSION_1_7
 dependencies {
     compile project(':nitrite')
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:appcompat-v7:24.2.0'
+    compile 'com.android.support:appcompat-v7:26.+'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
 }
