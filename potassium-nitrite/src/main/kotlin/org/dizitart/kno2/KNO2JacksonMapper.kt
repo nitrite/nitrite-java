@@ -1,4 +1,5 @@
 /*
+ *
  * Copyright 2017 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +13,26 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-rootProject.name = 'nitrite-database'
-include 'nitrite'
-include 'nitrite-explorer'
-include 'example-android-app'
-include	'example-benchmark'
-include 'nitrite-datagate'
-include 'potassium-nitrite'
+package org.dizitart.kno2
 
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import org.dizitart.no2.mapper.JacksonMapper
+
+/**
+ * Default [JacksonMapper] for potassium nitrite.
+ *
+ * @since 2.1.0
+ * @author Anindya Chatterjee
+ */
+internal class KNO2JacksonMapper : JacksonMapper() {
+    init {
+        objectMapper.registerModule(KotlinModule())
+        objectMapper.registerModule(JavaTimeModule())
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+    }
+}
