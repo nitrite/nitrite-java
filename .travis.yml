@@ -24,6 +24,8 @@ before_install:
 before_script:
   - rm nitrite-datagate/src/main/resources/application.properties
 
+install: true
+
 script:
   - travis_retry . ./.ci/build.sh
 
@@ -43,5 +45,5 @@ deploy:
 
 env:
   global:
-    - NITRITE_VERSION=2.1.0-SNAPSHOT
+    - NITRITE_VERSION=2.1.0
     - PGP_KEY_FILE=~/secring.gpg
