@@ -15,7 +15,6 @@
  */
 
 apply plugin: 'java'
-apply plugin: 'io.codearte.nexus-staging'
 apply plugin: 'signing'
 apply plugin: 'maven'
 apply from: 'jacoco.gradle'

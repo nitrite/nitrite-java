@@ -123,7 +123,7 @@ public class ObjectFilters {
 
     /**
      * Creates a greater than filter which matches those objects where the value
-     * of the value is greater than (i.e. >) the specified value.
+     * of the field is greater than (i.e. >) the specified value.
      *
      * [[app-listing]]
      * [source,java]
@@ -143,7 +143,7 @@ public class ObjectFilters {
 
     /**
      * Creates a greater equal filter which matches those objects where the value
-     * of the value is greater than or equals to (i.e. >=) the specified value.
+     * of the field is greater than or equals to (i.e. >=) the specified value.
      *
      * [[app-listing]]
      * [source,java]
@@ -163,7 +163,7 @@ public class ObjectFilters {
 
     /**
      * Creates a lesser than filter which matches those objects where the value
-     * of the value is less than (i.e. <) the specified value.
+     * of the field is less than (i.e. <) the specified value.
      *
      * [[app-listing]]
      * [source,java]
@@ -183,7 +183,7 @@ public class ObjectFilters {
 
     /**
      * Creates a lesser equal filter which matches those objects where the value
-     * of the value is lesser than or equals to (i.e. <=) the specified value.
+     * of the field is lesser than or equals to (i.e. <=) the specified value.
      *
      * [[app-listing]]
      * [source,java]
