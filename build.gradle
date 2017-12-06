@@ -35,18 +35,10 @@ buildscript {
     }
 }
 
-plugins {
-    id 'com.gradle.build-scan' version '1.0'
-}
-
-buildScan {
-    licenseAgreementUrl = 'https://gradle.com/terms-of-service'
-    licenseAgree = 'yes'
-}
-
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'net.ltgt.errorprone'
+apply plugin: 'io.codearte.nexus-staging'
 
 subprojects {
     apply plugin: 'io.franzbecker.gradle-lombok'
@@ -67,7 +59,6 @@ subprojects {
 
     repositories {
         mavenCentral()
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
         mavenLocal()
     }
 
