@@ -92,17 +92,56 @@ nexusStaging {
     password = System.getenv('OSSRH_PASSWORD')
 }
 
-uploadArchives {
+task snapshotUpload(type: Upload) {
+    onlyIf {
+        isSnapshotVersion
+    }
+
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
+                authentication(userName: System.getenv('OSSRH_USER'),
+                        password: System.getenv('OSSRH_PASSWORD'))
+            }
+
+            pom.project {
+                packaging 'jar'
+                name "Potassium Nitrite"
+                description 'An in-memory, single-file based embedded nosql persistent document store for Kotlin.'
+                url 'https://github.com/dizitart/nitrite-database'
+                scm {
+                    url 'git@github.com:dizitart/nitrite-database.git'
+                    connection 'scm:git:git@github.com:dizitart/nitrite-database.git'
+                    developerConnection 'scm:git:git@github.com:dizitart/nitrite-database.git'
+                }
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/license/LICENSE-2.0.txt'
+                        distribution 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id 'anidotnet'
+                        name 'Anindya Chatterjee'
+                        email 'anidotnet@gmail.com'
+                        organization 'Dizitart'
+                    }
+                }
+            }
+        }
+    }
+}
+
+task releaseUpload(type: Upload) {
     repositories {
         mavenDeployer {
             beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.getenv('OSSRH_USER'),
-                        password: System.getenv('OSSRH_PASSWORD'))
-            }
-
-            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
                 authentication(userName: System.getenv('OSSRH_USER'),
                         password: System.getenv('OSSRH_PASSWORD'))
             }
