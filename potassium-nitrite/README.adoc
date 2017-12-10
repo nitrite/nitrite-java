@@ -75,7 +75,7 @@ val collection = db.getCollection("test") {
 }
 
 // Initialize an Object Repository
-val repository = db.getRepository(Employee::class) {
+val repository = db.getRepository<Employee> {
     insert(Employee(1, "red"), Employee(2, "yellow"))
 }
 
