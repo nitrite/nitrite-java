@@ -36,7 +36,6 @@ import static org.dizitart.no2.exceptions.ErrorMessage.OBJ_REMOVE_ON_JOINED_OBJE
 class JoinedObjectIterable<T> implements RecordIterable<T> {
     private RecordIterable<Document> recordIterable;
     private Class<T> joinType;
-    private JoinedObjectIterator iterator;
     private NitriteMapper nitriteMapper;
 
     JoinedObjectIterable(NitriteMapper nitriteMapper,
@@ -45,13 +44,6 @@ class JoinedObjectIterable<T> implements RecordIterable<T> {
         this.recordIterable = recordIterable;
         this.joinType = joinType;
         this.nitriteMapper = nitriteMapper;
-        this.iterator = new JoinedObjectIterator(nitriteMapper);
-    }
-
-    @Override
-    public void reset() {
-        this.recordIterable.reset();
-        this.iterator = new JoinedObjectIterator(nitriteMapper);
     }
 
     @Override
@@ -71,21 +63,17 @@ class JoinedObjectIterable<T> implements RecordIterable<T> {
 
     @Override
     public T firstOrDefault() {
-        T item = Iterables.firstOrDefault(this);
-        reset();
-        return item;
+        return Iterables.firstOrDefault(this);
     }
 
     @Override
     public List<T> toList() {
-        List<T> list = Iterables.toList(this);
-        reset();
-        return list;
+        return Iterables.toList(this);
     }
 
     @Override
     public Iterator<T> iterator() {
-        return iterator;
+        return new JoinedObjectIterator(nitriteMapper);
     }
 
     @Override
@@ -95,25 +83,21 @@ class JoinedObjectIterable<T> implements RecordIterable<T> {
 
     private class JoinedObjectIterator implements Iterator<T> {
         private NitriteMapper objectMapper;
+        private Iterator<Document> documentIterator;
 
         JoinedObjectIterator(NitriteMapper nitriteMapper) {
             this.objectMapper = nitriteMapper;
+            this.documentIterator = recordIterable.iterator();
         }
 
         @Override
         public boolean hasNext() {
-            boolean hasNext = true;
-            try {
-                hasNext = recordIterable.iterator().hasNext();
-                return hasNext;
-            } finally {
-                if (!hasNext) reset();
-            }
+            return documentIterator.hasNext();
         }
 
         @Override
         public T next() {
-            Document record = new Document(recordIterable.iterator().next());
+            Document record = new Document(documentIterator.next());
             record.remove(DOC_ID);
             return objectMapper.asObject(record, joinType);
         }

@@ -39,13 +39,11 @@ class ObjectCursor<T> implements Cursor<T> {
     private org.dizitart.no2.Cursor cursor;
     private NitriteMapper nitriteMapper;
     private Class<T> type;
-    private Iterator<T> cursorIterator;
 
     ObjectCursor(NitriteMapper nitriteMapper, org.dizitart.no2.Cursor cursor, Class<T> type) {
         this.nitriteMapper = nitriteMapper;
         this.cursor = cursor;
         this.type = type;
-        this.cursorIterator = new ObjectCursorIterator(cursor.iterator());
     }
 
     @Override
@@ -80,27 +78,17 @@ class ObjectCursor<T> implements Cursor<T> {
 
     @Override
     public T firstOrDefault() {
-        T item = Iterables.firstOrDefault(this);
-        reset();
-        return item;
+        return Iterables.firstOrDefault(this);
     }
 
     @Override
     public List<T> toList() {
-        List<T> list = Iterables.toList(this);
-        reset();
-        return list;
+        return Iterables.toList(this);
     }
 
     @Override
     public Iterator<T> iterator() {
-        return cursorIterator;
-    }
-
-    @Override
-    public void reset() {
-        cursor.reset();
-        cursorIterator = new ObjectCursorIterator(cursor.iterator());
+        return new ObjectCursorIterator(cursor.iterator());
     }
 
     private class ObjectCursorIterator implements Iterator<T> {

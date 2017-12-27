@@ -54,7 +54,7 @@ public interface NitriteStore {
     /**
      * Compacts the store by moving all chunks next to each other.
      */
-    void compactMoveChunks();
+    void compact();
 
     /**
      * Commits the changes. For persistent stores, it also writes

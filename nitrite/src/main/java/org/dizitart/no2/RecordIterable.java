@@ -29,7 +29,7 @@ import java.util.List;
  * @see org.dizitart.no2.Cursor
  * @see org.dizitart.no2.objects.Cursor
  */
-public interface RecordIterable<T> extends Resettable<T> {
+public interface RecordIterable<T> extends Iterable<T> {
 
     /**
      * Specifies if there are more elements in the database that

@@ -127,7 +127,9 @@ class IndexMetaService {
 
     void dropAll() {
         for (String field : getIndexMetadata().keySet()) {
-            dropIndex(field);
+            if (field != null) {
+                dropIndex(field);
+            }
         }
         mvStore.removeMap(getIndexMetadata());
     }

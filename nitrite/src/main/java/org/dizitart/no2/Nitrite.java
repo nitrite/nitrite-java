@@ -204,7 +204,7 @@ public class Nitrite implements Closeable {
     public void compact() {
         if (store != null && !store.isClosed()
                 && !context.isReadOnly()) {
-            store.compactMoveChunks();
+            store.compact();
             if (log.isDebugEnabled()) {
                 log.debug("Store compaction is successful.");
             }

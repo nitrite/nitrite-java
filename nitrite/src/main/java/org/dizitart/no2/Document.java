@@ -30,10 +30,9 @@ import java.util.Map;
 import static org.dizitart.no2.Constants.*;
 import static org.dizitart.no2.NitriteId.createId;
 import static org.dizitart.no2.NitriteId.newId;
-import static org.dizitart.no2.exceptions.ErrorCodes.IIE_INVALID_ID_FOUND;
-import static org.dizitart.no2.exceptions.ErrorCodes.IOE_DOC_ID_AUTO_GENERATED;
-import static org.dizitart.no2.exceptions.ErrorCodes.VE_TYPE_NOT_SERIALIZABLE;
-import static org.dizitart.no2.exceptions.ErrorMessage.*;
+import static org.dizitart.no2.exceptions.ErrorCodes.*;
+import static org.dizitart.no2.exceptions.ErrorMessage.DOC_GET_TYPE_NULL;
+import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 
 /**

@@ -19,23 +19,22 @@
 package org.dizitart.no2.internals;
 
 import org.dizitart.no2.*;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.util.Iterables;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+
+import static org.dizitart.no2.exceptions.ErrorMessage.REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED;
 
 /**
  * @author Anindya Chatterjee.
  */
 class DocumentCursor implements Cursor {
-    private final Set<NitriteId> resultSet;
+    private final Collection<NitriteId> resultSet;
     private final NitriteMap<NitriteId, Document> underlyingMap;
     private boolean hasMore;
     private int totalCount;
-    private Iterator<Document> documentIterator;
     private FindResult findResult;
 
     DocumentCursor(FindResult findResult) {
@@ -47,7 +46,6 @@ class DocumentCursor implements Cursor {
         this.underlyingMap = findResult.getUnderlyingMap();
         this.hasMore = findResult.isHasMore();
         this.totalCount = findResult.getTotalCount();
-        this.documentIterator = new DocumentCursorIterator(this);
         this.findResult = findResult;
     }
 
@@ -63,7 +61,7 @@ class DocumentCursor implements Cursor {
 
     @Override
     public Iterator<Document> iterator() {
-        return documentIterator;
+        return new DocumentCursorIterator();
     }
 
     @Override
@@ -83,44 +81,35 @@ class DocumentCursor implements Cursor {
 
     @Override
     public Document firstOrDefault() {
-        Document item = Iterables.firstOrDefault(this);
-        reset();
-        return item;
+        return Iterables.firstOrDefault(this);
     }
 
     @Override
     public List<Document> toList() {
-        List<Document> list = Iterables.toList(this);
-        reset();
-        return list;
+        return Iterables.toList(this);
     }
 
-    @Override
-    public void reset() {
-        this.documentIterator = new DocumentCursorIterator(this);
-    }
-
-    private class DocumentCursorIterator extends DocumentIterator {
+    private class DocumentCursorIterator implements Iterator<Document> {
         private Iterator<NitriteId> iterator;
 
-        DocumentCursorIterator(Resettable<Document> resettable) {
-            super(resettable);
+        DocumentCursorIterator() {
             iterator = resultSet.iterator();
-            nextMatch();
         }
 
         @Override
-        void nextMatch() {
-            while (iterator.hasNext()) {
-                NitriteId next = iterator.next();
-                Document document = underlyingMap.get(next);
-                if (document != null) {
-                    nextElement = document;
-                    return;
-                }
-            }
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
 
-            nextElement = null;
+        @Override
+        public Document next() {
+            NitriteId next = iterator.next();
+            return underlyingMap.get(next);
+        }
+
+        @Override
+        public void remove() {
+            throw new InvalidOperationException(REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED);
         }
     }
 }

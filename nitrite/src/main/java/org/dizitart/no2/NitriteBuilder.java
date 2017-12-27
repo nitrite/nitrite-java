@@ -384,6 +384,9 @@ public class NitriteBuilder {
             builder = builder.autoCommitDisabled();
         }
 
+        // auto compact disabled github issue #41
+        builder.autoCompactFillRate(0);
+
         MVStore store = null;
         File dbFile = null;
         try {

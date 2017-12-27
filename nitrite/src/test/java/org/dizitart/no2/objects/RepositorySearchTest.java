@@ -69,7 +69,6 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
         Cursor<Employee> cursor = employeeRepository.find();
         assertNotNull(cursor.firstOrDefault());
-        cursor.reset();
         assertNotNull(cursor.toString());
         assertEquals(cursor.toList().size(), employeeList.size());
         assertNotNull(cursor.firstOrDefault());

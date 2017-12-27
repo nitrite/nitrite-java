@@ -19,21 +19,22 @@
 package org.dizitart.no2.internals;
 
 import org.dizitart.no2.*;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.util.Iterables;
 
 import java.util.*;
 
+import static org.dizitart.no2.exceptions.ErrorMessage.REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED;
 import static org.dizitart.no2.util.EqualsUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee.
  */
 class ProjectedDocumentIterable implements RecordIterable<Document> {
-    private final Set<NitriteId> resultSet;
+    private final Collection<NitriteId> resultSet;
     private final NitriteMap<NitriteId, Document> underlyingMap;
     private Document projection;
-    private Iterator<Document> iterator;
     private boolean hasMore;
     private int totalCount;
 
@@ -47,12 +48,11 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
         this.underlyingMap = findResult.getUnderlyingMap();
         this.hasMore = findResult.isHasMore();
         this.totalCount = findResult.getTotalCount();
-        this.iterator = new ProjectedDocumentIterator(this);
     }
 
     @Override
     public Iterator<Document> iterator() {
-        return iterator;
+        return new ProjectedDocumentIterator();
     }
 
     @Override
@@ -72,21 +72,12 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
 
     @Override
     public Document firstOrDefault() {
-        Document item = Iterables.firstOrDefault(this);
-        reset();
-        return item;
+        return Iterables.firstOrDefault(this);
     }
 
     @Override
     public List<Document> toList() {
-        List<Document> list = Iterables.toList(this);
-        reset();
-        return list;
-    }
-
-    @Override
-    public void reset() {
-        this.iterator = new ProjectedDocumentIterator(this);
+        return Iterables.toList(this);
     }
 
     @Override
@@ -94,17 +85,28 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
         return toList().toString();
     }
 
-    private class ProjectedDocumentIterator extends DocumentIterator {
+    private class ProjectedDocumentIterator implements Iterator<Document> {
         private Iterator<NitriteId> iterator;
+        private Document nextElement = null;
 
-        ProjectedDocumentIterator(Resettable<Document> resettable) {
-            super(resettable);
+        ProjectedDocumentIterator() {
             iterator = resultSet.iterator();
             nextMatch();
         }
 
         @Override
-        void nextMatch() {
+        public boolean hasNext() {
+            return nextElement != null;
+        }
+
+        @Override
+        public Document next() {
+            Document returnValue = nextElement;
+            nextMatch();
+            return returnValue;
+        }
+
+        private void nextMatch() {
             while (iterator.hasNext()) {
                 NitriteId next = iterator.next();
                 Document document = underlyingMap.get(next);
@@ -116,6 +118,11 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
             }
 
             nextElement = null;
+        }
+
+        @Override
+        public void remove() {
+            throw new InvalidOperationException(REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED);
         }
 
         private Document project(Document original) {

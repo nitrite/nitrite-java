@@ -142,7 +142,7 @@ class SearchService {
         findResult.setTotalCount(nitriteIdSet.size());
     }
 
-    private Set<NitriteId> sortIdSet(Set<NitriteId> nitriteIdSet, FindOptions findOptions) {
+    private Set<NitriteId> sortIdSet(Collection<NitriteId> nitriteIdSet, FindOptions findOptions) {
         String sortField = findOptions.getField();
         NavigableMap<Object, NitriteId> sortedMap = new TreeMap<>();
 

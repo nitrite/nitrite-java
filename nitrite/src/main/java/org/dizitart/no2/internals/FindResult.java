@@ -23,6 +23,7 @@ import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.store.NitriteMap;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -32,6 +33,6 @@ import java.util.Set;
 class FindResult {
     private boolean hasMore;
     private int totalCount;
-    private Set<NitriteId> idSet;
+    private Collection<NitriteId> idSet;
     private NitriteMap<NitriteId, Document> underlyingMap;
 }

@@ -60,7 +60,7 @@ public final class NitriteMVStore implements NitriteStore {
     }
 
     @Override
-    public void compactMoveChunks() {
+    public void compact() {
         mvStore.compactMoveChunks();
     }
 

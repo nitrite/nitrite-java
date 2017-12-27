@@ -19,22 +19,23 @@
 package org.dizitart.no2.internals;
 
 import org.dizitart.no2.*;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.util.Iterables;
 
 import java.util.*;
 
+import static org.dizitart.no2.exceptions.ErrorMessage.REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED;
 import static org.dizitart.no2.util.EqualsUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee.
  */
 class JoinedDocumentIterable implements RecordIterable<Document> {
-    private final Set<NitriteId> resultSet;
+    private final Collection<NitriteId> resultSet;
     private final NitriteMap<NitriteId, Document> underlyingMap;
     private boolean hasMore;
     private int totalCount;
-    private Iterator<Document> iterator;
     private Cursor foreignCursor;
     private Lookup lookup;
 
@@ -49,12 +50,6 @@ class JoinedDocumentIterable implements RecordIterable<Document> {
         this.underlyingMap = findResult.getUnderlyingMap();
         this.hasMore = findResult.isHasMore();
         this.totalCount = findResult.getTotalCount();
-        this.iterator = new JoinedDocumentIterator(this);
-    }
-
-    @Override
-    public void reset() {
-        this.iterator = new JoinedDocumentIterator(this);
     }
 
     @Override
@@ -74,21 +69,17 @@ class JoinedDocumentIterable implements RecordIterable<Document> {
 
     @Override
     public Document firstOrDefault() {
-        Document item = Iterables.firstOrDefault(this);
-        reset();
-        return item;
+        return Iterables.firstOrDefault(this);
     }
 
     @Override
     public List<Document> toList() {
-        List<Document> list = Iterables.toList(this);
-        reset();
-        return list;
+        return Iterables.toList(this);
     }
 
     @Override
     public Iterator<Document> iterator() {
-        return iterator;
+        return new JoinedDocumentIterator();
     }
 
     @Override
@@ -96,27 +87,28 @@ class JoinedDocumentIterable implements RecordIterable<Document> {
         return toList().toString();
     }
 
-    private class JoinedDocumentIterator extends DocumentIterator {
+    private class JoinedDocumentIterator implements Iterator<Document> {
         private Iterator<NitriteId> iterator;
 
-        JoinedDocumentIterator(Resettable<Document> resettable) {
-            super(resettable);
+        JoinedDocumentIterator() {
             iterator = resultSet.iterator();
-            nextMatch();
         }
 
         @Override
-        void nextMatch() {
-            while (iterator.hasNext()) {
-                NitriteId next = iterator.next();
-                Document document = underlyingMap.get(next);
-                Document joined = join(document, foreignCursor, lookup);
-                if (joined != null) {
-                    nextElement = joined;
-                    return;
-                }
-            }
-            nextElement = null;
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Document next() {
+            NitriteId next = iterator.next();
+            Document document = underlyingMap.get(next);
+            return join(document, foreignCursor, lookup);
+        }
+
+        @Override
+        public void remove() {
+            throw new InvalidOperationException(REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED);
         }
 
         private Document join(Document localDocument, Cursor foreignCursor, Lookup lookup) {

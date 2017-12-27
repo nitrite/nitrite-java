@@ -21,10 +21,7 @@ package org.dizitart.no2.store;
 import org.dizitart.no2.meta.Attributes;
 import org.h2.mvstore.MVMap;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.dizitart.no2.Constants.META_MAP_NAME;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
@@ -173,10 +170,9 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
             Attributes attributes = metaMap.get(getName());
             if (attributes == null) {
                 attributes = new Attributes(getName());
-            } else {
-                attributes.setLastModifiedTime(System.currentTimeMillis());
+                metaMap.put(getName(), attributes);
             }
-            metaMap.put(getName(), attributes);
+            attributes.setLastModifiedTime(System.currentTimeMillis());
         }
     }
 }
