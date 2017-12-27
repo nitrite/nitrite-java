@@ -94,7 +94,7 @@ nexusStaging {
 
 uploadArchives {
     onlyIf {
-        project.hasProperty('release') || isSnapshotVersion
+        project.hasProperty('release') || version.endsWith("SNAPSHOT")
     }
 
     repositories {

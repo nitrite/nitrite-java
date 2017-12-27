@@ -78,5 +78,3 @@ configurations.errorprone {
 nexusStaging {
     packageGroup = "org.dizitart"
 }
-
-ext.isSnapshotVersion = version.endsWith("SNAPSHOT")
