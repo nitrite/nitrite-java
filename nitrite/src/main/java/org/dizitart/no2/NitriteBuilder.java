@@ -35,13 +35,17 @@ import org.h2.mvstore.MVStore;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.dizitart.no2.Security.createSecurely;
 import static org.dizitart.no2.Security.openSecurely;
 import static org.dizitart.no2.exceptions.ErrorCodes.NIOE_DIR_DOES_NOT_EXISTS;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.tool.Recovery.recover;
+import static org.dizitart.no2.util.ObjectUtils.isObjectStore;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
+import static org.dizitart.no2.util.ValidationUtils.isValidCollectionName;
 
 /**
  * A builder utility to create a {@link Nitrite} database instance.
@@ -461,6 +465,11 @@ public class NitriteBuilder {
             context.setNitriteMapper(nitriteMapper);
 
             NitriteStore nitriteStore = new NitriteMVStore(store);
+
+            // populate existing maps
+            context.setCollectionRegistry(populateCollections(nitriteStore));
+            context.setRepositoryRegistry(populateRepositories(nitriteStore));
+
             Nitrite db = new Nitrite(nitriteStore, context);
 
             // shutdown hook to close db file gracefully
@@ -468,5 +477,37 @@ public class NitriteBuilder {
             return db;
         }
         return null;
+    }
+
+    private Set<String> populateCollections(NitriteStore store) {
+        Set<String> collectionRegistry = new HashSet<>();
+        if (store != null) {
+            for (String name : store.getMapNames()) {
+                if (isValidCollectionName(name) && !isObjectStore(name)) {
+                    collectionRegistry.add(name);
+                }
+            }
+        } else {
+            log.error("Underlying store is null. Nitrite has not been initialized properly.");
+        }
+        return collectionRegistry;
+    }
+
+    private Set<Class<?>> populateRepositories(NitriteStore store) {
+        Set<Class<?>> repositoryRegistry = new HashSet<>();
+        if (store != null) {
+            for (String name : store.getMapNames()) {
+                if (isValidCollectionName(name) && isObjectStore(name)) {
+                    try {
+                        repositoryRegistry.add(Class.forName(name));
+                    } catch (ClassNotFoundException e) {
+                        log.error("Could not find the class " + name);
+                    }
+                }
+            }
+        } else {
+            log.error("Underlying store is null. Nitrite has not been initialized properly.");
+        }
+        return repositoryRegistry;
     }
 }

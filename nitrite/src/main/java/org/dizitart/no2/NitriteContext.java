@@ -21,18 +21,23 @@ package org.dizitart.no2;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.util.ExecutorUtils;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.dizitart.no2.util.ExecutorUtils.shutdownAndAwaitTermination;
+import static org.dizitart.no2.util.ObjectUtils.isObjectStore;
+import static org.dizitart.no2.util.ValidationUtils.isValidCollectionName;
 
 /**
  * Represents a readonly view of all contextual information of a nitrite database.
@@ -41,6 +46,7 @@ import static org.dizitart.no2.util.ExecutorUtils.shutdownAndAwaitTermination;
  * @since 1.0
  * @see Nitrite#getContext()
  */
+@Slf4j
 @Getter @Setter(AccessLevel.PACKAGE)
 public class NitriteContext {
     /**
@@ -140,8 +146,6 @@ public class NitriteContext {
     NitriteContext() {
         workerPool = ExecutorUtils.daemonExecutor();
         scheduledWorkerPool = ExecutorUtils.scheduledExecutor();
-        collectionRegistry = new HashSet<>();
-        repositoryRegistry = new HashSet<>();
     }
 
     /**
@@ -159,5 +163,7 @@ public class NitriteContext {
     void shutdown() {
         shutdownAndAwaitTermination(scheduledWorkerPool, 5);
         shutdownAndAwaitTermination(workerPool, 5);
+        collectionRegistry.clear();
+        repositoryRegistry.clear();
     }
 }
