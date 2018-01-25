@@ -32,7 +32,6 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
-import org.apache.lucene.util.Version;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.fulltext.TextIndexingService;
@@ -56,24 +55,22 @@ public class LuceneService implements TextIndexingService {
     public LuceneService() {
         try {
             this.keySerializer = new ObjectMapper();
-            keySerializer.setVisibility(
-                    keySerializer.getSerializationConfig().
-                            getDefaultVisibilityChecker().
-                            withFieldVisibility(JsonAutoDetect.Visibility.ANY).
-                            withGetterVisibility(JsonAutoDetect.Visibility.NONE).
-                            withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
-            );
+            keySerializer.setVisibility(keySerializer
+                .getSerializationConfig()
+                .getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
 
             indexDirectory = new RAMDirectory();
-            analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+            analyzer = new StandardAnalyzer();
 
-            IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_4_9, analyzer);
+            IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
             indexWriter = new IndexWriter(indexDirectory, iwc);
             commit();
         } catch (IOException e) {
-            throw new IndexingException(errorMessage(
-                    "could not create full-text index", 0), e);
+            throw new IndexingException(errorMessage("could not create full-text index", 0), e);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -95,8 +92,7 @@ public class LuceneService implements TextIndexingService {
                 commit();
             }
         } catch (IOException ioe) {
-            throw new IndexingException(errorMessage(
-                    "could not write full-text index data for " + text, 0), ioe);
+            throw new IndexingException(errorMessage("could not write full-text index data for " + text, 0), ioe);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -105,12 +101,15 @@ public class LuceneService implements TextIndexingService {
     @Override
     public void updateIndex(NitriteId id, String field, String text) {
         try {
-            Document document = new Document();
             String jsonId = keySerializer.writeValueAsString(id);
-            Field contentField = new TextField(field, text, Field.Store.NO);
-            Field idField = new StringField(CONTENT_ID, jsonId, Field.Store.YES);
+            Document document = getDocument(jsonId);
+            if (document == null) {
+                document = new Document();
+                Field idField = new StringField(CONTENT_ID, jsonId, Field.Store.YES);
+                document.add(idField);
+            }
+            Field contentField = new TextField(field, text, Field.Store.YES);
 
-            document.add(idField);
             document.add(contentField);
 
             synchronized (this) {
@@ -118,8 +117,7 @@ public class LuceneService implements TextIndexingService {
                 commit();
             }
         } catch (IOException ioe) {
-            throw new IndexingException(errorMessage(
-                    "could not update full-text index for " + text, 0), ioe);
+            throw new IndexingException(errorMessage("could not update full-text index for " + text, 0), ioe);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -136,8 +134,7 @@ public class LuceneService implements TextIndexingService {
                 commit();
             }
         } catch (IOException ioe) {
-            throw new IndexingException(errorMessage(
-                    "could not remove full-text index for " + id, 0));
+            throw new IndexingException(errorMessage("could not remove full-text index for " + id, 0));
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -148,13 +145,12 @@ public class LuceneService implements TextIndexingService {
         if (!isNullOrEmpty(field)) {
             try {
                 Query query;
-                QueryParser parser = new QueryParser(Version.LUCENE_4_9, field, analyzer);
+                QueryParser parser = new QueryParser(field, analyzer);
                 parser.setAllowLeadingWildcard(true);
                 try {
                     query = parser.parse("*");
                 } catch (ParseException e) {
-                    throw new IndexingException(errorMessage(
-                            "could not remove full-text index for value " + field, 0));
+                    throw new IndexingException(errorMessage("could not remove full-text index for value " + field, 0));
                 }
 
                 synchronized (this) {
@@ -162,8 +158,7 @@ public class LuceneService implements TextIndexingService {
                     commit();
                 }
             } catch (IOException ioe) {
-                throw new IndexingException(errorMessage(
-                        "could not remove full-text index for value " + field, 0));
+                throw new IndexingException(errorMessage("could not remove full-text index for value " + field, 0));
             } catch (VirtualMachineError vme) {
                 handleVirtualMachineError(vme);
             }
@@ -174,14 +169,14 @@ public class LuceneService implements TextIndexingService {
     public Set<NitriteId> searchByIndex(String field, String searchString) {
         IndexReader indexReader = null;
         try {
-            QueryParser parser = new QueryParser(Version.LUCENE_4_9, field, analyzer);
+            QueryParser parser = new QueryParser(field, analyzer);
             parser.setAllowLeadingWildcard(true);
             Query query = parser.parse("*" + searchString + "*");
 
             indexReader = DirectoryReader.open(indexDirectory);
             IndexSearcher indexSearcher = new IndexSearcher(indexReader);
 
-            TopScoreDocCollector collector = TopScoreDocCollector.create(MAX_SEARCH, true);
+            TopScoreDocCollector collector = TopScoreDocCollector.create(MAX_SEARCH);
             indexSearcher.search(query, collector);
 
             TopDocs hits = collector.topDocs(0, MAX_SEARCH);
@@ -201,11 +196,48 @@ public class LuceneService implements TextIndexingService {
 
             return keySet;
         } catch (IOException | ParseException e) {
-            throw new IndexingException(errorMessage(
-                    "could not search on full-text index", 0), e);
+            throw new IndexingException(errorMessage("could not search on full-text index", 0), e);
         } finally {
             try {
-                if (indexReader != null) indexReader.close();
+                if (indexReader != null)
+                    indexReader.close();
+            } catch (IOException ignored) {
+                // ignored
+            }
+        }
+    }
+
+    private Document getDocument(String jsonId) {
+        IndexReader indexReader = null;
+        try {
+            Term idTerm = new Term(CONTENT_ID, jsonId);
+
+            TermQuery query = new TermQuery(idTerm);
+
+            indexReader = DirectoryReader.open(indexDirectory);
+            IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+
+            TopScoreDocCollector collector = TopScoreDocCollector.create(MAX_SEARCH);
+            indexSearcher.search(query, collector);
+
+            TopDocs hits = collector.topDocs(0, MAX_SEARCH);
+            Document document = null;
+            if (hits != null) {
+                ScoreDoc[] scoreDocs = hits.scoreDocs;
+                if (scoreDocs != null) {
+                    for (ScoreDoc scoreDoc : scoreDocs) {
+                        document = indexSearcher.doc(scoreDoc.doc);
+                    }
+                }
+            }
+
+            return document;
+        } catch (IOException e) {
+            throw new IndexingException(errorMessage("could not search on full-text index", 0), e);
+        } finally {
+            try {
+                if (indexReader != null)
+                    indexReader.close();
             } catch (IOException ignored) {
                 // ignored
             }
@@ -216,15 +248,14 @@ public class LuceneService implements TextIndexingService {
     public void drop() {
         try {
             indexDirectory = new RAMDirectory();
-            analyzer = new StandardAnalyzer(Version.LUCENE_4_9);
+            analyzer = new StandardAnalyzer();
 
-            IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_4_9, analyzer);
+            IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
             indexWriter = new IndexWriter(indexDirectory, iwc);
             commit();
         } catch (IOException e) {
-            throw new IndexingException(errorMessage(
-                    "could not drop full-text index", 0), e);
+            throw new IndexingException(errorMessage("could not drop full-text index", 0), e);
         }
     }
 
@@ -234,8 +265,7 @@ public class LuceneService implements TextIndexingService {
             indexWriter.deleteAll();
             commit();
         } catch (IOException e) {
-            throw new IndexingException(errorMessage(
-                    "could not clear full-text index", 0), e);
+            throw new IndexingException(errorMessage("could not clear full-text index", 0), e);
         }
     }
 
