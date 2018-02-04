@@ -27,6 +27,11 @@ Nitrite is a server-less embedded database ideal for desktop, mobile or small we
 * Observable store
 * Both way replication via Nitrite DataGate server
 
+== Kotlin Extension
+
+Nitrite has a kotlin extension called potassium-nitrite for kotlin developers.
+Visit https://github.com/dizitart/nitrite-database/tree/master/potassium-nitrite[here] for more details.
+
 == Getting Started
 
 === How To Install
