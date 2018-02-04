@@ -213,5 +213,13 @@ The library has a build-in support for kotlin data classes via jackson-kotlin mo
 module is already registered to the default jackson mapper so that user does not have to deal with it
 explicitly.
 
+== Documentation
+
+|===
+|Reference |API
+
+|http://www.dizitart.org/nitrite-database/#potassium-nitrite[Document]
+|https://javadoc.io/doc/org.dizitart/potassium-nitrite[JavaDoc]
+|===
 
 
