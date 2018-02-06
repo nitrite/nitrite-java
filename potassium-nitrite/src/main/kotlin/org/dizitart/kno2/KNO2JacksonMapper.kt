@@ -29,7 +29,7 @@ import org.dizitart.no2.mapper.JacksonMapper
  * @since 2.1.0
  * @author Anindya Chatterjee
  */
-internal class KNO2JacksonMapper : JacksonMapper() {
+open class KNO2JacksonMapper : JacksonMapper() {
     init {
         objectMapper.registerModule(KotlinModule())
         objectMapper.registerModule(JavaTimeModule())
