@@ -12,3 +12,6 @@ To run it use the following command:
 --
 java -jar nitrite-explorer-{version}.jar
 --
+
+See the https://github.com/dizitart/nitrite-database/releases[release] page for the latest
+version.
