@@ -20,8 +20,9 @@ package org.dizitart.no2.event;
 
 import org.dizitart.no2.NitriteContext;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -45,7 +46,7 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
      * @param context the context
      */
     public NitriteEventBus(NitriteContext context) {
-        this.listeners = new HashSet<>();
+        this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<EventListener, Boolean>());
         this.eventExecutor = context.getWorkerPool();
     }
 
