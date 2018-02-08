@@ -21,6 +21,7 @@ package org.dizitart.no2.util;
 import lombok.experimental.UtilityClass;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.FindOptions;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.ErrorMessage;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
@@ -218,6 +219,7 @@ public class ValidationUtils {
         }
 
         if (fieldType.isPrimitive()
+                || fieldType == NitriteId.class
                 || fieldType.isInterface()
                 || Modifier.isAbstract(fieldType.getModifiers())) {
             // we will validate the solid class during insertion/update

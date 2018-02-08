@@ -233,6 +233,14 @@ public class ErrorMessage {
             new ErrorMessage("id value can not be empty string",
                     IIE_ID_VALUE_EMPTY_STRING);
 
+    public static final ErrorMessage CANNOT_ACCESS_AUTO_ID =
+            new ErrorMessage("auto generated id value can not be accessed",
+                    IIE_CANNOT_ACCESS_AUTO_ID);
+
+    public static final ErrorMessage AUTO_ID_ALREADY_SET =
+            new ErrorMessage("auto generated id should not be set manually",
+                    IIE_AUTO_ID_ALREADY_SET);
+
     public static final ErrorMessage PAGINATION_SIZE_CAN_NOT_BE_NEGATIVE =
             new ErrorMessage("pagination size can not be negative",
                     VE_NEGATIVE_PAGINATION_SIZE);

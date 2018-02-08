@@ -216,6 +216,8 @@ public class ErrorCodes {
     public static final int IIE_ID_VALUE_EMPTY_STRING = 6005;
     public static final int IIE_FAILED_TO_CREATE_AUTO_ID = 6006;
     public static final int IIE_NULL_ID_FILTER_VALUE = 6007;
+    public static final int IIE_CANNOT_ACCESS_AUTO_ID = 6008;
+    public static final int IIE_AUTO_ID_ALREADY_SET = 6009;
 
     /* SecurityException Codes */
     public static final int SE_INVALID_USER_PASSWORD = 7001;

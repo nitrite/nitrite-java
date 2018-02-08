@@ -19,10 +19,7 @@
 package org.dizitart.no2.objects;
 
 import lombok.Data;
-import org.dizitart.no2.Lookup;
-import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.RecordIterable;
+import org.dizitart.no2.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -186,18 +183,24 @@ public class RepositoryJoinTest {
 
     @Data
     public static class Person {
+        @Id
+        private NitriteId nitriteId;
         private String id;
         private String name;
     }
 
     @Data
     public static class Address {
+        @Id
+        private NitriteId nitriteId;
         private String personId;
         private String street;
     }
 
     @Data
     public static class PersonDetails {
+        @Id
+        private NitriteId nitriteId;
         private String id;
         private String name;
         private List<Address> addresses;

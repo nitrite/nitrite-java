@@ -20,6 +20,8 @@ package org.dizitart.no2.util;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
@@ -178,6 +180,34 @@ public class ObjectUtils {
         } catch (Exception e) {
             return new ObjenesisStd().newInstance(type);
         }
+    }
+
+    public static <T> Document toDocument(T object, NitriteMapper nitriteMapper, Field idField, boolean idCheck) {
+        Document document = nitriteMapper.asDocument(object);
+        if (idField != null && idCheck) {
+            if (idField.getType() == NitriteId.class) {
+                try {
+                    idField.setAccessible(true);
+                    if (idField.get(object) == null) {
+                        NitriteId id = document.getId();
+                        idField.set(object, id);
+                        document.put(idField.getName(), id.getIdValue());
+                    } else {
+                        throw new InvalidIdException(AUTO_ID_ALREADY_SET);
+                    }
+                } catch (IllegalAccessException iae) {
+                    throw new InvalidIdException(CANNOT_ACCESS_AUTO_ID);
+                }
+            }
+            Object idValue = document.get(idField.getName());
+            if (idValue == null) {
+                throw new InvalidIdException(ID_CAN_NOT_BE_NULL);
+            }
+            if (idValue instanceof String && isNullOrEmpty((String) idValue)) {
+                throw new InvalidIdException(ID_VALUE_CAN_NOT_BE_EMPTY_STRING);
+            }
+        }
+        return document;
     }
 
     private <T> void populateIndex(NitriteMapper nitriteMapper, Class<T> type,

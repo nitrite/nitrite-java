@@ -285,17 +285,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     private Document asDocument(T object, boolean idCheck) {
-        Document document = nitriteMapper.asDocument(object);
-        if (idField != null && idCheck) {
-            Object idValue = document.get(idField.getName());
-            if (idValue == null) {
-                throw new InvalidIdException(ID_CAN_NOT_BE_NULL);
-            }
-            if (idValue instanceof String && isNullOrEmpty((String) idValue)) {
-                throw new InvalidIdException(ID_VALUE_CAN_NOT_BE_EMPTY_STRING);
-            }
-        }
-        return document;
+        return toDocument(object, nitriteMapper, idField, idCheck);
     }
 
     private Document[] asDocuments(T[] others) {

@@ -165,6 +165,7 @@ public class JacksonMapper extends AbstractMapper {
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
             objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.registerModule(new NitriteIdModule());
         }
         return objectMapper;
     }
