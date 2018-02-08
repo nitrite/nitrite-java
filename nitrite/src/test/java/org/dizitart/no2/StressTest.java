@@ -1,7 +1,5 @@
 package org.dizitart.no2;
 
-import org.h2.mvstore.MVMap;
-import org.h2.mvstore.MVStore;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -10,16 +8,12 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.Assert.assertNotNull;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 
 /**
@@ -43,7 +37,7 @@ public class StressTest {
     }
 
     @Test
-    public void testIssue41() throws InterruptedException {
+    public void testIssue41() {
         collection.createIndex("number", IndexOptions.indexOptions(IndexType.NonUnique));
         collection.createIndex("name", IndexOptions.indexOptions(IndexType.NonUnique));
         collection.createIndex("counter", IndexOptions.indexOptions(IndexType.Unique));
@@ -75,8 +69,8 @@ public class StressTest {
         System.out.println("Records size calculated in " + ((System.currentTimeMillis() - start) / (1000)) + " seconds");
 
         int i = 0;
-        for (Object element : cursor) {
-            assert element instanceof Document;
+        for (Document element : cursor) {
+            assertNotNull(element);
             i++;
             if (i % 10000 == 0) {
                 System.out.println(i + " entries processed");

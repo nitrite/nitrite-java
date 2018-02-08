@@ -21,7 +21,6 @@ package org.dizitart.no2.objects;
 import org.dizitart.no2.*;
 import org.dizitart.no2.Index;
 import org.dizitart.no2.event.ChangeListener;
-import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapper.NitriteMapper;
@@ -37,7 +36,6 @@ import static org.dizitart.no2.UpdateOptions.updateOptions;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.util.ObjectUtils.*;
-import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 
 /**
@@ -329,6 +327,9 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     private void filterKeys(Document document) {
         document.remove(DOC_ID);
+        if (idField != null && idField.getType() == NitriteId.class) {
+            document.remove(idField.getName());
+        }
 
         Document doc = new Document(document);
         for (KeyValuePair pair : doc) {
