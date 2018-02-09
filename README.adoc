@@ -5,7 +5,8 @@ image:https://travis-ci.org/dizitart/nitrite-database.svg?branch=master["Build S
 image:https://codecov.io/gh/dizitart/nitrite-database/branch/master/graph/badge.svg["Coverage Status", link="https://codecov.io/gh/dizitart/nitrite-database"]
 image:https://javadoc.io/badge/org.dizitart/nitrite.svg["Javadocs", link=https://javadoc.io/doc/org.dizitart/nitrite]
 image:https://badges.gitter.im/dizitart/nitrite-database.svg["Gitter", link="https://gitter.im/dizitart/nitrite-database?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge"]
-
+image:https://opencollective.com/nitrite-database/backers/badge.svg["Backers on Open Collective", link="#backers"]
+image:https://opencollective.com/nitrite-database/sponsors/badge.svg["Backers on Open Collective", link="#sponsors"]
 
 image:http://www.dizitart.org/nitrite-database/logo/nitrite-logo.svg[Logo 200, 200]
 
@@ -288,3 +289,24 @@ before you file an issue please check if it is already existing or not.
 == Maintainers
 
 * Anindya Chatterjee
+
+== Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+image:https://opencollective.com/nitrite-database/contributors.svg?width=890["Contributors", link="graphs/contributors"]
+
+== Backers
+
+Thank you to all our backers! 🙏 https://opencollective.com/nitrite-database#backer[Become a backer]
+
+image:https://opencollective.com/final-form/backers.svg?width=890["Backers", link="https://opencollective.com/nitrite-database#backers"]
+
+== Sponsors
+
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. https://opencollective.com/nitrite-database#sponsor[Become a sponsor]
+
+image:https://opencollective.com/nitrite-database/sponsor/0/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/0/website"]
+image:https://opencollective.com/nitrite-database/sponsor/1/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/1/website"]
+image:https://opencollective.com/nitrite-database/sponsor/2/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/2/website"]
+image:https://opencollective.com/nitrite-database/sponsor/3/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/3/website"]
+image:https://opencollective.com/nitrite-database/sponsor/4/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/4/website"]
