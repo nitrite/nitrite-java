@@ -292,8 +292,8 @@ before you file an issue please check if it is already existing or not.
 
 == Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-image:https://opencollective.com/nitrite-database/contributors.svg?width=890["Contributors", link="graphs/contributors"]
+This project exists thanks to all the people who contribute. https://github.com/dizitart/nitrite-database/blob/master/CONTRIBUTING.md[Contribute].
+image:https://opencollective.com/nitrite-database/contributors.svg?width=890["Contributors", link="https://github.com/dizitart/nitrite-database/graphs/contributors"]
 
 == Backers
 
