@@ -20,6 +20,7 @@ package org.dizitart.kno2
 
 import org.dizitart.no2.IndexType
 import org.dizitart.no2.SortOrder
+import org.dizitart.no2.objects.Id
 import org.dizitart.no2.objects.Index
 import org.dizitart.no2.objects.Indices
 import org.dizitart.no2.objects.InheritIndices
@@ -90,26 +91,48 @@ class NitriteTest : BaseTest() {
 
     @Test
     fun testIssue54() {
-        val repository = db?.getRepository<TestDataClass>()!!
-        assertTrue(repository.hasIndex("dateTime"))
-        assertTrue(repository.hasIndex("checked"))
+        val repository = db?.getRepository<SomeAbsClass>()!!
+        assertTrue(repository.hasIndex("id"))
+        assertTrue(repository.hasIndex("name"))
+
+        val item = MyClass(UUID.randomUUID(), "xyz", true)
+        var writeResult = repository.insert(item)
+        assertEquals(writeResult.affectedCount, 1)
+
+        var cursor = repository.find()
+        assertEquals(cursor.size(), 1)
+
+        val item2 = MyClass2(UUID.randomUUID(), "123", true, 3)
+        writeResult = repository.insert(item2)
+        assertEquals(writeResult.affectedCount, 1)
+
+        cursor = repository.find()
+        assertEquals(cursor.size(), 2)
     }
 }
 
-@Indices(value = [(Index(value = "dateTime", type = IndexType.NonUnique)),
-    (Index(value = "checked", type = IndexType.NonUnique))])
 interface MyInterface {
-    val localId: UUID
-    val checked: Boolean
-    val dateTime: String
-    val importance: Int
+    val id: UUID
+}
+
+@Indices(value = [(Index(value = "name", type = IndexType.NonUnique))])
+abstract class SomeAbsClass (
+        @Id override val id: UUID = UUID.randomUUID(),
+        open val name: String = "abcd"
+) : MyInterface {
+    abstract val checked: Boolean
 }
 
 @InheritIndices
-data class TestDataClass(
-        override val localId: UUID,
+class MyClass(
+        override val id: UUID,
+        override val name: String,
+        override val checked: Boolean) : SomeAbsClass(id, name)
+
+@InheritIndices
+class MyClass2(
+        override val id: UUID,
+        override val name: String,
         override val checked: Boolean,
-        override val dateTime: String,
-        override val importance: Int,
-        val anotherField: String
-) : MyInterface
+        val importance: Int
+) : SomeAbsClass(id, name)
