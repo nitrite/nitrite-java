@@ -19,6 +19,7 @@
 package org.dizitart.kno2
 
 import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.dizitart.no2.mapper.JacksonMapper
@@ -32,6 +33,7 @@ import org.dizitart.no2.mapper.JacksonMapper
 open class KNO2JacksonMapper : JacksonMapper() {
     init {
         objectMapper.registerModule(KotlinModule())
+        objectMapper.registerModule(Jdk8Module())
         objectMapper.registerModule(JavaTimeModule())
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     }

@@ -20,9 +20,13 @@ package org.dizitart.kno2
 
 import org.dizitart.no2.IndexType
 import org.dizitart.no2.SortOrder
+import org.dizitart.no2.objects.Index
+import org.dizitart.no2.objects.Indices
+import org.dizitart.no2.objects.InheritIndices
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.util.*
 
 /**
  *
@@ -83,4 +87,29 @@ class NitriteTest : BaseTest() {
             assertEquals(cursor.last()["a"], 4)
         }
     }
+
+    @Test
+    fun testIssue54() {
+        val repository = db?.getRepository<TestDataClass>()!!
+        assertTrue(repository.hasIndex("dateTime"))
+        assertTrue(repository.hasIndex("checked"))
+    }
 }
+
+@Indices(value = [(Index(value = "dateTime", type = IndexType.NonUnique)),
+    (Index(value = "checked", type = IndexType.NonUnique))])
+interface MyInterface {
+    val localId: UUID
+    val checked: Boolean
+    val dateTime: String
+    val importance: Int
+}
+
+@InheritIndices
+data class TestDataClass(
+        override val localId: UUID,
+        override val checked: Boolean,
+        override val dateTime: String,
+        override val importance: Int,
+        val anotherField: String
+) : MyInterface

@@ -66,17 +66,23 @@ public class ReflectionUtils {
         return currentClassFields;
     }
 
-    static <T extends Annotation> List<T> getAnnotationUpto(Class<T> annotation, Class<?> startClass, Class<?> exclusiveParent) {
-        notNull(startClass, errorMessage("startClass can not be null", VE_REFLECT_NULL_START_CLASS));
+    static <T extends Annotation> List<T> findAnnotations(Class<T> annotation, Class<?> type) {
+        notNull(type, errorMessage("type can not be null", VE_REFLECT_NULL_START_CLASS));
         notNull(annotation, errorMessage("annotationClass can not be null", VE_REFLECT_NULL_ANNOT_CLASS));
         List<T> annotations = new ArrayList<>();
 
-        T t = startClass.getAnnotation(annotation);
+        T t = type.getAnnotation(annotation);
         if (t != null) annotations.add(t);
 
-        Class<?> parentClass = startClass.getSuperclass();
-        if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
-            List<T> list = getAnnotationUpto(annotation, parentClass, exclusiveParent);
+        Class[] interfaces = type.getInterfaces();
+        for (Class<?> anInterface : interfaces) {
+            T ann = anInterface.getAnnotation(annotation);
+            if (ann != null) annotations.add(ann);
+        }
+
+        Class<?> parentClass = type.getSuperclass();
+        if (parentClass != null && !parentClass.equals(Object.class)) {
+            List<T> list = findAnnotations(annotation, parentClass);
             annotations.addAll(list);
         }
 
@@ -105,21 +111,35 @@ public class ReflectionUtils {
         return filtered;
     }
 
-    static <T> Field getField(Class<T> type, String name) {
+    static <T> Field getField(Class<T> type, String name, boolean recursive) {
         if (name.contains(FIELD_SEPARATOR)) {
             return getEmbeddedField(type, name);
         } else {
-            try {
-                if (type.isAnnotationPresent(InheritIndices.class)) {
-                    return type.getField(name);
-                } else {
-                    return type.getDeclaredField(name);
+            // first check declared fields (fix for kotlin properties, ref: issue #54)
+            // if nothing found and is-recursive then check recursively
+            Field[] declaredFields = type.getDeclaredFields();
+            Field field = null;
+            for (Field declaredField : declaredFields) {
+                if (declaredField.getName().equals(name)) {
+                    field = declaredField;
+                    break;
                 }
-            } catch (NoSuchFieldException nsfe) {
+            }
+            if (field == null && recursive) {
+                Field[] fields = type.getFields();
+                for (Field recursiveField : fields) {
+                    if (recursiveField.getName().equals(name)) {
+                        field = recursiveField;
+                        break;
+                    }
+                }
+            }
+            if (field == null) {
                 throw new ValidationException(errorMessage(
                         "no such value \'" + name + "\' for type " + type.getName(),
                         VE_REFLECT_FIELD_NO_SUCH_FIELD));
             }
+            return field;
         }
     }
 

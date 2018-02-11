@@ -35,7 +35,7 @@ import java.util.*;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
-import static org.dizitart.no2.util.ReflectionUtils.getAnnotationUpto;
+import static org.dizitart.no2.util.ReflectionUtils.findAnnotations;
 import static org.dizitart.no2.util.ReflectionUtils.getField;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
@@ -76,7 +76,7 @@ public class ObjectUtils {
 
         List<Indices> indicesList;
         if (type.isAnnotationPresent(InheritIndices.class)) {
-            indicesList = getAnnotationUpto(Indices.class, type, Object.class);
+            indicesList = findAnnotations(Indices.class, type);
         } else {
             indicesList = new ArrayList<>();
             Indices indices = type.getAnnotation(Indices.class);
@@ -93,7 +93,7 @@ public class ObjectUtils {
 
         List<Index> indexList;
         if (type.isAnnotationPresent(InheritIndices.class)) {
-            indexList = getAnnotationUpto(Index.class, type, Object.class);
+            indexList = findAnnotations(Index.class, type);
         } else {
             indexList = new ArrayList<>();
             Index index = type.getAnnotation(Index.class);
@@ -214,7 +214,7 @@ public class ObjectUtils {
                                    List<Index> indexList, Set<Index> indexSet) {
         for (Index index : indexList) {
             String name = index.value();
-            Field field = getField(type, name);
+            Field field = getField(type, name, type.isAnnotationPresent(InheritIndices.class));
             if (field != null) {
                 validateObjectIndexField(nitriteMapper, field.getType(), field.getName());
                 indexSet.add(index);

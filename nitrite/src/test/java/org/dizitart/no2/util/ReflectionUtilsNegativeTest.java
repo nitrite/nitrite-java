@@ -47,7 +47,7 @@ public class ReflectionUtilsNegativeTest {
 
     @Test(expected = ValidationException.class)
     public void testGetFieldNoSuchField() {
-        getField(getClass(), "test");
+        getField(getClass(), "test", false);
     }
 
     private static class ClassWithNoAnnotatedFields {
