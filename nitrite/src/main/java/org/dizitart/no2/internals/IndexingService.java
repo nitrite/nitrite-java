@@ -109,14 +109,14 @@ class IndexingService {
                         // update text index
                         textIndexingService.updateIndex(nitriteId, field, (String) fieldValue);
                     } else {
-                        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
-                                = indexMetaService.getIndexMap(field);
-
-                        // create the nitriteId list associated with the value
-                        ConcurrentSkipListSet<NitriteId> nitriteIdList
-                                = indexMap.get((Comparable) fieldValue);
-
                         synchronized (fieldLock) {
+                            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+                                    = indexMetaService.getIndexMap(field);
+
+                            // create the nitriteId list associated with the value
+                            ConcurrentSkipListSet<NitriteId> nitriteIdList
+                                    = indexMap.get((Comparable) fieldValue);
+
                             if (nitriteIdList == null) {
                                 nitriteIdList = new ConcurrentSkipListSet<>();
                             }

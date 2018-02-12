@@ -415,6 +415,6 @@ public class NitriteService {
         this.indexingService = new IndexingService(indexMetaService, textIndexingService, nitriteContext);
         this.indexedSearchService = new IndexedSearchService(indexMetaService, textIndexingService);
         this.searchService = new SearchService(this, mapStore);
-        this.dataService = new DataService(indexingService, searchService, mapStore, eventBus, nitriteContext);
+        this.dataService = new DataService(indexingService, searchService, mapStore, eventBus);
     }
 }

@@ -28,6 +28,8 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 /**
  *
@@ -109,6 +111,35 @@ class NitriteTest : BaseTest() {
         cursor = repository.find()
         assertEquals(cursor.size(), 2)
     }
+
+    @Test
+    fun testIssue55() {
+        val repository = db?.getRepository<CaObject>()!!
+        val uuid = UUID.randomUUID()
+        val executor = Executors.newFixedThreadPool(10)
+        val latch = CountDownLatch(200)
+        for(i in 0..100) {
+            val item = CaObject(uuid, "1234")
+            executor.submit {
+                try{
+                    repository.update(item, true)
+                } finally {
+                    latch.countDown()
+                }
+            }
+            executor.submit {
+                try{
+                    repository.insert(item)
+                } finally {
+                    latch.countDown()
+                }
+            }
+        }
+        latch.await()
+        val cursor = repository.find()
+        println(cursor.toList())
+        assertEquals(cursor.size(), 1)
+    }
 }
 
 interface MyInterface {
@@ -136,3 +167,8 @@ class MyClass2(
         override val checked: Boolean,
         val importance: Int
 ) : SomeAbsClass(id, name)
+
+data class CaObject(
+        @Id val localId: UUID,
+        val name: String
+)

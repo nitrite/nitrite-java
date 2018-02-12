@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.*;
 import org.dizitart.no2.event.*;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
-import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.ArrayList;
@@ -44,18 +43,17 @@ class DataService {
     private final NitriteMap<NitriteId, Document> underlyingMap;
     private final EventBus<ChangeInfo, ChangeListener> eventBus;
     private final String name;
-    private final NitriteMapper nitriteMapper;
+
+    private final Object lock = new Object();
 
     DataService(IndexingService indexingService, SearchService searchService,
                 NitriteMap<NitriteId, Document> mapStore,
-                EventBus<ChangeInfo, ChangeListener> eventBus,
-                NitriteContext nitriteContext) {
+                EventBus<ChangeInfo, ChangeListener> eventBus) {
         this.indexingService = indexingService;
         this.searchService = searchService;
         this.underlyingMap = mapStore;
         this.eventBus = eventBus;
         this.name = underlyingMap.getName();
-        this.nitriteMapper = nitriteContext.getNitriteMapper();
     }
 
     WriteResultImpl insert(Document... documents) {
@@ -79,25 +77,28 @@ class DataService {
                 document.remove(DOC_SOURCE);
             }
 
-            Document already = underlyingMap.putIfAbsent(nitriteId, document);
-            log.debug("Inserting document " + document + " in " + name);
+            synchronized (lock) {
+                Document already = underlyingMap.putIfAbsent(nitriteId, document);
+                log.debug("Inserting document " + document + " in " + name);
 
-            if (already != null) {
-                // rollback changes
-                underlyingMap.put(nitriteId, already);
-                log.debug("Another document already exists with id " + nitriteId);
-                throw new UniqueConstraintException(errorMessage("id constraint violation, " +
-                        "entry with same id already exists in " + name, UCE_CONSTRAINT_VIOLATED));
-            } else {
-                try {
-                    indexingService.updateIndexEntry(document, nitriteId);
-                } catch (UniqueConstraintException uce) {
-                    log.error("Unique constraint violated for the document "
-                            + document + " in " + name, uce);
-                    underlyingMap.remove(nitriteId);
-                    throw uce;
+                if (already != null) {
+                    // rollback changes
+                    underlyingMap.put(nitriteId, already);
+                    log.debug("Another document already exists with id " + nitriteId);
+                    throw new UniqueConstraintException(errorMessage("id constraint violation, " +
+                            "entry with same id already exists in " + name, UCE_CONSTRAINT_VIOLATED));
+                } else {
+                    try {
+                        indexingService.updateIndexEntry(document, nitriteId);
+                    } catch (UniqueConstraintException uce) {
+                        log.error("Unique constraint violated for the document "
+                                + document + " in " + name, uce);
+                        underlyingMap.remove(nitriteId);
+                        throw uce;
+                    }
                 }
             }
+
             nitriteIdList.add(nitriteId);
 
             ChangedItem changedItem = new ChangedItem();
@@ -155,7 +156,7 @@ class DataService {
                 if (document != null) {
                     NitriteId nitriteId = document.getId();
 
-                    synchronized (document) {
+                    synchronized (lock) {
                         indexingService.removeIndexEntry(document, nitriteId);
 
                         log.debug("Document to update " + document + " in " + name);
