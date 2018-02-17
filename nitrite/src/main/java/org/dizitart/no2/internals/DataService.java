@@ -21,6 +21,7 @@ package org.dizitart.no2.internals;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.*;
 import org.dizitart.no2.event.*;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.store.NitriteMap;
 
@@ -30,6 +31,7 @@ import java.util.List;
 
 import static org.dizitart.no2.Constants.*;
 import static org.dizitart.no2.exceptions.ErrorCodes.UCE_CONSTRAINT_VIOLATED;
+import static org.dizitart.no2.exceptions.ErrorMessage.OBJ_MULTI_UPDATE_WITH_JUST_ONCE;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 
 /**
@@ -134,6 +136,10 @@ class DataService {
                 return writeResult;
             }
         } else {
+            if (cursor.size() > 1 && updateOptions.isJustOnce()) {
+                throw new InvalidOperationException(OBJ_MULTI_UPDATE_WITH_JUST_ONCE);
+            }
+
             update = new Document(update);
             if (update.containsKey(DOC_ID)) {
                 update.remove(DOC_ID);
@@ -188,10 +194,6 @@ class DataService {
                     changedItem.setChangeType(ChangeType.UPDATE);
                     changedItem.setChangeTimestamp(document.getLastModifiedTime());
                     changedItems.add(changedItem);
-
-                    if (updateOptions.isJustOnce()) {
-                        break;
-                    }
                 }
             }
 

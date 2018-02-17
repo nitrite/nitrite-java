@@ -166,7 +166,11 @@ class IndexingService {
                             ConcurrentSkipListSet<NitriteId> nitriteIdList = indexMap.get((Comparable) fieldValue);
                             if (nitriteIdList != null) {
                                 nitriteIdList.remove(nitriteId);
-                                indexMap.put((Comparable) fieldValue, nitriteIdList);
+                                if (nitriteIdList.size() == 0) {
+                                    indexMap.remove((Comparable) fieldValue);
+                                } else {
+                                    indexMap.put((Comparable) fieldValue, nitriteIdList);
+                                }
                             }
                         }
                     }

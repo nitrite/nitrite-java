@@ -104,13 +104,13 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     @Override
     public final WriteResult insert(T object, T... others) {
         validateCollection();
-        return collection.insert(asDocument(object, true), asDocuments(others));
+        return collection.insert(asDocument(object, false), asDocuments(others, false));
     }
 
     @Override
     public WriteResult insert(T[] objects) {
         validateCollection();
-        return collection.insert(asDocuments(objects));
+        return collection.insert(asDocuments(objects, false));
     }
 
     @Override
@@ -123,23 +123,22 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         if (idField == null) {
             throw new NotIdentifiableException(OBJ_UPDATE_FAILED_AS_NO_ID_FOUND);
         }
-        return update(createUniqueFilter(element, idField), element, updateOptions(upsert));
+        return update(createUniqueFilter(element, idField), element, upsert);
     }
 
     @Override
     public WriteResult update(ObjectFilter filter, T update) {
-        return update(filter, update, new UpdateOptions());
+        return update(filter, update, false);
     }
 
     @Override
-    public WriteResult update(ObjectFilter filter, T update, UpdateOptions updateOptions) {
+    public WriteResult update(ObjectFilter filter, T update, boolean upsert) {
         validateCollection();
         notNull(update, errorMessage("update can not be null", VE_OBJ_UPDATE_NULL_OBJECT));
-        notNull(updateOptions, errorMessage("updateOptions can not be null", VE_OBJ_UPDATE_NULL_UPDATE_OPTIONS));
 
-        Document updateDocument = asDocument(update, false);
-        filterKeys(updateDocument);
-        return collection.update(prepare(filter), updateDocument, updateOptions);
+        Document updateDocument = asDocument(update, true);
+        removeIdFields(updateDocument);
+        return collection.update(prepare(filter), updateDocument, updateOptions(upsert, true));
     }
 
     @Override
@@ -152,7 +151,8 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         validateCollection();
         notNull(update, errorMessage("update can not be null", VE_OBJ_UPDATE_NULL_DOCUMENT));
 
-        filterKeys(update);
+        removeIdFields(update);
+        serializeFields(update);
         return collection.update(prepare(filter), update, updateOptions(false, justOnce));
     }
 
@@ -282,15 +282,15 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         }
     }
 
-    private Document asDocument(T object, boolean idCheck) {
-        return toDocument(object, nitriteMapper, idField, idCheck);
+    private Document asDocument(T object, boolean update) {
+        return toDocument(object, nitriteMapper, idField, update);
     }
 
-    private Document[] asDocuments(T[] others) {
+    private Document[] asDocuments(T[] others, boolean update) {
         if (others == null || others.length == 0) return null;
         Document[] documents = new Document[others.length];
         for (int i = 0; i < others.length; i++) {
-            documents[i] = asDocument(others[i], true);
+            documents[i] = asDocument(others[i], update);
         }
         return documents;
     }
@@ -325,16 +325,25 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         return null;
     }
 
-    private void filterKeys(Document document) {
+    private void removeIdFields(Document document) {
         document.remove(DOC_ID);
         if (idField != null && idField.getType() == NitriteId.class) {
             document.remove(idField.getName());
         }
+    }
 
-        Document doc = new Document(document);
-        for (KeyValuePair pair : doc) {
-            if (pair.getValue() == null) {
-                document.remove(pair.getKey());
+    private void serializeFields(Document document) {
+        if (document != null) {
+            for (KeyValuePair keyValuePair : document) {
+                String key = keyValuePair.getKey();
+                Object value = keyValuePair.getValue();
+                Object serializedValue;
+                if (nitriteMapper.isValueType(value)) {
+                    serializedValue = nitriteMapper.asValue(value);
+                } else {
+                    serializedValue = nitriteMapper.asDocument(value);
+                }
+                document.put(key, serializedValue);
             }
         }
     }

@@ -18,6 +18,7 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.junit.Test;
 
 import static org.dizitart.no2.Document.createDocument;
@@ -114,7 +115,26 @@ public class CollectionUpdateTest extends BaseCollectionTest {
     }
 
     @Test
-    public void testUpdateWithOptionsJustOnce() {
+    public void testUpdateMultipleWithJustOnceFalse() {
+        Cursor cursor = collection.find(eq("firstName", "fn1"));
+        assertEquals(cursor.size(), 0);
+
+        insert();
+
+        UpdateOptions updateOptions = new UpdateOptions();
+        updateOptions.setJustOnce(false);
+
+        Document document = createDocument("lastName", "newLastName1");
+        WriteResult updateResult = collection.update(not(eq("firstName", "fn1")),
+                document, updateOptions);
+        assertEquals(updateResult.getAffectedCount(), 2);
+
+        cursor = collection.find(eq("lastName", "newLastName1"));
+        assertEquals(cursor.size(), 2);
+    }
+
+    @Test(expected = InvalidOperationException.class)
+    public void testUpdateMultipleWithJustOnceTrue() {
         Cursor cursor = collection.find(eq("firstName", "fn1"));
         assertEquals(cursor.size(), 0);
 
@@ -124,12 +144,8 @@ public class CollectionUpdateTest extends BaseCollectionTest {
         updateOptions.setJustOnce(true);
 
         Document document = createDocument("lastName", "newLastName1");
-        WriteResult updateResult = collection.update(not(eq("firstName", "fn1")),
-                document, updateOptions);
-        assertEquals(updateResult.getAffectedCount(), 1);
-
-        cursor = collection.find(eq("lastName", "newLastName1"));
-        assertEquals(cursor.size(), 1);
+        collection.update(not(eq("firstName", "fn1")),
+            document, updateOptions);
     }
 
     @Test

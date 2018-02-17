@@ -39,7 +39,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.UpdateOptions.updateOptions;
 import static org.dizitart.no2.objects.filters.ObjectFilters.ALL;
 import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
 import static org.dizitart.no2.util.Iterables.firstOrDefault;
@@ -162,7 +161,7 @@ public class EventTest {
         e.setEmpId(1L);
         e.setAddress("abcd");
 
-        employeeRepository.update(eq("empId", 1), e, updateOptions(true));
+        employeeRepository.update(eq("empId", 1), e, true);
         await().atMost(1, TimeUnit.SECONDS).until(listenerPrepared(ChangeType.INSERT));
         assertEquals(listener.getAction(), ChangeType.INSERT);
         assertEquals(listener.getItems().size(), 1);

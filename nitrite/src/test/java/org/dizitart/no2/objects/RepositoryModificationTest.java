@@ -18,12 +18,15 @@
 
 package org.dizitart.no2.objects;
 
-import org.dizitart.no2.Index;
 import org.dizitart.no2.*;
+import org.dizitart.no2.Index;
+import org.dizitart.no2.exceptions.InvalidIdException;
+import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.objects.data.Company;
 import org.dizitart.no2.objects.data.DataGenerator;
 import org.dizitart.no2.objects.data.Employee;
 import org.dizitart.no2.objects.data.Note;
+import org.dizitart.no2.objects.filters.ObjectFilters;
 import org.dizitart.no2.util.Iterables;
 import org.junit.Test;
 
@@ -35,7 +38,6 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
-import static org.dizitart.no2.UpdateOptions.updateOptions;
 import static org.dizitart.no2.objects.filters.ObjectFilters.*;
 import static org.junit.Assert.*;
 
@@ -142,7 +144,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
             assertEquals(e.getAddress(), "abcd road");
         }
 
-        Employee updated = new Employee();
+        Employee updated = new Employee(employee);
         updated.setAddress("xyz road");
         WriteResult writeResult = employeeRepository.update(eq("empId", 12L), updated);
         assertEquals(writeResult.getAffectedCount(), 1);
@@ -154,7 +156,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     }
 
     @Test
-    public void testUpdateWithOption() throws ParseException {
+    public void testUpdateWithJustOnceFalse() throws ParseException {
         Date joiningDate = new Date();
         prepareUpdateWithOptions(joiningDate);
 
@@ -162,11 +164,11 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
                 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
         Date newJoiningDate = simpleDateFormat.parse("2012-07-01T16:02:48.440Z");
 
-        Employee updated1 = new Employee();
-        updated1.setJoinDate(newJoiningDate);
+        Document updated1 = new Document();
+        updated1.put("joinDate", newJoiningDate);
 
         WriteResult writeResult
-                = employeeRepository.update(eq("empId", 12L), updated1);
+                = employeeRepository.update(eq("empId", 12L), updated1, false);
         assertEquals(writeResult.getAffectedCount(), 1);
 
         Cursor<Employee> result = employeeRepository.find(eq("joinDate", joiningDate));
@@ -179,10 +181,10 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         result = employeeRepository.find();
         assertEquals(result.size(), 2);
 
-        Employee update = new Employee();
-        update.setJoinDate(newJoiningDate);
+        Document update = new Document();
+        update.put("joinDate", newJoiningDate);
 
-        writeResult = employeeRepository.update(eq("joinDate", joiningDate), update, updateOptions(false, false));
+        writeResult = employeeRepository.update(eq("joinDate", joiningDate), update, false);
         assertEquals(writeResult.getAffectedCount(), 2);
 
         result = employeeRepository.find(eq("joinDate", joiningDate));
@@ -210,7 +212,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         employee.setEmployeeNote(empNote1);
 
         WriteResult writeResult
-                = employeeRepository.update(eq("empId", 12), employee, updateOptions(true));
+                = employeeRepository.update(eq("empId", 12), employee, true);
         assertEquals(writeResult.getAffectedCount(), 1);
 
         result = employeeRepository.find(eq("joinDate", joiningDate));
@@ -235,7 +237,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         employee.setEmployeeNote(empNote1);
 
         WriteResult writeResult
-                = employeeRepository.update(eq("empId", 12), employee, updateOptions(false));
+                = employeeRepository.update(eq("empId", 12), employee, false);
         assertEquals(writeResult.getAffectedCount(), 0);
 
         result = employeeRepository.find(eq("joinDate", joiningDate));
@@ -290,14 +292,11 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     public void testUpdateWithOptions() {
         Employee employee = employeeRepository.find().firstOrDefault();
 
-        Employee update = new Employee();
-        update.setAddress("new address");
+        Document update = new Document();
+        update.put("address", "new address");
 
-        UpdateOptions options = new UpdateOptions();
-        options.setJustOnce(true);
-        options.setUpsert(false);
         WriteResult writeResult
-                = employeeRepository.update(eq("empId", employee.getEmpId()), update, options);
+                = employeeRepository.update(eq("empId", employee.getEmpId()), update, false);
         assertEquals(writeResult.getAffectedCount(), 1);
 
         NitriteId nitriteId = Iterables.firstOrDefault(writeResult);
@@ -305,13 +304,110 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         assertEquals(byId.getAddress(), "new address");
         assertEquals(byId.getEmpId(), employee.getEmpId());
 
-        update.setAddress("another address");
+        update.put("address", "another address");
         writeResult
                 = employeeRepository.update(eq("empId", employee.getEmpId()), update);
         nitriteId = Iterables.firstOrDefault(writeResult);
         byId = employeeRepository.getById(nitriteId);
         assertEquals(byId.getAddress(), "another address");
         assertEquals(byId.getEmpId(), employee.getEmpId());
+    }
+
+    @Test(expected = InvalidIdException.class)
+    public void testMultiUpdateWithObject() {
+        employeeRepository.remove(ObjectFilters.ALL);
+
+        Date now = new Date();
+        Employee employee1 = new Employee();
+        employee1.setEmpId(1L);
+        employee1.setAddress("abcd");
+        employee1.setJoinDate(now);
+
+        Employee employee2 = new Employee();
+        employee2.setEmpId(2L);
+        employee2.setAddress("xyz");
+        employee2.setJoinDate(now);
+        employeeRepository.insert(employee1, employee2);
+
+        Employee update = new Employee();
+        update.setAddress("new address");
+
+        WriteResult writeResult
+            = employeeRepository.update(eq("joinDate", now), update, false);
+        assertEquals(writeResult.getAffectedCount(), 0);
+    }
+
+    @Test
+    public void testUpdateNull() {
+        Employee employee = employeeRepository.find().firstOrDefault();
+        Employee newEmployee = new Employee(employee);
+        newEmployee.setJoinDate(null);
+
+        Employee result = employeeRepository.find(eq("empId", employee.getEmpId())).firstOrDefault();
+        assertNotNull(result.getJoinDate());
+
+        WriteResult writeResult = employeeRepository.update(newEmployee, false);
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        result = employeeRepository.find(eq("empId", employee.getEmpId())).firstOrDefault();
+        assertNull(result.getJoinDate());
+
+        // update with object filter and item and set id different
+    }
+
+    @Test
+    public void testUpdateWithChangedId() {
+        Employee employee = employeeRepository.find().firstOrDefault();
+        Long oldId = employee.getEmpId();
+        long count = employeeRepository.size();
+
+        Employee newEmployee = new Employee(employee);
+        newEmployee.setEmpId(50L);
+
+        Employee result = employeeRepository.find(eq("empId", oldId)).firstOrDefault();
+        assertNotNull(result.getJoinDate());
+
+        WriteResult writeResult = employeeRepository.update(eq("empId", oldId), newEmployee, false);
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        assertEquals(count, employeeRepository.size());
+        Cursor<Employee> cursor = employeeRepository.find(eq("empId", oldId));
+        assertEquals(cursor.size(), 0);
+    }
+
+    @Test(expected = InvalidIdException.class)
+    public void testUpdateWithNullId() {
+        Employee employee = employeeRepository.find().firstOrDefault();
+        Long oldId = employee.getEmpId();
+
+        Employee newEmployee = new Employee(employee);
+        newEmployee.setEmpId(null);
+
+        Employee result = employeeRepository.find(eq("empId", oldId)).firstOrDefault();
+        assertNotNull(result.getJoinDate());
+
+        WriteResult writeResult = employeeRepository.update(eq("empId", oldId), newEmployee, false);
+        assertEquals(writeResult.getAffectedCount(), 1);
+    }
+
+    @Test(expected = UniqueConstraintException.class)
+    public void testUpdateWithDuplicateId() {
+        Employee employee = employeeRepository.find().firstOrDefault();
+        Long oldId = employee.getEmpId();
+        long count = employeeRepository.size();
+
+        Employee newEmployee = new Employee(employee);
+        newEmployee.setEmpId(5L);
+
+        Employee result = employeeRepository.find(eq("empId", oldId)).firstOrDefault();
+        assertNotNull(result.getJoinDate());
+
+        WriteResult writeResult = employeeRepository.update(eq("empId", oldId), newEmployee, false);
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        assertEquals(count, employeeRepository.size());
+        Cursor<Employee> cursor = employeeRepository.find(eq("empId", oldId));
+        assertEquals(cursor.size(), 0);
     }
 
     @Test

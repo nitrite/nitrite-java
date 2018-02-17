@@ -96,19 +96,18 @@ public class ErrorCodes {
     public static final int VE_PROJECT_NULL_PROJECTION = 1068;
     public static final int VE_OBJ_CREATE_INDEX_NULL_FIELD = 1069;
     public static final int VE_OBJ_UPDATE_NULL_OBJECT = 1070;
-    public static final int VE_OBJ_UPDATE_NULL_UPDATE_OPTIONS = 1071;
-    public static final int VE_OBJ_UPDATE_NULL_DOCUMENT = 1072;
-    public static final int VE_NC_REBUILD_INDEX_NULL_INDEX = 1073;
-    public static final int VE_OBJ_INVALID_EMBEDDED_FIELD = 1074;
-    public static final int VE_OBJ_INVALID_FIELD = 1075;
-    public static final int VE_BIG_DECIMAL_INVALID_FORMAT = 1076;
-    public static final int VE_INVALID_EMBEDDED_FIELD = 1077;
-    public static final int VE_NEGATIVE_LIST_INDEX_FIELD = 1078;
-    public static final int VE_INVALID_LIST_INDEX_FIELD = 1079;
-    public static final int VE_NEGATIVE_ARRAY_INDEX_FIELD = 1080;
-    public static final int VE_INVALID_ARRAY_INDEX_FIELD = 1081;
-    public static final int VE_INVALID_REMAINING_FIELD = 1082;
-    public static final int VE_TYPE_NOT_SERIALIZABLE = 1083;
+    public static final int VE_OBJ_UPDATE_NULL_DOCUMENT = 1071;
+    public static final int VE_NC_REBUILD_INDEX_NULL_INDEX = 1072;
+    public static final int VE_OBJ_INVALID_EMBEDDED_FIELD = 1073;
+    public static final int VE_OBJ_INVALID_FIELD = 1074;
+    public static final int VE_BIG_DECIMAL_INVALID_FORMAT = 1075;
+    public static final int VE_INVALID_EMBEDDED_FIELD = 1076;
+    public static final int VE_NEGATIVE_LIST_INDEX_FIELD = 1077;
+    public static final int VE_INVALID_LIST_INDEX_FIELD = 1078;
+    public static final int VE_NEGATIVE_ARRAY_INDEX_FIELD = 1079;
+    public static final int VE_INVALID_ARRAY_INDEX_FIELD = 1080;
+    public static final int VE_INVALID_REMAINING_FIELD = 1081;
+    public static final int VE_TYPE_NOT_SERIALIZABLE = 1082;
 
     /* NitriteIOException Codes */
     public static final int NIOE_DATABASE_OPENED = 2001;
@@ -137,6 +136,7 @@ public class ErrorCodes {
     public static final int IOE_REPLICATOR_RUNNING = 3008;
     public static final int IOE_DOC_ID_AUTO_GENERATED = 3009;
     public static final int IOE_OBJ_REMOVE_JOINED_OBJECT_ITERATOR = 3010;
+    public static final int IOE_OBJ_MULTI_UPDATE_WITH_JUST_ONCE = 3011;
 
     /* FilterException Codes */
     public static final int FE_AND_INVALID = 4001;

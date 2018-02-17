@@ -182,9 +182,10 @@ public class ObjectUtils {
         }
     }
 
-    public static <T> Document toDocument(T object, NitriteMapper nitriteMapper, Field idField, boolean idCheck) {
+    public static <T> Document toDocument(T object, NitriteMapper nitriteMapper,
+                                          Field idField, boolean update) {
         Document document = nitriteMapper.asDocument(object);
-        if (idField != null && idCheck) {
+        if (idField != null) {
             if (idField.getType() == NitriteId.class) {
                 try {
                     idField.setAccessible(true);
@@ -192,7 +193,7 @@ public class ObjectUtils {
                         NitriteId id = document.getId();
                         idField.set(object, id);
                         document.put(idField.getName(), id.getIdValue());
-                    } else {
+                    } else if (!update) {
                         throw new InvalidIdException(AUTO_ID_ALREADY_SET);
                     }
                 } catch (IllegalAccessException iae) {

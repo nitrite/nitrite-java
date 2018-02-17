@@ -325,6 +325,10 @@ public class ErrorMessage {
             new ErrorMessage("replicator is already running",
                     IOE_REPLICATOR_RUNNING);
 
+    public static final ErrorMessage OBJ_MULTI_UPDATE_WITH_JUST_ONCE =
+            new ErrorMessage("cannot update multiple items as justOnce is set to true",
+                    IOE_OBJ_MULTI_UPDATE_WITH_JUST_ONCE);
+
     public static final ErrorMessage REMOVE_FAILED_AS_NO_ID_FOUND =
             new ErrorMessage("remove operation failed as no id value found for the document",
                     NIE_REMOVE_FAILED_FOR_NO_ID);
