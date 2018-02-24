@@ -163,7 +163,7 @@ class DataService {
                     NitriteId nitriteId = document.getId();
 
                     synchronized (lock) {
-                        indexingService.removeIndexEntry(document, nitriteId);
+                        Document oldDocument = new Document(document);
 
                         log.debug("Document to update " + document + " in " + name);
 
@@ -186,7 +186,7 @@ class DataService {
                             writeResult.addToList(nitriteId);
                         }
 
-                        indexingService.updateIndexEntry(document, nitriteId);
+                        indexingService.refreshIndexEntry(oldDocument, document, nitriteId);
                     }
 
                     ChangedItem changedItem = new ChangedItem();

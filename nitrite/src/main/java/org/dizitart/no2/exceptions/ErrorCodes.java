@@ -244,6 +244,7 @@ public class ErrorCodes {
     public static final int UCE_CONSTRAINT_VIOLATED = 10001;
     public static final int UCE_BUILD_INDEX_CONSTRAINT_VIOLATED = 10002;
     public static final int UCE_UPDATE_INDEX_CONSTRAINT_VIOLATED = 10003;
+    public static final int UCE_REFRESH_INDEX_CONSTRAINT_VIOLATED = 10004;
 
     /* SyncException Codes */
     public static final int SYE_GET_ACCOUNT_REMOTE_ERROR = 11001;

@@ -179,6 +179,75 @@ class IndexingService {
         }
     }
 
+    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    void refreshIndexEntry(Document oldDocument, Document newDocument, NitriteId nitriteId) {
+        Set<String> fields = getFields(newDocument);
+
+        for (String field : fields) {
+            Index index = indexMetaService.findIndex(field);
+            if (index != null) {
+                Object newValue = getFieldValue(newDocument, field);
+                Object oldValue = getFieldValue(oldDocument, field);
+
+                if (newValue == null) continue;
+                if (newValue instanceof Comparable && oldValue instanceof Comparable) {
+                    if (((Comparable) newValue).compareTo(oldValue) == 0) continue;
+                }
+
+                validateDocumentIndexField(newValue, field);
+
+                // if dirty index and currently indexing is not running, rebuild
+                if (indexMetaService.isDirtyIndex(field) &&
+                        indexBuildRegistry.get(field) != null
+                        && !indexBuildRegistry.get(field).get()) {
+                    // rebuild will also take care of the current document
+                    rebuildIndex(index, true);
+                } else {
+                    IndexType indexType = index.getIndexType();
+
+                    if (indexType == IndexType.Fulltext && newValue instanceof String) {
+                        // update text index
+                        textIndexingService.updateIndex(nitriteId, field, (String) newValue);
+                    } else {
+                        synchronized (indexMetaService.getFieldLock(field)) {
+                            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+                                    = indexMetaService.getIndexMap(field);
+
+                            // create the nitriteId list associated with the value
+                            ConcurrentSkipListSet<NitriteId> nitriteIdList
+                                    = indexMap.get((Comparable) newValue);
+
+                            if (nitriteIdList == null) {
+                                nitriteIdList = new ConcurrentSkipListSet<>();
+                            }
+
+                            if (indexType == IndexType.Unique && nitriteIdList.size() == 1) {
+                                // if key is already exists for unique type, throw error
+                                throw new UniqueConstraintException(errorMessage(
+                                        "unique key constraint violation for " + field,
+                                        UCE_REFRESH_INDEX_CONSTRAINT_VIOLATED));
+                            }
+
+                            // add the nitriteId to the list
+                            nitriteIdList.add(nitriteId);
+                            indexMap.put((Comparable) newValue, nitriteIdList);
+
+                            nitriteIdList = indexMap.get((Comparable) oldValue);
+                            if (nitriteIdList != null && !nitriteIdList.isEmpty()) {
+                                nitriteIdList.remove(nitriteId);
+                                if (nitriteIdList.size() == 0) {
+                                    indexMap.remove((Comparable) oldValue);
+                                } else {
+                                    indexMap.put((Comparable) oldValue, nitriteIdList);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     Collection<Index> listIndexes() {
         return indexMetaService.listIndexes();
     }

@@ -23,9 +23,14 @@ import org.dizitart.no2.IndexType
 import org.dizitart.no2.objects.Id
 import org.dizitart.no2.objects.Index
 import org.dizitart.no2.objects.Indices
+import org.dizitart.no2.objects.filters.ObjectFilters
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import java.util.*
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.Executors
 
 /**
  *
@@ -196,9 +201,61 @@ class ObjectFilterTest : BaseTest() {
             Assert.assertEquals(cursor.size(), 1)
         }
     }
+
+    @Test
+    fun testIssue58() {
+        val repository = db?.getRepository(SimpleObject::class.java)!!
+        val executor = Executors.newFixedThreadPool(10)
+
+        val uuid = UUID.randomUUID()
+        val latch = CountDownLatch(100)
+
+        repository.update(SimpleObject(
+                uuid,
+                true
+        ), true)
+
+        for(i in 0..100) {
+            executor.submit {
+                val simpleObject = try {
+                    repository.find(
+                            ObjectFilters.eq(SimpleObject::id.name, uuid)
+                    ).first()
+                } catch (t: Throwable) {
+                    t.printStackTrace()
+                    latch.countDown()
+                    return@submit
+                }
+
+                repository.update(simpleObject.copy(
+                        value = !simpleObject.value
+                ))
+
+                executor.submit {
+                    try {
+                        val result = repository.find(
+                                ObjectFilters.eq(SimpleObject::id.name, uuid)
+                        )
+                        assertEquals(result.totalCount(), 1)
+                    } catch (t: Throwable) {
+                        t.printStackTrace()
+                    } finally {
+                        latch.countDown()
+                    }
+                }
+            }
+        }
+        latch.await()
+    }
 }
 
 @Indices(Index(value = "text", type = IndexType.Fulltext))
 data class TestData(@Id val id: Int, val text: String, val list: List<ListData> = listOf())
 
 class ListData(val name: String, val score: Int)
+
+data class SimpleObject(
+        @Id val id: UUID,
+        val value: Boolean
+)
+
