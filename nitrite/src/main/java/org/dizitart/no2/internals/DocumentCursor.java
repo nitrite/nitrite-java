@@ -20,11 +20,16 @@ package org.dizitart.no2.internals;
 
 import org.dizitart.no2.*;
 import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.util.Iterables;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
 
+import static org.dizitart.no2.exceptions.ErrorMessage.PROJECTION_WITH_NOT_NULL_VALUES;
 import static org.dizitart.no2.exceptions.ErrorMessage.REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED;
 
 /**
@@ -51,6 +56,7 @@ class DocumentCursor implements Cursor {
 
     @Override
     public RecordIterable<Document> project(Document projection) {
+        validateProjection(projection);
         return new ProjectedDocumentIterable(projection, findResult);
     }
 
@@ -110,6 +116,22 @@ class DocumentCursor implements Cursor {
         @Override
         public void remove() {
             throw new InvalidOperationException(REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED);
+        }
+    }
+
+    private void validateProjection(Document projection) {
+        for (KeyValuePair kvp : projection) {
+            validateKeyValuePair(kvp);
+        }
+    }
+
+    private void validateKeyValuePair(KeyValuePair kvp) {
+        if (kvp.getValue() != null) {
+            if (!(kvp.getValue() instanceof Document)) {
+                throw new ValidationException(PROJECTION_WITH_NOT_NULL_VALUES);
+            } else {
+                validateProjection((Document) kvp.getValue());
+            }
         }
     }
 }

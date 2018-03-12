@@ -27,6 +27,7 @@ import org.dizitart.no2.objects.InheritIndices
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
+import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -140,6 +141,13 @@ class NitriteTest : BaseTest() {
         println(cursor.toList())
         assertEquals(cursor.size(), 1)
     }
+
+    @Test
+    fun testIssue59() {
+        val repository = db?.getRepository<ClassWithLocalDateTime>()!!
+        repository.insert(ClassWithLocalDateTime("test", LocalDateTime.now()))
+        assertNotNull(repository.find())
+    }
 }
 
 interface MyInterface {
@@ -171,4 +179,10 @@ class MyClass2(
 data class CaObject(
         @Id val localId: UUID,
         val name: String
+)
+
+@Indices(value = [(Index(value = "time", type = IndexType.Unique))])
+data class ClassWithLocalDateTime (
+        val name: String,
+        val time: LocalDateTime
 )

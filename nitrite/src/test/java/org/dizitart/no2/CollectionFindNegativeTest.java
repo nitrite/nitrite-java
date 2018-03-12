@@ -23,6 +23,9 @@ import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.Test;
 
+import java.util.Date;
+
+import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.FindOptions.limit;
 import static org.dizitart.no2.FindOptions.sort;
 import static org.dizitart.no2.filters.Filters.*;
@@ -79,5 +82,17 @@ public class CollectionFindNegativeTest extends BaseCollectionTest {
         insert();
         Cursor cursor = collection.find(regex("birthDay", "hello"));
         assertEquals(cursor.size(), 1);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testInvalidProjection() {
+        insert();
+        Cursor cursor = collection.find(lte("birthDay", new Date()),
+                sort("firstName", SortOrder.Ascending).thenLimit(0, 3));
+
+        Document projection = createDocument("firstName", null)
+                .put("lastName", "ln2");
+
+        cursor.project(projection);
     }
 }

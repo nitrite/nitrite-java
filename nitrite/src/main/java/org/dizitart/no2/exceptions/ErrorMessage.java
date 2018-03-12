@@ -293,6 +293,10 @@ public class ErrorMessage {
             new ErrorMessage("type can not be null",
                     VE_INVALID_EMBEDDED_FIELD);
 
+    public static final ErrorMessage PROJECTION_WITH_NOT_NULL_VALUES =
+            new ErrorMessage("projection contains not null values",
+                    VE_PROJECTION_WITH_NOT_NULL_VALUE);
+
     public static final ErrorMessage UNABLE_TO_CREATE_IN_MEMORY_READONLY_DB =
             new ErrorMessage("unable create readonly in-memory database",
                     IOE_IN_MEMORY_READONLY_DB);

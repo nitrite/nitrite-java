@@ -108,6 +108,7 @@ public class ErrorCodes {
     public static final int VE_INVALID_ARRAY_INDEX_FIELD = 1080;
     public static final int VE_INVALID_REMAINING_FIELD = 1081;
     public static final int VE_TYPE_NOT_SERIALIZABLE = 1082;
+    public static final int VE_PROJECTION_WITH_NOT_NULL_VALUE = 1083;
 
     /* NitriteIOException Codes */
     public static final int NIOE_DATABASE_OPENED = 2001;

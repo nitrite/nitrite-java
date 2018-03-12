@@ -24,6 +24,8 @@ import org.dizitart.no2.Filter;
 import org.dizitart.no2.KeyValuePair;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapper.NitriteMapper;
+import uk.co.jemos.podam.api.PodamFactory;
+import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
@@ -36,7 +38,6 @@ import static org.dizitart.no2.Constants.DOC_ID;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.filters.Filters.eq;
-import static org.dizitart.no2.util.ObjectUtils.newInstance;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 
 /**
@@ -51,6 +52,8 @@ public class DocumentUtils {
      * Field separator.
      * */
     static String FIELD_SEPARATOR = ".";
+
+    private static PodamFactory factory = new PodamFactoryImpl();
 
     /**
      * Gets all first level fields of a document.
@@ -133,7 +136,7 @@ public class DocumentUtils {
     }
 
     static <T> Document dummyDocument(NitriteMapper nitriteMapper, Class<T> type) {
-        T dummy = newInstance(type);
+        T dummy = factory.manufacturePojo(type);
         return nitriteMapper.asDocument(dummy);
     }
 

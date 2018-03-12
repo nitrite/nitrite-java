@@ -18,15 +18,20 @@
 
 package org.dizitart.no2.internals;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.KeyValuePair;
+import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.RecordIterable;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.util.Iterables;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeSet;
 
 import static org.dizitart.no2.exceptions.ErrorMessage.REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED;
-import static org.dizitart.no2.util.EqualsUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee.
@@ -132,14 +137,6 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
             for (KeyValuePair keyValuePair : original) {
                 if (!projection.containsKey(keyValuePair.getKey())) {
                     result.remove(keyValuePair.getKey());
-                } else {
-                    // find by example
-                    if (projection.get(keyValuePair.getKey()) != null) {
-                        if (!deepEquals(projection.get(keyValuePair.getKey()),
-                                keyValuePair.getValue())) {
-                            return null;
-                        }
-                    }
                 }
             }
             return result;

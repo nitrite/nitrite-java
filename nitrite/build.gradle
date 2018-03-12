@@ -39,6 +39,7 @@ dependencies {
     compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
     compile "org.jasypt:jasypt:$jasyptVersion"
     compile "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    compile "uk.co.jemos.podam:podam:$podamVersion"
 
     testCompile "junit:junit:$junitVersion"
     testCompile "org.apache.lucene:lucene-core:$luceneVersion"
@@ -50,7 +51,6 @@ dependencies {
     testCompile "joda-time:joda-time:$jodaTimeVersion"
     testCompile "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
     testCompile "org.meanbean:meanbean:$meanbeanVersion"
-    testCompile "uk.co.jemos.podam:podam:$podamVersion"
 }
 
 gradle.buildFinished { BuildResult result ->

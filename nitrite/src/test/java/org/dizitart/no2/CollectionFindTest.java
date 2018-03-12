@@ -344,41 +344,6 @@ public class CollectionFindTest extends BaseCollectionTest {
     }
 
     @Test
-    public void testSingleProjection() {
-        insert();
-        Cursor cursor = collection.find(lte("birthDay", new Date()),
-                sort("firstName", SortOrder.Ascending).thenLimit(0, 3));
-
-        Document projection = createDocument("firstName", null)
-                .put("lastName", "ln2");
-
-        Iterable<Document> documents = cursor.project(projection);
-        int iteration = 0;
-        for (Document document : documents) {
-            assertTrue(document.containsKey("firstName"));
-            assertTrue(document.containsKey("lastName"));
-
-            assertFalse(document.containsKey("_id"));
-            assertFalse(document.containsKey("birthDay"));
-            assertFalse(document.containsKey("data"));
-            assertFalse(document.containsKey("body"));
-
-            switch (iteration) {
-                case 0:
-                    assertEquals(document.get("firstName"), "fn2");
-                    assertEquals(document.get("lastName"), "ln2");
-                    break;
-                case 1:
-                    assertEquals(document.get("firstName"), "fn3");
-                    assertEquals(document.get("lastName"), "ln2");
-                    break;
-            }
-            iteration++;
-        }
-        assertEquals(iteration, 2);
-    }
-
-    @Test
     public void testFindWithArrayEqual() {
         insert();
         Cursor ids = collection.find(eq("data", new Object[]{3, 4, 3}));
