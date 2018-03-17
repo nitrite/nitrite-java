@@ -144,7 +144,7 @@ class SearchService {
 
     private Set<NitriteId> sortIdSet(Collection<NitriteId> nitriteIdSet, FindOptions findOptions) {
         String sortField = findOptions.getField();
-        NavigableMap<Object, NitriteId> sortedMap = new TreeMap<>();
+        NavigableMap<Object, List<NitriteId>> sortedMap = new TreeMap<>();
 
         for (NitriteId id : nitriteIdSet) {
             Document document = underlyingMap.get(id);
@@ -154,15 +154,23 @@ class SearchService {
                 if (value.getClass().isArray() || value instanceof Iterable) {
                     throw new InvalidOperationException(UNABLE_TO_SORT_ON_ARRAY);
                 }
-                sortedMap.put(value, id);
+                if (sortedMap.containsKey(value)) {
+                    List<NitriteId> idList = sortedMap.get(value);
+                    idList.add(id);
+                    sortedMap.put(value, idList);
+                } else {
+                    List<NitriteId> idList = new ArrayList<>();
+                    idList.add(id);
+                    sortedMap.put(value, idList);
+                }
             }
         }
 
         Collection<NitriteId> sortedValues;
         if (findOptions.getSortOrder() == SortOrder.Ascending) {
-            sortedValues = sortedMap.values();
+            sortedValues = flattenList(sortedMap.values());
         } else {
-            sortedValues = sortedMap.descendingMap().values();
+            sortedValues = flattenList(sortedMap.descendingMap().values());
         }
 
         return limitIdSet(sortedValues, findOptions);
@@ -183,5 +191,13 @@ class SearchService {
         }
 
         return resultSet;
+    }
+
+    private <T> List<T> flattenList(Collection<List<T>> collection) {
+        List<T> finalList = new ArrayList<>();
+        for (List<T> list : collection) {
+            finalList.addAll(list);
+        }
+        return finalList;
     }
 }

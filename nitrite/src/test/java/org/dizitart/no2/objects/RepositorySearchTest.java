@@ -399,4 +399,32 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         assertEquals(sameNamePeople.size(), 3);
     }
 
+    @Test
+    public void testIssue62() {
+        PersonEntity p1 = new PersonEntity("abcd");
+        p1.setStatus("Married");
+
+        PersonEntity p2 = new PersonEntity("efgh");
+        p2.setStatus("Married");
+
+        PersonEntity p3 = new PersonEntity("ijkl");
+        p3.setStatus("Un-Married");
+
+        ObjectRepository<PersonEntity> repository = db.getRepository(PersonEntity.class);
+        repository.insert(p1);
+        repository.insert(p2);
+        repository.insert(p3);
+
+        ObjectFilter married = eq("status", "Married");
+        FindOptions sortBy = FindOptions.sort("status", SortOrder.Descending);
+
+        assertEquals(repository.find(married).size(), 2);
+        assertEquals(repository.find(married, sortBy).size(), 2);
+
+        assertEquals(repository.find(sortBy).firstOrDefault().getStatus(), "Un-Married");
+
+        sortBy = FindOptions.sort("status", SortOrder.Ascending);
+        assertEquals(repository.find(sortBy).size(), 3);
+        assertEquals(repository.find(sortBy).firstOrDefault().getStatus(), "Married");
+    }
 }

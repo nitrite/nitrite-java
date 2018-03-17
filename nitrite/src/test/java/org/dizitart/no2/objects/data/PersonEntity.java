@@ -38,6 +38,7 @@ public class PersonEntity {
     @Id
     private String uuid;
     private String name;
+    private String status;
     private PersonEntity friend;
     private Date dateCreated;
 
