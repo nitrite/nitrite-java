@@ -45,5 +45,5 @@ deploy:
 
 env:
   global:
-    - NITRITE_VERSION=2.2.0-SNAPSHOT
+    - NITRITE_VERSION=3.0.0
     - PGP_KEY_FILE=~/secring.gpg
