@@ -40,6 +40,7 @@ import static org.dizitart.no2.util.IndexUtils.sortByScore;
 class NitriteTextIndexingService implements TextIndexingService {
     private TextTokenizer tokenizerService;
     private IndexMetaService indexMetaService;
+    private final Object indexLock = new Object();
 
     NitriteTextIndexingService(TextTokenizer textTokenizer, IndexMetaService indexMetaService) {
         this.tokenizerService = textTokenizer;
@@ -110,11 +111,10 @@ class NitriteTextIndexingService implements TextIndexingService {
                     = indexMetaService.getIndexMap(field);
             Set<String> words = tokenizerService.tokenize(text);
 
-            Object fieldLock = indexMetaService.getFieldLock(field);
             for (String word : words) {
                 ConcurrentSkipListSet<NitriteId> nitriteIds = indexMap.get(word);
 
-                synchronized (fieldLock) {
+                synchronized (indexLock) {
                     if (nitriteIds == null) {
                         nitriteIds = new ConcurrentSkipListSet<>();
                         indexMap.put(word, nitriteIds);

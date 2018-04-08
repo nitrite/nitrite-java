@@ -20,6 +20,7 @@ package org.dizitart.kno2
 
 import org.dizitart.no2.IndexType
 import org.dizitart.no2.SortOrder
+import org.dizitart.no2.exceptions.UniqueConstraintException
 import org.dizitart.no2.objects.Id
 import org.dizitart.no2.objects.Index
 import org.dizitart.no2.objects.Indices
@@ -124,6 +125,8 @@ class NitriteTest : BaseTest() {
             executor.submit {
                 try{
                     repository.update(item, true)
+                } catch (e: UniqueConstraintException) {
+                    fail("Synchronization failed on update")
                 } finally {
                     latch.countDown()
                 }

@@ -49,6 +49,8 @@ class IndexingService {
     private final ExecutorService rebuildExecutor;
     private final TextIndexingService textIndexingService;
 
+    private final Object indexLock = new Object();
+
     IndexingService(IndexMetaService indexMetaService,
                     TextIndexingService textIndexingService,
                     NitriteContext nitriteContext) {
@@ -63,9 +65,7 @@ class IndexingService {
     void createIndex(String field, IndexType indexType, boolean isAsync) {
         Index index;
 
-        // synchronize on value only
-        Object fieldLock = indexMetaService.getFieldLock(field);
-        synchronized (fieldLock) {
+        synchronized (indexLock) {
             if (!indexMetaService.hasIndex(field)) {
                 // if no index create index
                 index = indexMetaService.createIndexMetadata(field, indexType);
@@ -103,13 +103,12 @@ class IndexingService {
                     rebuildIndex(index, true);
                 } else {
                     IndexType indexType = index.getIndexType();
-                    Object fieldLock = indexMetaService.getFieldLock(field);
 
                     if (indexType == IndexType.Fulltext && fieldValue instanceof String) {
                         // update text index
                         textIndexingService.updateIndex(nitriteId, field, (String) fieldValue);
                     } else {
-                        synchronized (fieldLock) {
+                        synchronized (indexLock) {
                             NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                                     = indexMetaService.getIndexMap(field);
 
@@ -121,7 +120,8 @@ class IndexingService {
                                 nitriteIdList = new ConcurrentSkipListSet<>();
                             }
 
-                            if (indexType == IndexType.Unique && nitriteIdList.size() == 1) {
+                            if (indexType == IndexType.Unique && nitriteIdList.size() == 1
+                                    && !nitriteIdList.contains(nitriteId)) {
                                 // if key is already exists for unique type, throw error
                                 throw new UniqueConstraintException(errorMessage(
                                         "unique key constraint violation for " + field,
@@ -209,7 +209,7 @@ class IndexingService {
                         // update text index
                         textIndexingService.updateIndex(nitriteId, field, (String) newValue);
                     } else {
-                        synchronized (indexMetaService.getFieldLock(field)) {
+                        synchronized (indexLock) {
                             NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                                     = indexMetaService.getIndexMap(field);
 
@@ -221,7 +221,8 @@ class IndexingService {
                                 nitriteIdList = new ConcurrentSkipListSet<>();
                             }
 
-                            if (indexType == IndexType.Unique && nitriteIdList.size() == 1) {
+                            if (indexType == IndexType.Unique && nitriteIdList.size() == 1
+                                    && !nitriteIdList.contains(nitriteId)) {
                                 // if key is already exists for unique type, throw error
                                 throw new UniqueConstraintException(errorMessage(
                                         "unique key constraint violation for " + field,

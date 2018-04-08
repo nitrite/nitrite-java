@@ -141,9 +141,7 @@ class DataService {
             }
 
             update = new Document(update);
-            if (update.containsKey(DOC_ID)) {
-                update.remove(DOC_ID);
-            }
+            update.remove(DOC_ID);
 
             if (!REPLICATOR.contentEquals(update.getSource())) {
                 update.remove(DOC_REVISION);
