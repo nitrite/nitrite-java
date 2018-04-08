@@ -1,0 +1,22 @@
+class DBHandler {
+
+    companion object {
+
+        @Volatile private var INSTANCE: Nitrite? = null
+
+        fun getDBInstance(context: Context): Nitrite {
+            return INSTANCE ?: synchronized(this) {
+                INSTANCE ?: buildNitriteDB(context).also { INSTANCE = it }
+            }
+        }
+
+        private fun buildNitriteDB(context: Context): Nitrite {
+            return Nitrite.builder()
+                    .compressed()
+                    .filePath(context.filesDir.path + "/app.db")
+                    .openOrCreate()
+        }
+
+
+    }
+}
