@@ -45,15 +45,11 @@ import static org.dizitart.no2.util.IndexUtils.internalName;
  */
 class IndexMetaService {
     private final NitriteMap<NitriteId, Document> underlyingMap;
-    private final NitriteMap<String, IndexMeta> indexMetadata;
-    private final Map<String, Object> fieldLock;
     private final NitriteStore mvStore;
 
     IndexMetaService(NitriteMap<NitriteId, Document> underlyingMap) {
         this.underlyingMap = underlyingMap;
         this.mvStore = underlyingMap.getStore();
-        indexMetadata = getIndexMetadata();
-        this.fieldLock = new ConcurrentHashMap<>();
     }
 
     NitriteMap<NitriteId, Document> getUnderlyingMap() {
@@ -145,15 +141,6 @@ class IndexMetaService {
         getIndexMetadata().put(field, indexMeta);
 
         return index;
-    }
-
-    synchronized Object getFieldLock(String field) {
-        Object lock = fieldLock.get(field);
-        if (lock != null) return lock;
-
-        lock = new Object();
-        fieldLock.put(field, lock);
-        return lock;
     }
 
     private String getName() {
