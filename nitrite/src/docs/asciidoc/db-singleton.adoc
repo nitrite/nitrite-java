@@ -1,0 +1,10 @@
+In Android Nitrite DB might fail if it's opened by two processes at the same time.
+The solution to that problem is to apply the classic singleton design pattern.
+The idea is to make sure only one process is accessing the DB file, and subsequent requests are using the already built Nitrite DB object
+and not try to open the DB file again it it has already opened in the same context.
+
+
+.Example of Singleton in Kotlin:
+
+
+
