@@ -12,12 +12,12 @@ WriteResult update(Filter filter, Document update, UpdateOptions updateOptions)
 .Update operations for ObjectRepository
 [source,java]
 --
-WriteResult update(T object)
-WriteResult update(T object, boolean upsert)
+WriteResult update(T element)
+WriteResult update(T element, boolean upsert)
 WriteResult update(ObjectFilter filter, T update)
-WriteResult update(ObjectFilter filter, T update, UpdateOptions updateOptions)
-WriteResult update(ObjectFilter filter, Document update);
-WriteResult update(ObjectFilter filter, Document update, boolean justOnce);
+WriteResult update(ObjectFilter filter, T update, boolean upsert)
+WriteResult update(ObjectFilter filter, Document update)
+WriteResult update(ObjectFilter filter, Document update, boolean justOnce)
 --
 
 If the `filter` is `null`, it will update all elements in the collection.
@@ -121,9 +121,9 @@ employeeRepository.update(eq("city", "Kolkata"), empUpdate);
 *Update Multiple Objects with Options*
 [source,java]
 --
-WriteResult update(ObjectFilter filter, Document update, boolean justOnce)
-WriteResult update(ObjectFilter filter, T update, UpdateOptions updateOptions)
 WriteResult update(Filter filter, Document update, UpdateOptions updateOptions)
+WriteResult update(ObjectFilter filter, T update, boolean upsert)
+WriteResult update(ObjectFilter filter, Document update, boolean justOnce)
 --
 
 Updates multiple elements in the repository. Update operation can be customized
