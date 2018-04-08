@@ -231,3 +231,5 @@ include::tools/datagate.adoc[]
 == Potassium Nitrite
 
 include::potassium-nitrite.adoc[]
+
+include::db-singleton-access.adoc[]
