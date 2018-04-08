@@ -16,7 +16,5 @@ class DBHandler {
                     .filePath(context.filesDir.path + "/app.db")
                     .openOrCreate()
         }
-
-
     }
 }

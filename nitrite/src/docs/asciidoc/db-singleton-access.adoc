@@ -8,7 +8,7 @@ and not try to open the DB file again if it has already been opened in the same 
 .Example of Singleton Nitrite DB in Kotlin:
 
 
-[source,java]
+[source,kotlin]
 --
 include::examples/kotlin-singleton-access.adoc[]
 --

@@ -212,3 +212,5 @@ The library has a build-in support for kotlin data classes via jackson-kotlin mo
 This module is already registered to the default jackson mapper so that user does
 not have to deal with it explicitly.
 
+include::db-singleton-access.adoc[]
+
