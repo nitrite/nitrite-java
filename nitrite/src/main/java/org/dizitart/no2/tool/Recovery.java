@@ -31,6 +31,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.TreeMap;
@@ -232,7 +233,7 @@ public class Recovery {
                 if (data[i] == '\n') {
                     // set the position to the start of the first page
                     buff.position(pos + i + 1);
-                    String s = new String(data, 0, i, DataUtils.LATIN).trim();
+                    String s = new String(data, 0, i, StandardCharsets.ISO_8859_1).trim();
                     return fromString(s);
                 }
             }
