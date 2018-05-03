@@ -145,6 +145,7 @@ class SearchService {
     private Set<NitriteId> sortIdSet(Collection<NitriteId> nitriteIdSet, FindOptions findOptions) {
         String sortField = findOptions.getField();
         NavigableMap<Object, List<NitriteId>> sortedMap = new TreeMap<>();
+        Set<NitriteId> nullValueIds = new HashSet<>();
 
         for (NitriteId id : nitriteIdSet) {
             Document document = underlyingMap.get(id);
@@ -154,23 +155,35 @@ class SearchService {
                 if (value.getClass().isArray() || value instanceof Iterable) {
                     throw new InvalidOperationException(UNABLE_TO_SORT_ON_ARRAY);
                 }
-                if (sortedMap.containsKey(value)) {
-                    List<NitriteId> idList = sortedMap.get(value);
-                    idList.add(id);
-                    sortedMap.put(value, idList);
-                } else {
-                    List<NitriteId> idList = new ArrayList<>();
-                    idList.add(id);
-                    sortedMap.put(value, idList);
-                }
+            } else {
+                nullValueIds.add(id);
+                continue;
+            }
+
+            if (sortedMap.containsKey(value)) {
+                List<NitriteId> idList = sortedMap.get(value);
+                idList.add(id);
+                sortedMap.put(value, idList);
+            } else {
+                List<NitriteId> idList = new ArrayList<>();
+                idList.add(id);
+                sortedMap.put(value, idList);
             }
         }
 
-        Collection<NitriteId> sortedValues;
+        if (sortedMap.size() == 0) {
+            // search was made using non existing field in the whole collection
+            // so we should not consider nullValueIds at all and send empty set
+            return Collections.emptySet();
+        }
+
+        List<NitriteId> sortedValues;
         if (findOptions.getSortOrder() == SortOrder.Ascending) {
-            sortedValues = flattenList(sortedMap.values());
+            sortedValues = new ArrayList<>(nullValueIds);
+            sortedValues.addAll(flattenList(sortedMap.values()));
         } else {
             sortedValues = flattenList(sortedMap.descendingMap().values());
+            sortedValues.addAll(nullValueIds);
         }
 
         return limitIdSet(sortedValues, findOptions);

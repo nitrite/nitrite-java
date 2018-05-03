@@ -17,13 +17,13 @@
 buildscript {
     repositories {
         jcenter()
-        maven { url "https://plugins.gradle.org/m2/" }
-        maven { url 'https://maven.google.com' }
+        maven { url = "https://plugins.gradle.org/m2/" }
+        maven { url  = 'https://maven.google.com' }
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.1.0'
+        classpath 'com.android.tools.build:gradle:3.2.0-alpha12'
     }
 }
 
@@ -31,7 +31,7 @@ apply plugin: 'com.android.application'
 
 repositories {
     jcenter()
-    maven { url 'https://maven.google.com' }
+    maven { url = 'https://maven.google.com' }
     mavenCentral()
 }
 
@@ -73,8 +73,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+        sourceCompatibility = JavaVersion.VERSION_1_7
+        targetCompatibility = JavaVersion.VERSION_1_7
     }
     
     lintOptions {

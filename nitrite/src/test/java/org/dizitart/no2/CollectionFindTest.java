@@ -21,6 +21,7 @@ package org.dizitart.no2;
 import org.dizitart.no2.filters.Filters;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -553,5 +554,30 @@ public class CollectionFindTest extends BaseCollectionTest {
         cursor = collection.find(Filters.ALL);
         assertNotNull(cursor);
         assertEquals(cursor.size(), 3);
+    }
+
+    @Test
+    public void testIssue72() {
+        NitriteCollection coll = db.getCollection("test");
+        coll.createIndex("id", IndexOptions.indexOptions(IndexType.Unique));
+        coll.createIndex("group", IndexOptions.indexOptions(IndexType.NonUnique));
+
+        coll.remove(Filters.ALL);
+
+        Document doc = new Document().put("id", "test-1").put("group", "groupA");
+        assertEquals(1, coll.insert(doc).getAffectedCount());
+
+        doc = new Document().put("id", "test-2").put("group", "groupA").put("startTime", DateTime.now());
+        assertEquals(1, coll.insert(doc).getAffectedCount());
+
+        Cursor cursor = coll.find(Filters.eq("group", "groupA"), FindOptions.sort("startTime", SortOrder.Descending));
+        assertEquals(2, cursor.size());
+        assertNull(cursor.toList().get(1).get("startTime"));
+        assertNotNull(cursor.toList().get(0).get("startTime"));
+
+        cursor = coll.find(Filters.eq("group", "groupA"), FindOptions.sort("startTime", SortOrder.Ascending));
+        assertEquals(2, cursor.size());
+        assertNull(cursor.toList().get(0).get("startTime"));
+        assertNotNull(cursor.toList().get(1).get("startTime"));
     }
 }

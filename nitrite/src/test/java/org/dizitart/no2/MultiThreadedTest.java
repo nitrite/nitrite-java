@@ -173,13 +173,7 @@ public class MultiThreadedTest {
         }
     }
 
-    private Document generate() {
-        try {
-            Thread.sleep(generator.nextInt(50));
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    private synchronized Document generate() {
         Document document = createDocument("unixTime", System.nanoTime() + docCounter.incrementAndGet());
         byte[] blob = new byte[1024];
         generator.nextBytes(blob);
