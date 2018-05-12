@@ -51,6 +51,6 @@ SET JAVA_OPTS=
 
 IF NOT EXIST "%DATAGATE_LOG_DIR%" MD "%DATAGATE_LOG_DIR%"
 
-"%JAVA_EXE%" -jar "%DATAGATE_EXE%" --spring.config.location=file:\\\"%DATAGATE_CONF%" --datagate.log.dir="%DATAGATE_LOG_DIR%"
+"%JAVA_EXE%" -jar "%DATAGATE_EXE%" --spring.config.location=file:///"%DATAGATE_CONF%" -Ddatagate.log.dir="%DATAGATE_LOG_DIR%"
 
 SET PATH=%OLD_PATH%
