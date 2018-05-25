@@ -16,13 +16,14 @@
  *
  */
 
-package org.dizitart.no2.mapper;
+package org.dizitart.no2.tool;
 
-import static org.dizitart.no2.exceptions.ErrorCodes.OME_CYCLE_DETECTED;
-import static org.dizitart.no2.exceptions.ErrorCodes.OME_NO_DEFAULT_CTOR;
+import static org.dizitart.no2.exceptions.ErrorCodes.OME_PARSE_JSON_FAILED;
+import static org.dizitart.no2.exceptions.ErrorMessage.JSON_SERIALIZATION_FAILED;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -31,98 +32,46 @@ import java.util.Map;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.ObjectMappingException;
+import org.dizitart.no2.mapper.NitriteIdModule;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * A jackson based {@link NitriteMapper} implementation. It uses
- * jackson's {@link ObjectMapper} to convert an object into a
- * Nitrite {@link Document}.
- *
- * @author Anindya Chatterjee.
- * @since 1.0
- */
 @Slf4j
-public class JacksonMapper extends AbstractMapper {
+public class JacksonDeSerializer implements JsonDeSerializer {
     private ObjectMapper objectMapper;
 
-    public JacksonMapper() {
+    public JacksonDeSerializer() {
         getObjectMapper();
     }
 
     @Override
-    public <T> Document asDocumentInternal(T object) {
+    public Document parse(String json) {
         ObjectMapper objectMapper = getObjectMapper();
         try {
-            JsonNode node = objectMapper.convertValue(object, JsonNode.class);
+            JsonNode node = objectMapper.readValue(json, JsonNode.class);
             return loadDocument(node);
-        } catch (IllegalArgumentException iae) {
-            log.error("Error while converting object to document ", iae);
-            if (iae.getCause() instanceof JsonMappingException) {
-                JsonMappingException jme = (JsonMappingException) iae.getCause();
-                if (jme.getCause() instanceof StackOverflowError) {
-                    throw new ObjectMappingException(errorMessage(
-                            "cyclic reference detected. " + jme.getPathReference(), OME_CYCLE_DETECTED));
-                }
-            }
-            throw iae;
+        } catch (IOException e) {
+            log.error("Error while parsing json", e);
+            throw new ObjectMappingException(errorMessage("failed to parse json " + json,
+                    OME_PARSE_JSON_FAILED));
         }
     }
 
     @Override
-    public <T> T asObjectInternal(Document document, Class<T> type) {
+    public String toJson(Object object) {
+        StringWriter stringWriter = new StringWriter();
         try {
-            return getObjectMapper().convertValue(document, type);
-        } catch (IllegalArgumentException iae) {
-            log.error("Error while converting document to object ", iae);
-            if (iae.getCause() instanceof JsonMappingException) {
-                JsonMappingException jme = (JsonMappingException) iae.getCause();
-                if (jme.getMessage().contains("Cannot construct instance")) {
-                    throw new ObjectMappingException(errorMessage(
-                            jme.getMessage(), OME_NO_DEFAULT_CTOR));
-                }
-            }
-            throw iae;
-        }
-    }
-
-    @Override
-    public boolean isValueType(Object object) {
-        ObjectMapper objectMapper = getObjectMapper();
-        JsonNode node = objectMapper.convertValue(object, JsonNode.class);
-        return node != null && node.isValueNode();
-    }
-
-    @Override
-    public Object asValue(Object object) {
-        ObjectMapper objectMapper = getObjectMapper();
-        JsonNode node = objectMapper.convertValue(object, JsonNode.class);
-        if (node == null) {
-            return null;
-        }
-
-        switch (node.getNodeType()) {
-            case NUMBER:
-                return node.numberValue();
-            case STRING:
-                return node.textValue();
-            case BOOLEAN:
-                return node.booleanValue();
-            case ARRAY:
-            case BINARY:
-            case MISSING:
-            case NULL:
-            case OBJECT:
-            case POJO:
-            default:
-                return null;
+            getObjectMapper().writeValue(stringWriter, object);
+            return stringWriter.toString();
+        } catch (IOException e) {
+            log.error("Error while serializing object to json", e);
+            throw new ObjectMappingException(JSON_SERIALIZATION_FAILED);
         }
     }
 

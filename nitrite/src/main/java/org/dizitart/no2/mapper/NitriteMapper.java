@@ -73,19 +73,4 @@ public interface NitriteMapper {
      */
     Object asValue(Object object);
 
-    /**
-     * Parses a json string into a nitrite {@link Document}.
-     *
-     * @param json the json string to parse
-     * @return the document
-     */
-    Document parse(String json);
-
-    /**
-     * Serializes an object to a json string
-     *
-     * @param object the object
-     * @return the json string
-     */
-    String toJson(Object object);
 }

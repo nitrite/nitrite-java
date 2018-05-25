@@ -18,19 +18,19 @@
 
 package org.dizitart.no2.util;
 
+import static org.dizitart.no2.util.ObjectUtils.extractIndices;
+import static org.dizitart.no2.util.ObjectUtils.findObjectStoreName;
+import static org.junit.Assert.assertEquals;
+
+import java.util.Iterator;
+import java.util.Set;
+
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.objects.Index;
 import org.junit.Test;
-
-import java.util.Iterator;
-import java.util.Set;
-
-import static org.dizitart.no2.util.ObjectUtils.extractIndices;
-import static org.dizitart.no2.util.ObjectUtils.findObjectStoreName;
-import static org.junit.Assert.assertEquals;
 
 /**
  * @author Anindya Chatterjee.

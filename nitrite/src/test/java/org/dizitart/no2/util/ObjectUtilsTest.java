@@ -18,17 +18,20 @@
 
 package org.dizitart.no2.util;
 
+import static org.dizitart.no2.util.ObjectUtils.extractIndices;
+import static org.dizitart.no2.util.ObjectUtils.findObjectStoreName;
+import static org.dizitart.no2.util.ObjectUtils.isObjectStore;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+import java.math.BigDecimal;
+import java.util.Set;
+
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.objects.Index;
 import org.dizitart.no2.objects.Indices;
 import org.junit.Test;
-
-import java.math.BigDecimal;
-import java.util.Set;
-
-import static org.dizitart.no2.util.ObjectUtils.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.

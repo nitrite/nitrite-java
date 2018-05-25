@@ -18,19 +18,19 @@
 
 package org.dizitart.no2.util;
 
-import org.dizitart.no2.Document;
-import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.JacksonMapper;
-import org.dizitart.no2.mapper.NitriteMapper;
-import org.junit.Before;
-import org.junit.Test;
+import static org.dizitart.no2.util.DocumentUtils.emptyDocument;
+import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.AbstractCollection;
 
-import static org.dizitart.no2.util.DocumentUtils.emptyDocument;
-import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
-import static org.junit.Assert.assertEquals;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.tool.JacksonDeSerializer;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @author Anindya Chatterjee.
@@ -40,7 +40,7 @@ public class DocumentUtilsNegativeTest {
 
     @Before
     public void setUp() throws IOException {
-        NitriteMapper nitriteMapper = new JacksonMapper();
+    	JacksonDeSerializer nitriteMapper = new JacksonDeSerializer();
         doc = nitriteMapper.parse("{" +
                 "  score: 1034," +
                 "  location: {  " +

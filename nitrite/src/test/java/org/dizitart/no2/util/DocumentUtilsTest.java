@@ -19,8 +19,8 @@
 package org.dizitart.no2.util;
 
 import org.dizitart.no2.Document;
-import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.tool.JacksonDeSerializer;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,7 +37,7 @@ public class DocumentUtilsTest {
 
     @Before
     public void setUp() throws IOException {
-        NitriteMapper nitriteMapper = new JacksonMapper();
+    	JacksonDeSerializer nitriteMapper = new JacksonDeSerializer();
         doc = nitriteMapper.parse("{" +
                 "  score: 1034," +
                 "  location: {  " +
@@ -56,7 +56,7 @@ public class DocumentUtilsTest {
 
     @Test
     public void testGetValue() throws IOException {
-        NitriteMapper nitriteMapper = new JacksonMapper();
+    	JacksonDeSerializer nitriteMapper = new JacksonDeSerializer();
         assertEquals(getFieldValue(doc, ""), null);
         assertEquals(getFieldValue(doc, "score"), 1034);
         assertEquals(getFieldValue(doc, "location.state"), "NY");

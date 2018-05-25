@@ -19,8 +19,8 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.filters.Filters;
-import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.tool.JacksonDeSerializer;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -412,7 +412,7 @@ public class CollectionFindTest extends BaseCollectionTest {
 
     @Test
     public void testElemMatchFilter() throws IOException {
-        NitriteMapper parser = new JacksonMapper();
+    	JacksonDeSerializer parser = new JacksonDeSerializer();
         Document doc1 = parser.parse("{ productScores: [ { product: \"abc\", score: 10 }, " +
                 "{ product: \"xyz\", score: 5 } ], strArray: [\"a\", \"b\"]}");
         Document doc2 = parser.parse("{ productScores: [ { product: \"abc\", score: 8 }, " +
