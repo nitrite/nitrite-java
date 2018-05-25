@@ -27,8 +27,9 @@ import java.util.AbstractCollection;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.JacksonMapper;
-import org.dizitart.no2.tool.JacksonDeSerializer;
+import org.dizitart.no2.mapper.GenericMapper;
+import org.dizitart.no2.mapper.JacksonFacade;
+import org.dizitart.no2.mapper.MapperFacade;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ public class DocumentUtilsNegativeTest {
 
     @Before
     public void setUp() throws IOException {
-    	JacksonDeSerializer nitriteMapper = new JacksonDeSerializer();
+    	MapperFacade nitriteMapper = new JacksonFacade();
         doc = nitriteMapper.parse("{" +
                 "  score: 1034," +
                 "  location: {  " +
@@ -79,21 +80,21 @@ public class DocumentUtilsNegativeTest {
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForInterface() {
-        emptyDocument(new JacksonMapper(), Comparable.class);
+        emptyDocument(new GenericMapper(), Comparable.class);
     }
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForPrimitive() {
-        emptyDocument(new JacksonMapper(), int.class);
+        emptyDocument(new GenericMapper(), int.class);
     }
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForArray() {
-        emptyDocument(new JacksonMapper(), String[].class);
+        emptyDocument(new GenericMapper(), String[].class);
     }
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForAbstractClass() {
-        emptyDocument(new JacksonMapper(), AbstractCollection.class);
+        emptyDocument(new GenericMapper(), AbstractCollection.class);
     }
 }

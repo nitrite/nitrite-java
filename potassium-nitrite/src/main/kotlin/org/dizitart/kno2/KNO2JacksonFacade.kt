@@ -18,19 +18,21 @@
 
 package org.dizitart.kno2
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.dizitart.no2.mapper.NitriteMapper
-import org.dizitart.no2.mapper.GenericMapper
+import org.dizitart.no2.mapper.JacksonFacade
 
-/**
- * Default [NitriteMapper] for potassium nitrite.
- *
- * @since 2.1.0
- * @author Anindya Chatterjee
- */
-open class KNO2JacksonMapper : GenericMapper(KNO2JacksonFacade()) {
+open class KNO2JacksonFacade : JacksonFacade() {
 
+    override fun createObjectMapper(): ObjectMapper {
+        val objectMapper = super.createObjectMapper()
+        objectMapper.registerModule(KotlinModule())
+        objectMapper.registerModule(Jdk8Module())
+        objectMapper.registerModule(JavaTimeModule())
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+        return objectMapper
+    }
 }

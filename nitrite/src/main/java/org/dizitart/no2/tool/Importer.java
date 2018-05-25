@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.mapper.JacksonFacade;
 
 import java.io.*;
 
@@ -58,7 +59,7 @@ public class Importer {
     public static Importer of(Nitrite db) {
         Importer importer = new Importer();
         importer.db = db;
-        ObjectMapper objectMapper = new JacksonDeSerializer().getObjectMapper();
+        ObjectMapper objectMapper = new JacksonFacade().getObjectMapper();
         importer.jsonFactory = objectMapper.getFactory();
         return importer;
     }

@@ -37,7 +37,7 @@ import java.util.List;
 import org.dizitart.no2.FindOptions;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.GenericMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.junit.Test;
 
@@ -133,7 +133,7 @@ public class ValidationUtilsTest {
 
     @Test
     public void testValidateObjectIndexField() {
-        NitriteMapper nitriteMapper = new JacksonMapper();
+        NitriteMapper nitriteMapper = new GenericMapper();
         validateObjectIndexField(nitriteMapper, String.class, "dummy");
 
         boolean invalid = false;

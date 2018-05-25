@@ -27,7 +27,7 @@ import java.util.Set;
 
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.GenericMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.objects.Index;
 import org.junit.Test;
@@ -43,14 +43,14 @@ public class ObjectUtilsNegativeTest {
 
     @Test(expected = IndexingException.class)
     public void testInvalidIndexNonComparable() {
-        NitriteMapper nitriteMapper = new JacksonMapper();
+        NitriteMapper nitriteMapper = new GenericMapper();
         Set<Index> indexes = extractIndices(nitriteMapper, ObjectWithNonComparableIndex.class);
         assertEquals(indexes.size(), 2);
     }
 
     @Test(expected = IndexingException.class)
     public void testInvalidIndexComparableAndIterable() {
-        NitriteMapper nitriteMapper = new JacksonMapper();
+        NitriteMapper nitriteMapper = new GenericMapper();
         extractIndices(nitriteMapper, ObjectWithIterableIndex.class);
     }
 

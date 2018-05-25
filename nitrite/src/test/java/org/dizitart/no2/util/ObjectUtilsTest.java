@@ -27,7 +27,7 @@ import static org.junit.Assert.assertFalse;
 import java.math.BigDecimal;
 import java.util.Set;
 
-import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.GenericMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.objects.Index;
 import org.dizitart.no2.objects.Indices;
@@ -53,7 +53,7 @@ public class ObjectUtilsTest {
 
     @Test
     public void testIndexes() {
-        NitriteMapper nitriteMapper = new JacksonMapper();
+        NitriteMapper nitriteMapper = new GenericMapper();
         Set<Index> indexes = extractIndices(nitriteMapper, TestObjectWithIndex.class);
         assertEquals(indexes.size(), 2);
     }

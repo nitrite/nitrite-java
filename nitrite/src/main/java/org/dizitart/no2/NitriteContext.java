@@ -24,7 +24,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
-import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.GenericMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.util.ExecutorUtils;
@@ -155,7 +155,7 @@ public class NitriteContext {
      */
     public NitriteMapper getNitriteMapper() {
         if (nitriteMapper == null) {
-            nitriteMapper = new JacksonMapper();
+            nitriteMapper = new GenericMapper();
         }
         return nitriteMapper;
     }
