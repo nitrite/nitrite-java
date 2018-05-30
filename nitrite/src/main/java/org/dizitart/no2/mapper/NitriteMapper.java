@@ -25,7 +25,8 @@ import org.dizitart.no2.exceptions.ObjectMappingException;
  * Represents an object mapper for nitrite database. It
  * converts an object into a Nitrite {@link Document}.
  *
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
+ * @author Stefan Mandel
  * @since 1.0
  */
 public interface NitriteMapper {

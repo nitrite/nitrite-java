@@ -20,47 +20,55 @@ package org.dizitart.no2.mapper;
 
 import org.dizitart.no2.Document;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
- * A jackson based {@link NitriteMapper} implementation. It uses
- * jackson's {@link ObjectMapper} to convert an object into a
+ * A generic {@link NitriteMapper} implementation. It uses
+ * a {@link MapperFacade} implementation to convert an object into a
  * Nitrite {@link Document}.
  *
- * @author Anindya Chatterjee.
- * @since 1.0
+ * @author Anindya Chatterjee
+ * @author Stefan Mandel
+ * @since 3.0.1
  */
 public class GenericMapper extends AbstractMapper {
 
-	private MapperFacade facade;
-	
-    public GenericMapper(MapperFacade facade) {
-    	this.facade = facade;
-    }
+	private MapperFacade mapperFacade;
 
-    public GenericMapper() {
-    	this(new JacksonFacade());
+	/**
+     * Instantiate a new {@link GenericMapper} with a
+     * {@link MapperFacade} instance.
+     *
+     * @param facade a {@link MapperFacade} implementation
+     * */
+    public GenericMapper(MapperFacade facade) {
+    	this.mapperFacade = facade;
     }
 
     @Override
     public <T> Document asDocumentInternal(T object) {
-            return facade.asDocument(object);
+            return mapperFacade.asDocument(object);
     }
 
     @Override
     public <T> T asObjectInternal(Document document, Class<T> type) {
-            return facade.asObject(document, type);
+            return mapperFacade.asObject(document, type);
     }
 
     @Override
     public boolean isValueType(Object object) {
-    	return facade.isValueType(object);
+    	return mapperFacade.isValueType(object);
     }
 
     @Override
     public Object asValue(Object object) {
-    	return facade.asValue(object);
+    	return mapperFacade.asValue(object);
     }
 
-
+    /**
+     * Gets the underlying {@link MapperFacade} instance to configure.
+     *
+     * @return the facade instance.
+     */
+    public MapperFacade getMapperFacade() {
+        return mapperFacade;
+    }
 }

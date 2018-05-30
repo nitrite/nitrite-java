@@ -18,28 +18,20 @@
 
 package org.dizitart.no2.util;
 
-import static org.dizitart.no2.Constants.INDEX_META_PREFIX;
-import static org.dizitart.no2.Constants.INDEX_PREFIX;
-import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
-import static org.dizitart.no2.Constants.OBJECT_STORE_NAME_SEPARATOR;
-import static org.dizitart.no2.Constants.USER_MAP;
-import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
-import static org.dizitart.no2.util.ValidationUtils.notEmpty;
-import static org.dizitart.no2.util.ValidationUtils.notNull;
-import static org.dizitart.no2.util.ValidationUtils.validateCollectionName;
-import static org.dizitart.no2.util.ValidationUtils.validateLimit;
-import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-
 import org.dizitart.no2.FindOptions;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.GenericMapper;
+import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.junit.Test;
+
+import java.util.List;
+
+import static org.dizitart.no2.Constants.*;
+import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
+import static org.dizitart.no2.util.ValidationUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Anindya Chatterjee.
@@ -133,7 +125,7 @@ public class ValidationUtilsTest {
 
     @Test
     public void testValidateObjectIndexField() {
-        NitriteMapper nitriteMapper = new GenericMapper();
+        NitriteMapper nitriteMapper = new JacksonMapper();
         validateObjectIndexField(nitriteMapper, String.class, "dummy");
 
         boolean invalid = false;

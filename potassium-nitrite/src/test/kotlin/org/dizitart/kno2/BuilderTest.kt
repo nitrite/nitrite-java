@@ -22,7 +22,6 @@ import org.dizitart.no2.exceptions.SecurityException
 import org.dizitart.no2.fulltext.EnglishTextTokenizer
 import org.dizitart.no2.fulltext.UniversalTextTokenizer
 import org.dizitart.no2.mapper.GenericMapper
-import org.dizitart.no2.mapper.JacksonFacade
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.File
@@ -66,7 +65,7 @@ class BuilderTest : BaseTest() {
             compress = true
             autoCompact = false
             textTokenizer = UniversalTextTokenizer()
-            nitriteMapper = GenericMapper(JacksonFacade())
+            nitriteMapper = KNO2JacksonMapper()
         }
 
         val context = db?.context!!

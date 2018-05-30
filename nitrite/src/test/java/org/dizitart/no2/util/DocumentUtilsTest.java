@@ -18,27 +18,26 @@
 
 package org.dizitart.no2.util;
 
-import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
-import static org.dizitart.no2.util.DocumentUtils.getFields;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-
-import java.io.IOException;
-import java.util.Set;
-
 import org.dizitart.no2.Document;
 import org.dizitart.no2.mapper.JacksonFacade;
 import org.dizitart.no2.mapper.MapperFacade;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Set;
+
+import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
+import static org.dizitart.no2.util.DocumentUtils.getFields;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
 public class DocumentUtilsTest {
     private Document doc;
 
     @Before
-    public void setUp() throws IOException {
-    	MapperFacade nitriteMapper = new JacksonFacade();
-        doc = nitriteMapper.parse("{" +
+    public void setUp() {
+    	MapperFacade mapperFacade = new JacksonFacade();
+        doc = mapperFacade.parse("{" +
                 "  score: 1034," +
                 "  location: {  " +
                 "       state: 'NY', " +
@@ -55,7 +54,7 @@ public class DocumentUtilsTest {
     }
 
     @Test
-    public void testGetValue() throws IOException {
+    public void testGetValue() {
     	MapperFacade nitriteMapper = new JacksonFacade();
         assertEquals(getFieldValue(doc, ""), null);
         assertEquals(getFieldValue(doc, "score"), 1034);

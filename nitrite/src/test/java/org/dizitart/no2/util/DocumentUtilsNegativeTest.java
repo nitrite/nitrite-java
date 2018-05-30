@@ -18,20 +18,20 @@
 
 package org.dizitart.no2.util;
 
-import static org.dizitart.no2.util.DocumentUtils.emptyDocument;
-import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
-import static org.junit.Assert.assertEquals;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.mapper.JacksonFacade;
+import org.dizitart.no2.mapper.JacksonMapper;
+import org.dizitart.no2.mapper.MapperFacade;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.AbstractCollection;
 
-import org.dizitart.no2.Document;
-import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.GenericMapper;
-import org.dizitart.no2.mapper.JacksonFacade;
-import org.dizitart.no2.mapper.MapperFacade;
-import org.junit.Before;
-import org.junit.Test;
+import static org.dizitart.no2.util.DocumentUtils.emptyDocument;
+import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Anindya Chatterjee.
@@ -80,21 +80,21 @@ public class DocumentUtilsNegativeTest {
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForInterface() {
-        emptyDocument(new GenericMapper(), Comparable.class);
+        emptyDocument(new JacksonMapper(), Comparable.class);
     }
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForPrimitive() {
-        emptyDocument(new GenericMapper(), int.class);
+        emptyDocument(new JacksonMapper(), int.class);
     }
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForArray() {
-        emptyDocument(new GenericMapper(), String[].class);
+        emptyDocument(new JacksonMapper(), String[].class);
     }
 
     @Test(expected = ValidationException.class)
     public void testEmptyDocumentForAbstractClass() {
-        emptyDocument(new GenericMapper(), AbstractCollection.class);
+        emptyDocument(new JacksonMapper(), AbstractCollection.class);
     }
 }

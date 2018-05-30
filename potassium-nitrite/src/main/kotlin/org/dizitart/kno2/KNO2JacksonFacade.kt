@@ -25,6 +25,12 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.dizitart.no2.mapper.JacksonFacade
 
+/**
+ * Default [JacksonFacade] for potassium nitrite.
+ *
+ * @author Stefan Mandel
+ * @since 3.0.1
+ */
 open class KNO2JacksonFacade : JacksonFacade() {
 
     override fun createObjectMapper(): ObjectMapper {

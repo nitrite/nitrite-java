@@ -35,7 +35,7 @@ public class MapperTest {
 
     @Before
     public void setUp() {
-        jacksonMapper = new GenericMapper();
+        jacksonMapper = new JacksonMapper();
     }
 
     @Test

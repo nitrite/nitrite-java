@@ -18,42 +18,25 @@
 
 package org.dizitart.no2;
 
-import static org.dizitart.no2.Constants.DOC_ID;
-import static org.dizitart.no2.Constants.DOC_REVISION;
-import static org.dizitart.no2.Document.createDocument;
-import static org.dizitart.no2.FindOptions.limit;
-import static org.dizitart.no2.FindOptions.sort;
-import static org.dizitart.no2.filters.Filters.ALL;
-import static org.dizitart.no2.filters.Filters.and;
-import static org.dizitart.no2.filters.Filters.elemMatch;
-import static org.dizitart.no2.filters.Filters.eq;
-import static org.dizitart.no2.filters.Filters.gt;
-import static org.dizitart.no2.filters.Filters.gte;
-import static org.dizitart.no2.filters.Filters.in;
-import static org.dizitart.no2.filters.Filters.lt;
-import static org.dizitart.no2.filters.Filters.lte;
-import static org.dizitart.no2.filters.Filters.not;
-import static org.dizitart.no2.filters.Filters.or;
-import static org.dizitart.no2.filters.Filters.regex;
-import static org.dizitart.no2.util.Iterables.isSorted;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.dizitart.no2.filters.Filters;
 import org.dizitart.no2.mapper.JacksonFacade;
 import org.dizitart.no2.mapper.MapperFacade;
 import org.joda.time.DateTime;
 import org.junit.Test;
+
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.dizitart.no2.Constants.DOC_ID;
+import static org.dizitart.no2.Constants.DOC_REVISION;
+import static org.dizitart.no2.Document.createDocument;
+import static org.dizitart.no2.FindOptions.limit;
+import static org.dizitart.no2.FindOptions.sort;
+import static org.dizitart.no2.filters.Filters.*;
+import static org.dizitart.no2.util.Iterables.isSorted;
+import static org.junit.Assert.*;
 
 public class CollectionFindTest extends BaseCollectionTest {
 
@@ -427,7 +410,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     }
 
     @Test
-    public void testElemMatchFilter() throws IOException {
+    public void testElemMatchFilter() {
     	MapperFacade parser = new JacksonFacade();
         Document doc1 = parser.parse("{ productScores: [ { product: \"abc\", score: 10 }, " +
                 "{ product: \"xyz\", score: 5 } ], strArray: [\"a\", \"b\"]}");
