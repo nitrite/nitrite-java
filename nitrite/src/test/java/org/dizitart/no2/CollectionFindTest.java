@@ -19,12 +19,11 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.filters.Filters;
-import org.dizitart.no2.mapper.JacksonMapper;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.mapper.JacksonFacade;
+import org.dizitart.no2.mapper.MapperFacade;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -411,8 +410,8 @@ public class CollectionFindTest extends BaseCollectionTest {
     }
 
     @Test
-    public void testElemMatchFilter() throws IOException {
-        NitriteMapper parser = new JacksonMapper();
+    public void testElemMatchFilter() {
+    	MapperFacade parser = new JacksonFacade();
         Document doc1 = parser.parse("{ productScores: [ { product: \"abc\", score: 10 }, " +
                 "{ product: \"xyz\", score: 5 } ], strArray: [\"a\", \"b\"]}");
         Document doc2 = parser.parse("{ productScores: [ { product: \"abc\", score: 8 }, " +

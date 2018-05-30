@@ -16,18 +16,34 @@
  *
  */
 
-package org.dizitart.kno2
+package org.dizitart.no2.mapper;
 
-import org.dizitart.no2.mapper.GenericMapper
-import org.dizitart.no2.mapper.MapperFacade
+import org.dizitart.no2.Document;
 
 /**
- * Default [GenericMapper] for potassium nitrite.
+ * A facade for serializers to convert an object to a {@link Document}
+ * and vice versa.
  *
- * @author Anindya Chatterjee
  * @author Stefan Mandel
- * @since 2.1.0
+ * @author Anindya Chatterjee
+ * @since 3.0.1
  */
-open class KNO2JacksonMapper(mapperFacade: MapperFacade) : GenericMapper(mapperFacade) {
-    constructor() : this(KNO2JacksonFacade())
+public interface MapperFacade extends NitriteMapper {
+
+	/**
+	 * Parses a json string into a nitrite {@link Document}.
+	 *
+	 * @param json the json string to parse
+	 * @return the document
+	 */
+	Document parse(String json);
+
+	/**
+	 * Serializes an object to a json string
+	 *
+	 * @param object the object
+	 * @return the json string
+	 */
+	String toJson(Object object);
+
 }

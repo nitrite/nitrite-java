@@ -28,7 +28,8 @@ import java.math.BigDecimal;
 import java.util.Set;
 
 import static org.dizitart.no2.util.ObjectUtils.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Anindya Chatterjee.

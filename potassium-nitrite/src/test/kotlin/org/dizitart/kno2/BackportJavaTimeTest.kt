@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.databind.module.SimpleModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.dizitart.no2.IndexType
-import org.dizitart.no2.mapper.JacksonMapper
 import org.dizitart.no2.objects.Id
 import org.dizitart.no2.objects.Index
 import org.dizitart.no2.objects.Indices
@@ -59,13 +57,7 @@ class BackportJavaTimeTest {
     fun testIssue59() {
         val db = nitrite {
             path = dbPath
-            nitriteMapper = object : JacksonMapper() {
-                init {
-                    objectMapper.registerModule(KotlinModule())
-                    objectMapper.registerModule(ThreeTenAbpModule())
-                    objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                }
-            }
+            nitriteMapper = object : KNO2JacksonMapper(TestFacade()) {}
         }
 
         val repo = db.getRepository<TestData>()
@@ -74,5 +66,13 @@ class BackportJavaTimeTest {
         println(repo.find().firstOrDefault())
 
         Files.delete(Paths.get(dbPath))
+    }
+
+    class TestFacade : KNO2JacksonFacade() {
+        override fun createObjectMapper(): ObjectMapper {
+            val objectMapper = super.createObjectMapper()
+            objectMapper.registerModule(ThreeTenAbpModule())
+            return objectMapper;
+        }
     }
 }

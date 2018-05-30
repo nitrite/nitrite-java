@@ -25,7 +25,6 @@ import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
-import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMVStore;
 import org.dizitart.no2.store.NitriteStore;
@@ -33,8 +32,6 @@ import org.dizitart.no2.util.StringUtils;
 import org.h2.mvstore.MVStore;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -279,12 +276,13 @@ public class NitriteBuilder {
 
     /**
      * Sets a custom {@link NitriteMapper} implementation. If not set, a default
-     * jackson based mapper {@link JacksonMapper} will
+     * jackson based mapper {@link org.dizitart.no2.mapper.JacksonMapper} will
      * be used.
      *
      * @param nitriteMapper a {@link NitriteMapper} implementation
      * @return the {@link NitriteBuilder} instance.
-     * @see JacksonMapper
+     * @see org.dizitart.no2.mapper.GenericMapper
+     * @see org.dizitart.no2.mapper.JacksonMapper
      * */
     public NitriteBuilder nitriteMapper(NitriteMapper nitriteMapper) {
         this.nitriteMapper = nitriteMapper;
@@ -411,7 +409,8 @@ public class NitriteBuilder {
 
             if (!isNullOrEmpty(filePath)) {
                 try {
-                    if (Files.exists(Paths.get(filePath))) {
+                    File file = new File(filePath);
+                    if (file.exists() && file.isFile()) {
                         log.error("Database corruption detected. Trying to repair", ise);
                         recover(filePath);
                         store = builder.open();
