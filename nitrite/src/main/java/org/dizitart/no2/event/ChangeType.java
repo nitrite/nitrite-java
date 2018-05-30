@@ -45,7 +45,6 @@ public enum ChangeType {
      * @see org.dizitart.no2.NitriteCollection#update(Filter, Document)
      * @see org.dizitart.no2.NitriteCollection#update(Filter, Document, UpdateOptions)
      * @see org.dizitart.no2.objects.ObjectRepository#update(ObjectFilter, Object)
-     * @see org.dizitart.no2.objects.ObjectRepository#update(ObjectFilter, Object, UpdateOptions)
      */
     UPDATE,
 

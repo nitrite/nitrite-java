@@ -75,7 +75,7 @@ class BuilderTest : BaseTest() {
         assertFalse(context.isReadOnly)
         assertFalse(context.isAutoCompactEnabled)
         assertTrue(context.isCompressed)
-        assertFalse(context.nitriteMapper is KNO2JacksonMapper)
+        assertTrue(context.nitriteMapper is KNO2JacksonMapper)
         assertTrue(context.nitriteMapper is GenericMapper)
         assertNull(context.textIndexingService)
         assertTrue(context.textTokenizer is UniversalTextTokenizer)
