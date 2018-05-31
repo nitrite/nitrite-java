@@ -220,28 +220,31 @@ class DataService {
                 + " document(s) to remove with options " + removeOptions + " from " + name);
 
         List<ChangedItem> changedItems = new ArrayList<>();
-        for (Document document : cursor) {
-            NitriteId nitriteId = document.getId();
-            indexingService.removeIndexEntry(document, nitriteId);
 
-            Document removed = underlyingMap.remove(nitriteId);
-            int rev = removed.getRevision();
-            removed.put(DOC_REVISION, rev + 1);
-            removed.put(DOC_MODIFIED, System.currentTimeMillis());
+        synchronized (lock) {
+            for (Document document : cursor) {
+                NitriteId nitriteId = document.getId();
+                indexingService.removeIndexEntry(document, nitriteId);
 
-            log.debug("Document removed " + removed + " from " + name);
+                Document removed = underlyingMap.remove(nitriteId);
+                int rev = removed.getRevision();
+                removed.put(DOC_REVISION, rev + 1);
+                removed.put(DOC_MODIFIED, System.currentTimeMillis());
 
-            result.addToList(nitriteId);
+                log.debug("Document removed " + removed + " from " + name);
 
-            ChangedItem changedItem = new ChangedItem();
-            changedItem.setDocument(removed);
-            changedItem.setChangeType(ChangeType.REMOVE);
-            changedItem.setChangeTimestamp(removed.getLastModifiedTime());
-            changedItems.add(changedItem);
+                result.addToList(nitriteId);
 
-            if (removeOptions.isJustOne()) {
-                notify(ChangeType.REMOVE, changedItems);
-                return result;
+                ChangedItem changedItem = new ChangedItem();
+                changedItem.setDocument(removed);
+                changedItem.setChangeType(ChangeType.REMOVE);
+                changedItem.setChangeTimestamp(removed.getLastModifiedTime());
+                changedItems.add(changedItem);
+
+                if (removeOptions.isJustOne()) {
+                    notify(ChangeType.REMOVE, changedItems);
+                    return result;
+                }
             }
         }
 
