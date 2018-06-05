@@ -96,8 +96,8 @@ class IndexingService {
                 validateDocumentIndexField(fieldValue, field);
 
                 // if dirty index and currently indexing is not running, rebuild
-                if (indexMetaService.isDirtyIndex(field) &&
-                        indexBuildRegistry.get(field) != null
+                if (indexMetaService.isDirtyIndex(field)
+                        && indexBuildRegistry.get(field) != null
                         && !indexBuildRegistry.get(field).get()) {
                     // rebuild will also take care of the current document
                     rebuildIndex(index, true);
@@ -149,7 +149,9 @@ class IndexingService {
                 if (fieldValue == null) continue;
 
                 // if dirty index and currently indexing is not running, rebuild
-                if (indexMetaService.isDirtyIndex(field) && !indexBuildRegistry.get(field).get()) {
+                if (indexMetaService.isDirtyIndex(field)
+                        && indexBuildRegistry.get(field) != null
+                        && !indexBuildRegistry.get(field).get()) {
                     // rebuild will also take care of the current document
                     rebuildIndex(index, true);
                 } else {
