@@ -146,6 +146,34 @@ public class Nitrite implements Closeable {
     }
 
     /**
+     * Opens a type-safe object repository with a key identifier from the store. If the repository
+     * does not exist it will be created automatically and returned. If a
+     * repository is already opened, it is returned as is.
+     * 
+     * [icon="{@docRoot}/note.png"]
+     * NOTE: Returned repository is thread-safe for concurrent use.
+     *
+     * @param <T>  the type parameter
+     * @param key  the key that will be appended to the repositories name
+     * @param type the type of the object
+     * @return the repository containing objects of type {@link T}.
+     * @see ObjectRepository
+     */
+    public <T> ObjectRepository<T> getRepository(String key, Class<T> type) {
+        if (store != null) {
+            String name = findObjectStoreName(key, type);
+            NitriteMap<NitriteId, Document> mapStore = store.openMap(name);
+            NitriteCollection collection = CollectionFactory.open(mapStore, context);
+            ObjectRepository<T> repository = RepositoryFactory.open(type, collection, context);
+            context.getRepositoryRegistry().add(type);
+            return repository;
+        } else {
+            log.error("Underlying store is null. Nitrite has not been initialized properly.");
+        }
+        return null;
+    }
+
+    /**
      * Gets the set of all {@link NitriteCollection}s' names saved in the store.
      *
      * @return the set of all collections' names.
