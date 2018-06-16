@@ -18,11 +18,14 @@
 
 package org.dizitart.no2;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * A JVM shutdown hook to close database properly before exiting for good.
  *
  * @author Anindya Chatterjee.
  */
+@Slf4j
 class NitriteShutDownHook extends Thread {
     private Nitrite db;
 
@@ -33,9 +36,14 @@ class NitriteShutDownHook extends Thread {
     @Override
     public void run() {
         if (db != null && !db.isClosed()) {
-            // close the db immediately and discards
-            // any unsaved changes to avoid corruption
-            db.closeImmediately();
+            try {
+                db.close();
+            } catch (Throwable t) {
+                // close the db immediately and discards
+                // any unsaved changes to avoid corruption
+                log.error("Error while database shutdown", t);
+                db.closeImmediately();
+            }
         }
     }
 }
