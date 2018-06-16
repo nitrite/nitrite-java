@@ -267,8 +267,6 @@ public class Nitrite implements Closeable {
                 store = null;
                 log.info("Nitrite database has been closed successfully.");
             }
-        } else {
-            log.error("Underlying store is null. Nitrite has not been initialized properly.");
         }
     }
 
@@ -294,8 +292,6 @@ public class Nitrite implements Closeable {
                 store = null;
                 log.info("Nitrite database has been closed by JVM shutdown hook without saving last unsaved changes.");
             }
-        } else {
-            log.error("Underlying store is null. Nitrite has not been initialized properly.");
         }
     }
 
