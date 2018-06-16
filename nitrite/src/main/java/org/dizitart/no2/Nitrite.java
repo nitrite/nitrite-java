@@ -238,7 +238,7 @@ public class Nitrite implements Closeable {
      * Closes the database. Unsaved changes are written to disk and compacted first
      * for a file based store.
      */
-    public void close() {
+    public synchronized void close() {
         if (store != null) {
             try {
                 if (hasUnsavedChanges()) {
@@ -279,7 +279,7 @@ public class Nitrite implements Closeable {
      * NOTE: This operation is called from the JVM shutdown hook to
      * avoid database corruption.
      * */
-    void closeImmediately() {
+    synchronized void closeImmediately() {
         if (store != null) {
             try {
                 store.closeImmediately();
