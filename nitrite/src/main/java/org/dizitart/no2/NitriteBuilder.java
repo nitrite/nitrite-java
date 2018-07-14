@@ -101,6 +101,7 @@ public class NitriteBuilder {
     private boolean compress;
     private boolean autoCommit = true;
     private boolean autoCompact = true;
+    private boolean shutdownHook = true;
     private TextIndexingService textIndexingService;
     private TextTokenizer textTokenizer;
     private NitriteMapper nitriteMapper;
@@ -290,6 +291,16 @@ public class NitriteBuilder {
     }
 
     /**
+     * Disables JVM shutdown hook for closing the database gracefully.
+     *
+     * @return the {@link NitriteBuilder} instance.
+     * */
+    public NitriteBuilder disableShutdownHook() {
+        shutdownHook = false;
+        return this;
+    }
+
+    /**
      * Opens or creates a new database. If it is an in-memory store, then it
      * will create a new one. If it is a file based store, and if the file does not
      * exists, then it will create a new file store and open; otherwise it will
@@ -472,7 +483,9 @@ public class NitriteBuilder {
             Nitrite db = new Nitrite(nitriteStore, context);
 
             // shutdown hook to close db file gracefully
-            Runtime.getRuntime().addShutdownHook(new NitriteShutDownHook(db));
+            if (shutdownHook) {
+                Runtime.getRuntime().addShutdownHook(new NitriteShutDownHook(db));
+            }
             return db;
         }
         return null;

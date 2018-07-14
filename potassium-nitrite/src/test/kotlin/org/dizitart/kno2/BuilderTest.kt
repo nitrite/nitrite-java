@@ -66,6 +66,7 @@ class BuilderTest : BaseTest() {
             autoCompact = false
             textTokenizer = UniversalTextTokenizer()
             nitriteMapper = KNO2JacksonMapper()
+            disableShutdownHook = true
         }
 
         val context = db?.context!!

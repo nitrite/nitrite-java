@@ -99,6 +99,11 @@ class Builder internal constructor() {
      */
     var nitriteMapper: NitriteMapper? = null
 
+    /**
+     * Disables JVM shutdown hook for closing the database gracefully.
+     * */
+    var disableShutdownHook: Boolean = false
+
     internal fun createNitriteBuilder() : NitriteBuilder {
         val builder = Nitrite.builder()
         if (file != null) {
@@ -119,6 +124,7 @@ class Builder internal constructor() {
         if (compress) builder.compressed()
         if (!autoCommit) builder.disableAutoCommit()
         if (!autoCompact) builder.disableAutoCompact()
+        if (disableShutdownHook) builder.disableShutdownHook()
 
         return builder
     }
