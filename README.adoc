@@ -103,8 +103,8 @@ ObjectRepository<Employee> repository = db.getRepository(Employee.class);
 --
 // provides index information for ObjectRepository
 @Indices({
-        @Index(field = "joinDate", type = IndexType.NonUnique),
-        @Index(field = "name", type = IndexType.Unique)
+        @Index(value = "joinDate", type = IndexType.NonUnique),
+        @Index(value = "name", type = IndexType.Unique)
 })
 public class Employee implements Serializable {
     // provides id field to uniquely identify an object inside an ObjectRepository

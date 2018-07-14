@@ -32,8 +32,8 @@ import java.lang.annotation.Target;
  * --
  *
  * @Indices({
- *      @Index(field = "joinDate", type = IndexType.NonUnique),
- *      @Index(field = "address", type = IndexType.Fulltext)
+ *      @Index(value = "joinDate", type = IndexType.NonUnique),
+ *      @Index(value = "address", type = IndexType.Fulltext)
  * })
  * public class Employee implements Serializable {
  *

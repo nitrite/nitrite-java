@@ -32,7 +32,7 @@ import java.lang.annotation.Target;
  * [source,java]
  * .Example of Index annotation
  * --
- *  @Index(field = "companyName")
+ *  @Index(value = "companyName")
  *  public class Company implements Serializable {
  *
  *      @Id

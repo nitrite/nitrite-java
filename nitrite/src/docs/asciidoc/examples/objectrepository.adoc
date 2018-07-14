@@ -25,8 +25,8 @@ employeeStore.insert(emp);
 
 // Employee class
 @Indices({
-        @Index(field = "joinDate", type = IndexType.NonUnique),
-        @Index(field = "name", type = IndexType.Unique)
+        @Index(value = "joinDate", type = IndexType.NonUnique),
+        @Index(value = "name", type = IndexType.Unique)
 })
 public class Employee implements Serializable {
     @Id
