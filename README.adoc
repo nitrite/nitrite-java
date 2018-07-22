@@ -299,7 +299,7 @@ image:https://opencollective.com/nitrite-database/contributors.svg?width=890["Co
 
 Thank you to all our backers! 🙏 https://opencollective.com/nitrite-database#backer[Become a backer]
 
-image:https://opencollective.com/final-form/backers.svg?width=890["Backers", link="https://opencollective.com/nitrite-database#backers"]
+image:https://opencollective.com/nitrite-database/backers.svg?width=890["Backers", link="https://opencollective.com/nitrite-database#backers"]
 
 == Sponsors
 
