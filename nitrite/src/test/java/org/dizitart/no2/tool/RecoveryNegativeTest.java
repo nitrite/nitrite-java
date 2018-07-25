@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.tool.Recovery.recover;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 /**
@@ -45,7 +46,7 @@ public class RecoveryNegativeTest {
             raf.setLength(raf.length() + 100);
             raf.close();
 
-            recover(fileName);
+            assertFalse(recover(fileName));
         } else {
             fail("failed to create file");
         }

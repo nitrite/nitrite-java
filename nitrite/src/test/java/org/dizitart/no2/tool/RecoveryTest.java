@@ -33,6 +33,7 @@ import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.filters.Filters.ALL;
 import static org.dizitart.no2.tool.Recovery.recover;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Anindya Chatterjee.
@@ -41,7 +42,7 @@ public class RecoveryTest {
     private static final String fileName = getRandomTempDbFile();
 
     @Test
-    public void testRecovery() throws ParseException, IOException {
+    public void testRecovery() throws ParseException {
         Nitrite db;
         NitriteCollection collection;
         db = Nitrite.builder()
@@ -79,7 +80,7 @@ public class RecoveryTest {
         db.commit();
         db.close();
 
-        recover(fileName);
+        assertTrue(recover(fileName));
     }
 
     @After
