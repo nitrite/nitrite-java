@@ -216,7 +216,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testFindSortOnNonExistingField() {
         insert();
         Cursor cursor = collection.find(sort("my-value", SortOrder.Descending));
-        assertEquals(cursor.size(), 0);
+        assertEquals(cursor.size(), 3);
     }
 
     @Test
@@ -238,7 +238,7 @@ public class CollectionFindTest extends BaseCollectionTest {
         insert();
         Cursor cursor = collection.find(
                 sort("birthDay2", SortOrder.Descending).thenLimit(1, 2));
-        assertEquals(cursor.size(), 0);
+        assertEquals(cursor.size(), 2);
     }
 
     @Test
@@ -578,5 +578,21 @@ public class CollectionFindTest extends BaseCollectionTest {
         assertEquals(2, cursor.size());
         assertNull(cursor.toList().get(0).get("startTime"));
         assertNotNull(cursor.toList().get(1).get("startTime"));
+    }
+
+    @Test
+    public void testIssue93() {
+        NitriteCollection coll = db.getCollection("orderByOnNullableColumn2");
+
+        coll.remove(Filters.ALL);
+
+        Document doc = new Document().put("id", "test-2").put("group", "groupA");
+        assertEquals(1, coll.insert(doc).getAffectedCount());
+
+        doc = new Document().put("id", "test-1").put("group", "groupA");
+        assertEquals(1, coll.insert(doc).getAffectedCount());
+
+        Cursor cursor = coll.find(Filters.eq("group", "groupA"), FindOptions.sort("startTime", SortOrder.Descending));
+        assertEquals(2, cursor.size());
     }
 }

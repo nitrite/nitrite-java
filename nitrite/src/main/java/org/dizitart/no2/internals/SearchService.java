@@ -171,12 +171,6 @@ class SearchService {
             }
         }
 
-        if (sortedMap.size() == 0) {
-            // search was made using non existing field in the whole collection
-            // so we should not consider nullValueIds at all and send empty set
-            return Collections.emptySet();
-        }
-
         List<NitriteId> sortedValues;
         if (findOptions.getSortOrder() == SortOrder.Ascending) {
             sortedValues = new ArrayList<>(nullValueIds);
