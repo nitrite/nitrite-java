@@ -32,12 +32,14 @@ import org.objenesis.ObjenesisStd;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import static org.dizitart.no2.Constants.KEY_OBJ_SEPARATOR;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
 import static org.dizitart.no2.util.ReflectionUtils.findAnnotations;
 import static org.dizitart.no2.util.ReflectionUtils.getField;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
+import static org.dizitart.no2.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
 
@@ -50,7 +52,6 @@ import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
 @UtilityClass
 @Slf4j
 public class ObjectUtils {
-
     /**
      * Generates the name of an {@link org.dizitart.no2.objects.ObjectRepository}.
      *
@@ -61,6 +62,22 @@ public class ObjectUtils {
     public static <T> String findObjectStoreName(Class<T> type) {
         notNull(type, errorMessage("type can not be null", VE_OBJ_STORE_NULL_TYPE));
         return type.getName();
+    }
+
+    /**
+     * Generates the name of an {@link org.dizitart.no2.objects.ObjectRepository}
+     * with an unique key identifier.
+     *
+     * @param <T>  the type parameter
+     * @param key  the key identifier
+     * @param type the type of object stored in the repository
+     * @return the name of the object repository.
+     */
+    public static <T> String findObjectStoreName(String key, Class<T> type) {
+        notNull(key, errorMessage("key can not be null", VE_OBJ_STORE_NULL_KEY));
+        notEmpty(key, errorMessage("key can not be empty", VE_OBJ_STORE_EMPTY_KEY));
+        notNull(type, errorMessage("type can not be null", VE_OBJ_STORE_NULL_TYPE));
+        return type.getName() + KEY_OBJ_SEPARATOR + key;
     }
 
     /**
@@ -168,6 +185,29 @@ public class ObjectUtils {
         try {
             if (isNullOrEmpty(collectionName)) return false;
             Class clazz = Class.forName(collectionName);
+            return clazz != null;
+        } catch (ClassNotFoundException e) {
+            return isKeyedObjectStore(collectionName);
+        }
+    }
+
+    /**
+     * Checks whether a collection name is a valid keyed object store name.
+     *
+     * @param collectionName the collection name
+     * @return `true` if it is a valid object store name; `false` otherwise.
+     */
+    public static boolean isKeyedObjectStore(String collectionName) {
+        try {
+            if (isNullOrEmpty(collectionName)) return false;
+            if (!collectionName.contains(KEY_OBJ_SEPARATOR)) return false;
+
+            String[] split = collectionName.split("\\" + KEY_OBJ_SEPARATOR);
+            if (split.length != 2) {
+                return false;
+            }
+            String storeName = split[0];
+            Class clazz = Class.forName(storeName);
             return clazz != null;
         } catch (ClassNotFoundException e) {
             return false;

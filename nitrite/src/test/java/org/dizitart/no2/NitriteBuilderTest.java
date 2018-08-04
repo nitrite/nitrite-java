@@ -21,6 +21,8 @@ package org.dizitart.no2;
 import org.dizitart.no2.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
+import org.dizitart.no2.objects.Index;
+import org.dizitart.no2.objects.ObjectRepository;
 import org.dizitart.no2.services.LuceneService;
 import org.junit.Test;
 
@@ -115,5 +117,67 @@ public class NitriteBuilderTest {
 
         db.commit();
         db.close();
+    }
+
+    @Test
+    public void testPopulateRepositories() {
+        File file = new File(getRandomTempDbFile());
+        NitriteBuilder builder = Nitrite.builder();
+        builder.filePath(file);
+        Nitrite db = builder.openOrCreate();
+
+        NitriteCollection collection = db.getCollection("test");
+        collection.insert(Document.createDocument("id1", "value"));
+
+        ObjectRepository<TestObject> repository = db.getRepository(TestObject.class);
+        repository.insert(new TestObject("test", 1L));
+
+        ObjectRepository<TestObject> repository2 = db.getRepository("key", TestObject.class);
+        TestObject object = new TestObject();
+        object.stringValue = "test2";
+        object.longValue = 2L;
+        repository2.insert(object);
+
+        ObjectRepository<TestObject2> repository3 = db.getRepository("key", TestObject2.class);
+        TestObject2 object2 = new TestObject2();
+        object2.stringValue = "test2";
+        object2.longValue = 2L;
+        repository3.insert(object2);
+
+        db.commit();
+        db.close();
+
+        db = builder.openOrCreate();
+        assertTrue(db.hasCollection("test"));
+        assertTrue(db.hasRepository(TestObject.class));
+        assertTrue(db.hasRepository("key", TestObject.class));
+        assertFalse(db.hasRepository(TestObject2.class));
+        assertTrue(db.hasRepository("key", TestObject2.class));
+    }
+
+    @Index(value = "longValue")
+    private class TestObject {
+        private String stringValue;
+        private Long longValue;
+
+        public TestObject() {}
+
+        public TestObject(String stringValue, Long longValue) {
+            this.longValue = longValue;
+            this.stringValue = stringValue;
+        }
+    }
+
+    @Index(value = "longValue")
+    private class TestObject2 {
+        private String stringValue;
+        private Long longValue;
+
+        public TestObject2() {}
+
+        public TestObject2(String stringValue, Long longValue) {
+            this.longValue = longValue;
+            this.stringValue = stringValue;
+        }
     }
 }

@@ -64,6 +64,15 @@ class NitriteTest : BaseTest() {
     }
 
     @Test
+    fun testGetRepositoryWithKey() {
+        db?.getRepository<TestData>("tag") {
+            assertFalse(isClosed)
+            close()
+            assertTrue(isClosed)
+        }
+    }
+
+    @Test
     fun testIndexOption() {
         db?.getCollection("test") {
             createIndex("id", option(IndexType.Unique, true))

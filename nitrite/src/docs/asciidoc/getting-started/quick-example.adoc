@@ -25,6 +25,9 @@ NitriteCollection collection = db.getCollection("test");
 // Create an Object Repository
 ObjectRepository<Employee> repository = db.getRepository(Employee.class);
 
+// Create an Object Repository with a key
+ObjectRepository<Employee> repository = db.getRepository("key", Employee.class);
+
 --
 
 .CRUD Operations

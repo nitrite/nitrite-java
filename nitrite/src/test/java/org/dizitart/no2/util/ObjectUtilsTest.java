@@ -30,6 +30,7 @@ import java.util.Set;
 import static org.dizitart.no2.util.ObjectUtils.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Anindya Chatterjee.
@@ -41,12 +42,28 @@ public class ObjectUtilsTest {
         assertFalse(isObjectStore(""));
         assertFalse(isObjectStore(null));
         assertFalse(isObjectStore("abcd"));
+        assertTrue(isObjectStore("java.lang.String"));
+        assertTrue(isObjectStore("java.lang.String+key"));
+        assertFalse(isObjectStore("java.lang.String-key"));
+    }
+
+    @Test
+    public void testIsKeyedObjectStore() {
+        assertTrue(isKeyedObjectStore("java.lang.String+key"));
+        assertFalse(isKeyedObjectStore("java.lang.String2+key"));
+        assertFalse(isKeyedObjectStore("java.lang.String"));
+        assertFalse(isKeyedObjectStore(null));
+        assertFalse(isKeyedObjectStore(""));
+        assertFalse(isKeyedObjectStore("abcd"));
+        assertFalse(isKeyedObjectStore("+"));
+        assertFalse(isKeyedObjectStore("abcd+e"));
     }
 
     @Test
     public void testObjectStoreName() {
         assertEquals(findObjectStoreName(String.class), "java.lang.String");
         assertEquals(findObjectStoreName(TestObject.class), "org.dizitart.no2.util.ObjectUtilsTest$TestObject");
+        assertEquals(findObjectStoreName("key", TestObject.class), "org.dizitart.no2.util.ObjectUtilsTest$TestObject+key");
     }
 
     @Test

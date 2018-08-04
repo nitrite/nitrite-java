@@ -58,6 +58,24 @@ inline fun <reified T : Any> Nitrite.getRepository(noinline op: (ObjectRepositor
 }
 
 /**
+ * Opens a type-safe object repository with a key identifier from the store. If the repository
+ * does not exist it will be created automatically and returned. If a
+ * repository is already opened, it is returned as is.
+ *
+ * @param [T] type parameter
+ * @param key  the key that will be appended to the repositories name
+ * @param [op] repository builder block
+ * @return the object repository of type [T]
+ */
+inline fun <reified T : Any> Nitrite.getRepository(key: String, noinline op: (ObjectRepository<T>.() -> Unit)? = null): ObjectRepository<T> {
+    val repository = this.getRepository(key, T::class.java)
+    op?.invoke(repository)
+    return repository
+}
+
+
+
+/**
  * Creates an [IndexOptions] with the specified [indexType] and [async] flag.
  *
  * @param [indexType] the type of index to be created.

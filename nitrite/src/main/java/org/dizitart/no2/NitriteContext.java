@@ -28,6 +28,7 @@ import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.util.ExecutorUtils;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -133,7 +134,7 @@ public class NitriteContext {
     private Set<String> collectionRegistry;
 
     @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
-    private Set<Class<?>> repositoryRegistry;
+    private Map<String, Class<?>> repositoryRegistry;
 
     /**
      * Instantiates a new Nitrite context.

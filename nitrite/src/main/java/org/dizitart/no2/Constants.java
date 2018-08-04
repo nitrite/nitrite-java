@@ -191,6 +191,11 @@ public class Constants {
     public static final String DELETE_TIME = "deleteTime";
 
     /**
+     * The constant KEY_OBJ_SEPARATOR.
+     * */
+    public static final String KEY_OBJ_SEPARATOR = "+";
+
+    /**
      * The constant HASH_ITERATIONS.
      */
     static final int HASH_ITERATIONS = 10000;
