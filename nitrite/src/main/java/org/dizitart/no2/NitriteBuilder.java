@@ -32,14 +32,18 @@ import org.dizitart.no2.util.StringUtils;
 import org.h2.mvstore.MVStore;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
+import static org.dizitart.no2.Constants.KEY_OBJ_SEPARATOR;
 import static org.dizitart.no2.Security.createSecurely;
 import static org.dizitart.no2.Security.openSecurely;
 import static org.dizitart.no2.exceptions.ErrorCodes.NIOE_DIR_DOES_NOT_EXISTS;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.tool.Recovery.recover;
+import static org.dizitart.no2.util.ObjectUtils.isKeyedObjectStore;
 import static org.dizitart.no2.util.ObjectUtils.isObjectStore;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.util.ValidationUtils.isValidCollectionName;
@@ -505,13 +509,21 @@ public class NitriteBuilder {
         return collectionRegistry;
     }
 
-    private Set<Class<?>> populateRepositories(NitriteStore store) {
-        Set<Class<?>> repositoryRegistry = new HashSet<>();
+    private Map<String, Class<?>> populateRepositories(NitriteStore store) {
+        Map<String, Class<?>> repositoryRegistry = new HashMap<>();
         if (store != null) {
             for (String name : store.getMapNames()) {
                 if (isValidCollectionName(name) && isObjectStore(name)) {
                     try {
-                        repositoryRegistry.add(Class.forName(name));
+                        if (isKeyedObjectStore(name)) {
+                            String[] split = name.split("\\" + KEY_OBJ_SEPARATOR);
+                            String typeName = split[0];
+                            Class<?> type = Class.forName(typeName);
+                            repositoryRegistry.put(name, type);
+                        } else {
+                            Class<?> type = Class.forName(name);
+                            repositoryRegistry.put(name, type);
+                        }
                     } catch (ClassNotFoundException e) {
                         log.error("Could not find the class " + name);
                     }

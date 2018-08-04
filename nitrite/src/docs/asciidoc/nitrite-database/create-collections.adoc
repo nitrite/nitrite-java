@@ -14,7 +14,11 @@ Similarly, to create or open an ObjectRepository call
 
 [source,java]
 --
+// creates an object repository of type Employee
 ObjectRepository<Employee> repository = db.getRepository(Employee.class);
+
+// creates an object repository of type Employee with a specified key
+ObjectRepository<Employee> repository = db.getRepository("key", Employee.class);
 --
 
 If no object repository of the given type exists in the database, a new

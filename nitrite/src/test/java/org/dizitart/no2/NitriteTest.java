@@ -241,6 +241,15 @@ public class NitriteTest {
     }
 
     @Test
+    public void testGetRepositoryWithKey() {
+        ObjectRepository<NitriteTest> repository = db.getRepository("key", NitriteTest.class);
+        assertNotNull(repository);
+        assertEquals(repository.getType(), NitriteTest.class);
+        assertFalse(db.hasRepository(NitriteTest.class));
+        assertTrue(db.hasRepository("key", NitriteTest.class));
+    }
+
+    @Test
     public void testMultipleGetCollection() {
         NitriteCollection collection = db.getCollection("test-collection");
         assertNotNull(collection);
