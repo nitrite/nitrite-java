@@ -64,6 +64,21 @@ public class ObjectUtils {
     }
 
     /**
+     * Generates the name of an {@link org.dizitart.no2.objects.ObjectRepository}
+     * with an unique key identifier.
+     *
+     * @param <T>  the type parameter
+     * @param key  the key identifier
+     * @param type the type of object stored in the repository
+     * @return the name of the object repository.
+     */
+    public static <T> String findObjectStoreName(String key, Class<T> type) {
+        notNull(type, errorMessage("key can not be null", VE_OBJ_STORE_NULL_TYPE));
+        notNull(type, errorMessage("type can not be null", VE_OBJ_STORE_NULL_TYPE));
+        return type.getName() + "_" + key;
+    }
+
+    /**
      * Extract indices information by scanning for {@link Index} annotated fields.
      *
      * @param <T>           the type parameter
