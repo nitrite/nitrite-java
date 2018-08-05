@@ -18,6 +18,7 @@
 
 package org.dizitart.kno2
 
+import com.fasterxml.jackson.databind.Module
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
@@ -29,9 +30,10 @@ import org.dizitart.no2.mapper.JacksonFacade
  * Default [JacksonFacade] for potassium nitrite.
  *
  * @author Stefan Mandel
+ * @author Anindya Chatterjee
  * @since 3.0.1
  */
-open class KNO2JacksonFacade : JacksonFacade() {
+open class KNO2JacksonFacade(modules: Set<Module>? = setOf()) : JacksonFacade(modules) {
 
     override fun createObjectMapper(): ObjectMapper {
         val objectMapper = super.createObjectMapper()

@@ -18,6 +18,7 @@
 
 package org.dizitart.kno2
 
+import com.fasterxml.jackson.databind.Module
 import org.dizitart.no2.mapper.GenericMapper
 import org.dizitart.no2.mapper.MapperFacade
 
@@ -30,4 +31,5 @@ import org.dizitart.no2.mapper.MapperFacade
  */
 open class KNO2JacksonMapper(mapperFacade: MapperFacade) : GenericMapper(mapperFacade) {
     constructor() : this(KNO2JacksonFacade())
+    constructor(modules: Set<Module>) : this(KNO2JacksonFacade(modules))
 }

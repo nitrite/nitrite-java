@@ -93,8 +93,10 @@ public class JacksonFacade implements MapperFacade {
      * */
     protected ObjectMapper createObjectMapper(Set<Module> modules) {
         ObjectMapper mapper = createObjectMapper();
-        for (Module module : modules) {
-            mapper.registerModule(module);
+        if (modules != null) {
+            for (Module module : modules) {
+                mapper.registerModule(module);
+            }
         }
         return mapper;
     }

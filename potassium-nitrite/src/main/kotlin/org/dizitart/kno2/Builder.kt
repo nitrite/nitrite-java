@@ -18,6 +18,7 @@
 
 package org.dizitart.kno2
 
+import com.fasterxml.jackson.databind.Module
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.NitriteBuilder
 import org.dizitart.no2.fulltext.TextIndexingService
@@ -32,6 +33,8 @@ import java.io.File
  * @author Anindya Chatterjee
  */
 class Builder internal constructor() {
+    private val jacksonModules = mutableSetOf<Module>()
+
     /**
      * Path for the file based store.
      */
@@ -104,6 +107,15 @@ class Builder internal constructor() {
      * */
     var disableShutdownHook: Boolean = false
 
+    /**
+     * Registers a jackson [Module] to the [KNO2JacksonFacade]
+     *
+     * @param [module] jackson [Module] to register
+     * */
+    fun registerModule(module: Module) {
+        jacksonModules.add(module)
+    }
+
     internal fun createNitriteBuilder() : NitriteBuilder {
         val builder = Nitrite.builder()
         if (file != null) {
@@ -116,7 +128,11 @@ class Builder internal constructor() {
         builder.textTokenizer(textTokenizer)
 
         if (nitriteMapper == null) {
-            nitriteMapper = KNO2JacksonMapper()
+            nitriteMapper = if (jacksonModules.isEmpty()) {
+                KNO2JacksonMapper()
+            } else {
+                KNO2JacksonMapper(jacksonModules)
+            }
         }
         builder.nitriteMapper(nitriteMapper)
 
@@ -125,6 +141,9 @@ class Builder internal constructor() {
         if (!autoCommit) builder.disableAutoCommit()
         if (!autoCompact) builder.disableAutoCompact()
         if (disableShutdownHook) builder.disableShutdownHook()
+        if (jacksonModules.isNotEmpty()) {
+            jacksonModules.forEach { builder.registerModule(it) }
+        }
 
         return builder
     }
