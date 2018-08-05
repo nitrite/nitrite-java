@@ -18,6 +18,8 @@
 
 package org.dizitart.no2;
 
+import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.databind.Module;
 import org.dizitart.no2.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
@@ -155,6 +157,20 @@ public class NitriteBuilderTest {
         assertTrue(db.hasRepository("key", TestObject2.class));
     }
 
+    @Test
+    public void testRegisterModule() {
+        TestModule testModule = new TestModule();
+        File file = new File(getRandomTempDbFile());
+        NitriteBuilder builder = Nitrite
+                .builder()
+                .filePath(file)
+                .registerModule(testModule);
+        Nitrite db = builder.openOrCreate();
+        NitriteContext context = db.getContext();
+
+        assertTrue(context.getRegisteredModules().contains(testModule));
+    }
+
     @Index(value = "longValue")
     private class TestObject {
         private String stringValue;
@@ -178,6 +194,24 @@ public class NitriteBuilderTest {
         public TestObject2(String stringValue, Long longValue) {
             this.longValue = longValue;
             this.stringValue = stringValue;
+        }
+    }
+
+    private class TestModule extends Module {
+
+        @Override
+        public String getModuleName() {
+            return "TestModule";
+        }
+
+        @Override
+        public Version version() {
+            return Version.unknownVersion();
+        }
+
+        @Override
+        public void setupModule(SetupContext context) {
+
         }
     }
 }

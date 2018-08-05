@@ -20,3 +20,18 @@ The default NitriteMapper:
 * does not allow circular reference (will throw ObjectMappingException)
 * needs POJO classes to have a public parameter-less constructor
 * honors fields declared as `transient`
+
+As of 3.1.0, a jackson module can be easily registered with the default jackson mapper using
+the builder.
+
+[source,java]
+.Example for registering jackson module
+--
+
+Nitrite db = Nitrite.builder()
+            .registerModule(new Jdk8Module())        // register jdk8 module
+            .registerModule(new JavaTimeModule())    // register java.time module
+            .filePath("/tmp/test.db")
+            .openOrCreate("user", "password");
+
+--

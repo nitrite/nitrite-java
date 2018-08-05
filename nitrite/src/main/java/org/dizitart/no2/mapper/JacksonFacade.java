@@ -20,10 +20,7 @@ package org.dizitart.no2.mapper;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.ObjectMappingException;
@@ -58,6 +55,15 @@ public class JacksonFacade implements MapperFacade {
     }
 
     /**
+     * Instantiates a new {@link JacksonFacade}.
+     *
+     * @param modules jackson {@link Module} to register
+     */
+    public JacksonFacade(Set<Module> modules) {
+        this.objectMapper = createObjectMapper(modules);
+    }
+
+    /**
      * Creates a new jackson {@link ObjectMapper}.
      *
      * @return the object mapper
@@ -76,6 +82,21 @@ public class JacksonFacade implements MapperFacade {
         objectMapper.registerModule(new NitriteIdModule());
         objectMapper.findAndRegisterModules();
         return objectMapper;
+    }
+
+    /**
+     * Creates a new jackson {@link ObjectMapper} and registers
+     * {@link Module} specified by `modules`.
+     *
+     * @param modules jackson {@link Module} to register
+     * @return the object mapper
+     * */
+    protected ObjectMapper createObjectMapper(Set<Module> modules) {
+        ObjectMapper mapper = createObjectMapper();
+        for (Module module : modules) {
+            mapper.registerModule(module);
+        }
+        return mapper;
     }
 
     /**

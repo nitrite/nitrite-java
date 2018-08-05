@@ -1,6 +1,5 @@
 package org.dizitart.no2.mapper;
 
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.dizitart.no2.NitriteId;
 

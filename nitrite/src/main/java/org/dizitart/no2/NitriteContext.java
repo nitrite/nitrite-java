@@ -18,6 +18,7 @@
 
 package org.dizitart.no2;
 
+import com.fasterxml.jackson.databind.Module;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,6 +29,7 @@ import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.util.ExecutorUtils;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -136,6 +138,9 @@ public class NitriteContext {
     @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
     private Map<String, Class<?>> repositoryRegistry;
 
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.PACKAGE)
+    private Set<Module> jacksonModule;
+
     /**
      * Instantiates a new Nitrite context.
      */
@@ -151,9 +156,22 @@ public class NitriteContext {
      */
     public NitriteMapper getNitriteMapper() {
         if (nitriteMapper == null) {
-            nitriteMapper = new JacksonMapper();
+            if (jacksonModule == null || jacksonModule.isEmpty()) {
+                nitriteMapper = new JacksonMapper();
+            } else {
+                nitriteMapper = new JacksonMapper(jacksonModule);
+            }
         }
         return nitriteMapper;
+    }
+
+    /**
+     * Gets the jackson {@link Module} registered with {@link JacksonMapper}.
+     *
+     * @return the set of jackson {@link Module}.
+     */
+    public Set<Module> getRegisteredModules() {
+        return new HashSet<>(jacksonModule);
     }
 
     void shutdown() {

@@ -18,9 +18,11 @@
 
 package org.dizitart.no2.mapper;
 
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
+
+import java.util.Set;
 
 /**
  * A jackson based {@link GenericMapper} implementation. It uses
@@ -30,7 +32,6 @@ import org.dizitart.no2.Document;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-@Slf4j
 public class JacksonMapper extends GenericMapper {
 
     /**
@@ -38,6 +39,16 @@ public class JacksonMapper extends GenericMapper {
      */
     public JacksonMapper() {
         this(new JacksonFacade());
+    }
+
+    /**
+     * Instantiates a new {@link JacksonMapper} with a {@link JacksonFacade}
+     * and register jackson {@link Module} specified by `modules`.
+     *
+     * @param modules jackson {@link Module} to register
+     */
+    public JacksonMapper(Set<Module> modules) {
+        this(new JacksonFacade(modules));
     }
 
     /**

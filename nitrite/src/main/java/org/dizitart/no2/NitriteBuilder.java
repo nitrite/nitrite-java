@@ -18,6 +18,7 @@
 
 package org.dizitart.no2;
 
+import com.fasterxml.jackson.databind.Module;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
@@ -109,8 +110,10 @@ public class NitriteBuilder {
     private TextIndexingService textIndexingService;
     private TextTokenizer textTokenizer;
     private NitriteMapper nitriteMapper;
+    private Set<Module> jacksonModules;
 
     NitriteBuilder(){
+        jacksonModules = new HashSet<>();
     }
 
     /**
@@ -305,6 +308,29 @@ public class NitriteBuilder {
     }
 
     /**
+     * Registers a jackson {@link Module} to the {@link org.dizitart.no2.mapper.JacksonFacade}.
+     *
+     * [icon="{@docRoot}/note.png"]
+     * [NOTE]
+     * --
+     * This is only useful when the default {@link NitriteMapper} viz.
+     * {@link org.dizitart.no2.mapper.JacksonMapper} is used.
+     *
+     * --
+     *
+     * @param module jackson module to register
+     * @return the {@link NitriteBuilder} instance.
+     * @see org.dizitart.no2.mapper.JacksonFacade
+     * @see org.dizitart.no2.mapper.JacksonMapper
+     * @see NitriteMapper
+     * @see org.dizitart.no2.mapper.GenericMapper
+     * */
+    public NitriteBuilder registerModule(Module module) {
+        this.jacksonModules.add(module);
+        return this;
+    }
+
+    /**
      * Opens or creates a new database. If it is an in-memory store, then it
      * will create a new one. If it is a file based store, and if the file does not
      * exists, then it will create a new file store and open; otherwise it will
@@ -477,6 +503,7 @@ public class NitriteBuilder {
             context.setAutoCommitEnabled(autoCommit);
             context.setAutoCompactEnabled(autoCompact);
             context.setNitriteMapper(nitriteMapper);
+            context.setJacksonModule(jacksonModules);
 
             NitriteStore nitriteStore = new NitriteMVStore(store);
 
