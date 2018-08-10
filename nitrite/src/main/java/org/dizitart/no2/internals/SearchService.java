@@ -173,11 +173,21 @@ class SearchService {
 
         List<NitriteId> sortedValues;
         if (findOptions.getSortOrder() == SortOrder.Ascending) {
-            sortedValues = new ArrayList<>(nullValueIds);
-            sortedValues.addAll(flattenList(sortedMap.values()));
+            if (findOptions.getNullOrder() == NullOrder.Default || findOptions.getNullOrder() == NullOrder.First) {
+                sortedValues = new ArrayList<>(nullValueIds);
+                sortedValues.addAll(flattenList(sortedMap.values()));
+            } else {
+                sortedValues = flattenList(sortedMap.values());
+                sortedValues.addAll(nullValueIds);
+            }
         } else {
-            sortedValues = flattenList(sortedMap.descendingMap().values());
-            sortedValues.addAll(nullValueIds);
+            if (findOptions.getNullOrder() == NullOrder.Default || findOptions.getNullOrder() == NullOrder.Last) {
+                sortedValues = flattenList(sortedMap.descendingMap().values());
+                sortedValues.addAll(nullValueIds);
+            } else {
+                sortedValues = new ArrayList<>(nullValueIds);
+                sortedValues.addAll(flattenList(sortedMap.descendingMap().values()));
+            }
         }
 
         return limitIdSet(sortedValues, findOptions);

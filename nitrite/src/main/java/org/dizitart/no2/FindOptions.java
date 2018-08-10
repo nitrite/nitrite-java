@@ -75,7 +75,14 @@ public class FindOptions {
      *
      * @return the sort order.
      * */
-    @Getter @NonFinal private SortOrder sortOrder;
+    @Getter @NonFinal private SortOrder sortOrder = SortOrder.Ascending;
+
+    /**
+     * Gets the `null` values order of the find result.
+     *
+     * @return the `null` values order.
+     * */
+    @Getter @NonFinal private NullOrder nullOrder = NullOrder.Default;
 
 
     /**
@@ -101,6 +108,19 @@ public class FindOptions {
     }
 
     /**
+     * Instantiates a new find options with sorting criteria and `null` value order.
+     *
+     * @param field     the value to sort by.
+     * @param sortOrder the sort order.
+     * @param nullOrder the `null` value order.
+     */
+    public FindOptions(String field, SortOrder sortOrder, NullOrder nullOrder) {
+        this.field = field;
+        this.sortOrder = sortOrder;
+        this.nullOrder = nullOrder;
+    }
+
+    /**
      * Creates a find options with pagination criteria.
      *
      * @param offset the pagination offset.
@@ -120,6 +140,18 @@ public class FindOptions {
      */
     public static FindOptions sort(String field, SortOrder sortOrder) {
         return new FindOptions(field, sortOrder);
+    }
+
+    /**
+     * Creates a find options with sorting criteria.
+     *
+     * @param field     the value to sort by.
+     * @param sortOrder the sort order.
+     * @param nullOrder the `null` value order.
+     * @return the find options with sorting criteria.
+     */
+    public static FindOptions sort(String field, SortOrder sortOrder, NullOrder nullOrder) {
+        return new FindOptions(field, sortOrder, nullOrder);
     }
 
     /**
