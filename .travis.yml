@@ -13,9 +13,8 @@ services:
   - docker
   - mongodb
 
-# blocklist
 branches:
-  only:
+  except:
     - /^feature-.*$/
 
 before_install:
