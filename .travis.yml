@@ -13,6 +13,11 @@ services:
   - docker
   - mongodb
 
+# blocklist
+branches:
+  only:
+    - /^feature-.*$/
+
 before_install:
   - openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out ~/secring.gpg -d -md md5
   - chmod a+x gradlew
