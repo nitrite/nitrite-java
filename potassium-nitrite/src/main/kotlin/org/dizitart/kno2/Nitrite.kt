@@ -104,3 +104,14 @@ fun limit(offset: Int, size: Int): FindOptions
  */
 fun sort(field: String, sortOrder: SortOrder): FindOptions
     = FindOptions.sort(field, sortOrder)
+
+/**
+ * Creates a [FindOptions] with sorting criteria.
+ *
+ * @param [field] the value to sort by.
+ * @param [sortOrder] the sort order.
+ * @param [nullOrder] the `null` value order.
+ * @return a new [FindOptions]
+ */
+fun sort(field: String, sortOrder: SortOrder, nullOrder: NullOrder): FindOptions
+        = FindOptions.sort(field, sortOrder, nullOrder)

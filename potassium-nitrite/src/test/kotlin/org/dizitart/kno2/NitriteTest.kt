@@ -19,6 +19,7 @@
 package org.dizitart.kno2
 
 import org.dizitart.no2.IndexType
+import org.dizitart.no2.NullOrder
 import org.dizitart.no2.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
 import org.dizitart.no2.objects.Id
@@ -92,7 +93,7 @@ class NitriteTest : BaseTest() {
             var cursor = find(limit(0, 2))
             assertEquals(cursor.size(), 2)
 
-            cursor = find(sort("a", SortOrder.Descending))
+            cursor = find(sort("a", SortOrder.Descending, NullOrder.First))
             assertEquals(cursor.size(), 5)
             assertEquals(cursor.last()["a"], 1)
 
