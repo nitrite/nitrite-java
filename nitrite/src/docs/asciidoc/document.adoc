@@ -28,8 +28,8 @@ A document can directly be constructed from JSON string:
 
 [source,java]
 --
-NitriteMapper nitriteMapper = new JacksonMapper();
-Document doc = nitriteMapper.parse(jsonString);
+MapperFacade facade = new JacksonFacade();
+Document doc = facade.parse(jsonString);
 --
 
 ====

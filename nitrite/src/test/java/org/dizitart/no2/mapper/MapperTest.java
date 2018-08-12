@@ -145,4 +145,17 @@ public class MapperTest {
         System.out.println(diff);
         assertEquals(department, dept);
     }
+
+    @Test
+    public void testParseJson() {
+        MapperFacade facade = new JacksonFacade();
+        Document document = Document.createDocument("key1", 1)
+                .put("key2", "xyz")
+                .put("key3", new Date().getTime());
+        String json = facade.toJson(document);
+        System.out.println(json);
+
+        Document document2 = facade.parse(json);
+        assertEquals(document, document2);
+    }
 }
