@@ -18,6 +18,8 @@
 
 package org.dizitart.no2.objects.data;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dizitart.no2.IndexType;
 import org.dizitart.no2.objects.Id;
 import org.dizitart.no2.objects.Index;
@@ -28,11 +30,13 @@ import java.util.Date;
 /**
  * @author Anindya Chatterjee
  */
+@Getter
+@Setter
 @Indices(
         @Index(value = "date", type = IndexType.Unique)
 )
 public class ParentClass extends SuperDuperClass {
     @Id
-    public Long id;
-    public Date date;
+    protected Long id;
+    private Date date;
 }

@@ -18,12 +18,16 @@
 
 package org.dizitart.no2.objects.data;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dizitart.no2.objects.InheritIndices;
 
 /**
  * @author Anindya Chatterjee
  */
+@Getter
+@Setter
 @InheritIndices
 public class ChildClass extends ParentClass {
-    public String name;
+    private String name;
 }

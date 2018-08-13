@@ -18,13 +18,17 @@
 
 package org.dizitart.no2.objects.data;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.dizitart.no2.IndexType;
 import org.dizitart.no2.objects.Index;
 
 /**
  * @author Anindya Chatterjee
  */
+@Getter
+@Setter
 @Index(value = "text", type = IndexType.Fulltext)
 public class SuperDuperClass {
-    public String text;
+    private String text;
 }

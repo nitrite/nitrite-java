@@ -34,6 +34,7 @@ import java.util.UUID;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
+import static org.dizitart.no2.objects.filters.ObjectFilters.text;
 import static org.junit.Assert.*;
 
 /**
@@ -223,5 +224,31 @@ public class ObjectRepositoryTest {
         assertTrue(repository.hasIndex("id"));
         assertTrue(repository.hasIndex("date"));
         assertTrue(repository.hasIndex("text"));
+
+        ChildClass childClass = new ChildClass();
+        childClass.setName("first");
+        childClass.setDate(new Date(100000L));
+        childClass.setId(1L);
+        childClass.setText("I am first class");
+        repository.insert(childClass);
+
+        childClass = new ChildClass();
+        childClass.setName("seconds");
+        childClass.setDate(new Date(100001L));
+        childClass.setId(2L);
+        childClass.setText("I am second class");
+        repository.insert(childClass);
+
+        childClass = new ChildClass();
+        childClass.setName("third");
+        childClass.setDate(new Date(100002L));
+        childClass.setId(3L);
+        childClass.setText("I am third class");
+        repository.insert(childClass);
+
+        assertEquals(repository.find(text("text", "class")).size(), 3);
+        assertEquals(repository.find(text("text", "second")).size(), 0); // filtered in stop words
+        assertEquals(repository.find(eq("date", new Date(100000L))).size(), 1);
+        assertEquals(repository.find(eq("id", 1L)).size(), 1);
     }
 }

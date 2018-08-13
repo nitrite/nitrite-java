@@ -38,6 +38,7 @@ import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
 import static org.dizitart.no2.util.ReflectionUtils.findAnnotations;
 import static org.dizitart.no2.util.ReflectionUtils.getField;
+import static org.dizitart.no2.util.ReflectionUtils.getFieldsUpto;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
@@ -132,11 +133,11 @@ public class ObjectUtils {
      * @return the id field
      */
     public static <T> Field getIdField(NitriteMapper nitriteMapper, Class<T> type) {
-        Field[] fields;
+        List<Field> fields;
         if (type.isAnnotationPresent(InheritIndices.class)) {
-            fields = type.getFields();
+            fields = getFieldsUpto(type, Object.class);
         } else {
-            fields = type.getDeclaredFields();
+            fields = Arrays.asList(type.getDeclaredFields());
         }
 
         boolean alreadyIdFound = false;

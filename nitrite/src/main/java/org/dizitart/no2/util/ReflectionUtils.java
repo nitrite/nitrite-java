@@ -20,7 +20,6 @@ package org.dizitart.no2.util;
 
 import lombok.experimental.UtilityClass;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.objects.InheritIndices;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -58,7 +57,7 @@ public class ReflectionUtils {
         filterSynthetics(currentClassFields);
         Class<?> parentClass = startClass.getSuperclass();
 
-        if (parentClass != null && (exclusiveParent == null || !(parentClass.equals(exclusiveParent)))) {
+        if (parentClass != null && !(parentClass.equals(exclusiveParent))) {
             List<Field> parentClassFields = getFieldsUpto(parentClass, exclusiveParent);
             currentClassFields.addAll(parentClassFields);
         }
@@ -125,8 +124,9 @@ public class ReflectionUtils {
                     break;
                 }
             }
+
             if (field == null && recursive) {
-                Field[] fields = type.getFields();
+                List<Field> fields = getFieldsUpto(type, Object.class);
                 for (Field recursiveField : fields) {
                     if (recursiveField.getName().equals(name)) {
                         field = recursiveField;
