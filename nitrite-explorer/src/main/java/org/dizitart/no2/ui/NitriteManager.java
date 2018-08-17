@@ -32,7 +32,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.ui.data.Company;
 import org.dizitart.no2.ui.data.DataGenerator;
 import org.dizitart.no2.ui.data.Employee;

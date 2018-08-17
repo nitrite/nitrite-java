@@ -229,6 +229,7 @@ public class ErrorCodes {
     public static final int SE_NULL_USER_CREDENTIAL = 7004;
     public static final int SE_USER_ID_EMPTY = 7005;
     public static final int SE_PASSWORD_EMPTY = 7006;
+    public static final int SE_HASHING_FAILED = 7007;
 
     /* NotIdentifiableException Codes */
     public static final int NIE_REMOVE_FAILED_FOR_NO_ID = 8001;

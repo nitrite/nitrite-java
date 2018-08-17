@@ -24,7 +24,7 @@ import org.h2.mvstore.MVStore;
 
 import java.util.Set;
 
-import static org.dizitart.no2.Constants.META_MAP_NAME;
+import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 
 /**
  * A {@link MVStore} backed {@link NitriteStore} implementation.

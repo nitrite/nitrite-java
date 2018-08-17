@@ -20,7 +20,7 @@ package org.dizitart.no2.tool;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.dizitart.no2.*;
+import org.dizitart.no2.collection.PersistentCollection;
 
 import java.util.ArrayList;
 import java.util.List;

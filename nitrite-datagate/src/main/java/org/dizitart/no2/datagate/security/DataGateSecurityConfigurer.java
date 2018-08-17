@@ -19,7 +19,7 @@
 package org.dizitart.no2.datagate.security;
 
 import org.dizitart.no2.datagate.services.UserAccountService;
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.sync.types.UserAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -20,7 +20,7 @@ package org.dizitart.no2.datagate.services;
 
 import com.mongodb.CommandResult;
 import org.dizitart.no2.Document;
-import org.dizitart.no2.FindOptions;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.meta.Attributes;
 import org.dizitart.no2.datagate.models.NitriteDocument;
 import org.jongo.Jongo;
@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.dizitart.no2.Constants.COLLECTION;
-import static org.dizitart.no2.Constants.DOC_SOURCE;
+import static org.dizitart.no2.common.Constants.COLLECTION;
+import static org.dizitart.no2.common.Constants.DOC_SOURCE;
 import static org.dizitart.no2.datagate.Constants.ATTRIBUTE_REPO;
 import static org.dizitart.no2.datagate.Constants.STORAGE_VENDOR;
 import static org.dizitart.no2.datagate.models.NitriteDocument.*;

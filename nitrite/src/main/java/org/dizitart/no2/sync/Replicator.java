@@ -18,16 +18,17 @@
 
 package org.dizitart.no2.sync;
 
-import org.dizitart.no2.IndexType;
+import org.dizitart.no2.common.ExecutorServiceManager;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteCollection;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.event.EventBus;
-import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.dizitart.no2.Constants.DOC_REVISION;
-import static org.dizitart.no2.IndexOptions.indexOptions;
+import static org.dizitart.no2.common.Constants.DOC_REVISION;
+import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.dizitart.no2.exceptions.ErrorCodes.VE_SYNC_NULL_COLLECTION;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
@@ -160,11 +161,11 @@ public class Replicator {
             syncConfig.setSyncEventListener(listener);
 
             EventBus<SyncEventData, SyncEventListener> eventBus
-                    = new SyncEventBus(db.getContext());
+                    = new SyncEventBus();
             NitriteCollection changeLogRepository
                     = db.getCollection("removeLog");
             ScheduledExecutorService replicatorPool
-                    = db.getContext().getScheduledWorkerPool();
+                    = ExecutorServiceManager.scheduledExecutor();
 
             notNull(collection, errorMessage("collection can not be null", VE_SYNC_NULL_COLLECTION));
             String uniqueName = collection.getName();

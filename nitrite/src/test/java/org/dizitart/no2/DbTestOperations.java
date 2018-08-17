@@ -18,6 +18,13 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.collection.Cursor;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.SortOrder;
+import org.dizitart.no2.collection.WriteResult;
+import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.IndexType;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.dizitart.no2.Document.createDocument;
-import static org.dizitart.no2.FindOptions.sort;
+import static org.dizitart.no2.collection.FindOptions.sort;
 import static org.dizitart.no2.filters.Filters.*;
 import static org.dizitart.no2.util.Iterables.isSorted;
 import static org.junit.Assert.assertEquals;

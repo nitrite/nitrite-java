@@ -20,13 +20,13 @@ package org.dizitart.no2.sync;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteCollection;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.Retry;
-import org.dizitart.no2.objects.Cursor;
-import org.dizitart.no2.objects.ObjectRepository;
-import org.dizitart.no2.objects.data.DataGenerator;
-import org.dizitart.no2.objects.data.Employee;
-import org.dizitart.no2.util.ExecutorUtils;
+import org.dizitart.no2.collection.objects.Cursor;
+import org.dizitart.no2.collection.objects.ObjectRepository;
+import org.dizitart.no2.collection.objects.data.DataGenerator;
+import org.dizitart.no2.collection.objects.data.Employee;
+import org.dizitart.no2.common.ExecutorServiceManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
+import static org.dizitart.no2.filters.ObjectFilters.eq;
 import static org.dizitart.no2.sync.TimeSpan.timeSpan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -108,7 +108,7 @@ public class RandomSyncTest {
 
     @Test
     public void testRandomSync() throws InterruptedException {
-        ExecutorService worker = ExecutorUtils.daemonExecutor();
+        ExecutorService worker = ExecutorServiceManager.daemonExecutor();
         final CountDownLatch latch = new CountDownLatch(2);
 
         SyncHandle syncHandlePrimary = Replicator.of(primaryDb)

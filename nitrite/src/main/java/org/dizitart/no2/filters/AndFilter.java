@@ -22,8 +22,8 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
-import org.dizitart.no2.Filter;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.collection.Filter;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.store.NitriteMap;
 
@@ -49,7 +49,7 @@ class AndFilter extends BaseFilter {
     @Override
     public Set<NitriteId> apply(final NitriteMap<NitriteId, Document> documentMap) {
         Set<NitriteId> result = new LinkedHashSet<>();
-        ExecutorService executorService = nitriteService.getNitriteContext().getWorkerPool();
+        ExecutorService executorService = nitriteService.getNitriteContext().getQueryPool();
 
         try {
             List<Callable<Set<NitriteId>>> tasks = createTasks(filters, documentMap);

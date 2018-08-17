@@ -90,7 +90,7 @@ the specified filter.
 
 All filters for NitriteCollection find() operations are listed in
 `org.dizitart.no2.filters.Filters`. And same for ObjectRepository
-are listed in `org.dizitart.no2.objects.filters.ObjectFilters`.
+are listed in `org.dizitart.no2.filters.ObjectFilters`.
 
 ====
 

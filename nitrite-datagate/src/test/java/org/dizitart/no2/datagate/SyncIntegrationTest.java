@@ -20,10 +20,12 @@ package org.dizitart.no2.datagate;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.*;
-import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.collection.Cursor;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.sync.*;
-import org.dizitart.no2.sync.data.UserAccount;
-import org.dizitart.no2.util.ExecutorUtils;
+import org.dizitart.no2.sync.types.UserAccount;
+import org.dizitart.no2.common.ExecutorServiceManager;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.junit.After;
@@ -48,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.Document.createDocument;
-import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
+import static org.dizitart.no2.filters.ObjectFilters.eq;
 import static org.dizitart.no2.sync.TimeSpan.timeSpan;
 import static org.dizitart.no2.datagate.Constants.*;
 import static org.dizitart.no2.datagate.DbTestOperations.getRandomTempDbFile;
@@ -162,7 +164,7 @@ public class SyncIntegrationTest {
 
     @Test
     public void testDocumentSync() throws InterruptedException {
-        ExecutorService worker = ExecutorUtils.daemonExecutor();
+        ExecutorService worker = ExecutorServiceManager.daemonExecutor();
         final CountDownLatch latch = new CountDownLatch(2);
 
         SyncHandle syncHandlePrimary = Replicator.of(primaryDb)
@@ -277,7 +279,7 @@ public class SyncIntegrationTest {
 
     @Test
     public void testObjectSync() throws InterruptedException {
-        ExecutorService worker = ExecutorUtils.daemonExecutor();
+        ExecutorService worker = ExecutorServiceManager.daemonExecutor();
         final CountDownLatch latch = new CountDownLatch(2);
 
         SyncHandle syncHandlePrimary = Replicator.of(primaryDb)
@@ -324,7 +326,7 @@ public class SyncIntegrationTest {
                 primaryEmployeeRepository.insert(employee);
             }
 
-            org.dizitart.no2.objects.Cursor<Employee> cursor = primaryEmployeeRepository.find();
+            org.dizitart.no2.collection.objects.Cursor<Employee> cursor = primaryEmployeeRepository.find();
 
             int i = 0;
             for (Employee employee : cursor) {

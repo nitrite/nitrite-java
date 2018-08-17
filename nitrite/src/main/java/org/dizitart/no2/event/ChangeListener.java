@@ -18,10 +18,12 @@
 
 package org.dizitart.no2.event;
 
+import org.dizitart.no2.collection.NitriteCollection;
+
 /**
  * An interface when implemented makes an object be
- * able to listen to any changes in a {@link org.dizitart.no2.NitriteCollection}
- * or {@link org.dizitart.no2.objects.ObjectRepository}.
+ * able to listen to any changes in a {@link NitriteCollection}
+ * or {@link org.dizitart.no2.collection.objects.ObjectRepository}.
  *
  * [[app-listing]]
  * [source,java]

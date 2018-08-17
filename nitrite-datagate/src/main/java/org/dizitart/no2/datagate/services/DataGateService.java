@@ -22,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.meta.Attributes;
 import org.dizitart.no2.sync.TimeSpan;
-import org.dizitart.no2.sync.data.ChangeFeed;
-import org.dizitart.no2.sync.data.FeedOptions;
-import org.dizitart.no2.sync.data.InfoResponse;
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.sync.types.ChangeFeed;
+import org.dizitart.no2.sync.types.FeedOptions;
+import org.dizitart.no2.sync.types.InfoResponse;
+import org.dizitart.no2.sync.types.UserAccount;
 import org.dizitart.no2.datagate.UnAuthorizedAccessException;
 import org.dizitart.no2.datagate.security.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.dizitart.no2.FindOptions.limit;
+import static org.dizitart.no2.collection.FindOptions.limit;
 import static org.dizitart.no2.datagate.Constants.VENDOR;
 import static org.dizitart.no2.datagate.Constants.VERSION;
 

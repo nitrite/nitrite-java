@@ -23,7 +23,7 @@ import org.h2.mvstore.MVMap;
 
 import java.util.*;
 
-import static org.dizitart.no2.Constants.META_MAP_NAME;
+import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 
 /**

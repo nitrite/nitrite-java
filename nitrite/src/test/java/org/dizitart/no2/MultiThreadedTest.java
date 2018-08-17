@@ -18,6 +18,10 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.collection.Cursor;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.services.LuceneService;
 import org.junit.After;
 import org.junit.Rule;
@@ -35,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.filters.Filters.*;
-import static org.dizitart.no2.util.ExecutorUtils.shutdownAndAwaitTermination;
+import static org.dizitart.no2.common.ExecutorServiceManager.shutdownAndAwaitTermination;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.dizitart.no2.Document.createDocument;

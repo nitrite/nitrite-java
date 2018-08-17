@@ -19,7 +19,7 @@
 package org.dizitart.no2.filters;
 
 import lombok.experimental.UtilityClass;
-import org.dizitart.no2.Filter;
+import org.dizitart.no2.collection.Filter;
 
 /**
  * A helper class to create all type of {@link Filter}s.

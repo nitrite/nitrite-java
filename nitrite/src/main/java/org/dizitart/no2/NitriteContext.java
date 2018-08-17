@@ -23,11 +23,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.common.ExecutorServiceManager;
+import org.dizitart.no2.filters.ObjectFilters;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.util.ExecutorUtils;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -35,7 +36,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.dizitart.no2.util.ExecutorUtils.shutdownAndAwaitTermination;
+import static org.dizitart.no2.common.ExecutorServiceManager.shutdownExecutors;
 
 /**
  * Represents a readonly view of all contextual information of a nitrite database.
@@ -107,7 +108,7 @@ public class NitriteContext {
      *
      * @returns a {@link TextIndexingService} instance or `null`.
      * @see org.dizitart.no2.filters.Filters#text(String, String)
-     * @see org.dizitart.no2.objects.filters.ObjectFilters#text(String, String)
+     * @see ObjectFilters#text(String, String)
      * @see NitriteBuilder#textIndexingService(TextIndexingService)
      * */
     private TextIndexingService textIndexingService;
@@ -118,36 +119,33 @@ public class NitriteContext {
      *
      * @returns a {@link TextTokenizer} instance or `null`.
      * @see org.dizitart.no2.filters.Filters#text(String, String)
-     * @see org.dizitart.no2.objects.filters.ObjectFilters#text(String, String)
+     * @see ObjectFilters#text(String, String)
      * @see NitriteBuilder#textTokenizer(TextTokenizer)
      * */
     private TextTokenizer textTokenizer;
 
-    @Setter(AccessLevel.NONE)
-    private ExecutorService workerPool;
+    @Getter(AccessLevel.PACKAGE)
+    private Set<String> collectionRegistry;
 
-    @Setter(AccessLevel.NONE)
-    private ScheduledExecutorService scheduledWorkerPool;
+    @Getter(AccessLevel.PACKAGE)
+    private Map<String, Class<?>> repositoryRegistry;
 
     @Getter(AccessLevel.NONE)
     private NitriteMapper nitriteMapper;
 
-    @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
-    private Set<String> collectionRegistry;
-
-    @Getter(AccessLevel.PACKAGE) @Setter(AccessLevel.PACKAGE)
-    private Map<String, Class<?>> repositoryRegistry;
-
-    @Getter(AccessLevel.NONE) @Setter(AccessLevel.PACKAGE)
+    @Getter(AccessLevel.NONE)
     private Set<Module> jacksonModule;
+
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private ExecutorService workerPool;
+
+    @Getter(AccessLevel.NONE) @Setter(AccessLevel.NONE)
+    private ScheduledExecutorService scheduledWorkerPool;
 
     /**
      * Instantiates a new Nitrite context.
      */
-    NitriteContext() {
-        workerPool = ExecutorUtils.daemonExecutor();
-        scheduledWorkerPool = ExecutorUtils.scheduledExecutor();
-    }
+    NitriteContext() {}
 
     /**
      * Gets the {@link NitriteMapper} instance configured.
@@ -174,9 +172,20 @@ public class NitriteContext {
         return new HashSet<>(jacksonModule);
     }
 
+    /**
+     * Gets a worker pool with a specified pool size.
+     *
+     * @return a daemon thread pool executor
+     * */
+    public ExecutorService getQueryPool() {
+        if (workerPool == null) {
+            workerPool = ExecutorServiceManager.daemonExecutor();
+        }
+        return workerPool;
+    }
+
     void shutdown() {
-        shutdownAndAwaitTermination(scheduledWorkerPool, 5);
-        shutdownAndAwaitTermination(workerPool, 5);
+        shutdownExecutors(5);
         collectionRegistry.clear();
         repositoryRegistry.clear();
     }

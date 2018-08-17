@@ -19,8 +19,12 @@
 package org.dizitart.no2.event;
 
 import org.dizitart.no2.*;
-import org.dizitart.no2.objects.ObjectFilter;
-import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.RemoveOptions;
+import org.dizitart.no2.collection.UpdateOptions;
+import org.dizitart.no2.collection.Filter;
+import org.dizitart.no2.collection.objects.ObjectFilter;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 
 /**
  * Represents different types of collection modification
@@ -33,27 +37,27 @@ public enum ChangeType {
     /**
      * Insert action.
      *
-     * @see org.dizitart.no2.NitriteCollection#insert(Object[])
-     * @see org.dizitart.no2.objects.ObjectRepository#insert(Object, Object[])
-     * @see org.dizitart.no2.objects.ObjectRepository#insert(Object[])
+     * @see NitriteCollection#insert(Object[])
+     * @see org.dizitart.no2.collection.objects.ObjectRepository#insert(Object, Object[])
+     * @see org.dizitart.no2.collection.objects.ObjectRepository#insert(Object[])
      */
     INSERT,
 
     /**
      * Update action.
      *
-     * @see org.dizitart.no2.NitriteCollection#update(Filter, Document)
-     * @see org.dizitart.no2.NitriteCollection#update(Filter, Document, UpdateOptions)
-     * @see org.dizitart.no2.objects.ObjectRepository#update(ObjectFilter, Object)
+     * @see NitriteCollection#update(Filter, Document)
+     * @see NitriteCollection#update(Filter, Document, UpdateOptions)
+     * @see org.dizitart.no2.collection.objects.ObjectRepository#update(ObjectFilter, Object)
      */
     UPDATE,
 
     /**
      * Remove action.
      *
-     * @see org.dizitart.no2.NitriteCollection#remove(Filter)
-     * @see org.dizitart.no2.NitriteCollection#remove(Filter, RemoveOptions)
-     * @see org.dizitart.no2.objects.ObjectRepository#remove(ObjectFilter, RemoveOptions)
+     * @see NitriteCollection#remove(Filter)
+     * @see NitriteCollection#remove(Filter, RemoveOptions)
+     * @see org.dizitart.no2.collection.objects.ObjectRepository#remove(ObjectFilter, RemoveOptions)
      */
     REMOVE,
 

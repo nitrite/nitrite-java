@@ -19,8 +19,8 @@
 package org.dizitart.no2.sync;
 
 import org.dizitart.no2.Document;
-import org.dizitart.no2.sync.data.ChangeFeed;
-import org.dizitart.no2.sync.data.FeedOptions;
+import org.dizitart.no2.sync.types.ChangeFeed;
+import org.dizitart.no2.sync.types.FeedOptions;
 
 import java.util.List;
 

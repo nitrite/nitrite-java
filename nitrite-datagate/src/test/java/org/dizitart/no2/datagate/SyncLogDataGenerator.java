@@ -19,7 +19,7 @@
 package org.dizitart.no2.datagate;
 
 import org.dizitart.no2.datagate.models.SyncLog;
-import org.dizitart.no2.sync.data.UserAgent;
+import org.dizitart.no2.sync.types.UserAgent;
 import org.jongo.Jongo;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -18,17 +18,23 @@
 
 package org.dizitart.no2.sync;
 
-import org.dizitart.no2.NitriteContext;
+import org.dizitart.no2.common.ExecutorServiceManager;
 import org.dizitart.no2.event.NitriteEventBus;
+
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author Anindya Chatterjee
  */
-class SyncEventBus
-        extends NitriteEventBus<SyncEventData, SyncEventListener> {
+class SyncEventBus extends NitriteEventBus<SyncEventData, SyncEventListener> {
+    private ExecutorService executorService;
 
-    SyncEventBus(NitriteContext context) {
-        super(context);
+    @Override
+    protected ExecutorService getEventExecutor() {
+        if (executorService == null) {
+            executorService = ExecutorServiceManager.daemonExecutor(1);
+        }
+        return executorService;
     }
 
     @Override

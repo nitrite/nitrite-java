@@ -21,8 +21,8 @@ package org.dizitart.no2.filters;
 import lombok.Getter;
 import lombok.ToString;
 import org.dizitart.no2.Document;
-import org.dizitart.no2.Filter;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.collection.Filter;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.LinkedHashSet;
@@ -45,7 +45,7 @@ class NotFilter extends BaseFilter {
 
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
-        if (filter != null && filter instanceof BaseFilter) {
+        if (filter instanceof BaseFilter) {
             filter.setNitriteService(nitriteService);
         }
 

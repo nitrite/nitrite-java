@@ -23,7 +23,7 @@ import org.dizitart.no2.datagate.models.Device;
 import org.dizitart.no2.datagate.models.Statistics;
 import org.dizitart.no2.datagate.services.AnalyticsService;
 import org.dizitart.no2.datagate.services.UserAccountService;
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.sync.types.UserAccount;
 import org.dizitart.no2.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

@@ -20,11 +20,12 @@ package org.dizitart.no2;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
-import org.dizitart.no2.objects.Index;
-import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.index.annotations.Index;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.services.LuceneService;
 import org.junit.Test;
 

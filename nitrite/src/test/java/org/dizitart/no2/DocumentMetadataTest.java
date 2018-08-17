@@ -18,6 +18,7 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.collection.Cursor;
 import org.dizitart.no2.event.ChangeInfo;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.event.ChangeType;

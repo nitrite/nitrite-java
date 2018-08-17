@@ -22,14 +22,16 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.*;
+import org.dizitart.no2.collection.Cursor;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.filters.Filters;
 import org.dizitart.no2.meta.Attributes;
-import org.dizitart.no2.sync.data.ChangeFeed;
+import org.dizitart.no2.sync.types.ChangeFeed;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.dizitart.no2.Constants.*;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.filters.Filters.*;
 import static org.dizitart.no2.util.DocumentUtils.createUniqueFilter;
 import static org.dizitart.no2.util.DocumentUtils.isRecent;

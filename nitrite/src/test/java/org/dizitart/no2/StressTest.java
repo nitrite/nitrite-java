@@ -18,6 +18,10 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.collection.Cursor;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.IndexType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

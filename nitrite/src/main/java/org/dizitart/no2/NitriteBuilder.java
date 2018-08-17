@@ -20,12 +20,14 @@ package org.dizitart.no2;
 
 import com.fasterxml.jackson.databind.Module;
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.fulltext.TextTokenizer;
+import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMVStore;
 import org.dizitart.no2.store.NitriteStore;
@@ -38,9 +40,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.Constants.KEY_OBJ_SEPARATOR;
-import static org.dizitart.no2.Security.createSecurely;
-import static org.dizitart.no2.Security.openSecurely;
+import static org.dizitart.no2.common.Constants.KEY_OBJ_SEPARATOR;
+import static org.dizitart.no2.common.Security.createSecurely;
+import static org.dizitart.no2.common.Security.openSecurely;
 import static org.dizitart.no2.exceptions.ErrorCodes.NIOE_DIR_DOES_NOT_EXISTS;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.tool.Recovery.recover;
@@ -560,5 +562,27 @@ public class NitriteBuilder {
             log.error("Underlying store is null. Nitrite has not been initialized properly.");
         }
         return repositoryRegistry;
+    }
+
+    private static class NitriteShutDownHook extends Thread {
+        private Nitrite db;
+
+        NitriteShutDownHook(Nitrite db) {
+            this.db = db;
+        }
+
+        @Override
+        public void run() {
+            if (db != null && !db.isClosed()) {
+                try {
+                    db.close();
+                } catch (Throwable t) {
+                    // close the db immediately and discards
+                    // any unsaved changes to avoid corruption
+                    log.error("Error while database shutdown", t);
+                    db.closeImmediately();
+                }
+            }
+        }
     }
 }

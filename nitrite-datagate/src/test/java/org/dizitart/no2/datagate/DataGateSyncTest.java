@@ -18,8 +18,8 @@
 
 package org.dizitart.no2.datagate;
 
-import org.dizitart.no2.sync.data.UserAccount;
-import org.dizitart.no2.sync.data.SizeResponse;
+import org.dizitart.no2.sync.types.UserAccount;
+import org.dizitart.no2.sync.types.SizeResponse;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.junit.After;

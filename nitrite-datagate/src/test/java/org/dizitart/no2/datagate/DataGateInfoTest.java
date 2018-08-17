@@ -18,7 +18,7 @@
 
 package org.dizitart.no2.datagate;
 
-import org.dizitart.no2.sync.data.InfoResponse;
+import org.dizitart.no2.sync.types.InfoResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -20,8 +20,8 @@ package org.dizitart.no2.util;
 
 import lombok.experimental.UtilityClass;
 import org.dizitart.no2.Document;
-import org.dizitart.no2.Filter;
-import org.dizitart.no2.KeyValuePair;
+import org.dizitart.no2.collection.Filter;
+import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapper.NitriteMapper;
 import uk.co.jemos.podam.api.PodamFactory;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-import static org.dizitart.no2.Constants.DOC_ID;
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.filters.Filters.eq;

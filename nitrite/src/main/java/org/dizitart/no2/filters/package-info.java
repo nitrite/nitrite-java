@@ -17,7 +17,7 @@
  */
 
 /**
- * Filter api for {@link org.dizitart.no2.NitriteCollection}.
+ * Filter api for {@link org.dizitart.no2.collection.PersistentCollection}.
  *
  * @since 1.0
  * @author Anindya Chatterjee.

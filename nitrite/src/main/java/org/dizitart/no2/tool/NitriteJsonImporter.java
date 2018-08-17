@@ -21,12 +21,16 @@ package org.dizitart.no2.tool;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import org.dizitart.no2.*;
-import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.PersistentCollection;
+import org.dizitart.no2.index.Index;
+import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 
 import java.io.IOException;
 import java.util.Map;
 
-import static org.dizitart.no2.Constants.*;
+import static org.dizitart.no2.common.Constants.*;
 
 /**
  * @author Anindya Chatterjee.

@@ -20,7 +20,7 @@ package org.dizitart.no2.datagate.services;
 
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.sync.types.UserAccount;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.jongo.MongoCursor;

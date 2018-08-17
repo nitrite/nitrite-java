@@ -20,10 +20,10 @@ package org.dizitart.no2.tool;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteCollection;
-import org.dizitart.no2.objects.ObjectRepository;
-import org.dizitart.no2.objects.data.Company;
-import org.dizitart.no2.objects.data.Employee;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.objects.ObjectRepository;
+import org.dizitart.no2.collection.objects.data.Company;
+import org.dizitart.no2.collection.objects.data.Employee;
 import org.junit.After;
 import org.junit.Before;
 
@@ -32,7 +32,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.dizitart.no2.Constants.*;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 
 /**

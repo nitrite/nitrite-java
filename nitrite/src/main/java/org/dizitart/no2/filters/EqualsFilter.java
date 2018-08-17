@@ -28,7 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.Constants.DOC_ID;
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
 import static org.dizitart.no2.util.EqualsUtils.deepEquals;
 

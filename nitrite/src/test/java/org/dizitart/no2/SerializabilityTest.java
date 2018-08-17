@@ -18,6 +18,7 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.After;
 import org.junit.Before;

@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
-import org.dizitart.no2.sync.data.*;
+import org.dizitart.no2.sync.types.*;
 import org.dizitart.no2.sync.TimeSpan;
 import org.dizitart.no2.datagate.models.*;
 import org.dizitart.no2.datagate.services.DataGateService;

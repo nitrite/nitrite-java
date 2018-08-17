@@ -24,8 +24,8 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static org.dizitart.no2.Constants.ID_PREFIX;
-import static org.dizitart.no2.Constants.ID_SUFFIX;
+import static org.dizitart.no2.common.Constants.ID_PREFIX;
+import static org.dizitart.no2.common.Constants.ID_SUFFIX;
 import static org.junit.Assert.*;
 
 public class NitriteIdTest {

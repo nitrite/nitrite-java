@@ -19,12 +19,12 @@
 package org.dizitart.no2.util;
 
 import lombok.experimental.UtilityClass;
-import org.dizitart.no2.Index;
+import org.dizitart.no2.index.Index;
 
 import java.util.*;
 
-import static org.dizitart.no2.Constants.INDEX_PREFIX;
-import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
+import static org.dizitart.no2.common.Constants.INDEX_PREFIX;
+import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.exceptions.ErrorCodes.VE_INDEX_NULL_INDEX;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.ValidationUtils.notNull;

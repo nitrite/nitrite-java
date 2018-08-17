@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.sync.types.UserAccount;
 import org.dizitart.no2.datagate.models.DataGateError;
 import org.dizitart.no2.datagate.services.UserAccountService;
 import org.springframework.beans.factory.annotation.Autowired;

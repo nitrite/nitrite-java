@@ -21,7 +21,7 @@ package org.dizitart.no2.datagate.models;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
-import org.dizitart.no2.sync.data.UserAgent;
+import org.dizitart.no2.sync.types.UserAgent;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

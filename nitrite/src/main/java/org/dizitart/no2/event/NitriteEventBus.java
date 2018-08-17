@@ -18,7 +18,7 @@
 
 package org.dizitart.no2.event;
 
-import org.dizitart.no2.NitriteContext;
+import org.dizitart.no2.common.ExecutorServiceManager;
 
 import java.util.Collections;
 import java.util.Set;
@@ -43,11 +43,9 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
     /**
      * Instantiates a new Nitrite event bus.
      *
-     * @param context the context
      */
-    public NitriteEventBus(NitriteContext context) {
+    public NitriteEventBus() {
         this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<EventListener, Boolean>());
-        this.eventExecutor = context.getWorkerPool();
     }
 
     @Override
@@ -75,6 +73,9 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
      * @return the {@link ExecutorService}.
      */
     protected ExecutorService getEventExecutor() {
+        if (eventExecutor == null) {
+            eventExecutor = ExecutorServiceManager.daemonExecutor();
+        }
         return eventExecutor;
     }
 

@@ -29,7 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.Constants.DOC_ID;
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.exceptions.ErrorCodes.FE_LT_FIELD_NOT_COMPARABLE;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.DocumentUtils.getFieldValue;

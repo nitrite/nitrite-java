@@ -22,27 +22,27 @@ import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.collection.objects.ObjectFilter;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
+import org.dizitart.no2.index.annotations.Id;
+import org.dizitart.no2.index.annotations.Index;
+import org.dizitart.no2.index.annotations.Indices;
+import org.dizitart.no2.index.annotations.InheritIndices;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.objects.*;
 import org.objenesis.ObjenesisStd;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
-import static org.dizitart.no2.Constants.KEY_OBJ_SEPARATOR;
+import static org.dizitart.no2.common.Constants.KEY_OBJ_SEPARATOR;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
-import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
-import static org.dizitart.no2.util.ReflectionUtils.findAnnotations;
-import static org.dizitart.no2.util.ReflectionUtils.getField;
-import static org.dizitart.no2.util.ReflectionUtils.getFieldsUpto;
+import static org.dizitart.no2.filters.ObjectFilters.eq;
+import static org.dizitart.no2.util.ReflectionUtils.*;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.util.ValidationUtils.notEmpty;
-import static org.dizitart.no2.util.ValidationUtils.notNull;
-import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
+import static org.dizitart.no2.util.ValidationUtils.*;
 
 /**
  * A utility class for {@link Object}.
@@ -54,7 +54,7 @@ import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
 @Slf4j
 public class ObjectUtils {
     /**
-     * Generates the name of an {@link org.dizitart.no2.objects.ObjectRepository}.
+     * Generates the name of an {@link org.dizitart.no2.collection.objects.ObjectRepository}.
      *
      * @param <T>           the type parameter
      * @param type          the type of object stored in the repository
@@ -66,7 +66,7 @@ public class ObjectUtils {
     }
 
     /**
-     * Generates the name of an {@link org.dizitart.no2.objects.ObjectRepository}
+     * Generates the name of an {@link org.dizitart.no2.collection.objects.ObjectRepository}
      * with an unique key identifier.
      *
      * @param <T>  the type parameter

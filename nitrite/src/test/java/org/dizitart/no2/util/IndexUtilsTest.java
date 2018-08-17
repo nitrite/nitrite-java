@@ -18,8 +18,8 @@
 
 package org.dizitart.no2.util;
 
-import org.dizitart.no2.Index;
-import org.dizitart.no2.IndexType;
+import org.dizitart.no2.index.Index;
+import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
+import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.util.IndexUtils.internalName;
 import static org.dizitart.no2.util.IndexUtils.sortByScore;
 import static org.junit.Assert.assertArrayEquals;

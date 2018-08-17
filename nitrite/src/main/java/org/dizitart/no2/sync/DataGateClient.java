@@ -20,7 +20,7 @@ package org.dizitart.no2.sync;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.dizitart.no2.sync.data.UserAgent;
+import org.dizitart.no2.sync.types.UserAgent;
 
 import javax.net.ssl.*;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import java.net.Proxy;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
-import static org.dizitart.no2.sync.data.UserAgent.*;
+import static org.dizitart.no2.sync.types.UserAgent.*;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 
 /**

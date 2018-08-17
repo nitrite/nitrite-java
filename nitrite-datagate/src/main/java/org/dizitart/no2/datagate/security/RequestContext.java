@@ -18,7 +18,7 @@
 
 package org.dizitart.no2.datagate.security;
 
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.sync.types.UserAccount;
 
 /**
  * A context to store authenticated user details per request.

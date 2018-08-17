@@ -20,9 +20,11 @@ package org.dizitart.no2;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.internals.CollectionFactory;
-import org.dizitart.no2.objects.ObjectRepository;
-import org.dizitart.no2.objects.RepositoryFactory;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.Constants;
+import org.dizitart.no2.collection.CollectionFactory;
+import org.dizitart.no2.collection.objects.ObjectRepository;
+import org.dizitart.no2.collection.objects.RepositoryFactory;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
@@ -32,7 +34,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.Security.validateUserPassword;
+import static org.dizitart.no2.common.Security.validateUserPassword;
 import static org.dizitart.no2.util.ObjectUtils.findObjectStoreName;
 import static org.dizitart.no2.util.ValidationUtils.validateCollectionName;
 

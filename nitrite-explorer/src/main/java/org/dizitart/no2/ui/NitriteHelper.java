@@ -22,6 +22,9 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.dizitart.no2.*;
+import org.dizitart.no2.collection.Cursor;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.Filter;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
@@ -31,7 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.dizitart.no2.Constants.*;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.filters.Filters.*;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 

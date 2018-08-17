@@ -18,7 +18,7 @@
 
 package org.dizitart.no2.util;
 
-import org.dizitart.no2.FindOptions;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapper.JacksonMapper;
@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.dizitart.no2.Constants.*;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.ValidationUtils.*;
 import static org.junit.Assert.assertEquals;

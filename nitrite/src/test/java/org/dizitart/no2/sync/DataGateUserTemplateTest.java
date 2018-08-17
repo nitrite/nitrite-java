@@ -24,7 +24,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 import org.dizitart.no2.exceptions.SyncException;
-import org.dizitart.no2.sync.data.UserAccount;
+import org.dizitart.no2.sync.types.UserAccount;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

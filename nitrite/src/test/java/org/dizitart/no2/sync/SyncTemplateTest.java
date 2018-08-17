@@ -19,7 +19,7 @@
 package org.dizitart.no2.sync;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteCollection;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.meta.Attributes;
 import org.junit.After;
 import org.junit.Before;

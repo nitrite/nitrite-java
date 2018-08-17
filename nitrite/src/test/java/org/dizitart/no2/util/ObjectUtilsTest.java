@@ -20,8 +20,8 @@ package org.dizitart.no2.util;
 
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.objects.Index;
-import org.dizitart.no2.objects.Indices;
+import org.dizitart.no2.index.annotations.Index;
+import org.dizitart.no2.index.annotations.Indices;
 import org.junit.Test;
 
 import java.math.BigDecimal;

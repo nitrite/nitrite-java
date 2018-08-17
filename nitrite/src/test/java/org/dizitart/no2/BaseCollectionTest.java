@@ -18,6 +18,8 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.WriteResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,17 +36,17 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 
-import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.filters.Filters.ALL;
 
 @RunWith(value = Parameterized.class)
 public abstract class BaseCollectionTest {
     private String fileName = getRandomTempDbFile();
     protected Nitrite db;
-    NitriteCollection collection;
-    Document doc1, doc2, doc3;
-    SimpleDateFormat simpleDateFormat;
+    protected NitriteCollection collection;
+    protected Document doc1, doc2, doc3;
+    protected SimpleDateFormat simpleDateFormat;
 
     @Parameterized.Parameter
     public boolean inMemory = false;
@@ -155,7 +157,7 @@ public abstract class BaseCollectionTest {
         }
     }
 
-    WriteResult insert() {
+    protected WriteResult insert() {
         return collection.insert(doc1, doc2, doc3);
     }
 }

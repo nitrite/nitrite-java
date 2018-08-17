@@ -18,7 +18,7 @@
 
 package org.dizitart.no2.sync;
 
-import org.dizitart.no2.sync.data.*;
+import org.dizitart.no2.sync.types.*;
 import org.junit.Test;
 import org.meanbean.lang.Factory;
 import org.meanbean.test.BeanTester;

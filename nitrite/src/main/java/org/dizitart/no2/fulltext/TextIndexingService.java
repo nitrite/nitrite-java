@@ -19,6 +19,7 @@
 package org.dizitart.no2.fulltext;
 
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.filters.ObjectFilters;
 
 import java.util.Set;
 
@@ -32,7 +33,7 @@ import java.util.Set;
  * @author Anindya Chatterjee
  * @see org.dizitart.no2.NitriteBuilder#textIndexingService(TextIndexingService)
  * @see org.dizitart.no2.filters.Filters#text(String, String)
- * @see org.dizitart.no2.objects.filters.ObjectFilters#text(String, String)
+ * @see ObjectFilters#text(String, String)
  */
 public interface TextIndexingService {
     /**

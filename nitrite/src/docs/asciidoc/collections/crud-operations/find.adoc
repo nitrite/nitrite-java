@@ -53,7 +53,7 @@ Document document = collection.getById(id);
 [source,java]
 --
 // extracts all objects from the repository
-org.dizitart.no2.objects.Cursor<Employee> cursor = repository.find();
+org.dizitart.no2.collection.objects.Cursor<Employee> cursor = repository.find();
 
 // extracts paginated employee records from the repository
 Cursor<Employee> cursor = repository.find(limit(0, 1));

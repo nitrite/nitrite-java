@@ -20,8 +20,8 @@ package org.dizitart.no2.event;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.objects.ObjectRepository;
-import org.dizitart.no2.objects.data.Employee;
+import org.dizitart.no2.collection.objects.ObjectRepository;
+import org.dizitart.no2.collection.objects.data.Employee;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,8 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.objects.filters.ObjectFilters.ALL;
-import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
+import static org.dizitart.no2.filters.ObjectFilters.ALL;
+import static org.dizitart.no2.filters.ObjectFilters.eq;
 import static org.dizitart.no2.util.Iterables.firstOrDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

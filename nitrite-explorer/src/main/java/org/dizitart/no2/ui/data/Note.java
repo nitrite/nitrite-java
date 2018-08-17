@@ -21,7 +21,7 @@ package org.dizitart.no2.ui.data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.dizitart.no2.objects.Id;
+import org.dizitart.no2.index.annotations.Id;
 
 /**
  * @author Anindya Chatterjee.

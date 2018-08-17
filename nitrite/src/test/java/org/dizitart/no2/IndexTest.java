@@ -18,6 +18,8 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.index.Index;
+import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

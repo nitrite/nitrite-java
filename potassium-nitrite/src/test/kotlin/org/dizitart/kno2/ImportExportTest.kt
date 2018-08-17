@@ -20,9 +20,9 @@ package org.dizitart.kno2
 
 import org.dizitart.kno2.tool.exportTo
 import org.dizitart.kno2.tool.importFrom
-import org.dizitart.no2.objects.data.Company
-import org.dizitart.no2.objects.data.DataGenerator
-import org.dizitart.no2.objects.data.Employee
+import org.dizitart.no2.collection.objects.data.Company
+import org.dizitart.no2.collection.objects.data.DataGenerator
+import org.dizitart.no2.collection.objects.data.Employee
 import org.dizitart.no2.tool.BaseExternalTest
 import org.junit.Assert.assertEquals
 import org.junit.Test

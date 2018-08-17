@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.SyncException;
-import org.dizitart.no2.sync.data.*;
+import org.dizitart.no2.sync.types.*;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;

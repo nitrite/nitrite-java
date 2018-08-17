@@ -18,14 +18,14 @@
 
 package org.dizitart.kno2
 
-import org.dizitart.no2.IndexType
-import org.dizitart.no2.NullOrder
-import org.dizitart.no2.SortOrder
+import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.collection.NullOrder
+import org.dizitart.no2.collection.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
-import org.dizitart.no2.objects.Id
-import org.dizitart.no2.objects.Index
-import org.dizitart.no2.objects.Indices
-import org.dizitart.no2.objects.InheritIndices
+import org.dizitart.no2.index.annotations.Id
+import org.dizitart.no2.index.annotations.Index
+import org.dizitart.no2.index.annotations.Indices
+import org.dizitart.no2.index.annotations.InheritIndices
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
