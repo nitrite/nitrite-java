@@ -19,8 +19,8 @@
 package org.dizitart.no2.collection.objects;
 
 import lombok.experimental.UtilityClass;
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.NitriteContext;
+import org.dizitart.no2.collection.NitriteCollection;
 
 /**
  * A factory class to open a {@link ObjectRepository}.

@@ -191,7 +191,7 @@ class NitriteTextIndexingService implements TextIndexingService {
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexMetaService.getIndexMap(field);
         Set<NitriteId> idSet = new LinkedHashSet<>();
-        String term = searchString.substring(1, searchString.length());
+        String term = searchString.substring(1);
 
         for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();

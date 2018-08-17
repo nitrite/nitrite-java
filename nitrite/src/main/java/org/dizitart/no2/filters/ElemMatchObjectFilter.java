@@ -21,8 +21,8 @@ package org.dizitart.no2.filters;
 import lombok.ToString;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
-import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.collection.objects.ObjectFilter;
+import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.LinkedHashSet;

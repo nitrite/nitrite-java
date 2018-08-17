@@ -30,9 +30,11 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import org.dizitart.no2.*;
-import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.Filter;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.util.StringUtils;
 

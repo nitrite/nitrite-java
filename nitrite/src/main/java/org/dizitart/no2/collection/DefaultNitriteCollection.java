@@ -18,7 +18,9 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteContext;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.event.ChangeInfo;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.event.ChangeType;
@@ -54,13 +56,11 @@ class DefaultNitriteCollection implements NitriteCollection {
     private volatile boolean isDropped;
     private EventBus<ChangeInfo, ChangeListener> eventBus;
     private String collectionName;
-    private NitriteContext nitriteContext;
 
     DefaultNitriteCollection(NitriteMap<NitriteId, Document> nitriteMap, NitriteContext nitriteContext) {
         this.nitriteMap = nitriteMap;
         this.nitriteStore = nitriteMap.getStore();
-        this.nitriteContext = nitriteContext;
-        this.eventBus = new ChangeEventBus(nitriteContext);
+        this.eventBus = new ChangeEventBus();
         this.nitriteService = new NitriteService(nitriteMap, nitriteContext, eventBus);
         this.isDropped = false;
         this.collectionName = nitriteMap.getName();
@@ -370,7 +370,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     @Override
     public void register(ChangeListener listener) {
         if (eventBus == null && !isClosed() && !isDropped()) {
-            eventBus = new ChangeEventBus(nitriteContext);
+            eventBus = new ChangeEventBus();
         }
         eventBus.register(listener);
     }

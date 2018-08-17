@@ -31,8 +31,8 @@ import org.dizitart.no2.sync.types.FeedOptions;
 
 import java.util.List;
 
-import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.collection.FindOptions.limit;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.filters.Filters.*;
 import static org.dizitart.no2.util.Iterables.toList;
 

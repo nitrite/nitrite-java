@@ -24,7 +24,6 @@ import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collection;
-import java.util.Set;
 
 /**
  * @author Anindya Chatterjee.

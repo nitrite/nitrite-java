@@ -19,7 +19,8 @@
 package org.dizitart.no2.collection;
 
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.event.ChangeAware;
 import org.dizitart.no2.event.ChangeType;
 import org.dizitart.no2.exceptions.InvalidIdException;
@@ -118,7 +119,7 @@ public interface NitriteCollection extends PersistentCollection<Document> {
      *
      * @param filter        the filter to apply to select documents from the collection.
      * @param update        the modifications to apply.
-     * @param updateOptions the update optionss to customize the operation.
+     * @param updateOptions the update options to customize the operation.
      * @return the result of the update operation.
      * @throws org.dizitart.no2.exceptions.ValidationException if the `update` document is `null`.
      * @throws org.dizitart.no2.exceptions.ValidationException if `updateOptions` is `null`.

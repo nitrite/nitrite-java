@@ -67,7 +67,7 @@ public class ReflectionUtils {
 
     static <T extends Annotation> List<T> findAnnotations(Class<T> annotation, Class<?> type) {
         notNull(type, errorMessage("type can not be null", VE_REFLECT_NULL_START_CLASS));
-        notNull(annotation, errorMessage("annotationClass can not be null", VE_REFLECT_NULL_ANNOT_CLASS));
+        notNull(annotation, errorMessage("annotationClass can not be null", VE_REFLECT_NULL_ANNOTATION_CLASS));
         List<T> annotations = new ArrayList<>();
 
         T t = type.getAnnotation(annotation);
@@ -98,7 +98,7 @@ public class ReflectionUtils {
      */
     static List<Field> getAnnotatedFields(Class<?> startClass, Class<? extends Annotation> annotationClass) {
         notNull(startClass, errorMessage("startClass can not be null", VE_REFLECT_NULL_START_CLASS));
-        notNull(annotationClass, errorMessage("annotationClass can not be null", VE_REFLECT_NULL_ANNOT_CLASS));
+        notNull(annotationClass, errorMessage("annotationClass can not be null", VE_REFLECT_NULL_ANNOTATION_CLASS));
         Iterable<Field> fields = getFieldsUpto(startClass, Object.class);
         List<Field> filtered = new ArrayList<>();
         for (Field field : fields) {

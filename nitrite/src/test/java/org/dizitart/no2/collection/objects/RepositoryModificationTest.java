@@ -18,19 +18,20 @@
 
 package org.dizitart.no2.collection.objects;
 
-import org.dizitart.no2.*;
-import org.dizitart.no2.index.Index;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.RemoveOptions;
 import org.dizitart.no2.collection.WriteResult;
-import org.dizitart.no2.exceptions.InvalidIdException;
-import org.dizitart.no2.exceptions.UniqueConstraintException;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.collection.objects.data.Company;
 import org.dizitart.no2.collection.objects.data.DataGenerator;
 import org.dizitart.no2.collection.objects.data.Employee;
 import org.dizitart.no2.collection.objects.data.Note;
+import org.dizitart.no2.exceptions.InvalidIdException;
+import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.ObjectFilters;
+import org.dizitart.no2.index.Index;
+import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.util.Iterables;
 import org.junit.Test;
 

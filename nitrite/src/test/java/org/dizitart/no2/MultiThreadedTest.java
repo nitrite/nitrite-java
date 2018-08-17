@@ -38,11 +38,11 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.filters.Filters.*;
+import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.common.ExecutorServiceManager.shutdownAndAwaitTermination;
+import static org.dizitart.no2.filters.Filters.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.dizitart.no2.Document.createDocument;
 
 /**
  * @author Anindya Chatterjee.

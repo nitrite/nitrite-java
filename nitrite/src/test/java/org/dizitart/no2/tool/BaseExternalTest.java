@@ -32,8 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.common.Constants.*;
 
 /**
  * @author Anindya Chatterjee.

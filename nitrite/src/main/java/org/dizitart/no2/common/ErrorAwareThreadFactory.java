@@ -20,6 +20,7 @@ package org.dizitart.no2.common;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.validation.constraints.NotNull;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -40,7 +41,7 @@ public abstract class ErrorAwareThreadFactory implements ThreadFactory {
     public abstract Thread createThread(Runnable runnable);
 
     @Override
-    public Thread newThread(Runnable r) {
+    public Thread newThread(@NotNull Runnable r) {
         Thread thread = createThread(r);
         if (thread.getUncaughtExceptionHandler() == null) {
             thread.setUncaughtExceptionHandler(getUncaughtErrorHandler());

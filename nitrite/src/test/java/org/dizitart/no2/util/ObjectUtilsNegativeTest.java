@@ -20,9 +20,9 @@ package org.dizitart.no2.util;
 
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.index.annotations.Index;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.index.annotations.Index;
 import org.junit.Test;
 
 import java.util.Iterator;

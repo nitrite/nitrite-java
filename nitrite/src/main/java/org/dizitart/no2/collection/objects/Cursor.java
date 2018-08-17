@@ -18,9 +18,9 @@
 
 package org.dizitart.no2.collection.objects;
 
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.Lookup;
-import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.RecordIterable;
 
 /**

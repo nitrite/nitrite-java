@@ -37,6 +37,7 @@ import static org.dizitart.no2.common.Constants.SCHEDULED_THREAD_NAME;
 public class ExecutorServiceManager {
     private static Map<Integer, ExecutorService> daemonExecutors = new HashMap<>();
     private static Map<Integer, ScheduledExecutorService> scheduledExecutors = new HashMap<>();
+    private static final Object lock = new Object();
 
     /**
      * Creates an {@link ExecutorService} with pull size {@link Integer#MAX_VALUE}
@@ -74,13 +75,11 @@ public class ExecutorServiceManager {
                     }
                 });
         threadPool.allowCoreThreadTimeOut(true);
-        threadPool.setRejectedExecutionHandler(new RejectedExecutionHandler() {
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                try {
-                    executor.getQueue().put(r);
-                } catch (InterruptedException ie) {
-                    log.error("Thread interrupted while submitting rejected job", ie);
-                }
+        threadPool.setRejectedExecutionHandler((r, executor) -> {
+            try {
+                executor.getQueue().put(r);
+            } catch (InterruptedException ie) {
+                log.error("Thread interrupted while submitting rejected job", ie);
             }
         });
 
@@ -147,15 +146,15 @@ public class ExecutorServiceManager {
     }
 
 
-    private static void shutdownAndAwaitTermination(ExecutorService pool, int timeout) {
-        synchronized (pool) {
+    private static void shutdownAndAwaitTermination(final ExecutorService pool, int timeout) {
+        synchronized (lock) {
             // Disable new tasks from being submitted
             pool.shutdown();
         }
         try {
             // Wait a while for existing tasks to terminate
             if (!pool.awaitTermination(timeout, TimeUnit.SECONDS)) {
-                synchronized (pool) {
+                synchronized (lock) {
                     pool.shutdownNow(); // Cancel currently executing tasks
                 }
                 // Wait a while for tasks to respond to being cancelled
@@ -165,7 +164,7 @@ public class ExecutorServiceManager {
             }
         } catch (InterruptedException ie) {
             // (Re-)Cancel if current thread also interrupted
-            synchronized (pool) {
+            synchronized (lock) {
                 pool.shutdownNow();
             }
             // Preserve interrupt status

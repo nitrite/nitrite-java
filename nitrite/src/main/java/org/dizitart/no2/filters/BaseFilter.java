@@ -53,15 +53,12 @@ public abstract class BaseFilter implements Filter {
         List<Callable<Set<NitriteId>>> tasks = new ArrayList<>();
         for (final Filter filter : filters) {
             filter.setNitriteService(nitriteService);
-            tasks.add(new Callable<Set<NitriteId>>() {
-                @Override
-                public Set<NitriteId> call() throws Exception {
-                    try {
-                        return filter.apply(documentMap);
-                    } catch (Exception e) {
-                        log.error("Error while executing filter " + filter.toString(), e);
-                        throw e;
-                    }
+            tasks.add(() -> {
+                try {
+                    return filter.apply(documentMap);
+                } catch (Exception e) {
+                    log.error("Error while executing filter " + filter.toString(), e);
+                    throw e;
                 }
             });
         }

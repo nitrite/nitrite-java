@@ -18,16 +18,16 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.util.Iterables;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.TreeSet;
 
 import static org.dizitart.no2.exceptions.ErrorMessage.PROJECTION_WITH_NOT_NULL_VALUES;
@@ -66,6 +66,7 @@ class DocumentCursor implements Cursor {
         return new JoinedDocumentIterable(findResult, cursor, lookup);
     }
 
+    @NotNull
     @Override
     public Iterator<Document> iterator() {
         return new DocumentCursorIterator();
@@ -84,16 +85,6 @@ class DocumentCursor implements Cursor {
     @Override
     public int totalCount() {
         return totalCount;
-    }
-
-    @Override
-    public Document firstOrDefault() {
-        return Iterables.firstOrDefault(this);
-    }
-
-    @Override
-    public List<Document> toList() {
-        return Iterables.toList(this);
     }
 
     private class DocumentCursorIterator implements Iterator<Document> {

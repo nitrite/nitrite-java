@@ -1,10 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
 <!--
   ~
   ~ Copyright 2017-2018 Nitrite author or authors.
@@ -23,6 +18,11 @@
   ~
   -->
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
 <AnchorPane prefHeight="413.0" prefWidth="872.0" xmlns="http://javafx.com/javafx/8.0.72"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.dizitart.no2.ui.NitriteOverviewController">
     <SplitPane dividerPositions="0.29797979797979796" prefHeight="400.0" prefWidth="413.0" AnchorPane.bottomAnchor="0.0"

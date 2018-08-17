@@ -37,11 +37,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.dizitart.no2.common.Constants.DOC_ID;
-import static org.dizitart.no2.common.Constants.DOC_REVISION;
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.collection.FindOptions.limit;
 import static org.dizitart.no2.collection.FindOptions.sort;
+import static org.dizitart.no2.common.Constants.DOC_ID;
+import static org.dizitart.no2.common.Constants.DOC_REVISION;
 import static org.dizitart.no2.filters.Filters.*;
 import static org.dizitart.no2.util.Iterables.isSorted;
 import static org.hamcrest.CoreMatchers.is;

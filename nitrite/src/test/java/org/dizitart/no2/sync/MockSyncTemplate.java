@@ -19,8 +19,8 @@
 package org.dizitart.no2.sync;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.Cursor;
 import org.dizitart.no2.Document;
+import org.dizitart.no2.collection.Cursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.filters.Filters;
 import org.dizitart.no2.meta.Attributes;
@@ -31,9 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.collection.FindOptions.limit;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.filters.Filters.*;
 import static org.dizitart.no2.util.DocumentUtils.isRecent;
 import static org.dizitart.no2.util.Iterables.toList;

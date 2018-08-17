@@ -22,10 +22,9 @@ import org.dizitart.no2.Document;
 import org.dizitart.no2.collection.RecordIterable;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.util.Iterables;
 
+import javax.validation.constraints.NotNull;
 import java.util.Iterator;
-import java.util.List;
 
 import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.exceptions.ErrorMessage.OBJ_REMOVE_ON_PROJECTED_OBJECT_ITERATOR_NOT_SUPPORTED;
@@ -46,6 +45,7 @@ class ProjectedObjectIterable<T> implements RecordIterable<T> {
         this.nitriteMapper = nitriteMapper;
     }
 
+    @NotNull
     @Override
     public Iterator<T> iterator() {
         return new ProjectedObjectIterator(nitriteMapper);
@@ -64,16 +64,6 @@ class ProjectedObjectIterable<T> implements RecordIterable<T> {
     @Override
     public int totalCount() {
         return recordIterable.totalCount();
-    }
-
-    @Override
-    public T firstOrDefault() {
-        return Iterables.firstOrDefault(this);
-    }
-
-    @Override
-    public List<T> toList() {
-        return Iterables.toList(this);
     }
 
     @Override

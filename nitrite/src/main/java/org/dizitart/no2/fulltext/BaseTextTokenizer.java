@@ -35,7 +35,7 @@ public abstract class BaseTextTokenizer implements TextTokenizer {
     private static final String WHITESPACE_CHARS = " \t\n\r\f+\"*%&/()=?'!,.;:-_#@|^~`{}[]<>\\";
 
     @Override
-    public Set<String> tokenize(String text) throws IOException {
+    public Set<String> tokenize(String text) {
         Set<String> words = new HashSet<>();
         StringTokenizer tokenizer = new StringTokenizer(text, WHITESPACE_CHARS);
         while (tokenizer.hasMoreTokens()) {

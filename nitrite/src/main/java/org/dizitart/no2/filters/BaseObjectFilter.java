@@ -18,8 +18,8 @@
 
 package org.dizitart.no2.filters;
 
-import org.dizitart.no2.collection.objects.ObjectFilter;
 import org.dizitart.no2.collection.NitriteService;
+import org.dizitart.no2.collection.objects.ObjectFilter;
 import org.dizitart.no2.mapper.NitriteMapper;
 
 /**

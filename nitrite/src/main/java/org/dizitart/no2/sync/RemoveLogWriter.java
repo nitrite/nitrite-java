@@ -29,8 +29,8 @@ import org.dizitart.no2.event.ChangedItem;
 
 import java.util.List;
 
-import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.Document.createDocument;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.util.Iterables.toList;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 

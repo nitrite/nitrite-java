@@ -36,9 +36,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Random;
 
-import static org.dizitart.no2.common.Constants.HASH_ITERATIONS;
-import static org.dizitart.no2.common.Constants.HASH_KEY_LENGTH;
-import static org.dizitart.no2.common.Constants.USER_MAP;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.exceptions.ErrorCodes.SE_HASHING_FAILED;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;

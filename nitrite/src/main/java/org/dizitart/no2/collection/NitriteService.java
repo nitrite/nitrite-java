@@ -18,7 +18,9 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteContext;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.event.ChangeInfo;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.event.EventBus;

@@ -18,15 +18,14 @@
 
 package org.dizitart.no2.collection.objects;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
 import org.dizitart.no2.collection.Lookup;
 import org.dizitart.no2.collection.RecordIterable;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.util.Iterables;
 
+import javax.validation.constraints.NotNull;
 import java.util.Iterator;
-import java.util.List;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.VE_PROJECT_NULL_PROJECTION;
 import static org.dizitart.no2.exceptions.ErrorMessage.OBJ_REMOVE_ON_OBJECT_ITERATOR_NOT_SUPPORTED;
@@ -78,16 +77,7 @@ class ObjectCursor<T> implements Cursor<T> {
         return cursor.totalCount();
     }
 
-    @Override
-    public T firstOrDefault() {
-        return Iterables.firstOrDefault(this);
-    }
-
-    @Override
-    public List<T> toList() {
-        return Iterables.toList(this);
-    }
-
+    @NotNull
     @Override
     public Iterator<T> iterator() {
         return new ObjectCursorIterator(cursor.iterator());

@@ -30,11 +30,11 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
+import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.filters.Filters.eq;
 import static org.dizitart.no2.filters.Filters.text;
+import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.junit.Assert.*;
-import static org.dizitart.no2.Document.createDocument;
 
 /**
  * @author Anindya Chatterjee.

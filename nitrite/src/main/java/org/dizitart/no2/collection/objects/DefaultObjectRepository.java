@@ -18,16 +18,18 @@
 
 package org.dizitart.no2.collection.objects;
 
-import org.dizitart.no2.*;
-import org.dizitart.no2.common.KeyValuePair;
-import org.dizitart.no2.index.Index;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteContext;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.RemoveOptions;
 import org.dizitart.no2.collection.WriteResult;
+import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.index.Index;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapper.NitriteMapper;
@@ -37,11 +39,11 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Set;
 
-import static org.dizitart.no2.common.Constants.DOC_ID;
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
+import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.dizitart.no2.util.ObjectUtils.*;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 
@@ -111,13 +113,13 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     @Override
     public final WriteResult insert(T object, T... others) {
         validateCollection();
-        return collection.insert(asDocument(object, false), asDocuments(others, false));
+        return collection.insert(asDocument(object, false), asDocuments(others));
     }
 
     @Override
     public WriteResult insert(T[] objects) {
         validateCollection();
-        return collection.insert(asDocuments(objects, false));
+        return collection.insert(asDocuments(objects));
     }
 
     @Override
@@ -293,11 +295,11 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         return toDocument(object, nitriteMapper, idField, update);
     }
 
-    private Document[] asDocuments(T[] others, boolean update) {
+    private Document[] asDocuments(T[] others) {
         if (others == null || others.length == 0) return null;
         Document[] documents = new Document[others.length];
         for (int i = 0; i < others.length; i++) {
-            documents[i] = asDocument(others[i], update);
+            documents[i] = asDocument(others[i], false);
         }
         return documents;
     }

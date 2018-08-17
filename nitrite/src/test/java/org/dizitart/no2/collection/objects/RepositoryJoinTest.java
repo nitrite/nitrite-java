@@ -19,7 +19,9 @@
 package org.dizitart.no2.collection.objects;
 
 import lombok.Data;
-import org.dizitart.no2.*;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.Lookup;
 import org.dizitart.no2.collection.RecordIterable;
 import org.dizitart.no2.index.annotations.Id;

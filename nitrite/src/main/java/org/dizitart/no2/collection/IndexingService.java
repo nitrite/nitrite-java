@@ -18,7 +18,9 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteContext;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.fulltext.TextIndexingService;
@@ -301,12 +303,7 @@ class IndexingService {
         final String field = index.getField();
         if (getBuildFlag(field).compareAndSet(false, true)) {
             if (isAsync) {
-                rebuildExecutor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        buildIndexInternal(field, index);
-                    }
-                });
+                rebuildExecutor.submit(() -> buildIndexInternal(field, index));
             } else {
                 buildIndexInternal(field, index);
             }

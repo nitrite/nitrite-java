@@ -22,7 +22,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.dizitart.no2.Document;
 
-import java.util.*;
+import java.util.Date;
 
 /**
  * @author Anindya Chatterjee

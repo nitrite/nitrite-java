@@ -18,11 +18,11 @@
 
 package org.dizitart.kno2
 
+import org.dizitart.no2.filters.ObjectFilters
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.index.annotations.Id
 import org.dizitart.no2.index.annotations.Index
 import org.dizitart.no2.index.annotations.Indices
-import org.dizitart.no2.filters.ObjectFilters
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

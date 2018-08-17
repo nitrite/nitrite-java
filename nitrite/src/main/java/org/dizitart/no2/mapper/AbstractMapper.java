@@ -41,7 +41,7 @@ public abstract class AbstractMapper implements NitriteMapper {
      * @param object the object
      * @return the document
      */
-    protected abstract <T> Document asDocumentInternal(T object);
+    protected abstract <T> Document asDocumentAuto(T object);
 
 
     /**
@@ -53,7 +53,7 @@ public abstract class AbstractMapper implements NitriteMapper {
      * @param type     the type
      * @return the de-serialized object
      */
-    protected abstract <T> T asObjectInternal(Document document, Class<T> type);
+    protected abstract <T> T asObjectAuto(Document document, Class<T> type);
 
     @Override
     public <T> Document asDocument(T object) {
@@ -61,7 +61,7 @@ public abstract class AbstractMapper implements NitriteMapper {
             Mappable mappable = (Mappable) object;
             return mappable.write(this);
         }
-        return asDocumentInternal(object);
+        return asDocumentAuto(object);
     }
 
     @Override
@@ -71,6 +71,6 @@ public abstract class AbstractMapper implements NitriteMapper {
             ((Mappable) item).read(this, document);
             return item;
         }
-        return asObjectInternal(document, type);
+        return asObjectAuto(document, type);
     }
 }

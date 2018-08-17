@@ -18,6 +18,9 @@
 
 package org.dizitart.no2.collection;
 
+import io.reactivex.Observable;
+import org.dizitart.no2.util.Iterables;
+
 import java.util.List;
 
 /**
@@ -52,9 +55,9 @@ public interface RecordIterable<T> extends Iterable<T> {
      * [icon="{@docRoot}/note.png"]
      * [NOTE]
      * ====
-     * If pagination is used during find operation, {@link #totalCount()}
+     * If pagination is used during find operation, this method
      * and {@link #size()} may not be equal. In that case {@link #size()}
-     * denotes the size of the current page and {@link #totalCount()} denotes
+     * denotes the size of the current page and this method denotes
      * the size of all matching results in the database that may or may not
      * be retrieved yet.
      *
@@ -73,12 +76,25 @@ public interface RecordIterable<T> extends Iterable<T> {
      *
      * @return the first element or `null`
      */
-    T firstOrDefault();
+    default T firstOrDefault() {
+        return Iterables.firstOrDefault(this);
+    }
 
     /**
      * Returns a list of all elements.
      *
      * @return list of all elements.
      * */
-    List<T> toList();
+    default List<T> toList() {
+        return Iterables.toList(this);
+    }
+
+    /**
+     * Returns an {@link Observable} on the records.
+     *
+     * @return an {@link Observable} on the records
+     * */
+    default Observable<T> toObservable() {
+        return Observable.fromIterable(this);
+    }
 }

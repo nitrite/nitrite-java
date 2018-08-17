@@ -24,8 +24,8 @@ apply plugin: 'com.github.hauner.jarTest'
 apply from: 'jacoco.gradle'
 apply from: 'asciidoc.gradle'
 
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 jar {
     baseName = 'nitrite'
@@ -42,6 +42,7 @@ dependencies {
     compile "org.jasypt:jasypt:$jasyptVersion"
     compile "com.squareup.okhttp3:okhttp:$okhttpVersion"
     compile "uk.co.jemos.podam:podam:$podamVersion"
+    compile "io.reactivex.rxjava2:rxjava:$rxjavaVersion"
 
     testCompile "junit:junit:$junitVersion"
     testCompile "org.apache.lucene:lucene-core:$luceneVersion"
@@ -56,8 +57,8 @@ dependencies {
 }
 
 gradle.buildFinished { BuildResult result ->
-    if (result.failure && !JavaVersion.current().isJava7Compatible()) {
-        gradle.rootProject.logger.error("\n* Warning:\nJDK ${JavaVersion.VERSION_1_7} is minimal requirement for building nitrite. " +
+    if (result.failure && !JavaVersion.current().isJava8Compatible()) {
+        gradle.rootProject.logger.error("\n* Warning:\nJDK ${JavaVersion.VERSION_1_8} is minimal requirement for building nitrite. " +
                 "You have ${JavaVersion.current()}.")
     }
 }

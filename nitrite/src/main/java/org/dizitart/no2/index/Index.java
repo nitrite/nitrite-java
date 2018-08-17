@@ -87,6 +87,7 @@ public class Index implements Comparable<Index>, Serializable {
     }
 
     private Index() {
+        // constructor for jackson
     }
 
     @Override

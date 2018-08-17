@@ -35,8 +35,8 @@ import java.nio.file.Paths;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertNotNull;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Anindya Chatterjee

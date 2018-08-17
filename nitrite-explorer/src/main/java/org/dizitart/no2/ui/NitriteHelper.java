@@ -21,10 +21,12 @@ package org.dizitart.no2.ui;
 import javafx.scene.control.TreeItem;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.Cursor;
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.Filter;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 

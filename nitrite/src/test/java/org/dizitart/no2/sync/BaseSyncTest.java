@@ -20,8 +20,8 @@ package org.dizitart.no2.sync;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.Retry;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

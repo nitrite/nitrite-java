@@ -16,12 +16,11 @@
  *
  */
 
-package org.dizitart.no2.mapper;
+package org.dizitart.no2.serialization;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import org.dizitart.no2.NitriteId;
 
 import java.io.IOException;
@@ -29,16 +28,14 @@ import java.io.IOException;
 /**
  * @author Anindya Chatterjee
  */
-class NitriteIdSerializer extends StdScalarSerializer<NitriteId> {
+class NitriteIdDeserializer extends StdScalarDeserializer<NitriteId> {
 
-    protected NitriteIdSerializer() {
+    NitriteIdDeserializer() {
         super(NitriteId.class);
     }
 
     @Override
-    public void serialize(NitriteId value, JsonGenerator gen, SerializerProvider provider) throws IOException {
-        if (value.getIdValue() != null) {
-            gen.writeNumber(value.getIdValue());
-        }
+    public NitriteId deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+        return NitriteId.createId(p.getLongValue());
     }
 }

@@ -19,7 +19,8 @@
 package org.dizitart.no2.collection;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.event.*;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;

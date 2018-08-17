@@ -22,8 +22,8 @@ import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.Document;
 import org.junit.Test;
 
-import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.Document.createDocument;
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

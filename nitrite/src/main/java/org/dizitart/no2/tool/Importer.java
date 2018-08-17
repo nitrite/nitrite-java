@@ -28,9 +28,7 @@ import org.dizitart.no2.mapper.JacksonFacade;
 import java.io.*;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.NIOE_IMPORT_ERROR;
-import static org.dizitart.no2.exceptions.ErrorMessage.IMPORT_READER_ERROR;
-import static org.dizitart.no2.exceptions.ErrorMessage.IMPORT_READ_ERROR;
-import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
+import static org.dizitart.no2.exceptions.ErrorMessage.*;
 
 /**
  * Nitrite database import utility. It imports data from

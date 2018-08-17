@@ -19,13 +19,13 @@
 package org.dizitart.no2.tool;
 
 import org.dizitart.no2.Document;
-import org.dizitart.no2.index.Index;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.PersistentCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.collection.objects.data.Company;
 import org.dizitart.no2.collection.objects.data.DataGenerator;
 import org.dizitart.no2.collection.objects.data.Employee;
+import org.dizitart.no2.index.Index;
 import org.junit.Test;
 
 import java.io.File;

@@ -18,11 +18,11 @@
 
 package org.dizitart.no2.collection.objects;
 
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.fulltext.Languages;
 import org.dizitart.no2.fulltext.UniversalTextTokenizer;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.index.annotations.Index;
 import org.dizitart.no2.index.annotations.Indices;
 import org.junit.After;

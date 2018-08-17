@@ -31,36 +31,36 @@ import org.dizitart.no2.Document;
  */
 public class GenericMapper extends AbstractMapper {
 
-	private MapperFacade mapperFacade;
+    private MapperFacade mapperFacade;
 
-	/**
+    /**
      * Instantiate a new {@link GenericMapper} with a
      * {@link MapperFacade} instance.
      *
      * @param facade a {@link MapperFacade} implementation
-     * */
+     */
     public GenericMapper(MapperFacade facade) {
-    	this.mapperFacade = facade;
+        this.mapperFacade = facade;
     }
 
     @Override
-    public <T> Document asDocumentInternal(T object) {
-            return mapperFacade.asDocument(object);
+    public <T> Document asDocumentAuto(T object) {
+        return mapperFacade.asDocument(object);
     }
 
     @Override
-    public <T> T asObjectInternal(Document document, Class<T> type) {
-            return mapperFacade.asObject(document, type);
+    public <T> T asObjectAuto(Document document, Class<T> type) {
+        return mapperFacade.asObject(document, type);
     }
 
     @Override
     public boolean isValueType(Object object) {
-    	return mapperFacade.isValueType(object);
+        return mapperFacade.isValueType(object);
     }
 
     @Override
     public Object asValue(Object object) {
-    	return mapperFacade.asValue(object);
+        return mapperFacade.asValue(object);
     }
 
     /**

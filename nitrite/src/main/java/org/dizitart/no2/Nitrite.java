@@ -20,11 +20,11 @@ package org.dizitart.no2;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.collection.CollectionFactory;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.collection.objects.RepositoryFactory;
+import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 

@@ -79,7 +79,7 @@ public class Constants {
     /**
      * The constant NO2.
      */
-    public static final String NO2 = "NO\u2082";
+    private static final String NO2 = "NO\u2082";
 
     /**
      * The constant ID_SUFFIX used in {@link NitriteId#toString()}.
@@ -94,12 +94,12 @@ public class Constants {
     /**
      * The constant DAEMON_THREAD_NAME.
      */
-    public static final String DAEMON_THREAD_NAME = "Worker." + NO2;
+    static final String DAEMON_THREAD_NAME = "Worker." + NO2;
 
     /**
      * The constant SCHEDULED_THREAD_NAME.
      */
-    public static final String SCHEDULED_THREAD_NAME = "ScheduledWorker." + NO2;
+    static final String SCHEDULED_THREAD_NAME = "ScheduledWorker." + NO2;
 
     /**
      * The constant TAG_COLLECTIONS.

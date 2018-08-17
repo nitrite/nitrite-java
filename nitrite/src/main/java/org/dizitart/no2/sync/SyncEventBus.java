@@ -40,12 +40,7 @@ class SyncEventBus extends NitriteEventBus<SyncEventData, SyncEventListener> {
     @Override
     public void post(final SyncEventData syncEventData) {
         for (final SyncEventListener listener : getListeners()) {
-            getEventExecutor().submit(new Runnable() {
-                @Override
-                public void run() {
-                    listener.onSyncEvent(syncEventData);
-                }
-            });
+            getEventExecutor().submit(() -> listener.onSyncEvent(syncEventData));
         }
     }
 }

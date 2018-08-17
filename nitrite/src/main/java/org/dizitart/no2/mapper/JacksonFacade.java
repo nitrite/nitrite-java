@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.ObjectMappingException;
+import org.dizitart.no2.serialization.NitriteIdModule;
 
 import java.io.IOException;
 import java.io.StringWriter;

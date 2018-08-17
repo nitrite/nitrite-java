@@ -19,13 +19,14 @@
 package org.dizitart.no2.datagate;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Cursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
+import org.dizitart.no2.common.ExecutorServiceManager;
 import org.dizitart.no2.sync.*;
 import org.dizitart.no2.sync.types.UserAccount;
-import org.dizitart.no2.common.ExecutorServiceManager;
 import org.jongo.Jongo;
 import org.jongo.MongoCollection;
 import org.junit.After;
@@ -50,10 +51,10 @@ import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.Document.createDocument;
-import static org.dizitart.no2.filters.ObjectFilters.eq;
-import static org.dizitart.no2.sync.TimeSpan.timeSpan;
 import static org.dizitart.no2.datagate.Constants.*;
 import static org.dizitart.no2.datagate.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.filters.ObjectFilters.eq;
+import static org.dizitart.no2.sync.TimeSpan.timeSpan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

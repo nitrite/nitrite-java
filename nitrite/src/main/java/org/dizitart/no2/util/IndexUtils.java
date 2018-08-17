@@ -66,12 +66,7 @@ public class IndexUtils {
      */
     public static <K, V extends Comparable<V>> Map<K, V> sortByScore(Map<K, V> unsortedMap) {
         List<Map.Entry<K, V>> list = new LinkedList<>(unsortedMap.entrySet());
-        Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
-            @Override
-            public int compare(Map.Entry<K, V> e1, Map.Entry<K, V> e2) {
-                return (e2.getValue()).compareTo(e1.getValue());
-            }
-        });
+        Collections.sort(list, (e1, e2) -> (e2.getValue()).compareTo(e1.getValue()));
 
         Map<K, V> result = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : list) {

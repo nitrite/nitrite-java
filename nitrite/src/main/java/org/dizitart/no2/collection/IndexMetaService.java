@@ -21,15 +21,18 @@ package org.dizitart.no2.collection;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.dizitart.no2.Document;
-import org.dizitart.no2.index.Index;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.IndexingException;
+import org.dizitart.no2.index.Index;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 

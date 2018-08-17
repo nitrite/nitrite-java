@@ -27,9 +27,9 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.event.ChangeInfo;
 import org.dizitart.no2.event.ChangeListener;
-import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.filters.ObjectFilters;
 import org.dizitart.no2.util.Iterables;
 

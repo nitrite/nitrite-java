@@ -45,7 +45,7 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
      *
      */
     public NitriteEventBus() {
-        this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<EventListener, Boolean>());
+        this.listeners = Collections.newSetFromMap(new ConcurrentHashMap<>());
     }
 
     @Override

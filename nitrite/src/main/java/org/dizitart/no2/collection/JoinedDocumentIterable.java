@@ -18,11 +18,12 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Document;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.util.Iterables;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 import static org.dizitart.no2.exceptions.ErrorMessage.REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED;
@@ -67,16 +68,7 @@ class JoinedDocumentIterable implements RecordIterable<Document> {
         return totalCount;
     }
 
-    @Override
-    public Document firstOrDefault() {
-        return Iterables.firstOrDefault(this);
-    }
-
-    @Override
-    public List<Document> toList() {
-        return Iterables.toList(this);
-    }
-
+    @NotNull
     @Override
     public Iterator<Document> iterator() {
         return new JoinedDocumentIterator();

@@ -19,8 +19,8 @@
 package org.dizitart.kno2.filters
 
 import org.dizitart.no2.collection.Filter
-import org.dizitart.no2.filters.Filters
 import org.dizitart.no2.collection.objects.ObjectFilter
+import org.dizitart.no2.filters.Filters
 import org.dizitart.no2.filters.ObjectFilters
 import kotlin.reflect.KProperty
 

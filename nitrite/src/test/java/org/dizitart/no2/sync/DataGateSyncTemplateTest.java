@@ -39,9 +39,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.sync.TimeSpan.timeSpan;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.

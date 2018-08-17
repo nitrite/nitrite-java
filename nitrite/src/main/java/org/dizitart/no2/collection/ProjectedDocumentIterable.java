@@ -19,15 +19,14 @@
 package org.dizitart.no2.collection;
 
 import org.dizitart.no2.Document;
-import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.util.Iterables;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.TreeSet;
 
 import static org.dizitart.no2.exceptions.ErrorMessage.REMOVE_ON_DOCUMENT_ITERATOR_NOT_SUPPORTED;
@@ -54,6 +53,7 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
         this.totalCount = findResult.getTotalCount();
     }
 
+    @NotNull
     @Override
     public Iterator<Document> iterator() {
         return new ProjectedDocumentIterator();
@@ -72,16 +72,6 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
     @Override
     public int totalCount() {
         return totalCount;
-    }
-
-    @Override
-    public Document firstOrDefault() {
-        return Iterables.firstOrDefault(this);
-    }
-
-    @Override
-    public List<Document> toList() {
-        return Iterables.toList(this);
     }
 
     @Override

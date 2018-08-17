@@ -18,6 +18,7 @@
 
 package org.dizitart.no2.collection;
 
+import io.reactivex.Observable;
 import org.dizitart.no2.NitriteId;
 
 /**
@@ -36,4 +37,13 @@ public interface WriteResult extends Iterable<NitriteId> {
      * @return the affected document count.
      */
     int getAffectedCount();
+
+    /**
+     * Returns a {@link Observable} on the write result.
+     *
+     * @return an {@link Observable}
+     * */
+    default Observable<NitriteId> toObservable() {
+        return Observable.fromIterable(this);
+    }
 }

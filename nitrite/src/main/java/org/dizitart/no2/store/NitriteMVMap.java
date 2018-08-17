@@ -21,7 +21,10 @@ package org.dizitart.no2.store;
 import org.dizitart.no2.meta.Attributes;
 import org.h2.mvstore.MVMap;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;

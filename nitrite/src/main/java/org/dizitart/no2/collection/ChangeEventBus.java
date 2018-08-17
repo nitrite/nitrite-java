@@ -35,12 +35,7 @@ class ChangeEventBus extends NitriteEventBus<ChangeInfo, ChangeListener> {
             String threadName = Thread.currentThread().getName();
             changeInfo.setOriginatingThread(threadName);
 
-            getEventExecutor().submit(new Runnable() {
-                @Override
-                public void run() {
-                    listener.onChange(changeInfo);
-                }
-            });
+            getEventExecutor().submit(() -> listener.onChange(changeInfo));
         }
     }
 }

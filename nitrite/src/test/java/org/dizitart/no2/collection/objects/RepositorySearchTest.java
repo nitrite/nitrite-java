@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.dizitart.no2.collection.FindOptions.sort;
-import static org.dizitart.no2.filters.ObjectFilters.ALL;
 import static org.dizitart.no2.filters.ObjectFilters.*;
 import static org.junit.Assert.*;
 

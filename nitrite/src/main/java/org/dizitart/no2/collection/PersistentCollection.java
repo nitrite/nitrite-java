@@ -18,7 +18,8 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.*;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.event.ChangeAware;
 import org.dizitart.no2.event.ChangeType;
 import org.dizitart.no2.exceptions.IndexingException;
