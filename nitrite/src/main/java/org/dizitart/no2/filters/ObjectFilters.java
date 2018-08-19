@@ -20,6 +20,7 @@ package org.dizitart.no2.filters;
 
 import lombok.experimental.UtilityClass;
 import org.dizitart.no2.collection.objects.ObjectFilter;
+import org.dizitart.no2.index.TextIndexer;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
@@ -216,8 +217,8 @@ public class ObjectFilters {
      * @param field the value
      * @param value the text value
      * @return the text filter
-     * @see org.dizitart.no2.fulltext.TextIndexingService
-     * @see org.dizitart.no2.fulltext.TextTokenizer
+     * @see TextIndexer
+     * @see org.dizitart.no2.index.fulltext.TextTokenizer
      */
     public static ObjectFilter text(String field, String value) {
         return new TextObjectFilter(field, value);

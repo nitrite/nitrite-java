@@ -450,3 +450,4 @@ captures/
 !/nitrite-datagate/src/main/dist/
 !/nitrite-datagate/src/main/dist/bin/
 /nitrite-datagate/src/main/dist/logs/
+test.log

@@ -23,8 +23,6 @@ import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.filters.Filters;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapper.JacksonFacade;
 import org.dizitart.no2.mapper.MapperFacade;
 import org.joda.time.DateTime;

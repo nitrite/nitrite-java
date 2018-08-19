@@ -19,8 +19,8 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.collection.objects.ObjectRepository;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.index.annotations.Id;
 import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;

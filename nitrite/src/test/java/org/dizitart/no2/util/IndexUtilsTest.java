@@ -19,7 +19,7 @@
 package org.dizitart.no2.util;
 
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.collection.IndexType;
 import org.junit.Test;
 
 import java.util.HashMap;

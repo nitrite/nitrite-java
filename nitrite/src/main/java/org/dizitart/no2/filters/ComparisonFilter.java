@@ -20,7 +20,7 @@ package org.dizitart.no2.filters;
 
 import lombok.Getter;
 import lombok.ToString;
-import org.dizitart.no2.collection.NitriteService;
+import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.exceptions.FilterException;
 
 import static org.dizitart.no2.exceptions.ErrorMessage.VALUE_IS_NOT_COMPARABLE;
@@ -41,7 +41,7 @@ abstract class ComparisonFilter extends BaseFilter {
     }
 
     @Override
-    public void setNitriteService(NitriteService nitriteService) {
-        this.nitriteService = nitriteService;
+    public void setCollectionOperation(CollectionOperation collectionOperation) {
+        this.collectionOperation = collectionOperation;
     }
 }

@@ -20,13 +20,13 @@ package org.dizitart.no2;
 
 import org.dizitart.no2.collection.Cursor;
 import org.dizitart.no2.filters.BaseFilter;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.store.NitriteMap;
 import org.junit.Test;
 
 import java.util.Set;
 
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
+import static org.dizitart.no2.collection.IndexOptions.indexOptions;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -41,7 +41,7 @@ public class CustomFilterTest extends BaseCollectionTest {
         Cursor cursor = collection.find(new BaseFilter() {
             @Override
             public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
-                return nitriteService.findEqualWithIndex("firstName", "fn1");
+                return collectionOperation.findEqualWithIndex("firstName", "fn1");
             }
         });
 

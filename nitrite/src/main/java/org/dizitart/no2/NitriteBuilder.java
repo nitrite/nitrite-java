@@ -24,10 +24,10 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
-import org.dizitart.no2.fulltext.EnglishTextTokenizer;
-import org.dizitart.no2.fulltext.TextIndexingService;
-import org.dizitart.no2.fulltext.TextTokenizer;
-import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.fulltext.EnglishTextTokenizer;
+import org.dizitart.no2.index.TextIndexer;
+import org.dizitart.no2.index.fulltext.TextTokenizer;
+import org.dizitart.no2.collection.IndexOptions;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMVStore;
 import org.dizitart.no2.store.NitriteStore;
@@ -85,10 +85,10 @@ import static org.dizitart.no2.util.ValidationUtils.isValidCollectionName;
  *
  * [[app-listing]]
  * [source,java]
- * .Database with custom {@link TextIndexingService}
+ * .Database with custom {@link TextIndexer}
  * --
  *  Nitrite db = Nitrite.builder()
- *         .textIndexingService(new LuceneService())
+ *         .textIndexer(new LuceneService())
  *         .openOrCreate("user", "password");
  * --
  * [source,java]
@@ -109,7 +109,7 @@ public class NitriteBuilder {
     private boolean autoCommit = true;
     private boolean autoCompact = true;
     private boolean shutdownHook = true;
-    private TextIndexingService textIndexingService;
+    private TextIndexer textIndexer;
     private TextTokenizer textTokenizer;
     private NitriteMapper nitriteMapper;
     private Set<Module> jacksonModules;
@@ -229,7 +229,7 @@ public class NitriteBuilder {
 
 
     /**
-     * Sets a custom {@link TextIndexingService} implementation to be used
+     * Sets a custom {@link TextIndexer} implementation to be used
      * during full text indexing and full text search. If not set, the default
      * text indexer will be used.
      *
@@ -238,46 +238,46 @@ public class NitriteBuilder {
      * --
      * If user does not want to use the default text indexer and instead like to use
      * third-party full text search engine like apache lucene, a custom
-     * {@link TextIndexingService} implementation needs to be provided here.
+     * {@link TextIndexer} implementation needs to be provided here.
      *
      * --
      *
-     * @param textIndexingService the {@link TextIndexingService} implementation.
+     * @param textIndexer the {@link TextIndexer} implementation.
      * @return the {@link NitriteBuilder} instance.
-     * @see TextIndexingService
+     * @see TextIndexer
      * @see org.dizitart.no2.filters.Filters#text(String, String)
      * @see NitriteCollection#createIndex(String, IndexOptions)
      */
-    public NitriteBuilder textIndexingService(TextIndexingService textIndexingService) {
-        this.textIndexingService = textIndexingService;
+    public NitriteBuilder textIndexer(TextIndexer textIndexer) {
+        this.textIndexer = textIndexer;
         return this;
     }
 
 
     /**
-     * Sets a custom {@link TextTokenizer} for the in-built {@link TextIndexingService}.
-     * If not set, a default text tokenizer {@link org.dizitart.no2.fulltext.EnglishTextTokenizer}
+     * Sets a custom {@link TextTokenizer} for the in-built {@link TextIndexer}.
+     * If not set, a default text tokenizer {@link org.dizitart.no2.index.fulltext.EnglishTextTokenizer}
      * is used. The default tokenizer works on english language only.
      *
      * For non-english languages like chinese, japanese etc.,
-     * a {@link org.dizitart.no2.fulltext.UniversalTextTokenizer} needs to be set here.
+     * a {@link org.dizitart.no2.index.fulltext.UniversalTextTokenizer} needs to be set here.
      *
      * [icon="{@docRoot}/alert.png"]
      * [CAUTION]
      * --
-     * This settings is only applicable when in-built {@link TextIndexingService} is
+     * This settings is only applicable when in-built {@link TextIndexer} is
      * being used for full text indexing, in other words,
-     * {@link NitriteBuilder#textIndexingService(TextIndexingService)} is not set.
+     * {@link NitriteBuilder#textIndexer(TextIndexer)} is not set.
      *
-     * If a custom {@link TextIndexingService} implementation is set, this settings has
+     * If a custom {@link TextIndexer} implementation is set, this settings has
      * no effect. The custom implementation has to take care of any necessary text
      * tokenizer.
      *
      * --
      * @param textTokenizer the {@link TextTokenizer} implementation.
      * @return the {@link NitriteBuilder} instance.
-     * @see org.dizitart.no2.fulltext.EnglishTextTokenizer
-     * @see org.dizitart.no2.fulltext.UniversalTextTokenizer
+     * @see org.dizitart.no2.index.fulltext.EnglishTextTokenizer
+     * @see org.dizitart.no2.index.fulltext.UniversalTextTokenizer
      */
     public NitriteBuilder textTokenizer(TextTokenizer textTokenizer) {
         this.textTokenizer = textTokenizer;
@@ -488,7 +488,7 @@ public class NitriteBuilder {
 
         if (store != null) {
             NitriteContext context = new NitriteContext();
-            context.setTextIndexingService(textIndexingService);
+            context.setTextIndexer(textIndexer);
             if (textTokenizer == null) {
                 textTokenizer = new EnglishTextTokenizer();
             }

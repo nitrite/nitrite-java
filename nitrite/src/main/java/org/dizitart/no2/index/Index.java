@@ -21,6 +21,8 @@ package org.dizitart.no2.index;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.collection.NitriteCollection;
 
 import java.io.Serializable;

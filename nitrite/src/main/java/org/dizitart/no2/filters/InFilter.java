@@ -46,9 +46,9 @@ class InFilter extends BaseFilter {
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         validateInFilterValue(field, values);
 
-        if (nitriteService.hasIndex(field)
-                && !nitriteService.isIndexing(field) && objectList != null) {
-            return nitriteService.findInWithIndex(field, objectList);
+        if (collectionOperation.hasIndex(field)
+                && !collectionOperation.isIndexing(field) && objectList != null) {
+            return collectionOperation.findInWithIndex(field, objectList);
         } else {
             return matchedSet(documentMap);
         }

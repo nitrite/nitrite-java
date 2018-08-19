@@ -144,6 +144,11 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
+    public void drop() {
+        nitriteStore.removeMap(this);
+    }
+
+    @Override
     public Attributes getAttributes() {
         NitriteMap<String, Attributes> metaMap = nitriteStore.metaMap();
         if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {

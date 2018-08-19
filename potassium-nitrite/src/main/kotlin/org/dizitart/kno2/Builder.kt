@@ -21,8 +21,8 @@ package org.dizitart.kno2
 import com.fasterxml.jackson.databind.Module
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.NitriteBuilder
-import org.dizitart.no2.fulltext.TextIndexingService
-import org.dizitart.no2.fulltext.TextTokenizer
+import org.dizitart.no2.index.TextIndexer
+import org.dizitart.no2.index.fulltext.TextTokenizer
 import org.dizitart.no2.mapper.NitriteMapper
 import java.io.File
 
@@ -83,14 +83,14 @@ class Builder internal constructor() {
     var autoCompact = true
 
     /**
-     * Specifies a custom [TextIndexingService] implementation to be used
+     * Specifies a custom [TextIndexer] implementation to be used
      * during full text indexing and full text search. If not set, the default
      * text indexer will be used.
      */
-    var textIndexingService: TextIndexingService? = null
+    var textIndexer: TextIndexer? = null
 
     /**
-     * Specifies a custom [TextTokenizer] for the in-built [TextIndexingService].
+     * Specifies a custom [TextTokenizer] for the in-built [TextIndexer].
      * If not set, a default text tokenizer [org.dizitart.no2.fulltext.EnglishTextTokenizer]
      * is used. The default tokenizer works on english language only.
      */
@@ -124,7 +124,7 @@ class Builder internal constructor() {
             builder.filePath(path)
         }
         builder.autoCommitBufferSize(autoCommitBufferSize)
-        builder.textIndexingService(textIndexingService)
+        builder.textIndexer(textIndexer)
         builder.textTokenizer(textTokenizer)
 
         if (nitriteMapper == null) {

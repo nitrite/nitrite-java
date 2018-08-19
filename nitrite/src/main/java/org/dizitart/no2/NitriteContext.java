@@ -23,10 +23,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.ExecutorServiceManager;
 import org.dizitart.no2.filters.ObjectFilters;
-import org.dizitart.no2.fulltext.TextIndexingService;
-import org.dizitart.no2.fulltext.TextTokenizer;
+import org.dizitart.no2.index.TextIndexer;
+import org.dizitart.no2.index.fulltext.TextTokenizer;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 
@@ -102,16 +101,16 @@ public class NitriteContext {
     private boolean autoCompactEnabled;
 
     /**
-     * Gets the custom {@link TextIndexingService} implementation used for the database.
-     * It returns `null` if the default {@link TextIndexingService} implementation
+     * Gets the custom {@link TextIndexer} implementation used for the database.
+     * It returns `null` if the default {@link TextIndexer} implementation
      * is used.
      *
-     * @returns a {@link TextIndexingService} instance or `null`.
+     * @returns a {@link TextIndexer} instance or `null`.
      * @see org.dizitart.no2.filters.Filters#text(String, String)
      * @see ObjectFilters#text(String, String)
-     * @see NitriteBuilder#textIndexingService(TextIndexingService)
+     * @see NitriteBuilder#textIndexer(TextIndexer)
      * */
-    private TextIndexingService textIndexingService;
+    private TextIndexer textIndexer;
 
     /**
      * Gets the {@link TextTokenizer} implementation used for the database. It returns
@@ -170,18 +169,6 @@ public class NitriteContext {
      */
     public Set<Module> getRegisteredModules() {
         return new HashSet<>(jacksonModule);
-    }
-
-    /**
-     * Gets a worker pool with a specified pool size.
-     *
-     * @return a daemon thread pool executor
-     * */
-    public ExecutorService getQueryPool() {
-        if (workerPool == null) {
-            workerPool = ExecutorServiceManager.daemonExecutor();
-        }
-        return workerPool;
     }
 
     void shutdown() {

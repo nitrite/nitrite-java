@@ -26,8 +26,6 @@ import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.meta.MetadataAware;
 
 import java.util.Collection;

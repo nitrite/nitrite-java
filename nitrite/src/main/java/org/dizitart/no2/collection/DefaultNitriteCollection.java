@@ -29,9 +29,8 @@ import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.meta.Attributes;
+import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
@@ -52,7 +51,7 @@ import static org.dizitart.no2.util.ValidationUtils.notNull;
 class DefaultNitriteCollection implements NitriteCollection {
     private NitriteMap<NitriteId, Document> nitriteMap;
     private NitriteStore nitriteStore;
-    private NitriteService nitriteService;
+    private CollectionOperation collectionOperation;
     private volatile boolean isDropped;
     private EventBus<ChangeInfo, ChangeListener> eventBus;
     private String collectionName;
@@ -61,7 +60,7 @@ class DefaultNitriteCollection implements NitriteCollection {
         this.nitriteMap = nitriteMap;
         this.nitriteStore = nitriteMap.getStore();
         this.eventBus = new ChangeEventBus();
-        this.nitriteService = new NitriteService(nitriteMap, nitriteContext, eventBus);
+        this.collectionOperation = new CollectionOperation(nitriteMap, nitriteContext, eventBus);
         this.isDropped = false;
         this.collectionName = nitriteMap.getName();
     }
@@ -72,9 +71,9 @@ class DefaultNitriteCollection implements NitriteCollection {
         try {
             // by default async is false while creating index
             if (indexOptions == null) {
-                nitriteService.createIndex(field, IndexType.Unique, false);
+                collectionOperation.createIndex(field, IndexType.Unique, false);
             } else {
-                nitriteService.createIndex(field, indexOptions.getIndexType(),
+                collectionOperation.createIndex(field, indexOptions.getIndexType(),
                         indexOptions.isAsync());
             }
         } catch (VirtualMachineError vme) {
@@ -86,10 +85,10 @@ class DefaultNitriteCollection implements NitriteCollection {
     public void rebuildIndex(String field, boolean async) {
         checkOpened();
         try {
-            Index index = nitriteService.findIndex(field);
+            Index index = collectionOperation.findIndex(field);
             if (index != null) {
                 validateRebuildIndex(index);
-                nitriteService.rebuildIndex(index, async);
+                collectionOperation.rebuildIndex(index, async);
             } else {
                 throw new IndexingException(errorMessage(field + " is not indexed",
                         IE_REBUILD_INDEX_FIELD_NOT_INDEXED));
@@ -103,7 +102,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Collection<Index> listIndices() {
         checkOpened();
         try {
-            return nitriteService.listIndexes();
+            return collectionOperation.listIndexes();
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -114,7 +113,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public boolean hasIndex(String field) {
         checkOpened();
         try {
-            return nitriteService.hasIndex(field);
+            return collectionOperation.hasIndex(field);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -125,7 +124,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public boolean isIndexing(String field) {
         checkOpened();
         try {
-            return nitriteService.isIndexing(field);
+            return collectionOperation.isIndexing(field);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -136,7 +135,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public void dropIndex(String field) {
         checkOpened();
         try {
-            nitriteService.dropIndex(field);
+            collectionOperation.dropIndex(field);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -146,7 +145,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public void dropAllIndices() {
         checkOpened();
         try {
-            nitriteService.dropAllIndices();
+            collectionOperation.dropAllIndices();
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -156,7 +155,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public WriteResult insert(Document document, Document... documents) {
         checkOpened();
         try {
-            return nitriteService.insert(document, documents);
+            return collectionOperation.insert(document, documents);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -167,7 +166,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public WriteResult insert(Document[] documents) {
         checkOpened();
         try {
-            return nitriteService.insert(documents);
+            return collectionOperation.insert(documents);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -178,7 +177,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Cursor find(Filter filter) {
         checkOpened();
         try {
-            return nitriteService.find(filter);
+            return collectionOperation.find(filter);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -189,7 +188,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Cursor find(FindOptions findOptions) {
         checkOpened();
         try {
-            return nitriteService.find(findOptions);
+            return collectionOperation.find(findOptions);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -200,7 +199,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Cursor find(Filter filter, FindOptions findOptions) {
         checkOpened();
         try {
-            return nitriteService.find(filter, findOptions);
+            return collectionOperation.find(filter, findOptions);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -211,7 +210,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Cursor find() {
         checkOpened();
         try {
-            return nitriteService.find();
+            return collectionOperation.find();
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -222,7 +221,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public Document getById(NitriteId nitriteId) {
         checkOpened();
         try {
-            return nitriteService.getById(nitriteId);
+            return collectionOperation.getById(nitriteId);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -233,7 +232,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public void drop() {
         checkOpened();
         try {
-            nitriteService.dropCollection();
+            collectionOperation.dropCollection();
             isDropped = true;
             closeCollection();
             eventBus.post(new ChangeInfo(ChangeType.DROP));
@@ -322,7 +321,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
         checkOpened();
         try {
-            return nitriteService.update(filter, update, updateOptions);
+            return collectionOperation.update(filter, update, updateOptions);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -360,7 +359,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public WriteResult remove(Filter filter, RemoveOptions removeOptions) {
         checkOpened();
         try {
-            return nitriteService.remove(filter, removeOptions);
+            return collectionOperation.remove(filter, removeOptions);
         } catch (VirtualMachineError vme) {
             handleVirtualMachineError(vme);
         }
@@ -429,7 +428,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     private void closeCollection() {
         nitriteStore = null;
         nitriteMap = null;
-        nitriteService = null;
+        collectionOperation = null;
     }
 
     private void closeEventBus() {

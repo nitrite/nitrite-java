@@ -54,7 +54,7 @@ class LesserEqualObjectFilter extends BaseObjectFilter {
         }
 
         Filter lte = Filters.lte(field, comparable);
-        lte.setNitriteService(nitriteService);
+        lte.setCollectionOperation(collectionOperation);
         return lte.apply(documentMap);
     }
 }

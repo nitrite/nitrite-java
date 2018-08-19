@@ -46,7 +46,7 @@ class NotFilter extends BaseFilter {
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         if (filter instanceof BaseFilter) {
-            filter.setNitriteService(nitriteService);
+            filter.setCollectionOperation(collectionOperation);
         }
 
         return matchedSet(documentMap);

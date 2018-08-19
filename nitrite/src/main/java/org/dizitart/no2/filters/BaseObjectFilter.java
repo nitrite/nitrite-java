@@ -18,7 +18,7 @@
 
 package org.dizitart.no2.filters;
 
-import org.dizitart.no2.collection.NitriteService;
+import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.collection.objects.ObjectFilter;
 import org.dizitart.no2.mapper.NitriteMapper;
 
@@ -32,7 +32,7 @@ public abstract class BaseObjectFilter implements ObjectFilter {
     /**
      * The Nitrite service.
      */
-    protected NitriteService nitriteService;
+    protected CollectionOperation collectionOperation;
 
     /**
      * The {@link NitriteMapper} instance.
@@ -40,8 +40,8 @@ public abstract class BaseObjectFilter implements ObjectFilter {
     protected NitriteMapper nitriteMapper;
 
     @Override
-    public void setNitriteService(NitriteService nitriteService) {
-        this.nitriteService = nitriteService;
+    public void setCollectionOperation(CollectionOperation collectionOperation) {
+        this.collectionOperation = collectionOperation;
     }
 
     @Override

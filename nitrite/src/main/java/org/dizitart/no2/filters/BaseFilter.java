@@ -21,8 +21,8 @@ package org.dizitart.no2.filters;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.collection.Filter;
-import org.dizitart.no2.collection.NitriteService;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.ArrayList;
@@ -41,18 +41,18 @@ public abstract class BaseFilter implements Filter {
     /**
      * The Nitrite service.
      */
-    protected NitriteService nitriteService;
+    protected CollectionOperation collectionOperation;
 
     @Override
-    public void setNitriteService(NitriteService nitriteService) {
-        this.nitriteService = nitriteService;
+    public void setCollectionOperation(CollectionOperation collectionOperation) {
+        this.collectionOperation = collectionOperation;
     }
 
     List<Callable<Set<NitriteId>>> createTasks(Filter[] filters,
                                                final NitriteMap<NitriteId, Document> documentMap) {
         List<Callable<Set<NitriteId>>> tasks = new ArrayList<>();
         for (final Filter filter : filters) {
-            filter.setNitriteService(nitriteService);
+            filter.setCollectionOperation(collectionOperation);
             tasks.add(() -> {
                 try {
                     return filter.apply(documentMap);

@@ -182,4 +182,9 @@ public interface NitriteMap<Key, Value> extends MetadataAware {
      * @return list of all keys.
      * */
     List<Key> keyList();
+
+    /**
+     * Deletes the map from the store.
+     * */
+    void drop();
 }

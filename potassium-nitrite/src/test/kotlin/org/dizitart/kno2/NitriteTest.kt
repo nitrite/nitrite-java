@@ -21,7 +21,7 @@ package org.dizitart.kno2
 import org.dizitart.no2.collection.NullOrder
 import org.dizitart.no2.collection.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
-import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.collection.IndexType
 import org.dizitart.no2.index.annotations.Id
 import org.dizitart.no2.index.annotations.Index
 import org.dizitart.no2.index.annotations.Indices

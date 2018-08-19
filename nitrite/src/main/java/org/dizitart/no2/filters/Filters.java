@@ -20,6 +20,7 @@ package org.dizitart.no2.filters;
 
 import lombok.experimental.UtilityClass;
 import org.dizitart.no2.collection.Filter;
+import org.dizitart.no2.index.TextIndexer;
 
 /**
  * A helper class to create all type of {@link Filter}s.
@@ -209,8 +210,8 @@ public class Filters {
      * @param field the value
      * @param value the text value
      * @return the text filter
-     * @see org.dizitart.no2.fulltext.TextIndexingService
-     * @see org.dizitart.no2.fulltext.TextTokenizer
+     * @see TextIndexer
+     * @see org.dizitart.no2.index.fulltext.TextTokenizer
      */
     public static Filter text(String field, String value) {
         return new TextFilter(field, value);

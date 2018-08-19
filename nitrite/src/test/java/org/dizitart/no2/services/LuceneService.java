@@ -34,7 +34,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.fulltext.TextIndexingService;
+import org.dizitart.no2.index.TextIndexer;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -43,7 +43,7 @@ import java.util.Set;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 
-public class LuceneService implements TextIndexingService {
+public class LuceneService implements TextIndexer {
     private static final String CONTENT_ID = "content_id";
     private static final int MAX_SEARCH = Byte.MAX_VALUE;
 

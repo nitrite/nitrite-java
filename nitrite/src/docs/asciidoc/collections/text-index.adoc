@@ -127,7 +127,7 @@ include::../../../test/java/org/dizitart/no2/services/LuceneService.java[]
 
 // Configure third-party indexing service while opening the database
 Nitrite db = Nitrite.builder()
-            .textIndexingService(new LuceneService())
+            .textIndexer(new LuceneService())
             .filePath("/tmp/test.db")
             .openOrCreate();
 --

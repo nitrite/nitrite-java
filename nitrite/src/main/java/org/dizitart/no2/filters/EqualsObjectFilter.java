@@ -54,7 +54,7 @@ class EqualsObjectFilter extends BaseObjectFilter {
             eqFilter = Filters.eq(field, value);
         }
 
-        eqFilter.setNitriteService(nitriteService);
+        eqFilter.setCollectionOperation(collectionOperation);
         return eqFilter.apply(documentMap);
     }
 }

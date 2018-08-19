@@ -57,9 +57,9 @@ class GreaterThanFilter extends ComparisonFilter {
                 }
             }
             return nitriteIdSet;
-        } else if (nitriteService.hasIndex(field)
-                && !nitriteService.isIndexing(field)) {
-            return nitriteService.findGreaterThanWithIndex(field, comparable);
+        } else if (collectionOperation.hasIndex(field)
+                && !collectionOperation.isIndexing(field)) {
+            return collectionOperation.findGreaterThanWithIndex(field, comparable);
         } else {
             return matchedSet(documentMap);
         }

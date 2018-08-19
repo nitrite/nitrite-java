@@ -30,8 +30,8 @@ import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.ObjectFilters;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.util.Iterables;
 import org.junit.Test;
 

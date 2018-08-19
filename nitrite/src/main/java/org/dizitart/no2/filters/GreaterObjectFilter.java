@@ -54,7 +54,7 @@ class GreaterObjectFilter extends BaseObjectFilter {
         }
 
         Filter gt = Filters.gt(field, comparable);
-        gt.setNitriteService(nitriteService);
+        gt.setCollectionOperation(collectionOperation);
         return gt.apply(documentMap);
     }
 }

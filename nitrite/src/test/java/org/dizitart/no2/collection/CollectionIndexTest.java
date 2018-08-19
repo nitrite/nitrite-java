@@ -22,7 +22,6 @@ import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.filters.Filters.eq;
 import static org.dizitart.no2.filters.Filters.text;
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
+import static org.dizitart.no2.collection.IndexOptions.indexOptions;
 import static org.junit.Assert.*;
 
 /**

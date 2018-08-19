@@ -30,8 +30,8 @@ import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.meta.Attributes;
 
@@ -43,7 +43,7 @@ import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
+import static org.dizitart.no2.collection.IndexOptions.indexOptions;
 import static org.dizitart.no2.util.ObjectUtils.*;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 

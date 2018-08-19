@@ -20,7 +20,6 @@ package org.dizitart.no2.common;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -35,8 +34,8 @@ import static org.dizitart.no2.common.Constants.SCHEDULED_THREAD_NAME;
  */
 @Slf4j
 public class ExecutorServiceManager {
-    private static Map<Integer, ExecutorService> daemonExecutors = new HashMap<>();
-    private static Map<Integer, ScheduledExecutorService> scheduledExecutors = new HashMap<>();
+    private static Map<Integer, ExecutorService> daemonExecutors = new ConcurrentHashMap<>();
+    private static Map<Integer, ScheduledExecutorService> scheduledExecutors = new ConcurrentHashMap<>();
     private static final Object lock = new Object();
 
     /**

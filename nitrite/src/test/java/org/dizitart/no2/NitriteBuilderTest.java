@@ -22,9 +22,9 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.Module;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
-import org.dizitart.no2.fulltext.EnglishTextTokenizer;
-import org.dizitart.no2.fulltext.TextIndexingService;
-import org.dizitart.no2.fulltext.TextTokenizer;
+import org.dizitart.no2.index.fulltext.EnglishTextTokenizer;
+import org.dizitart.no2.index.TextIndexer;
+import org.dizitart.no2.index.fulltext.TextTokenizer;
 import org.dizitart.no2.index.annotations.Index;
 import org.dizitart.no2.services.LuceneService;
 import org.junit.Test;
@@ -45,7 +45,7 @@ public class NitriteBuilderTest {
 
     @Test
     public void testConfig() throws IOException {
-        TextIndexingService textIndexingService = new LuceneService();
+        TextIndexer textIndexer = new LuceneService();
         TextTokenizer textTokenizer = new EnglishTextTokenizer();
         String filePath = getRandomTempDbFile();
 
@@ -55,14 +55,14 @@ public class NitriteBuilderTest {
         builder.disableAutoCommit();
         builder.disableAutoCompact();
         builder.filePath(filePath);
-        builder.textIndexingService(textIndexingService);
+        builder.textIndexer(textIndexer);
         builder.textTokenizer(textTokenizer);
 
         Nitrite db = builder.openOrCreate();
         NitriteContext context = db.getContext();
 
         assertEquals(context.getAutoCommitBufferSize(), 1);
-        assertEquals(context.getTextIndexingService(), textIndexingService);
+        assertEquals(context.getTextIndexer(), textIndexer);
         assertEquals(context.getTextTokenizer(), textTokenizer);
         assertFalse(context.isAutoCommitEnabled());
         assertFalse(context.isAutoCompactEnabled());

@@ -58,10 +58,10 @@ class EqualsFilter extends BaseFilter {
                 }
             }
             return nitriteIdSet;
-        } else if (nitriteService.hasIndex(field)
-                && !nitriteService.isIndexing(field)
+        } else if (collectionOperation.hasIndex(field)
+                && !collectionOperation.isIndexing(field)
                 && value != null) {
-            return nitriteService.findEqualWithIndex(field, value);
+            return collectionOperation.findEqualWithIndex(field, value);
         } else {
             return matchedSet(documentMap);
         }

@@ -37,9 +37,9 @@ class TextFilter extends StringFilter {
 
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
-        if (nitriteService.hasIndex(field)
-                && !nitriteService.isIndexing(field)) {
-            return nitriteService.findTextWithIndex(field, value);
+        if (collectionOperation.hasIndex(field)
+                && !collectionOperation.isIndexing(field)) {
+            return collectionOperation.findTextWithIndex(field, value);
         } else {
             throw new IndexingException(errorMessage(field + " is not indexed",
                     IE_TEXT_FILTER_FIELD_NOT_INDEXED));

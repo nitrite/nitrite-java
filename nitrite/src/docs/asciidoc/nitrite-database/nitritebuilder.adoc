@@ -92,7 +92,7 @@ slow down read and write operations slightly.
 --
 Nitrite db = Nitrite.builder()
         .filePath("/tmp/test.db")
-        .textIndexingService(new MyTextIndexingEngine())
+        .textIndexer(new MyTextIndexingEngine())
         .openOrCreate();
 --
 

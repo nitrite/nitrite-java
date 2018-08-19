@@ -47,7 +47,7 @@ class RegexObjectFilter extends BaseObjectFilter {
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         validateSearchTerm(nitriteMapper, field, value);
         Filter regex = Filters.regex(field, value);
-        regex.setNitriteService(nitriteService);
+        regex.setCollectionOperation(collectionOperation);
         return regex.apply(documentMap);
     }
 }

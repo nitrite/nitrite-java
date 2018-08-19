@@ -20,6 +20,7 @@ package org.dizitart.no2.collection;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Set;
@@ -200,9 +201,9 @@ public interface Filter {
     Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap);
 
     /**
-     * Sets {@link NitriteService} in the filter object.
+     * Sets {@link CollectionOperation} in the filter object.
      *
-     * @param nitriteService the nitrite service
+     * @param collectionOperation the nitrite service
      */
-    void setNitriteService(NitriteService nitriteService);
+    void setCollectionOperation(CollectionOperation collectionOperation);
 }

@@ -19,7 +19,7 @@
 package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.*
-import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.collection.IndexType
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

@@ -21,8 +21,6 @@ package org.dizitart.no2.collection;
 import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
 import java.text.ParseException;

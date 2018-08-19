@@ -20,8 +20,8 @@ package org.dizitart.no2;
 
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

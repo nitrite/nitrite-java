@@ -68,7 +68,7 @@ class InObjectFilter extends BaseObjectFilter {
         }
 
         Filter in = Filters.in(field, valueArray);
-        in.setNitriteService(nitriteService);
+        in.setCollectionOperation(collectionOperation);
         return in.apply(documentMap);
     }
 }

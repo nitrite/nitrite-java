@@ -20,8 +20,8 @@ package org.dizitart.no2;
 
 import org.dizitart.no2.collection.Cursor;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.services.LuceneService;
 import org.junit.After;
 import org.junit.Rule;
@@ -98,7 +98,7 @@ public class MultiThreadedTest {
         }
 
         if (externalTextIndexer) {
-            builder.textIndexingService(new LuceneService());
+            builder.textIndexer(new LuceneService());
         }
 
         Nitrite db = builder.openOrCreate();
