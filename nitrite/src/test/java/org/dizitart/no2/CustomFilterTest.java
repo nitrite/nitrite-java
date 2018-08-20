@@ -41,7 +41,7 @@ public class CustomFilterTest extends BaseCollectionTest {
         Cursor cursor = collection.find(new BaseFilter() {
             @Override
             public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
-                return collectionOperation.findEqualWithIndex("firstName", "fn1");
+                return indexedQueryTemplate.getComparableIndexer().findEqual("firstName", "fn1");
             }
         });
 

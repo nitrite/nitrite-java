@@ -54,7 +54,7 @@ class LessThanObjectFilter extends BaseObjectFilter {
         }
 
         Filter lt = Filters.lt(field, comparable);
-        lt.setCollectionOperation(collectionOperation);
+        lt.setIndexedQueryTemplate(indexedQueryTemplate);
         return lt.apply(documentMap);
     }
 }

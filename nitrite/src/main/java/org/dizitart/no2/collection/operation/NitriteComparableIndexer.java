@@ -26,16 +26,14 @@ import org.dizitart.no2.index.ComparableIndexer;
 import org.dizitart.no2.store.IndexStore;
 import org.dizitart.no2.store.NitriteMap;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.CAN_NOT_SEARCH_NON_COMPARABLE_ON_INDEXED_FIELD;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
+import static org.dizitart.no2.util.ValidationUtils.notNull;
 import static org.dizitart.no2.util.ValidationUtils.validateDocumentIndexField;
 
 /**
@@ -145,15 +143,6 @@ class NitriteComparableIndexer implements ComparableIndexer {
     }
 
     @Override
-    public void truncateIndex(String field) {
-        synchronized (lock) {
-            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
-                    = indexStore.getIndexMap(field);
-            indexMap.clear();
-        }
-    }
-
-    @Override
     public void rebuildIndex(String field, boolean unique) {
         // create index map
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
@@ -193,6 +182,9 @@ class NitriteComparableIndexer implements ComparableIndexer {
 
     @Override
     public Set<NitriteId> findEqual(String field, Object value) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_EQUAL_INDEX_NULL_FIELD));
+        if (value == null) return new HashSet<>();
+
         if (!(value instanceof Comparable)) {
             throw new FilterException(CAN_NOT_SEARCH_NON_COMPARABLE_ON_INDEXED_FIELD);
         }
@@ -211,6 +203,9 @@ class NitriteComparableIndexer implements ComparableIndexer {
 
     @Override
     public Set<NitriteId> findGreaterThan(String field, Comparable comparable) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_GT_INDEX_NULL_FIELD));
+        notNull(comparable, errorMessage("comparable can not be null", VE_FIND_GT_INDEX_NULL_VALUE));
+
         Set<NitriteId> resultSet = new LinkedHashSet<>();
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexStore.getIndexMap(field);
@@ -228,6 +223,9 @@ class NitriteComparableIndexer implements ComparableIndexer {
 
     @Override
     public Set<NitriteId> findGreaterEqual(String field, Comparable comparable) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_GTE_INDEX_NULL_FIELD));
+        notNull(comparable, errorMessage("comparable can not be null", VE_FIND_GTE_INDEX_NULL_VALUE));
+
         Set<NitriteId> resultSet = new LinkedHashSet<>();
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexStore.getIndexMap(field);
@@ -245,6 +243,9 @@ class NitriteComparableIndexer implements ComparableIndexer {
 
     @Override
     public Set<NitriteId> findLesserThan(String field, Comparable comparable) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_LT_INDEX_NULL_FIELD));
+        notNull(comparable, errorMessage("comparable can not be null", VE_FIND_LT_INDEX_NULL_VALUE));
+
         Set<NitriteId> resultSet = new LinkedHashSet<>();
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexStore.getIndexMap(field);
@@ -262,6 +263,9 @@ class NitriteComparableIndexer implements ComparableIndexer {
 
     @Override
     public Set<NitriteId> findLesserEqual(String field, Comparable comparable) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_LTE_INDEX_NULL_FIELD));
+        notNull(comparable, errorMessage("comparable can not be null", VE_FIND_LTE_INDEX_NULL_VALUE));
+
         Set<NitriteId> resultSet = new LinkedHashSet<>();
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexStore.getIndexMap(field);
@@ -279,6 +283,9 @@ class NitriteComparableIndexer implements ComparableIndexer {
 
     @Override
     public Set<NitriteId> findIn(String field, List<Object> values) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_IN_INDEX_NULL_FIELD));
+        notNull(values, errorMessage("values can not be null", VE_FIND_IN_INDEX_NULL_VALUE));
+
         Set<NitriteId> resultSet = new LinkedHashSet<>();
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexStore.getIndexMap(field);

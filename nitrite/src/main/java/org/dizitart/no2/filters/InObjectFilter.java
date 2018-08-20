@@ -68,7 +68,7 @@ class InObjectFilter extends BaseObjectFilter {
         }
 
         Filter in = Filters.in(field, valueArray);
-        in.setCollectionOperation(collectionOperation);
+        in.setIndexedQueryTemplate(indexedQueryTemplate);
         return in.apply(documentMap);
     }
 }

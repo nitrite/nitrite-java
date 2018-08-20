@@ -23,6 +23,7 @@ import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.collection.Filter;
+import org.dizitart.no2.index.IndexedQueryTemplate;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.ArrayList;
@@ -39,20 +40,20 @@ import java.util.concurrent.Callable;
 @Slf4j
 public abstract class BaseFilter implements Filter {
     /**
-     * The Nitrite service.
+     * The {@link IndexedQueryTemplate}.
      */
-    protected CollectionOperation collectionOperation;
+    protected IndexedQueryTemplate indexedQueryTemplate;
 
     @Override
-    public void setCollectionOperation(CollectionOperation collectionOperation) {
-        this.collectionOperation = collectionOperation;
+    public void setIndexedQueryTemplate(IndexedQueryTemplate indexedQueryTemplate) {
+        this.indexedQueryTemplate = indexedQueryTemplate;
     }
 
     List<Callable<Set<NitriteId>>> createTasks(Filter[] filters,
                                                final NitriteMap<NitriteId, Document> documentMap) {
         List<Callable<Set<NitriteId>>> tasks = new ArrayList<>();
         for (final Filter filter : filters) {
-            filter.setCollectionOperation(collectionOperation);
+            filter.setIndexedQueryTemplate(indexedQueryTemplate);
             tasks.add(() -> {
                 try {
                     return filter.apply(documentMap);

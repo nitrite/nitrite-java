@@ -60,7 +60,7 @@ public class ExecutorServiceManager {
             return daemonExecutors.get(poolSize);
         }
 
-        final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+        final BlockingQueue<Runnable> queue = new SynchronousQueue<>();
         ThreadPoolExecutor threadPool = new ThreadPoolExecutor(0, poolSize,
                 60L, TimeUnit.SECONDS,
                 queue,

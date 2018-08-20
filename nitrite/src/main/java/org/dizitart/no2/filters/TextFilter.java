@@ -22,6 +22,7 @@ import lombok.ToString;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.exceptions.IndexingException;
+import org.dizitart.no2.index.TextIndexer;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Set;
@@ -37,9 +38,10 @@ class TextFilter extends StringFilter {
 
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
-        if (collectionOperation.hasIndex(field)
-                && !collectionOperation.isIndexing(field)) {
-            return collectionOperation.findTextWithIndex(field, value);
+        if (indexedQueryTemplate.hasIndex(field)
+                && !indexedQueryTemplate.isIndexing(field)) {
+            TextIndexer textIndexer = indexedQueryTemplate.getTextIndexer();
+            return textIndexer.findText(field, value);
         } else {
             throw new IndexingException(errorMessage(field + " is not indexed",
                     IE_TEXT_FILTER_FIELD_NOT_INDEXED));

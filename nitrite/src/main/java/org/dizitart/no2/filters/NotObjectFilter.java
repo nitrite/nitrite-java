@@ -42,11 +42,11 @@ class NotObjectFilter extends BaseObjectFilter {
 
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
-        filter.setCollectionOperation(collectionOperation);
+        filter.setIndexedQueryTemplate(indexedQueryTemplate);
         filter.setNitriteMapper(nitriteMapper);
 
         Filter not = Filters.not(filter);
-        not.setCollectionOperation(collectionOperation);
+        not.setIndexedQueryTemplate(indexedQueryTemplate);
         return not.apply(documentMap);
     }
 }

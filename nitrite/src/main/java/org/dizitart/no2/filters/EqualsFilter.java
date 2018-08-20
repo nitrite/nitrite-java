@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.index.ComparableIndexer;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.LinkedHashSet;
@@ -58,10 +59,11 @@ class EqualsFilter extends BaseFilter {
                 }
             }
             return nitriteIdSet;
-        } else if (collectionOperation.hasIndex(field)
-                && !collectionOperation.isIndexing(field)
+        } else if (indexedQueryTemplate.hasIndex(field)
+                && !indexedQueryTemplate.isIndexing(field)
                 && value != null) {
-            return collectionOperation.findEqualWithIndex(field, value);
+            ComparableIndexer comparableIndexer = indexedQueryTemplate.getComparableIndexer();
+            return comparableIndexer.findEqual(field, value);
         } else {
             return matchedSet(documentMap);
         }

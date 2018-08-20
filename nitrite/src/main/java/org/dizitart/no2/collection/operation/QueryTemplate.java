@@ -23,11 +23,12 @@ import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.dizitart.no2.index.IndexedQueryTemplate;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.*;
 
-import static org.dizitart.no2.exceptions.ErrorCodes.VE_SEARCH_SERVICE_NULL_NITRITE_SERVICE;
+import static org.dizitart.no2.exceptions.ErrorCodes.VE_INDEXED_QUERY_TEMPLATE_NULL;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
@@ -38,15 +39,19 @@ import static org.dizitart.no2.util.ValidationUtils.validateLimit;
  * @author Anindya Chatterjee.
  */
 class QueryTemplate {
-    private CollectionOperation collectionOperation;
+    private IndexedQueryTemplate indexedQueryTemplate;
     private NitriteMap<NitriteId, Document> underlyingMap;
 
-    QueryTemplate(CollectionOperation collectionOperation,
+    QueryTemplate(IndexedQueryTemplate indexedQueryTemplate,
                   NitriteMap<NitriteId, Document> mapStore) {
-        notNull(collectionOperation, errorMessage("collectionOperation can not be null",
-                VE_SEARCH_SERVICE_NULL_NITRITE_SERVICE));
-        this.collectionOperation = collectionOperation;
-        underlyingMap = mapStore;
+        notNull(indexedQueryTemplate, errorMessage("indexedQueryTemplate can not be null",
+            VE_INDEXED_QUERY_TEMPLATE_NULL));
+        this.indexedQueryTemplate = indexedQueryTemplate;
+        this.underlyingMap = mapStore;
+    }
+
+    Document getById(NitriteId nitriteId) {
+        return underlyingMap.get(nitriteId);
     }
 
     Cursor find() {
@@ -63,7 +68,7 @@ class QueryTemplate {
         if (filter == null) {
             return find();
         }
-        filter.setCollectionOperation(collectionOperation);
+        filter.setIndexedQueryTemplate(indexedQueryTemplate);
         Set<NitriteId> result;
 
         try {
@@ -97,7 +102,7 @@ class QueryTemplate {
         if (filter == null) {
             return find(findOptions);
         }
-        filter.setCollectionOperation(collectionOperation);
+        filter.setIndexedQueryTemplate(indexedQueryTemplate);
         FindResult findResult = new FindResult();
         findResult.setUnderlyingMap(underlyingMap);
         setFilteredResultSet(filter, findOptions, findResult);

@@ -31,11 +31,11 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.dizitart.no2.exceptions.ErrorCodes.IE_FAILED_TO_WRITE_FTS_DATA;
-import static org.dizitart.no2.exceptions.ErrorCodes.IE_REMOVE_FULL_TEXT_INDEX_FAILED;
+import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.util.DocumentUtils.getFieldValue;
 import static org.dizitart.no2.util.IndexUtils.sortByScore;
+import static org.dizitart.no2.util.ValidationUtils.notNull;
 
 /**
  * @author Anindya Chatterjee.
@@ -96,15 +96,6 @@ class NitriteTextIndexer implements TextIndexer {
     }
 
     @Override
-    public void truncateIndex(String field) {
-        synchronized (lock) {
-            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
-                    = indexStore.getIndexMap(field);
-            indexMap.clear();
-        }
-    }
-
-    @Override
     public void rebuildIndex(String field, boolean unique) {
         for (Map.Entry<NitriteId, Document> entry : underlyingMap.entrySet()) {
             // create the document
@@ -124,6 +115,9 @@ class NitriteTextIndexer implements TextIndexer {
 
     @Override
     public Set<NitriteId> findText(String field, String searchString) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_TEXT_INDEX_NULL_FIELD));
+        notNull(searchString, errorMessage("searchString can not be null", VE_FIND_TEXT_INDEX_NULL_VALUE));
+
         try {
             if (searchString.startsWith("*") || searchString.endsWith("*")) {
                 return searchByWildCard(field, searchString);
@@ -133,16 +127,6 @@ class NitriteTextIndexer implements TextIndexer {
         } catch (IOException ioe) {
             throw new IndexingException(FAILED_TO_QUERY_FTS_DATA, ioe);
         }
-    }
-
-    @Override
-    public void drop() {
-        // nothing to do. already handled by IndexTemplate
-    }
-
-    @Override
-    public void clear() {
-        // nothing to do. already handled by IndexTemplate
     }
 
     private void createOrUpdate(NitriteId id, String field, String text) {

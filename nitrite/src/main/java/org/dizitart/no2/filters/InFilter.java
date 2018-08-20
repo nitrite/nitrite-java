@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.ToString;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.index.ComparableIndexer;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.*;
@@ -46,9 +47,10 @@ class InFilter extends BaseFilter {
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         validateInFilterValue(field, values);
 
-        if (collectionOperation.hasIndex(field)
-                && !collectionOperation.isIndexing(field) && objectList != null) {
-            return collectionOperation.findInWithIndex(field, objectList);
+        if (indexedQueryTemplate.hasIndex(field)
+                && !indexedQueryTemplate.isIndexing(field) && objectList != null) {
+            ComparableIndexer comparableIndexer = indexedQueryTemplate.getComparableIndexer();
+            return comparableIndexer.findIn(field, objectList);
         } else {
             return matchedSet(documentMap);
         }

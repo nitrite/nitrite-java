@@ -260,10 +260,6 @@ class ReadWriteOperation {
         return result;
     }
 
-    Document getById(NitriteId nitriteId) {
-        return underlyingMap.get(nitriteId);
-    }
-
     private void notify(ChangeType action, Collection<ChangedItem> changedItems) {
         log.debug("Notifying " + action + " event for items " + changedItems + " from " + name);
         if (eventBus != null) {

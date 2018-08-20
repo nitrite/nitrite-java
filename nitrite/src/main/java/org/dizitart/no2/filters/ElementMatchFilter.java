@@ -60,7 +60,7 @@ class ElementMatchFilter extends BaseFilter {
             throw new FilterException(FULL_TEXT_ELEM_MATCH_NOT_SUPPORTED);
         }
 
-        elementFilter.setCollectionOperation(collectionOperation);
+        elementFilter.setIndexedQueryTemplate(indexedQueryTemplate);
 
         Set<NitriteId> nitriteIdSet = new LinkedHashSet<>();
         for (Map.Entry<NitriteId, Document> entry: documentMap.entrySet()) {

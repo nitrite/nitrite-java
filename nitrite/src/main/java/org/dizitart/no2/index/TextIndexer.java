@@ -37,15 +37,12 @@ import java.util.Set;
  */
 public interface TextIndexer extends Indexer<String> {
 
+    /**
+     * Finds with text filer using full-text index.
+     *
+     * @param field the value
+     * @param value the value
+     * @return the result set
+     */
     Set<NitriteId> findText(String field, String value);
-
-    /**
-     * Drops all full-text index entries of a collection.
-     */
-    void drop();
-
-    /**
-     * Deletes all full-text index entries.
-     */
-    void clear();
 }

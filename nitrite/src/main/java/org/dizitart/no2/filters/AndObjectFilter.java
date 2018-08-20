@@ -43,11 +43,11 @@ class AndObjectFilter extends BaseObjectFilter {
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         for (ObjectFilter filter : filters) {
-            filter.setCollectionOperation(collectionOperation);
+            filter.setIndexedQueryTemplate(indexedQueryTemplate);
             filter.setNitriteMapper(nitriteMapper);
         }
         Filter and = Filters.and(filters);
-        and.setCollectionOperation(collectionOperation);
+        and.setIndexedQueryTemplate(indexedQueryTemplate);
         return and.apply(documentMap);
     }
 }

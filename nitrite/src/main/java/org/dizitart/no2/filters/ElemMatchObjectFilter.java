@@ -62,7 +62,7 @@ class ElemMatchObjectFilter extends BaseObjectFilter {
             throw new FilterException(FULL_TEXT_OBJ_ELEM_MATCH_NOT_SUPPORTED);
         }
 
-        elementFilter.setCollectionOperation(collectionOperation);
+        elementFilter.setIndexedQueryTemplate(indexedQueryTemplate);
         elementFilter.setNitriteMapper(nitriteMapper);
 
         Set<NitriteId> nitriteIdSet = new LinkedHashSet<>();

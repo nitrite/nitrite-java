@@ -19,9 +19,9 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.collection.Cursor;
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.IndexOptions;
 import org.dizitart.no2.collection.IndexType;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.services.LuceneService;
 import org.junit.After;
 import org.junit.Rule;
@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.Document.createDocument;
-import static org.dizitart.no2.common.ExecutorServiceManager.shutdownAndAwaitTermination;
+import static org.dizitart.no2.common.ExecutorServiceManager.shutdownExecutors;
 import static org.dizitart.no2.filters.Filters.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -109,40 +109,37 @@ public class MultiThreadedTest {
         db.commit();
 
         for (int i = 0; i < threadCount; i++) {
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    for (int j = 0; j < iterationCount; j++) {
-                        try {
-                            Document document = generate();
-                            collection.insert(document);
+            executor.submit(() -> {
+                for (int j = 0; j < iterationCount; j++) {
+                    try {
+                        Document document = generate();
+                        collection.insert(document);
 
-                            if (j == iterationCount / 2
-                                    && !collection.hasIndex("text")
-                                    && !collection.hasIndex("date")) {
-                                collection.createIndex("text", IndexOptions.indexOptions(IndexType.Fulltext));
-                                collection.createIndex("date", IndexOptions.indexOptions(IndexType.NonUnique));
-                            }
-
-                            long unixTime = (long) document.get("unixTime");
-                            Cursor cursor = collection.find(eq("unixTime", unixTime));
-                            assertTrue(cursor.size() >= 0);
-
-                            if (collection.hasIndex("text") && !collection.isIndexing("text")) {
-                                String textData = (String) document.get("text");
-                                cursor = collection.find(text("text", textData));
-                                assertTrue(cursor.size() >= 0);
-                            }
-
-                            assertTrue(collection.hasIndex("unixTime"));
-                        } catch (Throwable e) {
-                            System.out.println("Exception at thread " +
-                                    Thread.currentThread().getName() + " with iteration " + j);
-                            e.printStackTrace();
+                        if (j == iterationCount / 2
+                                && !collection.hasIndex("text")
+                                && !collection.hasIndex("date")) {
+                            collection.createIndex("text", IndexOptions.indexOptions(IndexType.Fulltext));
+                            collection.createIndex("date", IndexOptions.indexOptions(IndexType.NonUnique));
                         }
+
+                        long unixTime = (long) document.get("unixTime");
+                        Cursor cursor = collection.find(eq("unixTime", unixTime));
+                        assertTrue(cursor.size() >= 0);
+
+                        if (collection.hasIndex("text") && !collection.isIndexing("text")) {
+                            String textData = (String) document.get("text");
+                            cursor = collection.find(text("text", textData));
+                            assertTrue(cursor.size() >= 0);
+                        }
+
+                        assertTrue(collection.hasIndex("unixTime"));
+                    } catch (Throwable e) {
+                        System.out.println("Exception at thread " +
+                                Thread.currentThread().getName() + " with iteration " + j);
+                        e.printStackTrace();
                     }
-                    latch.countDown();
                 }
+                latch.countDown();
             });
         }
 
@@ -172,7 +169,7 @@ public class MultiThreadedTest {
         }
 
         if (executor != null && !executor.isShutdown()) {
-            shutdownAndAwaitTermination(executor, 5);
+            shutdownExecutors(5);
             executor = null;
         }
     }

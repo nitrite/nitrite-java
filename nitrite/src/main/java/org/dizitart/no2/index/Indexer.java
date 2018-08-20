@@ -33,7 +33,5 @@ public interface Indexer<T> {
 
     void dropIndex(String field);
 
-    void truncateIndex(String field);
-
     void rebuildIndex(String field, boolean unique);
 }

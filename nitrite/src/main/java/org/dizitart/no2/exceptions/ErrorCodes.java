@@ -89,7 +89,7 @@ public class ErrorCodes {
     public static final int VE_GET_BY_ID_NULL_ID = 1059;
     public static final int VE_UPDATE_NULL_DOCUMENT = 1060;
     public static final int VE_UPDATE_NULL_UPDATE_OPTIONS = 1061;
-    public static final int VE_SEARCH_SERVICE_NULL_NITRITE_SERVICE = 1062;
+    public static final int VE_INDEXED_QUERY_TEMPLATE_NULL = 1062;
     public static final int VE_SYNC_NULL_COLLECTION = 1063;
     public static final int VE_RECOVER_NULL_FILE_NAME = 1064;
     public static final int VE_RECOVER_EMPTY_FILE_NAME = 1065;

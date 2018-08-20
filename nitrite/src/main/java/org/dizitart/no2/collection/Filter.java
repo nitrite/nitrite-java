@@ -21,6 +21,7 @@ package org.dizitart.no2.collection;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.collection.operation.CollectionOperation;
+import org.dizitart.no2.index.IndexedQueryTemplate;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Set;
@@ -201,9 +202,9 @@ public interface Filter {
     Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap);
 
     /**
-     * Sets {@link CollectionOperation} in the filter object.
+     * Sets {@link IndexedQueryTemplate} in the filter object.
      *
-     * @param collectionOperation the nitrite service
+     * @param indexedQueryTemplate the indexed query template
      */
-    void setCollectionOperation(CollectionOperation collectionOperation);
+    void setIndexedQueryTemplate(IndexedQueryTemplate indexedQueryTemplate);
 }

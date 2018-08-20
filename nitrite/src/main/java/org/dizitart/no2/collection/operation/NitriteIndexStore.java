@@ -110,7 +110,7 @@ class NitriteIndexStore implements IndexStore {
         IndexMeta meta = getIndexMetaMap().get(field);
         if (meta != null && meta.index != null) {
             String indexMapName = meta.indexMap;
-            mvStore.removeMap(mvStore.openMap(indexMapName));
+            mvStore.openMap(indexMapName).drop();
         } else {
             throw new IndexingException(errorMessage(
                     field + " is not indexed", IE_DROP_NON_EXISTING_INDEX));

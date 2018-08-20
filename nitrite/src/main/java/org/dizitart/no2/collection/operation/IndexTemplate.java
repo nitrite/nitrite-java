@@ -200,12 +200,20 @@ class IndexTemplate {
         return indexStore.listIndexes();
     }
 
+    boolean hasIndex(String field) {
+        return indexStore.hasIndex(field);
+    }
+
     boolean isIndexing(String field) {
         // has index will only return true, if there is an index on
         // the value and indexing is not running on it
         return indexStore.hasIndex(field)
                 && indexBuildRegistry.get(field) != null
                 && indexBuildRegistry.get(field).get();
+    }
+
+    Index findIndex(String field) {
+        return indexStore.findIndex(field);
     }
 
     void dropIndex(String field) {
@@ -216,12 +224,12 @@ class IndexTemplate {
                     IE_CAN_NOT_DROP_RUNNING_INDEX));
         }
 
-        Index index = indexStore.findIndex(field);
+        Index index = findIndex(field);
         if (index != null) {
             switch (index.getIndexType()) {
                 case Unique:
                 case NonUnique:
-                    indexStore.dropIndex(field);
+                    comparableIndexer.dropIndex(field);
                     break;
                 case Fulltext:
                     textIndexer.dropIndex(field);
@@ -241,8 +249,10 @@ class IndexTemplate {
             }
         }
 
+        for (Index index : listIndexes()) {
+            dropIndex(index.getField());
+        }
         indexStore.dropAll();
-        textIndexer.drop();
         indexBuildRegistry.clear();
     }
 

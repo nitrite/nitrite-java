@@ -43,11 +43,11 @@ class OrObjectFilter extends BaseObjectFilter {
     @Override
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         for (ObjectFilter filter : filters) {
-            filter.setCollectionOperation(collectionOperation);
+            filter.setIndexedQueryTemplate(indexedQueryTemplate);
             filter.setNitriteMapper(nitriteMapper);
         }
         Filter or = Filters.or(filters);
-        or.setCollectionOperation(collectionOperation);
+        or.setIndexedQueryTemplate(indexedQueryTemplate);
         return or.apply(documentMap);
     }
 }

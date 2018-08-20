@@ -54,7 +54,7 @@ class GreaterObjectFilter extends BaseObjectFilter {
         }
 
         Filter gt = Filters.gt(field, comparable);
-        gt.setCollectionOperation(collectionOperation);
+        gt.setIndexedQueryTemplate(indexedQueryTemplate);
         return gt.apply(documentMap);
     }
 }

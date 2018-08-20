@@ -47,7 +47,7 @@ class TextObjectFilter extends BaseObjectFilter {
     public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
         validateSearchTerm(nitriteMapper, field, value);
         Filter text = Filters.text(field, value);
-        text.setCollectionOperation(collectionOperation);
+        text.setIndexedQueryTemplate(indexedQueryTemplate);
         return text.apply(documentMap);
     }
 }

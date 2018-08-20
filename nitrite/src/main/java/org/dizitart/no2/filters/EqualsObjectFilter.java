@@ -54,7 +54,7 @@ class EqualsObjectFilter extends BaseObjectFilter {
             eqFilter = Filters.eq(field, value);
         }
 
-        eqFilter.setCollectionOperation(collectionOperation);
+        eqFilter.setIndexedQueryTemplate(indexedQueryTemplate);
         return eqFilter.apply(documentMap);
     }
 }
