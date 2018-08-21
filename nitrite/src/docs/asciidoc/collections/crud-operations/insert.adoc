@@ -11,7 +11,23 @@ NitriteId for every document and saves the value of the NitriteId into the '_id'
 Each object in an ObjectRepository can be uniquely identified by a field marked with `@Id` annotation. Nitrite
 maintains an unique index on that field to identify the objects.
 
-NOTE: Id field of an object does not have any relation with the `_id` field of the underlying Document.
+[NOTE]
+====
+Id field of an object does not have any direct relation with the `_id` field of the underlying Document.
+
+But one can retrieve the corresponding NitriteId for an object like this
+
+[source,java]
+--
+public class MyType {
+
+    @Id
+    private NitriteId idField;
+    private String name;
+}
+--
+
+====
 
 .Create operations for NitriteCollection
 [source,java]
