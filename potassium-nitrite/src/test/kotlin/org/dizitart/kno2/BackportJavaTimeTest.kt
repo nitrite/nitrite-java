@@ -90,7 +90,7 @@ class BackportJavaTimeTest {
         override fun createObjectMapper(): ObjectMapper {
             val objectMapper = super.createObjectMapper()
             objectMapper.registerModule(ThreeTenAbpModule())
-            return objectMapper;
+            return objectMapper
         }
     }
 }

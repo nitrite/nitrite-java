@@ -52,12 +52,12 @@ public class Retry implements TestRule {
                     try {
                         base.evaluate();
                         return;
-                    } catch (Throwable t) {
-                        caughtThrowable = t;
-                        log.error(description.getDisplayName() + ": run " + (i+1) + " failed");
+                    } catch (Throwable throwable) {
+                        caughtThrowable = throwable;
+                        log.error(description.getDisplayName() + ": run " + (i+1) + " failed ");
                     }
                 }
-                log.info(description.getDisplayName() + ": giving up after " + retryCount + " failures");
+                log.info(description.getDisplayName() + ": giving up after " + retryCount + " failures ");
                 if (caughtThrowable != null) {
                     throw caughtThrowable;
                 }

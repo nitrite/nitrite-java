@@ -18,12 +18,12 @@
 
 package org.dizitart.no2.collection;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.Document;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.text.ParseException;
 import java.util.Collection;
 
 import static org.dizitart.no2.Document.createDocument;
@@ -33,29 +33,34 @@ import static org.junit.Assert.*;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class CollectionJoinTest extends BaseCollectionTest {
     private NitriteCollection foreignCollection;
 
     @Before
     @Override
-    public void setUp() throws ParseException {
-        super.setUp();
-        foreignCollection = db.getCollection("foreign");
-        foreignCollection.remove(ALL);
+    public void setUp()  {
+        try {
+            super.setUp();
+            foreignCollection = db.getCollection("foreign");
+            foreignCollection.remove(ALL);
 
-        Document fdoc1 = createDocument("fName", "fn1")
-                .put("address", "ABCD Street")
-                .put("telephone", "123456789");
+            Document fdoc1 = createDocument("fName", "fn1")
+                    .put("address", "ABCD Street")
+                    .put("telephone", "123456789");
 
-        Document fdoc2 = createDocument("fName", "fn2")
-                .put("address", "XYZ Street")
-                .put("telephone", "000000000");
+            Document fdoc2 = createDocument("fName", "fn2")
+                    .put("address", "XYZ Street")
+                    .put("telephone", "000000000");
 
-        Document fdoc3 = createDocument("fName", "fn2")
-                .put("address", "Some other Street")
-                .put("telephone", "7893141321");
+            Document fdoc3 = createDocument("fName", "fn2")
+                    .put("address", "Some other Street")
+                    .put("telephone", "7893141321");
 
-        foreignCollection.insert(fdoc1, fdoc2, fdoc3);
+            foreignCollection.insert(fdoc1, fdoc2, fdoc3);
+        } catch (Throwable t) {
+            log.error("Error while initializing test database", t);
+        }
     }
 
     @Test

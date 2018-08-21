@@ -130,6 +130,7 @@ class IndexTemplate {
                 Object fieldValue = getFieldValue(document, field);
 
                 if (fieldValue == null) continue;
+                validateDocumentIndexField(fieldValue, field);
 
                 // if dirty index and currently indexing is not running, rebuild
                 if (indexStore.isDirtyIndex(field)
@@ -235,6 +236,9 @@ class IndexTemplate {
                     textIndexer.dropIndex(field);
                     break;
             }
+        } else {
+            throw new IndexingException(errorMessage(
+                    field + " is not indexed", IE_DROP_NON_EXISTING_INDEX));
         }
 
         indexBuildRegistry.remove(field);

@@ -31,14 +31,10 @@ import org.dizitart.no2.index.IndexedQueryTemplate;
 import org.dizitart.no2.index.TextIndexer;
 import org.dizitart.no2.index.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.index.fulltext.TextTokenizer;
-import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.IndexStore;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;

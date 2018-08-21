@@ -20,7 +20,6 @@ package org.dizitart.no2.collection;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
-import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.index.IndexedQueryTemplate;
 import org.dizitart.no2.store.NitriteMap;
 

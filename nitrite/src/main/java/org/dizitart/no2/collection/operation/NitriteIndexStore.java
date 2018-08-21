@@ -22,9 +22,8 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
-import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.index.Index;
 import org.dizitart.no2.collection.IndexType;
+import org.dizitart.no2.index.Index;
 import org.dizitart.no2.store.IndexStore;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
@@ -39,8 +38,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.Constants.INDEX_META_PREFIX;
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
-import static org.dizitart.no2.exceptions.ErrorCodes.IE_DROP_NON_EXISTING_INDEX;
-import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
 import static org.dizitart.no2.util.IndexUtils.internalName;
 
 /**
@@ -111,9 +108,6 @@ class NitriteIndexStore implements IndexStore {
         if (meta != null && meta.index != null) {
             String indexMapName = meta.indexMap;
             mvStore.openMap(indexMapName).drop();
-        } else {
-            throw new IndexingException(errorMessage(
-                    field + " is not indexed", IE_DROP_NON_EXISTING_INDEX));
         }
         getIndexMetaMap().remove(field);
     }

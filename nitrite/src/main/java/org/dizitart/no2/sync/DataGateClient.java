@@ -19,13 +19,15 @@
 package org.dizitart.no2.sync;
 
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
+import okhttp3.Credentials;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.dizitart.no2.sync.types.UserAgent;
 
-import javax.net.ssl.*;
-import java.io.IOException;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.X509TrustManager;
 import java.net.Proxy;
-import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
 import static org.dizitart.no2.sync.types.UserAgent.USER_AGENT;

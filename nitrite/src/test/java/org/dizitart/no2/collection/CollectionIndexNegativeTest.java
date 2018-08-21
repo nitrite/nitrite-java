@@ -29,6 +29,7 @@ import static org.junit.Assert.assertTrue;
  * @author Anindya Chatterjee.
  */
 public class CollectionIndexNegativeTest extends BaseCollectionTest {
+
     @Test(expected = UniqueConstraintException.class)
     public void testCreateInvalidUniqueIndex() {
         collection.createIndex("lastName", IndexOptions.indexOptions(IndexType.Unique));

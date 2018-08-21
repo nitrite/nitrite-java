@@ -20,9 +20,9 @@ package org.dizitart.no2.tool;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.IndexOptions;
 import org.dizitart.no2.collection.IndexType;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.junit.After;
 import org.junit.Test;
 

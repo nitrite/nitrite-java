@@ -21,17 +21,12 @@ package org.dizitart.no2.collection.objects;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteContext;
 import org.dizitart.no2.NitriteId;
-import org.dizitart.no2.collection.FindOptions;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.RemoveOptions;
-import org.dizitart.no2.collection.WriteResult;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.collection.IndexOptions;
-import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.meta.Attributes;
 
@@ -39,11 +34,11 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Set;
 
+import static org.dizitart.no2.collection.IndexOptions.indexOptions;
 import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
-import static org.dizitart.no2.collection.IndexOptions.indexOptions;
 import static org.dizitart.no2.util.ObjectUtils.*;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 

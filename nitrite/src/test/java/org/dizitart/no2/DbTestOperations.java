@@ -18,12 +18,7 @@
 
 package org.dizitart.no2;
 
-import org.dizitart.no2.collection.Cursor;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.SortOrder;
-import org.dizitart.no2.collection.WriteResult;
-import org.dizitart.no2.collection.IndexOptions;
-import org.dizitart.no2.collection.IndexType;
+import org.dizitart.no2.collection.*;
 
 import java.io.File;
 import java.io.IOException;

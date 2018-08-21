@@ -124,7 +124,7 @@ public abstract class BaseObjectRepositoryTest {
             builder.disableAutoCompact();
         }
 
-        if (!isProtected) {
+        if (isProtected) {
             db = builder.openOrCreate("test-user", "test-password");
         } else {
             db = builder.openOrCreate();

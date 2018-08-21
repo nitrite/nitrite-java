@@ -136,7 +136,7 @@ public class RepositoryJoinTest {
             builder.disableAutoCompact();
         }
 
-        if (!isProtected) {
+        if (isProtected) {
             db = builder.openOrCreate("test-user1", "test-password1");
         } else {
             db = builder.openOrCreate();

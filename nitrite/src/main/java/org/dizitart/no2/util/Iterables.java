@@ -19,7 +19,6 @@
 package org.dizitart.no2.util;
 
 import lombok.experimental.UtilityClass;
-import lombok.experimental.var;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;

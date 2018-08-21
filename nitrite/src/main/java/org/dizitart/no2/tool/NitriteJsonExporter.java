@@ -26,7 +26,6 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.PersistentCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.mapper.NitriteMapper;
 
 import java.io.IOException;
 import java.util.Collection;

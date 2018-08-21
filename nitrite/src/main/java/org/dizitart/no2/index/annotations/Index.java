@@ -18,9 +18,9 @@
 
 package org.dizitart.no2.index.annotations;
 
-import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.collection.IndexOptions;
 import org.dizitart.no2.collection.IndexType;
+import org.dizitart.no2.collection.objects.ObjectRepository;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

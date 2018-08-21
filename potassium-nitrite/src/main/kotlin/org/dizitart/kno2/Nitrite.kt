@@ -19,13 +19,8 @@
 package org.dizitart.kno2
 
 import org.dizitart.no2.Nitrite
-import org.dizitart.no2.collection.FindOptions
-import org.dizitart.no2.collection.NitriteCollection
-import org.dizitart.no2.collection.NullOrder
-import org.dizitart.no2.collection.SortOrder
+import org.dizitart.no2.collection.*
 import org.dizitart.no2.collection.objects.ObjectRepository
-import org.dizitart.no2.collection.IndexOptions
-import org.dizitart.no2.collection.IndexType
 
 /**
  * @since 2.1.0

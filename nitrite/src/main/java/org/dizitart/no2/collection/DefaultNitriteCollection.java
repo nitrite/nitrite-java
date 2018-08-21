@@ -21,6 +21,7 @@ package org.dizitart.no2.collection;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteContext;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.event.ChangeInfo;
 import org.dizitart.no2.event.ChangeListener;
 import org.dizitart.no2.event.ChangeType;
@@ -30,7 +31,6 @@ import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.index.Index;
 import org.dizitart.no2.meta.Attributes;
-import org.dizitart.no2.collection.operation.CollectionOperation;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 

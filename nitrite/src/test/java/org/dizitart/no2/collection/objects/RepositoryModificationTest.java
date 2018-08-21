@@ -20,6 +20,8 @@ package org.dizitart.no2.collection.objects;
 
 import org.dizitart.no2.Document;
 import org.dizitart.no2.NitriteId;
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.collection.RemoveOptions;
 import org.dizitart.no2.collection.WriteResult;
 import org.dizitart.no2.collection.objects.data.Company;
@@ -30,8 +32,6 @@ import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.ObjectFilters;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.collection.IndexOptions;
-import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.util.Iterables;
 import org.junit.Test;
 
@@ -40,7 +40,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.filters.ObjectFilters.*;
@@ -69,12 +68,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         companyRepository.rebuildIndex("dateCreated", true);
         assertTrue(companyRepository.isIndexing("dateCreated"));
 
-        await().until(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                return !companyRepository.isIndexing("dateCreated");
-            }
-        });
+        await().until(() -> !companyRepository.isIndexing("dateCreated"));
     }
 
     @Test

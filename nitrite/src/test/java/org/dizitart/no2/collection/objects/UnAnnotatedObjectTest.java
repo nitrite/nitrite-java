@@ -18,11 +18,11 @@
 
 package org.dizitart.no2.collection.objects;
 
+import org.dizitart.no2.collection.IndexOptions;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.collection.SortOrder;
 import org.dizitart.no2.collection.objects.data.ClassA;
 import org.dizitart.no2.collection.objects.data.ClassC;
-import org.dizitart.no2.collection.IndexOptions;
-import org.dizitart.no2.collection.IndexType;
 import org.junit.Test;
 
 import static org.dizitart.no2.collection.FindOptions.sort;

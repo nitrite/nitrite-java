@@ -19,18 +19,18 @@
 package org.dizitart.no2.sync;
 
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.collection.IndexType;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.common.ExecutorServiceManager;
 import org.dizitart.no2.event.EventBus;
-import org.dizitart.no2.collection.IndexType;
 
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.dizitart.no2.collection.IndexOptions.indexOptions;
 import static org.dizitart.no2.common.Constants.DOC_REVISION;
 import static org.dizitart.no2.exceptions.ErrorCodes.VE_SYNC_NULL_COLLECTION;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
-import static org.dizitart.no2.collection.IndexOptions.indexOptions;
 import static org.dizitart.no2.util.ValidationUtils.notNull;
 
 /**

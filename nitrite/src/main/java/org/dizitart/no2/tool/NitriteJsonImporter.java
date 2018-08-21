@@ -22,11 +22,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import org.dizitart.no2.Document;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.collection.IndexOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.PersistentCollection;
 import org.dizitart.no2.collection.objects.ObjectRepository;
 import org.dizitart.no2.index.Index;
-import org.dizitart.no2.collection.IndexOptions;
 
 import java.io.IOException;
 import java.util.Map;
