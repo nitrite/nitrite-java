@@ -69,6 +69,8 @@ class NitriteTextIndexingService implements TextIndexingService {
                 if (nitriteIds != null) {
                     nitriteIds.remove(id);
                 }
+
+                indexMap.put(word, nitriteIds);
             }
         } catch (IOException ioe) {
             throw new IndexingException(errorMessage(
@@ -117,11 +119,11 @@ class NitriteTextIndexingService implements TextIndexingService {
                 synchronized (indexLock) {
                     if (nitriteIds == null) {
                         nitriteIds = new ConcurrentSkipListSet<>();
-                        indexMap.put(word, nitriteIds);
                     }
                 }
 
                 nitriteIds.add(id);
+                indexMap.put(word, nitriteIds);
             }
         } catch (IOException ioe) {
             throw new IndexingException(errorMessage(
@@ -191,7 +193,7 @@ class NitriteTextIndexingService implements TextIndexingService {
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexMetaService.getIndexMap(field);
         Set<NitriteId> idSet = new LinkedHashSet<>();
-        String term = searchString.substring(1, searchString.length());
+        String term = searchString.substring(1);
 
         for (Map.Entry<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entrySet()) {
             String key = (String) entry.getKey();
