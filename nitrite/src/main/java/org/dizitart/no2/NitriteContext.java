@@ -28,6 +28,7 @@ import org.dizitart.no2.fulltext.TextTokenizer;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.util.ExecutorUtils;
+import org.dizitart.no2.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -36,6 +37,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 import static org.dizitart.no2.util.ExecutorUtils.shutdownAndAwaitTermination;
+import static org.dizitart.no2.util.ObjectUtils.isObjectStore;
 
 /**
  * Represents a readonly view of all contextual information of a nitrite database.
@@ -173,6 +175,18 @@ public class NitriteContext {
     public Set<Module> getRegisteredModules() {
         return new HashSet<>(jacksonModule);
     }
+
+    public void dropCollection(String name) {
+        if (!StringUtils.isNullOrEmpty(name)) {
+            if (isObjectStore(name)) {
+                repositoryRegistry.remove(name);
+            } else {
+                collectionRegistry.remove(name);
+            }
+        }
+    }
+
+
 
     void shutdown() {
         shutdownAndAwaitTermination(scheduledWorkerPool, 5);

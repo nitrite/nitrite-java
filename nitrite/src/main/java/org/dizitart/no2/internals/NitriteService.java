@@ -377,6 +377,7 @@ public class NitriteService {
      */
     void dropCollection() {
         indexingService.dropAllIndices();
+        nitriteContext.dropCollection(mapStore.getName());
         mapStore.getStore().removeMap(mapStore);
     }
 
