@@ -1,3 +1,5 @@
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdizitart%2Fnitrite-database.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdizitart%2Fnitrite-database?ref=badge_shield)
+
 = Nitrite Database
 
 image:https://liberapay.com/assets/widgets/donate.svg["Donate using Liberapay", link="https://liberapay.com/anidotnet/donate"]
@@ -310,3 +312,6 @@ image:https://opencollective.com/nitrite-database/sponsor/1/avatar.svg["Sponsor"
 image:https://opencollective.com/nitrite-database/sponsor/2/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/2/website"]
 image:https://opencollective.com/nitrite-database/sponsor/3/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/3/website"]
 image:https://opencollective.com/nitrite-database/sponsor/4/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/4/website"]
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdizitart%2Fnitrite-database.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdizitart%2Fnitrite-database?ref=badge_large)
