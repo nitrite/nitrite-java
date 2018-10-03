@@ -18,6 +18,7 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.objects.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
@@ -33,8 +34,8 @@ import java.util.Locale;
 import java.util.Set;
 
 import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
-import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.filters.Filters.ALL;
 import static org.junit.Assert.*;
 
@@ -269,5 +270,11 @@ public class NitriteTest {
         ObjectRepository<NitriteTest> repository2 = db.getRepository(NitriteTest.class);
         assertNotNull(repository2);
         assertEquals(repository2.getType(), NitriteTest.class);
+    }
+
+    @Test(expected = NitriteIOException.class)
+    public void testIssue112() {
+        Nitrite db = Nitrite.builder().filePath("/tmp").openOrCreate();
+        assertNull(db);
     }
 }
