@@ -68,9 +68,13 @@ class NitriteTextIndexingService implements TextIndexingService {
                 ConcurrentSkipListSet<NitriteId> nitriteIds = indexMap.get(word);
                 if (nitriteIds != null) {
                     nitriteIds.remove(id);
-                }
 
-                indexMap.put(word, nitriteIds);
+                    if (nitriteIds.isEmpty()) {
+                        indexMap.remove(word);
+                    } else {
+                        indexMap.put(word, nitriteIds);
+                    }
+                }
             }
         } catch (IOException ioe) {
             throw new IndexingException(errorMessage(
