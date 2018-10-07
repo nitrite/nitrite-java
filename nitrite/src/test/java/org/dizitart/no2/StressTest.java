@@ -18,6 +18,13 @@
 
 package org.dizitart.no2;
 
+import lombok.Data;
+import org.dizitart.no2.mapper.Mappable;
+import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.objects.Index;
+import org.dizitart.no2.objects.Indices;
+import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.objects.filters.ObjectFilters;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -28,11 +35,14 @@ import uk.co.jemos.podam.api.PodamFactoryImpl;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertNotNull;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Anindya Chatterjee
@@ -104,5 +114,103 @@ public class StressTest {
             System.out.println("Time to compact and close - " + (System.currentTimeMillis() - start) / 1000 + " seconds");
         }
         Files.delete(Paths.get(fileName));
+    }
+
+    @Test
+    public void testRepoPerformanceWithIndex() {
+        // warm-up
+        List<PerfTestIndexed> items = getItems(PerfTestIndexed.class);
+        ObjectRepository<PerfTestIndexed> repo = db.getRepository(PerfTestIndexed.class);
+        for (PerfTestIndexed item : items) {
+            assertNotNull(item);
+            repo.insert(item);
+        }
+        repo.remove(ObjectFilters.ALL);
+        repo.drop();
+
+        // actual calculation
+        repo = db.getRepository(PerfTestIndexed.class);
+        long start = System.currentTimeMillis();
+        for (PerfTestIndexed item : items) {
+            repo.insert(item);
+        }
+        long diff = System.currentTimeMillis() - start;
+        System.out.println("Time take to insert 10000 indexed items - " + diff + "ms");
+
+        start = System.currentTimeMillis();
+        repo.remove(ObjectFilters.ALL);
+        diff = System.currentTimeMillis() - start;
+        System.out.println("Time take to remove 10000 indexed items - " + diff + "ms");
+    }
+
+    @Test
+    public void testRepoPerformanceWithoutIndex() {
+        // warm-up
+        List<PerfTest> items = getItems(PerfTest.class);
+        ObjectRepository<PerfTest> repo = db.getRepository(PerfTest.class);
+        for (PerfTest item : items) {
+            assertNotNull(item);
+            repo.insert(item);
+        }
+        repo.remove(ObjectFilters.ALL);
+        repo.drop();
+
+        // actual calculation
+        repo = db.getRepository(PerfTest.class);
+        long start = System.currentTimeMillis();
+        for (PerfTest item : items) {
+            repo.insert(item);
+        }
+        long diff = System.currentTimeMillis() - start;
+        System.out.println("Time take to insert 10000 non-indexed items - " + diff + "ms");
+
+        start = System.currentTimeMillis();
+        repo.remove(ObjectFilters.ALL);
+        diff = System.currentTimeMillis() - start;
+        System.out.println("Time take to remove 10000 non-indexed items - " + diff + "ms");
+    }
+
+    private <T> List<T> getItems(Class<T> type) {
+        PodamFactory generator = new PodamFactoryImpl();
+        List<T> items = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            items.add(generator.manufacturePojoWithFullData(type));
+        }
+        assertEquals(items.size(), 10000);
+        return items;
+    }
+
+    @Data
+    public static class PerfTest implements Mappable {
+        private String firstName;
+        private String lastName;
+        private Integer age;
+        private String text;
+
+        @Override
+        public Document write(NitriteMapper mapper) {
+            Document document = new Document();
+            document.put("firstName", firstName);
+            document.put("lastName", lastName);
+            document.put("age", age);
+            document.put("text", text);
+            return document;
+        }
+
+        @Override
+        public void read(NitriteMapper mapper, Document document) {
+            this.firstName = (String) document.get("firstName");
+            this.lastName = (String) document.get("lastName");
+            this.age = (Integer) document.get("age");
+            this.text = (String) document.get("text");
+        }
+    }
+
+    @Indices({
+            @Index(value = "firstName", type = IndexType.NonUnique),
+            @Index(value = "age", type = IndexType.NonUnique),
+            @Index(value = "text", type = IndexType.Fulltext),
+    })
+    private static class PerfTestIndexed extends PerfTest {
     }
 }

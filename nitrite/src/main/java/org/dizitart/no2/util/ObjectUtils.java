@@ -256,7 +256,7 @@ public class ObjectUtils {
                                    List<Index> indexList, Set<Index> indexSet) {
         for (Index index : indexList) {
             String name = index.value();
-            Field field = getField(type, name, type.isAnnotationPresent(InheritIndices.class));
+            Field field = getField(type, name, true);
             if (field != null) {
                 validateObjectIndexField(nitriteMapper, field.getType(), field.getName());
                 indexSet.add(index);
