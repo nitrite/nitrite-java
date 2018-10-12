@@ -18,6 +18,7 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.exceptions.SecurityException;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import java.nio.file.Paths;
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Anindya Chatterjee.
@@ -93,5 +95,30 @@ public class NitriteSecurityTest {
         dbCollection = db.getCollection("test");
         assertEquals(dbCollection.find().size(), 0);
         db.close();
+    }
+
+    @Test
+    public void testIssue116() throws IOException {
+        Nitrite db = new NitriteBuilder()
+                .filePath(fileName)
+                .compressed()
+                .openOrCreate("test-user", "test-password");
+        db.close();
+
+        try {
+            db = new NitriteBuilder()
+                    .filePath(fileName)
+                    .compressed()
+                    .openOrCreate("test-user2", "test-password2");
+        } catch (SecurityException se) {
+            db = new NitriteBuilder()
+                    .filePath(fileName)
+                    .compressed()
+                    .openOrCreate("test-user", "test-password");
+            assertNotNull(db);
+        } finally {
+            db.close();
+            Files.delete(Paths.get(fileName));
+        }
     }
 }
