@@ -1,0 +1,35 @@
+<!--
+  ~
+  ~ Copyright 2017-2018 Nitrite author or authors.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~        http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  ~
+  -->
+
+<script>
+    var SeedAndDewConfig = {};
+    (function() {
+        SeedAndDewConfig['adClass'] = "snd-ad";
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        SeedAndDewConfig['projectId'] = '6bc6cfa1-f85f-44a3-a43e-28444b0ea5e5';
+        SeedAndDewConfig['loadStartTime'] = performance.now();
+        SeedAndDewConfig['apiVersion'] = '2018-05-28'
+        SeedAndDewConfig['sessionId'] = Math.random().toString(36).substring(2, 15);
+        var snd = document.createElement('script');
+        snd.type = 'text/javascript';
+        snd.async = true;
+        snd.src = 'https://www.seedanddew.com/static/embed.min.js';
+        (document.getElementsByTagName('head')[0] ||
+            document.getElementsByTagName('body')[0]).appendChild(snd);
+    })();
+</script>

@@ -17,6 +17,7 @@ v3.2.0, {docdate} {doctime}
 :pygments-style: tango
 :linkattrs:
 :sectnums:
+:docinfo: shared
 
 image::images/nitrite-logo.svg[Logo 200, 200,pdfwidth=40%]
 
