@@ -27,7 +27,9 @@ import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.objects.*;
+import org.objenesis.Objenesis;
 import org.objenesis.ObjenesisStd;
+import org.objenesis.instantiator.ObjectInstantiator;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -36,13 +38,9 @@ import static org.dizitart.no2.Constants.KEY_OBJ_SEPARATOR;
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.*;
 import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
-import static org.dizitart.no2.util.ReflectionUtils.findAnnotations;
-import static org.dizitart.no2.util.ReflectionUtils.getField;
-import static org.dizitart.no2.util.ReflectionUtils.getFieldsUpto;
+import static org.dizitart.no2.util.ReflectionUtils.*;
 import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.util.ValidationUtils.notEmpty;
-import static org.dizitart.no2.util.ValidationUtils.notNull;
-import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
+import static org.dizitart.no2.util.ValidationUtils.*;
 
 /**
  * A utility class for {@link Object}.
@@ -53,6 +51,9 @@ import static org.dizitart.no2.util.ValidationUtils.validateObjectIndexField;
 @UtilityClass
 @Slf4j
 public class ObjectUtils {
+    private static Map<String, ObjectInstantiator> constructorCache = new HashMap<>();
+    private static Objenesis objenesis = new ObjenesisStd();
+
     /**
      * Generates the name of an {@link org.dizitart.no2.objects.ObjectRepository}.
      *
@@ -215,11 +216,20 @@ public class ObjectUtils {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> T newInstance(Class<T> type) {
         try {
-            return type.newInstance();
+            String clazz = type.getName();
+            ObjectInstantiator instantiator = constructorCache.get(clazz);
+            if (instantiator == null) {
+                instantiator = objenesis.getInstantiatorOf(type);
+                constructorCache.put(clazz, instantiator);
+            }
+
+            return (T) instantiator.newInstance();
         } catch (Exception e) {
-            return new ObjenesisStd().newInstance(type);
+            log.error("Error while creating instance of " + type.getName(), e);
+            return null;
         }
     }
 
