@@ -32,7 +32,7 @@ import java.util.List;
 @ToString
 public class MappableDepartment implements Mappable {
     private String name;
-    private List<MappableEmployee> employeeList = new ArrayList<>();
+    private List<MappableEmployee> employeeList;
 
     @Override
     public Document write(NitriteMapper mapper) {
@@ -59,5 +59,12 @@ public class MappableDepartment implements Mappable {
                 getEmployeeList().add(me);
             }
         }
+    }
+
+    private List<MappableEmployee> getEmployeeList() {
+        if (employeeList == null){
+            employeeList = new ArrayList<>();
+        }
+        return employeeList;
     }
 }
