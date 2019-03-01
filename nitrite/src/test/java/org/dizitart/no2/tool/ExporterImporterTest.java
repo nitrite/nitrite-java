@@ -40,7 +40,7 @@ public class ExporterImporterTest extends BaseExternalTest {
     @Test
     public void testImportExport() {
         schemaFile = System.getProperty("java.io.tmpdir") + File.separator
-                + "nitriteEIT" + File.separator + "schema.json";
+                + "nitrite" + File.separator + "schemaEIT.json";
 
         Random random = new Random();
         for (int i = 0; i < 5; i++) {
