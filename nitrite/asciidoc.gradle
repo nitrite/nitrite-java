@@ -52,6 +52,7 @@ javadoc {
     options.docletpath = configurations.asciidoclet.files as List
     options.doclet = 'org.asciidoctor.Asciidoclet'
     options.overview = "$generatedSources/overview.adoc"
+    options.encoding = "UTF-8"
     options.addStringOption "-base-dir", "${projectDir}"
     options.addStringOption "doctitle", "${project.name.capitalize()} ${project.version} API"
     options.addStringOption "windowtitle", "${project.name.capitalize()} ${project.version} API"
