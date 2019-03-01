@@ -50,8 +50,8 @@ class DefaultNitriteCollection implements NitriteCollection {
     private NitriteService nitriteService;
     private volatile boolean isDropped;
     private EventBus<ChangeInfo, ChangeListener> eventBus;
-    private String collectionName;
-    private NitriteContext nitriteContext;
+    private final String collectionName;
+    private final NitriteContext nitriteContext;
 
     DefaultNitriteCollection(NitriteMap<NitriteId, Document> nitriteMap, NitriteContext nitriteContext) {
         this.nitriteMap = nitriteMap;

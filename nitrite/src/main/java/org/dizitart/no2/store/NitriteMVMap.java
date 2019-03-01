@@ -33,8 +33,8 @@ import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
  * @author Anindya Chatterjee.
  */
 class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
-    private MVMap<Key, Value> mvMap;
-    private NitriteStore nitriteStore;
+    private final MVMap<Key, Value> mvMap;
+    private final NitriteStore nitriteStore;
 
     NitriteMVMap(MVMap<Key, Value> mvMap, NitriteStore nitriteStore) {
         this.mvMap = mvMap;
