@@ -73,7 +73,7 @@ class ElementMatchFilter extends BaseFilter {
 
             if (fieldValue.getClass().isArray()) {
                 int length = Array.getLength(fieldValue);
-                List list = new ArrayList();
+                List list = new ArrayList(length);
                 for (int i = 0; i < length; i++) {
                     Object item = Array.get(fieldValue, i);
                     list.add(item);
