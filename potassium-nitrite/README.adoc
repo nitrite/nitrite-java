@@ -54,6 +54,14 @@ val db = nitrite("userId", "password") {
     autoCompact = false
 }
 
+// for android context
+val db = nitrite {
+    file = File(applicationContext.filesDir, fileName)
+    autoCommitBufferSize = 2048
+    compress = true
+    autoCompact = false
+}
+
 --
 
 *Collection / Repository*
