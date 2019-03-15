@@ -80,8 +80,9 @@ public class Importer {
      * @throws NitriteIOException  if there is any low-level I/O error.
      */
     public void importFrom(File file) {
-        try {
-            importFrom(new FileInputStream(file));
+
+        try(FileInputStream stream = new FileInputStream(file);) {
+            importFrom(stream);
         } catch (IOException ioe) {
             throw new NitriteIOException(
                     errorMessage("I/O error while reading content from file " + file,
