@@ -94,6 +94,18 @@ public class Exporter {
      */
     public void exportTo(File file) {
         try {
+            if (file.isDirectory()) {
+                throw new IOException(file.getPath() + " is not a file");
+            }
+
+            File parent = file.getParentFile();
+            // if parent dir does not exists, try to create it
+            if (!parent.exists()) {
+                boolean result = parent.mkdirs();
+                if (!result) {
+                    throw new IOException("Failed to create parent directory " + parent.getPath());
+                }
+            }
             exportTo(new FileOutputStream(file));
         } catch (IOException ioe) {
             throw new NitriteIOException(
