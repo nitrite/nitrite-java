@@ -38,7 +38,7 @@ class ImportExportTest : BaseExternalTest() {
     @Test
     fun testImportExport() {
         schemaFile = (System.getProperty("java.io.tmpdir") + File.separator
-            + "nitrite" + File.separator + "schema.json")
+            + "kno2" + File.separator + "schema.json")
 
         val random = Random()
         for (i in 0..4) {

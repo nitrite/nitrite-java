@@ -59,10 +59,10 @@ class DataService {
     }
 
     WriteResultImpl insert(Document... documents) {
-        List<NitriteId> nitriteIdList = new ArrayList<>();
-        List<ChangedItem> changedItems = new ArrayList<>();
+        List<NitriteId> nitriteIdList = new ArrayList<>(documents.length);
+        List<ChangedItem> changedItems = new ArrayList<>(documents.length);
 
-        log.debug("Total " + documents.length + " document(s) to be inserted in " + name);
+        log.debug("Total {} document(s) to be inserted in {}", documents.length, name);
 
         for (Document document : documents) {
             NitriteId nitriteId = document.getId();
@@ -81,12 +81,12 @@ class DataService {
 
             synchronized (lock) {
                 Document already = underlyingMap.putIfAbsent(nitriteId, document);
-                log.debug("Inserting document " + document + " in " + name);
+                log.debug("Inserting document {} in {}", document, name);
 
                 if (already != null) {
                     // rollback changes
                     underlyingMap.put(nitriteId, already);
-                    log.debug("Another document already exists with id " + nitriteId);
+                    log.debug("Another document already exists with id {}", nitriteId);
                     throw new UniqueConstraintException(errorMessage("id constraint violation, " +
                             "entry with same id already exists in " + name, UCE_CONSTRAINT_VIOLATED));
                 } else {
@@ -115,7 +115,7 @@ class DataService {
         WriteResultImpl result = new WriteResultImpl();
         result.setNitriteIdList(nitriteIdList);
 
-        log.debug("Returning write result " + result + " for collection " + name);
+        log.debug("Returning write result {}  for collection {}", result, name);
         return result;
     }
 
@@ -129,7 +129,7 @@ class DataService {
 
         WriteResultImpl writeResult = new WriteResultImpl();
         if (cursor == null || cursor.size() == 0) {
-            log.debug("No document found to update by the filter " + filter + " in " + name);
+            log.debug("No document found to update by the filter {}  in  {}", filter, name);
             if (updateOptions.isUpsert()) {
                 return insert(update);
             } else {
@@ -152,10 +152,9 @@ class DataService {
                 return writeResult;
             }
 
-            log.debug("Filter " + filter + " found total " + cursor.size()
-                    + " document(s) to update with options " + updateOptions + " in " + name);
+            log.debug("Filter {} found total {} document(s) to update with options {} in {}", filter, cursor.size(), updateOptions, name);
 
-            List<ChangedItem> changedItems = new ArrayList<>();
+            List<ChangedItem> changedItems = new ArrayList<>(cursor.size());
             for(final Document document : cursor) {
                 if (document != null) {
                     NitriteId nitriteId = document.getId();
@@ -163,7 +162,7 @@ class DataService {
                     synchronized (lock) {
                         Document oldDocument = new Document(document);
 
-                        log.debug("Document to update " + document + " in " + name);
+                        log.debug("Document to update {} in {}", document, name);
 
                         if (!REPLICATOR.contentEquals(update.getSource())) {
                             update.remove(DOC_SOURCE);
@@ -177,7 +176,7 @@ class DataService {
                         }
 
                         underlyingMap.put(nitriteId, document);
-                        log.debug("Document " + document + " updated in " + name);
+                        log.debug("Document {} updated in {}", document, name);
 
                         // if 'update' only contains id value, affected count = 0
                         if (update.size() > 0) {
@@ -198,7 +197,7 @@ class DataService {
             notify(ChangeType.UPDATE, changedItems);
         }
 
-        log.debug("Returning write result " + writeResult + " for collection " + name);
+        log.debug("Returning write result {} for collection {}", writeResult, name);
         return writeResult;
     }
 
@@ -212,14 +211,13 @@ class DataService {
 
         WriteResultImpl result = new WriteResultImpl();
         if (cursor == null) {
-            log.debug("No document found to remove by the filter " + filter + " in " + name);
+            log.debug("No document found to remove by the filter {} in {}", filter, name);
             return result;
         }
 
-        log.debug("Filter " + filter + " found total " + cursor.size()
-                + " document(s) to remove with options " + removeOptions + " from " + name);
+        log.debug("Filter {} found total {} document(s) to remove with options {} from {}", filter, cursor.size(), removeOptions, name);
 
-        List<ChangedItem> changedItems = new ArrayList<>();
+        List<ChangedItem> changedItems = new ArrayList<>(cursor.size());
 
         synchronized (lock) {
             for (Document document : cursor) {
@@ -231,7 +229,7 @@ class DataService {
                 removed.put(DOC_REVISION, rev + 1);
                 removed.put(DOC_MODIFIED, System.currentTimeMillis());
 
-                log.debug("Document removed " + removed + " from " + name);
+                log.debug("Document removed {} from {}", removed, name);
 
                 result.addToList(nitriteId);
 
@@ -250,7 +248,7 @@ class DataService {
 
         notify(ChangeType.REMOVE, changedItems);
 
-        log.debug("Returning write result " + result + " for collection " + name);
+        log.debug("Returning write result {} for collection {}", result, name);
         return result;
     }
 
@@ -259,7 +257,7 @@ class DataService {
     }
 
     private void notify(ChangeType action, Collection<ChangedItem> changedItems) {
-        log.debug("Notifying " + action + " event for items " + changedItems + " from " + name);
+        log.debug("Notifying {} event for items {} from {}", action, changedItems, name);
         if (eventBus != null) {
             ChangeInfo changeInfo = new ChangeInfo(action);
             changeInfo.setChangedItems(changedItems);
