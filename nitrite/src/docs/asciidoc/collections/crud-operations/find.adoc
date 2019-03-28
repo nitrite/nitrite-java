@@ -115,6 +115,9 @@ Cursor results = collection.find(sort("age", SortOrder.Ascending).thenLimit(0, 1
 // sorts the records by age in ascending order
 Cursor results = collection.find(sort("age", SortOrder.Ascending));
 
+// sorts the records by name in ascending order with custom collator
+Cursor results = collection.find(sort("name", SortOrder.Ascending, Collator.getInstance(Locale.FRANCE)));
+
 // fetch 10 records starting from offset = 2
 Cursor results = collection.find(limit(2, 10));
 

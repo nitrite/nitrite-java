@@ -20,6 +20,7 @@ package org.dizitart.kno2
 
 import org.dizitart.no2.*
 import org.dizitart.no2.objects.ObjectRepository
+import java.text.Collator
 
 /**
  * @since 2.1.0
@@ -110,8 +111,31 @@ fun sort(field: String, sortOrder: SortOrder): FindOptions
  *
  * @param [field] the value to sort by.
  * @param [sortOrder] the sort order.
+ * @param [collator] the collator.
+ * @return a new [FindOptions]
+ */
+fun sort(field: String, sortOrder: SortOrder, collator: Collator): FindOptions
+        = FindOptions.sort(field, sortOrder, collator)
+
+/**
+ * Creates a [FindOptions] with sorting criteria.
+ *
+ * @param [field] the value to sort by.
+ * @param [sortOrder] the sort order.
  * @param [nullOrder] the `null` value order.
  * @return a new [FindOptions]
  */
 fun sort(field: String, sortOrder: SortOrder, nullOrder: NullOrder): FindOptions
         = FindOptions.sort(field, sortOrder, nullOrder)
+
+/**
+ * Creates a [FindOptions] with sorting criteria.
+ *
+ * @param [field] the value to sort by.
+ * @param [sortOrder] the sort order.
+ * @param [collator] the collator.
+ * @param [nullOrder] the `null` value order.
+ * @return a new [FindOptions]
+ */
+fun sort(field: String, sortOrder: SortOrder, collator: Collator, nullOrder: NullOrder): FindOptions
+        = FindOptions.sort(field, sortOrder, collator, nullOrder)

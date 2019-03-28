@@ -25,11 +25,9 @@ import org.dizitart.no2.mapper.MapperFacade;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
+import java.text.Collator;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.dizitart.no2.Constants.DOC_ID;
 import static org.dizitart.no2.Constants.DOC_REVISION;
@@ -692,5 +690,18 @@ public class CollectionFindTest extends BaseCollectionTest {
         cursor = coll.find(Filters.eq("group", "groupA"), FindOptions.sort("startTime", SortOrder.Ascending, NullOrder.Last));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc2, doc3, doc1), is(cursor.toList()));
+    }
+
+    @Test
+    public void testIssue144(){
+        Document doc1 = new Document().put("id", "test-1").put("fruit", "Apple");
+        Document doc2 = new Document().put("id", "test-2").put("fruit", "Ôrange");
+        Document doc3 = new Document().put("id", "test-3").put("fruit", "Pineapple");
+
+        NitriteCollection coll = db.getCollection("test");
+        coll.insert(doc1, doc2, doc3);
+
+        Cursor cursor = coll.find(FindOptions.sort("fruit", SortOrder.Ascending, Collator.getInstance(Locale.FRANCE)));
+        assertEquals(cursor.toList().get(1).get("fruit"), "Ôrange");
     }
 }
