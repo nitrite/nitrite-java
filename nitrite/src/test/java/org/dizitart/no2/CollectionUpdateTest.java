@@ -19,10 +19,12 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.Filters;
 import org.junit.Test;
 
 import static org.dizitart.no2.Document.createDocument;
+import static org.dizitart.no2.IndexOptions.indexOptions;
 import static org.dizitart.no2.filters.Filters.eq;
 import static org.dizitart.no2.filters.Filters.not;
 import static org.junit.Assert.*;
@@ -207,5 +209,24 @@ public class CollectionUpdateTest extends BaseCollectionTest {
         Document savedDoc2 = coll.find(Filters.ALL).firstOrDefault();
         assertNotNull(savedDoc2);
         assertNull(savedDoc2.get("group"));
+    }
+
+    @Test(expected = UniqueConstraintException.class)
+    public void testIssue151() {
+        Document doc1 = new Document().put("id", "test-1").put("fruit", "Apple");
+        Document doc2 = new Document().put("id", "test-2").put("fruit", "Ôrange");
+        NitriteCollection coll = db.getCollection("test");
+        coll.insert(doc1, doc2);
+
+        coll.createIndex("fruit", indexOptions(IndexType.Unique));
+
+        assertEquals(coll.find(eq("fruit", "Apple")).totalCount(), 1);
+
+        Document doc3 = coll.find(eq("id", "test-2")).firstOrDefault();
+
+        doc3.put("fruit", "Apple");
+        coll.update(doc3);
+
+        assertEquals(coll.find(eq("fruit", "Apple")).totalCount(), 1);
     }
 }

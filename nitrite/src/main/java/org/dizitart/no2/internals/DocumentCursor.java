@@ -110,7 +110,11 @@ class DocumentCursor implements Cursor {
         @Override
         public Document next() {
             NitriteId next = iterator.next();
-            return underlyingMap.get(next);
+            Document document = underlyingMap.get(next);
+            if (document != null) {
+                return new Document(document);
+            }
+            return null;
         }
 
         @Override

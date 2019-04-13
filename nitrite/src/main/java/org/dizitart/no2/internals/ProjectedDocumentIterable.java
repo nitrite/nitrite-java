@@ -115,10 +115,14 @@ class ProjectedDocumentIterable implements RecordIterable<Document> {
             while (iterator.hasNext()) {
                 NitriteId next = iterator.next();
                 Document document = underlyingMap.get(next);
-                Document projected = project(document);
-                if (projected != null) {
-                    nextElement = projected;
-                    return;
+                if (document != null) {
+                    Document projected = project(new Document(document));
+                    if (projected != null) {
+                        nextElement = projected;
+                        return;
+                    }
+                } else {
+                    nextElement = null;
                 }
             }
 

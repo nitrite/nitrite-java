@@ -103,7 +103,10 @@ class JoinedDocumentIterable implements RecordIterable<Document> {
         public Document next() {
             NitriteId next = iterator.next();
             Document document = underlyingMap.get(next);
-            return join(document, foreignCursor, lookup);
+            if (document != null) {
+                return join(new Document(document), foreignCursor, lookup);
+            }
+            return null;
         }
 
         @Override

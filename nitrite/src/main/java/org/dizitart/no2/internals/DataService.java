@@ -80,7 +80,8 @@ class DataService {
             }
 
             synchronized (lock) {
-                Document already = underlyingMap.putIfAbsent(nitriteId, document);
+                Document item = new Document(document);
+                Document already = underlyingMap.putIfAbsent(nitriteId, item);
                 log.debug("Inserting document {} in {}", document, name);
 
                 if (already != null) {
@@ -91,7 +92,7 @@ class DataService {
                             "entry with same id already exists in " + name, UCE_CONSTRAINT_VIOLATED));
                 } else {
                     try {
-                        indexingService.updateIndexEntry(document, nitriteId);
+                        indexingService.updateIndexEntry(item, nitriteId);
                     } catch (UniqueConstraintException uce) {
                         log.error("Unique constraint violated for the document "
                                 + document + " in " + name, uce);
@@ -175,7 +176,8 @@ class DataService {
                             document.putAll(update);
                         }
 
-                        underlyingMap.put(nitriteId, document);
+                        Document item = new Document(document);
+                        underlyingMap.put(nitriteId, item);
                         log.debug("Document {} updated in {}", document, name);
 
                         // if 'update' only contains id value, affected count = 0
@@ -183,7 +185,7 @@ class DataService {
                             writeResult.addToList(nitriteId);
                         }
 
-                        indexingService.refreshIndexEntry(oldDocument, document, nitriteId);
+                        indexingService.refreshIndexEntry(oldDocument, item, nitriteId);
                     }
 
                     ChangedItem changedItem = new ChangedItem();
