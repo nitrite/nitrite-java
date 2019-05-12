@@ -27,12 +27,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.jongo.Jongo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -55,12 +53,10 @@ import java.util.Properties;
  */
 @Slf4j
 @EnableWebMvc
-@ComponentScan
 @Configuration
 @EnableSwagger2
 @EnableScheduling
-@SpringBootApplication
-@EnableAutoConfiguration(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
+@SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 public class NitriteDataGate extends WebMvcConfigurerAdapter {
 
     @Value("${datagate.mongo.host}")

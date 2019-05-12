@@ -143,7 +143,7 @@
                 <i class="fa fa-heart" aria-hidden="true" style="color: red"></i>
                  from Kolkata
                 <div class="pull-right smaller-font">
-                    Copyright © 2017 Dizitart. All Rights Reserved.
+                    <span th:text="'Copyright © 2017-' + ${#dates.year(#dates.createNow())} + ' Dizitart. All rights reserved.'"></span>
                     <span class="xx-small-font"> Template by <a href="https://colorlib.com">Colorlib</a></span>
                 </div>
             </div>

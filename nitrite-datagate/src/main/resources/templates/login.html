@@ -85,7 +85,7 @@
 
                         <div>
                             <h1 class="ubuntu-font">Nitrite DataGate</h1>
-                            <p>© 2017 Dizitart. All Rights Reserved.</p>
+                            <p th:text="'Copyright © 2017-' + ${#dates.year(#dates.createNow())} + ' Dizitart. All rights reserved.'"></p>
                         </div>
                     </div>
                 </form>

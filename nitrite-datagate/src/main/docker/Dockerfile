@@ -1,4 +1,4 @@
-FROM openjdk:8-jdk-alpine
+FROM adoptopenjdk/openjdk8-openj9:alpine
 VOLUME /tmp
 VOLUME /logs
 COPY ./nitrite-datagate.jar /
