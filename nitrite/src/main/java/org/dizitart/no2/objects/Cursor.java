@@ -23,6 +23,8 @@ import org.dizitart.no2.Lookup;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.RecordIterable;
 
+import java.util.Set;
+
 /**
  * A collection of {@link NitriteId}s of the database records,
  * as a result of a find operation.
@@ -62,4 +64,12 @@ public interface Cursor<T> extends RecordIterable<T> {
      * @since 2.1.0
      */
     <Foreign, Joined> RecordIterable<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type);
+
+    /**
+     * Gets the set of all {@link NitriteId}s from the {@code find()} results.
+     *
+     * @return a set of all {@link NitriteId}s.
+     * @since 3.3.0
+     */
+    Set<NitriteId> idSet();
 }

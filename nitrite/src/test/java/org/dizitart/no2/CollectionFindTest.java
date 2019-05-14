@@ -704,4 +704,20 @@ public class CollectionFindTest extends BaseCollectionTest {
         Cursor cursor = coll.find(FindOptions.sort("fruit", SortOrder.Ascending, Collator.getInstance(Locale.FRANCE)));
         assertEquals(cursor.toList().get(1).get("fruit"), "Ôrange");
     }
+
+    @Test
+    public void testIdSet() {
+        insert();
+        Cursor cursor = collection.find(Filters.eq("lastName", "ln2"));
+        Set<NitriteId> nitriteIds = cursor.idSet();
+        assertEquals(nitriteIds.size(), 2);
+
+        cursor = collection.find(Filters.eq("lastName", "ln1"));
+        nitriteIds = cursor.idSet();
+        assertEquals(nitriteIds.size(), 1);
+
+        NitriteId nitriteId = nitriteIds.iterator().next();
+        Document byId = collection.getById(nitriteId);
+        assertEquals(byId.get("lastName"), "ln1");
+    }
 }

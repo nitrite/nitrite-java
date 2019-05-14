@@ -19,6 +19,7 @@
 package org.dizitart.no2.objects;
 
 import org.dizitart.no2.FindOptions;
+import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.RecordIterable;
 import org.dizitart.no2.SortOrder;
 import org.dizitart.no2.objects.data.*;
@@ -27,6 +28,7 @@ import org.junit.Test;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import static org.dizitart.no2.FindOptions.sort;
 import static org.dizitart.no2.objects.filters.ObjectFilters.ALL;
@@ -426,5 +428,12 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         sortBy = FindOptions.sort("status", SortOrder.Ascending);
         assertEquals(repository.find(sortBy).size(), 3);
         assertEquals(repository.find(sortBy).firstOrDefault().getStatus(), "Married");
+    }
+
+    @Test
+    public void testIdSet() {
+        Cursor<Employee> employees = employeeRepository.find(sort("empId", SortOrder.Ascending));
+        Set<NitriteId> nitriteIds = employees.idSet();
+        assertEquals(nitriteIds.size(), 10);
     }
 }

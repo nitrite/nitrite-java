@@ -21,9 +21,11 @@ package org.dizitart.no2;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.filters.Filters;
 import org.junit.Test;
 
 import java.util.Date;
+import java.util.Set;
 
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.FindOptions.limit;
@@ -94,5 +96,21 @@ public class CollectionFindNegativeTest extends BaseCollectionTest {
                 .put("lastName", "ln2");
 
         cursor.project(projection);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testIdSetAdd() {
+        insert();
+        Cursor cursor = collection.find(Filters.eq("lastName", "ln2"));
+        Set<NitriteId> nitriteIds = cursor.idSet();
+        nitriteIds.add(NitriteId.newId());
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testIdSetRemove() {
+        insert();
+        Cursor cursor = collection.find(Filters.eq("lastName", "ln2"));
+        Set<NitriteId> nitriteIds = cursor.idSet();
+        nitriteIds.clear();
     }
 }

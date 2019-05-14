@@ -25,6 +25,7 @@ import org.dizitart.no2.util.Iterables;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.VE_PROJECT_NULL_PROJECTION;
 import static org.dizitart.no2.exceptions.ErrorMessage.OBJ_REMOVE_ON_OBJECT_ITERATOR_NOT_SUPPORTED;
@@ -59,6 +60,11 @@ class ObjectCursor<T> implements Cursor<T> {
                                                          Lookup lookup, Class<Joined> type) {
         ObjectCursor<Foreign> foreignObjectCursor = (ObjectCursor<Foreign>) foreignCursor;
         return new JoinedObjectIterable<>(nitriteMapper, cursor.join(foreignObjectCursor.cursor, lookup), type);
+    }
+
+    @Override
+    public Set<NitriteId> idSet() {
+        return cursor.idSet();
     }
 
     @Override
