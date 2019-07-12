@@ -19,6 +19,7 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.exceptions.IndexingException;
+import org.dizitart.no2.filters.Filters;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -26,11 +27,11 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
+import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.IndexOptions.indexOptions;
 import static org.dizitart.no2.filters.Filters.eq;
 import static org.dizitart.no2.filters.Filters.text;
 import static org.junit.Assert.*;
-import static org.dizitart.no2.Document.createDocument;
 
 /**
  * @author Anindya Chatterjee.
@@ -208,5 +209,27 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
         collection = db.getCollection("test");
         assertTrue(collection.hasIndex("firstName"));
+    }
+
+    @Test
+    public void testIssue178() {
+        collection.dropAllIndices();
+        collection.remove(Filters.ALL);
+
+        Document doc1 = Document.createDocument("field", 5);
+        Document doc2 = Document.createDocument("field", 4.3);
+        Document doc3 = Document.createDocument("field", 0.03);
+        Document doc4 = Document.createDocument("field", 4);
+        Document doc5 = Document.createDocument("field", 5.0);
+
+        collection.insert(doc1, doc2, doc3, doc4, doc5);
+
+        Cursor cursor = collection.find(Filters.eq("field", 5));
+        assertEquals(cursor.size(), 1);
+
+        collection.createIndex("field", IndexOptions.indexOptions(IndexType.NonUnique));
+
+        cursor = collection.find(Filters.eq("field", 5));
+        assertEquals(cursor.size(), 1);
     }
 }

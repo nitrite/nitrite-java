@@ -55,10 +55,12 @@ public class EqualsUtils {
         }
 
         if (o1 instanceof Number && o2 instanceof Number) {
-            // cast to Number and take care of boxing and compare
-            if (compare((Number) o1, (Number) o2) == 0) {
-                return true;
+            if (o1.getClass() != o2.getClass()) {
+                return false;
             }
+
+            // cast to Number and take care of boxing and compare
+            return compare((Number) o1, (Number) o2) == 0;
         } else if (o1 instanceof Iterable && o2 instanceof Iterable)  {
             Object[] arr1 = toArray((Iterable) o1);
             Object[] arr2 = toArray((Iterable) o2);
@@ -94,6 +96,5 @@ public class EqualsUtils {
         }
 
         // none of the type check passes so they are not of compatible type
-        return false;
     }
 }

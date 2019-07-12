@@ -116,7 +116,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
                 ));
         assertEquals(cursor.size(), 2);
 
-        cursor = collection.find(eq("data.1", 4));
+        cursor = collection.find(eq("data.1", (byte) 4));
         assertEquals(cursor.size(), 2);
 
         cursor = collection.find(lt("data.1", 4));
@@ -209,7 +209,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
                 ));
         assertEquals(cursor.size(), 2);
 
-        cursor = collection.find(eq("data.1", 4));
+        cursor = collection.find(eq("data.1", (byte) 4));
         assertEquals(cursor.size(), 2);
 
         cursor = collection.find(lt("data.1", 4));
