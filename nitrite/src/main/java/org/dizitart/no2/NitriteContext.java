@@ -189,9 +189,18 @@ public class NitriteContext {
 
 
     void shutdown() {
+        if (textIndexingService != null) {
+            textIndexingService.close();
+        }
         shutdownAndAwaitTermination(scheduledWorkerPool, 5);
         shutdownAndAwaitTermination(workerPool, 5);
         collectionRegistry.clear();
         repositoryRegistry.clear();
+    }
+
+    void initExternalCommit() {
+        if (textIndexingService != null) {
+            textIndexingService.commit();
+        }
     }
 }

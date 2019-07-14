@@ -264,6 +264,9 @@ public class Nitrite implements Closeable {
     public void commit() {
         if (store != null && !context.isReadOnly()) {
             store.commit();
+            // initialize commit for third party text indexing service
+            context.initExternalCommit();
+
             if (log.isDebugEnabled()) {
                 log.debug("Unsaved changes committed successfully.");
             }

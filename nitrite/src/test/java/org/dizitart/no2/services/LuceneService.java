@@ -68,7 +68,6 @@ public class LuceneService implements TextIndexingService {
             IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
             indexWriter = new IndexWriter(indexDirectory, iwc);
-            commit();
         } catch (IOException e) {
             throw new IndexingException(errorMessage("could not create full-text index", 0), e);
         } catch (VirtualMachineError vme) {
@@ -89,7 +88,6 @@ public class LuceneService implements TextIndexingService {
 
             synchronized (this) {
                 indexWriter.addDocument(document);
-                commit();
             }
         } catch (IOException ioe) {
             throw new IndexingException(errorMessage("could not write full-text index data for " + text, 0), ioe);
@@ -114,7 +112,6 @@ public class LuceneService implements TextIndexingService {
 
             synchronized (this) {
                 indexWriter.updateDocument(new Term(CONTENT_ID, jsonId), document);
-                commit();
             }
         } catch (IOException ioe) {
             throw new IndexingException(errorMessage("could not update full-text index for " + text, 0), ioe);
@@ -131,7 +128,6 @@ public class LuceneService implements TextIndexingService {
 
             synchronized (this) {
                 indexWriter.deleteDocuments(idTerm);
-                commit();
             }
         } catch (IOException ioe) {
             throw new IndexingException(errorMessage("could not remove full-text index for " + id, 0));
@@ -155,7 +151,6 @@ public class LuceneService implements TextIndexingService {
 
                 synchronized (this) {
                     indexWriter.deleteDocuments(query);
-                    commit();
                 }
             } catch (IOException ioe) {
                 throw new IndexingException(errorMessage("could not remove full-text index for value " + field, 0));
@@ -253,7 +248,6 @@ public class LuceneService implements TextIndexingService {
             IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
             indexWriter = new IndexWriter(indexDirectory, iwc);
-            commit();
         } catch (IOException e) {
             throw new IndexingException(errorMessage("could not drop full-text index", 0), e);
         }
@@ -263,7 +257,6 @@ public class LuceneService implements TextIndexingService {
     public void clear() {
         try {
             indexWriter.deleteAll();
-            commit();
         } catch (IOException e) {
             throw new IndexingException(errorMessage("could not clear full-text index", 0), e);
         }
@@ -280,7 +273,24 @@ public class LuceneService implements TextIndexingService {
         throw vme;
     }
 
-    private synchronized void commit() throws IOException {
-        indexWriter.commit();
+    @Override
+    public void commit() {
+        try {
+            indexWriter.commit();
+        } catch (IOException e) {
+            throw new IndexingException(errorMessage("could not commit unsaved changes", 0), e);
+        }
+    }
+
+    @Override
+    public void close() {
+        if (indexWriter != null) {
+            try {
+                commit();
+                indexWriter.close();
+            } catch (IOException ioe) {
+                // ignore it
+            }
+        }
     }
 }

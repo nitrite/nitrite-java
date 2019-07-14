@@ -88,4 +88,18 @@ public interface TextIndexingService {
      * Deletes all full-text index entries.
      */
     void clear();
+
+    /**
+     * Commits any unsaved changes. Third-party implementation should use
+     * his method to persists unsaved changes.
+     *
+     * */
+    void commit();
+
+    /**
+     * Closes all opened resources. Third-party implementation should use
+     * this method to close all resources before database closes.
+     *
+     * */
+    void close();
 }

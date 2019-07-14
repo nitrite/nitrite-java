@@ -111,6 +111,16 @@ class NitriteTextIndexingService implements TextIndexingService {
         // nothing to do. already handled by IndexingService
     }
 
+    @Override
+    public void commit() {
+        // nothing to do.
+    }
+
+    @Override
+    public void close() {
+        // nothing to do.
+    }
+
     private void createOrUpdate(NitriteId id, String field, String text) {
         try {
             NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
