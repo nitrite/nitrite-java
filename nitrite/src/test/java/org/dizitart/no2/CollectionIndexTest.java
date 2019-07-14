@@ -20,8 +20,12 @@ package org.dizitart.no2;
 
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.filters.Filters;
+import org.dizitart.no2.services.LuceneService;
 import org.junit.Test;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -231,5 +235,31 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
         cursor = collection.find(Filters.eq("field", 5));
         assertEquals(cursor.size(), 1);
+    }
+
+    @Test
+    public void testIssue174() throws IOException {
+        Files.delete(Paths.get("/tmp/nitrite.db"));
+        Nitrite ndb = Nitrite.builder()
+                .textIndexingService(new LuceneService())
+                .filePath("/tmp/nitrite.db")
+                .openOrCreate();
+
+        NitriteCollection coll = ndb.getCollection("lucene");
+
+        Document doc = Document.createDocument("text", "Quick brown fox").put("name", "Anindya Chatterjee");
+        Document doc2 = Document.createDocument("text", "Jump over lazy dog").put("name", "Subhra Chatterjee");
+
+        coll.insert(doc, doc2);
+
+        coll.createIndex("name", IndexOptions.indexOptions(IndexType.Unique));
+        coll.createIndex("text", IndexOptions.indexOptions(IndexType.Fulltext));
+
+        assertTrue(coll.hasIndex("name"));
+        assertTrue(coll.hasIndex("text"));
+
+        coll.dropIndex("text");
+
+        assertFalse(coll.hasIndex("text"));
     }
 }

@@ -273,6 +273,9 @@ class IndexingService {
 
         if (indexMetaService.hasTextIndex(field)) {
             textIndexingService.deleteIndexesByField(field);
+            if (!(textIndexingService instanceof NitriteTextIndexingService)) {
+                indexMetaService.dropIndex(field);
+            }
         } else {
             indexMetaService.dropIndex(field);
         }
