@@ -1,5 +1,6 @@
 * Embedded key-value/document and object store
-* In-memory or single data file
+* In-memory off-heap store
+* Single file store
 * Very fast and lightweight MongoDB like API
 * Indexing
 * Full text search capability

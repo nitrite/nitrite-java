@@ -12,7 +12,7 @@ based database. If the file exists, builder will try to open the existing databa
 NOTE: If the existing database file is corrupted, while opening, nitrite will try to recover
 from it by restoring the last known good version.
 
-.Create an in-memory database
+.Create an in-memory database with off-heap storage
 [source,java]
 --
 Nitrite db = Nitrite.builder()

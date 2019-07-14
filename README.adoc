@@ -19,7 +19,8 @@ Nitrite is a server-less embedded database ideal for desktop, mobile or small we
 **It features**:
 
 * Embedded key-value/document and object store
-* In-memory or single data file
+* In-memory off-heap store
+* Single file store
 * Very fast and lightweight MongoDB like API
 * Indexing
 * Full text search capability

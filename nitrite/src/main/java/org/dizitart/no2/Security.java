@@ -66,9 +66,7 @@ class Security {
                 userMap.put(userId, userCredential);
             }
         } finally {
-            if (store != null) {
-                store.commit();
-            }
+            store.commit();
         }
 
         return store;
