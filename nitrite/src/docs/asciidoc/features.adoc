@@ -3,6 +3,6 @@
 * Very fast and lightweight MongoDB like API
 * Indexing
 * Full text search capability
-* Full Android compatibility
+* Full Android compatibility (API Level 19)
 * Observable store
 * Both way replication via Nitrite DataGate server

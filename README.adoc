@@ -1,6 +1,5 @@
 = Nitrite Database
 
-image:https://liberapay.com/assets/widgets/donate.svg["Donate using Liberapay", link="https://liberapay.com/anidotnet/donate"]
 image:https://travis-ci.org/dizitart/nitrite-database.svg?branch=master["Build Status", link="https://travis-ci.org/dizitart/nitrite-database"]
 image:https://codecov.io/gh/dizitart/nitrite-database/branch/master/graph/badge.svg["Coverage Status", link="https://codecov.io/gh/dizitart/nitrite-database"]
 image:https://javadoc.io/badge/org.dizitart/nitrite.svg["Javadocs", link=https://javadoc.io/doc/org.dizitart/nitrite]
@@ -24,7 +23,7 @@ Nitrite is a server-less embedded database ideal for desktop, mobile or small we
 * Very fast and lightweight MongoDB like API
 * Indexing
 * Full text search capability
-* Full Android compatibility
+* Full Android compatibility (API Level 19)
 * Observable store
 * Both way replication via Nitrite DataGate server
 
@@ -274,7 +273,7 @@ to test replication using the DataGate server. Please run the below command to c
 db.getSiblingDB('benchmark').createUser({user: 'bench', pwd: 'bench', roles: [{role: 'readWrite', db: 'benchmark'}, {role: 'dbAdmin', db: 'benchmark'}]})
 --
 
-The test suite also requires android sdk 24.4.1 to be installed and ANDROID_HOME environment variable to be setup
+The test suite also requires android sdk 26 to be installed and ANDROID_HOME environment variable to be setup
 properly to test the android example.
 
 == Support / Feedback
