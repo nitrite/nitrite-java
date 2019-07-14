@@ -35,6 +35,18 @@ To create an index in collections use below function
 void createIndex(String field, IndexOptions indexOptions)
 --
 
+[TIP]
+====
+Nitrite supports indexing on embedded field also
+
+[source,java]
+--
+collection.createIndex("info.age", indexOptions(IndexType.NonUnique, true));
+--
+
+====
+
+
 NOTE: All indexing operation is synchronous and blocking in nature, unless
 `IndexOptions.async` is set to `true`.
 

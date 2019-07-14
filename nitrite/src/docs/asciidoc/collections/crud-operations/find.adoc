@@ -75,7 +75,6 @@ Employee employee = repository.getById(id);
 
 --
 
-
 *Cursor*
 
 A Cursor
@@ -120,5 +119,47 @@ Cursor results = collection.find(sort("name", SortOrder.Ascending, Collator.getI
 
 // fetch 10 records starting from offset = 2
 Cursor results = collection.find(limit(2, 10));
+
+--
+
+*Filter Embedded Document/Object*
+
+Find operation can query on embedded document/object also. Nitrite uses field separator `.` for querying
+embedded object.
+
+.Example
+[source,java]
+--
+
+// find a document which contains an "info" embedded document with age 30
+Document doc = createDocument("firstName", "John")
+     .put("lastName", "Doe")
+     .put("info", createDocument("age", 30));
+collection.insert(doc);
+
+Cursor results = collection.find(Filters.eq("info.age", 30));
+
+
+// find an employee whose note contains email addresses
+@Data
+@Indices({
+        @Index(value = "employeeNote.text", type = IndexType.Fulltext)
+})
+public class Employee implements Serializable {
+    @Id
+    private Long empId;
+
+    private Note employeeNote;
+}
+
+@Data
+public class Note {
+    @Id
+    private Long noteId;
+
+    private String text;
+}
+
+Cursor<Employee> cursor = employeeRepository.find(regex("employeeNote.text", "^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,6}$"));
 
 --
