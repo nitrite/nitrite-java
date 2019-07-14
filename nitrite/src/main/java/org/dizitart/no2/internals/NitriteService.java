@@ -30,7 +30,6 @@ import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
@@ -162,10 +161,23 @@ public class NitriteService {
      * @param values the values
      * @return the result set
      */
-    public Set<NitriteId> findInWithIndex(String field, List<Object> values) {
+    public Set<NitriteId> findInWithIndex(String field, Collection<Object> values) {
         notNull(field, errorMessage("field can not be null", VE_FIND_IN_INDEX_NULL_FIELD));
         notNull(values, errorMessage("values can not be null", VE_FIND_IN_INDEX_NULL_VALUE));
         return indexedSearchService.findIn(field, values);
+    }
+
+    /**
+     * Finds with not in filer using index.
+     *
+     * @param field  the value
+     * @param values the values
+     * @return the result set
+     */
+    public Set<NitriteId> findNotInWithIndex(String field, Collection<Object> values) {
+        notNull(field, errorMessage("field can not be null", VE_FIND_NOT_IN_INDEX_NULL_FIELD));
+        notNull(values, errorMessage("values can not be null", VE_FIND_NOT_IN_INDEX_NULL_VALUE));
+        return indexedSearchService.findNotIn(field, values);
     }
 
     /**

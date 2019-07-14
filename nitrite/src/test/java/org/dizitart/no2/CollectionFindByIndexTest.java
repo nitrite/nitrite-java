@@ -125,7 +125,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         cursor = collection.find(in("lastName", "ln1", "ln2", "ln10"));
         assertEquals(cursor.size(), 3);
 
-        cursor = collection.find(not(in("firstName", "fn1", "fn2")));
+        cursor = collection.find(notIn("firstName", "fn1", "fn2"));
         assertEquals(cursor.size(), 1);
     }
 
@@ -218,7 +218,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         cursor = collection.find(in("lastName", "ln1", "ln2", "ln10"));
         assertEquals(cursor.size(), 3);
 
-        cursor = collection.find(not(in("firstName", "fn1", "fn2")));
+        cursor = collection.find(notIn("firstName", "fn1", "fn2"));
         assertEquals(cursor.size(), 1);
     }
 

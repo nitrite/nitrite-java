@@ -25,10 +25,7 @@ import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.objects.ObjectFilter;
 import org.dizitart.no2.store.NitriteMap;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -127,6 +124,8 @@ class ElemMatchObjectFilter extends BaseObjectFilter {
             return matchLesser(item, filter);
         } else if (filter instanceof InObjectFilter) {
             return matchIn(item, filter);
+        } else if (filter instanceof NotInObjectFilter) {
+            return matchNotIn(item, filter);
         } else if (filter instanceof RegexObjectFilter) {
             return matchRegex(item, filter);
         } else {
@@ -276,14 +275,32 @@ class ElemMatchObjectFilter extends BaseObjectFilter {
     }
 
     private boolean matchIn(Object item, ObjectFilter filter) {
-        List<Object> values = ((InObjectFilter) filter).getObjectList();
-        if (values != null) {
+        Set<Object> values = new HashSet<>();
+        Collections.addAll(values, ((InObjectFilter) filter).getValues());
+
+        if (!values.isEmpty()) {
             if (item instanceof Document) {
                 Document document = (Document) item;
                 Object docValue = getFieldValue(document, ((InObjectFilter) filter).getField());
                 return values.contains(docValue);
             } else {
                 return values.contains(item);
+            }
+        }
+        return false;
+    }
+
+    private boolean matchNotIn(Object item, ObjectFilter filter) {
+        Set<Object> values = new HashSet<>();
+        Collections.addAll(values, ((NotInObjectFilter) filter).getValues());
+
+        if (!values.isEmpty()) {
+            if (item instanceof Document) {
+                Document document = (Document) item;
+                Object docValue = getFieldValue(document, ((NotInObjectFilter) filter).getField());
+                return !values.contains(docValue);
+            } else {
+                return !values.contains(item);
             }
         }
         return false;

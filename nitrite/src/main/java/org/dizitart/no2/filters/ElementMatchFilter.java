@@ -135,6 +135,8 @@ class ElementMatchFilter extends BaseFilter {
             return matchLesser(item, filter);
         } else if (filter instanceof InFilter) {
             return matchIn(item, filter);
+        } else if (filter instanceof NotInFilter) {
+            return matchNotIn(item, filter);
         } else if (filter instanceof RegexFilter) {
             return matchRegex(item, filter);
         } else {
@@ -259,14 +261,32 @@ class ElementMatchFilter extends BaseFilter {
     }
 
     private boolean matchIn(Object item, Filter filter) {
-        List<Object> values = ((InFilter) filter).getObjectList();
-        if (values != null) {
+        Set<Object> values = new HashSet<>();
+        Collections.addAll(values, ((InFilter) filter).getValues());
+
+        if (!values.isEmpty()) {
             if (item instanceof Document) {
                 Document document = (Document) item;
                 Object docValue = getFieldValue(document, ((InFilter) filter).getField());
                 return values.contains(docValue);
             } else {
                 return values.contains(item);
+            }
+        }
+        return false;
+    }
+
+    private boolean matchNotIn(Object item, Filter filter) {
+        Set<Object> values = new HashSet<>();
+        Collections.addAll(values, ((NotInFilter) filter).getValues());
+
+        if (!values.isEmpty()) {
+            if (item instanceof Document) {
+                Document document = (Document) item;
+                Object docValue = getFieldValue(document, ((NotInFilter) filter).getField());
+                return !values.contains(docValue);
+            } else {
+                return !values.contains(item);
             }
         }
         return false;

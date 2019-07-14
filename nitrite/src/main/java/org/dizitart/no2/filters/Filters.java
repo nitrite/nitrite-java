@@ -257,6 +257,26 @@ public class Filters {
     }
 
     /**
+     * Creates a notIn filter which matches the documents where
+     * the value of a field not equals any value in the specified array.
+     *
+     * [[app-listing]]
+     * [source,java]
+     * .Example
+     * --
+     * // matches all documents where 'age' field has value not in [20, 30, 40]
+     * collection.find(notIn("age", 20, 30, 40));
+     * --
+     *
+     * @param field  the value
+     * @param values the range values
+     * @return the notIn filter
+     */
+    public static Filter notIn(String field, Object... values) {
+        return new NotInFilter(field, values);
+    }
+
+    /**
      * Creates an element match filter that matches documents that contain an array
      * value with at least one element that matches the specified `filter`.
      *

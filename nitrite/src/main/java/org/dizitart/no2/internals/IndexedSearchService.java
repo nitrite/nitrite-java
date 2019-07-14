@@ -23,8 +23,8 @@ import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.fulltext.TextIndexingService;
 import org.dizitart.no2.store.NitriteMap;
 
+import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -123,7 +123,7 @@ class IndexedSearchService {
         return resultSet;
     }
 
-    Set<NitriteId> findIn(String field, List<Object> values) {
+    Set<NitriteId> findIn(String field, Collection<Object> values) {
         Set<NitriteId> resultSet = new LinkedHashSet<>();
         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
                 = indexMetaService.getIndexMap(field);
@@ -131,6 +131,22 @@ class IndexedSearchService {
         if (indexMap != null) {
             for (Comparable comparable : indexMap.keySet()) {
                 if (values.contains(comparable)) {
+                    resultSet.addAll(indexMap.get(comparable));
+                }
+            }
+        }
+
+        return resultSet;
+    }
+
+    Set<NitriteId> findNotIn(String field, Collection<Object> values) {
+        Set<NitriteId> resultSet = new LinkedHashSet<>();
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+                = indexMetaService.getIndexMap(field);
+
+        if (indexMap != null) {
+            for (Comparable comparable : indexMap.keySet()) {
+                if (!values.contains(comparable)) {
                     resultSet.addAll(indexMap.get(comparable));
                 }
             }

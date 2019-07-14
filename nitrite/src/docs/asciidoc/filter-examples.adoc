@@ -64,6 +64,13 @@ collection.find(in("age", 20, 30, 40));
 --
 
 [source,java]
+.notIn()
+--
+// matches all documents where 'age' field does not have value in [20, 30, 40]
+collection.find(notIn("age", 20, 30, 40));
+--
+
+[source,java]
 .elemMatch()
 --
 // matches all documents which has an array field - 'color' and the array

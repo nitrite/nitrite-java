@@ -256,6 +256,21 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
     }
 
     @Test
+    public void testNotInFilter() {
+        Employee emp = employeeRepository.find(sort("empId", SortOrder.Descending)).firstOrDefault();
+        long id = emp.getEmpId();
+
+        List<Employee> employeeList = employeeRepository.find(notIn("empId", id, id - 1, id - 2))
+                .toList();
+
+        assertFalse(employeeList.contains(emp));
+        assertEquals(employeeList.size(), 7);
+
+        employeeList = employeeRepository.find(notIn("empId", id - 1, id - 2)).toList();
+        assertEquals(employeeList.size(), 8);
+    }
+
+    @Test
     public void testElemMatchFilter() {
         final ProductScore score1 = new ProductScore("abc", 10);
         final ProductScore score2 = new ProductScore("abc", 8);
@@ -318,6 +333,10 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         elements = repository.find(elemMatch("productScores",
                 (in("score", 7, 8)))).toList();
         assertEquals(elements.size(), 2);
+
+        elements = repository.find(elemMatch("productScores",
+                (notIn("score", 7, 8)))).toList();
+        assertEquals(elements.size(), 1);
 
         elements = repository.find(elemMatch("productScores",
                 (regex("product", "xyz")))).toList();

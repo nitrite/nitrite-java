@@ -264,6 +264,26 @@ public class ObjectFilters {
     }
 
     /**
+     * Creates a notIn filter which matches the objects where
+     * the value of a field not equals to any value in the specified array.
+     *
+     * [[app-listing]]
+     * [source,java]
+     * .Example
+     * --
+     * // matches all objects where 'age' field has value in [20, 30, 40]
+     * repository.find(in("age", 20, 30, 40));
+     * --
+     *
+     * @param field  the value
+     * @param values the range values
+     * @return the notIn filter
+     */
+    public static ObjectFilter notIn(String field, Object... values) {
+        return new NotInObjectFilter(field, values);
+    }
+
+    /**
      * Creates an element match filter that matches objects that contain an array
      * value with at least one element that matches the specified `filter`.
      *

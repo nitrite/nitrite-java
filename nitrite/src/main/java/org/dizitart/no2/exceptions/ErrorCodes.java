@@ -111,6 +111,8 @@ public class ErrorCodes {
     public static final int VE_PROJECTION_WITH_NOT_NULL_VALUE = 1083;
     public static final int VE_OBJ_STORE_NULL_KEY = 1084;
     public static final int VE_OBJ_STORE_EMPTY_KEY = 1085;
+    public static final int VE_FIND_NOT_IN_INDEX_NULL_FIELD = 1086;
+    public static final int VE_FIND_NOT_IN_INDEX_NULL_VALUE = 1087;
 
     /* NitriteIOException Codes */
     public static final int NIOE_DATABASE_OPENED = 2001;
@@ -188,6 +190,7 @@ public class ErrorCodes {
     public static final int FE_SEARCH_TERM_INVALID_LEADING_STAR = 4043;
     public static final int FE_SEARCH_TERM_INVALID_TRAILING_STAR = 4044;
     public static final int FE_MULTIPLE_WORDS_WITH_WILDCARD = 4045;
+    public static final int FE_NOT_IN_SEARCH_TERM_NOT_COMPARABLE = 4046;
 
     /* IndexingException Codes */
     public static final int IE_TEXT_FILTER_FIELD_NOT_INDEXED = 5001;
