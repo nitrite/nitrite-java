@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
+import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.IndexOptions.indexOptions;
 import static org.dizitart.no2.filters.Filters.eq;
@@ -239,16 +240,16 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
     @Test
     public void testIssue174() throws IOException {
-        Files.delete(Paths.get("/tmp/nitrite.db"));
+        String file = getRandomTempDbFile();
         Nitrite ndb = Nitrite.builder()
                 .textIndexingService(new LuceneService())
-                .filePath("/tmp/nitrite.db")
+                .filePath(file)
                 .openOrCreate();
 
         NitriteCollection coll = ndb.getCollection("lucene");
 
-        Document doc = Document.createDocument("text", "Quick brown fox").put("name", "Anindya Chatterjee");
-        Document doc2 = Document.createDocument("text", "Jump over lazy dog").put("name", "Subhra Chatterjee");
+        Document doc = Document.createDocument("text", "Quick brown fox").put("name", "Anindya");
+        Document doc2 = Document.createDocument("text", "Jump over lazy dog").put("name", "Chatterjee");
 
         coll.insert(doc, doc2);
 
@@ -261,5 +262,7 @@ public class CollectionIndexTest extends BaseCollectionTest {
         coll.dropIndex("text");
 
         assertFalse(coll.hasIndex("text"));
+
+        Files.delete(Paths.get(file));
     }
 }
