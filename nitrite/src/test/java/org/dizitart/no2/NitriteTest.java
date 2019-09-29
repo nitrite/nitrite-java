@@ -18,7 +18,11 @@
 
 package org.dizitart.no2;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.objects.Id;
 import org.dizitart.no2.objects.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
@@ -37,6 +41,8 @@ import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.Document.createDocument;
 import static org.dizitart.no2.filters.Filters.ALL;
+import static org.dizitart.no2.objects.filters.ObjectFilters.eq;
+import static org.dizitart.no2.objects.filters.ObjectFilters.not;
 import static org.junit.Assert.*;
 
 public class NitriteTest {
@@ -276,5 +282,54 @@ public class NitriteTest {
     public void testIssue112() {
         Nitrite db = Nitrite.builder().filePath("/tmp").openOrCreate();
         assertNull(db);
+    }
+
+    @Test
+    public void testIssue185() {
+        final ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
+        final Receipt receipt = new Receipt();
+        receipt.clientRef = "111-11111";
+        receipt.status = Receipt.Status.PREPARING;
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (int i = 0; i < 1000; ++i) {
+                    repository.update(receipt, true);
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ignored) {
+                    }
+                    repository.remove(receipt);
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+            }
+        }).start();
+
+        for (int i = 0; i < 1000; ++i) {
+            repository.find(not(eq("status", Receipt.Status.COMPLETED)), FindOptions.sort("createdTimestamp", SortOrder.Descending)).toList();
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Receipt {
+        public enum Status {
+            COMPLETED,
+            PREPARING,
+        }
+
+        private Status status;
+        @Id
+        private String clientRef;
+        private Long createdTimestamp = System.currentTimeMillis();
     }
 }

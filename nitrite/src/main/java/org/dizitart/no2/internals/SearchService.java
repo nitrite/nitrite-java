@@ -158,6 +158,8 @@ class SearchService {
 
         for (NitriteId id : nitriteIdSet) {
             Document document = underlyingMap.get(id);
+            if (document == null) continue;
+
             Object value = getFieldValue(document, sortField);
 
             if (value != null) {
