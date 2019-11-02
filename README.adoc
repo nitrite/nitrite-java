@@ -310,3 +310,7 @@ image:https://opencollective.com/nitrite-database/sponsor/1/avatar.svg["Sponsor"
 image:https://opencollective.com/nitrite-database/sponsor/2/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/2/website"]
 image:https://opencollective.com/nitrite-database/sponsor/3/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/3/website"]
 image:https://opencollective.com/nitrite-database/sponsor/4/avatar.svg["Sponsor", link="https://opencollective.com/nitrite-database/sponsor/4/website"]
+
+== Presentation & Talks
+
+https://github.com/sheinbergon[Idan Sheinberg] has given a talk on Nitrite at https://www.meetup.com/KotlinTLV/events/265145254/[**Kotlin Everywhere - TLV Edition**] meetup on October 27, 2019. Please find his presentation https://www.slideshare.net/IdanShinberg/nitrite-choosing-the-rite-embedded-database[here].
