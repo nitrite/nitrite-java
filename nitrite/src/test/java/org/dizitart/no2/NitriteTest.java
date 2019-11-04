@@ -23,10 +23,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.objects.Id;
+import org.dizitart.no2.objects.Index;
+import org.dizitart.no2.objects.Indices;
 import org.dizitart.no2.objects.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import uk.co.jemos.podam.api.PodamFactory;
+import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +39,11 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.dizitart.no2.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
@@ -318,9 +326,38 @@ public class NitriteTest {
         }
     }
 
+    @Test
+    public void testIssue193() throws InterruptedException {
+        final ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
+        final PodamFactory factory = new PodamFactoryImpl();
+        final String[] refs = new String[] {"1", "2", "3", "4", "5"};
+        final Random random = new Random();
+        ExecutorService pool = Executors.newCachedThreadPool();
+
+        final CountDownLatch latch = new CountDownLatch(10000);
+        for (int i = 0; i < 10000; i++) {
+            pool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    int refIndex = random.nextInt(5);
+                    Receipt receipt = factory.manufacturePojoWithFullData(Receipt.class);
+                    receipt.setClientRef(refs[refIndex]);
+                    repository.update(receipt, true);
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        assertTrue(repository.find().size() <= 5);
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @Indices({
+        @Index(value = "synced", type = IndexType.NonUnique)
+    })
     public static class Receipt {
         public enum Status {
             COMPLETED,
@@ -330,6 +367,7 @@ public class NitriteTest {
         private Status status;
         @Id
         private String clientRef;
+        public boolean synced;
         private Long createdTimestamp = System.currentTimeMillis();
     }
 }

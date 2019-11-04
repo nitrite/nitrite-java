@@ -31,6 +31,8 @@ import org.dizitart.no2.store.NitriteMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static org.dizitart.no2.exceptions.ErrorCodes.*;
 import static org.dizitart.no2.exceptions.ErrorMessage.errorMessage;
@@ -51,6 +53,9 @@ public class NitriteService {
     private IndexedSearchService indexedSearchService;
     private IndexMetaService indexMetaService;
     private EventBus<ChangeInfo, ChangeListener> eventBus;
+    private ReentrantReadWriteLock readWriteLock;
+    private Lock readLock;
+    private Lock writeLock;
 
     /**
      * Instantiates a new Nitrite service.
@@ -75,7 +80,12 @@ public class NitriteService {
      */
     public boolean isIndexing(String field) {
         notNull(field, errorMessage("field can not be null", VE_IS_INDEXING_NULL_FIELD));
-        return indexingService.isIndexing(field);
+        try {
+            readLock.lock();
+            return indexingService.isIndexing(field);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -86,7 +96,12 @@ public class NitriteService {
      */
     public boolean hasIndex(String field) {
         notNull(field, errorMessage("field can not be null", VE_HAS_INDEX_NULL_FIELD));
-        return indexMetaService.hasIndex(field);
+        try {
+            readLock.lock();
+            return indexMetaService.hasIndex(field);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -99,7 +114,12 @@ public class NitriteService {
     public Set<NitriteId> findEqualWithIndex(String field, Object value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_EQUAL_INDEX_NULL_FIELD));
         if (value == null) return new HashSet<>();
-        return indexedSearchService.findEqual(field, value);
+        try {
+            readLock.lock();
+            return indexedSearchService.findEqual(field, value);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -112,7 +132,12 @@ public class NitriteService {
     public Set<NitriteId> findGreaterThanWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_GT_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_GT_INDEX_NULL_VALUE));
-        return indexedSearchService.findGreaterThan(field, value);
+        try {
+            readLock.lock();
+            return indexedSearchService.findGreaterThan(field, value);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -125,7 +150,12 @@ public class NitriteService {
     public Set<NitriteId> findGreaterEqualWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_GTE_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_GTE_INDEX_NULL_VALUE));
-        return indexedSearchService.findGreaterEqual(field, value);
+        try {
+            readLock.lock();
+            return indexedSearchService.findGreaterEqual(field, value);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -138,7 +168,12 @@ public class NitriteService {
     public Set<NitriteId> findLesserThanWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_LT_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_LT_INDEX_NULL_VALUE));
-        return indexedSearchService.findLesserThan(field, value);
+        try {
+            readLock.lock();
+            return indexedSearchService.findLesserThan(field, value);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -151,7 +186,12 @@ public class NitriteService {
     public Set<NitriteId> findLesserEqualWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_LTE_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_LTE_INDEX_NULL_VALUE));
-        return indexedSearchService.findLesserEqual(field, value);
+        try {
+            readLock.lock();
+            return indexedSearchService.findLesserEqual(field, value);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -164,7 +204,12 @@ public class NitriteService {
     public Set<NitriteId> findInWithIndex(String field, Collection<Object> values) {
         notNull(field, errorMessage("field can not be null", VE_FIND_IN_INDEX_NULL_FIELD));
         notNull(values, errorMessage("values can not be null", VE_FIND_IN_INDEX_NULL_VALUE));
-        return indexedSearchService.findIn(field, values);
+        try {
+            readLock.lock();
+            return indexedSearchService.findIn(field, values);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -177,7 +222,12 @@ public class NitriteService {
     public Set<NitriteId> findNotInWithIndex(String field, Collection<Object> values) {
         notNull(field, errorMessage("field can not be null", VE_FIND_NOT_IN_INDEX_NULL_FIELD));
         notNull(values, errorMessage("values can not be null", VE_FIND_NOT_IN_INDEX_NULL_VALUE));
-        return indexedSearchService.findNotIn(field, values);
+        try {
+            readLock.lock();
+            return indexedSearchService.findNotIn(field, values);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -190,7 +240,12 @@ public class NitriteService {
     public Set<NitriteId> findTextWithIndex(String field, String value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_TEXT_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_TEXT_INDEX_NULL_VALUE));
-        return indexedSearchService.findText(field, value);
+        try {
+            readLock.lock();
+            return indexedSearchService.findText(field, value);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -222,7 +277,12 @@ public class NitriteService {
     void createIndex(String field, IndexType indexType, boolean async) {
         notNull(field, errorMessage("field can not be null", VE_CREATE_INDEX_NULL_FIELD));
         notNull(indexType, errorMessage("indexType can not be null", VE_CREATE_INDEX_NULL_INDEX_TYPE));
-        indexingService.createIndex(field, indexType, async);
+        try {
+            writeLock.lock();
+            indexingService.createIndex(field, indexType, async);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -233,7 +293,12 @@ public class NitriteService {
      */
     void rebuildIndex(Index index, boolean isAsync) {
         notNull(index, errorMessage("index can not be null", VE_REBUILD_INDEX_NULL_INDEX));
-        indexingService.rebuildIndex(index, isAsync);
+        try {
+            writeLock.lock();
+            indexingService.rebuildIndex(index, isAsync);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -244,7 +309,12 @@ public class NitriteService {
      */
     Index findIndex(String field) {
         notNull(field, errorMessage("field can not be null", VE_FIND_INDEX_NULL_INDEX));
-        return indexMetaService.findIndex(field);
+        try {
+            readLock.lock();
+            return indexMetaService.findIndex(field);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -254,14 +324,24 @@ public class NitriteService {
      */
     void dropIndex(String field) {
         notNull(field, errorMessage("field can not be null", VE_DROP_INDEX_NULL_FIELD));
-        indexingService.dropIndex(field);
+        try {
+            writeLock.lock();
+            indexingService.dropIndex(field);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
      * Drops all indices.
      */
     void dropAllIndices() {
-        indexingService.dropAllIndices();
+        try {
+            writeLock.lock();
+            indexingService.dropAllIndices();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -270,7 +350,12 @@ public class NitriteService {
      * @return the collection of index information.
      */
     Collection<Index> listIndexes() {
-        return indexingService.listIndexes();
+        try {
+            readLock.lock();
+            return indexingService.listIndexes();
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -285,13 +370,18 @@ public class NitriteService {
 
         int length = documents == null ? 0 : documents.length;
 
-        if (length > 0) {
-            Document[] array = new Document[length + 1];
-            array[0] = document;
-            System.arraycopy(documents, 0, array, 1, length);
-            return dataService.insert(array);
-        } else {
-            return dataService.insert(document);
+        try {
+            writeLock.lock();
+            if (length > 0) {
+                Document[] array = new Document[length + 1];
+                array[0] = document;
+                System.arraycopy(documents, 0, array, 1, length);
+                return dataService.insert(array);
+            } else {
+                return dataService.insert(document);
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -303,7 +393,12 @@ public class NitriteService {
      */
     WriteResult insert(Document[] documents) {
         notNull(documents, errorMessage("documents can not be null", VE_INSERT_NULL_DOCUMENT_ARRAY));
-        return dataService.insert(documents);
+        try {
+            writeLock.lock();
+            return dataService.insert(documents);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -313,7 +408,12 @@ public class NitriteService {
      * @return the result set
      */
     Cursor find(Filter filter) {
-        return searchService.find(filter);
+        try {
+            readLock.lock();
+            return searchService.find(filter);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -322,7 +422,12 @@ public class NitriteService {
      * @return the result set
      */
     Cursor find() {
-        return searchService.find();
+        try {
+            readLock.lock();
+            return searchService.find();
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -333,7 +438,12 @@ public class NitriteService {
      */
     Cursor find(FindOptions findOptions) {
         notNull(findOptions, errorMessage("findOptions can not be null", VE_FIND_NULL_FIND_OPTIONS));
-        return searchService.find(findOptions);
+        try {
+            readLock.lock();
+            return searchService.find(findOptions);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -345,7 +455,12 @@ public class NitriteService {
      */
     Cursor find(Filter filter, FindOptions findOptions) {
         notNull(findOptions, errorMessage("findOptions can not be null", VE_FIND_FILTERED_NULL_FIND_OPTIONS));
-        return searchService.find(filter, findOptions);
+        try {
+            readLock.lock();
+            return searchService.find(filter, findOptions);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -356,7 +471,12 @@ public class NitriteService {
      */
     Document getById(NitriteId nitriteId) {
         notNull(nitriteId, errorMessage("nitriteId can not be null", VE_GET_BY_ID_NULL_ID));
-        return dataService.getById(nitriteId);
+        try {
+            readLock.lock();
+            return dataService.getById(nitriteId);
+        } finally {
+            readLock.unlock();
+        }
     }
 
     /**
@@ -370,7 +490,12 @@ public class NitriteService {
     WriteResultImpl update(Filter filter, Document update, UpdateOptions updateOptions) {
         notNull(update, errorMessage("update document can not be null", VE_UPDATE_NULL_DOCUMENT));
         notNull(updateOptions, errorMessage("updateOptions can not be null", VE_UPDATE_NULL_UPDATE_OPTIONS));
-        return dataService.update(filter, update, updateOptions);
+        try {
+            writeLock.lock();
+            return dataService.update(filter, update, updateOptions);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -381,16 +506,26 @@ public class NitriteService {
      * @return the write result
      */
     WriteResultImpl remove(Filter filter, RemoveOptions removeOptions) {
-        return dataService.remove(filter, removeOptions);
+        try {
+            writeLock.lock();
+            return dataService.remove(filter, removeOptions);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
      * Drops a nitrite collection from the store.
      */
     void dropCollection() {
-        indexingService.dropAllIndices();
-        nitriteContext.dropCollection(mapStore.getName());
-        mapStore.getStore().removeMap(mapStore);
+        try {
+            writeLock.lock();
+            indexingService.dropAllIndices();
+            nitriteContext.dropCollection(mapStore.getName());
+            mapStore.getStore().removeMap(mapStore);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     /**
@@ -422,6 +557,10 @@ public class NitriteService {
     }
 
     private void init() {
+        this.readWriteLock = new ReentrantReadWriteLock();
+        this.readLock = this.readWriteLock.readLock();
+        this.writeLock = this.readWriteLock.writeLock();
+
         this.indexMetaService = new IndexMetaService(mapStore);
         TextIndexingService textIndexingService = getTextIndexingService();
 

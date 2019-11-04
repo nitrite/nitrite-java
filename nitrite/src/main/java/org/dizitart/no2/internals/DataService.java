@@ -46,8 +46,6 @@ class DataService {
     private final EventBus<ChangeInfo, ChangeListener> eventBus;
     private final String name;
 
-    private final Object lock = new Object();
-
     DataService(IndexingService indexingService, SearchService searchService,
                 NitriteMap<NitriteId, Document> mapStore,
                 EventBus<ChangeInfo, ChangeListener> eventBus) {
@@ -79,26 +77,24 @@ class DataService {
                 document.remove(DOC_SOURCE);
             }
 
-            synchronized (lock) {
-                Document item = new Document(document);
-                Document already = underlyingMap.putIfAbsent(nitriteId, item);
-                log.debug("Inserting document {} in {}", document, name);
+            Document item = new Document(document);
+            Document already = underlyingMap.putIfAbsent(nitriteId, item);
+            log.debug("Inserting document {} in {}", document, name);
 
-                if (already != null) {
-                    // rollback changes
-                    underlyingMap.put(nitriteId, already);
-                    log.debug("Another document already exists with id {}", nitriteId);
-                    throw new UniqueConstraintException(errorMessage("id constraint violation, " +
-                            "entry with same id already exists in " + name, UCE_CONSTRAINT_VIOLATED));
-                } else {
-                    try {
-                        indexingService.updateIndexEntry(item, nitriteId);
-                    } catch (UniqueConstraintException uce) {
-                        log.error("Unique constraint violated for the document "
-                                + document + " in " + name, uce);
-                        underlyingMap.remove(nitriteId);
-                        throw uce;
-                    }
+            if (already != null) {
+                // rollback changes
+                underlyingMap.put(nitriteId, already);
+                log.debug("Another document already exists with id {}", nitriteId);
+                throw new UniqueConstraintException(errorMessage("id constraint violation, " +
+                    "entry with same id already exists in " + name, UCE_CONSTRAINT_VIOLATED));
+            } else {
+                try {
+                    indexingService.updateIndexEntry(item, nitriteId);
+                } catch (UniqueConstraintException uce) {
+                    log.error("Unique constraint violated for the document "
+                        + document + " in " + name, uce);
+                    underlyingMap.remove(nitriteId);
+                    throw uce;
                 }
             }
 
@@ -159,34 +155,31 @@ class DataService {
             for(final Document document : cursor) {
                 if (document != null) {
                     NitriteId nitriteId = document.getId();
+                    Document oldDocument = new Document(document);
 
-                    synchronized (lock) {
-                        Document oldDocument = new Document(document);
+                    log.debug("Document to update {} in {}", document, name);
 
-                        log.debug("Document to update {} in {}", document, name);
-
-                        if (!REPLICATOR.contentEquals(update.getSource())) {
-                            update.remove(DOC_SOURCE);
-                            document.putAll(update);
-                            int rev = document.getRevision();
-                            document.put(DOC_REVISION, rev + 1);
-                            document.put(DOC_MODIFIED, System.currentTimeMillis());
-                        } else {
-                            update.remove(DOC_SOURCE);
-                            document.putAll(update);
-                        }
-
-                        Document item = new Document(document);
-                        underlyingMap.put(nitriteId, item);
-                        log.debug("Document {} updated in {}", document, name);
-
-                        // if 'update' only contains id value, affected count = 0
-                        if (update.size() > 0) {
-                            writeResult.addToList(nitriteId);
-                        }
-
-                        indexingService.refreshIndexEntry(oldDocument, item, nitriteId);
+                    if (!REPLICATOR.contentEquals(update.getSource())) {
+                        update.remove(DOC_SOURCE);
+                        document.putAll(update);
+                        int rev = document.getRevision();
+                        document.put(DOC_REVISION, rev + 1);
+                        document.put(DOC_MODIFIED, System.currentTimeMillis());
+                    } else {
+                        update.remove(DOC_SOURCE);
+                        document.putAll(update);
                     }
+
+                    Document item = new Document(document);
+                    underlyingMap.put(nitriteId, item);
+                    log.debug("Document {} updated in {}", document, name);
+
+                    // if 'update' only contains id value, affected count = 0
+                    if (update.size() > 0) {
+                        writeResult.addToList(nitriteId);
+                    }
+
+                    indexingService.refreshIndexEntry(oldDocument, item, nitriteId);
 
                     ChangedItem changedItem = new ChangedItem();
                     changedItem.setDocument(document);
@@ -221,30 +214,28 @@ class DataService {
 
         List<ChangedItem> changedItems = new ArrayList<>(cursor.size());
 
-        synchronized (lock) {
-            for (Document document : cursor) {
-                NitriteId nitriteId = document.getId();
-                indexingService.removeIndexEntry(document, nitriteId);
+        for (Document document : cursor) {
+            NitriteId nitriteId = document.getId();
+            indexingService.removeIndexEntry(document, nitriteId);
 
-                Document removed = underlyingMap.remove(nitriteId);
-                int rev = removed.getRevision();
-                removed.put(DOC_REVISION, rev + 1);
-                removed.put(DOC_MODIFIED, System.currentTimeMillis());
+            Document removed = underlyingMap.remove(nitriteId);
+            int rev = removed.getRevision();
+            removed.put(DOC_REVISION, rev + 1);
+            removed.put(DOC_MODIFIED, System.currentTimeMillis());
 
-                log.debug("Document removed {} from {}", removed, name);
+            log.debug("Document removed {} from {}", removed, name);
 
-                result.addToList(nitriteId);
+            result.addToList(nitriteId);
 
-                ChangedItem changedItem = new ChangedItem();
-                changedItem.setDocument(removed);
-                changedItem.setChangeType(ChangeType.REMOVE);
-                changedItem.setChangeTimestamp(removed.getLastModifiedTime());
-                changedItems.add(changedItem);
+            ChangedItem changedItem = new ChangedItem();
+            changedItem.setDocument(removed);
+            changedItem.setChangeType(ChangeType.REMOVE);
+            changedItem.setChangeTimestamp(removed.getLastModifiedTime());
+            changedItems.add(changedItem);
 
-                if (removeOptions.isJustOne()) {
-                    notify(ChangeType.REMOVE, changedItems);
-                    return result;
-                }
+            if (removeOptions.isJustOne()) {
+                notify(ChangeType.REMOVE, changedItems);
+                return result;
             }
         }
 

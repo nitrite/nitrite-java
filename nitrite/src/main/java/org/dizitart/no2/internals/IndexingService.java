@@ -49,8 +49,6 @@ class IndexingService {
     private final ExecutorService rebuildExecutor;
     private final TextIndexingService textIndexingService;
 
-    private final Object indexLock = new Object();
-
     IndexingService(IndexMetaService indexMetaService,
                     TextIndexingService textIndexingService,
                     NitriteContext nitriteContext) {
@@ -65,15 +63,13 @@ class IndexingService {
     void createIndex(String field, IndexType indexType, boolean isAsync) {
         Index index;
 
-        synchronized (indexLock) {
-            if (!indexMetaService.hasIndex(field)) {
-                // if no index create index
-                index = indexMetaService.createIndexMetadata(field, indexType);
-            } else {
-                // if index already there throw
-                throw new IndexingException(errorMessage(
-                        "index already exists on " + field, IE_INDEX_EXISTS));
-            }
+        if (!indexMetaService.hasIndex(field)) {
+            // if no index create index
+            index = indexMetaService.createIndexMetadata(field, indexType);
+        } else {
+            // if index already there throw
+            throw new IndexingException(errorMessage(
+                "index already exists on " + field, IE_INDEX_EXISTS));
         }
 
         try {
@@ -108,30 +104,28 @@ class IndexingService {
                         // update text index
                         textIndexingService.updateIndex(nitriteId, field, (String) fieldValue);
                     } else {
-                        synchronized (indexLock) {
-                            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
-                                    = indexMetaService.getIndexMap(field);
+                        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+                            = indexMetaService.getIndexMap(field);
 
-                            // create the nitriteId list associated with the value
-                            ConcurrentSkipListSet<NitriteId> nitriteIdList
-                                    = indexMap.get((Comparable) fieldValue);
+                        // create the nitriteId list associated with the value
+                        ConcurrentSkipListSet<NitriteId> nitriteIdList
+                            = indexMap.get((Comparable) fieldValue);
 
-                            if (nitriteIdList == null) {
-                                nitriteIdList = new ConcurrentSkipListSet<>();
-                            }
-
-                            if (indexType == IndexType.Unique && nitriteIdList.size() == 1
-                                    && !nitriteIdList.contains(nitriteId)) {
-                                // if key is already exists for unique type, throw error
-                                throw new UniqueConstraintException(errorMessage(
-                                        "unique key constraint violation for " + field,
-                                        UCE_UPDATE_INDEX_CONSTRAINT_VIOLATED));
-                            }
-
-                            // add the nitriteId to the list
-                            nitriteIdList.add(nitriteId);
-                            indexMap.put((Comparable) fieldValue, nitriteIdList);
+                        if (nitriteIdList == null) {
+                            nitriteIdList = new ConcurrentSkipListSet<>();
                         }
+
+                        if (indexType == IndexType.Unique && nitriteIdList.size() == 1
+                            && !nitriteIdList.contains(nitriteId)) {
+                            // if key is already exists for unique type, throw error
+                            throw new UniqueConstraintException(errorMessage(
+                                "unique key constraint violation for " + field,
+                                UCE_UPDATE_INDEX_CONSTRAINT_VIOLATED));
+                        }
+
+                        // add the nitriteId to the list
+                        nitriteIdList.add(nitriteId);
+                        indexMap.put((Comparable) fieldValue, nitriteIdList);
                     }
                 }
             }
@@ -211,38 +205,36 @@ class IndexingService {
                         // update text index
                         textIndexingService.updateIndex(nitriteId, field, (String) newValue);
                     } else {
-                        synchronized (indexLock) {
-                            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
-                                    = indexMetaService.getIndexMap(field);
+                        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+                            = indexMetaService.getIndexMap(field);
 
-                            // create the nitriteId list associated with the value
-                            ConcurrentSkipListSet<NitriteId> nitriteIdList
-                                    = indexMap.get((Comparable) newValue);
+                        // create the nitriteId list associated with the value
+                        ConcurrentSkipListSet<NitriteId> nitriteIdList
+                            = indexMap.get((Comparable) newValue);
 
-                            if (nitriteIdList == null) {
-                                nitriteIdList = new ConcurrentSkipListSet<>();
-                            }
+                        if (nitriteIdList == null) {
+                            nitriteIdList = new ConcurrentSkipListSet<>();
+                        }
 
-                            if (indexType == IndexType.Unique && nitriteIdList.size() == 1
-                                    && !nitriteIdList.contains(nitriteId)) {
-                                // if key is already exists for unique type, throw error
-                                throw new UniqueConstraintException(errorMessage(
-                                        "unique key constraint violation for " + field,
-                                        UCE_REFRESH_INDEX_CONSTRAINT_VIOLATED));
-                            }
+                        if (indexType == IndexType.Unique && nitriteIdList.size() == 1
+                            && !nitriteIdList.contains(nitriteId)) {
+                            // if key is already exists for unique type, throw error
+                            throw new UniqueConstraintException(errorMessage(
+                                "unique key constraint violation for " + field,
+                                UCE_REFRESH_INDEX_CONSTRAINT_VIOLATED));
+                        }
 
-                            // add the nitriteId to the list
-                            nitriteIdList.add(nitriteId);
-                            indexMap.put((Comparable) newValue, nitriteIdList);
+                        // add the nitriteId to the list
+                        nitriteIdList.add(nitriteId);
+                        indexMap.put((Comparable) newValue, nitriteIdList);
 
-                            nitriteIdList = indexMap.get((Comparable) oldValue);
-                            if (nitriteIdList != null && !nitriteIdList.isEmpty()) {
-                                nitriteIdList.remove(nitriteId);
-                                if (nitriteIdList.size() == 0) {
-                                    indexMap.remove((Comparable) oldValue);
-                                } else {
-                                    indexMap.put((Comparable) oldValue, nitriteIdList);
-                                }
+                        nitriteIdList = indexMap.get((Comparable) oldValue);
+                        if (nitriteIdList != null && !nitriteIdList.isEmpty()) {
+                            nitriteIdList.remove(nitriteId);
+                            if (nitriteIdList.size() == 0) {
+                                indexMap.remove((Comparable) oldValue);
+                            } else {
+                                indexMap.put((Comparable) oldValue, nitriteIdList);
                             }
                         }
                     }
