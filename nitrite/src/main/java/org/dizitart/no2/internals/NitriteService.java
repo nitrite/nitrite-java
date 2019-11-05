@@ -29,7 +29,6 @@ import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -80,12 +79,7 @@ public class NitriteService {
      */
     public boolean isIndexing(String field) {
         notNull(field, errorMessage("field can not be null", VE_IS_INDEXING_NULL_FIELD));
-        try {
-            readLock.lock();
-            return indexingService.isIndexing(field);
-        } finally {
-            readLock.unlock();
-        }
+        return indexingService.isIndexing(field);
     }
 
     /**
@@ -96,12 +90,7 @@ public class NitriteService {
      */
     public boolean hasIndex(String field) {
         notNull(field, errorMessage("field can not be null", VE_HAS_INDEX_NULL_FIELD));
-        try {
-            readLock.lock();
-            return indexMetaService.hasIndex(field);
-        } finally {
-            readLock.unlock();
-        }
+        return indexMetaService.hasIndex(field);
     }
 
     /**
@@ -113,7 +102,6 @@ public class NitriteService {
      */
     public Set<NitriteId> findEqualWithIndex(String field, Object value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_EQUAL_INDEX_NULL_FIELD));
-        if (value == null) return new HashSet<>();
         try {
             readLock.lock();
             return indexedSearchService.findEqual(field, value);
