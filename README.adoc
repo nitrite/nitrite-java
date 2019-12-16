@@ -316,7 +316,7 @@ image:https://opencollective.com/nitrite-database/sponsor/4/avatar.svg["Sponsor"
 https://github.com/sheinbergon[Idan Sheinberg] has given a talk on Nitrite at https://www.meetup.com/KotlinTLV/events/265145254/[**Kotlin Everywhere - TLV Edition**] meetup on October 27, 2019. Please find his presentation https://www.slideshare.net/IdanShinberg/nitrite-choosing-the-rite-embedded-database[here].
 
 == Special Thanks
-[![YourKit](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/java/profiler/)
+image:https://www.yourkit.com/images/yklogo.png["YourKit", link="https://www.yourkit.com/java/profiler/"]
 
 I highly recommend YourKit Java Profiler for any performance critical application you make.
 
