@@ -39,11 +39,11 @@ import static org.dizitart.no2.objects.filters.ObjectFilters.ALL;
 public abstract class BaseObjectRepositoryTest {
     private String fileName = getRandomTempDbFile();
     protected Nitrite db;
-    ObjectRepository<Company> companyRepository;
-    ObjectRepository<Employee> employeeRepository;
+    protected ObjectRepository<Company> companyRepository;
+    protected ObjectRepository<Employee> employeeRepository;
 
-    ObjectRepository<ClassA> aObjectRepository;
-    ObjectRepository<ClassC> cObjectRepository;
+    protected ObjectRepository<ClassA> aObjectRepository;
+    protected ObjectRepository<ClassC> cObjectRepository;
 
     @Parameterized.Parameter
     public boolean inMemory = false;

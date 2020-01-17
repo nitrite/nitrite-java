@@ -1,8 +1,9 @@
 package org.dizitart.no2;
 
-import org.dizitart.no2.mapper.Employee;
 import org.dizitart.no2.objects.BaseObjectRepositoryTest;
 import org.dizitart.no2.objects.ObjectRepository;
+import org.dizitart.no2.objects.data.Employee;
+import org.dizitart.no2.objects.data.Note;
 import org.dizitart.no2.objects.filters.ObjectFilters;
 import org.junit.Test;
 
@@ -15,17 +16,17 @@ public class EdgeCases extends BaseObjectRepositoryTest {
 
     @Test
     public void testDeleteIteratorNPE() {
-        ObjectRepository<Employee> emps = db.getRepository(Employee.class);
-        Employee one = new Employee();
-        one.setName("Jane");
-        one.setEmpId("1");
-        Employee two = new Employee();
-        two.setName("Jill");
-        two.setEmpId("2");
+        ObjectRepository<Note> notes = db.getRepository(Note.class);
+        Note one = new Note();
+        one.setText("Jane");
+        one.setNoteId(1L);
+        Note two = new Note();
+        two.setText("Jill");
+        two.setNoteId(2L);
 
-        emps.insert(one, two);
+        notes.insert(one, two);
 
-        WriteResult writeResult = emps.remove(ObjectFilters.eq("name", "Pete"));
+        WriteResult writeResult = notes.remove(ObjectFilters.eq("text", "Pete"));
         for (NitriteId id : writeResult) {
             assertNotNull(id);
         }
@@ -33,6 +34,6 @@ public class EdgeCases extends BaseObjectRepositoryTest {
 
     @Test
     public void testDelete() {
-
+        Employee employee = employeeRepository.find().firstOrDefault();
     }
 }
