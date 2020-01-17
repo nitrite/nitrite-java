@@ -206,7 +206,9 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     @Override
     public T getById(NitriteId nitriteId) {
         validateCollection();
-        Document document = new Document(collection.getById(nitriteId));
+        Document byId = collection.getById(nitriteId);
+        if (byId == null) return null;
+        Document document = new Document(byId);
         document.remove(DOC_ID);
         return nitriteMapper.asObject(document, type);
     }
