@@ -18,12 +18,12 @@
 
 buildscript {
     repositories {
-        maven { url 'http://repo.spring.io/plugins-release' }
+        maven { url 'https://repo.spring.io/plugins-release' }
         mavenCentral()
     }
     dependencies {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion"
-        classpath "org.springframework.build.gradle:propdeps-plugin:$propDepsPluginVersion"
+        classpath "io.spring.gradle:propdeps-plugin:$propDepsPluginVersion"
     }
 }
 
