@@ -158,6 +158,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     @Override
     public WriteResult remove(T element) {
+        notNull(element, errorMessage("element can not be null", VE_OBJ_REMOVE_NULL_OBJECT));
         if (idField == null) {
             throw new NotIdentifiableException(OBJ_REMOVE_FAILED_AS_NO_ID_FOUND);
         }

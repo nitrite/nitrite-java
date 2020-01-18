@@ -113,6 +113,7 @@ public class ErrorCodes {
     public static final int VE_OBJ_STORE_EMPTY_KEY = 1085;
     public static final int VE_FIND_NOT_IN_INDEX_NULL_FIELD = 1086;
     public static final int VE_FIND_NOT_IN_INDEX_NULL_VALUE = 1087;
+    public static final int VE_OBJ_REMOVE_NULL_OBJECT = 1088;
 
     /* NitriteIOException Codes */
     public static final int NIOE_DATABASE_OPENED = 2001;

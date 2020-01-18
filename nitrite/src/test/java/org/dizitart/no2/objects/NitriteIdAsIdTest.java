@@ -18,11 +18,11 @@
 
 package org.dizitart.no2.objects;
 
-import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteId;
 import org.dizitart.no2.WriteResult;
 import org.dizitart.no2.exceptions.InvalidIdException;
+import org.dizitart.no2.objects.data.WithNitriteId;
 import org.dizitart.no2.util.Iterables;
 import org.junit.After;
 import org.junit.Before;
@@ -106,10 +106,4 @@ public class NitriteIdAsIdTest {
         assertEquals(repo.size(), 1);
     }
 
-    @Data
-    private static class WithNitriteId {
-        @Id
-        private NitriteId idField;
-        private String name;
-    }
 }
