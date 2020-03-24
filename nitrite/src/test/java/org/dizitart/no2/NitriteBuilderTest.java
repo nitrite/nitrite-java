@@ -56,6 +56,7 @@ public class NitriteBuilderTest {
         builder.filePath(filePath);
         builder.textIndexingService(textIndexingService);
         builder.textTokenizer(textTokenizer);
+        builder.enableOffHeapStorage();
 
         Nitrite db = builder.openOrCreate();
         NitriteContext context = db.getContext();

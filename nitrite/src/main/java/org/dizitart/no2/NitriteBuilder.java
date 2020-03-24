@@ -109,6 +109,7 @@ public class NitriteBuilder {
     private boolean autoCommit = true;
     private boolean autoCompact = true;
     private boolean shutdownHook = true;
+    private boolean offHeapStorage = false;
     private TextIndexingService textIndexingService;
     private TextTokenizer textTokenizer;
     private NitriteMapper nitriteMapper;
@@ -332,6 +333,17 @@ public class NitriteBuilder {
         return this;
     }
 
+
+    /**
+     * Enables off-heap storage for in-memory database.
+     *
+     * @return the {@link NitriteBuilder} instance.
+     * */
+    public NitriteBuilder enableOffHeapStorage() {
+        this.offHeapStorage = true;
+        return this;
+    }
+
     /**
      * Opens or creates a new database. If it is an in-memory store, then it
      * will create a new one. If it is a file based store, and if the file does not
@@ -429,8 +441,7 @@ public class NitriteBuilder {
             builder = builder.autoCommitDisabled();
         }
 
-        if (isNullOrEmpty(filePath)) {
-            // for in memory store use off heap storage
+        if (isNullOrEmpty(filePath) && offHeapStorage) {
             builder = builder.fileStore(new OffHeapStore());
         }
 
