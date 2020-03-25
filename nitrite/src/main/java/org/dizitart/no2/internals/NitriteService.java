@@ -102,12 +102,7 @@ public class NitriteService {
      */
     public Set<NitriteId> findEqualWithIndex(String field, Object value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_EQUAL_INDEX_NULL_FIELD));
-        try {
-            readLock.lock();
-            return indexedSearchService.findEqual(field, value);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findEqual(field, value);
     }
 
     /**
@@ -120,12 +115,7 @@ public class NitriteService {
     public Set<NitriteId> findGreaterThanWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_GT_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_GT_INDEX_NULL_VALUE));
-        try {
-            readLock.lock();
-            return indexedSearchService.findGreaterThan(field, value);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findGreaterThan(field, value);
     }
 
     /**
@@ -138,12 +128,7 @@ public class NitriteService {
     public Set<NitriteId> findGreaterEqualWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_GTE_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_GTE_INDEX_NULL_VALUE));
-        try {
-            readLock.lock();
-            return indexedSearchService.findGreaterEqual(field, value);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findGreaterEqual(field, value);
     }
 
     /**
@@ -156,12 +141,7 @@ public class NitriteService {
     public Set<NitriteId> findLesserThanWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_LT_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_LT_INDEX_NULL_VALUE));
-        try {
-            readLock.lock();
-            return indexedSearchService.findLesserThan(field, value);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findLesserThan(field, value);
     }
 
     /**
@@ -174,12 +154,7 @@ public class NitriteService {
     public Set<NitriteId> findLesserEqualWithIndex(String field, Comparable value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_LTE_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_LTE_INDEX_NULL_VALUE));
-        try {
-            readLock.lock();
-            return indexedSearchService.findLesserEqual(field, value);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findLesserEqual(field, value);
     }
 
     /**
@@ -192,12 +167,7 @@ public class NitriteService {
     public Set<NitriteId> findInWithIndex(String field, Collection<Object> values) {
         notNull(field, errorMessage("field can not be null", VE_FIND_IN_INDEX_NULL_FIELD));
         notNull(values, errorMessage("values can not be null", VE_FIND_IN_INDEX_NULL_VALUE));
-        try {
-            readLock.lock();
-            return indexedSearchService.findIn(field, values);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findIn(field, values);
     }
 
     /**
@@ -210,12 +180,7 @@ public class NitriteService {
     public Set<NitriteId> findNotInWithIndex(String field, Collection<Object> values) {
         notNull(field, errorMessage("field can not be null", VE_FIND_NOT_IN_INDEX_NULL_FIELD));
         notNull(values, errorMessage("values can not be null", VE_FIND_NOT_IN_INDEX_NULL_VALUE));
-        try {
-            readLock.lock();
-            return indexedSearchService.findNotIn(field, values);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findNotIn(field, values);
     }
 
     /**
@@ -228,12 +193,7 @@ public class NitriteService {
     public Set<NitriteId> findTextWithIndex(String field, String value) {
         notNull(field, errorMessage("field can not be null", VE_FIND_TEXT_INDEX_NULL_FIELD));
         notNull(value, errorMessage("value can not be null", VE_FIND_TEXT_INDEX_NULL_VALUE));
-        try {
-            readLock.lock();
-            return indexedSearchService.findText(field, value);
-        } finally {
-            readLock.unlock();
-        }
+        return indexedSearchService.findText(field, value);
     }
 
     /**

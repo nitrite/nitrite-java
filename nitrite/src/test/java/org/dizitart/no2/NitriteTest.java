@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.filters.Filters;
 import org.dizitart.no2.objects.Id;
 import org.dizitart.no2.objects.Index;
 import org.dizitart.no2.objects.Indices;
@@ -358,6 +359,30 @@ public class NitriteTest {
         latch.await();
         assertTrue(repository.find().size() <= 5);
     }
+
+    @Test
+    public void testIssue212() {
+        NitriteCollection collection = db.getCollection("test");
+        Document doc1 = createDocument("key", "key").put("second_key", "second_key").put("third_key", "third_key");
+        Document doc2 = createDocument("key", "key").put("second_key", "second_key").put("fourth_key", "fourth_key");
+        Document doc = createDocument("fifth_key", "fifth_key");
+
+        if(!collection.hasIndex("key")){
+            collection.createIndex("key", IndexOptions.indexOptions(IndexType.NonUnique));
+        }
+        if(!collection.hasIndex("second_key")){
+            collection.createIndex("second_key", IndexOptions.indexOptions(IndexType.NonUnique));
+        }
+
+        collection.insert(doc1, doc2);
+        collection.update(Filters.and(Filters.eq("key", "key"),
+            Filters.eq("second_key", "second_key")), doc, UpdateOptions.updateOptions(true));
+
+        for (Document document : collection.find()) {
+            System.out.println(document);
+        }
+    }
+
 
     @Data
     @NoArgsConstructor
