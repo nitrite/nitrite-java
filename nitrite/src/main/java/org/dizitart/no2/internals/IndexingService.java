@@ -203,6 +203,7 @@ class IndexingService {
 
                     if (indexType == IndexType.Fulltext && newValue instanceof String) {
                         // update text index
+                        textIndexingService.deleteIndex(nitriteId, field, (String) oldValue);
                         textIndexingService.updateIndex(nitriteId, field, (String) newValue);
                     } else {
                         NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap

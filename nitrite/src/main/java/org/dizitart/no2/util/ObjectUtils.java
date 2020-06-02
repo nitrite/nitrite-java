@@ -186,9 +186,9 @@ public class ObjectUtils {
     public static boolean isObjectStore(String collectionName) {
         try {
             if (isNullOrEmpty(collectionName)) return false;
-            Class clazz = Class.forName(collectionName);
-            return clazz != null;
-        } catch (ClassNotFoundException e) {
+            Class.forName(collectionName);
+            return true;
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
             return isKeyedObjectStore(collectionName);
         }
     }
@@ -209,9 +209,9 @@ public class ObjectUtils {
                 return false;
             }
             String storeName = split[0];
-            Class clazz = Class.forName(storeName);
-            return clazz != null;
-        } catch (ClassNotFoundException e) {
+            Class.forName(storeName);
+            return true;
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
             return false;
         }
     }

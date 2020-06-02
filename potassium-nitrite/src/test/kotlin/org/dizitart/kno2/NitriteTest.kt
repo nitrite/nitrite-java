@@ -18,6 +18,7 @@
 
 package org.dizitart.kno2
 
+import org.dizitart.no2.IndexOptions
 import org.dizitart.no2.IndexType
 import org.dizitart.no2.NullOrder
 import org.dizitart.no2.SortOrder
@@ -26,6 +27,7 @@ import org.dizitart.no2.objects.Id
 import org.dizitart.no2.objects.Index
 import org.dizitart.no2.objects.Indices
 import org.dizitart.no2.objects.InheritIndices
+import org.dizitart.no2.objects.filters.ObjectFilters
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -161,6 +163,26 @@ class NitriteTest : BaseTest() {
         repository.insert(ClassWithLocalDateTime("test", LocalDateTime.now()))
         assertNotNull(repository.find())
     }
+
+    @Test
+    fun testIssue222() {
+        val first = NestedObjects("value1", "1", listOf(TempObject("name-1", 42,LevelUnder("street", 12))))
+        val repository = db?.getRepository<NestedObjects>()!!
+        repository.insert(first)
+
+        repository.createIndex("ob1", IndexOptions.indexOptions(IndexType.Fulltext));
+        var found = repository.find(ObjectFilters.text("ob1", "value1"))
+        assertTrue(found.idSet().isNotEmpty())
+
+        first.ob1 = "value2"
+        repository.update(first)
+
+        found = repository.find(ObjectFilters.text("ob1", "value2"))
+        assertTrue(found.idSet().isNotEmpty())
+
+        found = repository.find(ObjectFilters.text("ob1", "value1"))
+        assertTrue(found.idSet().isEmpty())
+    }
 }
 
 interface MyInterface {
@@ -199,3 +221,8 @@ data class ClassWithLocalDateTime (
         val name: String,
         val time: LocalDateTime
 )
+
+data class NestedObjects(var ob1:String, @Id val id: String, val list: List<TempObject>)
+
+data class TempObject(val name:String, val aga:Int, val add:LevelUnder)
+data class LevelUnder(val street:String, val number:Int)

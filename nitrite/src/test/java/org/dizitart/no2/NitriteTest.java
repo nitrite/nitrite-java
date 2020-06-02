@@ -383,6 +383,28 @@ public class NitriteTest {
         }
     }
 
+    @Test
+    public void testIssue220() {
+        NitriteCollection collection = db.getCollection("object");
+        collection.drop();
+        collection = db.getCollection("object");
+        Document doc1 = createDocument("key", "key").put("second_key", "second_key").put("third_key", "third_key");
+        Document doc2 = createDocument("key", "key").put("second_key", "second_key").put("fourth_key", "fourth_key");
+        Document doc = createDocument("fifth_key", "fifth_key");
+        
+        collection.insert(doc1, doc2, doc);
+        db.close();
+
+        db = new NitriteBuilder()
+            .filePath(fileName)
+            .compressed()
+            .openOrCreate("test-user", "test-password");
+        collection = db.getCollection("object");
+        Cursor documents = collection.find(Filters.eq("fifth_key", "fifth_key"));
+        assertEquals(1, documents.size());
+        assertEquals(doc, documents.firstOrDefault());
+    }
+
 
     @Data
     @NoArgsConstructor
