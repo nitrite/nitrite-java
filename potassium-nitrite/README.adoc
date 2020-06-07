@@ -27,7 +27,7 @@ To use potassium-nitrite in any kotlin application, just add the below dependenc
 
 [source,groovy,subs="verbatim,attributes"]
 ----
-compile 'org.dizitart:potassium-nitrite:{version}'
+implementation 'org.dizitart:potassium-nitrite:{version}'
 ----
 
 === Usage
