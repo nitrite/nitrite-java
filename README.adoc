@@ -64,7 +64,7 @@ To use Nitrite in any Java application, just add the below dependency:
 
 [source,groovy,subs="verbatim,attributes"]
 ----
-compile 'org.dizitart:nitrite:{version}'
+implementation 'org.dizitart:nitrite:{version}'
 ----
 
 <<<
