@@ -1,4 +1,0 @@
-Nitrite supports two types of collections
-
-* NitriteCollection - for storing Documents
-* ObjectRepository - for storing java objects

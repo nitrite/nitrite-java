@@ -1,36 +1,35 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.meta.Attributes;
+import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.ReadableStream;
 import org.h2.mvstore.MVMap;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
-import static org.dizitart.no2.Constants.META_MAP_NAME;
-import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
+import static org.dizitart.no2.common.Constants.META_MAP_NAME;
+import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
- * A {@link MVMap} backed {@link NitriteMap} implementation.
- *
  * @since 1.0
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
  */
 class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     private final MVMap<Key, Value> mvMap;
@@ -68,8 +67,8 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public Collection<Value> values() {
-        return mvMap.values();
+    public ReadableStream<Value> values() {
+        return ReadableStream.fromIterable(mvMap.values());
     }
 
     @Override
@@ -79,8 +78,8 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public Set<Key> keySet() {
-        return mvMap.keySet();
+    public ReadableStream<Key> keySet() {
+        return ReadableStream.fromIterable(mvMap.keySet());
     }
 
     @Override
@@ -90,24 +89,32 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public int size() {
-        return mvMap.size();
-    }
-
-    @Override
-    public long sizeAsLong() {
+    public long size() {
         return mvMap.sizeAsLong();
     }
 
     @Override
-    public Value putIfAbsent(Key nitriteId, Value document) {
+    public Value putIfAbsent(Key key, Value value) {
         updateAttributes();
-        return mvMap.putIfAbsent(nitriteId, document);
+        return mvMap.putIfAbsent(key, value);
     }
 
     @Override
-    public Set<Map.Entry<Key, Value>> entrySet() {
-        return mvMap.entrySet();
+    public ReadableStream<KeyValuePair<Key, Value>> entries() {
+        return () -> new Iterator<KeyValuePair<Key, Value>>() {
+            final Iterator<Map.Entry<Key, Value>> entryIterator = mvMap.entrySet().iterator();
+
+            @Override
+            public boolean hasNext() {
+                return entryIterator.hasNext();
+            }
+
+            @Override
+            public KeyValuePair<Key, Value> next() {
+                Map.Entry<Key, Value> entry = entryIterator.next();
+                return new KeyValuePair<>(entry.getKey(), entry.getValue());
+            }
+        };
     }
 
     @Override
@@ -136,13 +143,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public List<Key> keyList() {
-        return mvMap.keyList();
+    public void drop() {
+        nitriteStore.removeMap(getName());
     }
 
     @Override
     public Attributes getAttributes() {
-        NitriteMap<String, Attributes> metaMap = nitriteStore.metaMap();
+        NitriteMap<String, Attributes> metaMap = nitriteStore.openMap(META_MAP_NAME);
         if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
             return metaMap.get(getName());
         }
@@ -151,28 +158,24 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void setAttributes(Attributes attributes) {
-        NitriteMap<String, Attributes> metaMap = nitriteStore.metaMap();
+        NitriteMap<String, Attributes> metaMap = nitriteStore.openMap(META_MAP_NAME);
         if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
             metaMap.put(getName(), attributes);
         }
     }
 
-    MVMap<Key, Value> getUnderlyingMVMap() {
-        return mvMap;
-    }
-
     private void updateAttributes() {
         if (isNullOrEmpty(getName())
-                || META_MAP_NAME.equals(getName())) return;
+            || META_MAP_NAME.equals(getName())) return;
 
-        NitriteMap<String, Attributes> metaMap = nitriteStore.metaMap();
+        NitriteMap<String, Attributes> metaMap = nitriteStore.openMap(META_MAP_NAME);
         if (metaMap != null) {
             Attributes attributes = metaMap.get(getName());
             if (attributes == null) {
                 attributes = new Attributes(getName());
                 metaMap.put(getName(), attributes);
             }
-            attributes.setLastModifiedTime(System.currentTimeMillis());
+            attributes.set(Attributes.LAST_MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
         }
     }
 }

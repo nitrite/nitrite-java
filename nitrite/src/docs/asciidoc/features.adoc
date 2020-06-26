@@ -1,9 +1,0 @@
-* Embedded key-value/document and object store
-* In-memory (on/off)-heap store
-* Single file store
-* Very fast and lightweight MongoDB like API
-* Indexing
-* Full text search capability
-* Full Android compatibility (API Level 19)
-* Observable store
-* Both way replication via Nitrite DataGate server

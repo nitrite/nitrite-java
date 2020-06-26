@@ -1,1 +1,0 @@
-CRUD operations create, read, update, and delete documents/objects in collections.

@@ -1,1 +1,0 @@
-Nitrite comes with several tools for various database operations.

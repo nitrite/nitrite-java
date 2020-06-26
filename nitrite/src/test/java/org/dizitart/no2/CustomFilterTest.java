@@ -1,30 +1,26 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.dizitart.no2;
 
-import org.dizitart.no2.filters.BaseFilter;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
-import java.util.Set;
-
-import static org.dizitart.no2.IndexOptions.indexOptions;
+import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -36,14 +32,10 @@ public class CustomFilterTest extends BaseCollectionTest {
     public void testCustomFilter() {
         insert();
         collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
-        Cursor cursor = collection.find(new BaseFilter() {
-            @Override
-            public Set<NitriteId> apply(NitriteMap<NitriteId, Document> documentMap) {
-                return nitriteService.findEqualWithIndex("firstName", "fn1");
-            }
-        });
+        DocumentCursor cursor = collection.find(element -> element.getValue().get("firstName", String.class)
+            .equalsIgnoreCase("FN1"));
 
         assertEquals(cursor.size(), 1);
-        assertEquals(cursor.firstOrDefault().get("firstName"), "fn1");
+        assertEquals(cursor.firstOrNull().get("firstName"), "fn1");
     }
 }

@@ -1,4 +1,0 @@
-For any detail information or when in doubt please consult the http://javadoc.io/doc/org.dizitart/nitrite/[javadoc].
-This is not one of those plain old vanilla javadoc, it is heavily attributed with lots of example and gotchas.
-
-TIP: Click the icon:file-code-o[] icon next to a class name in the document to go directly to corresponding javadoc.

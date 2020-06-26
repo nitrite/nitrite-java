@@ -1,6 +1,0 @@
-include::/src/docs/asciidoc/intro.adoc[]
-
-=== Features
-
-include::/src/docs/asciidoc/features.adoc[]
-

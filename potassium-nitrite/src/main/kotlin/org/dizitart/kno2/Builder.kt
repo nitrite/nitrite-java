@@ -1,29 +1,28 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.dizitart.kno2
 
-import com.fasterxml.jackson.databind.Module
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.NitriteBuilder
-import org.dizitart.no2.fulltext.TextIndexingService
-import org.dizitart.no2.fulltext.TextTokenizer
-import org.dizitart.no2.mapper.NitriteMapper
+import org.dizitart.no2.NitriteConfig
+import org.dizitart.no2.module.NitriteModule
+import org.dizitart.no2.module.NitriteModule.module
+import org.dizitart.no2.spatial.SpatialIndexer
+import org.dizitart.no2.store.events.StoreEventListener
 import java.io.File
 
 /**
@@ -33,7 +32,8 @@ import java.io.File
  * @author Anindya Chatterjee
  */
 class Builder internal constructor() {
-    private val jacksonModules = mutableSetOf<Module>()
+    private val modules = mutableSetOf<NitriteModule>()
+    private val listeners = mutableSetOf<StoreEventListener>()
 
     /**
      * Path for the file based store.
@@ -83,69 +83,73 @@ class Builder internal constructor() {
     var autoCompact = true
 
     /**
-     * Specifies a custom [TextIndexingService] implementation to be used
-     * during full text indexing and full text search. If not set, the default
-     * text indexer will be used.
+     * Sets the thread pool shutdown timeout in seconds. Default value
+     * is 5s.
      */
-    var textIndexingService: TextIndexingService? = null
+    var poolShutdownTimeout = 5
 
     /**
-     * Specifies a custom [TextTokenizer] for the in-built [TextIndexingService].
-     * If not set, a default text tokenizer [org.dizitart.no2.fulltext.EnglishTextTokenizer]
-     * is used. The default tokenizer works on english language only.
+     * Enables off-heap storage for in-memory database.
      */
-    var textTokenizer: TextTokenizer? = null
+    var offHeapStorage = false;
 
     /**
-     * Specifies a custom [NitriteMapper] implementation. If not set, a default
-     * jackson based mapper [KNO2JacksonMapper] will be used.
-     */
-    var nitriteMapper: NitriteMapper? = null
-
-    /**
-     * Disables JVM shutdown hook for closing the database gracefully.
-     * */
-    var disableShutdownHook: Boolean = false
-
-    /**
-     * Registers a jackson [Module] to the [KNO2JacksonFacade]
+     * Specifies the separator character for embedded field.
+     * Default value is `.`
      *
-     * @param [module] jackson [Module] to register
      * */
-    fun registerModule(module: Module) {
-        jacksonModules.add(module)
+    var fieldSeparator: String = NitriteConfig.getFieldSeparator()
+
+    /**
+     * Loads [NitriteModule] instances.
+     * */
+    fun loadModule(module: NitriteModule) {
+        modules.add(module)
     }
 
-    internal fun createNitriteBuilder() : NitriteBuilder {
-        val builder = Nitrite.builder()
+    /**
+     * Adds a [StoreEventListener] instance and subscribe it to store event.
+     * */
+    fun addStoreEventListener(listener: StoreEventListener) {
+        listeners.add(listener)
+    }
+
+    internal fun createNitriteBuilder(): NitriteBuilder {
+        val builder = NitriteBuilder.get()
         if (file != null) {
             builder.filePath(file)
         } else {
             builder.filePath(path)
         }
         builder.autoCommitBufferSize(autoCommitBufferSize)
-        builder.textIndexingService(textIndexingService)
-        builder.textTokenizer(textTokenizer)
 
-        if (nitriteMapper == null) {
-            nitriteMapper = if (jacksonModules.isEmpty()) {
-                KNO2JacksonMapper()
-            } else {
-                KNO2JacksonMapper(jacksonModules)
-            }
-        }
-        builder.nitriteMapper(nitriteMapper)
+        modules.forEach { builder.loadModule(it) }
+        loadDefaultPlugins(builder)
+
+        builder.fieldSeparator(fieldSeparator)
 
         if (readOnly) builder.readOnly()
         if (compress) builder.compressed()
         if (!autoCommit) builder.disableAutoCommit()
         if (!autoCompact) builder.disableAutoCompact()
-        if (disableShutdownHook) builder.disableShutdownHook()
-        if (jacksonModules.isNotEmpty()) {
-            jacksonModules.forEach { builder.registerModule(it) }
-        }
+        if (offHeapStorage) builder.enableOffHeapStorage()
+
+        listeners.forEach { builder.addStoreEventListener(it) }
 
         return builder
+    }
+
+    private fun loadDefaultPlugins(builder: NitriteBuilder) {
+        val mapperFound = modules.any { module -> module.plugins().any { it is KNO2JacksonMapper } }
+        val spatialIndexerFound = modules.any { module -> module.plugins().any { it is SpatialIndexer } }
+
+        if (!mapperFound && spatialIndexerFound) {
+            builder.loadModule(module(KNO2JacksonMapper()))
+        } else if (!spatialIndexerFound && mapperFound) {
+            builder.loadModule(module(SpatialIndexer()))
+        } else if (!mapperFound && !spatialIndexerFound) {
+            builder.loadModule(KNO2Module())
+        }
     }
 }
 
@@ -160,7 +164,7 @@ class Builder internal constructor() {
  * @return the nitrite database instance.
  */
 fun nitrite(userId: String? = null, password: String? = null,
-            op: (Builder.() -> Unit)? = null) : Nitrite {
+            op: (Builder.() -> Unit)? = null): Nitrite {
     val builder = Builder()
     op?.invoke(builder)
     val nitriteBuilder = builder.createNitriteBuilder()

@@ -1,4 +1,0 @@
-The Nitrite
-icon:file-code-o[link="http://static.javadoc.io/org.dizitart/nitrite/{version}/org/dizitart/no2/Nitrite.html", window="_blank"]
-class provides several methods to create, query, close or compact a nitrite
-database.

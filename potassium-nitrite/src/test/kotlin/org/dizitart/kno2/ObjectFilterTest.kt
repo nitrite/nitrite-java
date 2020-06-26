@@ -1,33 +1,33 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.*
-import org.dizitart.no2.IndexType
-import org.dizitart.no2.objects.Id
-import org.dizitart.no2.objects.Index
-import org.dizitart.no2.objects.Indices
-import org.dizitart.no2.objects.filters.ObjectFilters
-import org.junit.Assert
+import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.repository.annotations.Id
+import org.dizitart.no2.repository.annotations.Index
+import org.dizitart.no2.repository.annotations.Indices
+import org.dizitart.no2.spatial.SpatialIndexer
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.locationtech.jts.geom.Geometry
+import org.locationtech.jts.geom.Point
+import org.locationtech.jts.io.WKTReader
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -51,10 +51,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "red"), TestData(2, "yellow"))
 
             var cursor = find(TestData::id eq 1)
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
 
             cursor = find(TestData::id eq 3)
-            Assert.assertEquals(cursor.size(), 0)
+            assertEquals(cursor.size(), 0)
         }
     }
 
@@ -64,10 +64,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "red"), TestData(2, "yellow"))
 
             var cursor = find(TestData::id gt 1)
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
 
             cursor = find(TestData::id gt 2)
-            Assert.assertEquals(cursor.size(), 0)
+            assertEquals(cursor.size(), 0)
         }
     }
 
@@ -77,10 +77,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "red"), TestData(2, "yellow"))
 
             var cursor = find(TestData::id gte 1)
-            Assert.assertEquals(cursor.size(), 2)
+            assertEquals(cursor.size(), 2)
 
             cursor = find(TestData::id gte 2)
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
         }
     }
 
@@ -90,10 +90,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "red"), TestData(2, "yellow"))
 
             var cursor = find(TestData::id lt 1)
-            Assert.assertEquals(cursor.size(), 0)
+            assertEquals(cursor.size(), 0)
 
             cursor = find(TestData::id lt 2)
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
         }
     }
 
@@ -103,10 +103,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "red"), TestData(2, "yellow"))
 
             var cursor = find(TestData::id lte 2)
-            Assert.assertEquals(cursor.size(), 2)
+            assertEquals(cursor.size(), 2)
 
             cursor = find(TestData::id lte 1)
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
         }
     }
 
@@ -116,10 +116,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "red"), TestData(2, "yellow"))
 
             var cursor = find(TestData::id within 1..2)
-            Assert.assertEquals(cursor.size(), 2)
+            assertEquals(cursor.size(), 2)
 
             cursor = find(TestData::id within arrayOf(2, 3))
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
         }
     }
 
@@ -127,13 +127,13 @@ class ObjectFilterTest : BaseTest() {
     fun testElemMatch() {
         db?.getRepository<TestData> {
             insert(TestData(1, "red", list = listOf(ListData("a", 1), ListData("b", 2))),
-                    TestData(2, "yellow", list = listOf(ListData("a", 9), ListData("b", 10))))
+                TestData(2, "yellow", list = listOf(ListData("a", 9), ListData("b", 10))))
 
             var cursor = find(TestData::list elemMatch (ListData::score eq 4))
-            Assert.assertEquals(cursor.size(), 0)
+            assertEquals(cursor.size(), 0)
 
             cursor = find(TestData::list elemMatch (ListData::name eq "b"))
-            Assert.assertEquals(cursor.size(), 2)
+            assertEquals(cursor.size(), 2)
         }
     }
 
@@ -143,10 +143,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "lorem ipsum dolor"), TestData(2, "quick brown fox"))
 
             var cursor = find(TestData::text text "*u*")
-            Assert.assertEquals(cursor.size(), 2)
+            assertEquals(cursor.size(), 2)
 
             cursor = find(TestData::text text "u*")
-            Assert.assertEquals(cursor.size(), 0)
+            assertEquals(cursor.size(), 0)
         }
     }
 
@@ -156,10 +156,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "lorem"), TestData(2, "12345"))
 
             var cursor = find(TestData::text regex "[a-z]+")
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
 
             cursor = find(TestData::text regex "[0-9]+")
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
         }
     }
 
@@ -169,10 +169,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "lorem"), TestData(2, "12345"))
 
             var cursor = find((TestData::id eq 1) and (TestData::text text "lorem"))
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
 
             cursor = find((TestData::id eq 1) and (TestData::text text "12345"))
-            Assert.assertEquals(cursor.size(), 0)
+            assertEquals(cursor.size(), 0)
         }
     }
 
@@ -182,10 +182,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "lorem"), TestData(2, "12345"))
 
             var cursor = find((TestData::id eq 1) or (TestData::text text "12345"))
-            Assert.assertEquals(cursor.size(), 2)
+            assertEquals(cursor.size(), 2)
 
             cursor = find((TestData::id eq 3) or (TestData::text text "123456"))
-            Assert.assertEquals(cursor.size(), 0)
+            assertEquals(cursor.size(), 0)
         }
     }
 
@@ -195,10 +195,10 @@ class ObjectFilterTest : BaseTest() {
             insert(TestData(1, "red"), TestData(2, "yellow"))
 
             var cursor = find(!(TestData::id lt 1))
-            Assert.assertEquals(cursor.size(), 2)
+            assertEquals(cursor.size(), 2)
 
             cursor = find(!(TestData::id lt 2))
-            Assert.assertEquals(cursor.size(), 1)
+            assertEquals(cursor.size(), 1)
         }
     }
 
@@ -211,16 +211,14 @@ class ObjectFilterTest : BaseTest() {
         val latch = CountDownLatch(100)
 
         repository.update(SimpleObject(
-                uuid,
-                true
+            uuid,
+            true
         ), true)
 
-        for(i in 0..100) {
+        for (i in 0..100) {
             executor.submit {
                 val simpleObject = try {
-                    repository.find(
-                            ObjectFilters.eq(SimpleObject::id.name, uuid)
-                    ).first()
+                    repository.find(SimpleObject::id.name eq uuid).first()
                 } catch (t: Throwable) {
                     t.printStackTrace()
                     latch.countDown()
@@ -228,15 +226,14 @@ class ObjectFilterTest : BaseTest() {
                 }
 
                 repository.update(simpleObject.copy(
-                        value = !simpleObject.value
+                    value = !simpleObject.value
                 ))
 
                 executor.submit {
                     try {
-                        val result = repository.find(
-                                ObjectFilters.eq(SimpleObject::id.name, uuid)
-                        )
-                        assertEquals(result.totalCount(), 1)
+                        val result = repository
+                            .find(SimpleObject::id.name eq uuid)
+                        assertEquals(result.size(), 1)
                     } catch (t: Throwable) {
                         t.printStackTrace()
                     } finally {
@@ -246,6 +243,80 @@ class ObjectFilterTest : BaseTest() {
             }
         }
         latch.await()
+    }
+
+    @Test
+    fun testIntersects() {
+        val reader = WKTReader()
+        val search = reader.read("POLYGON ((490 490, 536 490, 536 515, 490 515, 490 490))")
+
+        db?.getRepository<SpatialData> {
+            val object1 = SpatialData(1L, reader.read("POINT(500 505)"))
+            val object2 = SpatialData(2L, reader.read("LINESTRING(550 551, 525 512, 565 566)"))
+            val object3 = SpatialData(3L, reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
+
+            insert(object1, object2, object3)
+
+            val cursor = find(SpatialData::geometry intersects search)
+            assertEquals(cursor.size(), 2)
+            assertEquals(cursor.toList(), listOf(object1, object2))
+        }
+    }
+
+    @Test
+    fun testGeoWithin() {
+        val reader = WKTReader()
+        val search = reader.read("POLYGON ((490 490, 536 490, 536 515, 490 515, 490 490))")
+
+        db?.getRepository<SpatialData> {
+            val object1 = SpatialData(1L, reader.read("POINT(500 505)"))
+            val object2 = SpatialData(2L, reader.read("LINESTRING(550 551, 525 512, 565 566)"))
+            val object3 = SpatialData(3L, reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
+
+            insert(object1, object2, object3)
+
+            val cursor = find(SpatialData::geometry within search)
+            assertEquals(cursor.size().toLong(), 1)
+            assertEquals(cursor.toList(), listOf(object1))
+        }
+    }
+
+    @Test
+    fun testNearPoint() {
+        val reader = WKTReader()
+        val search = reader.read("POINT (490 490)") as Point
+
+        db?.getRepository<SpatialData> {
+            val object1 = SpatialData(1L, reader.read("POINT(500 505)"))
+            val object2 = SpatialData(2L, reader.read("LINESTRING(550 551, 525 512, 565 566)"))
+            val object3 = SpatialData(3L, reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
+
+            insert(object1, object2, object3)
+
+            val cursor = find(SpatialData::geometry.near(search, 20.0))
+            assertEquals(cursor.size().toLong(), 1)
+            assertEquals(cursor.toList(), listOf(object1))
+        }
+    }
+
+
+    @Test
+    fun testNearCoordinate() {
+        val reader = WKTReader()
+        val search = reader.read("POINT (490 490)") as Point
+        val coordinate = search.coordinate
+
+        db?.getRepository<SpatialData> {
+            val object1 = SpatialData(1L, reader.read("POINT(500 505)"))
+            val object2 = SpatialData(2L, reader.read("LINESTRING(550 551, 525 512, 565 566)"))
+            val object3 = SpatialData(3L, reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
+
+            insert(object1, object2, object3)
+
+            val cursor = find(SpatialData::geometry.near(coordinate, 20.0))
+            assertEquals(cursor.size(), 1)
+            assertEquals(cursor.toList(), listOf(object1))
+        }
     }
 }
 
@@ -257,5 +328,11 @@ class ListData(val name: String, val score: Int)
 data class SimpleObject(
         @Id val id: UUID,
         val value: Boolean
+)
+
+@Index(value = "geometry", type = SpatialIndexer.SpatialIndex)
+data class SpatialData(
+        @Id val id: Long,
+        val geometry: Geometry
 )
 

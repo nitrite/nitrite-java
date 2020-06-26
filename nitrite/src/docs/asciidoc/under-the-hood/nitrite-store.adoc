@@ -1,8 +1,0 @@
-NitriteStore
-icon:file-code-o[link="http://static.javadoc.io/org.dizitart/nitrite/{version}/org/dizitart/no2/store/NitriteStore.html", window="_blank"]
-is a storage abstraction layer of Nitrite database. Currently it uses h2 database's
-http://www.h2database.com/html/mvstore.html[MVStore, window="_blank"] as the underlying
-storage implementation.
-
-NitriteStore houses NitriteMaps in itself which are the building block of database
-collections.

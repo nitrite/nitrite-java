@@ -1,33 +1,35 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.dizitart.no2;
 
 import lombok.Data;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.repository.annotations.Index;
+import org.dizitart.no2.repository.annotations.Indices;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.objects.Index;
-import org.dizitart.no2.objects.Indices;
-import org.dizitart.no2.objects.ObjectRepository;
-import org.dizitart.no2.objects.filters.ObjectFilters;
+import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -47,19 +49,17 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Anindya Chatterjee
  */
-@Ignore
 public class StressTest {
-    private String fileName = getRandomTempDbFile();
+    private final String fileName = getRandomTempDbFile();
     private Nitrite db;
     private NitriteCollection collection;
 
     @Before
     public void before() {
-        db = Nitrite
-                .builder()
-                .compressed()
-                .filePath(fileName)
-                .openOrCreate();
+        db = NitriteBuilder.get()
+            .compressed()
+            .filePath(fileName)
+            .openOrCreate();
         collection = db.getCollection("test");
         System.out.println(fileName);
     }
@@ -74,9 +74,9 @@ public class StressTest {
         AtomicLong counter = new AtomicLong(System.currentTimeMillis());
         PodamFactory factory = new PodamFactoryImpl();
 
-        long start= System.currentTimeMillis();
-        for (int i = 0; i < 1000000; i++) {
-            Document doc = new Document();
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) {
+            Document doc = Document.createDocument();
             doc.put("number", random.nextDouble());
             doc.put("name", factory.manufacturePojo(String.class));
             doc.put("counter", counter.getAndIncrement());
@@ -91,12 +91,13 @@ public class StressTest {
             db.commit();
         }
 
-        start= System.currentTimeMillis();
-        Cursor cursor = collection.find();
+        start = System.currentTimeMillis();
+        DocumentCursor cursor = collection.find();
         System.out.println("Size ->" + cursor.size());
         System.out.println("Records size calculated in " + ((System.currentTimeMillis() - start) / (1000)) + " seconds");
 
         int i = 0;
+        start = System.currentTimeMillis();
         for (Document element : cursor) {
             assertNotNull(element);
             i++;
@@ -104,6 +105,7 @@ public class StressTest {
                 System.out.println(i + " entries processed");
             }
         }
+        System.out.println("Iteration completed in " + ((System.currentTimeMillis() - start) / (1000)) + " seconds");
     }
 
     @After
@@ -125,7 +127,7 @@ public class StressTest {
             assertNotNull(item);
             repo.insert(item);
         }
-        repo.remove(ObjectFilters.ALL);
+        repo.remove(Filter.ALL);
         repo.drop();
 
         // actual calculation
@@ -138,7 +140,7 @@ public class StressTest {
         System.out.println("Time take to insert 10000 indexed items - " + diff + "ms");
 
         start = System.currentTimeMillis();
-        repo.remove(ObjectFilters.ALL);
+        repo.remove(Filter.ALL);
         diff = System.currentTimeMillis() - start;
         System.out.println("Time take to remove 10000 indexed items - " + diff + "ms");
     }
@@ -152,7 +154,7 @@ public class StressTest {
             assertNotNull(item);
             repo.insert(item);
         }
-        repo.remove(ObjectFilters.ALL);
+        repo.remove(Filter.ALL);
         repo.drop();
 
         // actual calculation
@@ -165,7 +167,7 @@ public class StressTest {
         System.out.println("Time take to insert 10000 non-indexed items - " + diff + "ms");
 
         start = System.currentTimeMillis();
-        repo.remove(ObjectFilters.ALL);
+        repo.remove(Filter.ALL);
         diff = System.currentTimeMillis() - start;
         System.out.println("Time take to remove 10000 non-indexed items - " + diff + "ms");
     }
@@ -189,7 +191,7 @@ public class StressTest {
 
         @Override
         public Document write(NitriteMapper mapper) {
-            Document document = new Document();
+            Document document = Document.createDocument();
             document.put("firstName", firstName);
             document.put("lastName", lastName);
             document.put("age", age);
@@ -207,9 +209,9 @@ public class StressTest {
     }
 
     @Indices({
-            @Index(value = "firstName", type = IndexType.NonUnique),
-            @Index(value = "age", type = IndexType.NonUnique),
-            @Index(value = "text", type = IndexType.Fulltext),
+        @Index(value = "firstName", type = IndexType.NonUnique),
+        @Index(value = "age", type = IndexType.NonUnique),
+        @Index(value = "text", type = IndexType.Fulltext),
     })
     private static class PerfTestIndexed extends PerfTest {
     }

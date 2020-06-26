@@ -1,27 +1,25 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.dizitart.kno2
 
 import org.dizitart.no2.exceptions.SecurityException
-import org.dizitart.no2.fulltext.EnglishTextTokenizer
-import org.dizitart.no2.fulltext.UniversalTextTokenizer
-import org.dizitart.no2.mapper.GenericMapper
+import org.dizitart.no2.index.NitriteTextIndexer
+import org.dizitart.no2.index.fulltext.UniversalTextTokenizer
+import org.dizitart.no2.module.NitriteModule.module
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.File
@@ -40,21 +38,15 @@ class BuilderTest : BaseTest() {
             autoCommit = false
         }
 
-        val context = db?.context!!
-        assertEquals(context.filePath, fileName)
-        assertEquals(context.autoCommitBufferSize, 1024)
-        assertFalse(context.isAutoCommitEnabled)
-        assertFalse(context.isReadOnly)
-        assertTrue(context.isAutoCompactEnabled)
-        assertFalse(context.isCompressed)
-        assertTrue(context.nitriteMapper is KNO2JacksonMapper)
-        assertNull(context.textIndexingService)
-        assertTrue(context.textTokenizer is EnglishTextTokenizer)
+        val context = db?.config!!
+        assertEquals(context.storeConfig.filePath, fileName)
+        assertFalse(context.storeConfig.isReadOnly)
+        assertTrue(context.nitriteMapper() is KNO2JacksonMapper)
 
         assertFalse(db?.isClosed!!)
 
         val collection = db?.getCollection("test")!!
-        assertFalse(collection.isClosed)
+        assertTrue(collection.isOpen)
     }
 
     @Test
@@ -64,22 +56,13 @@ class BuilderTest : BaseTest() {
             autoCommitBufferSize = 2048
             compress = true
             autoCompact = false
-            textTokenizer = UniversalTextTokenizer()
-            nitriteMapper = KNO2JacksonMapper()
-            disableShutdownHook = true
+            loadModule(module(NitriteTextIndexer(UniversalTextTokenizer())))
         }
 
-        val context = db?.context!!
-        assertEquals(context.filePath, fileName)
-        assertEquals(context.autoCommitBufferSize, 2048)
-        assertTrue(context.isAutoCommitEnabled)
-        assertFalse(context.isReadOnly)
-        assertFalse(context.isAutoCompactEnabled)
-        assertTrue(context.isCompressed)
-        assertTrue(context.nitriteMapper is KNO2JacksonMapper)
-        assertTrue(context.nitriteMapper is GenericMapper)
-        assertNull(context.textIndexingService)
-        assertTrue(context.textTokenizer is UniversalTextTokenizer)
+        val context = db?.config!!
+        assertEquals(context.storeConfig.filePath, fileName)
+        assertFalse(context.storeConfig.isReadOnly)
+        assertTrue(context.nitriteMapper() is KNO2JacksonMapper)
 
         assertFalse(db?.isClosed!!)
     }
@@ -108,7 +91,7 @@ class BuilderTest : BaseTest() {
     @Test
     fun testBuilderInMemory() {
         db = nitrite()
-        assertTrue(db?.context?.isInMemory!!)
+        assertTrue(db?.config?.storeConfig?.isInMemory!!)
     }
 }
 

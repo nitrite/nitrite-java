@@ -1,6 +1,0 @@
-Document doc = createDocument("firstName", "John")
-     .put("lastName", "Doe")
-     .put("birthDay", new Date())
-     .put("data", new byte[] {1, 2, 3})
-     .put("fruits", new ArrayList<String>() {{ add("apple"); add("orange"); add("banana"); }})
-     .put("note", "a quick brown fox jump over the lazy dog");

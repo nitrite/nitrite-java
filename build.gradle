@@ -1,22 +1,18 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
-import io.franzbecker.gradle.lombok.task.DelombokTask
 
 buildscript {
     repositories {
@@ -28,10 +24,9 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.franzbecker:gradle-lombok:$lombokPluginVersion"
+        classpath "io.freefair.gradle:lombok-plugin:$lombokPluginVersion"
         classpath "org.asciidoctor:asciidoctor-gradle-plugin:$asciidoctorPluginVersion"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:$errorPronePluginVersion"
-        classpath "com.github.jengelman.gradle.plugins:shadow:$shadowPluginVersion"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:$nexusStagingPlugin"
         classpath "com.adarshr:gradle-test-logger-plugin:$testLoggerPluginVersion"
         classpath "gradle.plugin.gradle-plugins:jartest:$jarTestVersion"
@@ -44,16 +39,11 @@ apply plugin: 'net.ltgt.errorprone'
 apply plugin: 'io.codearte.nexus-staging'
 
 subprojects {
-    apply plugin: 'io.franzbecker.gradle-lombok'
+    apply plugin: 'io.freefair.lombok'
     apply plugin: 'com.adarshr.test-logger'
 
     group = 'org.dizitart'
     version = "$nitriteVersion"
-
-    lombok {
-        version = "$lombokVersion"
-        sha256 = ""
-    }
 
     testlogger {
         theme 'mocha'
@@ -64,10 +54,6 @@ subprojects {
         mavenCentral()
         mavenLocal()
     }
-
-    task delombok(type: DelombokTask) {
-        args "src/main/java", "-d", "build/generated-src/delombok/java"
-    }
 }
 
 task clean(type: Delete) {
@@ -75,9 +61,17 @@ task clean(type: Delete) {
 }
 
 configurations.errorprone {
-    resolutionStrategy.force 'com.google.errorprone:error_prone_core:$errorProneVersion'
+    resolutionStrategy.force "com.google.errorprone:error_prone_core:$errorProneVersion"
 }
 
 nexusStaging {
     packageGroup = "org.dizitart"
+}
+
+
+gradle.buildFinished { BuildResult result ->
+    if (result.failure && !JavaVersion.current().isJava8Compatible()) {
+        println("\n* Warning:\nJDK ${JavaVersion.VERSION_1_8} is minimal requirement for building nitrite. " +
+            "You have ${JavaVersion.current()}.")
+    }
 }

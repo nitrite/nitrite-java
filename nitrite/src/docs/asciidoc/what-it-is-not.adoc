@@ -1,2 +1,0 @@
-Nitrite is not an RDBMS. It is also not a distributed nosql database like MongoDB or Cassandra. It does not have
-any server for external application to connect to. It does not support sharding and ACID transaction.

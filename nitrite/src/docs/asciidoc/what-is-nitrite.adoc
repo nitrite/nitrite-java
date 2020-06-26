@@ -1,5 +1,0 @@
-include::intro.adoc[]
-
-**It features**:
-
-include::features.adoc[]

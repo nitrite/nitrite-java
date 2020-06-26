@@ -1,75 +1,59 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-apply plugin: 'java'
-apply plugin: 'signing'
-apply plugin: 'maven'
-apply plugin: 'com.github.hauner.jarTest'
+plugins {
+    id 'java'
+    id 'signing'
+    id 'maven'
+    id 'com.github.hauner.jarTest'
+    id 'jacoco'
+}
 
-apply from: 'jacoco.gradle'
-apply from: 'asciidoc.gradle'
-
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 jar {
-    baseName = 'nitrite'
+    archivesBaseName = 'nitrite'
+}
+
+repositories {
+    mavenCentral()
 }
 
 dependencies {
-    compile "org.slf4j:slf4j-api:$slf4jVersion"
-    compile "com.h2database:h2-mvstore:$h2Version"
-    compile "org.objenesis:objenesis:$objenesisVersion"
-    compile ("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion") {
-        exclude module: 'jackson-annotations'
-    }
-    compile "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-    compile "org.jasypt:jasypt:$jasyptVersion"
-    compile "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    compile "uk.co.jemos.podam:podam:$podamVersion"
+    implementation project(path: ':nitrite-core', configuration: 'default')
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "com.h2database:h2-mvstore:$h2Version"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
 
-    testCompile "junit:junit:$junitVersion"
-    testCompile "org.apache.lucene:lucene-core:$luceneVersion"
-    testCompile "org.apache.lucene:lucene-analyzers-common:$luceneVersion"
-    testCompile "org.apache.lucene:lucene-queryparser:$luceneVersion"
-    testCompile "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
-    testCompile "org.apache.logging.log4j:log4j-core:$log4j2Version"
-    testCompile "org.awaitility:awaitility:$awaitilityVersion"
-    testCompile "joda-time:joda-time:$jodaTimeVersion"
-    testCompile "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
-    testCompile "org.meanbean:meanbean:$meanbeanVersion"
-}
-
-gradle.buildFinished { BuildResult result ->
-    if (result.failure && !JavaVersion.current().isJava7Compatible()) {
-        gradle.rootProject.logger.error("\n* Warning:\nJDK ${JavaVersion.VERSION_1_7} is minimal requirement for building nitrite. " +
-                "You have ${JavaVersion.current()}.")
-    }
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
+    testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testImplementation "uk.co.jemos.podam:podam:$podamVersion"
+    testImplementation "com.github.javafaker:javafaker:$javaFakerVersion"
+    testImplementation "junit:junit:$junitVersion"
+    testImplementation "org.openjdk.jmh:jmh-core:$jmhVersion"
+    testImplementation "org.apache.lucene:lucene-core:$luceneVersion"
+    testImplementation "org.apache.lucene:lucene-analyzers-common:$luceneVersion"
+    testImplementation "org.apache.lucene:lucene-queryparser:$luceneVersion"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
+    testImplementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    testImplementation "org.awaitility:awaitility:$awaitilityVersion"
+    testImplementation "joda-time:joda-time:$jodaTimeVersion"
+    testImplementation "org.meanbean:meanbean:$meanbeanVersion"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 }
 
 test {
@@ -77,67 +61,13 @@ test {
     testLogging.exceptionFormat = 'full'
 }
 
-artifacts {
-    archives jar
-    archives javadocJar
-    archives sourcesJar
-}
-
-signing {
-    required { gradle.taskGraph.hasTask("uploadArchives") }
-    sign configurations.archives
-}
-
-nexusStaging {
-    username = System.getenv('OSSRH_USER')
-    password = System.getenv('OSSRH_PASSWORD')
-}
-
-uploadArchives {
-    onlyIf {
-        project.hasProperty('release') || version.endsWith("SNAPSHOT")
-    }
-
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.getenv('OSSRH_USER'),
-                        password: System.getenv('OSSRH_PASSWORD'))
-            }
-
-            snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots') {
-                authentication(userName: System.getenv('OSSRH_USER'),
-                    password: System.getenv('OSSRH_PASSWORD'))
-            }
-
-            pom.project {
-                packaging 'jar'
-                name 'Nitrite'
-                description 'An in-memory, single-file based embedded nosql persistent document store.'
-                url 'https://github.com/dizitart/nitrite-database'
-                scm {
-                    url 'git@github.com:dizitart/nitrite-database.git'
-                    connection 'scm:git:git@github.com:dizitart/nitrite-database.git'
-                    developerConnection 'scm:git:git@github.com:dizitart/nitrite-database.git'
-                }
-                licenses {
-                    license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/license/LICENSE-2.0.txt'
-                        distribution 'repo'
-                    }
-                }
-                developers {
-                    developer {
-                        id 'anidotnet'
-                        name 'Anindya Chatterjee'
-                        email 'anidotnet@gmail.com'
-                        organization 'Dizitart'
-                    }
-                }
-            }
-        }
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        csv.enabled false
+        html.destination file("${buildDir}/reports/coverage")
     }
 }
+
+check.dependsOn jacocoTestReport

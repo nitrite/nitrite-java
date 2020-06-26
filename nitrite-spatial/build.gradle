@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2017-2020. Nitrite author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+    id 'java'
+    id 'signing'
+    id 'maven'
+    id 'com.github.hauner.jarTest'
+    id 'jacoco'
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+jar {
+    archivesBaseName = 'nitrite-spatial'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(path: ':nitrite-core', configuration: 'default')
+    implementation project(path: ':nitrite-jackson-mapper', configuration: 'default')
+    implementation "org.slf4j:slf4j-api:$slf4jVersion"
+    implementation "org.locationtech.jts:jts-core:$jtsVersion"
+    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+
+    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    testImplementation project(path: ':nitrite', configuration: 'default')
+    testImplementation project(path: ':nitrite-jackson-mapper', configuration: 'default')
+    testImplementation "junit:junit:$junitVersion"
+}
+
+test {
+    testLogging.showStandardStreams = false
+    testLogging.exceptionFormat = 'full'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        csv.enabled false
+        html.destination file("${buildDir}/reports/coverage")
+    }
+}
+
+check.dependsOn jacocoTestReport

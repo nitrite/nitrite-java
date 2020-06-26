@@ -1,33 +1,31 @@
 /*
- *
- * Copyright 2017-2018 Nitrite author or authors.
+ * Copyright (c) 2017-2020. Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *        http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package org.dizitart.kno2
 
-import org.dizitart.no2.IndexOptions
-import org.dizitart.no2.IndexType
-import org.dizitart.no2.NullOrder
-import org.dizitart.no2.SortOrder
+import org.dizitart.kno2.filters.text
+import org.dizitart.no2.common.NullOrder
+import org.dizitart.no2.common.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
-import org.dizitart.no2.objects.Id
-import org.dizitart.no2.objects.Index
-import org.dizitart.no2.objects.Indices
-import org.dizitart.no2.objects.InheritIndices
-import org.dizitart.no2.objects.filters.ObjectFilters
+import org.dizitart.no2.index.IndexOptions
+import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.repository.annotations.Id
+import org.dizitart.no2.repository.annotations.Index
+import org.dizitart.no2.repository.annotations.Indices
+import org.dizitart.no2.repository.annotations.InheritIndices
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
@@ -51,27 +49,27 @@ class NitriteTest : BaseTest() {
     @Test
     fun testGetCollection() {
         db?.getCollection("test") {
-            assertFalse(isClosed)
+            assertTrue(isOpen)
             close()
-            assertTrue(isClosed)
+            assertFalse(isOpen)
         }
     }
 
     @Test
     fun testGetRepository() {
         db?.getRepository<TestData> {
-            assertFalse(isClosed)
+            assertTrue(isOpen)
             close()
-            assertTrue(isClosed)
+            assertFalse(isOpen)
         }
     }
 
     @Test
     fun testGetRepositoryWithKey() {
         db?.getRepository<TestData>("tag") {
-            assertFalse(isClosed)
+            assertTrue(isOpen)
             close()
-            assertTrue(isClosed)
+            assertFalse(isOpen)
         }
     }
 
@@ -88,18 +86,18 @@ class NitriteTest : BaseTest() {
     fun testFindOption() {
         db?.getCollection("test") {
             insert(documentOf("a" to 1),
-                    documentOf("a" to 2),
-                    documentOf("a" to 3),
-                    documentOf("a" to 4),
-                    documentOf("a" to 5))
-            var cursor = find(limit(0, 2))
+                documentOf("a" to 2),
+                documentOf("a" to 3),
+                documentOf("a" to 4),
+                documentOf("a" to 5))
+            var cursor = find().skipLimit(0, 2)
             assertEquals(cursor.size(), 2)
 
-            cursor = find(sort("a", SortOrder.Descending, NullOrder.First))
+            cursor = find().sort("a", SortOrder.Descending, NullOrder.First)
             assertEquals(cursor.size(), 5)
             assertEquals(cursor.last()["a"], 1)
 
-            cursor = find(sort("a", SortOrder.Descending).thenLimit(0, 2))
+            cursor = find().sort("a", SortOrder.Descending).skipLimit(0, 2)
             assertEquals(cursor.size(), 2)
             assertEquals(cursor.last()["a"], 4)
         }
@@ -132,10 +130,10 @@ class NitriteTest : BaseTest() {
         val uuid = UUID.randomUUID()
         val executor = Executors.newFixedThreadPool(10)
         val latch = CountDownLatch(200)
-        for(i in 0..100) {
+        for (i in 0..100) {
             val item = CaObject(uuid, "1234")
             executor.submit {
-                try{
+                try {
                     repository.update(item, true)
                 } catch (e: UniqueConstraintException) {
                     fail("Synchronization failed on update")
@@ -144,7 +142,7 @@ class NitriteTest : BaseTest() {
                 }
             }
             executor.submit {
-                try{
+                try {
                     repository.insert(item)
                 } finally {
                     latch.countDown()
@@ -166,22 +164,22 @@ class NitriteTest : BaseTest() {
 
     @Test
     fun testIssue222() {
-        val first = NestedObjects("value1", "1", listOf(TempObject("name-1", 42,LevelUnder("street", 12))))
+        val first = NestedObjects("value1", "1", listOf(TempObject("name-1", 42, LevelUnder("street", 12))))
         val repository = db?.getRepository<NestedObjects>()!!
         repository.insert(first)
 
         repository.createIndex("ob1", IndexOptions.indexOptions(IndexType.Fulltext));
-        var found = repository.find(ObjectFilters.text("ob1", "value1"))
-        assertTrue(found.idSet().isNotEmpty())
+        var found = repository.find("ob1" text "value1")
+        assertFalse(found.isEmpty)
 
         first.ob1 = "value2"
         repository.update(first)
 
-        found = repository.find(ObjectFilters.text("ob1", "value2"))
-        assertTrue(found.idSet().isNotEmpty())
+        found = repository.find("ob1" text "value2")
+        assertFalse(found.isEmpty)
 
-        found = repository.find(ObjectFilters.text("ob1", "value1"))
-        assertTrue(found.idSet().isEmpty())
+        found = repository.find("ob1" text "value1")
+        assertTrue(found.isEmpty)
     }
 }
 
@@ -190,7 +188,7 @@ interface MyInterface {
 }
 
 @Indices(value = [(Index(value = "name", type = IndexType.NonUnique))])
-abstract class SomeAbsClass (
+abstract class SomeAbsClass(
         @Id override val id: UUID = UUID.randomUUID(),
         open val name: String = "abcd"
 ) : MyInterface {
@@ -199,16 +197,16 @@ abstract class SomeAbsClass (
 
 @InheritIndices
 class MyClass(
-        override val id: UUID,
-        override val name: String,
-        override val checked: Boolean) : SomeAbsClass(id, name)
+    override val id: UUID,
+    override val name: String,
+    override val checked: Boolean) : SomeAbsClass(id, name)
 
 @InheritIndices
 class MyClass2(
-        override val id: UUID,
-        override val name: String,
-        override val checked: Boolean,
-        val importance: Int
+    override val id: UUID,
+    override val name: String,
+    override val checked: Boolean,
+    val importance: Int
 ) : SomeAbsClass(id, name)
 
 data class CaObject(
@@ -217,12 +215,11 @@ data class CaObject(
 )
 
 @Indices(value = [(Index(value = "time", type = IndexType.Unique))])
-data class ClassWithLocalDateTime (
-        val name: String,
-        val time: LocalDateTime
+data class ClassWithLocalDateTime(
+    val name: String,
+    val time: LocalDateTime
 )
 
-data class NestedObjects(var ob1:String, @Id val id: String, val list: List<TempObject>)
-
-data class TempObject(val name:String, val aga:Int, val add:LevelUnder)
-data class LevelUnder(val street:String, val number:Int)
+data class NestedObjects(var ob1: String, @Id val id: String, val list: List<TempObject>)
+data class TempObject(val name: String, val aga: Int, val add: LevelUnder)
+data class LevelUnder(val street: String, val number: Int)
