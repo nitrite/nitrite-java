@@ -30,25 +30,11 @@ import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
  * @author Anindya Chatterjee.
  */
 public class MappableMapper implements NitriteMapper {
-    private final Map<Class<?>, TypeConverter<?>> typeConverterMap;
     private final Set<Class<?>> valueTypes;
 
-    public MappableMapper() {
-        this(null, null);
-    }
-
-    public MappableMapper(TypeConverter<?>... typeConverters) {
-        this(null, listOf(typeConverters));
-    }
-
     public MappableMapper(Class<?>... valueTypes) {
-        this(listOf(valueTypes), null);
-    }
-
-    public MappableMapper(List<Class<?>> valueTypes, List<TypeConverter<?>> typeConverters) {
-        this.typeConverterMap = new HashMap<>();
         this.valueTypes = new HashSet<>();
-        init(valueTypes, typeConverters);
+        init(listOf(valueTypes));
     }
 
     @Override
@@ -64,15 +50,14 @@ public class MappableMapper implements NitriteMapper {
             if (Document.class.isAssignableFrom(type)) {
                 return (Target) convertToDocument(source);
             } else if (source instanceof Document) {
-                return convertToObject((Document) source, type);
+                return convertFromDocument((Document) source, type);
             }
         }
 
         throw new ObjectMappingException("object must implements Mappable or register a TypeConverter");
     }
 
-    @SuppressWarnings("unchecked")
-    protected <Target> Target convertToObject(Document source, Class<Target> type) {
+    protected <Target> Target convertFromDocument(Document source, Class<Target> type) {
         if (source == null) {
             return null;
         }
@@ -85,27 +70,13 @@ public class MappableMapper implements NitriteMapper {
             return item;
         }
 
-        Class<?> key = findConverterKey(type);
-        if (key != null) {
-            TypeConverter<?> typeConverter = typeConverterMap.get(key);
-            Converter<Document, ?> converter = typeConverter.getTargetConverter();
-            return (Target) converter.convert(source, this);
-        }
-
         throw new ObjectMappingException("object must implements Mappable or register a TypeConverter");
     }
 
-    @SuppressWarnings("unchecked")
     protected <Source> Document convertToDocument(Source source) {
         if (source instanceof Mappable) {
             Mappable mappable = (Mappable) source;
             return mappable.write(this);
-        }
-
-        Class<?> key = findConverterKey(source.getClass());
-        if (key != null) {
-            TypeConverter<Source> typeConverter = (TypeConverter<Source>) typeConverterMap.get(key);
-            return typeConverter.getSourceConverter().convert(source, this);
         }
 
         throw new ObjectMappingException("object must implements Mappable or register a TypeConverter");
@@ -136,17 +107,7 @@ public class MappableMapper implements NitriteMapper {
         this.valueTypes.add(valueType);
     }
 
-    private Class<?> findConverterKey(Class<?> type) {
-        if (typeConverterMap.containsKey(type)) return type;
-        for (Class<?> aClass : typeConverterMap.keySet()) {
-            if (aClass.isAssignableFrom(type)) {
-                return aClass;
-            }
-        }
-        return null;
-    }
-
-    private void init(List<Class<?>> valueTypes, List<TypeConverter<?>> typeConverters) {
+    private void init(List<Class<?>> valueTypes) {
         this.valueTypes.add(Number.class);
         this.valueTypes.add(Boolean.class);
         this.valueTypes.add(Character.class);
@@ -158,18 +119,6 @@ public class MappableMapper implements NitriteMapper {
 
         if (valueTypes != null && !valueTypes.isEmpty()) {
             this.valueTypes.addAll(valueTypes);
-        }
-
-        if (typeConverters != null && !typeConverters.isEmpty()) {
-            registerConverters(typeConverters);
-        }
-    }
-
-    private void registerConverters(List<TypeConverter<?>> converters) {
-        if (converters != null) {
-            for (TypeConverter<?> converter : converters) {
-                typeConverterMap.put(converter.getSourceType(), converter);
-            }
         }
     }
 }

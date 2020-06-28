@@ -16,8 +16,6 @@
 
 package org.dizitart.no2.common.util;
 
-import lombok.experimental.UtilityClass;
-
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -27,8 +25,8 @@ import java.util.*;
  * @author Anindya Chatterjee.
  * @since 1.0
  */
-@UtilityClass
 public class Iterables {
+    private Iterables() {}
 
     /**
      * Gets the first element of an {@link Iterable} or

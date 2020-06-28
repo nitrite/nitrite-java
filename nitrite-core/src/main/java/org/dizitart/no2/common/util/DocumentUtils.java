@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.common.util;
 
-import lombok.experimental.UtilityClass;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.filters.Filter;
@@ -33,8 +32,8 @@ import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-@UtilityClass
 public class DocumentUtils {
+    private DocumentUtils(){}
 
     /**
      * Determines whether a document has recently been updated/created than the other.
@@ -89,7 +88,7 @@ public class DocumentUtils {
         return result;
     }
 
-    private Document removeValues(Document document) {
+    private static Document removeValues(Document document) {
         if (document == null) return null;
         for (KeyValuePair<String, Object> entry : document) {
             if (entry.getValue() instanceof Map) {

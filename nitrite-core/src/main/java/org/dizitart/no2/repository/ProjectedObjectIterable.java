@@ -29,9 +29,9 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * @author Anindya Chatterjee.
  */
 class ProjectedObjectIterable<T> implements ReadableStream<T> {
-    private ReadableStream<Document> recordIterable;
-    private Class<T> projectionType;
-    private NitriteMapper nitriteMapper;
+    private final ReadableStream<Document> recordIterable;
+    private final Class<T> projectionType;
+    private final NitriteMapper nitriteMapper;
 
     ProjectedObjectIterable(NitriteMapper nitriteMapper,
                             ReadableStream<Document> recordIterable,
@@ -47,8 +47,8 @@ class ProjectedObjectIterable<T> implements ReadableStream<T> {
     }
 
     private class ProjectedObjectIterator implements Iterator<T> {
-        private NitriteMapper objectMapper;
-        private Iterator<Document> documentIterator;
+        private final NitriteMapper objectMapper;
+        private final Iterator<Document> documentIterator;
 
         ProjectedObjectIterator(NitriteMapper nitriteMapper) {
             this.objectMapper = nitriteMapper;

@@ -101,7 +101,7 @@ public class JacksonMapper extends MappableMapper {
             if (Document.class.isAssignableFrom(type)) {
                 return (Target) convertToDocument(source);
             } else if (source instanceof Document) {
-                return convertToObject((Document) source, type);
+                return convertFromDocument((Document) source, type);
             }
         }
 
@@ -133,9 +133,9 @@ public class JacksonMapper extends MappableMapper {
     }
 
     @Override
-    protected <Target> Target convertToObject(Document source, Class<Target> type) {
+    protected <Target> Target convertFromDocument(Document source, Class<Target> type) {
         try {
-            return super.convertToObject(source, type);
+            return super.convertFromDocument(source, type);
         } catch (ObjectMappingException ome) {
             try {
                 return objectMapper.convertValue(source, type);

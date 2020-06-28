@@ -28,7 +28,6 @@ import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.MappableMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.mapper.TypeConverter;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
@@ -52,28 +51,12 @@ import static org.junit.Assert.*;
  * @author Anindya Chatterjee.
  */
 public class ObjectRepositoryTest {
-    private String dbPath = getRandomTempDbFile();
+    private final String dbPath = getRandomTempDbFile();
     private Nitrite db;
 
     @Before
     public void setUp() {
-        TypeConverter<StressRecord> converter = new TypeConverter<>(StressRecord.class,
-            (source, mapper) -> Document.createDocument("firstName", source.getFirstName())
-                .put("lastName", source.getLastName())
-                .put("failed", source.isFailed())
-                .put("notes", source.getNotes())
-                .put("processed", source.isProcessed()),
-            (source, mapper) -> {
-                StressRecord record = new StressRecord();
-                record.setFirstName(source.get("firstName", String.class));
-                record.setProcessed(source.get("processed", Boolean.class));
-                record.setLastName(source.get("lastName", String.class));
-                record.setFailed(source.get("failed", Boolean.class));
-                record.setNotes(source.get("notes", String.class));
-                return record;
-            });
-
-        NitriteMapper mapper = new MappableMapper(converter);
+        NitriteMapper mapper = new MappableMapper();
 
         db = NitriteBuilder.get()
             .filePath(dbPath)

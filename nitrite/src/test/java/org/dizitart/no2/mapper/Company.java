@@ -25,46 +25,46 @@ import java.io.Serializable;
  * @author Anindya Chatterjee.
  */
 @Data
-public class Company {
+public class Company implements Mappable {
     private String name;
     private Long id;
     private CompanyId companyId;
 
-    public static TypeConverter<Company> getConverter() {
-        return new TypeConverter<>(
-            Company.class,
-            (source, mapper) -> Document.createDocument("id", source.id)
-                .put("name", source.name)
-                .put("companyId", mapper.convert(source.companyId, Document.class)),
-            (source, mapper) -> {
-                Company company = new Company();
-                company.name = source.get("name", String.class);
-                company.id = source.get("id", Long.class);
-                company.companyId = source.get("companyId", CompanyId.class);
-                return company;
-            }
-        );
+    @Override
+    public Document write(NitriteMapper mapper) {
+        return Document.createDocument("id", id)
+            .put("name", name)
+            .put("companyId", mapper.convert(companyId, Document.class));
+    }
+
+    @Override
+    public void read(NitriteMapper mapper, Document document) {
+        name = document.get("name", String.class);
+        id = document.get("id", Long.class);
+        companyId = document.get("companyId", CompanyId.class);
     }
 
     @Data
-    public static class CompanyId implements Comparable<CompanyId>, Serializable {
+    public static class CompanyId implements Comparable<CompanyId>, Serializable, Mappable {
         private Long idValue;
 
         public CompanyId(long value) {
             this.idValue = value;
         }
 
-        public static TypeConverter<CompanyId> getConverter() {
-            return new TypeConverter<>(
-                CompanyId.class,
-                (source, mapper) -> Document.createDocument("idValue", source.idValue),
-                (source, mapper) -> new CompanyId(source.get("idValue", Long.class))
-            );
-        }
-
         @Override
         public int compareTo(CompanyId other) {
             return idValue.compareTo(other.idValue);
+        }
+
+        @Override
+        public Document write(NitriteMapper mapper) {
+            return Document.createDocument().put("idValue", idValue);
+        }
+
+        @Override
+        public void read(NitriteMapper mapper, Document document) {
+            idValue = document.get("idValue", Long.class);
         }
     }
 }

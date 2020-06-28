@@ -28,38 +28,32 @@ import java.util.List;
  */
 @Data
 @ToString
-public class Department {
+public class Department implements Mappable {
     private String name;
     private List<MappableEmployee> employeeList;
 
+
+    @Override
+    public Document write(NitriteMapper mapper) {
+        List<Document> docList = new ArrayList<>();
+        if (employeeList != null && !employeeList.isEmpty()) {
+            employeeList.stream().map(employee -> mapper.convert(employee, Document.class))
+                .forEach(docList::add);
+        }
+
+        return Document.createDocument().put("name", name)
+            .put("employeeList", docList);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
-    public static TypeConverter<Department> getConverter() {
-        TypeConverter<Department> converter = new TypeConverter<>();
-        converter.setSourceType(Department.class);
-        converter.setSourceConverter((source, mapper) -> {
-            Document document = Document.createDocument("name", source.name);
-            List<Document> list = new ArrayList<>();
-            if (source.employeeList != null) {
-                for (MappableEmployee employee : source.employeeList) {
-                    list.add(mapper.convert(employee, Document.class));
-                }
-            }
-            document.put("employeeList", list);
-            return document;
-        });
-        converter.setTargetConverter((document, mapper) -> {
-            Department department = new Department();
-            department.name = document.get("name", String.class);
-            List<Document> list = document.get("employeeList", List.class);
-            if (list != null) {
-                department.employeeList = new ArrayList<>();
-                for (Document doc : list) {
-                    MappableEmployee mappableEmployee = mapper.convert(doc, MappableEmployee.class);
-                    department.employeeList.add(mappableEmployee);
-                }
-            }
-            return department;
-        });
-        return converter;
+    public void read(NitriteMapper mapper, Document document) {
+        employeeList = new ArrayList<>();
+        List<Document> documentList = (List<Document>) document.get("employeeList", ArrayList.class);
+        if (documentList != null && !documentList.isEmpty()) {
+            documentList.stream().map(doc -> mapper.convert(doc, MappableEmployee.class))
+                .forEach(employeeList::add);
+        }
+        name = document.get("name", String.class);
     }
 }

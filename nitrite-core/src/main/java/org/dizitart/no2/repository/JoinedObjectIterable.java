@@ -29,9 +29,9 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * @author Anindya Chatterjee.
  */
 class JoinedObjectIterable<T> implements ReadableStream<T> {
-    private ReadableStream<Document> recordIterable;
-    private Class<T> joinType;
-    private NitriteMapper nitriteMapper;
+    private final ReadableStream<Document> recordIterable;
+    private final Class<T> joinType;
+    private final NitriteMapper nitriteMapper;
 
     JoinedObjectIterable(NitriteMapper nitriteMapper,
                          ReadableStream<Document> recordIterable,
@@ -47,8 +47,8 @@ class JoinedObjectIterable<T> implements ReadableStream<T> {
     }
 
     private class JoinedObjectIterator implements Iterator<T> {
-        private NitriteMapper objectMapper;
-        private Iterator<Document> documentIterator;
+        private final NitriteMapper objectMapper;
+        private final Iterator<Document> documentIterator;
 
         JoinedObjectIterator(NitriteMapper nitriteMapper) {
             this.objectMapper = nitriteMapper;

@@ -37,9 +37,9 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @author Anindya Chatterjee.
  */
 class ObjectCursor<T> implements Cursor<T> {
-    private DocumentCursor cursor;
-    private NitriteMapper nitriteMapper;
-    private Class<T> type;
+    private final DocumentCursor cursor;
+    private final NitriteMapper nitriteMapper;
+    private final Class<T> type;
 
     public ObjectCursor(NitriteMapper nitriteMapper, DocumentCursor cursor, Class<T> type) {
         this.nitriteMapper = nitriteMapper;
@@ -100,7 +100,7 @@ class ObjectCursor<T> implements Cursor<T> {
     }
 
     private class ObjectCursorIterator implements Iterator<T> {
-        private Iterator<Document> documentIterator;
+        private final Iterator<Document> documentIterator;
 
         ObjectCursorIterator(Iterator<Document> documentIterator) {
             this.documentIterator = documentIterator;

@@ -18,16 +18,37 @@ package org.dizitart.no2.repository.data;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.mapper.Mappable;
+import org.dizitart.no2.mapper.NitriteMapper;
 
 /**
  * @author Anindya Chatterjee.
  */
 @Getter
 @Setter
-public class StressRecord {
+public class StressRecord implements Mappable {
     private String firstName;
     private boolean processed;
     private String lastName;
     private boolean failed;
     private String notes;
+
+    @Override
+    public Document write(NitriteMapper mapper) {
+        return Document.createDocument().put("firstName", firstName)
+            .put("processed", processed)
+            .put("lastName", lastName)
+            .put("failed", failed)
+            .put("notes", notes);
+    }
+
+    @Override
+    public void read(NitriteMapper mapper, Document document) {
+        firstName = document.get("firstName", String.class);
+        processed = document.get("processed", Boolean.class);
+        lastName = document.get("lastName", String.class);
+        failed = document.get("failed", Boolean.class);
+        notes = document.get("notes", String.class);
+    }
 }

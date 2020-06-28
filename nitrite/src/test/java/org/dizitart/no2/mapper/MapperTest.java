@@ -22,7 +22,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static org.dizitart.no2.common.util.Iterables.listOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -34,7 +33,7 @@ public class MapperTest {
 
     @Test
     public void testWithConverter() {
-        mappableMapper = new MappableMapper(Employee.getConverter());
+        mappableMapper = new MappableMapper();
 
         Employee boss = new Employee();
         boss.setEmpId("1");
@@ -88,7 +87,7 @@ public class MapperTest {
 
     @Test
     public void testWithConverterAndMappableMix() {
-        mappableMapper = new MappableMapper(Department.getConverter());
+        mappableMapper = new MappableMapper();
 
         final MappableEmployee boss = new MappableEmployee();
         boss.setEmpId("1");
@@ -156,7 +155,7 @@ public class MapperTest {
 
     @Test
     public void testWithValueType() {
-        mappableMapper = new MappableMapper(Company.getConverter(), Company.CompanyId.getConverter());
+        mappableMapper = new MappableMapper();
         Company company = new Company();
         company.setName("test");
         company.setId(1L);
@@ -165,11 +164,5 @@ public class MapperTest {
         Document document = mappableMapper.convert(company, Document.class);
         Object companyId = document.get("companyId");
         assertTrue(companyId instanceof Document);
-
-        mappableMapper = new MappableMapper(listOf(Company.CompanyId.class),
-            listOf(Company.getConverter()));
-        document = mappableMapper.convert(company, Document.class);
-        companyId = document.get("companyId");
-        assertTrue(companyId instanceof Company.CompanyId);
     }
 }

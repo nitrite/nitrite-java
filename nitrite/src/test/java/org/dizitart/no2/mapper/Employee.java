@@ -27,41 +27,34 @@ import java.util.Date;
  */
 @Data
 @ToString
-public class Employee {
+public class Employee implements Mappable {
     private String empId;
     private String name;
     private Date joiningDate;
     private Employee boss;
 
-    public static TypeConverter<Employee> getConverter() {
-        return new TypeConverter<>(
-            Employee.class,
-            (source, mapper) -> {
-                if (source != null) {
-                    Document document = Document.createDocument("empId", source.getEmpId())
-                        .put("name", source.getName())
-                        .put("joiningDate", source.getJoiningDate());
+    @Override
+    public Document write(NitriteMapper mapper) {
+        Document document = Document.createDocument("empId", getEmpId())
+            .put("name", getName())
+            .put("joiningDate", getJoiningDate());
 
-                    if (source.getBoss() != null) {
-                        document.put("boss", mapper.convert(source.getBoss(), Document.class));
-                    }
-                    return document;
-                }
-                return null;
-            },
-            (source, mapper) -> {
-                Employee employee = new Employee();
-                employee.setEmpId(source.get("empId", String.class));
-                employee.setName(source.get("name", String.class));
-                employee.setJoiningDate(source.get("joiningDate", Date.class));
+        if (getBoss() != null) {
+            document.put("boss", mapper.convert(getBoss(), Document.class));
+        }
+        return document;
+    }
 
-                Document bossDoc = source.get("boss", Document.class);
-                if (bossDoc != null) {
-                    Employee boss = mapper.convert(bossDoc, Employee.class);
-                    employee.setBoss(boss);
-                }
-                return employee;
-            }
-        );
+    @Override
+    public void read(NitriteMapper mapper, Document document) {
+        setEmpId(document.get("empId", String.class));
+        setName(document.get("name", String.class));
+        setJoiningDate(document.get("joiningDate", Date.class));
+
+        Document bossDoc = document.get("boss", Document.class);
+        if (bossDoc != null) {
+            Employee boss = mapper.convert(bossDoc, Employee.class);
+            setBoss(boss);
+        }
     }
 }
