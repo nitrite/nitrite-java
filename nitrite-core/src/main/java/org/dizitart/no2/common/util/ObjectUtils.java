@@ -294,7 +294,7 @@ public class ObjectUtils {
         if (type.isPrimitive()) {
             switch (type.getName()) {
                 case "boolean":
-                    return (T) Boolean.valueOf(false);
+                    return (T) Boolean.FALSE;
                 case "byte":
                     return (T) Byte.valueOf((byte) 0);
                 case "short":
