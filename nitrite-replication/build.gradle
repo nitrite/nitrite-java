@@ -35,21 +35,21 @@ repositories {
 
 dependencies {
     implementation project(path: ':nitrite-core', configuration: 'default')
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-    implementation "com.squareup.okhttp3:okhttp:$okhttp3Version"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.slf4j:slf4j-api:1.7.30"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.10.1"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.10.1"
+    implementation "com.squareup.okhttp3:okhttp:4.3.1"
+    annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testImplementation project(path: ':nitrite', configuration: 'default')
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    testImplementation "jakarta.websocket:jakarta.websocket-api:$websocketApiVersion"
-    testImplementation "org.glassfish.tyrus:tyrus-server:$tyrusVersion"
-    testImplementation "org.glassfish.tyrus:tyrus-container-grizzly-server:$tyrusVersion"
-    testImplementation "org.awaitility:awaitility:$awaitilityVersion"
-    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
-    testImplementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
-    testImplementation "junit:junit:$junitVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testImplementation "jakarta.websocket:jakarta.websocket-api:1.1.2"
+    testImplementation "org.glassfish.tyrus:tyrus-server:1.15"
+    testImplementation "org.glassfish.tyrus:tyrus-container-grizzly-server:1.15"
+    testImplementation "org.awaitility:awaitility:4.0.2"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.0"
+    testImplementation "org.apache.logging.log4j:log4j-core:2.13.0"
+    testImplementation "junit:junit:4.13"
 }
 
 test {

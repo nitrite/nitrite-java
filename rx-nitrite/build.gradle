@@ -35,14 +35,14 @@ repositories {
 
 dependencies {
     implementation project(path: ':nitrite-core', configuration: 'default')
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation "io.reactivex.rxjava2:rxjava:$rxJavaVersion"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.slf4j:slf4j-api:1.7.30"
+    implementation "io.reactivex.rxjava2:rxjava:2.2.14"
+    annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testImplementation project(':nitrite')
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "uk.co.jemos.podam:podam:$podamVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testImplementation "junit:junit:4.13"
+    testImplementation "uk.co.jemos.podam:podam:7.2.3.RELEASE"
 }
 
 test {

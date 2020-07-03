@@ -35,18 +35,18 @@ repositories {
 
 dependencies {
     implementation project(path: ':nitrite-core', configuration: 'default')
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.slf4j:slf4j-api:1.7.30"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.10.1"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.10.1"
+    annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testImplementation project(path: ':nitrite', configuration: 'default')
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.locationtech.jts:jts-core:$jtsVersion"
-    testImplementation "org.awaitility:awaitility:$awaitilityVersion"
-    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
-    testImplementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testImplementation "junit:junit:4.13"
+    testImplementation "org.locationtech.jts:jts-core:1.15.1"
+    testImplementation "org.awaitility:awaitility:4.0.2"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.0"
+    testImplementation "org.apache.logging.log4j:log4j-core:2.13.0"
 }
 
 test {

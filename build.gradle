@@ -24,12 +24,12 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.freefair.gradle:lombok-plugin:$lombokPluginVersion"
-        classpath "org.asciidoctor:asciidoctor-gradle-plugin:$asciidoctorPluginVersion"
-        classpath "net.ltgt.gradle:gradle-errorprone-plugin:$errorPronePluginVersion"
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:$nexusStagingPlugin"
-        classpath "com.adarshr:gradle-test-logger-plugin:$testLoggerPluginVersion"
-        classpath "gradle.plugin.gradle-plugins:jartest:$jarTestVersion"
+        classpath "io.freefair.gradle:lombok-plugin:5.1.0"
+        classpath "org.asciidoctor:asciidoctor-gradle-plugin:1.5.6"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:0.0.8"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.21.2"
+        classpath "com.adarshr:gradle-test-logger-plugin:1.0.1"
+        classpath "gradle.plugin.gradle-plugins:jartest:1.0.1"
     }
 }
 
@@ -61,7 +61,7 @@ task clean(type: Delete) {
 }
 
 configurations.errorprone {
-    resolutionStrategy.force "com.google.errorprone:error_prone_core:$errorProneVersion"
+    resolutionStrategy.force "com.google.errorprone:error_prone_core:2.0.17"
 }
 
 nexusStaging {

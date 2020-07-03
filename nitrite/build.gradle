@@ -35,25 +35,25 @@ repositories {
 
 dependencies {
     implementation project(path: ':nitrite-core', configuration: 'default')
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation "com.h2database:h2-mvstore:$h2Version"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.slf4j:slf4j-api:1.7.30"
+    implementation "com.h2database:h2-mvstore:1.4.200"
+    annotationProcessor "org.projectlombok:lombok:1.18.12"
 
-    testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:$jmhVersion"
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    testImplementation "uk.co.jemos.podam:podam:$podamVersion"
-    testImplementation "com.github.javafaker:javafaker:$javaFakerVersion"
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.openjdk.jmh:jmh-core:$jmhVersion"
-    testImplementation "org.apache.lucene:lucene-core:$luceneVersion"
-    testImplementation "org.apache.lucene:lucene-analyzers-common:$luceneVersion"
-    testImplementation "org.apache.lucene:lucene-queryparser:$luceneVersion"
-    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:$log4j2Version"
-    testImplementation "org.apache.logging.log4j:log4j-core:$log4j2Version"
-    testImplementation "org.awaitility:awaitility:$awaitilityVersion"
-    testImplementation "joda-time:joda-time:$jodaTimeVersion"
-    testImplementation "org.meanbean:meanbean:$meanbeanVersion"
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+    testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:1.21"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testImplementation "uk.co.jemos.podam:podam:7.2.3.RELEASE"
+    testImplementation "com.github.javafaker:javafaker:1.0.2"
+    testImplementation "junit:junit:4.13"
+    testImplementation "org.openjdk.jmh:jmh-core:1.21"
+    testImplementation "org.apache.lucene:lucene-core:7.2.1"
+    testImplementation "org.apache.lucene:lucene-analyzers-common:7.2.1"
+    testImplementation "org.apache.lucene:lucene-queryparser:7.2.1"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.0"
+    testImplementation "org.apache.logging.log4j:log4j-core:2.13.0"
+    testImplementation "org.awaitility:awaitility:4.0.2"
+    testImplementation "joda-time:joda-time:2.9.9"
+    testImplementation "org.meanbean:meanbean:2.0.3"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.10.1"
 }
 
 test {

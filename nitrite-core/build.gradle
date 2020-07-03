@@ -29,13 +29,13 @@ jar {
 }
 
 dependencies {
-    implementation "org.slf4j:slf4j-api:$slf4jVersion"
-    implementation "org.objenesis:objenesis:$objenesisVersion"
-    implementation "org.jasypt:jasypt:$jasyptVersion"
-    annotationProcessor "org.projectlombok:lombok:$lombokVersion"
+    implementation "org.slf4j:slf4j-api:1.7.30"
+    implementation "org.objenesis:objenesis:2.6"
+    implementation "org.jasypt:jasypt:1.9.3"
+    annotationProcessor "org.projectlombok:lombok:1.18.12"
 
-    testAnnotationProcessor "org.projectlombok:lombok:$lombokVersion"
-    testImplementation "junit:junit:$junitVersion"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testImplementation "junit:junit:4.13"
 }
 
 test {
