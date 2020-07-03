@@ -17,7 +17,7 @@
 package org.dizitart.no2.test;
 
 import lombok.Getter;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
 public class RepositorySearchTest extends BaseObjectRepositoryTest {
     @Test
     public void testFindWithOptions() {
-        Cursor<Employee> cursor = employeeRepository.find().limit(0, 1);
+        Cursor<Employee> cursor = employeeRepository.find().skipLimit(0, 1);
         assertEquals(cursor.size(), 1);
         assertNotNull(cursor.firstOrNull());
     }
@@ -309,7 +309,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testRegexFilter() {
-        ReadableStream<Employee> employees = employeeRepository.find();
+        RecordStream<Employee> employees = employeeRepository.find();
         int count = employees.toList().size();
 
         List<Employee> employeeList = employeeRepository.find(where("employeeNote.text").regex(".*"))

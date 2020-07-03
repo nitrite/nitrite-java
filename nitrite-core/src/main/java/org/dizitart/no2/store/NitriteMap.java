@@ -18,7 +18,7 @@ package org.dizitart.no2.store;
 
 import org.dizitart.no2.collection.meta.MetadataAware;
 import org.dizitart.no2.common.KeyValuePair;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 
 /**
  * Represents a Nitrite key-value pair map. Every piece of
@@ -67,12 +67,12 @@ public interface NitriteMap<Key, Value> extends MetadataAware {
     String getName();
 
     /**
-     * Gets a {@link ReadableStream} view of the values contained in
+     * Gets a {@link RecordStream} view of the values contained in
      * this map.
      *
      * @return the collection view of all values in this map.
      */
-    ReadableStream<Value> values();
+    RecordStream<Value> values();
 
     /**
      * Removes the mapping for a key from this map if it is present.
@@ -83,11 +83,11 @@ public interface NitriteMap<Key, Value> extends MetadataAware {
     Value remove(Key key);
 
     /**
-     * Gets a {@link ReadableStream} view of the keys contained in this map.
+     * Gets a {@link RecordStream} view of the keys contained in this map.
      *
      * @return a set view of the keys contained in this map.
      */
-    ReadableStream<Key> keySet();
+    RecordStream<Key> keySet();
 
     /**
      * Associates the specified value with the specified key in this map.
@@ -117,11 +117,11 @@ public interface NitriteMap<Key, Value> extends MetadataAware {
     Value putIfAbsent(Key key, Value value);
 
     /**
-     * Gets a {@link ReadableStream} view of the mappings contained in this map.
+     * Gets a {@link RecordStream} view of the mappings contained in this map.
      *
      * @return a set view of the mappings contained in this map.
      */
-    ReadableStream<KeyValuePair<Key, Value>> entries();
+    RecordStream<KeyValuePair<Key, Value>> entries();
 
     /**
      * Get the smallest key that is larger than the given key, or null if no

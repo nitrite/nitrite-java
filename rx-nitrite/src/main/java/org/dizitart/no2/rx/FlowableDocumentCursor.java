@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.NullOrder;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 
 import java.text.Collator;
@@ -90,7 +90,7 @@ public final class FlowableDocumentCursor extends FlowableReadableStream<Documen
     }
 
     public FlowableReadableStream<Document> project(Document projection) {
-        Callable<ReadableStream<Document>> projectionSupplier = () -> {
+        Callable<RecordStream<Document>> projectionSupplier = () -> {
             DocumentCursor documentCursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
             return documentCursor.project(projection);
@@ -99,7 +99,7 @@ public final class FlowableDocumentCursor extends FlowableReadableStream<Documen
     }
 
     public FlowableReadableStream<Document> join(FlowableDocumentCursor foreignCursor, Lookup lookup) {
-        Callable<ReadableStream<Document>> joinSupplier = () -> {
+        Callable<RecordStream<Document>> joinSupplier = () -> {
             DocumentCursor documentCursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
 

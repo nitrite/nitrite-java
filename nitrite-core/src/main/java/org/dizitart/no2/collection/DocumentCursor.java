@@ -18,7 +18,7 @@ package org.dizitart.no2.collection;
 
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.NullOrder;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 
 import java.text.Collator;
@@ -51,7 +51,7 @@ import java.text.Collator;
  * @author Anindya Chatterjee
  * @since 4.0
  */
-public interface DocumentCursor extends ReadableStream<Document> {
+public interface DocumentCursor extends RecordStream<Document> {
 
     DocumentCursor sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder);
 
@@ -63,7 +63,7 @@ public interface DocumentCursor extends ReadableStream<Document> {
      * @param projection the selected keys of a result document.
      * @return a lazy iterable of documents.
      */
-    ReadableStream<Document> project(Document projection);
+    RecordStream<Document> project(Document projection);
 
     /**
      * Performs a left outer join with a foreign cursor with the specified lookup parameters.
@@ -77,7 +77,7 @@ public interface DocumentCursor extends ReadableStream<Document> {
      * @return a lazy iterable of joined documents.
      * @since 2.1.0
      */
-    ReadableStream<Document> join(DocumentCursor foreignCursor, Lookup lookup);
+    RecordStream<Document> join(DocumentCursor foreignCursor, Lookup lookup);
 
     default DocumentCursor skip(long skip) {
         return skipLimit(skip, size());

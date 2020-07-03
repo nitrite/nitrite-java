@@ -22,7 +22,7 @@ import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.mapper.Mappable;
@@ -166,7 +166,7 @@ public class RepositoryJoinTest {
         lookup.setForeignField("personId");
         lookup.setTargetField("addresses");
 
-        ReadableStream<PersonDetails> result
+        RecordStream<PersonDetails> result
             = personRepository.find().join(addressRepository.find(), lookup,
             PersonDetails.class);
         assertEquals(result.size(), 10);
@@ -181,7 +181,7 @@ public class RepositoryJoinTest {
             }
         }
 
-        result = personRepository.find().limit(0, 5).join(addressRepository.find(), lookup,
+        result = personRepository.find().skipLimit(0, 5).join(addressRepository.find(), lookup,
             PersonDetails.class);
 
         assertEquals(result.size(), 5);
@@ -196,7 +196,7 @@ public class RepositoryJoinTest {
         lookup.setForeignField("personId");
         lookup.setTargetField("addresses");
 
-        ReadableStream<PersonDetails> result
+        RecordStream<PersonDetails> result
             = personRepository.find().join(addressRepository.find(), lookup,
             PersonDetails.class);
         assertEquals(result.size(), 10);

@@ -54,7 +54,7 @@ public abstract class BaseObjectRepositoryTest {
     ObjectRepository<Employee> employeeRepository;
     ObjectRepository<ClassA> aObjectRepository;
     ObjectRepository<ClassC> cObjectRepository;
-    private String fileName = getRandomTempDbFile();
+    private final String fileName = getRandomTempDbFile();
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}, " +
         "Compressed = {2}, AutoCommit = {3}, AutoCompact = {4}")

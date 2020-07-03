@@ -25,12 +25,12 @@ import java.util.Set;
 /**
  * @author Anindya Chatterjee.
  */
-public interface ReadableStream<T> extends Iterable<T> {
-    static <T> ReadableStream<T> fromIterable(Iterable<T> iterable) {
+public interface RecordStream<T> extends Iterable<T> {
+    static <T> RecordStream<T> fromIterable(Iterable<T> iterable) {
         return iterable::iterator;
     }
 
-    static <T> ReadableStream<T> fromIterator(Iterator<T> iterator) {
+    static <T> RecordStream<T> fromIterator(Iterator<T> iterator) {
         return () -> iterator;
     }
 

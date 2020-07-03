@@ -17,7 +17,7 @@
 package org.dizitart.no2.store;
 
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.index.BoundingBox;
 import org.h2.mvstore.rtree.MVRTreeMap;
 import org.h2.mvstore.rtree.SpatialKey;
@@ -53,10 +53,10 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value>
     }
 
     @Override
-    public ReadableStream<NitriteId> findIntersectingKeys(Key key) {
+    public RecordStream<NitriteId> findIntersectingKeys(Key key) {
         SpatialKey spatialKey = getKey(key, 0L);
         MVRTreeMap.RTreeCursor treeCursor = mvMap.findIntersectingKeys(spatialKey);
-        return ReadableStream.fromIterator(new Iterator<NitriteId>() {
+        return RecordStream.fromIterator(new Iterator<NitriteId>() {
             @Override
             public boolean hasNext() {
                 return treeCursor.hasNext();
@@ -71,10 +71,10 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value>
     }
 
     @Override
-    public ReadableStream<NitriteId> findContainedKeys(Key key) {
+    public RecordStream<NitriteId> findContainedKeys(Key key) {
         SpatialKey spatialKey = getKey(key, 0L);
         MVRTreeMap.RTreeCursor treeCursor = mvMap.findContainedKeys(spatialKey);
-        return ReadableStream.fromIterator(new Iterator<NitriteId>() {
+        return RecordStream.fromIterator(new Iterator<NitriteId>() {
             @Override
             public boolean hasNext() {
                 return treeCursor.hasNext();

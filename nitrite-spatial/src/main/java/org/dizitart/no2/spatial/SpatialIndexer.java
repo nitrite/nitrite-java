@@ -19,7 +19,7 @@ package org.dizitart.no2.spatial;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.index.Indexer;
@@ -39,13 +39,13 @@ public class SpatialIndexer implements Indexer {
     private NitriteMapper nitriteMapper;
     private NitriteStore nitriteStore;
 
-    public ReadableStream<NitriteId> findWithin(String collectionName, String field, Geometry geometry) {
+    public RecordStream<NitriteId> findWithin(String collectionName, String field, Geometry geometry) {
         NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collectionName, field);
         BoundingBox boundingBox = new NitriteBoundingBox(geometry);
         return indexMap.findContainedKeys(boundingBox);
     }
 
-    public ReadableStream<NitriteId> findIntersects(String collectionName, String field, Geometry geometry) {
+    public RecordStream<NitriteId> findIntersects(String collectionName, String field, Geometry geometry) {
         NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collectionName, field);
         BoundingBox boundingBox = new NitriteBoundingBox(geometry);
         return indexMap.findIntersectingKeys(boundingBox);

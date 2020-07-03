@@ -19,7 +19,7 @@ package org.dizitart.no2.rx;
 import io.reactivex.internal.functions.ObjectHelper;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.NullOrder;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.repository.Cursor;
 
@@ -82,14 +82,14 @@ public final class FlowableCursor<T> extends FlowableReadableStream<T> {
         Callable<Cursor<T>> sortSupplier = () -> {
             Cursor<T> cursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
-            return cursor.limit(offset, size);
+            return cursor.skipLimit(offset, size);
         };
 
         return new FlowableCursor<>(sortSupplier);
     }
 
     public <P> FlowableReadableStream<P> project(Class<P> projectionType) {
-        Callable<ReadableStream<P>> projectionSupplier = () -> {
+        Callable<RecordStream<P>> projectionSupplier = () -> {
             Cursor<T> cursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
             return cursor.project(projectionType);
@@ -100,7 +100,7 @@ public final class FlowableCursor<T> extends FlowableReadableStream<T> {
 
     public <Foreign, Joined> FlowableReadableStream<Joined> join(FlowableCursor<Foreign> foreignCursor, Lookup lookup,
                                                                  Class<Joined> type) {
-        Callable<ReadableStream<Joined>> joinSupplier = () -> {
+        Callable<RecordStream<Joined>> joinSupplier = () -> {
             Cursor<T> cursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
 

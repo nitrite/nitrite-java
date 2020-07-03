@@ -20,7 +20,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.NullOrder;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -53,16 +53,16 @@ class ObjectCursor<T> implements Cursor<T> {
     }
 
     @Override
-    public <P> ReadableStream<P> project(Class<P> projectionType) {
+    public <P> RecordStream<P> project(Class<P> projectionType) {
         notNull(projectionType, "projection cannot be null");
         Document dummyDoc = emptyDocument(nitriteMapper, projectionType);
-        return new ProjectedObjectIterable<>(nitriteMapper, cursor.project(dummyDoc), projectionType);
+        return new ProjectedObjectStream<>(nitriteMapper, cursor.project(dummyDoc), projectionType);
     }
 
     @Override
-    public <Foreign, Joined> ReadableStream<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type) {
+    public <Foreign, Joined> RecordStream<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type) {
         ObjectCursor<Foreign> foreignObjectCursor = (ObjectCursor<Foreign>) foreignCursor;
-        return new JoinedObjectIterable<>(nitriteMapper, cursor.join(foreignObjectCursor.cursor, lookup), type);
+        return new JoinedObjectStream<>(nitriteMapper, cursor.join(foreignObjectCursor.cursor, lookup), type);
     }
 
     @Override
@@ -71,8 +71,8 @@ class ObjectCursor<T> implements Cursor<T> {
     }
 
     @Override
-    public Cursor<T> limit(int offset, int size) {
-        return new ObjectCursor<>(nitriteMapper, cursor.skipLimit(offset, size), type);
+    public Cursor<T> skipLimit(long skip, long size) {
+        return new ObjectCursor<>(nitriteMapper, cursor.skipLimit(skip, size), type);
     }
 
     @Override
@@ -89,6 +89,8 @@ class ObjectCursor<T> implements Cursor<T> {
             throw new ValidationException("cannot project to array");
         } else if (Modifier.isAbstract(type.getModifiers())) {
             throw new ValidationException("cannot project to abstract type");
+        } else if (nitriteMapper.isValueType(type)) {
+            throw new ValidationException("cannot to project to nitrite mapper's value type");
         }
 
         Document dummyDoc = skeletonDocument(nitriteMapper, type);

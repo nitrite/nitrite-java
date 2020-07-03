@@ -17,7 +17,7 @@
 package org.dizitart.no2.store;
 
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 
 /**
  * @author Anindya Chatterjee.
@@ -27,7 +27,7 @@ public interface NitriteRTree<Key, Value> {
 
     void remove(Key key, NitriteId nitriteId);
 
-    ReadableStream<NitriteId> findIntersectingKeys(Key key);
+    RecordStream<NitriteId> findIntersectingKeys(Key key);
 
-    ReadableStream<NitriteId> findContainedKeys(Key key);
+    RecordStream<NitriteId> findContainedKeys(Key key);
 }

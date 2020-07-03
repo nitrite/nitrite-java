@@ -17,7 +17,7 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.mapper.NitriteMapper;
 
@@ -28,14 +28,14 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
 /**
  * @author Anindya Chatterjee.
  */
-class JoinedObjectIterable<T> implements ReadableStream<T> {
-    private final ReadableStream<Document> recordIterable;
+class JoinedObjectStream<T> implements RecordStream<T> {
+    private final RecordStream<Document> recordIterable;
     private final Class<T> joinType;
     private final NitriteMapper nitriteMapper;
 
-    JoinedObjectIterable(NitriteMapper nitriteMapper,
-                         ReadableStream<Document> recordIterable,
-                         Class<T> joinType) {
+    JoinedObjectStream(NitriteMapper nitriteMapper,
+                       RecordStream<Document> recordIterable,
+                       Class<T> joinType) {
         this.recordIterable = recordIterable;
         this.joinType = joinType;
         this.nitriteMapper = nitriteMapper;

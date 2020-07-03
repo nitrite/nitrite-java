@@ -17,7 +17,7 @@
 package org.dizitart.no2.spatial;
 
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.FilterException;
 import org.locationtech.jts.geom.Geometry;
 
@@ -37,7 +37,7 @@ class IntersectsFilter extends SpatialFilter {
         if (getIsFieldIndexed()) {
             if (getIndexer() instanceof SpatialIndexer && getValue() != null) {
                 SpatialIndexer spatialIndexer = (SpatialIndexer) getIndexer();
-                ReadableStream<NitriteId> idSet = spatialIndexer.findIntersects(getCollectionName(), getField(), getValue());
+                RecordStream<NitriteId> idSet = spatialIndexer.findIntersects(getCollectionName(), getField(), getValue());
                 return idSet.toSet();
             } else {
                 throw new FilterException(getValue() + " is not a Geometry");

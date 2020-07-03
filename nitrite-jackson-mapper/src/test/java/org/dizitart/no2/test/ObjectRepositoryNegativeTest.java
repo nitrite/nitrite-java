@@ -19,7 +19,7 @@ package org.dizitart.no2.test;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.mapper.JacksonMapperModule;
@@ -118,7 +118,7 @@ public class ObjectRepositoryNegativeTest {
     public void testFindResultRemove() {
         ObjectRepository<Employee> repository = db.getRepository(Employee.class);
         repository.insert(DataGenerator.generateEmployee());
-        ReadableStream<Employee> result = repository.find();
+        RecordStream<Employee> result = repository.find();
         result.iterator().remove();
     }
 
@@ -160,7 +160,7 @@ public class ObjectRepositoryNegativeTest {
         object.setNumber(1L);
         repository.insert(object);
 
-        ReadableStream<LineString> project = repository.find().project(LineString.class);
+        RecordStream<LineString> project = repository.find().project(LineString.class);
         assertNull(project);
     }
 

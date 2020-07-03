@@ -16,12 +16,14 @@
 
 package org.dizitart.no2.test;
 
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.test.data.Employee;
 import org.junit.Test;
 
 import java.util.AbstractCollection;
+import java.util.Date;
 
 /**
  * @author Anindya Chatterjee
@@ -50,5 +52,12 @@ public class ObjectCursorTest extends BaseObjectRepositoryTest {
     public void testProjectForAbstractClass() {
         Cursor<Employee> cursor = employeeRepository.find();
         cursor.project(AbstractCollection.class);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testProjectForValueType() {
+        Cursor<Employee> cursor = employeeRepository.find();
+        RecordStream<Date> project = cursor.project(Date.class);
+        project.forEach(System.out::println);
     }
 }

@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.filters.IndexAwareFilter;
 import org.dizitart.no2.filters.LogicalFilter;
@@ -50,8 +50,8 @@ class ReadOperations {
     }
 
     public DocumentCursor find() {
-        ReadableStream<NitriteId> readableStream = nitriteMap.keySet();
-        return new DocumentCursorImpl(readableStream, nitriteMap);
+        RecordStream<NitriteId> recordStream = nitriteMap.keySet();
+        return new DocumentCursorImpl(recordStream, nitriteMap);
     }
 
     public DocumentCursor find(Filter filter) {
@@ -60,8 +60,8 @@ class ReadOperations {
         }
 
         prepareFilter(filter);
-        ReadableStream<KeyValuePair<NitriteId, Document>> readableStream = nitriteMap.entries();
-        FilteredReadableStream filteredReadableStream = new FilteredReadableStream(readableStream, filter);
+        RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+        FilteredRecordStream filteredReadableStream = new FilteredRecordStream(recordStream, filter);
 
         return new DocumentCursorImpl(filteredReadableStream, nitriteMap);
     }

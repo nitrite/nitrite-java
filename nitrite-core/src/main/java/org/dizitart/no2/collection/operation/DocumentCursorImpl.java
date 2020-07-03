@@ -32,40 +32,40 @@ import java.util.Iterator;
  * @author Anindya Chatterjee.
  */
 class DocumentCursorImpl implements DocumentCursor {
-    private final ReadableStream<NitriteId> readableStream;
+    private final RecordStream<NitriteId> recordStream;
     private final NitriteMap<NitriteId, Document> nitriteMap;
 
-    DocumentCursorImpl(ReadableStream<NitriteId> readableStream, NitriteMap<NitriteId, Document> nitriteMap) {
-        this.readableStream = readableStream;
+    DocumentCursorImpl(RecordStream<NitriteId> recordStream, NitriteMap<NitriteId, Document> nitriteMap) {
+        this.recordStream = recordStream;
         this.nitriteMap = nitriteMap;
     }
 
     @Override
     public DocumentCursor sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder) {
         return new DocumentCursorImpl(new SortedDocumentCursor(field, sortOrder, collator,
-            nullOrder, readableStream, nitriteMap), nitriteMap);
+            nullOrder, recordStream, nitriteMap), nitriteMap);
     }
 
     @Override
     public DocumentCursor skipLimit(long skip, long limit) {
-        return new DocumentCursorImpl(new BoundedDocumentCursor(readableStream, skip, limit), nitriteMap);
+        return new DocumentCursorImpl(new BoundedDocumentStream(recordStream, skip, limit), nitriteMap);
     }
 
     @Override
-    public ReadableStream<Document> project(Document projection) {
+    public RecordStream<Document> project(Document projection) {
         validateProjection(projection);
-        return new ProjectedDocumentIterable(readableStream, nitriteMap, projection);
+        return new ProjectedDocumentStream(recordStream, nitriteMap, projection);
     }
 
     @Override
-    public ReadableStream<Document> join(DocumentCursor foreignCursor, Lookup lookup) {
-        return new JoinedDocumentIterable(readableStream, nitriteMap, foreignCursor, lookup);
+    public RecordStream<Document> join(DocumentCursor foreignCursor, Lookup lookup) {
+        return new JoinedDocumentStream(recordStream, nitriteMap, foreignCursor, lookup);
     }
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<NitriteId> iterator = readableStream == null ? Collections.emptyIterator()
-            : readableStream.iterator();
+        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+            : recordStream.iterator();
         return new DocumentCursorIterator(iterator);
     }
 

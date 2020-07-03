@@ -25,7 +25,7 @@ import java.util.Set;
  * @author Anindya Chatterjee
  */
 public class JacksonMapperModule implements NitriteModule {
-    private JacksonMapper jacksonMapper;
+    private final JacksonMapper jacksonMapper;
 
     public JacksonMapperModule() {
         jacksonMapper = new JacksonMapper();

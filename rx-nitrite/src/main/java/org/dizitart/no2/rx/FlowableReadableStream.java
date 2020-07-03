@@ -19,7 +19,7 @@ package org.dizitart.no2.rx;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import io.reactivex.internal.functions.ObjectHelper;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 
 import java.util.concurrent.Callable;
 
@@ -28,21 +28,21 @@ import java.util.concurrent.Callable;
  */
 public abstract class FlowableReadableStream<T> extends FlowableIterable<T> {
 
-    private final Callable<? extends ReadableStream<T>> supplier;
+    private final Callable<? extends RecordStream<T>> supplier;
 
-    FlowableReadableStream(Callable<? extends ReadableStream<T>> supplier) {
+    FlowableReadableStream(Callable<? extends RecordStream<T>> supplier) {
         super(supplier);
         this.supplier = supplier;
     }
 
-    static <R> FlowableReadableStream<R> create(Callable<? extends ReadableStream<R>> supplier) {
+    static <R> FlowableReadableStream<R> create(Callable<? extends RecordStream<R>> supplier) {
         return new FlowableReadableStream<R>(supplier) {
         };
     }
 
     public Single<Long> size() {
         return Single.fromCallable(() -> {
-            ReadableStream<T> recordIterable = ObjectHelper.requireNonNull(supplier.call(),
+            RecordStream<T> recordIterable = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
             return recordIterable.size();
         });

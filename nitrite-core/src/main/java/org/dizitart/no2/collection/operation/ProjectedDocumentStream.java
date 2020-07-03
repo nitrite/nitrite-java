@@ -19,7 +19,7 @@ package org.dizitart.no2.collection.operation;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
 
@@ -29,23 +29,23 @@ import java.util.Iterator;
 /**
  * @author Anindya Chatterjee.
  */
-class ProjectedDocumentIterable implements ReadableStream<Document> {
-    private final ReadableStream<NitriteId> readableStream;
+class ProjectedDocumentStream implements RecordStream<Document> {
+    private final RecordStream<NitriteId> recordStream;
     private final NitriteMap<NitriteId, Document> nitriteMap;
     private final Document projection;
 
-    public ProjectedDocumentIterable(ReadableStream<NitriteId> readableStream,
-                                     NitriteMap<NitriteId, Document> nitriteMap,
-                                     Document projection) {
-        this.readableStream = readableStream;
+    public ProjectedDocumentStream(RecordStream<NitriteId> recordStream,
+                                   NitriteMap<NitriteId, Document> nitriteMap,
+                                   Document projection) {
+        this.recordStream = recordStream;
         this.nitriteMap = nitriteMap;
         this.projection = projection;
     }
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<NitriteId> iterator = readableStream == null ? Collections.emptyIterator()
-            : readableStream.iterator();
+        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+            : recordStream.iterator();
         return new ProjectedDocumentIterator(iterator);
     }
 

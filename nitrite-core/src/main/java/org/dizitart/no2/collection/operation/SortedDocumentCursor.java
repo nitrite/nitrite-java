@@ -19,7 +19,7 @@ package org.dizitart.no2.collection.operation;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.NullOrder;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
@@ -30,32 +30,32 @@ import java.util.*;
 /**
  * @author Anindya Chatterjee.
  */
-class SortedDocumentCursor implements ReadableStream<NitriteId> {
+class SortedDocumentCursor implements RecordStream<NitriteId> {
     private final String field;
     private final SortOrder sortOrder;
     private final Collator collator;
     private final NullOrder nullOrder;
-    private final ReadableStream<NitriteId> readableStream;
+    private final RecordStream<NitriteId> recordStream;
     private final NitriteMap<NitriteId, Document> nitriteMap;
 
     public SortedDocumentCursor(String field,
                                 SortOrder sortOrder,
                                 Collator collator,
                                 NullOrder nullOrder,
-                                ReadableStream<NitriteId> readableStream,
+                                RecordStream<NitriteId> recordStream,
                                 NitriteMap<NitriteId, Document> nitriteMap) {
         this.field = field;
         this.sortOrder = sortOrder;
         this.collator = collator;
         this.nullOrder = nullOrder;
         this.nitriteMap = nitriteMap;
-        this.readableStream = readableStream;
+        this.recordStream = recordStream;
     }
 
     @Override
     public Iterator<NitriteId> iterator() {
-        Iterator<NitriteId> iterator = readableStream == null ? Collections.emptyIterator()
-            : readableStream.iterator();
+        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+            : recordStream.iterator();
         return new SortedDocumentIterator(field, sortOrder, collator, nullOrder, iterator, nitriteMap);
     }
 

@@ -17,7 +17,7 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.mapper.NitriteMapper;
 
@@ -28,14 +28,14 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
 /**
  * @author Anindya Chatterjee.
  */
-class ProjectedObjectIterable<T> implements ReadableStream<T> {
-    private final ReadableStream<Document> recordIterable;
+class ProjectedObjectStream<T> implements RecordStream<T> {
+    private final RecordStream<Document> recordIterable;
     private final Class<T> projectionType;
     private final NitriteMapper nitriteMapper;
 
-    ProjectedObjectIterable(NitriteMapper nitriteMapper,
-                            ReadableStream<Document> recordIterable,
-                            Class<T> projectionType) {
+    ProjectedObjectStream(NitriteMapper nitriteMapper,
+                          RecordStream<Document> recordIterable,
+                          Class<T> projectionType) {
         this.recordIterable = recordIterable;
         this.projectionType = projectionType;
         this.nitriteMapper = nitriteMapper;

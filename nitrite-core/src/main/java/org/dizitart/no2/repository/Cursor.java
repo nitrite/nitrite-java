@@ -19,7 +19,7 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.NullOrder;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.filters.Filter;
 
@@ -34,10 +34,10 @@ import java.text.Collator;
  * @see ObjectRepository#find()
  * @since 1.0
  */
-public interface Cursor<T> extends ReadableStream<T> {
+public interface Cursor<T> extends RecordStream<T> {
     Cursor<T> sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder);
 
-    Cursor<T> limit(int offset, int size);
+    Cursor<T> skipLimit(long skip, long size);
 
     /**
      * Projects the result of one type into an {@link Iterable} of other type.
@@ -46,7 +46,7 @@ public interface Cursor<T> extends ReadableStream<T> {
      * @param projectionType the projection type.
      * @return `Iterable` of projected objects.
      */
-    <P> ReadableStream<P> project(Class<P> projectionType);
+    <P> RecordStream<P> project(Class<P> projectionType);
 
     /**
      * Performs a left outer join with a foreign cursor with the specified lookup parameters.
@@ -63,7 +63,7 @@ public interface Cursor<T> extends ReadableStream<T> {
      * @return a lazy iterable of joined objects.
      * @since 2.1.0
      */
-    <Foreign, Joined> ReadableStream<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type);
+    <Foreign, Joined> RecordStream<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type);
 
     default Cursor<T> sort(String field) {
         return sort(field, SortOrder.Ascending);

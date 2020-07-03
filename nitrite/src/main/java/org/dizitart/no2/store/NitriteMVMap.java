@@ -18,7 +18,7 @@ package org.dizitart.no2.store;
 
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.KeyValuePair;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.h2.mvstore.MVMap;
 
 import java.util.Iterator;
@@ -67,8 +67,8 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public ReadableStream<Value> values() {
-        return ReadableStream.fromIterable(mvMap.values());
+    public RecordStream<Value> values() {
+        return RecordStream.fromIterable(mvMap.values());
     }
 
     @Override
@@ -78,8 +78,8 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public ReadableStream<Key> keySet() {
-        return ReadableStream.fromIterable(mvMap.keySet());
+    public RecordStream<Key> keySet() {
+        return RecordStream.fromIterable(mvMap.keySet());
     }
 
     @Override
@@ -100,7 +100,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public ReadableStream<KeyValuePair<Key, Value>> entries() {
+    public RecordStream<KeyValuePair<Key, Value>> entries() {
         return () -> new Iterator<KeyValuePair<Key, Value>>() {
             final Iterator<Map.Entry<Key, Value>> entryIterator = mvMap.entrySet().iterator();
 

@@ -19,7 +19,7 @@ package org.dizitart.no2.collection;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -72,7 +72,7 @@ public class CollectionJoinTest extends BaseCollectionTest {
         lookup.setForeignField("fName");
         lookup.setTargetField("personalDetails");
 
-        ReadableStream<Document> result = collection.find().join(foreignCollection.find(), lookup);
+        RecordStream<Document> result = collection.find().join(foreignCollection.find(), lookup);
         assertEquals(result.size(), 3);
 
         for (Document document : result) {

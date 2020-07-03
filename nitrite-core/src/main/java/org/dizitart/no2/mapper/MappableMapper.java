@@ -54,7 +54,7 @@ public class MappableMapper implements NitriteMapper {
             }
         }
 
-        throw new ObjectMappingException("object must implements Mappable or register a TypeConverter");
+        throw new ObjectMappingException("object must implements Mappable");
     }
 
     protected <Target> Target convertFromDocument(Document source, Class<Target> type) {
@@ -70,7 +70,7 @@ public class MappableMapper implements NitriteMapper {
             return item;
         }
 
-        throw new ObjectMappingException("object must implements Mappable or register a TypeConverter");
+        throw new ObjectMappingException("object must implements Mappable");
     }
 
     protected <Source> Document convertToDocument(Source source) {
@@ -79,9 +79,8 @@ public class MappableMapper implements NitriteMapper {
             return mappable.write(this);
         }
 
-        throw new ObjectMappingException("object must implements Mappable or register a TypeConverter");
+        throw new ObjectMappingException("object must implements Mappable");
     }
-
 
     @Override
     public boolean isValueType(Class<?> type) {

@@ -21,7 +21,7 @@ import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.junit.Test;
 
@@ -67,7 +67,7 @@ public class DocumentCursorTest {
         collection.insert(createDocument("first", "second"));
 
         Document projection = createDocument("first", createDocument("second", null));
-        ReadableStream<Document> project = collection.find().project(projection);
+        RecordStream<Document> project = collection.find().project(projection);
         assertNotNull(project);
     }
 }

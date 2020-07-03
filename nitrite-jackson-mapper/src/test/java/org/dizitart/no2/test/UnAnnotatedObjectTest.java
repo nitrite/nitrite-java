@@ -45,7 +45,7 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
         aObjectRepository.createIndex("b.number", indexOptions);
 
         cursor = aObjectRepository.find(where("b.number").eq(160).not()).
-            sort("b.number", SortOrder.Ascending).limit(0, 10);
+            sort("b.number", SortOrder.Ascending).skipLimit(0, 10);
 
         System.out.println("Available - " + !cursor.isEmpty());
         System.out.println("Total Size - " + cursor.size());
@@ -56,7 +56,7 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
         }
 
         cursor = aObjectRepository.find(where("b.number").eq(160).not()).
-            sort("b.number", SortOrder.Descending).limit(2, 7);
+            sort("b.number", SortOrder.Descending).skipLimit(2, 7);
 
         System.out.println("Available - " + !cursor.isEmpty());
         System.out.println("Total Size - " + cursor.size());
@@ -67,7 +67,7 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
         }
 
         cursor = cObjectRepository.find(where("id").gt(900)).
-            sort("id", SortOrder.Descending).limit(2, 7);
+            sort("id", SortOrder.Descending).skipLimit(2, 7);
         System.out.println("Available - " + !cursor.isEmpty());
         System.out.println("Total Size - " + cursor.size());
 

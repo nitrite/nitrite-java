@@ -19,7 +19,7 @@ package org.dizitart.no2.collection.operation;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.filters.Filter;
 
@@ -30,19 +30,19 @@ import java.util.NoSuchElementException;
 /**
  * @author Anindya Chatterjee.
  */
-class FilteredReadableStream implements ReadableStream<NitriteId> {
-    private final ReadableStream<KeyValuePair<NitriteId, Document>> readableStream;
+class FilteredRecordStream implements RecordStream<NitriteId> {
+    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
     private final Filter filter;
 
-    FilteredReadableStream(ReadableStream<KeyValuePair<NitriteId, Document>> readableStream, Filter filter) {
-        this.readableStream = readableStream;
+    FilteredRecordStream(RecordStream<KeyValuePair<NitriteId, Document>> recordStream, Filter filter) {
+        this.recordStream = recordStream;
         this.filter = filter;
     }
 
     @Override
     public Iterator<NitriteId> iterator() {
-        Iterator<KeyValuePair<NitriteId, Document>> iterator = readableStream == null ? Collections.emptyIterator()
-            : readableStream.iterator();
+        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
+            : recordStream.iterator();
         return new FilteredIterator(iterator, filter);
     }
 

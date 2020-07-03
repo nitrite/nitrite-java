@@ -20,7 +20,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
 
@@ -34,17 +34,17 @@ import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 /**
  * @author Anindya Chatterjee.
  */
-class JoinedDocumentIterable implements ReadableStream<Document> {
-    private final ReadableStream<NitriteId> readableStream;
+class JoinedDocumentStream implements RecordStream<Document> {
+    private final RecordStream<NitriteId> recordStream;
     private final NitriteMap<NitriteId, Document> nitriteMap;
     private final DocumentCursor foreignCursor;
     private final Lookup lookup;
 
-    JoinedDocumentIterable(ReadableStream<NitriteId> readableStream,
-                           NitriteMap<NitriteId, Document> nitriteMap,
-                           DocumentCursor foreignCursor,
-                           Lookup lookup) {
-        this.readableStream = readableStream;
+    JoinedDocumentStream(RecordStream<NitriteId> recordStream,
+                         NitriteMap<NitriteId, Document> nitriteMap,
+                         DocumentCursor foreignCursor,
+                         Lookup lookup) {
+        this.recordStream = recordStream;
         this.nitriteMap = nitriteMap;
         this.foreignCursor = foreignCursor;
         this.lookup = lookup;
@@ -53,8 +53,8 @@ class JoinedDocumentIterable implements ReadableStream<Document> {
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<NitriteId> iterator = readableStream == null ? Collections.emptyIterator()
-            : readableStream.iterator();
+        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+            : recordStream.iterator();
         return new JoinedDocumentIterator(iterator);
     }
 

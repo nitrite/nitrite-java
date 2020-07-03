@@ -21,7 +21,7 @@ import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.ReadableStream;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Anindya Chatterjee
  */
-public class JoinedDocumentIterableTest {
+public class JoinedDocumentStreamTest {
 
     @Test
     public void testFindResult() {
@@ -42,8 +42,8 @@ public class JoinedDocumentIterableTest {
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("first", "second"));
 
-        ReadableStream<Document> result = collection.find().join(collection.find(), new Lookup());
-        assertTrue(result instanceof JoinedDocumentIterable);
+        RecordStream<Document> result = collection.find().join(collection.find(), new Lookup());
+        assertTrue(result instanceof JoinedDocumentStream);
     }
 
     @Test(expected = InvalidOperationException.class)
@@ -52,7 +52,7 @@ public class JoinedDocumentIterableTest {
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("first", "second"));
 
-        ReadableStream<Document> cursor = collection.find().join(collection.find(), new Lookup());
+        RecordStream<Document> cursor = collection.find().join(collection.find(), new Lookup());
         assertNotNull(cursor.toString());
         Iterator<Document> iterator = cursor.iterator();
         if (iterator.hasNext()) {
