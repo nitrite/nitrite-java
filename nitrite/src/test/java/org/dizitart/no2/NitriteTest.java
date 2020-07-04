@@ -452,6 +452,9 @@ public class NitriteTest {
             Files.delete(Paths.get("/tmp/old.db"));
         }
         InputStream stream = ClassLoader.getSystemResourceAsStream("no2-old.db");
+        if (stream == null) {
+            stream = ClassLoader.getSystemClassLoader().getResourceAsStream("no2-old.db");
+        }
         assert stream != null;
 
         Files.copy(stream, Paths.get("/tmp/old.db"));
