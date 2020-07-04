@@ -447,9 +447,7 @@ captures/
 # Notepad++ backups #
 ### Windows template
 
-!/nitrite-datagate/src/main/dist/
-!/nitrite-datagate/src/main/dist/bin/
-/nitrite-datagate/src/main/dist/logs/
 .attach_pid*
 test.log
 /build
+!/nitrite/src/test/resources/no2-old.db
