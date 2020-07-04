@@ -38,7 +38,7 @@ public abstract class NitriteConfig {
      * Gets the embedded field separator character. Default value
      * is `.` unless set explicitly.
      *
-     * @returns the embedded field separator character.
+     * @return the embedded field separator character.
      */
     @Getter
     private static String fieldSeparator = ".";
@@ -48,7 +48,7 @@ public abstract class NitriteConfig {
     /**
      * Gets the {@link NitriteStore} configuration.
      *
-     * @returns the {@link NitriteStore} configuration.
+     * @return the {@link NitriteStore} configuration.
      */
     @Getter
     private StoreConfig storeConfig;

@@ -17,16 +17,20 @@
 plugins {
     id 'java'
     id 'signing'
-    id 'maven'
+    id 'maven-publish'
     id 'com.github.hauner.jarTest'
     id 'jacoco'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 jar {
     archivesBaseName = 'nitrite-spatial'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 repositories {
@@ -61,3 +65,77 @@ jacocoTestReport {
 }
 
 check.dependsOn jacocoTestReport
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'nitrite-spatial'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'Nitrite Spatial'
+                description = 'Spatial data indexing support for Nitrite.'
+                url = 'https://github.com/nitrite/nitrite-java'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'anidotnet'
+                        name = 'Anindya Chatterjee'
+                        email = 'anidotnet@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git@github.com:nitrite/nitrite-java.git'
+                    developerConnection = 'scm:git:git@github.com:nitrite/nitrite-java.git'
+                    url = 'git@github.com:nitrite/nitrite-java.git'
+                }
+            }
+        }
+    }
+    repositories {
+        if (version.endsWith('SNAPSHOT') || project.hasProperty('release')) {
+            maven {
+                name = "OSSRH"
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username System.getenv('MAVEN_USERNAME')
+                    password System.getenv('MAVEN_PASSWORD')
+                }
+
+            }
+        }
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/nitrite/nitrite-java"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}

@@ -170,7 +170,7 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
      * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
-     * {@link EventType#Update
+     * {@link EventType#Update}
      * or {@link EventType#Insert}.
      *
      * @param element        the element to update.

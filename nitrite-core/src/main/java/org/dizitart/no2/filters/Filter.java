@@ -33,7 +33,6 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * the index map for that value. But if the value is not indexed, it scans
  * the whole collection.
  * <p>
- * <p>
  * The supported filters are:
  * <p>
  * .Comparison Filters
@@ -66,7 +65,6 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * |Matches any of the values specified in an array.
  * |===
  * <p>
- * <p>
  * .Logical Filters
  * [width="80%",cols="2,4,10"]
  * |===
@@ -87,7 +85,6 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * of both filters.
  * |===
  * <p>
- * <p>
  * .Array Filter
  * [width="80%",cols="2,4,10"]
  * |===
@@ -98,7 +95,6 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * |Matches documents that contain an array field with at least one element that matches
  * the specified filter.
  * |===
- * <p>
  * <p>
  * .Text Filters
  * [width="80%",cols="2,4,10"]
@@ -113,7 +109,6 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * |{@link FluentFilter#regex(String)}
  * |Selects documents where values match a specified regular expression.
  * |===
- * <p>
  * <p>
  * [[app-listing]]
  * [source,java]
@@ -178,7 +173,6 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
  * <p>
  * // filter on object array
  * collection.find(where("objArray.0.field").eq(1));
- * <p>
  * <p>
  * --
  *

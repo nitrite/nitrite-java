@@ -31,14 +31,6 @@ import java.lang.annotation.*;
  * --
  *
  * @author Anindya Chatterjee.
- * @Index(value = "companyName")
- * public class Company implements Serializable {
- * @Id private long companyId;
- * <p>
- * private String companyName;
- * <p>
- * }
- * --
  * @see ObjectRepository#createIndex(String, IndexOptions)
  * @since 1.0
  */

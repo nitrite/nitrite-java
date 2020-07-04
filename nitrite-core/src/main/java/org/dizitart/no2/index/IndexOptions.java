@@ -33,7 +33,7 @@ public class IndexOptions {
      * Specifies the type of an index to create.
      *
      * @param indexType type of an index.
-     * @returns type of an index to create.
+     * @return type of an index to create.
      */
     @Getter
     @Setter
@@ -46,7 +46,7 @@ public class IndexOptions {
      * @param async if set to `true` then the index will be created asynchronously;
      * otherwise create index operation will wait until all existing
      * documents are indexed.
-     * @returns `true` if index is to be created asynchronously; otherwise `false`.
+     * @return `true` if index is to be created asynchronously; otherwise `false`.
      * @see NitriteCollection#createIndex(String, IndexOptions)
      */
     @Getter

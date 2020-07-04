@@ -40,7 +40,7 @@ public class KeyValuePair<Key, Value> implements Serializable {
      * The key of the pair.
      *
      * @param key the key to set.
-     * @returns the key.
+     * @return the key.
      */
     private Key key;
 
@@ -48,7 +48,7 @@ public class KeyValuePair<Key, Value> implements Serializable {
      * The value of the pair.
      *
      * @param value the value to set.
-     * @returns the value.
+     * @return the value.
      */
     private Value value;
 

@@ -55,18 +55,14 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * .openOrCreate("user", "password");
  * <p>
  * // create an object repository
- * ObjectRepository<Employee> employeeStore = db.getRepository(Employee.class);
+ * ObjectRepository&lt;Employee&gt; employeeStore = db.getRepository(Employee.class);
  * <p>
  * // observe any change to the repository
  * employeeStore.register(new ChangeListener() {
  *
  * @param <T> the type of the object to store.
  * @author Anindya Chatterjee.
- * @Override public void onChange(ChangeInfo changeInfo) {
- * // your logic based on action
- * }
- * });
- * <p>
+ *
  * // insert an object
  * Employee emp = new Employee();
  * emp.setName("John Doe");

@@ -47,7 +47,7 @@ public class UpdateOptions {
     /**
      * Indicates if only one document will be updated or all of them.
      *
-     * @param justOne a value indicating if only one document to update or all.
+     * @param justOnce a value indicating if only one document to update or all.
      * @return `true` if only one document to update; otherwise, `false`.
      */
     @Getter

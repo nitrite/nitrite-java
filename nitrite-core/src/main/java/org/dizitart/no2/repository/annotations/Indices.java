@@ -30,17 +30,8 @@ import java.lang.annotation.Target;
  * --
  *
  * @author Anindya Chatterjee.
- * @Indices({
- * @Index(value = "joinDate", type = IndexType.NonUnique),
- * @Index(value = "address", type = IndexType.Fulltext)
- * })
- * public class Employee implements Serializable {
- * @Id private long empId;
- * private Date joinDate;
- * private String address;
- * }
- * <p>
- * --
+ *
+ *
  * @see Index
  * @since 1.0
  */

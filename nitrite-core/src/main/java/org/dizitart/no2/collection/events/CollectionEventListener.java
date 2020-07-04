@@ -33,14 +33,6 @@ import org.dizitart.no2.repository.ObjectRepository;
  * collection.subscribe(new EventListener() {
  *
  * @author Anindya Chatterjee.
- * @Override public void onEvent(EventInfo<Document> eventInfo) {
- * System.out.println("Action - " + eventInfo.getEventType());
- * <p>
- * System.out.println("Affected document - " + eventInfo.getItem());
- * }
- * });
- * <p>
- * --
  * @since 4.0
  */
 public interface CollectionEventListener {

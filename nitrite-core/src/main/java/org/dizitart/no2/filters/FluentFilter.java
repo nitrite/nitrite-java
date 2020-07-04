@@ -55,7 +55,7 @@ public final class FluentFilter {
 
     /**
      * Creates a greater than filter which matches those documents where the value
-     * of the field is greater than (i.e. >) the specified value.
+     * of the field is greater than (i.e. &gt;) the specified value.
      * <p>
      * [[app-listing]]
      * [source,java]
@@ -74,7 +74,7 @@ public final class FluentFilter {
 
     /**
      * Creates a greater equal filter which matches those documents where the value
-     * of the field is greater than or equals to (i.e. >=) the specified value.
+     * of the field is greater than or equals to (i.e. &ge;) the specified value.
      * <p>
      * [[app-listing]]
      * [source,java]
@@ -93,7 +93,7 @@ public final class FluentFilter {
 
     /**
      * Creates a lesser than filter which matches those documents where the value
-     * of the field is less than (i.e. <) the specified value.
+     * of the field is less than (i.e. &lt;) the specified value.
      * <p>
      * [[app-listing]]
      * [source,java]
@@ -112,7 +112,7 @@ public final class FluentFilter {
 
     /**
      * Creates a lesser equal filter which matches those documents where the value
-     * of the field is lesser than or equals to (i.e. <=) the specified value.
+     * of the field is lesser than or equals to (i.e. &le;) the specified value.
      * <p>
      * [[app-listing]]
      * [source,java]
@@ -132,7 +132,6 @@ public final class FluentFilter {
     /**
      * Creates a between filter which matches those documents where the value
      * of the field is within the specified bound including the end values.
-     * <p>
      * <pre> {@code
      * // matches all documents where 'age' field is between 30 and 40
      * collection.find(where("age").between(40, 30));
@@ -150,7 +149,6 @@ public final class FluentFilter {
     /**
      * Creates a between filter which matches those documents where the value
      * of the field is within the specified bound.
-     * <p>
      * <pre> {@code
      * // matches all documents where 'age' field is
      * // between 30 and 40, excluding 30 and 40
@@ -170,7 +168,6 @@ public final class FluentFilter {
     /**
      * Creates a between filter which matches those documents where the value
      * of the field is within the specified bound.
-     * <p>
      * <pre> {@code
      * // matches all documents where 'age' field is
      * // between 30 and 40, including 40 and excluding 30

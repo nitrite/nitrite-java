@@ -34,23 +34,23 @@ public class CollectionEventInfo<T> {
      * Specifies the item triggering the event.
      *
      * @param item the item that changed.
-     * @returns the item.
+     * @return the item.
      */
     private T item;
 
     /**
-     * Specifies the change type.
+     * Specifies the event type.
      *
-     * @param changeType the type of the change.
-     * @returns the type of the change.
+     * @param eventType the type of the event.
+     * @return the type of the event.
      */
     private EventType eventType;
 
     /**
      * Specifies the unix timestamp of the change.
      *
-     * @param changeTimestamp the unix timestamp of the change.
-     * @returns the unix timestamp of the change.
+     * @param timestamp the unix timestamp of the change.
+     * @return the unix timestamp of the change.
      */
     private long timestamp;
 
@@ -58,7 +58,7 @@ public class CollectionEventInfo<T> {
      * Specifies the name of the originator who has initiated this event.
      *
      * @param originator name of originator of the event.
-     * @returns name of the originator.
+     * @return name of the originator.
      * @since 4.0.0
      */
     private String originator;

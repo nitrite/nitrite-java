@@ -46,6 +46,8 @@ public class ThreadPoolManager {
      * Creates an {@link ExecutorService} with provided size where
      * all {@link Thread}s are daemon threads and uncaught error aware.
      *
+     * @param size       the size of the thread pool
+     * @param threadName the thread name
      * @return the {@link ExecutorService}.
      */
     public static ExecutorService getThreadPool(int size, String threadName) {
