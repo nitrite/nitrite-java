@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.TextIndexer;
+import org.dizitart.no2.store.NitriteMap;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -48,7 +49,12 @@ class TextFilter extends StringFilter {
     }
 
     @Override
-    protected boolean applyNonIndexed(KeyValuePair<NitriteId, Document> element) {
+    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
+        throw new FilterException("text filter cannot be applied on _id field");
+    }
+
+    @Override
+    public boolean apply(KeyValuePair<NitriteId, Document> element) {
         throw new FilterException(getField() + " is not full-text indexed");
     }
 }

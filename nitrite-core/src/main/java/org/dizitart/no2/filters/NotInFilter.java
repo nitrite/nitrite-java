@@ -23,6 +23,7 @@ import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.ComparableIndexer;
+import org.dizitart.no2.store.NitriteMap;
 
 import java.util.*;
 
@@ -33,8 +34,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  */
 class NotInFilter extends IndexAwareFilter {
     @Getter
-    @SuppressWarnings("rawtypes")
-    private Set<Comparable> comparableSet;
+    private Set<Comparable<?>> comparableSet;
 
     NotInFilter(String field, Comparable<?>... values) {
         super(field, values);
@@ -44,6 +44,9 @@ class NotInFilter extends IndexAwareFilter {
 
     @Override
     protected Set<NitriteId> findIndexedIdSet() {
+        validateNotInFilterValue(getField(), comparableSet);
+        this.comparableSet = convertValues(this.comparableSet);
+
         Set<NitriteId> idSet = new LinkedHashSet<>();
         if (getIsFieldIndexed()) {
             if (getIndexer() instanceof ComparableIndexer && comparableSet != null) {
@@ -62,27 +65,39 @@ class NotInFilter extends IndexAwareFilter {
     }
 
     @Override
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
-        validateNotInFilterValue(getField(), comparableSet);
-        this.comparableSet = convertValues(this.comparableSet);
-        return super.apply(element);
+    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
+        Set<NitriteId> idSet = new LinkedHashSet<>();
+        if (getOnIdField()) {
+            Set<NitriteId> notInSet = new LinkedHashSet<>();
+            for (Comparable<?> comparable : comparableSet) {
+                if (comparable instanceof String) {
+                    NitriteId nitriteId = NitriteId.createId((String) comparable);
+                    notInSet.add(nitriteId);
+                }
+            }
+
+            for (NitriteId nitriteId : collection.keySet()) {
+                if (!notInSet.contains(nitriteId)) {
+                    idSet.add(nitriteId);
+                }
+            }
+        }
+        return idSet;
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
-    protected boolean applyNonIndexed(KeyValuePair<NitriteId, Document> element) {
+    public boolean apply(KeyValuePair<NitriteId, Document> element) {
         Document document = element.getValue();
         Object fieldValue = document.get(getField());
 
         if (fieldValue instanceof Comparable) {
-            Comparable comparable = (Comparable) fieldValue;
+            Comparable<?> comparable = (Comparable<?>) fieldValue;
             return !comparableSet.contains(comparable);
         }
         return true;
     }
 
-    @SuppressWarnings("rawtypes")
-    private void validateNotInFilterValue(String field, Collection<Comparable> values) {
+    private void validateNotInFilterValue(String field, Collection<Comparable<?>> values) {
         notNull(field, "field cannot be null");
         notNull(values, "values cannot be null");
         if (values.size() == 0) {

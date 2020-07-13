@@ -16,9 +16,11 @@
 
 package org.dizitart.no2.filters;
 
+import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.exceptions.FilterException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -26,22 +28,27 @@ import java.util.List;
 /**
  * @author Anindya Chatterjee
  */
-class AndFilter extends LogicalFilter {
+@Getter
+public class AndFilter extends LogicalFilter {
     private final Filter rhs;
     private final Filter lhs;
 
-    AndFilter(Filter rhs, Filter lhs) {
-        this.rhs = rhs;
+    AndFilter(Filter lhs, Filter rhs) {
         this.lhs = lhs;
+        this.rhs = rhs;
+
+        if (rhs instanceof TextFilter) {
+            throw new FilterException("text filter must be the first filter in and operation");
+        }
     }
 
     @Override
     public boolean apply(KeyValuePair<NitriteId, Document> element) {
-        return rhs.apply(element) && lhs.apply(element);
+        return lhs.apply(element) && rhs.apply(element);
     }
 
     @Override
     public List<Filter> getFilters() {
-        return Arrays.asList(rhs, lhs);
+        return Arrays.asList(lhs, rhs);
     }
 }

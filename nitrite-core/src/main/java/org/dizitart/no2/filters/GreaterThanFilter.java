@@ -21,11 +21,11 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.ComparableIndexer;
+import org.dizitart.no2.store.NitriteMap;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.NumberUtils.compare;
 
 /**
@@ -57,32 +57,24 @@ class GreaterThanFilter extends ComparisonFilter {
     }
 
     @Override
+    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
+        throw new FilterException("gt filter cannot be applied on _id field");
+    }
+
+    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public boolean applyNonIndexed(KeyValuePair<NitriteId, Document> element) {
+    public boolean apply(KeyValuePair<NitriteId, Document> element) {
         Comparable comparable = getComparable();
-
-        if (getField().equalsIgnoreCase(DOC_ID)) {
-            NitriteId nitriteId = null;
-            if (comparable instanceof String) {
-                nitriteId = NitriteId.createId((String) comparable);
-            }
-
-            if (nitriteId != null) {
-                return element.getKey().compareTo(nitriteId) > 0;
-            }
-
-        } else {
-            Document document = element.getValue();
-            Object fieldValue = document.get(getField());
-            if (fieldValue != null) {
-                if (fieldValue instanceof Number && comparable instanceof Number) {
-                    return compare((Number) fieldValue, (Number) comparable) > 0;
-                } else if (fieldValue instanceof Comparable) {
-                    Comparable arg = (Comparable) fieldValue;
-                    return arg.compareTo(comparable) > 0;
-                } else {
-                    throw new FilterException(fieldValue + " is not comparable");
-                }
+        Document document = element.getValue();
+        Object fieldValue = document.get(getField());
+        if (fieldValue != null) {
+            if (fieldValue instanceof Number && comparable instanceof Number) {
+                return compare((Number) fieldValue, (Number) comparable) > 0;
+            } else if (fieldValue instanceof Comparable) {
+                Comparable arg = (Comparable) fieldValue;
+                return arg.compareTo(comparable) > 0;
+            } else {
+                throw new FilterException(fieldValue + " is not comparable");
             }
         }
 

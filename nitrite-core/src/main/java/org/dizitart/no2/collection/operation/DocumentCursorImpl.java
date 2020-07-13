@@ -22,7 +22,6 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.*;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.store.NitriteMap;
 
 import java.text.Collator;
 import java.util.Collections;
@@ -32,39 +31,37 @@ import java.util.Iterator;
  * @author Anindya Chatterjee.
  */
 class DocumentCursorImpl implements DocumentCursor {
-    private final RecordStream<NitriteId> recordStream;
-    private final NitriteMap<NitriteId, Document> nitriteMap;
+    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
 
-    DocumentCursorImpl(RecordStream<NitriteId> recordStream, NitriteMap<NitriteId, Document> nitriteMap) {
+    DocumentCursorImpl(RecordStream<KeyValuePair<NitriteId, Document>> recordStream) {
         this.recordStream = recordStream;
-        this.nitriteMap = nitriteMap;
     }
 
     @Override
     public DocumentCursor sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder) {
         return new DocumentCursorImpl(new SortedDocumentCursor(field, sortOrder, collator,
-            nullOrder, recordStream, nitriteMap), nitriteMap);
+            nullOrder, recordStream));
     }
 
     @Override
     public DocumentCursor skipLimit(long skip, long limit) {
-        return new DocumentCursorImpl(new BoundedDocumentStream(recordStream, skip, limit), nitriteMap);
+        return new DocumentCursorImpl(new BoundedDocumentStream(recordStream, skip, limit));
     }
 
     @Override
     public RecordStream<Document> project(Document projection) {
         validateProjection(projection);
-        return new ProjectedDocumentStream(recordStream, nitriteMap, projection);
+        return new ProjectedDocumentStream(recordStream, projection);
     }
 
     @Override
     public RecordStream<Document> join(DocumentCursor foreignCursor, Lookup lookup) {
-        return new JoinedDocumentStream(recordStream, nitriteMap, foreignCursor, lookup);
+        return new JoinedDocumentStream(recordStream, foreignCursor, lookup);
     }
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new DocumentCursorIterator(iterator);
     }
@@ -85,10 +82,10 @@ class DocumentCursorImpl implements DocumentCursor {
         }
     }
 
-    private class DocumentCursorIterator implements Iterator<Document> {
-        private final Iterator<NitriteId> iterator;
+    private static class DocumentCursorIterator implements Iterator<Document> {
+        private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
 
-        DocumentCursorIterator(Iterator<NitriteId> iterator) {
+        DocumentCursorIterator(Iterator<KeyValuePair<NitriteId, Document>> iterator) {
             this.iterator = iterator;
         }
 
@@ -99,8 +96,8 @@ class DocumentCursorImpl implements DocumentCursor {
 
         @Override
         public Document next() {
-            NitriteId next = iterator.next();
-            Document document = nitriteMap.get(next);
+            KeyValuePair<NitriteId, Document> next = iterator.next();
+            Document document = next.getValue();
             if (document != null) {
                 return document.clone();
             }

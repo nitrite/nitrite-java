@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 /**
  * @author Anindya Chatterjee.
  */
-class FilteredRecordStream implements RecordStream<NitriteId> {
+class FilteredRecordStream implements RecordStream<KeyValuePair<NitriteId, Document>> {
     private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
     private final Filter filter;
 
@@ -40,17 +40,17 @@ class FilteredRecordStream implements RecordStream<NitriteId> {
     }
 
     @Override
-    public Iterator<NitriteId> iterator() {
+    public Iterator<KeyValuePair<NitriteId, Document>> iterator() {
         Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new FilteredIterator(iterator, filter);
     }
 
-    static class FilteredIterator implements Iterator<NitriteId> {
+    static class FilteredIterator implements Iterator<KeyValuePair<NitriteId, Document>> {
         private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
         private final Filter filter;
-        private NitriteId nextId;
-        private boolean nextIdSet = false;
+        private KeyValuePair<NitriteId, Document> nextPair;
+        private boolean nextPairSet = false;
 
         public FilteredIterator(Iterator<KeyValuePair<NitriteId, Document>> iterator, Filter filter) {
             this.iterator = iterator;
@@ -59,21 +59,21 @@ class FilteredRecordStream implements RecordStream<NitriteId> {
 
         @Override
         public boolean hasNext() {
-            return nextIdSet || setNextId();
+            return nextPairSet || setNextId();
         }
 
         @Override
-        public NitriteId next() {
-            if (!nextIdSet && !setNextId()) {
+        public KeyValuePair<NitriteId, Document> next() {
+            if (!nextPairSet && !setNextId()) {
                 throw new NoSuchElementException();
             }
-            nextIdSet = false;
-            return nextId;
+            nextPairSet = false;
+            return nextPair;
         }
 
         @Override
         public void remove() {
-            if (nextIdSet) {
+            if (nextPairSet) {
                 throw new InvalidOperationException("remove operation cannot be called here");
             }
             iterator.remove();
@@ -83,8 +83,8 @@ class FilteredRecordStream implements RecordStream<NitriteId> {
             while (iterator.hasNext()) {
                 final KeyValuePair<NitriteId, Document> keyValuePair = iterator.next();
                 if (filter.apply(keyValuePair)) {
-                    nextId = keyValuePair.getKey();
-                    nextIdSet = true;
+                    nextPair = keyValuePair;
+                    nextPairSet = true;
                     return true;
                 }
             }

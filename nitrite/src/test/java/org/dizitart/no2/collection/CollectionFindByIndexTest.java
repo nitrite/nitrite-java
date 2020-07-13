@@ -344,4 +344,23 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 0);
     }
 
+    @Test
+    public void testFindWithOrIndexed() {
+        NitriteCollection collection = db.getCollection("testFindWithOrIndexed");
+        Document doc1 = Document.createDocument("firstName", "John").put("lastName", "Doe");
+        Document doc2 = Document.createDocument("firstName", "Jane").put("lastName", "Doe");
+        Document doc3 = Document.createDocument("firstName", "Jonas").put("lastName", "Doe");
+        Document doc4 = Document.createDocument("firstName", "Johan").put("lastName", "Day");
+
+        collection.createIndex("firstName", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex("lastName", IndexOptions.indexOptions(IndexType.NonUnique));
+
+        collection.insert(doc1, doc2, doc3, doc4);
+
+        DocumentCursor cursor = collection.find(where("firstName").eq("John").or(where("lastName").eq("Day")));
+        assertEquals(cursor.size(), 2);
+
+        List<Document> list = cursor.toList();
+        assertEquals(list.size(), 2);
+    }
 }

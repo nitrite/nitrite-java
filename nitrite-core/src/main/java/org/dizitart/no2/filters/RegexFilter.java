@@ -28,15 +28,15 @@ import java.util.regex.Pattern;
  * @author Anindya Chatterjee
  */
 class RegexFilter extends FieldBasedFilter {
+    private final Pattern pattern;
+
     RegexFilter(String field, String value) {
         super(field, value);
+        pattern = Pattern.compile(value);
     }
 
     @Override
     public boolean apply(KeyValuePair<NitriteId, Document> element) {
-        String value = (String) getValue();
-        Pattern pattern = Pattern.compile(value);
-
         Document document = element.getValue();
         Object fieldValue = document.get(getField());
         if (fieldValue != null) {

@@ -232,9 +232,8 @@ class ElementMatchFilter extends NitriteFilter {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private boolean matchIn(Object item, Filter filter) {
-        Set<Comparable> values = ((InFilter) filter).getComparableSet();
+        Set<Comparable<?>> values = ((InFilter) filter).getComparableSet();
         if (values != null) {
             if (item instanceof Document) {
                 Document document = (Document) item;
@@ -249,9 +248,8 @@ class ElementMatchFilter extends NitriteFilter {
         return false;
     }
 
-    @SuppressWarnings("rawtypes")
     private boolean matchNotIn(Object item, Filter filter) {
-        Set<Comparable> values = ((NotInFilter) filter).getComparableSet();
+        Set<Comparable<?>> values = ((NotInFilter) filter).getComparableSet();
         if (values != null) {
             if (item instanceof Document) {
                 Document document = (Document) item;

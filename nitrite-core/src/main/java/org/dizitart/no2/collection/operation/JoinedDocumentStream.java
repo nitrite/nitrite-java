@@ -19,10 +19,10 @@ package org.dizitart.no2.collection.operation;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,17 +35,14 @@ import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
  * @author Anindya Chatterjee.
  */
 class JoinedDocumentStream implements RecordStream<Document> {
-    private final RecordStream<NitriteId> recordStream;
-    private final NitriteMap<NitriteId, Document> nitriteMap;
+    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
     private final DocumentCursor foreignCursor;
     private final Lookup lookup;
 
-    JoinedDocumentStream(RecordStream<NitriteId> recordStream,
-                         NitriteMap<NitriteId, Document> nitriteMap,
+    JoinedDocumentStream(RecordStream<KeyValuePair<NitriteId, Document>> recordStream,
                          DocumentCursor foreignCursor,
                          Lookup lookup) {
         this.recordStream = recordStream;
-        this.nitriteMap = nitriteMap;
         this.foreignCursor = foreignCursor;
         this.lookup = lookup;
     }
@@ -53,7 +50,7 @@ class JoinedDocumentStream implements RecordStream<Document> {
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new JoinedDocumentIterator(iterator);
     }
@@ -64,9 +61,9 @@ class JoinedDocumentStream implements RecordStream<Document> {
     }
 
     private class JoinedDocumentIterator implements Iterator<Document> {
-        private final Iterator<NitriteId> iterator;
+        private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
 
-        JoinedDocumentIterator(Iterator<NitriteId> iterator) {
+        JoinedDocumentIterator(Iterator<KeyValuePair<NitriteId, Document>> iterator) {
             this.iterator = iterator;
         }
 
@@ -77,8 +74,8 @@ class JoinedDocumentStream implements RecordStream<Document> {
 
         @Override
         public Document next() {
-            NitriteId next = iterator.next();
-            Document document = nitriteMap.get(next);
+            KeyValuePair<NitriteId, Document> next = iterator.next();
+            Document document = next.getValue();
             if (document != null) {
                 return join(document.clone(), foreignCursor, lookup);
             }

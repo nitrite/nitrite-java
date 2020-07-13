@@ -242,7 +242,7 @@ public class CollectionOperations {
         this.readLock = readWriteLock.readLock();
         this.writeLock = readWriteLock.writeLock();
         this.indexOperations = new IndexOperations(nitriteConfig, nitriteMap, eventBus);
-        this.readOperations = new ReadOperations(collectionName, nitriteConfig, nitriteMap);
+        this.readOperations = new ReadOperations(collectionName, nitriteConfig, nitriteMap, indexOperations);
         this.writeOperations = new WriteOperations(indexOperations, readOperations,
             nitriteMap, eventBus);
     }

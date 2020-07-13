@@ -41,18 +41,20 @@ public abstract class FieldBasedFilter extends NitriteFilter {
     @Getter(AccessLevel.NONE)
     private Object value;
 
+    @Getter(AccessLevel.NONE)
+    private boolean processed = false;
+
     protected FieldBasedFilter(String field, Object value) {
         this.field = field;
         this.value = value;
     }
 
-    @SuppressWarnings("rawtypes")
-    protected Set<Comparable> convertValues(Set<Comparable> values) {
+    protected Set<Comparable<?>> convertValues(Set<Comparable<?>> values) {
         if (getObjectFilter()) {
             NitriteMapper nitriteMapper = getNitriteConfig().nitriteMapper();
-            Set<Comparable> convertedValues = new HashSet<>();
+            Set<Comparable<?>> convertedValues = new HashSet<>();
 
-            for (Comparable comparable : values) {
+            for (Comparable<?> comparable : values) {
                 if (comparable == null
                     || !nitriteMapper.isValue(comparable)) {
                     throw new FilterException("search term " + comparable
@@ -60,7 +62,7 @@ public abstract class FieldBasedFilter extends NitriteFilter {
                 }
 
                 if (nitriteMapper.isValue(comparable)) {
-                    Comparable convertValue = nitriteMapper.convert(comparable, Comparable.class);
+                    Comparable<?> convertValue = nitriteMapper.convert(comparable, Comparable.class);
                     convertedValues.add(convertValue);
                 }
             }
@@ -71,6 +73,8 @@ public abstract class FieldBasedFilter extends NitriteFilter {
     }
 
     public Object getValue() {
+        if (this.processed) return value;
+
         if (value == null) return null;
 
         if (getObjectFilter()) {
@@ -80,6 +84,8 @@ public abstract class FieldBasedFilter extends NitriteFilter {
                 value = nitriteMapper.convert(value, Comparable.class);
             }
         }
+
+        this.processed = true;
         return value;
     }
 

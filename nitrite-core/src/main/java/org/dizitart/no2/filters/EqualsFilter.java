@@ -23,12 +23,11 @@ import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.ComparableIndexer;
 import org.dizitart.no2.index.TextIndexer;
+import org.dizitart.no2.store.NitriteMap;
 
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 
-import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
@@ -64,19 +63,28 @@ class EqualsFilter extends IndexAwareFilter {
     }
 
     @Override
-    public boolean applyNonIndexed(KeyValuePair<NitriteId, Document> element) {
-        Object value = getValue();
-
-        if (getField().equalsIgnoreCase(DOC_ID)) {
-            if (value instanceof String) {
-                return Objects.equals(element.getKey().getIdValue(), getValue());
+    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
+        Set<NitriteId> idSet = new LinkedHashSet<>();
+        if (getOnIdField() && getValue() instanceof String) {
+            NitriteId nitriteId = NitriteId.createId((String) getValue());
+            if (collection.containsKey(nitriteId)) {
+                idSet.add(nitriteId);
             }
-        } else {
-            Document document = element.getValue();
-            Object fieldValue = document.get(getField());
-            return deepEquals(fieldValue, value);
         }
+        return idSet;
+    }
 
-        return false;
+    @Override
+    public boolean apply(KeyValuePair<NitriteId, Document> element) {
+        Document document = element.getValue();
+        Object fieldValue = document.get(getField());
+        return deepEquals(fieldValue, getValue());
+    }
+
+    @Override
+    public void setIsFieldIndexed(Boolean isFieldIndexed) {
+        if (!(getIndexer() instanceof TextIndexer && getValue() instanceof String)) {
+            super.setIsFieldIndexed(isFieldIndexed);
+        }
     }
 }

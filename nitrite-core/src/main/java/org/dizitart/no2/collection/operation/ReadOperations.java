@@ -22,16 +22,14 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.filters.IndexAwareFilter;
-import org.dizitart.no2.filters.LogicalFilter;
-import org.dizitart.no2.filters.NitriteFilter;
+import org.dizitart.no2.filters.*;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.Indexer;
-import org.dizitart.no2.store.IndexCatalog;
 import org.dizitart.no2.store.NitriteMap;
 
-import java.util.List;
+import java.util.*;
+
+import static org.dizitart.no2.common.Constants.DOC_ID;
 
 /**
  * @author Anindya Chatterjee
@@ -40,18 +38,21 @@ class ReadOperations {
     private final String collectionName;
     private final NitriteConfig nitriteConfig;
     private final NitriteMap<NitriteId, Document> nitriteMap;
+    private final IndexOperations indexOperations;
 
     ReadOperations(String collectionName,
                    NitriteConfig nitriteConfig,
-                   NitriteMap<NitriteId, Document> nitriteMap) {
+                   NitriteMap<NitriteId, Document> nitriteMap,
+                   IndexOperations indexOperations) {
         this.nitriteMap = nitriteMap;
         this.nitriteConfig = nitriteConfig;
         this.collectionName = collectionName;
+        this.indexOperations = indexOperations;
     }
 
     public DocumentCursor find() {
-        RecordStream<NitriteId> recordStream = nitriteMap.keySet();
-        return new DocumentCursorImpl(recordStream, nitriteMap);
+        RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+        return new DocumentCursorImpl(recordStream);
     }
 
     public DocumentCursor find(Filter filter) {
@@ -60,10 +61,9 @@ class ReadOperations {
         }
 
         prepareFilter(filter);
-        RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
-        FilteredRecordStream filteredReadableStream = new FilteredRecordStream(recordStream, filter);
 
-        return new DocumentCursorImpl(filteredReadableStream, nitriteMap);
+        RecordStream<KeyValuePair<NitriteId, Document>> recordStream = findSuitableStream(filter);
+        return new DocumentCursorImpl(recordStream);
     }
 
     Document getById(NitriteId nitriteId) {
@@ -106,17 +106,96 @@ class ReadOperations {
     private void prepareIndexedFilter(IndexAwareFilter indexAwareFilter) {
         String field = indexAwareFilter.getField();
 
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
-        IndexEntry indexEntry = indexCatalog.findIndexEntry(collectionName, field);
+        IndexEntry indexEntry = indexOperations.findIndexEntry(field);
         if (indexEntry != null) {
             String indexType = indexEntry.getIndexType();
-
-            Indexer indexer = nitriteConfig.findIndexer(indexType);
+            Indexer indexer = indexOperations.findIndexer(indexType);
             if (indexer != null) {
-                indexAwareFilter.setIsFieldIndexed(true);
                 indexAwareFilter.setIndexer(indexer);
-                indexAwareFilter.cacheIndexedIds();
+                indexAwareFilter.setIsFieldIndexed(true);
+            }
+        } else {
+            if (indexAwareFilter.getField().equalsIgnoreCase(DOC_ID)) {
+                // default _id index
+                indexAwareFilter.setOnIdField(true);
             }
         }
+    }
+
+    private RecordStream<KeyValuePair<NitriteId, Document>> findSuitableStream(Filter filter) {
+        if (filter instanceof AndFilter) {
+            AndFilter andFilter = (AndFilter) filter;
+            Filter lhs = andFilter.getLhs();
+            Filter rhs = andFilter.getRhs();
+
+            if (lhs instanceof IndexAwareFilter && ((IndexAwareFilter) lhs).getIsFieldIndexed()) {
+                // Indexed AND Filter => IndexScan (LHS) -> Filter (RHS)
+
+                return getFilteredStream(((IndexAwareFilter) lhs), rhs);
+            } else if (rhs instanceof IndexAwareFilter && ((IndexAwareFilter) rhs).getIsFieldIndexed()) {
+                // Non-Indexed AND Indexed => IndexScan (RHS) -> Filter (LHS)
+
+                return getFilteredStream(((IndexAwareFilter) rhs), lhs);
+            } else {
+                // Non-Indexed AND Filter => CollectionScan
+
+                RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+                return new FilteredRecordStream(recordStream, filter);
+            }
+        } else if (filter instanceof OrFilter) {
+            OrFilter orFilter = (OrFilter) filter;
+            Filter lhs = orFilter.getLhs();
+            Filter rhs = orFilter.getRhs();
+
+            if (lhs instanceof IndexAwareFilter && ((IndexAwareFilter) lhs).getIsFieldIndexed()
+                && rhs instanceof IndexAwareFilter && ((IndexAwareFilter) rhs).getIsFieldIndexed()) {
+                // Indexed OR Indexed => IndexScan (LHS) Union IndexScan (RHS)
+
+                final RecordStream<KeyValuePair<NitriteId, Document>> lhsStream
+                    = getIndexedStream(((IndexAwareFilter) lhs));
+                final RecordStream<KeyValuePair<NitriteId, Document>> rhsStream
+                    = getIndexedStream(((IndexAwareFilter) rhs));
+
+                return getUnionStream(lhsStream, rhsStream);
+            } else {
+                // Non-Indexed OR Filter => CollectionScan
+                // Indexed OR Non-Indexed => CollectionScan
+
+                RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+                return new FilteredRecordStream(recordStream, filter);
+            }
+        } else if (filter instanceof IndexAwareFilter && ((IndexAwareFilter) filter).getIsFieldIndexed()) {
+            // Indexed => IndexScan
+
+            IndexAwareFilter indexAwareFilter = (IndexAwareFilter) filter;
+            return getIndexedStream(indexAwareFilter);
+        } else {
+            // Non-Indexed => CollectionScan
+
+            RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+            return new FilteredRecordStream(recordStream, filter);
+        }
+    }
+
+    private RecordStream<KeyValuePair<NitriteId, Document>> getFilteredStream(IndexAwareFilter indexAwareFilter,
+                                                                              Filter rest) {
+
+        RecordStream<KeyValuePair<NitriteId, Document>> indexStream = getIndexedStream(indexAwareFilter);
+        if (rest != null) {
+            return new FilteredRecordStream(indexStream, rest);
+        } else {
+            return indexStream;
+        }
+    }
+
+    private RecordStream<KeyValuePair<NitriteId, Document>> getUnionStream(
+        RecordStream<KeyValuePair<NitriteId, Document>> lhsStream,
+        RecordStream<KeyValuePair<NitriteId, Document>> rhsStream) {
+
+        return RecordStream.fromIterable(() -> new UnionStreamIterator(lhsStream, rhsStream));
+    }
+
+    private RecordStream<KeyValuePair<NitriteId, Document>> getIndexedStream(IndexAwareFilter indexAwareFilter) {
+        return new IndexedStream(indexAwareFilter, nitriteMap);
     }
 }

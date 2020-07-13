@@ -18,7 +18,6 @@ package org.dizitart.no2.common;
 
 import org.dizitart.no2.common.util.Iterables;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -28,10 +27,6 @@ import java.util.Set;
 public interface RecordStream<T> extends Iterable<T> {
     static <T> RecordStream<T> fromIterable(Iterable<T> iterable) {
         return iterable::iterator;
-    }
-
-    static <T> RecordStream<T> fromIterator(Iterator<T> iterator) {
-        return () -> iterator;
     }
 
     default long size() {

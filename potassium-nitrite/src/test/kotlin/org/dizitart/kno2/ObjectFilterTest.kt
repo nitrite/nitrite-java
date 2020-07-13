@@ -168,10 +168,10 @@ class ObjectFilterTest : BaseTest() {
         db?.getRepository<TestData> {
             insert(TestData(1, "lorem"), TestData(2, "12345"))
 
-            var cursor = find((TestData::id eq 1) and (TestData::text text "lorem"))
+            var cursor = find((TestData::text text "lorem") and (TestData::id eq 1))
             assertEquals(cursor.size(), 1)
 
-            cursor = find((TestData::id eq 1) and (TestData::text text "12345"))
+            cursor = find((TestData::text text "12345") and (TestData::id eq 1))
             assertEquals(cursor.size(), 0)
         }
     }

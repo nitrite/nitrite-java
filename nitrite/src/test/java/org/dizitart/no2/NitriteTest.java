@@ -391,7 +391,6 @@ public class NitriteTest {
     }
 
     @Test
-//    @Ignore("Only need to test manually with old version of nitrite")
     public void testReadCompatibility() throws IOException {
 //      ******* Old DB Creation Code Start *********
 //
@@ -465,8 +464,10 @@ public class NitriteTest {
             .openOrCreate("test-user", "test-password");
 
         NitriteCollection collection = db.getCollection("test");
-        List<Document> cursor = collection.find(where("first_key").eq(1)
-            .and(where("second_key").text("fox"))).toList();
+
+        // text filter has be the first filter in and clause
+        List<Document> cursor = collection.find(where("second_key").text("fox")
+            .and(where("first_key").eq(1))).toList();
         assertEquals(cursor.size(), 1);
         assertEquals(cursor.get(0).get("third_key"), 0.5);
 

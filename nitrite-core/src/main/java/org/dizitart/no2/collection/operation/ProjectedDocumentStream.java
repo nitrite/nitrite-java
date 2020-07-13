@@ -21,7 +21,6 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -30,21 +29,18 @@ import java.util.Iterator;
  * @author Anindya Chatterjee.
  */
 class ProjectedDocumentStream implements RecordStream<Document> {
-    private final RecordStream<NitriteId> recordStream;
-    private final NitriteMap<NitriteId, Document> nitriteMap;
+    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
     private final Document projection;
 
-    public ProjectedDocumentStream(RecordStream<NitriteId> recordStream,
-                                   NitriteMap<NitriteId, Document> nitriteMap,
+    public ProjectedDocumentStream(RecordStream<KeyValuePair<NitriteId, Document>> recordStream,
                                    Document projection) {
         this.recordStream = recordStream;
-        this.nitriteMap = nitriteMap;
         this.projection = projection;
     }
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new ProjectedDocumentIterator(iterator);
     }
@@ -55,10 +51,10 @@ class ProjectedDocumentStream implements RecordStream<Document> {
     }
 
     private class ProjectedDocumentIterator implements Iterator<Document> {
-        private final Iterator<NitriteId> iterator;
+        private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
         private Document nextElement = null;
 
-        ProjectedDocumentIterator(Iterator<NitriteId> iterator) {
+        ProjectedDocumentIterator(Iterator<KeyValuePair<NitriteId, Document>> iterator) {
             this.iterator = iterator;
             nextMatch();
         }
@@ -77,8 +73,8 @@ class ProjectedDocumentStream implements RecordStream<Document> {
 
         private void nextMatch() {
             while (iterator.hasNext()) {
-                NitriteId next = iterator.next();
-                Document document = nitriteMap.get(next);
+                KeyValuePair<NitriteId, Document> next = iterator.next();
+                Document document = next.getValue();
                 if (document != null) {
                     Document projected = project(document.clone());
                     if (projected != null) {

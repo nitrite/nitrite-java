@@ -159,7 +159,7 @@ public abstract class ComparableIndexer implements Indexer {
         return resultSet;
     }
 
-    public Set<NitriteId> findIn(String collectionName, String field, Collection<Comparable> values) {
+    public Set<NitriteId> findIn(String collectionName, String field, Collection<Comparable<?>> values) {
         notNull(values, "values cannot be null");
 
         Set<NitriteId> resultSet = new LinkedHashSet<>();
@@ -176,7 +176,7 @@ public abstract class ComparableIndexer implements Indexer {
         return resultSet;
     }
 
-    public Set<NitriteId> findNotIn(String collectionName, String field, Collection<Comparable> values) {
+    public Set<NitriteId> findNotIn(String collectionName, String field, Collection<Comparable<?>> values) {
         notNull(values, "values cannot be null");
 
         Set<NitriteId> resultSet = new LinkedHashSet<>();

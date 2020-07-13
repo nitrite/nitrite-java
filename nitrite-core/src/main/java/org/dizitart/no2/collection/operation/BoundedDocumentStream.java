@@ -16,7 +16,9 @@
 
 package org.dizitart.no2.collection.operation;
 
+import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.ValidationException;
 
@@ -27,12 +29,12 @@ import java.util.NoSuchElementException;
 /**
  * @author Anindya Chatterjee.
  */
-class BoundedDocumentStream implements RecordStream<NitriteId> {
-    private final RecordStream<NitriteId> recordStream;
+class BoundedDocumentStream implements RecordStream<KeyValuePair<NitriteId, Document>> {
+    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
     private final long offset;
     private final long limit;
 
-    BoundedDocumentStream(RecordStream<NitriteId> recordStream, final long offset, final long limit) {
+    BoundedDocumentStream(RecordStream<KeyValuePair<NitriteId, Document>> recordStream, final long offset, final long limit) {
         if (offset < 0) {
             throw new ValidationException("offset parameter must not be negative");
         }
@@ -46,8 +48,8 @@ class BoundedDocumentStream implements RecordStream<NitriteId> {
     }
 
     @Override
-    public Iterator<NitriteId> iterator() {
-        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+    public Iterator<KeyValuePair<NitriteId, Document>> iterator() {
+        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new BoundedIterator<>(iterator, offset, limit);
     }

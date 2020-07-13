@@ -22,8 +22,8 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.index.Indexer;
+import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Set;
 
@@ -33,35 +33,36 @@ import java.util.Set;
 @ToString(exclude = "indexedIdSet")
 @EqualsAndHashCode(callSuper = true)
 public abstract class IndexAwareFilter extends FieldBasedFilter {
-    @Getter
-    @Setter
+    @Getter @Setter
     private Boolean isFieldIndexed = false;
 
-    @Getter
-    @Setter
+    @Getter @Setter
+    private Boolean onIdField = false;
+
+    @Getter @Setter
     private Indexer indexer;
 
     private Set<NitriteId> indexedIdSet;
+    private Set<NitriteId> idSet;
 
     protected IndexAwareFilter(String field, Object value) {
         super(field, value);
     }
 
     protected abstract Set<NitriteId> findIndexedIdSet();
+    protected abstract Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection);
 
-    protected abstract boolean applyNonIndexed(KeyValuePair<NitriteId, Document> element);
-
-    public void cacheIndexedIds() {
+    public Set<NitriteId> cachedIndexedIds() {
         if (indexedIdSet == null) {
             indexedIdSet = findIndexedIdSet();
         }
+        return indexedIdSet;
     }
 
-    @Override
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
-        if (isFieldIndexed) {
-            return indexedIdSet.contains(element.getKey());
+    public Set<NitriteId> cachedIds(NitriteMap<NitriteId, Document> collection) {
+        if (idSet == null) {
+            idSet = findIdSet(collection);
         }
-        return applyNonIndexed(element);
+        return idSet;
     }
 }

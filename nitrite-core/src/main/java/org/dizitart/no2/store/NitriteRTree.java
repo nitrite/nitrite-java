@@ -30,4 +30,6 @@ public interface NitriteRTree<Key, Value> {
     RecordStream<NitriteId> findIntersectingKeys(Key key);
 
     RecordStream<NitriteId> findContainedKeys(Key key);
+
+    long size();
 }

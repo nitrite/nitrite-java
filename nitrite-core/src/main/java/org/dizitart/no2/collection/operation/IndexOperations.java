@@ -60,6 +60,13 @@ class IndexOperations implements AutoCloseable {
         init();
     }
 
+    @Override
+    public void close() {
+        if (rebuildExecutor != null) {
+            this.rebuildExecutor.shutdown();
+        }
+    }
+
     void ensureIndex(String field, String indexType, boolean isAsync) {
         IndexEntry indexEntry;
         if (!hasIndexEntry(field)) {
@@ -192,20 +199,20 @@ class IndexOperations implements AutoCloseable {
         return indexCatalog.findIndexEntry(collectionName, field);
     }
 
+    Indexer findIndexer(String indexType) {
+        Indexer indexer = nitriteConfig.findIndexer(indexType);
+        if (indexer != null) {
+            return indexer;
+        }
+        throw new IndexingException("no indexer found for index type " + indexType);
+    }
+
     private void init() {
         NitriteStore nitriteStore = nitriteConfig.getNitriteStore();
         this.indexCatalog = nitriteStore.getIndexCatalog();
         this.collectionName = nitriteMap.getName();
         this.indexBuildRegistry = new ConcurrentHashMap<>();
         this.rebuildExecutor = ThreadPoolManager.workerPool();
-    }
-
-    private Indexer findIndexer(String indexType) {
-        Indexer indexer = nitriteConfig.findIndexer(indexType);
-        if (indexer != null) {
-            return indexer;
-        }
-        throw new IndexingException("no indexer found for index type " + indexType);
     }
 
     private void buildIndexInternal(final String field, final IndexEntry indexEntry) {
@@ -289,13 +296,6 @@ class IndexOperations implements AutoCloseable {
         eventInfo.setEventType(eventType);
         if (eventBus != null) {
             eventBus.post(eventInfo);
-        }
-    }
-
-    @Override
-    public void close() {
-        if (rebuildExecutor != null) {
-            this.rebuildExecutor.shutdown();
         }
     }
 }

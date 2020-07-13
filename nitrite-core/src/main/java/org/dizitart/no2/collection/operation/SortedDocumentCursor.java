@@ -18,11 +18,11 @@ package org.dizitart.no2.collection.operation;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.common.NullOrder;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.store.NitriteMap;
 
 import java.text.Collator;
 import java.util.*;
@@ -30,55 +30,49 @@ import java.util.*;
 /**
  * @author Anindya Chatterjee.
  */
-class SortedDocumentCursor implements RecordStream<NitriteId> {
+class SortedDocumentCursor implements RecordStream<KeyValuePair<NitriteId, Document>> {
     private final String field;
     private final SortOrder sortOrder;
     private final Collator collator;
     private final NullOrder nullOrder;
-    private final RecordStream<NitriteId> recordStream;
-    private final NitriteMap<NitriteId, Document> nitriteMap;
+    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
 
     public SortedDocumentCursor(String field,
                                 SortOrder sortOrder,
                                 Collator collator,
                                 NullOrder nullOrder,
-                                RecordStream<NitriteId> recordStream,
-                                NitriteMap<NitriteId, Document> nitriteMap) {
+                                RecordStream<KeyValuePair<NitriteId, Document>> recordStream) {
         this.field = field;
         this.sortOrder = sortOrder;
         this.collator = collator;
         this.nullOrder = nullOrder;
-        this.nitriteMap = nitriteMap;
         this.recordStream = recordStream;
     }
 
     @Override
-    public Iterator<NitriteId> iterator() {
-        Iterator<NitriteId> iterator = recordStream == null ? Collections.emptyIterator()
+    public Iterator<KeyValuePair<NitriteId, Document>> iterator() {
+        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
-        return new SortedDocumentIterator(field, sortOrder, collator, nullOrder, iterator, nitriteMap);
+        return new SortedDocumentIterator(field, sortOrder, collator, nullOrder, iterator);
     }
 
-    static class SortedDocumentIterator implements Iterator<NitriteId> {
+    static class SortedDocumentIterator implements Iterator<KeyValuePair<NitriteId, Document>> {
         private final String field;
         private final SortOrder sortOrder;
         private final Collator collator;
         private final NullOrder nullOrder;
-        private final Iterator<NitriteId> iterator;
-        private final NitriteMap<NitriteId, Document> nitriteMap;
-        private Iterator<NitriteId> sortedIterator;
+        private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
+        private Iterator<KeyValuePair<NitriteId, Document>> sortedIterator;
 
         public SortedDocumentIterator(String field,
                                       SortOrder sortOrder,
                                       Collator collator,
                                       NullOrder nullOrder,
-                                      Iterator<NitriteId> iterator,
-                                      NitriteMap<NitriteId, Document> nitriteMap) {
+                                      Iterator<KeyValuePair<NitriteId, Document>> iterator) {
             this.field = field;
             this.sortOrder = sortOrder;
             this.collator = collator;
             this.nullOrder = nullOrder;
-            this.nitriteMap = nitriteMap;
             this.iterator = iterator;
             init();
         }
@@ -89,22 +83,22 @@ class SortedDocumentCursor implements RecordStream<NitriteId> {
         }
 
         @Override
-        public NitriteId next() {
+        public KeyValuePair<NitriteId, Document> next() {
             return sortedIterator.next();
         }
 
         private void init() {
-            NavigableMap<Object, List<NitriteId>> sortedMap;
+            NavigableMap<Object, List<KeyValuePair<NitriteId, Document>>> sortedMap;
             if (collator != null) {
                 sortedMap = new TreeMap<>(collator);
             } else {
                 sortedMap = new TreeMap<>();
             }
 
-            Set<NitriteId> nullValueIds = new HashSet<>();
+            Set<KeyValuePair<NitriteId, Document>> nullValueEntries = new HashSet<>();
             while (iterator.hasNext()) {
-                NitriteId id = iterator.next();
-                Document document = nitriteMap.get(id);
+                KeyValuePair<NitriteId, Document> next = iterator.next();
+                Document document = next.getValue();
                 if (document == null) continue;
 
                 Object value = document.get(field);
@@ -113,41 +107,40 @@ class SortedDocumentCursor implements RecordStream<NitriteId> {
                         throw new ValidationException("cannot sort on an array or collection object");
                     }
                 } else {
-                    nullValueIds.add(id);
+                    nullValueEntries.add(next);
                     continue;
                 }
 
+                List<KeyValuePair<NitriteId, Document>> keyValuePairs;
                 if (sortedMap.containsKey(value)) {
-                    List<NitriteId> idList = sortedMap.get(value);
-                    idList.add(id);
-                    sortedMap.put(value, idList);
+                    keyValuePairs = sortedMap.get(value);
                 } else {
-                    List<NitriteId> idList = new ArrayList<>();
-                    idList.add(id);
-                    sortedMap.put(value, idList);
+                    keyValuePairs = new ArrayList<>();
                 }
+                keyValuePairs.add(next);
+                sortedMap.put(value, keyValuePairs);
             }
 
-            List<NitriteId> sortedValues;
+            List<KeyValuePair<NitriteId, Document>> sortedKeyValuePairs;
             if (sortOrder == SortOrder.Ascending) {
                 if (nullOrder == NullOrder.Default || nullOrder == NullOrder.First) {
-                    sortedValues = new ArrayList<>(nullValueIds);
-                    sortedValues.addAll(flattenList(sortedMap.values()));
+                    sortedKeyValuePairs = new ArrayList<>(nullValueEntries);
+                    sortedKeyValuePairs.addAll(flattenList(sortedMap.values()));
                 } else {
-                    sortedValues = flattenList(sortedMap.values());
-                    sortedValues.addAll(nullValueIds);
+                    sortedKeyValuePairs = flattenList(sortedMap.values());
+                    sortedKeyValuePairs.addAll(nullValueEntries);
                 }
             } else {
                 if (nullOrder == NullOrder.Default || nullOrder == NullOrder.Last) {
-                    sortedValues = flattenList(sortedMap.descendingMap().values());
-                    sortedValues.addAll(nullValueIds);
+                    sortedKeyValuePairs = flattenList(sortedMap.descendingMap().values());
+                    sortedKeyValuePairs.addAll(nullValueEntries);
                 } else {
-                    sortedValues = new ArrayList<>(nullValueIds);
-                    sortedValues.addAll(flattenList(sortedMap.descendingMap().values()));
+                    sortedKeyValuePairs = new ArrayList<>(nullValueEntries);
+                    sortedKeyValuePairs.addAll(flattenList(sortedMap.descendingMap().values()));
                 }
             }
 
-            this.sortedIterator = sortedValues.iterator();
+            this.sortedIterator = sortedKeyValuePairs.iterator();
         }
 
         private <E> List<E> flattenList(Collection<List<E>> collection) {

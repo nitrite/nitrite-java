@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.filters;
 
+import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
@@ -26,22 +27,23 @@ import java.util.List;
 /**
  * @author Anindya Chatterjee
  */
-class OrFilter extends LogicalFilter {
+@Getter
+public class OrFilter extends LogicalFilter {
     private final Filter rhs;
     private final Filter lhs;
 
-    OrFilter(Filter rhs, Filter lhs) {
-        this.rhs = rhs;
+    OrFilter(Filter lhs, Filter rhs) {
         this.lhs = lhs;
+        this.rhs = rhs;
     }
 
     @Override
     public List<Filter> getFilters() {
-        return Arrays.asList(rhs, lhs);
+        return Arrays.asList(lhs, rhs);
     }
 
     @Override
     public boolean apply(KeyValuePair<NitriteId, Document> element) {
-        return rhs.apply(element) || lhs.apply(element);
+        return lhs.apply(element) || rhs.apply(element);
     }
 }

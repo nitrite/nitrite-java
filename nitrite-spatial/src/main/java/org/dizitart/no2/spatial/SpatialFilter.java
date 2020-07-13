@@ -21,13 +21,16 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.IndexAwareFilter;
+import org.dizitart.no2.store.NitriteMap;
 import org.locationtech.jts.geom.Geometry;
+
+import java.util.Set;
 
 /**
  * @author Anindya Chatterjee
  */
 public abstract class SpatialFilter extends IndexAwareFilter {
-    private Geometry geometry;
+    private final Geometry geometry;
 
     protected SpatialFilter(String field, Geometry geometry) {
         super(field, geometry);
@@ -40,7 +43,12 @@ public abstract class SpatialFilter extends IndexAwareFilter {
     }
 
     @Override
-    protected boolean applyNonIndexed(KeyValuePair<NitriteId, Document> element) {
-        throw new FilterException(getField() + " is not indexed with Spatial index");
+    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
+        throw new FilterException("spatial filters cannot be applied on _id field");
+    }
+
+    @Override
+    public boolean apply(KeyValuePair<NitriteId, Document> element) {
+        throw new FilterException(getField() + " is not indexed with spatial index");
     }
 }
