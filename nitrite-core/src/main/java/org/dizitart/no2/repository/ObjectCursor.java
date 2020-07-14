@@ -56,13 +56,13 @@ class ObjectCursor<T> implements Cursor<T> {
     public <P> RecordStream<P> project(Class<P> projectionType) {
         notNull(projectionType, "projection cannot be null");
         Document dummyDoc = emptyDocument(nitriteMapper, projectionType);
-        return new ProjectedObjectStream<>(nitriteMapper, cursor.project(dummyDoc), projectionType);
+        return new MutatedObjectStream<>(nitriteMapper, cursor.project(dummyDoc), projectionType);
     }
 
     @Override
     public <Foreign, Joined> RecordStream<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type) {
         ObjectCursor<Foreign> foreignObjectCursor = (ObjectCursor<Foreign>) foreignCursor;
-        return new JoinedObjectStream<>(nitriteMapper, cursor.join(foreignObjectCursor.cursor, lookup), type);
+        return new MutatedObjectStream<>(nitriteMapper, cursor.join(foreignObjectCursor.cursor, lookup), type);
     }
 
     @Override

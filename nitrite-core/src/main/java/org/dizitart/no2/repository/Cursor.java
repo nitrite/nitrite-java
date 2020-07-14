@@ -80,4 +80,12 @@ public interface Cursor<T> extends RecordStream<T> {
     default Cursor<T> sort(String field, SortOrder sortOrder, NullOrder nullOrder) {
         return sort(field, sortOrder, null, nullOrder);
     }
+
+    default Cursor<T> skip(long skip) {
+        return skipLimit(skip, size());
+    }
+
+    default Cursor<T> limit(long limit) {
+        return skipLimit(0, limit);
+    }
 }

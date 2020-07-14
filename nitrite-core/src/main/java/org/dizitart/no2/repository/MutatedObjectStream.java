@@ -28,30 +28,30 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
 /**
  * @author Anindya Chatterjee.
  */
-class ProjectedObjectStream<T> implements RecordStream<T> {
+class MutatedObjectStream<T> implements RecordStream<T> {
     private final RecordStream<Document> recordIterable;
-    private final Class<T> projectionType;
+    private final Class<T> mutationType;
     private final NitriteMapper nitriteMapper;
 
-    ProjectedObjectStream(NitriteMapper nitriteMapper,
-                          RecordStream<Document> recordIterable,
-                          Class<T> projectionType) {
+    MutatedObjectStream(NitriteMapper nitriteMapper,
+                        RecordStream<Document> recordIterable,
+                        Class<T> mutationType) {
         this.recordIterable = recordIterable;
-        this.projectionType = projectionType;
+        this.mutationType = mutationType;
         this.nitriteMapper = nitriteMapper;
     }
 
     @Override
     public Iterator<T> iterator() {
-        return new ProjectedObjectIterator(nitriteMapper);
+        return new MutatedObjectIterator(nitriteMapper);
     }
 
-    private class ProjectedObjectIterator implements Iterator<T> {
-        private final NitriteMapper objectMapper;
+    private class MutatedObjectIterator implements Iterator<T> {
+        private final NitriteMapper nitriteMapper;
         private final Iterator<Document> documentIterator;
 
-        ProjectedObjectIterator(NitriteMapper nitriteMapper) {
-            this.objectMapper = nitriteMapper;
+        MutatedObjectIterator(NitriteMapper nitriteMapper) {
+            this.nitriteMapper = nitriteMapper;
             this.documentIterator = recordIterable.iterator();
         }
 
@@ -66,7 +66,7 @@ class ProjectedObjectStream<T> implements RecordStream<T> {
             if (item != null) {
                 Document record = item.clone();
                 record.remove(DOC_ID);
-                return objectMapper.convert(record, projectionType);
+                return nitriteMapper.convert(record, mutationType);
             }
             return null;
         }
