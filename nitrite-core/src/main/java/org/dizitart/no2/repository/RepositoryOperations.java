@@ -24,8 +24,8 @@ import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.repository.annotations.*;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.repository.annotations.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
