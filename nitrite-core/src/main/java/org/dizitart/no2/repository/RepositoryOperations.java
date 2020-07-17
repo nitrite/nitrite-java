@@ -23,6 +23,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.filters.NitriteFilter;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.*;
@@ -290,6 +291,15 @@ class RepositoryOperations {
         } else {
             throw new NotIdentifiableException(type.getName() + " does not have any id field");
         }
+    }
+
+    Filter asObjectFilter(Filter filter) {
+        if (filter instanceof NitriteFilter) {
+            NitriteFilter nitriteFilter = (NitriteFilter) filter;
+            nitriteFilter.setObjectFilter(true);
+            return nitriteFilter;
+        }
+        return filter;
     }
 
     private void validateCollection() {

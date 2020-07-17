@@ -23,7 +23,6 @@ import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.filters.NitriteFilter;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapper.NitriteMapper;
@@ -107,7 +106,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         if (!insertIfAbsent) {
             operations.removeNitriteId(updateDocument);
         }
-        return collection.update(asObjectFilter(filter), updateDocument, updateOptions(insertIfAbsent, true));
+        return collection.update(operations.asObjectFilter(filter), updateDocument, updateOptions(insertIfAbsent, true));
     }
 
     @Override
@@ -115,7 +114,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         notNull(update, "a null document cannot be used for update");
         operations.removeNitriteId(update);
         operations.serializeFields(update);
-        return collection.update(asObjectFilter(filter), update, updateOptions(false, justOnce));
+        return collection.update(operations.asObjectFilter(filter), update, updateOptions(false, justOnce));
     }
 
     @Override
@@ -126,7 +125,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     @Override
     public WriteResult remove(Filter filter, boolean justOne) {
-        return collection.remove(asObjectFilter(filter), justOne);
+        return collection.remove(operations.asObjectFilter(filter), justOne);
     }
 
     @Override
@@ -136,7 +135,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     @Override
     public Cursor<T> find(Filter filter) {
-        return new ObjectCursor<>(nitriteMapper, collection.find(asObjectFilter(filter)), type);
+        return new ObjectCursor<>(nitriteMapper, collection.find(operations.asObjectFilter(filter)), type);
     }
 
     @Override
@@ -211,12 +210,4 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         operations.createIndexes();
     }
 
-    private Filter asObjectFilter(Filter filter) {
-        if (filter instanceof NitriteFilter) {
-            NitriteFilter nitriteFilter = (NitriteFilter) filter;
-            nitriteFilter.setObjectFilter(true);
-            return nitriteFilter;
-        }
-        return filter;
-    }
 }
