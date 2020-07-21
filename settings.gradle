@@ -24,4 +24,5 @@ include 'nitrite-spatial'
 include 'nitrite-replication'
 include 'nitrite-support'
 include 'potassium-nitrite'
+include 'nitrite-leveldb'
 

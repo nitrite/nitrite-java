@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.store;
+package org.dizitart.no2.index;
 
 import lombok.Data;
-import org.dizitart.no2.index.IndexEntry;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

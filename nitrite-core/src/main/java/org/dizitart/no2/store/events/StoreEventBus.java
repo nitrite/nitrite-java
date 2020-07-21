@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.store;
+package org.dizitart.no2.store.events;
 
 import org.dizitart.no2.common.event.NitriteEventBus;
-import org.dizitart.no2.store.events.EventInfo;
-import org.dizitart.no2.store.events.StoreEventListener;
 
 /**
  * @since 4.0.0
  * @author Anindya Chatterjee.
  */
-class StoreEventBus extends NitriteEventBus<EventInfo, StoreEventListener> {
+public class StoreEventBus extends NitriteEventBus<EventInfo, StoreEventListener> {
     @Override
     public void post(EventInfo storeEvent) {
         for (final StoreEventListener listener : getListeners()) {

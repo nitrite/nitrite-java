@@ -18,42 +18,32 @@ package org.dizitart.no2.store;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.KeyValuePair;
-import org.dizitart.no2.common.event.NitriteEventBus;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.BoundingBox;
-import org.dizitart.no2.store.events.EventInfo;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.rtree.MVRTreeMap;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.common.Constants.*;
-import static org.dizitart.no2.common.util.ObjectUtils.getKeyName;
-import static org.dizitart.no2.common.util.ObjectUtils.getKeyedRepositoryType;
-import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
+import static org.dizitart.no2.common.Constants.COLLECTION_CATALOG;
 
 /**
  * @since 1.0
  * @author Anindya Chatterjee
  */
 @Slf4j
-public class NitriteMVStore implements NitriteStore {
-    private final NitriteEventBus<EventInfo, StoreEventListener> eventBus;
+public class NitriteMVStore extends AbstractNitriteStore {
     private MVStore mvStore;
     private MVStoreConfig mvStoreConfig;
-    private NitriteConfig nitriteConfig;
 
     public NitriteMVStore() {
-        this.eventBus = new StoreEventBus();
+        super();
     }
 
     @Override
@@ -68,47 +58,6 @@ public class NitriteMVStore implements NitriteStore {
     @Override
     public boolean isClosed() {
         return mvStore.isClosed();
-    }
-
-    @Override
-    public Set<String> getCollectionNames() {
-        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG);
-        Document document = catalogMap.get(TAG_COLLECTIONS);
-        if (document == null) return new HashSet<>();
-
-        return document.getFields();
-    }
-
-    @Override
-    public Set<String> getRepositoryRegistry() {
-        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG);
-        Document document = catalogMap.get(TAG_REPOSITORIES);
-        if (document == null) return new HashSet<>();
-
-        return document.getFields();
-    }
-
-    @Override
-    public Map<String, Set<String>> getKeyedRepositoryRegistry() {
-        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG);
-        Document document = catalogMap.get(TAG_KEYED_REPOSITORIES);
-        if (document == null) return new HashMap<>();
-
-        Map<String, Set<String>> resultMap = new HashMap<>();
-        for (String field : document.getFields()) {
-            String key = getKeyName(field);
-            String type = getKeyedRepositoryType(field);
-
-            Set<String> types;
-            if (resultMap.containsKey(key)) {
-                types = resultMap.get(key);
-            } else {
-                types = new HashSet<>();
-            }
-            types.add(type);
-            resultMap.put(key, types);
-        }
-        return resultMap;
     }
 
     @Override
@@ -134,16 +83,6 @@ public class NitriteMVStore implements NitriteStore {
         }
         mvStore.close();
         alert(StoreEvents.Closed);
-    }
-
-    @Override
-    public void beforeClose() {
-        alert(StoreEvents.Closing);
-    }
-
-    @Override
-    public IndexCatalog getIndexCatalog() {
-        return new MVStoreIndexCatalog(this);
     }
 
     @Override
@@ -188,51 +127,18 @@ public class NitriteMVStore implements NitriteStore {
     }
 
     @Override
-    public void removeRTree(String mapName) {
-        this.removeMap(mapName);
-    }
-
-    @Override
-    public void subscribe(StoreEventListener listener) {
-        eventBus.register(listener);
-    }
-
-    @Override
-    public void unsubscribe(StoreEventListener listener) {
-        eventBus.deregister(listener);
-    }
-
-    @Override
     public StoreInfo getStoreInfo() {
         return MVStoreUtils.getStoreInfo(mvStore);
-    }
-
-    @Override
-    public void initialize(NitriteConfig nitriteConfig) {
-        this.nitriteConfig = nitriteConfig;
     }
 
     public void compact() {
         mvStore.compactMoveChunks();
     }
 
-    private void alert(StoreEvents eventType) {
-        EventInfo event = new EventInfo(eventType, nitriteConfig);
-        eventBus.post(event);
-    }
-
     private void validateStoreConfig(StoreConfig storeConfig) {
         if (!(storeConfig instanceof MVStoreConfig)) {
             throw new ValidationException("store config is not valid mv store config");
         }
-    }
-
-    private boolean isValidCollectionName(String name) {
-        if (isNullOrEmpty(name)) return false;
-        for (String reservedName : RESERVED_NAMES) {
-            if (name.contains(reservedName)) return false;
-        }
-        return true;
     }
 
     private void initEventBus() {

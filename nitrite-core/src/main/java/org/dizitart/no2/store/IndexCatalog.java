@@ -17,26 +17,111 @@
 package org.dizitart.no2.store;
 
 import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexMeta;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.dizitart.no2.common.Constants.*;
+import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 
 /**
+ *
+ * @since 4.0
  * @author Anindya Chatterjee
  */
-public interface IndexCatalog {
-    boolean hasIndexEntry(String collectionName, String field);
+public class IndexCatalog {
+    private final NitriteStore nitriteStore;
 
-    IndexEntry createIndexEntry(String collectionName, String field, String indexType);
+    public IndexCatalog(NitriteStore nitriteStore) {
+        this.nitriteStore = nitriteStore;
+    }
 
-    IndexEntry findIndexEntry(String collectionName, String field);
+    public boolean hasIndexEntry(String collectionName, String field) {
+        NitriteMap<String, IndexMeta> indexMetaMap = getIndexMetaMap(collectionName);
+        if (!indexMetaMap.containsKey(field)) return false;
 
-    boolean isDirtyIndex(String collectionName, String field);
+        IndexMeta indexMeta = indexMetaMap.get(field);
+        return indexMeta != null;
+    }
 
-    Collection<IndexEntry> listIndexEntries(String collectionName);
+    public IndexEntry createIndexEntry(String collectionName, String field, String indexType) {
+        IndexEntry index = new IndexEntry(indexType, field, collectionName);
 
-    void dropIndexEntry(String collectionName, String field);
+        IndexMeta indexMeta = new IndexMeta();
+        indexMeta.setIndexEntry(index);
+        indexMeta.setIsDirty(new AtomicBoolean(false));
+        indexMeta.setIndexMap(getIndexMapName(index));
 
-    void beginIndexing(String collectionName, String field);
+        getIndexMetaMap(collectionName).put(field, indexMeta);
 
-    void endIndexing(String collectionName, String field);
+        return index;
+    }
+
+    public IndexEntry findIndexEntry(String collectionName, String field) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
+        if (meta != null) {
+            return meta.getIndexEntry();
+        }
+        return null;
+    }
+
+    public boolean isDirtyIndex(String collectionName, String field) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
+        return meta != null && meta.getIsDirty().get();
+    }
+
+    public Collection<IndexEntry> listIndexEntries(String collectionName) {
+        Set<IndexEntry> indexSet = new LinkedHashSet<>();
+        for (IndexMeta indexMeta : getIndexMetaMap(collectionName).values()) {
+            indexSet.add(indexMeta.getIndexEntry());
+        }
+        return Collections.unmodifiableSet(indexSet);
+    }
+
+    public void dropIndexEntry(String collectionName, String field) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
+        if (meta != null && meta.getIndexEntry() != null) {
+            String indexMapName = meta.getIndexMap();
+            nitriteStore.openMap(indexMapName).drop();
+        }
+        getIndexMetaMap(collectionName).remove(field);
+    }
+
+    public void beginIndexing(String collectionName, String field) {
+        markDirty(collectionName, field, true);
+    }
+
+    public void endIndexing(String collectionName, String field) {
+        markDirty(collectionName, field, false);
+    }
+
+    private NitriteMap<String, IndexMeta> getIndexMetaMap(String collectionName) {
+        String indexMetaName = getIndexMetaName(collectionName);
+        return nitriteStore.openMap(indexMetaName);
+    }
+
+    private String getIndexMetaName(String collectionName) {
+        return INDEX_META_PREFIX + INTERNAL_NAME_SEPARATOR + collectionName;
+    }
+
+    private String getIndexMapName(IndexEntry index) {
+        return INDEX_PREFIX +
+            INTERNAL_NAME_SEPARATOR +
+            index.getCollectionName() +
+            INTERNAL_NAME_SEPARATOR +
+            index.getField() +
+            INTERNAL_NAME_SEPARATOR +
+            index.getIndexType();
+    }
+
+    private void markDirty(String collectionName, String field, boolean dirty) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
+        if (meta != null && meta.getIndexEntry() != null) {
+            meta.getIsDirty().set(dirty);
+        }
+    }
 }

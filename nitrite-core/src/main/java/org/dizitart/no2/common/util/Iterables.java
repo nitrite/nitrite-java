@@ -119,7 +119,12 @@ public class Iterables {
         if (iterable instanceof Collection) {
             return ((Collection<?>) iterable).size();
         }
-        return toList(iterable).size();
+
+        long count = 0;
+        for (Object ignored : iterable) {
+            count++;
+        }
+        return count;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

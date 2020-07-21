@@ -83,8 +83,8 @@ class WriteOperations {
 
             if (already != null) {
                 log.warn("Another document {} already exists with same id {}", already, nitriteId);
-                // rollback changes
-                nitriteMap.put(nitriteId, already);
+                // nitriteMap.put(nitriteId, already);
+
                 throw new UniqueConstraintException("id constraint violation, " +
                     "entry with same id already exists in " + nitriteMap.getName());
             } else {
