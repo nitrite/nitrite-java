@@ -64,7 +64,12 @@ class DocumentTest : BaseTest() {
 
     @Test
     fun documentInsert() {
-        db = nitrite()
+        db = nitrite {
+            loadModule(mvStore {
+                path = fileName
+            })
+        }
+
         val doc = documentOf("a" to 1)
         db?.getCollection("test") {
             insert(doc)

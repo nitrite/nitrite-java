@@ -25,10 +25,10 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 
 import java.util.List;
@@ -54,8 +54,13 @@ public class MainActivity extends AppCompatActivity {
             progressBar.setVisibility(View.VISIBLE);
             String fileName = getFilesDir().getPath() + "/test.db";
             Log.i("Nitrite", "Nitrite file - " + fileName);
-            db = NitriteBuilder.get()
+
+            MVStoreModule storeModule = MVStoreModule.withConfig()
                 .filePath(fileName)
+                .build();
+
+            db = Nitrite.builder()
+                .loadModule(storeModule)
                 .openOrCreate("test-user", "test-password");
             repository = db.getRepository(User.class);
 

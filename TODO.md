@@ -138,3 +138,38 @@ send over websocket
     Server->Server: Removes replica id
     Replica (R1)->Replica (R1): Closes connection
 
+
+
+
+https://blog.yugabyte.com/how-we-built-a-high-performance-document-store-on-rocksdb/
+
+https://docs.yugabyte.com/latest/architecture/docdb/persistence/
+
+https://blog.yugabyte.com/enhancing-rocksdb-for-speed-scale/
+
+## Fix
+
+1. repository package
+
+
+```c++
+Options.max_background_flushes: 2
+Options.max_background_compactions: 8
+Options.avoid_flush_during_shutdown: 1
+Options.compaction_readahead_size: 16384
+ColumnFamilyOptions.comparator: leveldb.BytewiseComparator
+ColumnFamilyOptions.table_factory: BlockBasedTable
+BlockBasedTableOptions.checksum: kxxHash
+BlockBasedTableOptions.block_size: 16384
+BlockBasedTableOptions.filter_policy: rocksdb.BuiltinBloomFilter
+BlockBasedTableOptions.whole_key_filtering: 0
+BlockBasedTableOptions.format_version: 4
+LRUCacheOptionsOptions.capacity : 8589934592
+ColumnFamilyOptions.write_buffer_size: 134217728
+ColumnFamilyOptions.compression[0]: NoCompression
+ColumnFamilyOptions.compression[1]: NoCompression
+ColumnFamilyOptions.compression[2]: LZ4
+ColumnFamilyOptions.prefix_extractor: CustomPrefixExtractor
+ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
+
+```

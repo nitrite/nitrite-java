@@ -23,7 +23,6 @@ import okhttp3.*;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.sync.Replica;
@@ -39,6 +38,7 @@ import java.nio.file.Path;
 import java.security.cert.CertificateException;
 
 import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.test.TestUtils.createDb;
 
 /**
  * @author Anindya Chatterjee
@@ -64,9 +64,7 @@ public class DataGateIntegrationTest {
             createUser();
             dbPath = Files.createTempFile("no2-datagate-it", "db");
 
-            Nitrite db = NitriteBuilder.get()
-                .filePath(dbPath.toFile())
-                .openOrCreate();
+            Nitrite db = createDb(dbPath.toFile().getPath());
 
             NitriteCollection collection = db.getCollection("datagateIntegration");
             Document document = createDocument().put("firstName", "Anindya")

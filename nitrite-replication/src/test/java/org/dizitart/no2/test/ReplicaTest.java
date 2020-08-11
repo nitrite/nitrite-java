@@ -19,7 +19,6 @@ package org.dizitart.no2.test;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.filters.Filter;
@@ -46,6 +45,7 @@ import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.util.DocumentUtils.isSimilar;
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.test.TestUtils.createDb;
 import static org.dizitart.no2.test.TestUtils.randomDocument;
 import static org.junit.Assert.*;
 
@@ -91,9 +91,7 @@ public class ReplicaTest {
     public void testSingleUserSingleReplica() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        Nitrite db = createDb(dbFile);
         NitriteCollection collection = db.getCollection("testSingleUserSingleReplica");
         Document document = createDocument().put("firstName", "Anindya")
             .put("lastName", "Chatterjee")
@@ -147,12 +145,9 @@ public class ReplicaTest {
     public void testSingleUserMultiReplica() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        Nitrite db1 = createDb(dbFile);
 
-        Nitrite db2 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db2 = createDb();
 
         NitriteCollection c1 = db1.getCollection("testSingleUserMultiReplica");
         NitriteCollection c2 = db2.getCollection("testSingleUserMultiReplica");
@@ -257,16 +252,13 @@ public class ReplicaTest {
         repository.getUserMap().put("user2", "abcd");
         repository.getUserMap().put("user3", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db1 = createDb();
         NitriteCollection c1 = db1.getCollection("testMultiUserSingleReplica");
 
-        Nitrite db2 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db2 = createDb();
         NitriteCollection c2 = db2.getCollection("testMultiUserSingleReplica");
 
-        Nitrite db3 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db3 = createDb();
         NitriteCollection c3 = db3.getCollection("testMultiUserSingleReplica");
 
         Replica r1 = Replica.builder()
@@ -323,12 +315,10 @@ public class ReplicaTest {
         repository.getUserMap().put("user1", "abcd");
         repository.getUserMap().put("user2", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db1 = createDb();
         NitriteCollection c1 = db1.getCollection("testMultiUserSingleReplica1");
 
-        Nitrite db2 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db2 = createDb();
         NitriteCollection c2 = db2.getCollection("testMultiUserSingleReplica2");
 
         Replica r1 = Replica.builder()
@@ -368,8 +358,7 @@ public class ReplicaTest {
     public void testSecurityInCorrectCredentials() {
         repository.getUserMap().put("user", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db1 = createDb();
         NitriteCollection c1 = db1.getCollection("testSecurity");
 
         Replica r1 = Replica.builder()
@@ -392,12 +381,9 @@ public class ReplicaTest {
     public void testCloseDbAndReconnect() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        Nitrite db1 = createDb(dbFile);
 
-        Nitrite db2 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db2 = createDb();
 
         NitriteCollection c1 = db1.getCollection("testCloseDbAndReconnect");
         NitriteCollection c2 = db2.getCollection("testCloseDbAndReconnect");
@@ -459,9 +445,7 @@ public class ReplicaTest {
         r1.close();
         db1.close();
 
-        db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        db1 = createDb(dbFile);
         c1 = db1.getCollection("testCloseDbAndReconnect");
         r1 = Replica.builder()
             .of(c1)
@@ -509,9 +493,7 @@ public class ReplicaTest {
     public void testDelayedConnect() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        Nitrite db1 = createDb(dbFile);
         NitriteCollection c1 = db1.getCollection("testDelayedConnect");
         Replica r1 = Replica.builder()
             .of(c1)
@@ -531,8 +513,7 @@ public class ReplicaTest {
         r1.close();
         db1.close();
 
-        Nitrite db2 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db2 = createDb();
         NitriteCollection c2 = db2.getCollection("testDelayedConnect");
         Replica r2 = Replica.builder()
             .of(c2)
@@ -547,9 +528,7 @@ public class ReplicaTest {
     public void testDelayedConnectRemoveAll() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        Nitrite db1 = createDb(dbFile);
         NitriteCollection c1 = db1.getCollection("testDelayedConnect");
         Replica r1 = Replica.builder()
             .of(c1)
@@ -571,8 +550,7 @@ public class ReplicaTest {
         r1.close();
         db1.close();
 
-        Nitrite db2 = NitriteBuilder.get()
-            .openOrCreate();
+        Nitrite db2 = createDb();
         NitriteCollection c2 = db2.getCollection("testDelayedConnect");
         Replica r2 = Replica.builder()
             .of(c2)
@@ -586,9 +564,7 @@ public class ReplicaTest {
             c2.insert(document);
         }
 
-        db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        db1 = createDb(dbFile);
         NitriteCollection c3 = db1.getCollection("testDelayedConnect");
         r1 = Replica.builder()
             .of(c3)
@@ -606,9 +582,7 @@ public class ReplicaTest {
     @Test
     public void testGarbageCollect() throws InterruptedException {
         repository.getUserMap().put("anidotnet", "abcd");
-        Nitrite db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        Nitrite db1 = createDb(dbFile);
         NitriteCollection c1 = db1.getCollection("testGarbageCollect");
         Replica r1 = Replica.builder()
             .of(c1)
@@ -632,9 +606,7 @@ public class ReplicaTest {
 
         repository.setGcTtl(1L);
 
-        db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        db1 = createDb(dbFile);
         NitriteCollection c2 = db1.getCollection("testGarbageCollect");
         r1 = Replica.builder()
             .of(c2)

@@ -21,8 +21,11 @@ import org.dizitart.no2.NitriteBuilder
 import org.dizitart.no2.NitriteConfig
 import org.dizitart.no2.module.NitriteModule
 import org.dizitart.no2.module.NitriteModule.module
+import org.dizitart.no2.mvstore.MVStoreModule
+import org.dizitart.no2.mvstore.MVStoreModuleBuilder
 import org.dizitart.no2.spatial.SpatialIndexer
 import org.dizitart.no2.store.events.StoreEventListener
+import org.h2.mvstore.FileStore
 import java.io.File
 
 /**
@@ -33,65 +36,6 @@ import java.io.File
  */
 class Builder internal constructor() {
     private val modules = mutableSetOf<NitriteModule>()
-    private val listeners = mutableSetOf<StoreEventListener>()
-
-    /**
-     * Path for the file based store.
-     */
-    var path: String? = null
-
-    /**
-     * [File] for the file based store.
-     */
-    var file: File? = null
-
-    /**
-     * The size of the write buffer, in KB disk space (for file-based
-     * stores). Unless auto-commit is disabled, changes are automatically
-     * saved if there are more than this amount of changes.
-     *
-     * When the values is set to 0 or lower, it will assume the default value
-     * - 1024 KB.
-     */
-    var autoCommitBufferSize: Int = 0
-
-    /**
-     * Opens the file in read-only mode. In this case, a shared lock will be
-     * acquired to ensure the file is not concurrently opened in write mode.
-     *
-     * If this option is not used, the file is locked exclusively.
-     */
-    var readOnly: Boolean = false
-
-    /**
-     * Compresses data before writing using the LZF algorithm. This will save
-     * about 50% of the disk space, but will slow down read and write
-     * operations slightly.
-     */
-    var compress: Boolean = false
-
-    /**
-     * Enables auto commit. If disabled, unsaved changes will not be written
-     * into disk until {@link Nitrite#commit()} is called.
-     */
-    var autoCommit = true
-
-    /**
-     * Enables auto compact before close. If disabled, compaction will not
-     * be performed. Disabling would increase close performance.
-     */
-    var autoCompact = true
-
-    /**
-     * Sets the thread pool shutdown timeout in seconds. Default value
-     * is 5s.
-     */
-    var poolShutdownTimeout = 5
-
-    /**
-     * Enables off-heap storage for in-memory database.
-     */
-    var offHeapStorage = false;
 
     /**
      * Specifies the separator character for embedded field.
@@ -107,35 +51,13 @@ class Builder internal constructor() {
         modules.add(module)
     }
 
-    /**
-     * Adds a [StoreEventListener] instance and subscribe it to store event.
-     * */
-    fun addStoreEventListener(listener: StoreEventListener) {
-        listeners.add(listener)
-    }
-
     internal fun createNitriteBuilder(): NitriteBuilder {
-        val builder = NitriteBuilder.get()
-        if (file != null) {
-            builder.filePath(file)
-        } else {
-            builder.filePath(path)
-        }
-        builder.autoCommitBufferSize(autoCommitBufferSize)
+        val builder = Nitrite.builder()
 
         modules.forEach { builder.loadModule(it) }
         loadDefaultPlugins(builder)
 
         builder.fieldSeparator(fieldSeparator)
-
-        if (readOnly) builder.readOnly()
-        if (compress) builder.compressed()
-        if (!autoCommit) builder.disableAutoCommit()
-        if (!autoCompact) builder.disableAutoCompact()
-        if (offHeapStorage) builder.enableOffHeapStorage()
-
-        listeners.forEach { builder.addStoreEventListener(it) }
-
         return builder
     }
 
@@ -150,6 +72,49 @@ class Builder internal constructor() {
         } else if (!mapperFound && !spatialIndexerFound) {
             builder.loadModule(KNO2Module())
         }
+    }
+}
+
+class MVStoreBuilder internal constructor() {
+    private val eventListeners = mutableSetOf<StoreEventListener>()
+
+    var path: String? = null
+    var file: File? = null
+    var autoCommitBufferSize = 1024
+    var encryptionKey: CharArray? = null
+    var readOnly = false
+    var compress = false
+    var compressHigh = false
+    var autoCommit = true
+    var recoveryMode = false
+    var cacheSize = 16
+    var cacheConcurrency = 16
+    var pageSplitSize = 16
+    var fileStore: FileStore? = null
+
+    fun addStoreEventListener(listener: StoreEventListener) {
+        eventListeners.add(listener)
+    }
+
+    fun createStoreModuleBuilder(): MVStoreModuleBuilder {
+        val path = if (file != null) (file as File).path else path
+
+        val builder = MVStoreModule.withConfig()
+            .filePath(path)
+            .autoCommitBufferSize(autoCommitBufferSize)
+            .encryptionKey(encryptionKey)
+            .readOnly(readOnly)
+            .compress(compress)
+            .compressHigh(compressHigh)
+            .autoCommit(autoCommit)
+            .recoveryMode(recoveryMode)
+            .cacheSize(cacheSize)
+            .cacheConcurrency(cacheConcurrency)
+            .pageSplitSize(pageSplitSize)
+            .fileStore(fileStore)
+
+        eventListeners.forEach { builder.addStoreEventListener(it) }
+        return builder
     }
 }
 
@@ -173,4 +138,11 @@ fun nitrite(userId: String? = null, password: String? = null,
     } else {
         nitriteBuilder.openOrCreate(userId, password)
     }
+}
+
+fun mvStore(op: (MVStoreBuilder.() -> Unit)? = null): MVStoreModule {
+    val storeBuilder = MVStoreBuilder()
+    op?.invoke(storeBuilder)
+    val moduleBuilder = storeBuilder.createStoreModuleBuilder()
+    return moduleBuilder.build()
 }

@@ -16,16 +16,19 @@
 
 package org.dizitart.no2.test;
 
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.index.NitriteTextIndexer;
-import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 import org.dizitart.no2.index.fulltext.Languages;
 import org.dizitart.no2.index.fulltext.UniversalTextTokenizer;
 import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.mvstore.MVStoreModule;
+import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.repository.annotations.Index;
+import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -95,25 +98,25 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
     }
 
     private void openDb() {
-        NitriteBuilder builder = NitriteBuilder.get();
+        MVStoreModuleBuilder builder = MVStoreModule.withConfig();
+
+        if (isCompressed) {
+            builder.compress(true);
+        }
 
         if (!isAutoCommit) {
-            builder.disableAutoCommit();
+            builder.autoCommit(false);
         }
 
         if (!inMemory) {
             builder.filePath(fileName);
         }
 
-        if (isCompressed) {
-            builder.compressed();
-        }
+        MVStoreModule storeModule = builder.build();
+        NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .loadModule(storeModule);
 
-        if (!isAutoCompact) {
-            builder.disableAutoCompact();
-        }
-
-        builder.loadModule(new JacksonMapperModule());
+        nitriteBuilder.loadModule(new JacksonMapperModule());
 
         UniversalTextTokenizer tokenizer;
         if (isCompressed) {
@@ -121,12 +124,12 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
         } else {
             tokenizer = new UniversalTextTokenizer(Languages.ALL);
         }
-        builder.loadModule(module(new NitriteTextIndexer(tokenizer)));
+        nitriteBuilder.loadModule(module(new NitriteTextIndexer(tokenizer)));
 
-        if (!isProtected) {
-            db = builder.openOrCreate("test-user", "test-password");
+        if (isProtected) {
+            db = nitriteBuilder.openOrCreate("test-user", "test-password");
         } else {
-            db = builder.openOrCreate();
+            db = nitriteBuilder.openOrCreate();
         }
     }
 

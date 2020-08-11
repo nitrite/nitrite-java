@@ -19,7 +19,6 @@ plugins {
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
-    id 'jacoco'
 }
 
 jar {
@@ -33,48 +32,20 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
-    implementation project(path: ':nitrite-core', configuration: 'default')
     implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "com.h2database:h2-mvstore:1.4.200"
+    implementation "org.objenesis:objenesis:2.6"
+    implementation "org.jasypt:jasypt:1.9.3"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
-    testAnnotationProcessor "org.openjdk.jmh:jmh-generator-annprocess:1.21"
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
-    testImplementation "uk.co.jemos.podam:podam:7.2.3.RELEASE"
-    testImplementation "com.github.javafaker:javafaker:1.0.2"
     testImplementation "junit:junit:4.13"
-    testImplementation "org.openjdk.jmh:jmh-core:1.21"
-    testImplementation "org.apache.lucene:lucene-core:7.2.1"
-    testImplementation "org.apache.lucene:lucene-analyzers-common:7.2.1"
-    testImplementation "org.apache.lucene:lucene-queryparser:7.2.1"
-    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.0"
-    testImplementation "org.apache.logging.log4j:log4j-core:2.13.0"
-    testImplementation "org.awaitility:awaitility:4.0.2"
-    testImplementation "joda-time:joda-time:2.9.9"
-    testImplementation "org.meanbean:meanbean:2.0.3"
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.10.1"
 }
 
 test {
     testLogging.showStandardStreams = false
     testLogging.exceptionFormat = 'full'
 }
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        xml.destination file("${buildDir}/reports/jacoco/report.xml")
-        csv.enabled false
-        html.destination file("${buildDir}/reports/coverage")
-    }
-}
-
-check.dependsOn jacocoTestReport
 
 publishing {
     publications {
@@ -91,7 +62,7 @@ publishing {
             }
             pom {
                 name = 'Nitrite'
-                description = 'An in-memory, file-based embedded nosql persistent document store based on mvstore.'
+                description = 'Nitrite Database API'
                 url = 'https://github.com/nitrite/nitrite-java'
                 licenses {
                     license {

@@ -34,13 +34,15 @@ class BuilderTest : BaseTest() {
     @Test
     fun testBuilder1() {
         db = nitrite {
-            path = fileName
-            autoCommit = false
+            loadModule(mvStore {
+                path = fileName
+                autoCommit = false
+            })
         }
 
         val context = db?.config!!
-        assertEquals(context.storeConfig.filePath, fileName)
-        assertFalse(context.storeConfig.isReadOnly)
+        assertEquals(context.nitriteStore.storeConfig.filePath(), fileName)
+        assertFalse(context.nitriteStore.storeConfig.isReadOnly)
         assertTrue(context.nitriteMapper() is KNO2JacksonMapper)
 
         assertFalse(db?.isClosed!!)
@@ -52,16 +54,18 @@ class BuilderTest : BaseTest() {
     @Test
     fun testBuilder2() {
         db = nitrite {
-            file = File(fileName)
-            autoCommitBufferSize = 2048
-            compress = true
-            autoCompact = false
+            loadModule(mvStore {
+                file = File(fileName)
+                autoCommitBufferSize = 2048
+                compress = true
+            })
+
             loadModule(module(NitriteTextIndexer(UniversalTextTokenizer())))
         }
 
         val context = db?.config!!
-        assertEquals(context.storeConfig.filePath, fileName)
-        assertFalse(context.storeConfig.isReadOnly)
+        assertEquals(context.nitriteStore.storeConfig.filePath(), fileName)
+        assertFalse(context.nitriteStore.storeConfig.isReadOnly)
         assertTrue(context.nitriteMapper() is KNO2JacksonMapper)
 
         assertFalse(db?.isClosed!!)
@@ -70,28 +74,36 @@ class BuilderTest : BaseTest() {
     @Test(expected = SecurityException::class)
     fun testBuilderNoUser() {
         db = nitrite("", "password") {
-            file = File(fileName)
+            loadModule(mvStore {
+                file = File(fileName)
+            })
         }
     }
 
     @Test(expected = SecurityException::class)
     fun testBuilderNoPassword() {
         db = nitrite("user", "") {
-            file = File(fileName)
+            loadModule(mvStore {
+                file = File(fileName)
+            })
         }
     }
 
     @Test
     fun testBuilderNoUserPassword() {
         db = nitrite("", "") {
-            file = File(fileName)
+            loadModule(mvStore {
+                file = File(fileName)
+            })
         }
     }
 
     @Test
     fun testBuilderInMemory() {
-        db = nitrite()
-        assertTrue(db?.config?.storeConfig?.isInMemory!!)
+        db = nitrite {
+            loadModule(mvStore())
+        }
+        assertTrue(db?.config?.nitriteStore?.storeConfig?.isInMemory!!)
     }
 }
 

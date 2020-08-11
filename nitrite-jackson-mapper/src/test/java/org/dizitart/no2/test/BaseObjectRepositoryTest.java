@@ -19,6 +19,8 @@ package org.dizitart.no2.test;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.mvstore.MVStoreModule;
+import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.test.data.*;
 import org.junit.After;
@@ -57,7 +59,7 @@ public abstract class BaseObjectRepositoryTest {
     private final String fileName = getRandomTempDbFile();
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}, " +
-        "Compressed = {2}, AutoCommit = {3}, AutoCompact = {4}")
+        "Compressed = {2}, AutoCommit = {3}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
             {false, false, false, false, false},
@@ -111,30 +113,29 @@ public abstract class BaseObjectRepositoryTest {
     }
 
     private void openDb() {
-        NitriteBuilder builder = NitriteBuilder.get();
+        MVStoreModuleBuilder builder = MVStoreModule.withConfig();
+
+        if (isCompressed) {
+            builder.compress(true);
+        }
 
         if (!isAutoCommit) {
-            builder.disableAutoCommit();
+            builder.autoCommit(false);
         }
 
         if (!inMemory) {
             builder.filePath(fileName);
         }
 
-        if (isCompressed) {
-            builder.compressed();
-        }
-
-        if (!isAutoCompact) {
-            builder.disableAutoCompact();
-        }
-
-        builder.loadModule(new JacksonMapperModule());
+        MVStoreModule storeModule = builder.build();
+        NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .loadModule(new JacksonMapperModule())
+            .loadModule(storeModule);
 
         if (isProtected) {
-            db = builder.openOrCreate("test-user", "test-password");
+            db = nitriteBuilder.openOrCreate("test-user", "test-password");
         } else {
-            db = builder.openOrCreate();
+            db = nitriteBuilder.openOrCreate();
         }
     }
 

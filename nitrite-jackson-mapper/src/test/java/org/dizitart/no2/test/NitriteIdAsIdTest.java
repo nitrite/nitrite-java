@@ -18,15 +18,14 @@ package org.dizitart.no2.test;
 
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.exceptions.InvalidIdException;
-import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.mapper.JacksonMapper;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.repository.annotations.Id;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +36,7 @@ import java.nio.file.Paths;
 
 import static org.dizitart.no2.module.NitriteModule.module;
 import static org.dizitart.no2.test.BaseObjectRepositoryTest.getRandomTempDbFile;
+import static org.dizitart.no2.test.TestUtil.createDb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -44,14 +44,14 @@ import static org.junit.Assert.assertNotNull;
  * @author Anindya Chatterjee
  */
 public class NitriteIdAsIdTest {
-    private String fileName = getRandomTempDbFile();
+    private final String fileName = getRandomTempDbFile();
     private Nitrite db;
     private ObjectRepository<WithNitriteId> repo;
 
     @Before
     public void before() {
         JacksonMapper mapper = new JacksonMapper();
-        db = NitriteBuilder.get().loadModule(module(mapper)).filePath(fileName).openOrCreate();
+        db = createDb(fileName, module(mapper));
         repo = db.getRepository(WithNitriteId.class);
     }
 

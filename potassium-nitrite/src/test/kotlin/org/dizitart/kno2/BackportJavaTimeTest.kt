@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
-import org.dizitart.no2.mapper.JacksonModule
+import org.dizitart.no2.mapper.JacksonExtension
 import org.junit.Test
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
@@ -44,7 +44,7 @@ class BackportJavaTimeTest {
             val time: LocalDateTime
     )
 
-    class ThreeTenAbpModule : JacksonModule {
+    class ThreeTenAbpExtension : JacksonExtension {
         override fun getModule(): Module {
             return object : SimpleModule() {
                 override fun setupModule(context: SetupContext?) {
@@ -80,8 +80,10 @@ class BackportJavaTimeTest {
     @Test
     fun testIssue59() {
         val db = nitrite {
-            path = dbPath
-            loadModule(KNO2Module(ThreeTenAbpModule()))
+            loadModule(mvStore {
+                path = dbPath
+            })
+            loadModule(KNO2Module(ThreeTenAbpExtension()))
         }
 
         val repo = db.getRepository<TestData>()

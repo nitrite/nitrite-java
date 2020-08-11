@@ -24,7 +24,7 @@ import org.locationtech.jts.io.WKTWriter;
 
 import java.io.IOException;
 
-import static org.dizitart.no2.spatial.mapper.GeometryModule.GEOMETRY_ID;
+import static org.dizitart.no2.spatial.mapper.GeometryExtension.GEOMETRY_ID;
 
 /**
  * @author Anindya Chatterjee

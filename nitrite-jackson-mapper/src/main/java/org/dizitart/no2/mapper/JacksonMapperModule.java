@@ -31,8 +31,8 @@ public class JacksonMapperModule implements NitriteModule {
         jacksonMapper = new JacksonMapper();
     }
 
-    public JacksonMapperModule(JacksonModule... jacksonModules) {
-        jacksonMapper = new JacksonMapper(jacksonModules);
+    public JacksonMapperModule(JacksonExtension... jacksonExtensions) {
+        jacksonMapper = new JacksonMapper(jacksonExtensions);
     }
 
     @Override

@@ -17,7 +17,6 @@
 package org.dizitart.no2.test;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.WriteResult;
@@ -34,6 +33,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static org.dizitart.no2.test.TestUtil.createDb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -41,15 +41,12 @@ import static org.junit.Assert.assertNull;
  * @author Anindya Chatterjee.
  */
 public class ObjectRepositoryNegativeTest {
-    private String dbPath = BaseObjectRepositoryTest.getRandomTempDbFile();
+    private final String dbPath = BaseObjectRepositoryTest.getRandomTempDbFile();
     private Nitrite db;
 
     @Before
     public void setUp() {
-        db = NitriteBuilder.get()
-            .filePath(dbPath)
-            .loadModule(new JacksonMapperModule())
-            .openOrCreate();
+        db = createDb(dbPath, new JacksonMapperModule());
     }
 
     @After

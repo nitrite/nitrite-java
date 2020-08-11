@@ -18,12 +18,13 @@ package org.dizitart.no2.test.server;
 
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 
 import javax.websocket.Session;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.dizitart.no2.test.TestUtils.createDb;
 
 /**
  * @author Anindya Chatterjee
@@ -55,7 +56,7 @@ public class Repository {
         authorizedSessions = new HashSet<>();
         userMap = new ConcurrentHashMap<>();
 
-        db = NitriteBuilder.get().openOrCreate();
+        db = createDb();
         serverId = UUID.randomUUID().toString();
         gcTtl = 0L;
     }

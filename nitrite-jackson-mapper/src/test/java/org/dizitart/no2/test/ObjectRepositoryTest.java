@@ -17,7 +17,6 @@
 package org.dizitart.no2.test;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.mapper.JacksonMapperModule;
 import org.dizitart.no2.repository.Cursor;
@@ -34,21 +33,19 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.test.TestUtil.createDb;
 import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.
  */
 public class ObjectRepositoryTest {
-    private String dbPath = BaseObjectRepositoryTest.getRandomTempDbFile();
+    private final String dbPath = BaseObjectRepositoryTest.getRandomTempDbFile();
     private Nitrite db;
 
     @Before
     public void setUp() {
-        db = NitriteBuilder.get()
-            .loadModule(new JacksonMapperModule())
-            .filePath(dbPath)
-            .openOrCreate();
+        db = createDb(dbPath, new JacksonMapperModule());
     }
 
     @After

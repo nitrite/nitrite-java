@@ -39,7 +39,9 @@ class FilterTest : BaseTest() {
     @Before
     fun before() {
         db = nitrite {
-            path = fileName
+            loadModule(mvStore {
+                path = fileName
+            })
         }
     }
 

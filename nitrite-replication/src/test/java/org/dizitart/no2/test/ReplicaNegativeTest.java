@@ -17,7 +17,6 @@
 package org.dizitart.no2.test;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
@@ -34,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.test.ReplicaTest.getRandomTempDbFile;
+import static org.dizitart.no2.test.TestUtils.createDb;
 import static org.dizitart.no2.test.TestUtils.randomDocument;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -68,9 +68,7 @@ public class ReplicaNegativeTest {
     public void testServerClose() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = NitriteBuilder.get()
-            .filePath(dbFile)
-            .openOrCreate();
+        Nitrite db1 = createDb(dbFile);
 
         NitriteCollection c1 = db1.getCollection("testServerClose");
 

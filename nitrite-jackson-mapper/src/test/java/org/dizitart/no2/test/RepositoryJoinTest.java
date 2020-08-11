@@ -23,9 +23,11 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.mvstore.MVStoreModule;
+import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.repository.annotations.Id;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -115,30 +117,30 @@ public class RepositoryJoinTest {
     }
 
     private void openDb() {
-        NitriteBuilder builder = NitriteBuilder.get();
+        MVStoreModuleBuilder builder = MVStoreModule.withConfig();
+
+        if (isCompressed) {
+            builder.compress(true);
+        }
 
         if (!isAutoCommit) {
-            builder.disableAutoCommit();
+            builder.autoCommit(false);
         }
 
         if (!inMemory) {
             builder.filePath(fileName);
         }
 
-        if (isCompressed) {
-            builder.compressed();
-        }
+        MVStoreModule storeModule = builder.build();
+        NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .loadModule(storeModule);
 
-        if (!isAutoCompact) {
-            builder.disableAutoCompact();
-        }
-
-        builder.loadModule(new JacksonMapperModule());
+        nitriteBuilder.loadModule(new JacksonMapperModule());
 
         if (isProtected) {
-            db = builder.openOrCreate("test-user1", "test-password1");
+            db = nitriteBuilder.openOrCreate("test-user1", "test-password1");
         } else {
-            db = builder.openOrCreate();
+            db = nitriteBuilder.openOrCreate();
         }
     }
 

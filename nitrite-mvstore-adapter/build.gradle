@@ -1,0 +1,150 @@
+/*
+ * Copyright (c) 2017-2020. Nitrite author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+plugins {
+    id 'java'
+    id 'signing'
+    id 'maven-publish'
+    id 'com.github.hauner.jarTest'
+    id 'jacoco'
+}
+
+jar {
+    archivesBaseName = 'nitrite-mvstore-adapter'
+}
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(path: ':nitrite', configuration: 'default')
+    implementation "org.slf4j:slf4j-api:1.7.30"
+    implementation "com.h2database:h2-mvstore:1.4.200"
+    annotationProcessor "org.projectlombok:lombok:1.18.12"
+
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testImplementation "uk.co.jemos.podam:podam:7.2.3.RELEASE"
+    testImplementation "com.github.javafaker:javafaker:1.0.2"
+    testImplementation "junit:junit:4.13"
+    testImplementation "org.apache.lucene:lucene-core:8.5.1"
+    testImplementation "org.apache.lucene:lucene-analyzers-common:8.5.1"
+    testImplementation "org.apache.lucene:lucene-queryparser:8.2.0"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.0"
+    testImplementation "org.apache.logging.log4j:log4j-core:2.13.0"
+    testImplementation "org.awaitility:awaitility:4.0.2"
+    testImplementation "joda-time:joda-time:2.10.1"
+    testImplementation "org.meanbean:meanbean:2.0.3"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    testImplementation "com.fasterxml.jackson.core:jackson-core:2.11.1"
+}
+
+test {
+    testLogging.showStandardStreams = false
+    testLogging.exceptionFormat = 'full'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination file("${buildDir}/reports/jacoco/report.xml")
+        csv.enabled false
+        html.destination file("${buildDir}/reports/coverage")
+    }
+}
+
+check.dependsOn jacocoTestReport
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'nitrite-mvstore-adapter'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'Nitrite MVStore Storage Engine'
+                description = 'An in-memory, file-based embedded nosql persistent document store based on mvstore.'
+                url = 'https://github.com/nitrite/nitrite-java'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'anidotnet'
+                        name = 'Anindya Chatterjee'
+                        email = 'anidotnet@gmail.com'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git@github.com:nitrite/nitrite-java.git'
+                    developerConnection = 'scm:git:git@github.com:nitrite/nitrite-java.git'
+                    url = 'git@github.com:nitrite/nitrite-java.git'
+                }
+            }
+        }
+    }
+    repositories {
+        if (version.endsWith('SNAPSHOT') || project.hasProperty('release')) {
+            maven {
+                name = "OSSRH"
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username System.getenv('MAVEN_USERNAME')
+                    password System.getenv('MAVEN_PASSWORD')
+                }
+
+            }
+        }
+        maven {
+            name = "GitHubPackages"
+            url = "https://maven.pkg.github.com/nitrite/nitrite-java"
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+
+javadoc {
+    if(JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}

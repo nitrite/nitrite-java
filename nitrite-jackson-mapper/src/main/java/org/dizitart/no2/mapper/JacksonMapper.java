@@ -29,6 +29,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.ObjectMappingException;
+import org.dizitart.no2.mapper.extensions.NitriteIdExtension;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -41,20 +42,20 @@ import static org.dizitart.no2.common.util.Iterables.listOf;
  */
 @Slf4j
 public class JacksonMapper extends MappableMapper {
-    private List<JacksonModule> jacksonModules;
-    private List<Class<?>> moduleTypes;
+    private final List<JacksonExtension> jacksonExtensions;
+    private final List<Class<?>> moduleTypes;
 
     @Getter(AccessLevel.PROTECTED)
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public JacksonMapper() {
-        this.jacksonModules = new ArrayList<>();
+        this.jacksonExtensions = new ArrayList<>();
         this.moduleTypes = new ArrayList<>();
         this.objectMapper = createObjectMapper();
     }
 
-    public JacksonMapper(JacksonModule... jacksonModules) {
-        this.jacksonModules = new ArrayList<>(listOf(jacksonModules));
+    public JacksonMapper(JacksonExtension... jacksonExtensions) {
+        this.jacksonExtensions = new ArrayList<>(listOf(jacksonExtensions));
         this.moduleTypes = new ArrayList<>();
         this.objectMapper = createObjectMapper();
     }
@@ -71,9 +72,9 @@ public class JacksonMapper extends MappableMapper {
         objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-        this.jacksonModules.add(new NitriteIdModule());
-        for (JacksonModule jacksonModule : jacksonModules) {
-            loadJacksonModule(jacksonModule, objectMapper);
+        this.jacksonExtensions.add(new NitriteIdExtension());
+        for (JacksonExtension jacksonExtension : jacksonExtensions) {
+            loadJacksonExtension(jacksonExtension, objectMapper);
         }
         return objectMapper;
     }
@@ -162,11 +163,11 @@ public class JacksonMapper extends MappableMapper {
         }
     }
 
-    private void loadJacksonModule(JacksonModule jacksonModule, ObjectMapper objectMapper) {
-        for (Class<?> dataType : jacksonModule.getDataTypes()) {
+    private void loadJacksonExtension(JacksonExtension jacksonExtension, ObjectMapper objectMapper) {
+        for (Class<?> dataType : jacksonExtension.getDataTypes()) {
             addValueType(dataType);
         }
-        objectMapper.registerModule(jacksonModule.getModule());
+        objectMapper.registerModule(jacksonExtension.getModule());
     }
 
     private Object convertValue(Object object) {

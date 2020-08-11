@@ -17,7 +17,6 @@
 package org.dizitart.no2.spatial.test;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
@@ -27,10 +26,11 @@ import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.filters.FluentFilter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.spatial.SpatialModule;
-import org.dizitart.no2.spatial.mapper.GeometryModule;
+import org.dizitart.no2.spatial.mapper.GeometryExtension;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +62,7 @@ import static org.junit.Assert.*;
  * @author Anindya Chatterjee
  */
 public class SpatialIndexTest {
-    private String fileName = getRandomTempDbFile();
+    private final String fileName = getRandomTempDbFile();
     private Nitrite db;
     private NitriteCollection collection;
     private ObjectRepository<SpatialData> repository;
@@ -88,9 +88,13 @@ public class SpatialIndexTest {
 
     @Before
     public void before() throws ParseException {
-        db = NitriteBuilder.get()
+        MVStoreModule module = MVStoreModule.withConfig()
             .filePath(fileName)
-            .loadModule(new JacksonMapperModule(new GeometryModule()))
+            .build();
+
+        db = Nitrite.builder()
+            .loadModule(module)
+            .loadModule(new JacksonMapperModule(new GeometryExtension()))
             .loadModule(new SpatialModule())
             .openOrCreate();
 
@@ -269,7 +273,14 @@ public class SpatialIndexTest {
 
     @Test
     public void testParseGeometry() throws ParseException {
-        Nitrite db = NitriteBuilder.get().loadModule(new SpatialModule()).openOrCreate();
+        MVStoreModule storeModule = MVStoreModule.withConfig()
+            .filePath((String) null)
+            .build();
+
+        Nitrite db = Nitrite.builder()
+            .loadModule(storeModule)
+            .loadModule(new SpatialModule())
+            .openOrCreate();
 
         WKTReader reader = new WKTReader();
         Geometry point = reader.read("POINT(500 505)");

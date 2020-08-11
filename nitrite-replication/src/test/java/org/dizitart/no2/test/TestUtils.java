@@ -16,10 +16,11 @@
 
 package org.dizitart.no2.test;
 
-import lombok.experimental.UtilityClass;
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
+import org.dizitart.no2.mvstore.MVStoreModule;
 import org.junit.Assert;
 
 import java.util.List;
@@ -29,9 +30,30 @@ import java.util.stream.Collectors;
 /**
  * @author Anindya Chatterjee
  */
-@UtilityClass
 public class TestUtils {
-    private static Random random = new Random();
+    private TestUtils() {}
+
+    private static final Random random = new Random();
+
+    public static Nitrite createDb() {
+        MVStoreModule storeModule = MVStoreModule.withConfig()
+            .build();
+
+        return Nitrite.builder()
+            .loadModule(storeModule)
+            .openOrCreate();
+    }
+
+    public static Nitrite createDb(String filePath) {
+        MVStoreModule storeModule = MVStoreModule.withConfig()
+            .filePath(filePath)
+            .compress(true)
+            .build();
+
+        return Nitrite.builder()
+            .loadModule(storeModule)
+            .openOrCreate();
+    }
 
     public static void assertEquals(NitriteCollection c1, NitriteCollection c2) {
         List<Document> l1 = c1.find().toList().stream().map(TestUtils::trimMeta).collect(Collectors.toList());

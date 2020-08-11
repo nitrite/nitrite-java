@@ -38,13 +38,13 @@ repositories {
 }
 
 dependencies {
-    implementation project(path: ':nitrite-core', configuration: 'default')
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.10.1"
-    implementation "commons-codec:commons-codec:1.13"
+    implementation project(configuration: 'default', path: ':nitrite')
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    implementation "commons-codec:commons-codec:1.14"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
-    testImplementation project(path: ':nitrite', configuration: 'default')
+    testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testImplementation "junit:junit:4.13"
 }
 

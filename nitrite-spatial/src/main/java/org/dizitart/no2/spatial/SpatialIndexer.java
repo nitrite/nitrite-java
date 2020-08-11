@@ -37,7 +37,7 @@ public class SpatialIndexer implements Indexer {
     public static final String SpatialIndex = "Spatial";
 
     private NitriteMapper nitriteMapper;
-    private NitriteStore nitriteStore;
+    private NitriteStore<?> nitriteStore;
 
     public RecordStream<NitriteId> findWithin(String collectionName, String field, Geometry geometry) {
         NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collectionName, field);

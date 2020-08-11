@@ -15,14 +15,14 @@
  */
 
 rootProject.name = 'nitrite-java'
-include 'nitrite-core'
-include 'nitrite-android-example'
 include 'nitrite'
+include 'nitrite-android-example'
+include 'nitrite-mvstore-adapter'
 include 'rx-nitrite'
 include 'nitrite-jackson-mapper'
 include 'nitrite-spatial'
 include 'nitrite-replication'
 include 'nitrite-support'
 include 'potassium-nitrite'
-include 'nitrite-leveldb'
+include 'nitrite-rocksdb-adapter'
 

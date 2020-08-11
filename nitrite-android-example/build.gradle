@@ -21,7 +21,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.0.0'
     }
 }
 
@@ -83,6 +83,7 @@ android {
 
 dependencies {
     implementation project(path: ':nitrite', configuration: 'default')
+    implementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation 'com.android.support:appcompat-v7:28.0.0'

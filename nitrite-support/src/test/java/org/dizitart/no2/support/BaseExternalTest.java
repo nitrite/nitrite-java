@@ -17,9 +17,9 @@
 package org.dizitart.no2.support;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
@@ -63,13 +63,9 @@ public abstract class BaseExternalTest {
         sourceDbFile = getRandomTempDbFile();
         destDbFile = getRandomTempDbFile();
 
-        sourceDb = NitriteBuilder.get()
-            .filePath(sourceDbFile)
-            .openOrCreate();
+        sourceDb = createDb(sourceDbFile);
 
-        destDb = NitriteBuilder.get()
-            .filePath(destDbFile)
-            .openOrCreate();
+        destDb = createDb(destDbFile);
 
         sourceEmpRepo = sourceDb.getRepository(Employee.class);
         sourceKeyedEmpRepo = sourceDb.getRepository(Employee.class, "key");
@@ -101,5 +97,15 @@ public abstract class BaseExternalTest {
             document.remove(DOC_SOURCE);
         }
         return documents;
+    }
+
+    private Nitrite createDb(String filePath) {
+        MVStoreModule storeModule = MVStoreModule.withConfig()
+            .filePath(filePath)
+            .build();
+
+        return Nitrite.builder()
+            .loadModule(storeModule)
+            .openOrCreate();
     }
 }

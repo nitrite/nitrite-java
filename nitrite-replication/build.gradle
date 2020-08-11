@@ -39,14 +39,14 @@ repositories {
 }
 
 dependencies {
-    implementation project(path: ':nitrite-core', configuration: 'default')
+    implementation project(configuration: 'default', path: ':nitrite')
     implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.10.1"
-    implementation "com.fasterxml.jackson.core:jackson-annotations:2.10.1"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:2.11.1"
     implementation "com.squareup.okhttp3:okhttp:4.3.1"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
-    testImplementation project(path: ':nitrite', configuration: 'default')
+    testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
     testImplementation "jakarta.websocket:jakarta.websocket-api:1.1.2"
     testImplementation "org.glassfish.tyrus:tyrus-server:1.15"

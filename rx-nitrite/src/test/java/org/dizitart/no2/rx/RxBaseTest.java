@@ -21,11 +21,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.mvstore.MVStoreModule;
+import org.dizitart.no2.repository.annotations.Id;
 import org.junit.Before;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -57,8 +58,12 @@ public class RxBaseTest {
 
     @Before
     public void setUp() {
-        db = new RxNitrite(NitriteBuilder.get()
+        MVStoreModule storeModule = MVStoreModule.withConfig()
             .filePath(dbPath)
+            .build();
+
+        db = new RxNitrite(Nitrite.builder()
+            .loadModule(storeModule)
             .openOrCreate("test-user", "test-password"));
 
         Employee e1 = new Employee("John Doe", 35);

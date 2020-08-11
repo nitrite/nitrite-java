@@ -22,8 +22,8 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.dizitart.no2.mapper.JacksonMapper
-import org.dizitart.no2.mapper.JacksonModule
-import org.dizitart.no2.spatial.mapper.GeometryModule
+import org.dizitart.no2.mapper.JacksonExtension
+import org.dizitart.no2.spatial.mapper.GeometryExtension
 import java.time.ZoneId
 import java.time.chrono.ChronoPeriod
 import java.time.temporal.Temporal
@@ -38,7 +38,7 @@ import java.util.*
  * @author Stefan Mandel
  * @since 2.1.0
  */
-open class KNO2JacksonMapper(vararg modules: JacksonModule) : JacksonMapper(GeometryModule(), *modules) {
+open class KNO2JacksonMapper(vararg extensions: JacksonExtension) : JacksonMapper(GeometryExtension(), *extensions) {
 
     override fun createObjectMapper(): ObjectMapper {
         // add value types from JavaTimeModule
