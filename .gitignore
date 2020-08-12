@@ -450,4 +450,4 @@ captures/
 .attach_pid*
 test.log
 /build
-!/nitrite/src/test/resources/no2-old.db
+!no2-old.db
