@@ -51,7 +51,7 @@ dependencies {
     testImplementation "jakarta.websocket:jakarta.websocket-api:1.1.2"
     testImplementation "org.glassfish.tyrus:tyrus-server:1.15"
     testImplementation "org.glassfish.tyrus:tyrus-container-grizzly-server:1.15"
-    testImplementation "org.awaitility:awaitility:4.0.2"
+    testImplementation "org.awaitility:awaitility:4.0.3"
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.0"
     testImplementation "org.apache.logging.log4j:log4j-core:2.13.0"
     testImplementation "junit:junit:4.13"
