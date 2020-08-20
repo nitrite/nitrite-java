@@ -93,7 +93,7 @@ public class SpatialIndexer implements Indexer {
 
     private NitriteRTree<BoundingBox, Geometry> getIndexMap(String collectionName, String field) {
         String mapName = getIndexMapName(collectionName, field);
-        return nitriteStore.openRTree(mapName);
+        return nitriteStore.openRTree(mapName, BoundingBox.class, Geometry.class);
     }
 
     private Geometry parseGeometry(String field, Object fieldValue) {

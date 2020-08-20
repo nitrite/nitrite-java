@@ -37,7 +37,7 @@ public class NitriteMapStressTest extends AbstractTest {
     @Test
     public void testWithInsertReadUpdate() {
         NitriteStore<?> nitriteStore = db.getStore();
-        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testWithInsertReadUpdate");
+        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testWithInsertReadUpdate", String.class, Document.class);
 
         int count = 10000;
         for (int i = 0; i < count; i++) {
@@ -65,7 +65,7 @@ public class NitriteMapStressTest extends AbstractTest {
     @Test
     public void testNullKey() {
         NitriteStore<?> nitriteStore = db.getStore();
-        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullKey");
+        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullKey", String.class, Document.class);
         nitriteMap.put(null, Document.createDocument());
 
         assertNotNull(nitriteMap.get(null));
@@ -79,14 +79,14 @@ public class NitriteMapStressTest extends AbstractTest {
     @Test(expected = ValidationException.class)
     public void testNullValue() {
         NitriteStore<?> nitriteStore = db.getStore();
-        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullValue");
+        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullValue", String.class, Document.class);
         nitriteMap.put(null, null);
     }
 
     @Test(expected = ValidationException.class)
     public void testNullPutIfAbsent() {
         NitriteStore<?> nitriteStore = db.getStore();
-        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullPutIfAbsent");
+        NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullPutIfAbsent", String.class, Document.class);
         nitriteMap.putIfAbsent(null, null);
     }
 }

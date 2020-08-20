@@ -79,7 +79,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
-    public <Key, Value> NitriteMap<Key, Value> openMap(String name) {
+    public <Key, Value> NitriteMap<Key, Value> openMap(String name, Class<?> keyType, Class<?> valueType) {
         MVMap<Key, Value> mvMap = mvStore.openMap(name);
         return new NitriteMVMap<>(mvMap, this);
     }
@@ -93,7 +93,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String name) {
+    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String name, Class<?> keyType, Class<?> valueType) {
         MVRTreeMap<Value> map = mvStore.openMap(name, new MVRTreeMap.Builder<>());
         return new org.dizitart.no2.mvstore.NitriteMVRTreeMap(map);
     }

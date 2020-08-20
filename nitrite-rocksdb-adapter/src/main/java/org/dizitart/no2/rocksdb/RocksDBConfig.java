@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.store.StoreConfig;
 import org.dizitart.no2.store.events.StoreEventListener;
 
@@ -34,12 +36,12 @@ public class RocksDBConfig implements StoreConfig {
     private String filePath;
 
     @Getter @Setter(AccessLevel.PACKAGE)
-    private Marshaller marshaller;
+    private ObjectFormatter objectFormatter;
 
 
     RocksDBConfig() {
         eventListeners = new HashSet<>();
-        marshaller = new FSTMarshaller();
+        objectFormatter = new KryoObjectFormatter();
     }
 
     @Override

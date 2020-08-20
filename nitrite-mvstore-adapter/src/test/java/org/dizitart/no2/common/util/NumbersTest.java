@@ -25,14 +25,14 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.dizitart.no2.common.util.NumberUtils.compare;
+import static org.dizitart.no2.common.util.Numbers.compare;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Anindya Chatterjee.
  */
 @RunWith(Parameterized.class)
-public class NumberUtilsTest {
+public class NumbersTest {
 
     @Parameterized.Parameter
     public Number x;

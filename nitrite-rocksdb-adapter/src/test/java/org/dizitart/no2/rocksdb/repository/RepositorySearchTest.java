@@ -289,6 +289,8 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testLesserEqualFilter() {
+        employeeRepository = db.getRepository(Employee.class);
+
         Employee emp = employeeRepository.find().sort("empId", SortOrder.Descending).firstOrNull();
         long id = emp.getEmpId();
 

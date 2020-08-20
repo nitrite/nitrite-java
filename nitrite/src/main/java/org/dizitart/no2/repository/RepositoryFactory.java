@@ -115,7 +115,7 @@ public class RepositoryFactory {
     }
 
     private void writeCatalog(NitriteStore<?> store, String name, String key) {
-        NitriteMap<String, Document> catalogMap = store.openMap(COLLECTION_CATALOG);
+        NitriteMap<String, Document> catalogMap = store.openMap(COLLECTION_CATALOG, String.class, Document.class);
         Document document = StringUtils.isNullOrEmpty(key) ? catalogMap.get(TAG_REPOSITORIES)
             : catalogMap.get(TAG_KEYED_REPOSITORIES);
         if (document == null) document = Document.createDocument();

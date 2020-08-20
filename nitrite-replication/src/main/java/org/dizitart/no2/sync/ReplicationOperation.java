@@ -65,7 +65,7 @@ interface ReplicationOperation {
         saveAttributes(attributes);
 
         NitriteStore<?> store = getCollection().getStore();
-        NitriteMap<NitriteId, Long> tombstone = store.openMap(tombstoneName);
+        NitriteMap<NitriteId, Long> tombstone = store.openMap(tombstoneName, NitriteId.class, Long.class);
         return new LastWriteWinMap(getCollection(), tombstone);
     }
 

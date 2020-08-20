@@ -26,7 +26,7 @@ import org.dizitart.no2.store.NitriteMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static org.dizitart.no2.common.util.NumberUtils.compare;
+import static org.dizitart.no2.common.util.Numbers.compare;
 
 /**
  * @author Anindya Chatterjee

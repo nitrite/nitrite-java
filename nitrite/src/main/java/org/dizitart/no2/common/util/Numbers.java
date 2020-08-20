@@ -27,8 +27,8 @@ import java.math.BigInteger;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-public class NumberUtils {
-    private NumberUtils() {
+public class Numbers {
+    private Numbers() {
     }
 
     /**
@@ -48,6 +48,27 @@ public class NumberUtils {
         }
     }
 
+    public static Object castNumber(Object value, Class<?> type) {
+        if (value instanceof Number && Number.class.isAssignableFrom(type)) {
+            Number number = (Number) value;
+            if (type.equals(Short.class) || type.equals(short.class)) {
+                return number.shortValue();
+            } else if (type.equals(Byte.class) || type.equals(byte.class)) {
+                return number.byteValue();
+            } else if (type.equals(Double.class) || type.equals(double.class)) {
+                return number.doubleValue();
+            } else if (type.equals(Float.class) || type.equals(float.class)) {
+                return number.floatValue();
+            } else if (type.equals(Integer.class) || type.equals(int.class)) {
+                return number.intValue();
+            } else if (type.equals(Long.class) || type.equals(long.class)) {
+                return number.longValue();
+            }
+        }
+        throw new ValidationException("cannot cast number of type " + value.getClass().getName()
+            + " to " + type.getName());
+    }
+
     private static boolean isSpecial(Number number) {
         boolean specialDouble = number instanceof Double
             && (Double.isNaN((Double) number) || Double.isInfinite((Double) number));
@@ -65,7 +86,7 @@ public class NumberUtils {
             || number instanceof Integer || number instanceof Long)
             return new BigDecimal(number.longValue());
         if (number instanceof Float || number instanceof Double)
-            return new BigDecimal(number.doubleValue());
+            return BigDecimal.valueOf(number.doubleValue());
 
         try {
             return new BigDecimal(number.toString());

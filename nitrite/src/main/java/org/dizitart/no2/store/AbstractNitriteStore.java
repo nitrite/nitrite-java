@@ -42,7 +42,7 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
 
     @Override
     public Set<String> getCollectionNames() {
-        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG);
+        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG, String.class, Document.class);
         Document document = catalogMap.get(TAG_COLLECTIONS);
         if (document == null) return new HashSet<>();
 
@@ -51,7 +51,7 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
 
     @Override
     public Set<String> getRepositoryRegistry() {
-        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG);
+        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG, String.class, Document.class);
         Document document = catalogMap.get(TAG_REPOSITORIES);
         if (document == null) return new HashSet<>();
 
@@ -60,7 +60,7 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
 
     @Override
     public Map<String, Set<String>> getKeyedRepositoryRegistry() {
-        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG);
+        NitriteMap<String, Document> catalogMap = openMap(COLLECTION_CATALOG, String.class, Document.class);
         Document document = catalogMap.get(TAG_KEYED_REPOSITORIES);
         if (document == null) return new HashMap<>();
 
@@ -93,7 +93,7 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
 
     @Override
     public void removeMap(String mapName) {
-        NitriteMap<String, Document> catalogueMap = openMap(COLLECTION_CATALOG);
+        NitriteMap<String, Document> catalogueMap = openMap(COLLECTION_CATALOG, String.class, Document.class);
         for (KeyValuePair<String, Document> entry : catalogueMap.entries()) {
             String catalogue = entry.getKey();
             Document document = entry.getValue();

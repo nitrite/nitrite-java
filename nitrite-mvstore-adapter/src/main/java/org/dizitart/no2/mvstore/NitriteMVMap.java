@@ -150,4 +150,9 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     public void drop() {
         nitriteStore.removeMap(getName());
     }
+
+    @Override
+    public void close() {
+        // nothing to close
+    }
 }

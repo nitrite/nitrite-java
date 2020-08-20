@@ -44,6 +44,10 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
     private static final long serialVersionUID = 1477462374L;
     private static final List<String> reservedFields = listOf(DOC_ID, DOC_REVISION, DOC_SOURCE, DOC_MODIFIED);
 
+    NitriteDocument() {
+        super();
+    }
+
     NitriteDocument(Map<String, Object> objectMap) {
         super(objectMap);
     }
@@ -323,7 +327,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
     }
 
     private static class PairIterator implements Iterator<KeyValuePair<String, Object>> {
-        private Iterator<Map.Entry<String, Object>> iterator;
+        private final Iterator<Map.Entry<String, Object>> iterator;
 
         PairIterator(Iterator<Map.Entry<String, Object>> iterator) {
             this.iterator = iterator;

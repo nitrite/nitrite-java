@@ -20,6 +20,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.store.events.StoreEventListener;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class RocksDBModuleBuilder {
     private int maxOpenFiles = 1000;
     private boolean paranoidChecks;
     private String filePath;
-    private Marshaller marshaller;
+    private ObjectFormatter objectFormatter;
     private RocksDBConfig dbConfig;
 
     @Setter(AccessLevel.NONE)
@@ -77,8 +78,8 @@ public class RocksDBModuleBuilder {
         dbConfig.paranoidChecks(paranoidChecks());
         dbConfig.filePath(filePath());
 
-        if (marshaller() != null) {
-            dbConfig.marshaller(marshaller());
+        if (objectFormatter() != null) {
+            dbConfig.objectFormatter(objectFormatter());
         }
         dbConfig.eventListeners(eventListeners());
 

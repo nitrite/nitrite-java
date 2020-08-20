@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.store.StoreInfo;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDBException;
@@ -27,7 +28,7 @@ class RocksDBStoreUtils {
                 db = StoreFactory.openSecurely(storeConfig, username, password);
             } else {
                 db = StoreFactory.createSecurely(storeConfig, username, password);
-                writeStoreInfo(db, storeConfig.marshaller());
+                writeStoreInfo(db, storeConfig.objectFormatter());
             }
         } else {
             throw new InvalidOperationException("nitrite rocksdb store does not support in-memory database");
@@ -35,13 +36,13 @@ class RocksDBStoreUtils {
         return db;
     }
 
-    static StoreInfo getStoreInfo(RocksDBReference reference, Marshaller marshaller) {
+    static StoreInfo getStoreInfo(RocksDBReference reference, ObjectFormatter objectFormatter) {
         try {
             ColumnFamilyHandle storeInfo = reference.getOrCreateColumnFamily(STORE_INFO);
-            byte[] key = marshaller.marshal(Constants.STORE_INFO_KEY);
+            byte[] key = objectFormatter.encode(Constants.STORE_INFO_KEY);
             byte[] value = reference.getRocksDB().get(storeInfo, key);
 
-            Document document = marshaller.unmarshal(value, Document.class);
+            Document document = objectFormatter.decode(value, Document.class);
             if (document != null) {
                 return new StoreInfo(document);
             }
@@ -53,7 +54,7 @@ class RocksDBStoreUtils {
         return null;
     }
 
-    private static void writeStoreInfo(RocksDBReference reference, Marshaller marshaller) {
+    private static void writeStoreInfo(RocksDBReference reference, ObjectFormatter objectFormatter) {
         try {
             ColumnFamilyHandle storeInfo = reference.getOrCreateColumnFamily(STORE_INFO);
 
@@ -62,8 +63,8 @@ class RocksDBStoreUtils {
             document.put(FILE_STORE, "RocksDB/6.11.4");
             document.put(STORE_VERSION, NITRITE_VERSION);
 
-            byte[] key = marshaller.marshal(Constants.STORE_INFO_KEY);
-            byte[] value = marshaller.marshal(document);
+            byte[] key = objectFormatter.encode(Constants.STORE_INFO_KEY);
+            byte[] value = objectFormatter.encode(document);
             reference.getRocksDB().put(storeInfo, key, value);
         } catch (RocksDBException e) {
             log.error("Error while writing store info", e);

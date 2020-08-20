@@ -25,9 +25,8 @@ dependencies {
     implementation project(configuration: 'default', path: ':nitrite')
     implementation "org.slf4j:slf4j-api:1.7.30"
     implementation "org.rocksdb:rocksdbjni:6.11.4"
-    implementation ("de.ruedigermoeller:fst:2.57") {
-        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-core'
-    }
+    implementation "com.esotericsoftware:kryo:4.0.2"
+
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
@@ -42,7 +41,7 @@ dependencies {
     testImplementation "org.awaitility:awaitility:4.0.2"
     testImplementation "joda-time:joda-time:2.10.1"
     testImplementation "org.meanbean:meanbean:2.0.3"
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.2"
     testImplementation "commons-io:commons-io:2.7"
     testImplementation "com.google.guava:guava:29.0-jre"
 }

@@ -66,7 +66,7 @@ public class CollectionFactory {
 
     private NitriteCollection createCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalog) {
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
-        NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name);
+        NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name, NitriteId.class, Document.class);
         NitriteCollection collection = new NitriteCollectionImpl(name, nitriteMap, nitriteConfig);
 
         if (writeCatalog) {
@@ -82,7 +82,7 @@ public class CollectionFactory {
             }
 
             collectionMap.put(name, collection);
-            NitriteMap<String, Document> catalogMap = store.openMap(COLLECTION_CATALOG);
+            NitriteMap<String, Document> catalogMap = store.openMap(COLLECTION_CATALOG, String.class, Document.class);
             Document document = catalogMap.get(TAG_COLLECTIONS);
             if (document == null) document = Document.createDocument();
             document.put(name, true);

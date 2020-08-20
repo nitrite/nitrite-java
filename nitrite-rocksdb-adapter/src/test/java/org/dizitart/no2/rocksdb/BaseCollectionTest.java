@@ -17,15 +17,20 @@
 package org.dizitart.no2.rocksdb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.WriteResult;
+import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.JodaTimeKryoKeySerializer;
+import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,7 +39,6 @@ import java.util.Locale;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.rocksdb.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.rocksdb.TestUtil.deleteFile;
 
 @Slf4j
 @RunWith(value = Parameterized.class)
@@ -47,6 +51,7 @@ public abstract class BaseCollectionTest {
     protected Document doc1, doc2, doc3;
     protected SimpleDateFormat simpleDateFormat;
     private final String fileName = getRandomTempDbFile();
+    protected final KryoObjectFormatter fstMarshaller = new KryoObjectFormatter();
 
     @Parameterized.Parameters(name = "Secured = {0}")
     public static Collection<Object[]> data() {
@@ -97,15 +102,18 @@ public abstract class BaseCollectionTest {
                 collection.close();
             }
             if (db != null && !db.isClosed()) db.close();
-//            deleteFile(fileName);
+            FileUtils.deleteDirectory(new File(fileName));
         } catch (Throwable t) {
             log.error("Error while clearing test database", t);
         }
     }
 
     private void openDb() {
+        fstMarshaller.registerSerializer(DateTime.class, new JodaTimeKryoKeySerializer());
+
         RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(fileName)
+            .objectFormatter(fstMarshaller)
             .build();
 
         if (isSecured) {

@@ -43,6 +43,8 @@ import static org.dizitart.no2.filters.FluentFilter.$;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.rocksdb.TestUtil.isSorted;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.*;
 
 public class CollectionFindTest extends BaseCollectionTest {
@@ -735,7 +737,7 @@ public class CollectionFindTest extends BaseCollectionTest {
             .sort("startTime", SortOrder.Descending);
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc3, doc2, doc1),
-            is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
+            equalTo(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
 
         cursor = coll.find(where("group").eq("groupA"))
             .sort("startTime", SortOrder.Descending, NullOrder.First);

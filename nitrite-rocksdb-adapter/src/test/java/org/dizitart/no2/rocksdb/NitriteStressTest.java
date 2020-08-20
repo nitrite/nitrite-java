@@ -33,6 +33,8 @@ import javax.xml.bind.annotation.XmlSchemaType;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
+
 
 /**
  * @author Anindya Chatterjee
@@ -57,6 +59,9 @@ public class NitriteStressTest extends AbstractTest {
             System.err.println("Crashed after " + counter + " records");
             throw t;
         }
+
+        int size = testRepository.find().toList().size();
+        assertEquals(counter, size);
     }
 
     private List<TestDto> createTestSet() {

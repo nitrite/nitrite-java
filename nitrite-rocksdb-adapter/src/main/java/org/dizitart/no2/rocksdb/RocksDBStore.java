@@ -1,6 +1,7 @@
 package org.dizitart.no2.rocksdb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.common.UnknownType;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
@@ -81,11 +82,22 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <Key, Value> NitriteMap<Key, Value> openMap(String mapName) {
+    public <Key, Value> NitriteMap<Key, Value> openMap(String mapName,
+                                                       Class<?> keyType,
+                                                       Class<?> valueType) {
         if (nitriteMapRegistry.containsKey(mapName)) {
-            return (NitriteMap<Key, Value>) nitriteMapRegistry.get(mapName);
+            RocksDBMap<Key, Value> nitriteMap = (RocksDBMap<Key, Value>) nitriteMapRegistry.get(mapName);
+            if (UnknownType.class.equals(nitriteMap.getKeyType())) {
+                nitriteMap.setKeyType(keyType);
+            }
+
+            if (UnknownType.class.equals(nitriteMap.getValueType())) {
+                nitriteMap.setValueType(valueType);
+            }
+
+            return nitriteMap;
         } else {
-            NitriteMap<Key, Value> nitriteMap = new RocksDBMap<>(mapName, this, this.reference);
+            NitriteMap<Key, Value> nitriteMap = new RocksDBMap<>(mapName, this, this.reference, keyType, valueType);
             nitriteMapRegistry.put(mapName, nitriteMap);
             return nitriteMap;
         }
@@ -99,13 +111,15 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName) {
+    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
+                                                                               Class<?> keyType,
+                                                                               Class<?> valueType) {
         throw new InvalidOperationException("rtree not supported on rocksdb store");
     }
 
     @Override
     public StoreInfo getStoreInfo() {
-        return RocksDBStoreUtils.getStoreInfo(reference, getStoreConfig().marshaller());
+        return RocksDBStoreUtils.getStoreInfo(reference, getStoreConfig().objectFormatter());
     }
 
     private void initEventBus() {

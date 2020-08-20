@@ -17,6 +17,8 @@
 package org.dizitart.no2.collection.meta;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -43,6 +45,8 @@ public class Attributes implements Serializable {
     public static final String TOMBSTONE = "tombstone";
     public static final String REPLICA = "replica";
     private static final long serialVersionUID = 1481284930L;
+
+    @Getter @Setter
     private Map<String, String> attributes;
 
     public Attributes() {

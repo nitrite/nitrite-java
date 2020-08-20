@@ -80,16 +80,17 @@ public class NitriteTextIndexer implements TextIndexer {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
         try {
             validateStringValue(fieldValue, field);
             Set<String> words = decompose(fieldValue);
 
-            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+            NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
                 = getIndexMap(collection.getName(), field);
 
             for (String word : words) {
-                ConcurrentSkipListSet<NitriteId> nitriteIds = indexMap.get(word);
+                ConcurrentSkipListSet<NitriteId> nitriteIds = (ConcurrentSkipListSet<NitriteId>) indexMap.get(word);
                 if (nitriteIds != null) {
                     nitriteIds.remove(nitriteId);
 
@@ -123,9 +124,9 @@ public class NitriteTextIndexer implements TextIndexer {
     }
 
     @SuppressWarnings("rawtypes")
-    private NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> getIndexMap(String collectionName, String field) {
+    private NitriteMap<Comparable, ConcurrentSkipListSet> getIndexMap(String collectionName, String field) {
         String mapName = getIndexMapName(collectionName, field);
-        return nitriteStore.openMap(mapName);
+        return nitriteStore.openMap(mapName, String.class, ConcurrentSkipListSet.class);
     }
 
     private void validateStringValue(Object value, String field) {
@@ -140,16 +141,17 @@ public class NitriteTextIndexer implements TextIndexer {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void createOrUpdate(NitriteMap<NitriteId, Document> collection, NitriteId id, String field, Object fieldValue) {
         try {
             validateStringValue(fieldValue, field);
             Set<String> words = decompose(fieldValue);
 
-            NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+            NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
                 = getIndexMap(collection.getName(), field);
 
             for (String word : words) {
-                ConcurrentSkipListSet<NitriteId> nitriteIds = indexMap.get(word);
+                ConcurrentSkipListSet<NitriteId> nitriteIds = (ConcurrentSkipListSet<NitriteId>) indexMap.get(word);
 
                 if (nitriteIds == null) {
                     nitriteIds = new ConcurrentSkipListSet<>();
@@ -208,66 +210,70 @@ public class NitriteTextIndexer implements TextIndexer {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Set<NitriteId> searchByTrailingWildCard(String collectionName, String field, String searchString) {
         if (searchString.equalsIgnoreCase("*")) {
             throw new FilterException("invalid search term '*'");
         }
 
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
             = getIndexMap(collectionName, field);
         Set<NitriteId> idSet = new LinkedHashSet<>();
         String term = searchString.substring(0, searchString.length() - 1);
 
-        for (KeyValuePair<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entries()) {
+        for (KeyValuePair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
             String key = (String) entry.getKey();
             if (key.startsWith(term.toLowerCase())) {
-                idSet.addAll(entry.getValue());
+                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getValue());
             }
         }
         return idSet;
     }
 
+    @SuppressWarnings("unchecked")
     private Set<NitriteId> searchContains(String collectionName, String field, String term) {
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
             = getIndexMap(collectionName, field);
         Set<NitriteId> idSet = new LinkedHashSet<>();
 
-        for (KeyValuePair<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entries()) {
+        for (KeyValuePair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
             String key = (String) entry.getKey();
             if (key.contains(term.toLowerCase())) {
-                idSet.addAll(entry.getValue());
+                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getValue());
             }
         }
         return idSet;
     }
 
+    @SuppressWarnings("unchecked")
     private Set<NitriteId> searchByLeadingWildCard(String collectionName, String field, String searchString) {
         if (searchString.equalsIgnoreCase("*")) {
             throw new FilterException("invalid search term '*'");
         }
 
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
             = getIndexMap(collectionName, field);
         Set<NitriteId> idSet = new LinkedHashSet<>();
         String term = searchString.substring(1);
 
-        for (KeyValuePair<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entries()) {
+        for (KeyValuePair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
             String key = (String) entry.getKey();
             if (key.endsWith(term.toLowerCase())) {
-                idSet.addAll(entry.getValue());
+                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getValue());
             }
         }
         return idSet;
     }
 
+    @SuppressWarnings("unchecked")
     private Set<NitriteId> searchExactByIndex(String collectionName, String field, String searchString) throws IOException {
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
             = getIndexMap(collectionName, field);
 
         Set<String> words = textTokenizer.tokenize(searchString);
         Map<NitriteId, Integer> scoreMap = new HashMap<>();
         for (String word : words) {
-            ConcurrentSkipListSet<NitriteId> nitriteIds = indexMap.get(word);
+            ConcurrentSkipListSet<NitriteId> nitriteIds = (ConcurrentSkipListSet<NitriteId>) indexMap.get(word);
             if (nitriteIds != null) {
                 for (NitriteId id : nitriteIds) {
                     Integer score = scoreMap.get(id);

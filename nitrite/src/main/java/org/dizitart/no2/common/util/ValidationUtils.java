@@ -21,6 +21,8 @@ import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 
+import java.util.Collection;
+
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
@@ -54,6 +56,18 @@ public class ValidationUtils {
      */
     public static void notEmpty(CharSequence value, String message) {
         if (isNullOrEmpty(value)) {
+            throw new ValidationException(message);
+        }
+    }
+
+    /**
+     * Validates if a {@link CharSequence} is empty or `null`.
+     *
+     * @param value   the value
+     * @param message the message
+     */
+    public static void notEmpty(Collection<?> value, String message) {
+        if (value.isEmpty()) {
             throw new ValidationException(message);
         }
     }

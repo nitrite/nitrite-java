@@ -17,6 +17,7 @@
 package org.dizitart.no2.index;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Anindya Chatterjee
  */
 @Data
+@NoArgsConstructor
 public class IndexMeta implements Serializable {
     private static final long serialVersionUID = 1576690663L;
 

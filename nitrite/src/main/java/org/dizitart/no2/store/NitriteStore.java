@@ -105,12 +105,14 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
      * automatically create if it does not yet exist. If a map with this
      * name is already open, this map is returned.
      *
-     * @param <Key>   the key type
-     * @param <Value> the value type
-     * @param mapName the map name
+     * @param <Key>     the key type
+     * @param <Value>   the value type
+     * @param mapName   the map name
+     * @param keyType   the key type
+     * @param valueType the value type
      * @return the map.
      */
-    <Key, Value> NitriteMap<Key, Value> openMap(String mapName);
+    <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType);
 
     /**
      * Removes a map from the store.
@@ -127,9 +129,11 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
      * @param <Key>     the key type
      * @param <Value>   the value type
      * @param rTreeName the RTree name
+     * @param keyType   the key type
+     * @param valueType the value type
      * @return the map.
      */
-    <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName);
+    <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName, Class<?> keyType, Class<?> valueType);
 
     /**
      * Removes a RTree from the store.

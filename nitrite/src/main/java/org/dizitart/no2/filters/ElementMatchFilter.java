@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.dizitart.no2.common.util.NumberUtils.compare;
+import static org.dizitart.no2.common.util.Numbers.compare;
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**

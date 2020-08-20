@@ -33,7 +33,7 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  * @author Anindya Chatterjee.
  * @since 1.0
  */
-public interface NitriteMap<Key, Value> extends MetadataAware {
+public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     /**
      * Determines if the map contains a mapping for the
      * specified key.
@@ -173,8 +173,10 @@ public interface NitriteMap<Key, Value> extends MetadataAware {
      */
     void drop();
 
+    void close();
+
     default Attributes getAttributes() {
-        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME);
+        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
         if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
             return metaMap.get(getName());
         }
@@ -182,7 +184,7 @@ public interface NitriteMap<Key, Value> extends MetadataAware {
     }
 
     default void setAttributes(Attributes attributes) {
-        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME);
+        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
         if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
             metaMap.put(getName(), attributes);
         }
@@ -192,7 +194,7 @@ public interface NitriteMap<Key, Value> extends MetadataAware {
         if (isNullOrEmpty(getName())
             || META_MAP_NAME.equals(getName())) return;
 
-        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME);
+        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
         if (metaMap != null) {
             Attributes attributes = metaMap.get(getName());
             if (attributes == null) {

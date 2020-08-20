@@ -31,8 +31,7 @@ import static org.dizitart.no2.common.Constants.*;
 public interface Document extends Iterable<KeyValuePair<String, Object>>, Cloneable, Serializable {
 
     static Document createDocument() {
-        LinkedHashMap<String, Object> document = new LinkedHashMap<>();
-        return new NitriteDocument(document);
+        return new NitriteDocument();
     }
 
     static Document createDocument(String key, Object value) {

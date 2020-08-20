@@ -196,7 +196,7 @@ public class EventTest {
         e.setAddress("abcd");
         employeeRepository.insert(e);
 
-        await().atMost(1, TimeUnit.SECONDS).until(listenerPrepared(EventType.Insert));
+        await().atMost(2, TimeUnit.SECONDS).until(listenerPrepared(EventType.Insert));
         assertEquals(count.get(), 1);
     }
 

@@ -19,6 +19,7 @@ package org.dizitart.no2.rocksdb;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.store.UserCredential;
 import org.rocksdb.*;
 
@@ -46,7 +47,7 @@ class StoreFactory {
                                                   String userId,
                                                   String password) {
         RocksDBReference reference = createDBReference(dbConfig);
-        Marshaller marshaller = dbConfig.marshaller();
+        ObjectFormatter objectFormatter = dbConfig.objectFormatter();
 
         try {
             ColumnFamilyHandle userMap = reference.getOrCreateColumnFamily(USER_MAP);
@@ -58,8 +59,8 @@ class StoreFactory {
                 userCredential.setPasswordHash(hash);
                 userCredential.setPasswordSalt(salt);
 
-                byte[] key = marshaller.marshal(userId);
-                byte[] value = marshaller.marshal(userCredential);
+                byte[] key = objectFormatter.encode(userId);
+                byte[] value = objectFormatter.encode(userCredential);
 
                 reference.getRocksDB().put(userMap, key, value);
             }
@@ -75,7 +76,7 @@ class StoreFactory {
                                                 String userId,
                                                 String password) {
         RocksDBReference reference = createDBReference(dbConfig);
-        Marshaller marshaller = dbConfig.marshaller();
+        ObjectFormatter objectFormatter = dbConfig.objectFormatter();
         boolean success = false;
 
         try {
@@ -89,13 +90,13 @@ class StoreFactory {
                 }
 
                 try {
-                    byte[] key = marshaller.marshal(userId);
+                    byte[] key = objectFormatter.encode(userId);
                     byte[] value = reference.getRocksDB().get(userMap, key);
                     if (value == null) {
                         throw new SecurityException("username or password is invalid");
                     }
 
-                    UserCredential userCredential = marshaller.unmarshal(value, UserCredential.class);
+                    UserCredential userCredential = objectFormatter.decode(value, UserCredential.class);
                     if (userCredential != null) {
                         byte[] salt = userCredential.getPasswordSalt();
                         byte[] expectedHash = userCredential.getPasswordHash();
@@ -154,18 +155,18 @@ class StoreFactory {
     }
 
     private static void createColumnFamilyOptions(RocksDBReference reference, RocksDBConfig dbConfig) {
-        ColumnFamilyOptions cfOpts = new ColumnFamilyOptions();
+        ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()
 //            .optimizeForSmallDb()
-//            .optimizeUniversalStyleCompaction();
+            .optimizeUniversalStyleCompaction();
 
-        ComparatorOptions comparatorOptions = new ComparatorOptions();
+//        ComparatorOptions comparatorOptions = new ComparatorOptions();
 
         // set custom comparator
-        AbstractComparator comparator = new NitriteRocksDBComparator(comparatorOptions, dbConfig.marshaller());
+//        AbstractComparator comparator = new NitriteRocksDBComparator(comparatorOptions, dbConfig.marshaller());
 
-        cfOpts.setComparator(comparator);
-        reference.setDbComparator(comparator);
-        reference.setComparatorOptions(comparatorOptions);
+//        cfOpts.setComparator(comparator);
+//        reference.setDbComparator(comparator);
+//        reference.setComparatorOptions(comparatorOptions);
         reference.setColumnFamilyOptions(cfOpts);
     }
 

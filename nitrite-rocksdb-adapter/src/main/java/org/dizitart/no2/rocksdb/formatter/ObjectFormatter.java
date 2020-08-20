@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.rocksdb;
+package org.dizitart.no2.rocksdb.formatter;
 
 /**
  * @author Anindya Chatterjee
  */
-public interface Marshaller {
-    <T> byte[] marshal(T object);
-    <T> T unmarshal(byte[] bytes, Class<T> type);
+public interface ObjectFormatter {
+    <T> byte[] encode(T object);
+    <T> byte[] encodeKey(T object);
+
+    <T> T decode(byte[] bytes, Class<T> type);
+    <T> T decodeKey(byte[] bytes, Class<T> type);
 }

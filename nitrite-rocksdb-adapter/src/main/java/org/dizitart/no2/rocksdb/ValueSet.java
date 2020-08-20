@@ -1,5 +1,6 @@
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
@@ -7,14 +8,16 @@ import org.rocksdb.RocksIterator;
 import java.util.Iterator;
 
 class ValueSet<V> implements Iterable<V> {
-    private final Marshaller marshaller;
+    private final ObjectFormatter objectFormatter;
     private final RocksDB rocksDB;
     private final ColumnFamilyHandle columnFamilyHandle;
+    private final Class<?> valueType;
 
-    public ValueSet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, Marshaller marshaller) {
+    public ValueSet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, ObjectFormatter objectFormatter, Class<?> valueType) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
-        this.marshaller = marshaller;
+        this.objectFormatter = objectFormatter;
+        this.valueType = valueType;
     }
 
     @Override
@@ -49,7 +52,7 @@ class ValueSet<V> implements Iterable<V> {
         public V next() {
             byte[] value = rawEntryIterator.value();
             rawEntryIterator.next();
-            return (V) marshaller.unmarshal(value, Object.class);
+            return (V) objectFormatter.decode(value, valueType);
         }
 
         @Override

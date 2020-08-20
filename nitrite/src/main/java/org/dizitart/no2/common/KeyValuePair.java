@@ -18,10 +18,8 @@ package org.dizitart.no2.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -31,6 +29,7 @@ import java.io.Serializable;
  * @since 1.0
  */
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class KeyValuePair<Key, Value> implements Serializable {
     /**
@@ -49,14 +48,14 @@ public class KeyValuePair<Key, Value> implements Serializable {
      */
     private Value value;
 
-    private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeObject(key);
-        stream.writeObject(value);
-    }
-
-    @SuppressWarnings("unchecked")
-    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        key = (Key) stream.readObject();
-        value = (Value) stream.readObject();
-    }
+//    private void writeObject(ObjectOutputStream stream) throws IOException {
+//        stream.writeObject(key);
+//        stream.writeObject(value);
+//    }
+//
+//    @SuppressWarnings("unchecked")
+//    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+//        key = (Key) stream.readObject();
+//        value = (Value) stream.readObject();
+//    }
 }

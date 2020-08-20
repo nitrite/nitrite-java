@@ -39,25 +39,22 @@ public class RocksDBReference implements AutoCloseable {
     private Map<String, ColumnFamilyHandle> columnFamilyHandleRegistry;
     private RocksDB rocksDB;
     private ComparatorOptions comparatorOptions;
-    private AbstractComparator dbComparator;
+    private List<AbstractComparator> dbComparators;
 
     public RocksDBReference() {
         this.columnFamilyDescriptors = new ArrayList<>();
         this.columnFamilyHandleRegistry = new ConcurrentHashMap<>();
+        this.dbComparators = new ArrayList<>();
     }
 
     @Override
     public void close() throws RocksDBException {
-        for (ColumnFamilyHandle handle : columnFamilyHandleRegistry.values()) {
-            handle.close();
-        }
+        columnFamilyHandleRegistry.values().forEach(AbstractImmutableNativeReference::close);
         columnFamilyHandleRegistry.clear();
 
         rocksDB.closeE();
         dbOptions.close();
-        if (dbComparator != null) {
-            dbComparator.close();
-        }
+        dbComparators.forEach(AbstractImmutableNativeReference::close);
         columnFamilyOptions.close();
     }
 
@@ -89,5 +86,9 @@ public class RocksDBReference implements AutoCloseable {
                 throw new NitriteIOException("failed to drop column family", e);
             }
         }
+    }
+
+    public void addComparator(AbstractComparator comparator) {
+        dbComparators.add(comparator);
     }
 }

@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.Constants.*;
-import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 
 /**
  *
@@ -86,7 +85,7 @@ public class IndexCatalog {
         IndexMeta meta = getIndexMetaMap(collectionName).get(field);
         if (meta != null && meta.getIndexEntry() != null) {
             String indexMapName = meta.getIndexMap();
-            nitriteStore.openMap(indexMapName).drop();
+            nitriteStore.openMap(indexMapName, Object.class, Object.class).drop();
         }
         getIndexMetaMap(collectionName).remove(field);
     }
@@ -101,7 +100,7 @@ public class IndexCatalog {
 
     private NitriteMap<String, IndexMeta> getIndexMetaMap(String collectionName) {
         String indexMetaName = getIndexMetaName(collectionName);
-        return nitriteStore.openMap(indexMetaName);
+        return nitriteStore.openMap(indexMetaName, String.class, IndexMeta.class);
     }
 
     private String getIndexMetaName(String collectionName) {

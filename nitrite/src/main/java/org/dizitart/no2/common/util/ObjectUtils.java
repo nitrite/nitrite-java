@@ -129,7 +129,7 @@ public class ObjectUtils {
                 return false;
             }
             // cast to Number and take care of boxing and compare
-            return NumberUtils.compare((Number) o1, (Number) o2) == 0;
+            return Numbers.compare((Number) o1, (Number) o2) == 0;
         } else if (o1 instanceof Iterable && o2 instanceof Iterable) {
             Object[] arr1 = toArray((Iterable) o1);
             Object[] arr2 = toArray((Iterable) o2);

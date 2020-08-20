@@ -19,6 +19,8 @@ package org.dizitart.no2.index;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.UnknownType;
+import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
@@ -55,20 +57,29 @@ public abstract class ComparableIndexer implements Indexer {
     @Override
     public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
         validateIndexField(fieldValue, field);
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collection.getName(), field);
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = null;
 
         if (fieldValue == null) {
+            indexMap = getIndexMap(collection.getName(), field, UnknownType.class);
             removeElementFromIndexMap(indexMap, nitriteId, field, null);
         } else if (fieldValue instanceof Comparable) {
+            indexMap = getIndexMap(collection.getName(), field, field.getClass());
             removeElementFromIndexMap(indexMap, nitriteId, field, (Comparable) fieldValue);
         } else if (fieldValue.getClass().isArray()) {
             Object[] array = convertToObjectArray(fieldValue);
+
             for (Object item : array) {
+                if (indexMap == null) {
+                    indexMap = getIndexMap(collection.getName(), field, item.getClass());
+                }
                 removeElementFromIndexMap(indexMap, nitriteId, field, (Comparable) item);
             }
         } else if (fieldValue instanceof Iterable) {
             Iterable iterable = (Iterable) fieldValue;
             for (Object item : iterable) {
+                if (indexMap == null) {
+                    indexMap = getIndexMap(collection.getName(), field, item.getClass());
+                }
                 removeElementFromIndexMap(indexMap, nitriteId, field, (Comparable) item);
             }
         }
@@ -88,7 +99,9 @@ public abstract class ComparableIndexer implements Indexer {
     }
 
     public Set<NitriteId> findEqual(String collectionName, String field, Comparable value) {
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
+            value != null ? getIndexMap(collectionName, field, value.getClass())
+                : getIndexMap(collectionName, field, UnknownType.class);
 
         Set<NitriteId> resultSet = null;
         if (indexMap != null) {
@@ -101,7 +114,9 @@ public abstract class ComparableIndexer implements Indexer {
 
     public Set<NitriteId> findGreaterThan(String collectionName, String field, Comparable comparable) {
         Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
+            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
+            : getIndexMap(collectionName, field, UnknownType.class);
 
         if (indexMap != null) {
             Comparable higherKey = indexMap.higherKey(comparable);
@@ -116,7 +131,9 @@ public abstract class ComparableIndexer implements Indexer {
 
     public Set<NitriteId> findGreaterEqual(String collectionName, String field, Comparable comparable) {
         Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
+            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
+            : getIndexMap(collectionName, field, UnknownType.class);
 
         if (indexMap != null) {
             Comparable ceilingKey = indexMap.ceilingKey(comparable);
@@ -131,7 +148,9 @@ public abstract class ComparableIndexer implements Indexer {
 
     public Set<NitriteId> findLesserThan(String collectionName, String field, Comparable comparable) {
         Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
+            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
+                : getIndexMap(collectionName, field, UnknownType.class);
 
         if (indexMap != null) {
             Comparable lowerKey = indexMap.lowerKey(comparable);
@@ -146,7 +165,9 @@ public abstract class ComparableIndexer implements Indexer {
 
     public Set<NitriteId> findLesserEqual(String collectionName, String field, Comparable comparable) {
         Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
+            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
+                : getIndexMap(collectionName, field, UnknownType.class);
 
         if (indexMap != null) {
             Comparable floorKey = indexMap.floorKey(comparable);
@@ -161,9 +182,11 @@ public abstract class ComparableIndexer implements Indexer {
 
     public Set<NitriteId> findIn(String collectionName, String field, Collection<Comparable<?>> values) {
         notNull(values, "values cannot be null");
+        notEmpty(values, "values cannot be empty");
 
         Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        Class<?> type = Iterables.firstOrNull(values).getClass();
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field, type);
 
         if (indexMap != null) {
             for (Comparable comparable : indexMap.keySet()) {
@@ -180,7 +203,8 @@ public abstract class ComparableIndexer implements Indexer {
         notNull(values, "values cannot be null");
 
         Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        Class<?> type = Iterables.firstOrNull(values).getClass();
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field, type);
 
         if (indexMap != null) {
             for (Comparable comparable : indexMap.keySet()) {
@@ -207,7 +231,8 @@ public abstract class ComparableIndexer implements Indexer {
     }
 
     private void addIndexEntry(String collectionName, NitriteId id, String field, Object element) {
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field);
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
+            = getIndexMap(collectionName, field, UnknownType.class);
 
         if (element == null) {
             addElementToIndexMap(indexMap, id, field, null);
@@ -261,8 +286,9 @@ public abstract class ComparableIndexer implements Indexer {
     }
 
     @SuppressWarnings("rawtypes")
-    private NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> getIndexMap(String collectionName, String field) {
+    private NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> getIndexMap(
+        String collectionName, String field, Class<?> keyType) {
         String mapName = getIndexMapName(collectionName, field);
-        return nitriteStore.openMap(mapName);
+        return nitriteStore.openMap(mapName, keyType, ConcurrentSkipListSet.class);
     }
 }

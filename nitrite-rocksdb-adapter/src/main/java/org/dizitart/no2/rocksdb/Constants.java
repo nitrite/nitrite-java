@@ -20,8 +20,6 @@ package org.dizitart.no2.rocksdb;
  * @author Anindya Chatterjee
  */
 public class Constants {
-    public static final byte[] PREFIX_DELIMITER = new byte[]{Byte.MIN_VALUE, Byte.MAX_VALUE, Byte.MIN_VALUE};
     public static final byte[] DB_NULL = new byte[]{-1};
-
     public static final String STORE_INFO_KEY = "store-info";
 }

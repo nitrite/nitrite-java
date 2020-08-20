@@ -1,5 +1,6 @@
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
@@ -7,14 +8,16 @@ import org.rocksdb.RocksIterator;
 import java.util.Iterator;
 
 class KeySet<K> implements Iterable<K> {
-    private final Marshaller marshaller;
+    private final ObjectFormatter objectFormatter;
     private final RocksDB rocksDB;
     private final ColumnFamilyHandle columnFamilyHandle;
+    private final Class<?> keyType;
 
-    public KeySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, Marshaller marshaller) {
+    public KeySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, ObjectFormatter objectFormatter, Class<?> keyType) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
-        this.marshaller = marshaller;
+        this.objectFormatter = objectFormatter;
+        this.keyType = keyType;
     }
 
     @Override
@@ -47,7 +50,7 @@ class KeySet<K> implements Iterable<K> {
         @Override
         @SuppressWarnings("unchecked")
         public K next() {
-            K key = (K) marshaller.unmarshal(rawEntryIterator.key(), Object.class);
+            K key = (K) objectFormatter.decodeKey(rawEntryIterator.key(), keyType);
             rawEntryIterator.next();
             return key;
         }

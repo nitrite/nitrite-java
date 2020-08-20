@@ -296,7 +296,8 @@ public class SimpleDataGateEndpoint {
     private LastWriteWinMap createCrdt(String collection) {
         NitriteCollection nc = repository.getDb().getCollection(collection);
         NitriteMap<NitriteId, Long> nitriteMap =
-            repository.getDb().getConfig().getNitriteStore().openMap(collection + "-replica");
+            repository.getDb().getConfig().getNitriteStore().openMap(collection + "-replica",
+                NitriteId.class, Long.class);
         return new LastWriteWinMap(nc, nitriteMap);
     }
 

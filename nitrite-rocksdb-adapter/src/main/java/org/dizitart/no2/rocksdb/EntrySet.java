@@ -1,19 +1,25 @@
 package org.dizitart.no2.rocksdb;
 
 import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.rocksdb.*;
 
 import java.util.Iterator;
 
 class EntrySet<K, V> implements Iterable<KeyValuePair<K, V>> {
-    private final Marshaller marshaller;
+    private final ObjectFormatter objectFormatter;
     private final RocksDB rocksDB;
     private final ColumnFamilyHandle columnFamilyHandle;
+    private final Class<?> keyType;
+    private final Class<?> valueType;
 
-    public EntrySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, Marshaller marshaller) {
+    public EntrySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle,
+                    ObjectFormatter objectFormatter, Class<?> keyType, Class<?> valueType) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
-        this.marshaller = marshaller;
+        this.objectFormatter = objectFormatter;
+        this.keyType = keyType;
+        this.valueType = valueType;
     }
 
     @Override
@@ -46,10 +52,15 @@ class EntrySet<K, V> implements Iterable<KeyValuePair<K, V>> {
         @Override
         @SuppressWarnings("unchecked")
         public KeyValuePair<K, V> next() {
-            K key = (K) marshaller.unmarshal(rawEntryIterator.key(), Object.class);
-            V value = (V) marshaller.unmarshal(rawEntryIterator.value(), Object.class);
-            rawEntryIterator.next();
-            return new KeyValuePair<>(key, value);
+            K key = (K) objectFormatter.decodeKey(rawEntryIterator.key(), keyType);
+            try {
+                V value = (V) objectFormatter.decode(rawEntryIterator.value(), valueType);
+                rawEntryIterator.next();
+                return new KeyValuePair<>(key, value);
+            } catch (Exception e) {
+                System.out.println(new String(rawEntryIterator.value()));
+                throw e;
+            }
         }
 
         @Override

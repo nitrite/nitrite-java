@@ -16,6 +16,8 @@
 
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
+import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.rocksdb.utils.ByteUtil;
 import org.junit.Test;
 
@@ -27,7 +29,7 @@ import static org.dizitart.no2.rocksdb.utils.ByteUtil.concat;
  * @author Anindya Chatterjee
  */
 public class ByteUtilTest {
-    private final Marshaller marshaller = new FSTMarshaller();
+    private final ObjectFormatter objectFormatter = new KryoObjectFormatter();
 
     @Test
     public void testConcat() {

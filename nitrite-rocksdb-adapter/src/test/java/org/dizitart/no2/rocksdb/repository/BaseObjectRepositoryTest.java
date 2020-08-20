@@ -18,9 +18,9 @@ package org.dizitart.no2.rocksdb.repository;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.rocksdb.RocksDBModule;
 import org.dizitart.no2.rocksdb.repository.data.*;
-import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -32,7 +32,6 @@ import java.util.Collection;
 
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.rocksdb.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.rocksdb.TestUtil.deleteFile;
 
 @RunWith(value = Parameterized.class)
 public abstract class BaseObjectRepositoryTest {
@@ -114,6 +113,6 @@ public abstract class BaseObjectRepositoryTest {
             db.close();
         }
 
-        deleteFile(fileName);
+//        deleteFile(fileName);
     }
 }
