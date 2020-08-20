@@ -173,6 +173,3 @@ ColumnFamilyOptions.prefix_extractor: CustomPrefixExtractor
 ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
 
 ```
-
-## TODO:
- - remove comparables, numbers.compare, rocksdb map (ceiling key), nitrite document (get) 
