@@ -25,11 +25,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the docker image
-        run: docker build . \
-          --build-arg PGP_KEY_PASSWORD=$PGP_KEY_PASSWORD \
-          --build-arg GITHUB_WORKSPACE=$GITHUB_WORKSPACE \
-          --build-arg PGP_KEY_ID=$PGP_KEY_ID \
-          --build-arg MAVEN_USERNAME=$MAVEN_USERNAME \
-          --build-arg MAVEN_PASSWORD=$MAVEN_PASSWORD \
-          --build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
-          /
+        run: >-
+          docker build .
+          --build-arg PGP_KEY_PASSWORD=$PGP_KEY_PASSWORD
+          --build-arg GITHUB_WORKSPACE=$GITHUB_WORKSPACE
+          --build-arg PGP_KEY_ID=$PGP_KEY_ID
+          --build-arg MAVEN_USERNAME=$MAVEN_USERNAME
+          --build-arg MAVEN_PASSWORD=$MAVEN_PASSWORD
+          --build-arg GITHUB_TOKEN=$GITHUB_TOKEN
