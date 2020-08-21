@@ -53,7 +53,7 @@ dependencies {
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.3"
     testImplementation "org.apache.logging.log4j:log4j-core:2.13.3"
     testImplementation "org.awaitility:awaitility:4.0.3"
-    testImplementation "joda-time:joda-time:2.10.1"
+    testImplementation "joda-time:joda-time:2.10.6"
     testImplementation "org.meanbean:meanbean:2.0.3"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
     testImplementation "com.fasterxml.jackson.core:jackson-core:2.11.1"
