@@ -32,7 +32,7 @@ plugins {
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
-    id "org.jetbrains.dokka" version "0.11.0-dev-59"
+    id "org.jetbrains.dokka" version "0.10.1"
     id 'jacoco'
 }
 
