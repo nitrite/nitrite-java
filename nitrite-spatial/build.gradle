@@ -41,7 +41,7 @@ dependencies {
     implementation project(configuration: 'default', path: ':nitrite')
     implementation project(path: ':nitrite-jackson-mapper', configuration: 'default')
     implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "org.locationtech.jts:jts-core:1.15.1"
+    implementation "org.locationtech.jts:jts-core:1.17.0"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
