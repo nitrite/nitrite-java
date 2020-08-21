@@ -34,7 +34,7 @@ java {
 
 dependencies {
     implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "org.objenesis:objenesis:2.6"
+    implementation "org.objenesis:objenesis:3.1"
     implementation "org.jasypt:jasypt:1.9.3"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
