@@ -58,8 +58,8 @@ dependencies {
     implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.2"
 
     testImplementation "junit:junit:4.13"
+    testImplementation "joda-time:joda-time:2.10.6"
     testImplementation "org.threeten:threetenbp:1.4.4"
-    testImplementation "joda-time:joda-time:2.10.1"
 }
 
 compileKotlin {
