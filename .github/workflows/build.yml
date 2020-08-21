@@ -21,6 +21,7 @@ jobs:
       MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
       PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
       GITHUB_TOKEN: ${{ secrets.NITRITE_GH_TOKEN }}
+      ANDROID_SDK_ROOT: /media/anindya/data/android/linux/android-sdk-linux
 
     steps:
       - uses: actions/checkout@v2
