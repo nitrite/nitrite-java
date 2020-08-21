@@ -3,8 +3,7 @@ language: java
 jdk:
   - openjdk8
 
-sudo:
-  - required
+sudo: required
 
 os:
   - linux
