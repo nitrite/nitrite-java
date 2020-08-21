@@ -32,4 +32,5 @@ jobs:
           --build-arg MAVEN_USERNAME=$MAVEN_USERNAME \
           --build-arg MAVEN_PASSWORD=$MAVEN_PASSWORD \
           --build-arg GITHUB_TOKEN=$GITHUB_TOKEN \
+          . \
           /

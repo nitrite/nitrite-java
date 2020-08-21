@@ -41,8 +41,6 @@ import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -56,7 +54,6 @@ import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.rocksdb.TestUtil.createDb;
 import static org.junit.Assert.*;
 
 /**
@@ -263,26 +260,13 @@ public class NitriteTest extends AbstractTest {
     @Test(expected = NitriteIOException.class)
     public void testCloseNullStore() {
         try (Nitrite db = Nitrite.builder().openOrCreate()) {
-            db.close();
+            assertNotNull(db);
         }
     }
 
     @Test(expected = ValidationException.class)
     public void testGetCollectionInvalidName() {
         db.getCollection(META_MAP_NAME);
-    }
-
-    @Test(expected = NitriteIOException.class)
-    public void testIssue112() {
-        RocksDBModule storeModule = RocksDBModule.withConfig()
-            .filePath("/non-existent")
-            .build();
-
-        Nitrite db = Nitrite.builder()
-            .loadModule(storeModule)
-            .openOrCreate();
-
-        assertNull(db);
     }
 
     @Test
