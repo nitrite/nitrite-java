@@ -55,7 +55,7 @@ dependencies {
     testImplementation "org.awaitility:awaitility:4.0.3"
     testImplementation "joda-time:joda-time:2.10.6"
     testImplementation "org.meanbean:meanbean:2.0.3"
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.2"
     testImplementation "com.fasterxml.jackson.core:jackson-core:2.11.2"
 }
 
@@ -125,14 +125,6 @@ publishing {
                     password System.getenv('MAVEN_PASSWORD')
                 }
 
-            }
-        }
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/nitrite/nitrite-java"
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }

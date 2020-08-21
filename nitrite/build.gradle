@@ -96,15 +96,6 @@ publishing {
                     username System.getenv('MAVEN_USERNAME')
                     password System.getenv('MAVEN_PASSWORD')
                 }
-
-            }
-        }
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/nitrite/nitrite-java"
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }

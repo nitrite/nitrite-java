@@ -40,7 +40,7 @@ repositories {
 dependencies {
     implementation project(configuration: 'default', path: ':nitrite')
     implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.1"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.2"
     implementation "com.fasterxml.jackson.core:jackson-annotations:2.11.2"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
@@ -119,14 +119,6 @@ publishing {
                     password System.getenv('MAVEN_PASSWORD')
                 }
 
-            }
-        }
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/nitrite/nitrite-java"
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
             }
         }
     }

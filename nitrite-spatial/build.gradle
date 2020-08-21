@@ -118,14 +118,6 @@ publishing {
 
             }
         }
-        maven {
-            name = "GitHubPackages"
-            url = "https://maven.pkg.github.com/nitrite/nitrite-java"
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
     }
 }
 

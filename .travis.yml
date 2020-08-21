@@ -8,10 +8,6 @@ sudo: required
 os:
   - linux
 
-services:
-  - docker
-  - mongodb
-
 branches:
   except:
     - /^feature-.*$/
