@@ -34,6 +34,7 @@ public class TestUtil {
         return Nitrite.builder()
             .loadModule(storeModule)
             .loadModule(module)
+            .fieldSeparator(".")
             .openOrCreate();
     }
 
@@ -44,6 +45,7 @@ public class TestUtil {
         return Nitrite.builder()
             .loadModule(storeModule)
             .loadModule(module)
+            .fieldSeparator(".")
             .openOrCreate(user, password);
     }
 
@@ -56,6 +58,7 @@ public class TestUtil {
         return Nitrite.builder()
             .loadModule(storeModule)
             .loadModule(module)
+            .fieldSeparator(".")
             .openOrCreate();
     }
 
@@ -68,6 +71,7 @@ public class TestUtil {
         return Nitrite.builder()
             .loadModule(storeModule)
             .loadModule(module)
+            .fieldSeparator(".")
             .openOrCreate(user, password);
     }
 }

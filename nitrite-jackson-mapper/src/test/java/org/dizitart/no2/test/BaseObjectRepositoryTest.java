@@ -130,6 +130,7 @@ public abstract class BaseObjectRepositoryTest {
         MVStoreModule storeModule = builder.build();
         NitriteBuilder nitriteBuilder = Nitrite.builder()
             .loadModule(new JacksonMapperModule())
+            .fieldSeparator(".")
             .loadModule(storeModule);
 
         if (isProtected) {
