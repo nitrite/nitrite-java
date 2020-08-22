@@ -141,7 +141,7 @@ public class SpatialIndexTest {
 
     @After
     public void after() throws IOException {
-        if (!db.isClosed()) {
+        if (db != null && !db.isClosed()) {
             db.close();
         }
 
@@ -277,7 +277,7 @@ public class SpatialIndexTest {
             .filePath((String) null)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(storeModule)
             .loadModule(new SpatialModule())
             .openOrCreate();

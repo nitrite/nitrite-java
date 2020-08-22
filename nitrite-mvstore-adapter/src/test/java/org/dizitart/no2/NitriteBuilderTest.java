@@ -57,6 +57,8 @@ import static org.junit.Assert.*;
 public class NitriteBuilderTest {
     private String fakeFile;
     private String filePath;
+    private Nitrite db;
+    private Nitrite fakeDb;
 
     @Before
     public void startup() {
@@ -66,8 +68,16 @@ public class NitriteBuilderTest {
 
     @After
     public void cleanup() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
         if (Files.exists(Paths.get(filePath))) {
             Files.delete(Paths.get(filePath));
+        }
+
+        if (fakeDb != null && !fakeDb.isClosed()){
+            fakeDb.close();
         }
 
         if (Files.exists(Paths.get(fakeFile))) {
@@ -87,7 +97,7 @@ public class NitriteBuilderTest {
         nitriteBuilder.loadModule(module(new CustomIndexer()));
         nitriteBuilder.loadModule(builder.build());
 
-        Nitrite db = nitriteBuilder.openOrCreate();
+        db = nitriteBuilder.openOrCreate();
         NitriteConfig config = nitriteBuilder.getNitriteConfig();
         MVStoreConfig storeConfig = (MVStoreConfig) db.getStore().getStoreConfig();
 
@@ -123,7 +133,7 @@ public class NitriteBuilderTest {
             .compress(true)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(storeModule)
             .openOrCreate();
         StoreConfig storeConfig = db.getStore().getStoreConfig();
@@ -143,8 +153,11 @@ public class NitriteBuilderTest {
     @Test
     public void testConfigWithFileNull() {
         File file = null;
-        MVStoreModule module = MVStoreModule.withConfig().filePath(file).build();
-        Nitrite db = Nitrite.builder().loadModule(module).openOrCreate();
+        MVStoreModule module = MVStoreModule.withConfig()
+                .filePath(file)
+                .build();
+
+        db = Nitrite.builder().loadModule(module).openOrCreate();
         StoreConfig storeConfig = db.getStore().getStoreConfig();
 
         assertTrue(storeConfig.isInMemory());
@@ -161,7 +174,7 @@ public class NitriteBuilderTest {
     public void testPopulateRepositories() {
         File file = new File(filePath);
         MVStoreModule module = MVStoreModule.withConfig().filePath(file).build();
-        Nitrite db = Nitrite.builder().loadModule(module).openOrCreate();
+        db = Nitrite.builder().loadModule(module).openOrCreate();
 
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("id1", "value"));
@@ -231,7 +244,7 @@ public class NitriteBuilderTest {
         // Close the stream
         writer.close();
 
-        Nitrite fakeDb = createDb(fakeFile);
+        fakeDb = createDb(fakeFile);
         assertNull(fakeDb);
     }
 
@@ -241,7 +254,7 @@ public class NitriteBuilderTest {
             .readOnly(true)
             .build();
 
-        Nitrite fakeDb = Nitrite.builder()
+        fakeDb = Nitrite.builder()
             .loadModule(module)
             .openOrCreate();
         assertNull(fakeDb);
@@ -249,8 +262,8 @@ public class NitriteBuilderTest {
 
     @Test(expected = NitriteIOException.class)
     public void testDbInvalidDirectory() {
-        fakeFile = "/tmp/fake/fake.db";
-        Nitrite db = createDb(fakeFile, "test", "test");
+        fakeFile = System.getProperty("java.io.tmpdir") + File.separator + "fake" + File.separator + "fake.db";
+        db = createDb(fakeFile, "test", "test");
         assertNull(db);
     }
 
@@ -259,7 +272,7 @@ public class NitriteBuilderTest {
         MVStoreModule module = MVStoreModule.withConfig()
             .filePath(filePath)
             .build();
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(module)
             .fieldSeparator("::")
             .openOrCreate();
@@ -284,7 +297,7 @@ public class NitriteBuilderTest {
             .filePath("http://www.localhost.com")
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(module)
             .openOrCreate("test", "test");
         assertNull(db);

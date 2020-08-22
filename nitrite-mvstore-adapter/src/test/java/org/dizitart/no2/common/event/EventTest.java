@@ -64,25 +64,25 @@ public class EventTest {
     private SampleListenerCollection listener;
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}, " +
-        "Compressed = {2}, AutoCommit = {3}")
+            "Compressed = {2}, AutoCommit = {3}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-            {false, false, false, false},
-            {false, false, false, true},
-            {false, false, true, false},
-            {false, false, true, true},
-            {false, true, false, false},
-            {false, true, false, true},
-            {false, true, true, false},
-            {false, true, true, true},
-            {true, false, false, false},
-            {true, false, false, true},
-            {true, false, true, false},
-            {true, false, true, true},
-            {true, true, false, false},
-            {true, true, false, true},
-            {true, true, true, false},
-            {true, true, true, true},
+                {false, false, false, false},
+                {false, false, false, true},
+                {false, false, true, false},
+                {false, false, true, true},
+                {false, true, false, false},
+                {false, true, false, true},
+                {false, true, true, false},
+                {false, true, true, true},
+                {true, false, false, false},
+                {true, false, false, true},
+                {true, false, true, false},
+                {true, false, true, true},
+                {true, true, false, false},
+                {true, true, false, true},
+                {true, true, true, false},
+                {true, true, true, true},
         });
     }
 
@@ -104,7 +104,8 @@ public class EventTest {
 
         MVStoreModule storeModule = builder.build();
         NitriteBuilder nitriteBuilder = Nitrite.builder()
-            .loadModule(storeModule);
+                .fieldSeparator(".")
+                .loadModule(storeModule);
 
         if (isProtected) {
             db = nitriteBuilder.openOrCreate("test-user", "test-password");
@@ -237,7 +238,7 @@ public class EventTest {
     public void clear() throws IOException {
         if (employeeRepository != null) {
             if (!employeeRepository.isDropped()
-                && employeeRepository.isOpen()) {
+                    && employeeRepository.isOpen()) {
                 employeeRepository.remove(ALL);
                 employeeRepository.unsubscribe(listener);
                 employeeRepository.close();

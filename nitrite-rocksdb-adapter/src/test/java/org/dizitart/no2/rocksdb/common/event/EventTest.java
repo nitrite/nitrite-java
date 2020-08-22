@@ -58,30 +58,37 @@ public class EventTest {
     @Parameterized.Parameters(name = "Protected = {0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-            {false},
-            {true},
+                {false},
+                {true},
         });
     }
 
     @Before
     public void setUp() {
         RocksDBModule storeModule = RocksDBModule.withConfig()
-            .filePath(fileName)
-            .build();
+                .filePath(fileName)
+                .build();
 
         if (isProtected) {
             db = Nitrite.builder()
-                .loadModule(storeModule)
-                .openOrCreate("test-user", "test-password");
+                    .fieldSeparator(".")
+                    .loadModule(storeModule)
+                    .openOrCreate("test-user", "test-password");
         } else {
             db = Nitrite.builder()
-                .loadModule(storeModule)
-                .openOrCreate();
+                    .fieldSeparator(".")
+                    .loadModule(storeModule)
+                    .openOrCreate();
         }
 
-        employeeRepository = db.getRepository(Employee.class);
-        listener = new SampleListenerCollection();
-        employeeRepository.subscribe(listener);
+        try {
+            employeeRepository = db.getRepository(Employee.class);
+            listener = new SampleListenerCollection();
+            employeeRepository.subscribe(listener);
+        } catch (Exception e) {
+            System.out.println("NitriteConfig - " + db.getConfig());
+            throw e;
+        }
     }
 
     @Test
@@ -204,7 +211,7 @@ public class EventTest {
     public void clear() throws IOException {
         if (employeeRepository != null) {
             if (!employeeRepository.isDropped()
-                && employeeRepository.isOpen()) {
+                    && employeeRepository.isOpen()) {
                 employeeRepository.remove(ALL);
                 employeeRepository.unsubscribe(listener);
                 employeeRepository.close();

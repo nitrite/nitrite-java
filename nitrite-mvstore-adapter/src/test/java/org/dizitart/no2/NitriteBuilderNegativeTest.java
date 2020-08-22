@@ -16,10 +16,16 @@
 
 package org.dizitart.no2;
 
+import org.apache.commons.io.FileUtils;
+import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.mvstore.MVStoreModule;
+import org.junit.After;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.TestUtil.createDb;
@@ -28,17 +34,19 @@ import static org.dizitart.no2.TestUtil.createDb;
  * @author Anindya Chatterjee.
  */
 public class NitriteBuilderNegativeTest {
+    private Nitrite db;
+    private String filePath;
 
     @Test(expected = NitriteIOException.class)
     public void testCreateReadonlyDatabase() {
-        String filePath = getRandomTempDbFile();
+        filePath = getRandomTempDbFile();
 
         MVStoreModule storeModule = MVStoreModule.withConfig()
             .filePath(filePath)
             .readOnly(true)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(storeModule)
             .openOrCreate();
         db.close();
@@ -50,7 +58,7 @@ public class NitriteBuilderNegativeTest {
             .readOnly(true)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(storeModule)
             .openOrCreate();
         db.close();
@@ -58,15 +66,26 @@ public class NitriteBuilderNegativeTest {
 
     @Test(expected = NitriteIOException.class)
     public void testOpenWithLock() {
-        String filePath = getRandomTempDbFile();
+        filePath = getRandomTempDbFile();
 
-        createDb(filePath);
-        createDb(filePath);
+        db = createDb(filePath);
+        db = createDb(filePath);
     }
 
     @Test(expected = NitriteIOException.class)
     public void testInvalidDirectory() {
-        String filePath = "/ytgr/hfurh/frij.db";
-        createDb(filePath);
+        filePath = "/ytgr/hfurh/frij.db";
+        db = createDb(filePath);
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
+        if (!StringUtils.isNullOrEmpty(filePath)) {
+            FileUtils.deleteQuietly(new File(filePath));
+        }
     }
 }

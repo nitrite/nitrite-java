@@ -37,16 +37,21 @@ import static org.junit.Assert.assertTrue;
 public class SerializabilityTest {
     private NitriteCollection collection;
     private File dbFile;
+    private Nitrite db;
 
     @Before
     public void setUp() {
         dbFile = new File(getRandomTempDbFile());
-        Nitrite db = createDb(dbFile.getPath());
+        db = createDb(dbFile.getPath());
         collection = db.getCollection("test");
     }
 
     @After
     public void tearDown() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
         if (dbFile.exists()) {
             boolean delete = dbFile.delete();
             assertTrue(delete);

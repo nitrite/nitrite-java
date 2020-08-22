@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.repository;
 
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.TestUtil;
 import org.dizitart.no2.collection.*;
@@ -27,8 +28,10 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.store.NitriteStore;
+import org.junit.After;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Collection;
 
 import static org.junit.Assert.assertNotNull;
@@ -37,6 +40,8 @@ import static org.junit.Assert.assertNotNull;
  * @author Anindya Chatterjee
  */
 public class RepositoryFactoryTest {
+    private Nitrite db;
+
     @Test
     public void testRepositoryFactory() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
@@ -46,14 +51,14 @@ public class RepositoryFactoryTest {
     @Test(expected = ValidationException.class)
     public void testNullType() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
-        Nitrite db = TestUtil.createDb();
+        db = TestUtil.createDb();
         factory.getRepository(db.getConfig(), null, "dummy");
     }
 
     @Test
     public void testNullCollection() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
-        Nitrite db = TestUtil.createDb();
+        db = TestUtil.createDb();
         factory.getRepository(db.getConfig(), DummyCollection.class, null);
     }
 
@@ -61,6 +66,13 @@ public class RepositoryFactoryTest {
     public void testNullContext() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
         factory.getRepository(null, DummyCollection.class, "dummy");
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
     }
 
     private static class DummyCollection implements NitriteCollection {

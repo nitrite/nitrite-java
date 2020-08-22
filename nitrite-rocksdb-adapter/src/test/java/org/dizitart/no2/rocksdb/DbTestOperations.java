@@ -41,6 +41,7 @@ import static org.junit.Assert.assertTrue;
  * @author Anindya Chatterjee.
  */
 public class DbTestOperations {
+    private Nitrite db;
     private final String fileName = getRandomTempDbFile();
 
     public static String getRandomTempDbFile() {
@@ -53,12 +54,11 @@ public class DbTestOperations {
     }
 
     void createDb() {
-        Nitrite db = TestUtil.createDb(fileName);
+        db = TestUtil.createDb(fileName);
         db.close();
     }
 
     void writeCollection() {
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -69,7 +69,6 @@ public class DbTestOperations {
     }
 
     void writeIndex() {
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -102,7 +101,6 @@ public class DbTestOperations {
             .put("body", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
                 "Sed nunc mi, mattis ullamcorper dignissim vitae, condimentum non lorem.");
 
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -117,7 +115,6 @@ public class DbTestOperations {
     }
 
     void readCollection() throws ParseException {
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -203,6 +200,10 @@ public class DbTestOperations {
     }
 
     void deleteDb() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
         TestUtil.deleteFile(fileName);
     }
 }

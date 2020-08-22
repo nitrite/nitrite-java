@@ -16,10 +16,13 @@
 
 package org.dizitart.no2;
 
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.junit.After;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -34,11 +37,12 @@ import static org.junit.Assert.assertNotNull;
  * @author Anindya Chatterjee.
  */
 public class NitriteStoreFactoryTest {
+    private Nitrite db;
     private final String fileName = getRandomTempDbFile();
 
     @Test
     public void testSecured() throws IOException {
-        Nitrite db = createDb(fileName, "test-user", "test-password");
+        db = createDb(fileName, "test-user", "test-password");
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -53,7 +57,7 @@ public class NitriteStoreFactoryTest {
 
     @Test
     public void testUnsecured() throws IOException {
-        Nitrite db = createDb(fileName);
+        db = createDb(fileName);
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -68,7 +72,7 @@ public class NitriteStoreFactoryTest {
 
     @Test
     public void testInMemory() {
-        Nitrite db = createDb("test-user", "test-password");
+        db = createDb("test-user", "test-password");
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -83,7 +87,7 @@ public class NitriteStoreFactoryTest {
 
     @Test
     public void testIssue116() throws IOException {
-        Nitrite db = createDb(fileName, "test-user", "test-password");
+        db = createDb(fileName, "test-user", "test-password");
         db.close();
         try {
             db = createDb(fileName,"test-user2", "test-password2");
@@ -94,5 +98,14 @@ public class NitriteStoreFactoryTest {
             db.close();
             Files.delete(Paths.get(fileName));
         }
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
+        FileUtils.deleteQuietly(new File(fileName));
     }
 }

@@ -27,6 +27,7 @@ import org.rocksdb.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -219,7 +220,10 @@ public class RocksDBTest extends AbstractTest {
                 .setCreateIfMissing(true)
                 .setCreateMissingColumnFamilies(true);
                  final RocksDB db = RocksDB.open(options,
-                     "/tmp/nitrite/data/test", cfDescriptors,
+                     System.getProperty("java.io.tmpdir") + File.separator
+                         + "nitrite" + File.separator
+                         + "data" + File.separator
+                         + "test", cfDescriptors,
                      columnFamilyHandleList)) {
                 try {
                     ColumnFamilyHandle handle = columnFamilyHandleList.get(1);

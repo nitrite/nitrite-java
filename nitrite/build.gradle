@@ -32,6 +32,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+
 dependencies {
     implementation "org.slf4j:slf4j-api:1.7.30"
     implementation "org.objenesis:objenesis:3.1"

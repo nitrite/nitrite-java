@@ -44,6 +44,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class DbTestOperations {
     private final String fileName = getRandomTempDbFile();
+    private Nitrite db;
 
     public static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";
@@ -55,12 +56,11 @@ public class DbTestOperations {
     }
 
     void createDb() {
-        Nitrite db = TestUtil.createDb(fileName);
+        db = TestUtil.createDb(fileName);
         db.close();
     }
 
     void writeCollection() {
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -71,7 +71,6 @@ public class DbTestOperations {
     }
 
     void writeIndex() {
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -104,7 +103,6 @@ public class DbTestOperations {
             .put("body", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
                 "Sed nunc mi, mattis ullamcorper dignissim vitae, condimentum non lorem.");
 
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -119,7 +117,6 @@ public class DbTestOperations {
     }
 
     void readCollection() throws ParseException {
-        Nitrite db;
         NitriteCollection collection;
 
         db = TestUtil.createDb(fileName);
@@ -205,6 +202,9 @@ public class DbTestOperations {
     }
 
     void deleteDb() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
         Files.delete(Paths.get(fileName));
     }
 }

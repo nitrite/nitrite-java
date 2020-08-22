@@ -58,6 +58,7 @@ public class ReplicaTest {
     private String dbFile;
     private ExecutorService executorService;
     private Repository repository;
+    private Nitrite db;
 
     public static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";
@@ -81,6 +82,11 @@ public class ReplicaTest {
     public void cleanUp() throws Exception {
         executorService.awaitTermination(2, SECONDS);
         executorService.shutdown();
+
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
         if (Files.exists(Paths.get(dbFile))) {
             Files.delete(Paths.get(dbFile));
         }
@@ -91,7 +97,7 @@ public class ReplicaTest {
     public void testSingleUserSingleReplica() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db = createDb(dbFile);
+        db = createDb(dbFile);
         NitriteCollection collection = db.getCollection("testSingleUserSingleReplica");
         Document document = createDocument().put("firstName", "Anindya")
             .put("lastName", "Chatterjee")
@@ -145,11 +151,11 @@ public class ReplicaTest {
     public void testSingleUserMultiReplica() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = createDb(dbFile);
+        db = createDb(dbFile);
 
         Nitrite db2 = createDb();
 
-        NitriteCollection c1 = db1.getCollection("testSingleUserMultiReplica");
+        NitriteCollection c1 = db.getCollection("testSingleUserMultiReplica");
         NitriteCollection c2 = db2.getCollection("testSingleUserMultiReplica");
 
         Replica r1 = Replica.builder()
@@ -381,11 +387,11 @@ public class ReplicaTest {
     public void testCloseDbAndReconnect() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = createDb(dbFile);
+        db = createDb(dbFile);
 
         Nitrite db2 = createDb();
 
-        NitriteCollection c1 = db1.getCollection("testCloseDbAndReconnect");
+        NitriteCollection c1 = db.getCollection("testCloseDbAndReconnect");
         NitriteCollection c2 = db2.getCollection("testCloseDbAndReconnect");
 
         Replica r1 = Replica.builder()
@@ -443,10 +449,10 @@ public class ReplicaTest {
 
         r1.disconnect();
         r1.close();
-        db1.close();
+        db.close();
 
-        db1 = createDb(dbFile);
-        c1 = db1.getCollection("testCloseDbAndReconnect");
+        db = createDb(dbFile);
+        c1 = db.getCollection("testCloseDbAndReconnect");
         r1 = Replica.builder()
             .of(c1)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testCloseDbAndReconnect")
@@ -528,8 +534,8 @@ public class ReplicaTest {
     public void testDelayedConnectRemoveAll() {
         repository.getUserMap().put("anidotnet", "abcd");
 
-        Nitrite db1 = createDb(dbFile);
-        NitriteCollection c1 = db1.getCollection("testDelayedConnect");
+        db = createDb(dbFile);
+        NitriteCollection c1 = db.getCollection("testDelayedConnect");
         Replica r1 = Replica.builder()
             .of(c1)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
@@ -548,7 +554,7 @@ public class ReplicaTest {
 
         r1.disconnect();
         r1.close();
-        db1.close();
+        db.close();
 
         Nitrite db2 = createDb();
         NitriteCollection c2 = db2.getCollection("testDelayedConnect");
@@ -564,8 +570,8 @@ public class ReplicaTest {
             c2.insert(document);
         }
 
-        db1 = createDb(dbFile);
-        NitriteCollection c3 = db1.getCollection("testDelayedConnect");
+        db = createDb(dbFile);
+        NitriteCollection c3 = db.getCollection("testDelayedConnect");
         r1 = Replica.builder()
             .of(c3)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
@@ -582,8 +588,8 @@ public class ReplicaTest {
     @Test
     public void testGarbageCollect() throws InterruptedException {
         repository.getUserMap().put("anidotnet", "abcd");
-        Nitrite db1 = createDb(dbFile);
-        NitriteCollection c1 = db1.getCollection("testGarbageCollect");
+        db = createDb(dbFile);
+        NitriteCollection c1 = db.getCollection("testGarbageCollect");
         Replica r1 = Replica.builder()
             .of(c1)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testGarbageCollect")
@@ -602,12 +608,12 @@ public class ReplicaTest {
 
         r1.disconnect();
         r1.close();
-        db1.close();
+        db.close();
 
         repository.setGcTtl(1L);
 
-        db1 = createDb(dbFile);
-        NitriteCollection c2 = db1.getCollection("testGarbageCollect");
+        db = createDb(dbFile);
+        NitriteCollection c2 = db.getCollection("testGarbageCollect");
         r1 = Replica.builder()
             .of(c2)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testGarbageCollect")

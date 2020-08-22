@@ -16,9 +16,13 @@
 
 package org.dizitart.no2.collection;
 
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.junit.After;
 import org.junit.Test;
+
+import java.io.File;
 
 import static org.dizitart.no2.TestUtil.createDb;
 import static org.junit.Assert.assertEquals;
@@ -27,15 +31,23 @@ import static org.junit.Assert.assertEquals;
  * @author Anindya Chatterjee
  */
 public class NitriteCollectionTest {
+    private Nitrite db;
 
     @Test
     public void testAttributes() {
-        Nitrite db = createDb();
+        db = createDb();
         NitriteCollection collection = db.getCollection("test");
 
         Attributes attributes = new Attributes("test");
         collection.setAttributes(attributes);
 
         assertEquals(collection.getAttributes(), attributes);
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
     }
 }

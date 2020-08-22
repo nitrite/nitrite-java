@@ -77,17 +77,26 @@ public class NitriteCorruptedTest {
             collection.remove(ALL);
             collection.close();
         }
-        db.close();
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
         TestUtil.deleteFile(fileName);
     }
 
     @Test(timeout = 10000)
     public void issue118() throws InterruptedException {
-        thread.start();
-        Thread.sleep(10);
-        thread.interrupt();
-        Thread.sleep(500);
-        assertTrue(collection.isOpen());
-        assertFalse(db.isClosed());
+        try {
+            thread.start();
+            Thread.sleep(10);
+            thread.interrupt();
+            Thread.sleep(500);
+            assertTrue(collection.isOpen());
+            assertFalse(db.isClosed());
+        } catch (InterruptedException e) {
+            if (db != null && !db.isClosed()) {
+                db.close();
+            }
+            throw e;
+        }
     }
 }

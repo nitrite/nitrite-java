@@ -18,6 +18,7 @@ package org.dizitart.no2;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.ToString;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.Indexer;
 import org.dizitart.no2.mapper.NitriteMapper;
@@ -32,6 +33,7 @@ import org.dizitart.no2.store.NitriteStore;
  * @author Anindya Chatterjee.
  * @since 4.0.0
  */
+@ToString
 public class NitriteConfig {
     /**
      * Gets the embedded field separator character. Default value

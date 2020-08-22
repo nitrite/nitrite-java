@@ -39,6 +39,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class NitriteStoreEventTest {
     private String dbFile;
+    private Nitrite db;
 
     @Before
     public void before() {
@@ -47,6 +48,10 @@ public class NitriteStoreEventTest {
 
     @After
     public void cleanup() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
         if (Files.exists(Paths.get(dbFile))) {
             Files.delete(Paths.get(dbFile));
         }
@@ -65,7 +70,7 @@ public class NitriteStoreEventTest {
             .addStoreEventListener(listener)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(module)
             .openOrCreate();
 

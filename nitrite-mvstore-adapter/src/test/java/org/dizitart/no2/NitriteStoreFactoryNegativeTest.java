@@ -16,9 +16,13 @@
 
 package org.dizitart.no2;
 
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.NitriteException;
+import org.junit.After;
 import org.junit.Test;
+
+import java.io.File;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.TestUtil.createDb;
@@ -29,11 +33,12 @@ import static org.junit.Assert.assertEquals;
  * @author Anindya Chatterjee.
  */
 public class NitriteStoreFactoryNegativeTest {
+    private Nitrite db;
     private final String fileName = getRandomTempDbFile();
 
     @Test(expected = NitriteException.class)
     public void testOpenSecuredWithoutCredential() {
-        Nitrite db = createDb(fileName, "test-user", "test-password");
+        db = createDb(fileName, "test-user", "test-password");
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -46,7 +51,7 @@ public class NitriteStoreFactoryNegativeTest {
 
     @Test(expected = NitriteException.class)
     public void testOpenUnsecuredWithCredential() {
-        Nitrite db = createDb(fileName);
+        db = createDb(fileName);
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -59,7 +64,7 @@ public class NitriteStoreFactoryNegativeTest {
 
     @Test(expected = NitriteException.class)
     public void testWrongCredential() {
-        Nitrite db = createDb(fileName, "test-user", "test-password");
+        db = createDb(fileName, "test-user", "test-password");
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -68,5 +73,14 @@ public class NitriteStoreFactoryNegativeTest {
         db = createDb(fileName, "test-user", "test-password2");
         dbCollection = db.getCollection("test");
         assertEquals(dbCollection.find().size(), 1);
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
+        FileUtils.deleteQuietly(new File(fileName));
     }
 }

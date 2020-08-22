@@ -40,10 +40,11 @@ import static org.junit.Assert.assertNotNull;
  */
 public class NitriteMapStressTest {
     private final String dbPath = getRandomTempDbFile();
+    private Nitrite db;
 
     @Test
     public void testWithInsertReadUpdate() {
-        Nitrite db = createDb(dbPath);
+        db = createDb(dbPath);
 
         NitriteStore<?> nitriteStore = db.getStore();
         NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testWithInsertReadUpdate",
@@ -74,7 +75,7 @@ public class NitriteMapStressTest {
 
     @Test
     public void testNullKey() {
-        Nitrite db = createDb(dbPath);
+        db = createDb(dbPath);
         NitriteStore<?> nitriteStore = db.getStore();
         NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullKey",
             String.class, Document.class);
@@ -90,7 +91,7 @@ public class NitriteMapStressTest {
 
     @Test(expected = ValidationException.class)
     public void testNullValue() {
-        Nitrite db = createDb(dbPath);
+        db = createDb(dbPath);
         NitriteStore<?> nitriteStore = db.getStore();
         NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullValue",
             String.class, Document.class);
@@ -99,7 +100,7 @@ public class NitriteMapStressTest {
 
     @Test(expected = ValidationException.class)
     public void testNullPutIfAbsent() {
-        Nitrite db = createDb(dbPath);
+        db = createDb(dbPath);
         NitriteStore<?> nitriteStore = db.getStore();
         NitriteMap<String, Document> nitriteMap = nitriteStore.openMap("testNullPutIfAbsent",
             String.class, Document.class);
@@ -108,6 +109,9 @@ public class NitriteMapStressTest {
 
     @After
     public void tearDown() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
         Files.delete(Paths.get(dbPath));
     }
 }

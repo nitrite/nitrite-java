@@ -57,25 +57,25 @@ public abstract class BaseCollectionTest {
     private final String fileName = getRandomTempDbFile();
 
     @Parameterized.Parameters(name = "InMemory = {0}, Secured = {1}, " +
-        "Compressed = {2}, AutoCommit = {3}, AutoCompact = {4}")
+            "Compressed = {2}, AutoCommit = {3}, AutoCompact = {4}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-            {false, false, false, false},
-            {false, false, false, true},
-            {false, false, true, false},
-            {false, false, true, true},
-            {false, true, false, false},
-            {false, true, false, true},
-            {false, true, true, false},
-            {false, true, true, true},
-            {true, false, false, false},
-            {true, false, false, true},
-            {true, false, true, false},
-            {true, false, true, true},
-            {true, true, false, false},
-            {true, true, false, true},
-            {true, true, true, false},
-            {true, true, true, true},
+                {false, false, false, false},
+                {false, false, false, true},
+                {false, false, true, false},
+                {false, false, true, true},
+                {false, true, false, false},
+                {false, true, false, true},
+                {false, true, true, false},
+                {false, true, true, true},
+                {true, false, false, false},
+                {true, false, false, true},
+                {true, false, true, false},
+                {true, false, true, true},
+                {true, true, false, false},
+                {true, true, false, true},
+                {true, true, true, false},
+                {true, true, true, true},
         });
     }
 
@@ -85,26 +85,26 @@ public abstract class BaseCollectionTest {
             openDb();
 
             simpleDateFormat
-                = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+                    = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
             doc1 = createDocument("firstName", "fn1")
-                .put("lastName", "ln1")
-                .put("birthDay", simpleDateFormat.parse("2012-07-01T16:02:48.440Z"))
-                .put("data", new byte[]{1, 2, 3})
-                .put("list", Arrays.asList("one", "two", "three"))
-                .put("body", "a quick brown fox jump over the lazy dog");
+                    .put("lastName", "ln1")
+                    .put("birthDay", simpleDateFormat.parse("2012-07-01T16:02:48.440Z"))
+                    .put("data", new byte[]{1, 2, 3})
+                    .put("list", Arrays.asList("one", "two", "three"))
+                    .put("body", "a quick brown fox jump over the lazy dog");
             doc2 = createDocument("firstName", "fn2")
-                .put("lastName", "ln2")
-                .put("birthDay", simpleDateFormat.parse("2010-06-12T16:02:48.440Z"))
-                .put("data", new byte[]{3, 4, 3})
-                .put("list", Arrays.asList("three", "four", "three"))
-                .put("body", "quick hello world from nitrite");
+                    .put("lastName", "ln2")
+                    .put("birthDay", simpleDateFormat.parse("2010-06-12T16:02:48.440Z"))
+                    .put("data", new byte[]{3, 4, 3})
+                    .put("list", Arrays.asList("three", "four", "three"))
+                    .put("body", "quick hello world from nitrite");
             doc3 = createDocument("firstName", "fn3")
-                .put("lastName", "ln2")
-                .put("birthDay", simpleDateFormat.parse("2014-04-17T16:02:48.440Z"))
-                .put("data", new byte[]{9, 4, 8})
-                .put("body", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
-                    "Sed nunc mi, mattis ullamcorper dignissim vitae, condimentum non lorem.");
+                    .put("lastName", "ln2")
+                    .put("birthDay", simpleDateFormat.parse("2014-04-17T16:02:48.440Z"))
+                    .put("data", new byte[]{9, 4, 8})
+                    .put("body", "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " +
+                            "Sed nunc mi, mattis ullamcorper dignissim vitae, condimentum non lorem.");
 
             collection = db.getCollection("test");
             collection.remove(ALL);
@@ -145,7 +145,8 @@ public abstract class BaseCollectionTest {
 
         MVStoreModule storeModule = builder.build();
         NitriteBuilder nitriteBuilder = Nitrite.builder()
-            .loadModule(storeModule);
+                .fieldSeparator(".")
+                .loadModule(storeModule);
 
         if (isSecured) {
             db = nitriteBuilder.openOrCreate("test-user", "test-password");

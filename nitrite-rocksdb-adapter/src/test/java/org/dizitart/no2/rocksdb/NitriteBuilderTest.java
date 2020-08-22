@@ -54,6 +54,8 @@ import static org.junit.Assert.*;
 public class NitriteBuilderTest {
     private String fakeFile;
     private String filePath;
+    private Nitrite db;
+    private Nitrite fakeDb;
 
     @Before
     public void startup() {
@@ -63,8 +65,16 @@ public class NitriteBuilderTest {
 
     @After
     public void cleanup() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
         if (Files.exists(Paths.get(filePath))) {
             TestUtil.deleteFile(filePath);
+        }
+
+        if (fakeDb != null && !fakeDb.isClosed()){
+            fakeDb.close();
         }
 
         if (Files.exists(Paths.get(fakeFile))) {
@@ -82,7 +92,7 @@ public class NitriteBuilderTest {
         nitriteBuilder.loadModule(module(new CustomIndexer()));
         nitriteBuilder.loadModule(storeModule);
 
-        Nitrite db = nitriteBuilder.openOrCreate();
+        db = nitriteBuilder.openOrCreate();
         NitriteConfig config = nitriteBuilder.getNitriteConfig();
         RocksDBConfig storeConfig = (RocksDBConfig) db.getStore().getStoreConfig();
 
@@ -102,7 +112,7 @@ public class NitriteBuilderTest {
             .filePath(file)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(storeModule)
             .openOrCreate();
         StoreConfig storeConfig = db.getStore().getStoreConfig();
@@ -126,7 +136,7 @@ public class NitriteBuilderTest {
             .filePath(file)
             .build();
 
-        Nitrite db = Nitrite.builder().loadModule(storeModule).openOrCreate();
+        db = Nitrite.builder().loadModule(storeModule).openOrCreate();
         StoreConfig storeConfig = db.getStore().getStoreConfig();
 
         assertTrue(storeConfig.isInMemory());
@@ -146,7 +156,7 @@ public class NitriteBuilderTest {
             .filePath(file)
             .build();
 
-        Nitrite db = Nitrite.builder().loadModule(storeModule).openOrCreate();
+        db = Nitrite.builder().loadModule(storeModule).openOrCreate();
 
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("id1", "value"));
@@ -201,8 +211,8 @@ public class NitriteBuilderTest {
 
     @Test(expected = NitriteIOException.class)
     public void testDbInvalidDirectory() {
-        fakeFile = "/tmp/fake/fake.db";
-        Nitrite db = TestUtil.createDb(fakeFile, "test", "test");
+        fakeFile = System.getProperty("java.io.tmpdir") + File.separator + "fake" + File.separator + "fake.db";
+        db = TestUtil.createDb(fakeFile, "test", "test");
         assertNull(db);
     }
 
@@ -211,7 +221,7 @@ public class NitriteBuilderTest {
         RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(filePath)
             .build();
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(storeModule)
             .fieldSeparator("::")
             .openOrCreate();

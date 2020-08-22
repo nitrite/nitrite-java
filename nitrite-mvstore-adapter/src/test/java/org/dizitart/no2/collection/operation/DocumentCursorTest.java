@@ -16,14 +16,17 @@
 
 package org.dizitart.no2.collection.operation;
 
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.junit.After;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.Iterator;
 
 import static org.dizitart.no2.TestUtil.createDb;
@@ -35,10 +38,11 @@ import static org.junit.Assert.assertTrue;
  * @author Anindya Chatterjee.
  */
 public class DocumentCursorTest {
+    private Nitrite db;
 
     @Test
     public void testFindResult() {
-        Nitrite db = createDb();
+        db = createDb();
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("first", "second"));
 
@@ -48,7 +52,7 @@ public class DocumentCursorTest {
 
     @Test(expected = InvalidOperationException.class)
     public void testIteratorRemove() {
-        Nitrite db = createDb();
+        db = createDb();
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("first", "second"));
 
@@ -62,12 +66,19 @@ public class DocumentCursorTest {
 
     @Test
     public void testValidateProjection() {
-        Nitrite db = createDb();
+        db = createDb();
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("first", "second"));
 
         Document projection = createDocument("first", createDocument("second", null));
         RecordStream<Document> project = collection.find().project(projection);
         assertNotNull(project);
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
     }
 }

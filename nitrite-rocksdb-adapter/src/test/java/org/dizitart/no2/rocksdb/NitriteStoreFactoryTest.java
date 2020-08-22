@@ -16,11 +16,14 @@
 
 package org.dizitart.no2.rocksdb;
 
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.junit.After;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
 
 import static org.dizitart.no2.collection.Document.createDocument;
@@ -33,11 +36,12 @@ import static org.junit.Assert.assertNotNull;
  * @author Anindya Chatterjee.
  */
 public class NitriteStoreFactoryTest {
+    private Nitrite db;
     private final String fileName = getRandomTempDbFile();
 
     @Test
     public void testSecured() throws IOException {
-        Nitrite db = TestUtil.createDb(fileName, "test-user", "test-password");
+        db = TestUtil.createDb(fileName, "test-user", "test-password");
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -52,7 +56,7 @@ public class NitriteStoreFactoryTest {
 
     @Test
     public void testUnsecured() throws IOException {
-        Nitrite db = TestUtil.createDb(fileName);
+        db = TestUtil.createDb(fileName);
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
         db.commit();
@@ -67,7 +71,7 @@ public class NitriteStoreFactoryTest {
 
     @Test
     public void testIssue116() throws IOException {
-        Nitrite db = TestUtil.createDb(fileName, "test-user", "test-password");
+        db = TestUtil.createDb(fileName, "test-user", "test-password");
         db.close();
         try {
             db = TestUtil.createDb(fileName,"test-user2", "test-password2");
@@ -78,5 +82,14 @@ public class NitriteStoreFactoryTest {
             db.close();
             TestUtil.deleteFile(fileName);
         }
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
+        FileUtils.deleteQuietly(new File(fileName));
     }
 }

@@ -57,6 +57,7 @@ public class MultiThreadedTest {
     private final Random generator = new Random();
     private final AtomicInteger docCounter = new AtomicInteger(0);
     private ExecutorService executor = ThreadPoolManager.getThreadPool(threadCount, "MultiThreadedTest");
+    private Nitrite db;
 
     @Parameterized.Parameters(name = "InMemory = {0}")
     public static Collection<Object[]> data() {
@@ -68,7 +69,7 @@ public class MultiThreadedTest {
 
     @Test
     public void testOperations() throws InterruptedException {
-        Nitrite db = inMemory ? createDb() : createDb(fileName);
+        db = inMemory ? createDb() : createDb(fileName);
 
         collection = db.getCollection("test");
         collection.remove(Filter.ALL);
@@ -128,6 +129,10 @@ public class MultiThreadedTest {
 
     @After
     public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
         if (!inMemory) {
             File dbFile = new File(fileName);
             long fileSize = dbFile.length();

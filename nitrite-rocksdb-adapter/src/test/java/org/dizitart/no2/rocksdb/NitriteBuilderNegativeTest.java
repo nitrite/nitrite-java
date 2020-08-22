@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.junit.After;
 import org.junit.Test;
@@ -31,21 +32,29 @@ import static org.dizitart.no2.rocksdb.TestUtil.createDb;
  */
 public class NitriteBuilderNegativeTest {
     private final String filePath = getRandomTempDbFile();
+    private Nitrite db1, db2;
 
     @Test(expected = NitriteIOException.class)
     public void testOpenWithLock() {
-        TestUtil.createDb(filePath);
-        TestUtil.createDb(filePath);
+        db1 = TestUtil.createDb(filePath);
+        db2 = TestUtil.createDb(filePath);
     }
 
     @Test(expected = NitriteIOException.class)
     public void testInvalidDirectory() {
         String filePath = "/ytgr/hfurh/frij.db";
-        TestUtil.createDb(filePath);
+        db1 = TestUtil.createDb(filePath);
     }
 
     @After
     public void cleanUp() throws IOException {
+        if (db1 != null && !db1.isClosed()) {
+            db1.close();
+        }
+
+        if (db2 != null && !db2.isClosed()) {
+            db2.close();
+        }
         TestUtil.deleteFile(filePath);
     }
 }

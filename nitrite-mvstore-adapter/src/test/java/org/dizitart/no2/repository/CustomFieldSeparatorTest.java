@@ -46,6 +46,7 @@ import static org.junit.Assert.assertEquals;
  * @author Anindya Chatterjee
  */
 public class CustomFieldSeparatorTest {
+    private Nitrite db;
     private ObjectRepository<EmployeeForCustomSeparator> repository;
 
     @Before
@@ -54,7 +55,7 @@ public class CustomFieldSeparatorTest {
             .compress(true)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(module)
             .fieldSeparator(":")
             .openOrCreate();
@@ -65,6 +66,9 @@ public class CustomFieldSeparatorTest {
     @After
     public void reset() {
         (new NitriteConfig()).fieldSeparator(".");
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
     }
 
     @Test

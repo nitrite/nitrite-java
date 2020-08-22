@@ -19,6 +19,7 @@ package org.dizitart.no2;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
@@ -68,7 +69,6 @@ import static org.junit.Assert.*;
  * @author Anindya Chatterjee.
  */
 public class NitriteTest {
-
     private Nitrite db;
     private NitriteCollection collection;
     private SimpleDateFormat simpleDateFormat;
@@ -111,7 +111,7 @@ public class NitriteTest {
             collection.remove(ALL);
             collection.close();
         }
-        if (!db.isClosed()) {
+        if (db != null && !db.isClosed()) {
             db.close();
         }
         Files.delete(get(fileName));
@@ -275,28 +275,28 @@ public class NitriteTest {
 
     @Test(expected = NitriteIOException.class)
     public void testGetCollectionNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.getCollection("test");
     }
 
     @Test(expected = NitriteIOException.class)
     public void testGetRepositoryNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class);
     }
 
     @Test(expected = NitriteIOException.class)
     public void testGetKeyedRepositoryNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class, "key");
     }
 
     @Test(expected = NitriteIOException.class)
     public void testCommitNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.commit();
     }
@@ -304,7 +304,7 @@ public class NitriteTest {
     @Test(expected = NitriteIOException.class)
     public void testCloseNullStore() {
         try (Nitrite db = Nitrite.builder().openOrCreate()) {
-            db.close();
+            assertNotNull(db);
         }
     }
 
@@ -316,11 +316,11 @@ public class NitriteTest {
     @Test(expected = NitriteIOException.class)
     public void testIssue112() {
         MVStoreModule storeModule = MVStoreModule.withConfig()
-            .filePath("/tmp")
+            .filePath(System.getProperty("java.io.tmpdir"))
             .compress(true)
             .build();
 
-        Nitrite db = Nitrite.builder()
+        db = Nitrite.builder()
             .loadModule(storeModule)
             .openOrCreate();
         assertNull(db);
@@ -446,18 +446,19 @@ public class NitriteTest {
 //
 //      ******* Old DB Creation Code End *********
 
-        if (Files.exists(Paths.get("/tmp/old.db"))) {
-            Files.delete(Paths.get("/tmp/old.db"));
+        if (Files.exists(Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "old.db"))) {
+            Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "old.db"));
         }
+
         InputStream stream = ClassLoader.getSystemResourceAsStream("no2-old.db");
         if (stream == null) {
             stream = ClassLoader.getSystemClassLoader().getResourceAsStream("no2-old.db");
         }
         assert stream != null;
 
-        Files.copy(stream, Paths.get("/tmp/old.db"));
+        Files.copy(stream, Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "old.db"));
 
-        String oldDbFile = "/tmp/old.db";
+        String oldDbFile = System.getProperty("java.io.tmpdir") + File.separator + "old.db";
         Nitrite db = TestUtil.createDb(oldDbFile, "test-user", "test-password");
 
         NitriteCollection collection = db.getCollection("test");
@@ -505,6 +506,15 @@ public class NitriteTest {
         for (Document document : collection.find()) {
             System.out.println(document);
         }
+    }
+
+    @After
+    public void cleanUp() {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+
+        FileUtils.deleteQuietly(new File(fileName));
     }
 
     @Data

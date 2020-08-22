@@ -231,28 +231,28 @@ public class NitriteTest extends AbstractTest {
 
     @Test(expected = NitriteIOException.class)
     public void testGetCollectionNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.getCollection("test");
     }
 
     @Test(expected = NitriteIOException.class)
     public void testGetRepositoryNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class);
     }
 
     @Test(expected = NitriteIOException.class)
     public void testGetKeyedRepositoryNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class, "key");
     }
 
     @Test(expected = NitriteIOException.class)
     public void testCommitNullStore() {
-        Nitrite db = Nitrite.builder().openOrCreate();
+        db = Nitrite.builder().openOrCreate();
         db.close();
         db.commit();
     }

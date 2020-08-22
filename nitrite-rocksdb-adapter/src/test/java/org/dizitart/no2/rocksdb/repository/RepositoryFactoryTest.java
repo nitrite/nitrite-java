@@ -41,6 +41,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Anindya Chatterjee
  */
 public class RepositoryFactoryTest {
+    private Nitrite db;
     private final String fileName = DbTestOperations.getRandomTempDbFile();
 
     @Test
@@ -52,14 +53,14 @@ public class RepositoryFactoryTest {
     @Test(expected = ValidationException.class)
     public void testNullType() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
-        Nitrite db = TestUtil.createDb(fileName);
+        db = TestUtil.createDb(fileName);
         factory.getRepository(db.getConfig(), null, "dummy");
     }
 
     @Test
     public void testNullCollection() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
-        Nitrite db = TestUtil.createDb(fileName);
+        db = TestUtil.createDb(fileName);
         factory.getRepository(db.getConfig(), DummyCollection.class, null);
     }
 
@@ -71,6 +72,9 @@ public class RepositoryFactoryTest {
 
     @After
     public void cleanUp() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
         TestUtil.deleteFile(fileName);
     }
 
