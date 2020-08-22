@@ -74,6 +74,7 @@ public class NitriteStoreEventTest  {
 
         db = Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
 
         await().atMost(1, TimeUnit.SECONDS).until(() -> listener.opened);

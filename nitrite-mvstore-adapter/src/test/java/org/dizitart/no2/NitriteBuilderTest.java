@@ -68,6 +68,8 @@ public class NitriteBuilderTest {
 
     @After
     public void cleanup() throws IOException {
+        (new NitriteConfig()).fieldSeparator(".");
+
         if (db != null && !db.isClosed()) {
             db.close();
         }
@@ -174,7 +176,10 @@ public class NitriteBuilderTest {
     public void testPopulateRepositories() {
         File file = new File(filePath);
         MVStoreModule module = MVStoreModule.withConfig().filePath(file).build();
-        db = Nitrite.builder().loadModule(module).openOrCreate();
+        db = Nitrite.builder()
+            .fieldSeparator(".")
+            .loadModule(module)
+            .openOrCreate();
 
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("id1", "value"));
@@ -197,7 +202,10 @@ public class NitriteBuilderTest {
         db.commit();
         db.close();
 
-        db = Nitrite.builder().loadModule(module).openOrCreate();
+        db = Nitrite.builder()
+            .loadModule(module)
+            .fieldSeparator(".")
+            .openOrCreate();
         assertTrue(db.hasCollection("test"));
         assertTrue(db.hasRepository(TestObject.class));
         assertTrue(db.hasRepository(TestObject.class, "key"));

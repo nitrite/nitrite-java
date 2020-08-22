@@ -41,6 +41,7 @@ public class TestUtils {
 
         return Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
     }
 
@@ -52,6 +53,7 @@ public class TestUtils {
 
         return Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
     }
 

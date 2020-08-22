@@ -115,6 +115,7 @@ public abstract class BaseObjectRepositoryTest {
 
         MVStoreModule storeModule = builder.build();
         NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .fieldSeparator(".")
             .loadModule(storeModule);
 
         if (isProtected) {

@@ -64,6 +64,7 @@ public class ObjectRepositoryTest {
         db = Nitrite.builder()
             .loadModule(module(mapper))
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
     }
 

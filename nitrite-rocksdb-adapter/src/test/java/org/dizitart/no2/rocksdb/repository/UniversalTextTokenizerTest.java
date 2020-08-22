@@ -102,6 +102,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
             .build();
 
         NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .fieldSeparator(".")
             .loadModule(storeModule);
 
         UniversalTextTokenizer tokenizer;

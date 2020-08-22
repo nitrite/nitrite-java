@@ -106,6 +106,7 @@ public abstract class BaseExternalTest {
 
         return Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
     }
 }

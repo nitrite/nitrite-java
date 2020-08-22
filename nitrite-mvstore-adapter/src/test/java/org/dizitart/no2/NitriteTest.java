@@ -215,6 +215,7 @@ public class NitriteTest {
 
         db = Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate("test-user", "test-password");
         NitriteCollection testCollection = db.getCollection("test");
         testCollection.insert(createDocument("a", "b"));
@@ -322,6 +323,7 @@ public class NitriteTest {
 
         db = Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
         assertNull(db);
     }

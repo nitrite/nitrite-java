@@ -64,6 +64,7 @@ public class StressTest {
 
         db = Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
 
         collection = db.getCollection("test");

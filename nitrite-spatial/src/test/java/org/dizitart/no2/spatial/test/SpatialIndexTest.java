@@ -96,6 +96,7 @@ public class SpatialIndexTest {
             .loadModule(module)
             .loadModule(new JacksonMapperModule(new GeometryExtension()))
             .loadModule(new SpatialModule())
+            .fieldSeparator(".")
             .openOrCreate();
 
         collection = db.getCollection("test");
@@ -280,6 +281,7 @@ public class SpatialIndexTest {
         db = Nitrite.builder()
             .loadModule(storeModule)
             .loadModule(new SpatialModule())
+            .fieldSeparator(".")
             .openOrCreate();
 
         WKTReader reader = new WKTReader();

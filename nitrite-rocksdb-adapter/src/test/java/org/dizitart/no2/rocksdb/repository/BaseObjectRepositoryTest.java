@@ -81,6 +81,7 @@ public abstract class BaseObjectRepositoryTest {
             .build();
 
         NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .fieldSeparator(".")
             .loadModule(storeModule);
 
         if (isProtected) {

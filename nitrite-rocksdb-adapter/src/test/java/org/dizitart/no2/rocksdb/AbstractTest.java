@@ -38,6 +38,7 @@ public abstract class AbstractTest {
 
         db = Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate();
     }
 

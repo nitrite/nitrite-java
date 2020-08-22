@@ -131,6 +131,7 @@ public class RepositoryJoinTest {
 
         MVStoreModule storeModule = builder.build();
         NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .fieldSeparator(".")
             .loadModule(storeModule);
 
         if (isProtected) {

@@ -114,6 +114,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
 
         MVStoreModule storeModule = builder.build();
         NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .fieldSeparator(".")
             .loadModule(storeModule);
 
         nitriteBuilder.loadModule(new JacksonMapperModule());

@@ -64,6 +64,7 @@ public class RxBaseTest {
 
         db = new RxNitrite(Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
             .openOrCreate("test-user", "test-password"));
 
         Employee e1 = new Employee("John Doe", 35);
