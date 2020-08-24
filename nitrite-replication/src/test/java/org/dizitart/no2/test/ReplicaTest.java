@@ -29,6 +29,7 @@ import org.dizitart.no2.test.server.Repository;
 import org.dizitart.no2.test.server.SimpleDataGateServer;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -59,6 +60,9 @@ public class ReplicaTest {
     private ExecutorService executorService;
     private Repository repository;
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     public static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";
@@ -100,8 +104,8 @@ public class ReplicaTest {
         db = createDb(dbFile);
         NitriteCollection collection = db.getCollection("testSingleUserSingleReplica");
         Document document = createDocument().put("firstName", "Anindya")
-            .put("lastName", "Chatterjee")
-            .put("address", createDocument("street", "1234 Abcd Street")
+                .put("lastName", "Chatterjee")
+                .put("address", createDocument("street", "1234 Abcd Street")
                 .put("pin", 123456));
         collection.insert(document);
 
