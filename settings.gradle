@@ -25,4 +25,5 @@ include 'nitrite-replication'
 include 'nitrite-support'
 include 'potassium-nitrite'
 include 'nitrite-rocksdb-adapter'
+include 'nitrite-mapdb-adapter'
 
