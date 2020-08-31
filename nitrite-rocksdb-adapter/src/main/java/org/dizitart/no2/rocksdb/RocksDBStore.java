@@ -107,13 +107,17 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     public void removeMap(String mapName) {
         reference.dropColumnFamily(mapName);
         nitriteMapRegistry.remove(mapName);
-        super.removeMap(mapName);
     }
 
     @Override
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
                                                                                Class<?> keyType,
                                                                                Class<?> valueType) {
+        throw new InvalidOperationException("rtree not supported on rocksdb store");
+    }
+
+    @Override
+    public void removeRTree(String mapName) {
         throw new InvalidOperationException("rtree not supported on rocksdb store");
     }
 

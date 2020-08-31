@@ -19,7 +19,6 @@ package org.dizitart.no2;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
@@ -112,7 +111,10 @@ public class NitriteTest {
             collection.close();
         }
         if (db != null && !db.isClosed()) {
-            db.close();
+            try {
+                db.close();
+            } catch (NitriteIOException ignore) {
+            }
         }
         Files.delete(get(fileName));
     }
@@ -202,7 +204,7 @@ public class NitriteTest {
         assertFalse(testCollection.isOpen());
     }
 
-    @Test
+    @Test(expected = NitriteIOException.class)
     public void testCloseReadonlyDatabase() {
         db.close();
         db = null;
@@ -508,15 +510,6 @@ public class NitriteTest {
         for (Document document : collection.find()) {
             System.out.println(document);
         }
-    }
-
-    @After
-    public void cleanUp() {
-        if (db != null && !db.isClosed()) {
-            db.close();
-        }
-
-        FileUtils.deleteQuietly(new File(fileName));
     }
 
     @Data

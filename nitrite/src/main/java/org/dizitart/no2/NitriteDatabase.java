@@ -126,18 +126,22 @@ class NitriteDatabase implements Nitrite {
             collectionFactory.clear();
             store.close();
             log.info("Nitrite database has been closed successfully.");
+        } catch (NitriteIOException e) {
+            throw e;
         } catch (Throwable error) {
-            if (!store.getStoreConfig().isReadOnly()) {
-                throw new NitriteIOException("error while shutting down nitrite", error);
-            }
+            throw new NitriteIOException("error while shutting down nitrite", error);
         }
     }
 
     @Override
     public void commit() {
         checkOpened();
-        if (store != null && !store.getStoreConfig().isReadOnly()) {
-            store.commit();
+        if (store != null) {
+            try {
+                store.commit();
+            } catch (Exception e) {
+                throw new NitriteIOException("failed to commit changes", e);
+            }
             log.debug("Unsaved changes committed successfully.");
         }
     }

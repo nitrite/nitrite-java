@@ -28,9 +28,7 @@ repositories {
 dependencies {
     implementation project(path: ':nitrite', configuration: 'default')
     implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation ("org.mapdb:mapdb:3.0.8") {
-        exclude(group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib')
-    }
+    implementation "org.mapdb:mapdb:3.0.8"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"

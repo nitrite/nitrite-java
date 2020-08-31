@@ -49,7 +49,7 @@ public class MVStoreConfig implements StoreConfig {
     private char[] encryptionKey;
 
     @Getter @Setter(AccessLevel.PACKAGE)
-    private boolean isReadOnly;
+    private Boolean isReadOnly = false;
 
     @Getter @Setter(AccessLevel.PACKAGE)
     private boolean compress;

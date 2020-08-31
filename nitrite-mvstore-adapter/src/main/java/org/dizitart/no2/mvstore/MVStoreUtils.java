@@ -38,14 +38,14 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 class MVStoreUtils {
     private MVStoreUtils() { }
 
-    static MVStore openOrCreate(String username, String password, MVStoreConfig mvStoreConfig) {
-        MVStore.Builder builder = createBuilder(mvStoreConfig);
+    static MVStore openOrCreate(String username, String password, MVStoreConfig storeConfig) {
+        MVStore.Builder builder = createBuilder(storeConfig);
 
         MVStore store = null;
         File dbFile = null;
         try {
-            if (!isNullOrEmpty(mvStoreConfig.filePath())) {
-                dbFile = new File(mvStoreConfig.filePath());
+            if (!isNullOrEmpty(storeConfig.filePath())) {
+                dbFile = new File(storeConfig.filePath());
                 if (dbFile.exists()) {
                     store = StoreFactory.openSecurely(builder, username, password);
                 } else {
@@ -60,25 +60,25 @@ class MVStoreUtils {
                 throw new NitriteIOException("database is already opened in other process");
             }
 
-            if (!isNullOrEmpty(mvStoreConfig.filePath())) {
+            if (!isNullOrEmpty(storeConfig.filePath())) {
                 try {
-                    File file = new File(mvStoreConfig.filePath());
+                    File file = new File(storeConfig.filePath());
                     if (file.isDirectory()) {
-                        throw new NitriteIOException(mvStoreConfig.filePath()
+                        throw new NitriteIOException(storeConfig.filePath()
                             + " is a directory, must be a file");
                     }
 
                     if (file.exists() && file.isFile()) {
                         if (isCompatibilityError(ise)) {
                             closeStore(store);
-                            store = tryMigrate(username, password, file, builder, mvStoreConfig);
+                            store = tryMigrate(username, password, file, builder, storeConfig);
                         } else {
                             log.error("Database corruption detected. Trying to repair", ise);
-                            Recovery.recover(mvStoreConfig.filePath());
+                            Recovery.recover(storeConfig.filePath());
                             store = builder.open();
                         }
                     } else {
-                        if (mvStoreConfig.isReadOnly()) {
+                        if (storeConfig.isReadOnly()) {
                             throw new NitriteIOException("cannot create readonly database", ise);
                         }
                     }

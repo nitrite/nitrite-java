@@ -24,6 +24,7 @@ import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.filters.Filter;
@@ -31,8 +32,12 @@ import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static org.dizitart.no2.common.Constants.COLLECTION_CATALOG;
 
 /**
  * @author Anindya Chatterjee
@@ -198,7 +203,7 @@ public class CollectionOperations {
         try {
             writeLock.lock();
             indexOperations.dropAllIndices();
-            nitriteMap.drop();
+            dropNitriteMap();
         } finally {
             writeLock.unlock();
         }
@@ -245,5 +250,30 @@ public class CollectionOperations {
         this.readOperations = new ReadOperations(collectionName, nitriteConfig, nitriteMap, indexOperations);
         this.writeOperations = new WriteOperations(indexOperations, readOperations,
             nitriteMap, eventBus);
+    }
+
+    private void dropNitriteMap() {
+        NitriteMap<String, Document> catalogueMap = nitriteMap.getStore().openMap(COLLECTION_CATALOG, String.class, Document.class);
+        for (KeyValuePair<String, Document> entry : catalogueMap.entries()) {
+            String catalogue = entry.getKey();
+            Document document = entry.getValue();
+
+            Set<String> bin = new HashSet<>();
+            boolean foundKey = false;
+            for (String field : document.getFields()) {
+                if (field.equals(nitriteMap.getName())) {
+                    foundKey = true;
+                    bin.add(field);
+                }
+            }
+
+            for (String field : bin) {
+                document.remove(field);
+            }
+            catalogueMap.put(catalogue, document);
+
+            if (foundKey) break;
+        }
+        nitriteMap.drop();
     }
 }

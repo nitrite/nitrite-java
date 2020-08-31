@@ -29,6 +29,9 @@ import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.rtree.MVRTreeMap;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @since 1.0
  * @author Anindya Chatterjee
@@ -36,9 +39,11 @@ import org.h2.mvstore.rtree.MVRTreeMap;
 @Slf4j
 public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     private MVStore mvStore;
+    private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
 
     public NitriteMVStore() {
         super();
+        nitriteMapRegistry = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -79,23 +84,30 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
-    public <Key, Value> NitriteMap<Key, Value> openMap(String name, Class<?> keyType, Class<?> valueType) {
-        MVMap<Key, Value> mvMap = mvStore.openMap(name);
-        return new NitriteMVMap<>(mvMap, this);
+    @SuppressWarnings("unchecked")
+    public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
+        if (nitriteMapRegistry.containsKey(mapName)) {
+            return (NitriteMVMap<Key, Value>) nitriteMapRegistry.get(mapName);
+        }
+
+        MVMap<Key, Value> mvMap = mvStore.openMap(mapName);
+        NitriteMVMap<Key, Value> nitriteMVMap = new NitriteMVMap<>(mvMap, this);
+        nitriteMapRegistry.put(mapName, nitriteMVMap);
+        return nitriteMVMap;
     }
 
     @Override
     public void removeMap(String name) {
         MVMap<?, ?> mvMap = mvStore.openMap(name);
         mvStore.removeMap(mvMap);
-        super.removeMap(name);
+        nitriteMapRegistry.remove(name);
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String name, Class<?> keyType, Class<?> valueType) {
         MVRTreeMap<Value> map = mvStore.openMap(name, new MVRTreeMap.Builder<>());
-        return new org.dizitart.no2.mvstore.NitriteMVRTreeMap(map);
+        return new NitriteMVRTreeMap(map);
     }
 
     @Override

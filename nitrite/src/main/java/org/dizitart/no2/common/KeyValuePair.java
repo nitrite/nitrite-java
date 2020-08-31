@@ -20,6 +20,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -32,6 +35,8 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class KeyValuePair<Key, Value> implements Serializable {
+    private static final long serialVersionUID = 1598774244L;
+
     /**
      * The key of the pair.
      *
@@ -48,14 +53,14 @@ public class KeyValuePair<Key, Value> implements Serializable {
      */
     private Value value;
 
-//    private void writeObject(ObjectOutputStream stream) throws IOException {
-//        stream.writeObject(key);
-//        stream.writeObject(value);
-//    }
-//
-//    @SuppressWarnings("unchecked")
-//    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-//        key = (Key) stream.readObject();
-//        value = (Value) stream.readObject();
-//    }
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeObject(key);
+        stream.writeObject(value);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        key = (Key) stream.readObject();
+        value = (Value) stream.readObject();
+    }
 }

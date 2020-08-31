@@ -5,7 +5,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.KeyValuePair;
 import org.dizitart.no2.common.event.NitriteEventBus;
 import org.dizitart.no2.store.events.EventInfo;
 import org.dizitart.no2.store.events.StoreEventBus;
@@ -89,31 +88,6 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
     @Override
     public IndexCatalog getIndexCatalog() {
         return new IndexCatalog(this);
-    }
-
-    @Override
-    public void removeMap(String mapName) {
-        NitriteMap<String, Document> catalogueMap = openMap(COLLECTION_CATALOG, String.class, Document.class);
-        for (KeyValuePair<String, Document> entry : catalogueMap.entries()) {
-            String catalogue = entry.getKey();
-            Document document = entry.getValue();
-
-            Set<String> bin = new HashSet<>();
-            boolean foundKey = false;
-            for (String field : document.getFields()) {
-                if (field.equals(mapName)) {
-                    foundKey = true;
-                    bin.add(field);
-                }
-            }
-
-            for (String field : bin) {
-                document.remove(field);
-            }
-            catalogueMap.put(catalogue, document);
-
-            if (foundKey) break;
-        }
     }
 
     @Override

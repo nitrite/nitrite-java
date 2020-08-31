@@ -38,7 +38,7 @@ public interface StoreConfig {
      *
      * @return `true`, if readonly store; otherwise `false`.
      */
-    boolean isReadOnly();
+    Boolean isReadOnly();
 
     /**
      * Adds a {@link StoreEventListener} instance and subscribe it to store event.

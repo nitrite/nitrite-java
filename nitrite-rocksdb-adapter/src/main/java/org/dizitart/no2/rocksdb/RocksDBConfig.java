@@ -55,7 +55,7 @@ public class RocksDBConfig implements StoreConfig {
     }
 
     @Override
-    public final boolean isReadOnly() {
+    public final Boolean isReadOnly() {
         return false;
     }
 }
