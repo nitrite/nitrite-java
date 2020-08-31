@@ -158,7 +158,7 @@ public class ObjectRepositoryTest {
 
     @Test
     public void testWriteThousandRecords() {
-        int count = 5000;
+        int count = 1000;
 
         ObjectRepository<StressRecord> repository = db.getRepository(StressRecord.class);
 
