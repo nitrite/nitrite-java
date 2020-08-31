@@ -1,4 +1,4 @@
-package org.dizitart.no2.test;
+package org.dizitart.no2.mapdb;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;

@@ -21,10 +21,12 @@ import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.mapdb.MapDBModule;
 import org.dizitart.no2.mapdb.MapDBModuleBuilder;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.repository.data.Employee;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -68,6 +70,9 @@ public class EventTest {
                 {true, true},
         });
     }
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {
