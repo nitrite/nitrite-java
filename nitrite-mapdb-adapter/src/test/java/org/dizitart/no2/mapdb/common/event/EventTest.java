@@ -61,6 +61,9 @@ public class EventTest {
     private ObjectRepository<Employee> employeeRepository;
     private SampleListenerCollection listener;
 
+    @Rule
+    public Retry retry = new Retry(3);
+
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
@@ -70,9 +73,6 @@ public class EventTest {
                 {true, true},
         });
     }
-
-    @Rule
-    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {
