@@ -21,7 +21,7 @@ before_install:
 install: true
 
 script:
-  - travis_retry . ./.ci/build.sh
+  - travis_retry travis_wait 30 . ./.ci/build.sh
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
