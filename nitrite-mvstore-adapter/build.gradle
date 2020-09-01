@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -42,9 +42,10 @@ repositories {
 }
 
 dependencies {
-    implementation project(path: ':nitrite', configuration: 'default')
-    implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "com.h2database:h2-mvstore:1.4.200"
+    api platform(project(':nitrite-platform'))
+    api project(':nitrite')
+    api "org.slf4j:slf4j-api"
+    api "com.h2database:h2-mvstore"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"

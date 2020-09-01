@@ -46,16 +46,17 @@ jar {
 }
 
 dependencies {
-    implementation project(path: ':nitrite', configuration: 'default')
-    implementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
-    implementation project(path: ':nitrite-spatial', configuration: 'default')
-    implementation project(path: ':nitrite-jackson-mapper', configuration: 'default')
+    api platform(project(':nitrite-platform'))
+    api project(':nitrite')
+    api project(':nitrite-mvstore-adapter')
+    api project(':nitrite-spatial')
+    api project(':nitrite-jackson-mapper')
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.0"
-    implementation "org.jetbrains.kotlin:kotlin-reflect:1.4.0"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.2"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.2"
-    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.2"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    api "org.jetbrains.kotlin:kotlin-reflect"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8"
+    api "com.fasterxml.jackson.module:jackson-module-kotlin"
 
     testImplementation "junit:junit:4.13"
     testImplementation "joda-time:joda-time:2.10.6"

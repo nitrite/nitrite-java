@@ -295,7 +295,8 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      * is found, it will return `null`. The object must have a field annotated with {@link Id},
      * otherwise this call will throw {@link InvalidIdException}.
      *
-     * @param id the id value
+     * @param <I> the type parameter
+     * @param id  the id value
      * @return the unique object associated with the id.
      * @throws ValidationException      if `id` is `null`.
      * @throws InvalidIdException       if the id value is `null`, or the type is not compatible.

@@ -1,0 +1,71 @@
+plugins {
+    id 'java-platform'
+    id 'signing'
+    id 'maven-publish'
+}
+
+version = "$nitriteVersion"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    constraints {
+        api project(":nitrite")
+        api project(":nitrite-jackson-mapper")
+        api project(":nitrite-spatial")
+        api project(":nitrite-replication")
+        api project(":nitrite-support")
+        api project(":rx-nitrite")
+        api project(":potassium-nitrite")
+
+        api project(":nitrite-mvstore-adapter")
+        api project(":nitrite-rocksdb-adapter")
+        api project(":nitrite-mapdb-adapter")
+
+        api "org.slf4j:slf4j-api:1.7.30"
+        api "org.objenesis:objenesis:2.6"
+        api "org.jasypt:jasypt:1.9.3"
+        api "com.fasterxml.jackson.core:jackson-databind:2.11.2"
+        api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.2"
+        api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.11.2"
+        api "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.2"
+        api "org.mapdb:mapdb:3.0.8"
+        api "com.h2database:h2-mvstore:1.4.200"
+        api "com.squareup.okhttp3:okhttp:4.8.1"
+        api "org.rocksdb:rocksdbjni:6.11.4"
+        api "com.esotericsoftware:kryo:4.0.2"
+        api "org.locationtech.jts:jts-core:1.17.1"
+        api "commons-codec:commons-codec:1.14"
+        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.0"
+        api "org.jetbrains.kotlin:kotlin-reflect:1.4.0"
+        api "io.reactivex.rxjava2:rxjava:2.2.19"
+    }
+}
+
+publishing {
+    publications {
+        myPlatform(MavenPublication) {
+            from components.javaPlatform
+        }
+    }
+    repositories {
+        if (version.endsWith('SNAPSHOT') || project.hasProperty('release')) {
+            maven {
+                name = "OSSRH"
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+                url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+                credentials {
+                    username System.getenv('MAVEN_USERNAME')
+                    password System.getenv('MAVEN_PASSWORD')
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.myPlatform
+}

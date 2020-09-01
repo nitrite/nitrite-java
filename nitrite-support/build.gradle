@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -42,9 +42,11 @@ repositories {
 }
 
 dependencies {
-    implementation project(configuration: 'default', path: ':nitrite')
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.2"
-    implementation "commons-codec:commons-codec:1.14"
+    api platform(project(':nitrite-platform'))
+    api project(':nitrite')
+    api "com.fasterxml.jackson.core:jackson-databind"
+    api "commons-codec:commons-codec"
+
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"

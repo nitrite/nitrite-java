@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -43,10 +43,11 @@ repositories {
 }
 
 dependencies {
-    implementation project(configuration: 'default', path: ':nitrite')
-    implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "com.fasterxml.jackson.core:jackson-databind:2.11.2"
-    implementation "com.squareup.okhttp3:okhttp:4.8.1"
+    api platform(project(':nitrite-platform'))
+    api project(':nitrite')
+    api "org.slf4j:slf4j-api"
+    api "com.fasterxml.jackson.core:jackson-databind"
+    api "com.squareup.okhttp3:okhttp"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')

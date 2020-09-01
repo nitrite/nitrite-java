@@ -42,6 +42,8 @@ public interface StoreConfig {
 
     /**
      * Adds a {@link StoreEventListener} instance and subscribe it to store event.
+     *
+     * @param listener the listener
      */
     void addStoreEventListener(StoreEventListener listener);
 

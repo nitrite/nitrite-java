@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -26,9 +26,11 @@ repositories {
 }
 
 dependencies {
-    implementation project(path: ':nitrite', configuration: 'default')
-    implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "org.mapdb:mapdb:3.0.8"
+    api platform(project(':nitrite-platform'))
+    api project(':nitrite')
+    api "org.slf4j:slf4j-api"
+    api "org.mapdb:mapdb"
+
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"

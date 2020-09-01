@@ -202,7 +202,7 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
      * <p>
      * Any further access to a dropped collection would result into
      * a {@link IllegalStateException}.
-     * <p>
+     * </p>
      */
     void drop();
 

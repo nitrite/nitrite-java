@@ -44,8 +44,7 @@ import java.text.Collator;
  * for (Document doc : result) {
  * // use your logic with the retrieved doc here
  * }
- * <p>
- * <p>
+ * </p>
  * --
  *
  * @author Anindya Chatterjee

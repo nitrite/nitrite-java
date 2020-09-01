@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -42,9 +42,10 @@ repositories {
 }
 
 dependencies {
-    implementation project(configuration: 'default', path: ':nitrite')
-    implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "io.reactivex.rxjava2:rxjava:2.2.19"
+    api platform(project(':nitrite-platform'))
+    api project(':nitrite')
+    api "org.slf4j:slf4j-api"
+    api "io.reactivex.rxjava2:rxjava"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testImplementation project(':nitrite-mvstore-adapter')
@@ -118,7 +119,6 @@ publishing {
                     username System.getenv('MAVEN_USERNAME')
                     password System.getenv('MAVEN_PASSWORD')
                 }
-
             }
         }
     }

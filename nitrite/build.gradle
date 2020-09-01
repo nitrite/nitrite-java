@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -37,9 +37,10 @@ compileTestJava.options.encoding = 'UTF-8'
 javadoc.options.encoding = 'UTF-8'
 
 dependencies {
-    implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "org.objenesis:objenesis:3.1"
-    implementation "org.jasypt:jasypt:1.9.3"
+    api platform(project(':nitrite-platform'))
+    api "org.slf4j:slf4j-api"
+    api "org.objenesis:objenesis"
+    api "org.jasypt:jasypt"
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"

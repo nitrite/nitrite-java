@@ -87,6 +87,7 @@ public class ValidationUtils {
     /**
      * Validates if an array contains `null` item.
      *
+     * @param <T>     the type parameter
      * @param array   the array to check for `null` object
      * @param message the message
      */

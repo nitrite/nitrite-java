@@ -15,7 +15,7 @@
  */
 
 plugins {
-    id 'java'
+    id 'java-library'
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -42,10 +42,12 @@ repositories {
 }
 
 dependencies {
-    implementation project(configuration: 'default', path: ':nitrite')
-    implementation project(path: ':nitrite-jackson-mapper', configuration: 'default')
-    implementation "org.slf4j:slf4j-api:1.7.30"
-    implementation "org.locationtech.jts:jts-core:1.17.1"
+    api platform(project(':nitrite-platform'))
+    api project(':nitrite')
+    api project(':nitrite-jackson-mapper')
+    api "org.slf4j:slf4j-api"
+    api "org.locationtech.jts:jts-core"
+
     annotationProcessor "org.projectlombok:lombok:1.18.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
