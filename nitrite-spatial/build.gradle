@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-    api platform(project(':nitrite-platform'))
+    api platform(project(':nitrite-bom'))
     api project(':nitrite')
     api project(':nitrite-jackson-mapper')
     api "org.slf4j:slf4j-api"

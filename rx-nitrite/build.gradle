@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-    api platform(project(':nitrite-platform'))
+    api platform(project(':nitrite-bom'))
     api project(':nitrite')
     api "org.slf4j:slf4j-api"
     api "io.reactivex.rxjava2:rxjava"

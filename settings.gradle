@@ -26,5 +26,5 @@ include 'nitrite-support'
 include 'potassium-nitrite'
 include 'nitrite-rocksdb-adapter'
 include 'nitrite-mapdb-adapter'
-include 'nitrite-platform'
+include 'nitrite-bom'
 

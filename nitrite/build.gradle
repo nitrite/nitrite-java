@@ -37,7 +37,7 @@ compileTestJava.options.encoding = 'UTF-8'
 javadoc.options.encoding = 'UTF-8'
 
 dependencies {
-    api platform(project(':nitrite-platform'))
+    api platform(project(':nitrite-bom'))
     api "org.slf4j:slf4j-api"
     api "org.objenesis:objenesis"
     api "org.jasypt:jasypt"

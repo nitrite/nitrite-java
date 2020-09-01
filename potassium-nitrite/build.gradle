@@ -46,7 +46,7 @@ jar {
 }
 
 dependencies {
-    api platform(project(':nitrite-platform'))
+    api platform(project(':nitrite-bom'))
     api project(':nitrite')
     api project(':nitrite-mvstore-adapter')
     api project(':nitrite-spatial')

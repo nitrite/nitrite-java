@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-    api platform(project(':nitrite-platform'))
+    api platform(project(':nitrite-bom'))
     api project(':nitrite')
     api "org.slf4j:slf4j-api"
     api "com.h2database:h2-mvstore"

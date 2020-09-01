@@ -1,9 +1,11 @@
 ##TODO:
-- LevelDB storage - https://github.com/dain/leveldb
-- All exception message must be detailed and unique as no number is there now.
+- Database Migration
+    1. https://docs.realm.io/sync/v/3.x/using-synced-realms/migrating-your-data
+    2. https://github.com/nitrite/nitrite-java/issues/213
+    3. https://realm.io/docs/dotnet/latest/api/reference/Realms.Migration.html
+    4. https://developer.android.com/training/data-storage/room/migrating-db-versions#java
 - LuceneIndexer, test with testIssue174()
 - Ensure every error event in replication
-
 
 DataGate Server:
 

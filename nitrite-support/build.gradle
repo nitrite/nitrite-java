@@ -42,7 +42,7 @@ repositories {
 }
 
 dependencies {
-    api platform(project(':nitrite-platform'))
+    api platform(project(':nitrite-bom'))
     api project(':nitrite')
     api "com.fasterxml.jackson.core:jackson-databind"
     api "commons-codec:commons-codec"
