@@ -16,6 +16,7 @@
 
 package org.dizitart.no2;
 
+import org.dizitart.no2.collection.BaseCollectionTest;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.events.EventType;

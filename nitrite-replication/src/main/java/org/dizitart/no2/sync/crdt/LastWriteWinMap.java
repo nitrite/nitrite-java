@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Map;
@@ -64,10 +64,10 @@ public class LastWriteWinMap {
 
         if (offset == 0) {
             // don't repeat for other offsets
-            for (KeyValuePair<NitriteId, Long> entry : tombstones.entries()) {
-                Long timestamp = entry.getValue();
+            for (Pair<NitriteId, Long> entry : tombstones.entries()) {
+                Long timestamp = entry.getSecond();
                 if (timestamp >= since) {
-                    state.getTombstones().put(entry.getKey().getIdValue(), entry.getValue());
+                    state.getTombstones().put(entry.getFirst().getIdValue(), entry.getSecond());
                 }
             }
         }

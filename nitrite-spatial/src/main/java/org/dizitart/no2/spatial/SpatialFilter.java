@@ -18,7 +18,7 @@ package org.dizitart.no2.spatial;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.IndexAwareFilter;
 import org.dizitart.no2.store.NitriteMap;
@@ -48,7 +48,7 @@ public abstract class SpatialFilter extends IndexAwareFilter {
     }
 
     @Override
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
+    public boolean apply(Pair<NitriteId, Document> element) {
         throw new FilterException(getField() + " is not indexed with spatial index");
     }
 }

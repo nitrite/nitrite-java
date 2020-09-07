@@ -20,7 +20,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.filters.*;
 import org.dizitart.no2.index.IndexEntry;
@@ -51,7 +51,7 @@ class ReadOperations {
     }
 
     public DocumentCursor find() {
-        RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+        RecordStream<Pair<NitriteId, Document>> recordStream = nitriteMap.entries();
         return new DocumentCursorImpl(recordStream);
     }
 
@@ -62,7 +62,7 @@ class ReadOperations {
 
         prepareFilter(filter);
 
-        RecordStream<KeyValuePair<NitriteId, Document>> recordStream = findSuitableStream(filter);
+        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(filter);
         return new DocumentCursorImpl(recordStream);
     }
 
@@ -122,7 +122,7 @@ class ReadOperations {
         }
     }
 
-    private RecordStream<KeyValuePair<NitriteId, Document>> findSuitableStream(Filter filter) {
+    private RecordStream<Pair<NitriteId, Document>> findSuitableStream(Filter filter) {
         if (filter instanceof AndFilter) {
             AndFilter andFilter = (AndFilter) filter;
             Filter lhs = andFilter.getLhs();
@@ -139,7 +139,7 @@ class ReadOperations {
             } else {
                 // Non-Indexed AND Filter => CollectionScan
 
-                RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+                RecordStream<Pair<NitriteId, Document>> recordStream = nitriteMap.entries();
                 return new FilteredRecordStream(recordStream, filter);
             }
         } else if (filter instanceof OrFilter) {
@@ -151,9 +151,9 @@ class ReadOperations {
                 && rhs instanceof IndexAwareFilter && ((IndexAwareFilter) rhs).getIsFieldIndexed()) {
                 // Indexed OR Indexed => IndexScan (LHS) Union IndexScan (RHS)
 
-                final RecordStream<KeyValuePair<NitriteId, Document>> lhsStream
+                final RecordStream<Pair<NitriteId, Document>> lhsStream
                     = getIndexedStream(((IndexAwareFilter) lhs));
-                final RecordStream<KeyValuePair<NitriteId, Document>> rhsStream
+                final RecordStream<Pair<NitriteId, Document>> rhsStream
                     = getIndexedStream(((IndexAwareFilter) rhs));
 
                 return getUnionStream(lhsStream, rhsStream);
@@ -161,7 +161,7 @@ class ReadOperations {
                 // Non-Indexed OR Filter => CollectionScan
                 // Indexed OR Non-Indexed => CollectionScan
 
-                RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+                RecordStream<Pair<NitriteId, Document>> recordStream = nitriteMap.entries();
                 return new FilteredRecordStream(recordStream, filter);
             }
         } else if (filter instanceof IndexAwareFilter && ((IndexAwareFilter) filter).getIsFieldIndexed()) {
@@ -172,14 +172,14 @@ class ReadOperations {
         } else {
             // Non-Indexed => CollectionScan
 
-            RecordStream<KeyValuePair<NitriteId, Document>> recordStream = nitriteMap.entries();
+            RecordStream<Pair<NitriteId, Document>> recordStream = nitriteMap.entries();
             return new FilteredRecordStream(recordStream, filter);
         }
     }
 
-    private RecordStream<KeyValuePair<NitriteId, Document>> getFilteredStream(IndexAwareFilter indexAwareFilter,
-                                                                              Filter rest) {
-        RecordStream<KeyValuePair<NitriteId, Document>> indexStream = getIndexedStream(indexAwareFilter);
+    private RecordStream<Pair<NitriteId, Document>> getFilteredStream(IndexAwareFilter indexAwareFilter,
+                                                                      Filter rest) {
+        RecordStream<Pair<NitriteId, Document>> indexStream = getIndexedStream(indexAwareFilter);
         if (rest != null) {
             return new FilteredRecordStream(indexStream, rest);
         } else {
@@ -187,14 +187,14 @@ class ReadOperations {
         }
     }
 
-    private RecordStream<KeyValuePair<NitriteId, Document>> getUnionStream(
-        RecordStream<KeyValuePair<NitriteId, Document>> lhsStream,
-        RecordStream<KeyValuePair<NitriteId, Document>> rhsStream) {
+    private RecordStream<Pair<NitriteId, Document>> getUnionStream(
+        RecordStream<Pair<NitriteId, Document>> lhsStream,
+        RecordStream<Pair<NitriteId, Document>> rhsStream) {
 
         return RecordStream.fromIterable(() -> new UnionStreamIterator(lhsStream, rhsStream));
     }
 
-    private RecordStream<KeyValuePair<NitriteId, Document>> getIndexedStream(IndexAwareFilter indexAwareFilter) {
+    private RecordStream<Pair<NitriteId, Document>> getIndexedStream(IndexAwareFilter indexAwareFilter) {
         return new IndexedStream(indexAwareFilter, nitriteMap);
     }
 }

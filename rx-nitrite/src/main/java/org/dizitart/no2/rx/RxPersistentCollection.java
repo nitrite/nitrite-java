@@ -53,6 +53,8 @@ public interface RxPersistentCollection<T> {
 
     FlowableWriteResult remove(T element);
 
+    Completable clear();
+
     Completable drop();
 
     Single<Boolean> isDropped();

@@ -19,7 +19,7 @@ package org.dizitart.no2.filters;
 import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class AndFilter extends LogicalFilter {
     }
 
     @Override
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
+    public boolean apply(Pair<NitriteId, Document> element) {
         return lhs.apply(element) && rhs.apply(element);
     }
 

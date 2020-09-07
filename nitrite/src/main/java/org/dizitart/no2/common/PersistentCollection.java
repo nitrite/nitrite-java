@@ -198,6 +198,12 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
     WriteResult remove(T element);
 
     /**
+     * Removes all element from the collection.
+     *
+     * */
+    void clear();
+
+    /**
      * Drops the collection and all of its indices.
      * <p>
      * Any further access to a dropped collection would result into

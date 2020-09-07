@@ -3,7 +3,7 @@ package org.dizitart.no2.mapdb;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.store.NitriteMap;
@@ -185,8 +185,8 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
-    public RecordStream<KeyValuePair<K, V>> entries() {
-        return () -> new Iterator<KeyValuePair<K, V>>() {
+    public RecordStream<Pair<K, V>> entries() {
+        return () -> new Iterator<Pair<K, V>>() {
             final Iterator<Map.Entry<K, V>> entryIterator = bTreeMap.entrySet().iterator();
             final Iterator<Map.Entry<NullEntry, V>> nullEntryIterator = nullEntryMap.entrySet().iterator();
 
@@ -200,13 +200,13 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
             }
 
             @Override
-            public KeyValuePair<K, V> next() {
+            public Pair<K, V> next() {
                 if (nullEntryIterator.hasNext()) {
                     Map.Entry<NullEntry, V> entry = nullEntryIterator.next();
-                    return new KeyValuePair<>(null, entry.getValue());
+                    return new Pair<>(null, entry.getValue());
                 } else {
                     Map.Entry<K, V> entry = entryIterator.next();
-                    return new KeyValuePair<>(entry.getKey(), entry.getValue());
+                    return new Pair<>(entry.getKey(), entry.getValue());
                 }
             }
         };

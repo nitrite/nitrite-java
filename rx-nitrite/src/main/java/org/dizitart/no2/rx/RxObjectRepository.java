@@ -33,6 +33,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  */
 public interface RxObjectRepository<T> extends RxPersistentCollection<T> {
 
+    @SuppressWarnings("unchecked")
     default FlowableWriteResult insert(T object, T... others) {
         notNull(object, "a null object cannot be inserted");
         if (others != null) {

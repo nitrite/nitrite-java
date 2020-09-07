@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 import org.dizitart.no2.sync.event.ReplicationEvent;
@@ -169,9 +169,9 @@ public class ReplicationTemplate implements ReplicationOperation {
             long collectTime = System.currentTimeMillis() - ttl;
             if (crdt != null && crdt.getTombstones() != null) {
                 Set<NitriteId> removeSet = new HashSet<>();
-                for (KeyValuePair<NitriteId, Long> entry : crdt.getTombstones().entries()) {
-                    if (entry.getValue() < collectTime) {
-                        removeSet.add(entry.getKey());
+                for (Pair<NitriteId, Long> entry : crdt.getTombstones().entries()) {
+                    if (entry.getSecond() < collectTime) {
+                        removeSet.add(entry.getFirst());
                     }
                 }
 

@@ -102,7 +102,9 @@ public class NitriteConfig {
      * @return the {@link Indexer}
      */
     public Indexer findIndexer(String indexType) {
-        return pluginManager.getIndexerMap().get(indexType);
+        Indexer indexer = pluginManager.getIndexerMap().get(indexType);
+        indexer.initialize(this);
+        return indexer;
     }
 
     /**

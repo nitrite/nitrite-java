@@ -17,7 +17,6 @@
 package org.dizitart.no2.collection;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.junit.Before;

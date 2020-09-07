@@ -18,7 +18,7 @@ package org.dizitart.no2.mapdb.mapdb;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
@@ -61,9 +61,9 @@ public class NitriteMapStressTest {
             nitriteMap.put(UUID.randomUUID().toString(), record);
         }
 
-        for (KeyValuePair<String, Document> entry : nitriteMap.entries()) {
-            String key = entry.getKey();
-            Document record = entry.getValue();
+        for (Pair<String, Document> entry : nitriteMap.entries()) {
+            String key = entry.getFirst();
+            Document record = entry.getSecond();
 
             record.put("processed", true);
 

@@ -18,7 +18,7 @@ package org.dizitart.no2.collection.operation;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.filters.IndexAwareFilter;
 import org.dizitart.no2.store.NitriteMap;
@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * @author Anindya Chatterjee
  */
-class IndexedStream implements RecordStream<KeyValuePair<NitriteId, Document>> {
+class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
     private final Set<NitriteId> nitriteIds;
     private final NitriteMap<NitriteId, Document> nitriteMap;
 
@@ -43,11 +43,11 @@ class IndexedStream implements RecordStream<KeyValuePair<NitriteId, Document>> {
     }
 
     @Override
-    public Iterator<KeyValuePair<NitriteId, Document>> iterator() {
+    public Iterator<Pair<NitriteId, Document>> iterator() {
         return new IndexedStreamIterator(nitriteIds.iterator(), nitriteMap);
     }
 
-    static class IndexedStreamIterator implements Iterator<KeyValuePair<NitriteId, Document>> {
+    static class IndexedStreamIterator implements Iterator<Pair<NitriteId, Document>> {
         private final Iterator<NitriteId> iterator;
         private final NitriteMap<NitriteId, Document> nitriteMap;
 
@@ -63,10 +63,10 @@ class IndexedStream implements RecordStream<KeyValuePair<NitriteId, Document>> {
         }
 
         @Override
-        public KeyValuePair<NitriteId, Document> next() {
+        public Pair<NitriteId, Document> next() {
             NitriteId id = iterator.next();
             Document document = nitriteMap.get(id);
-            return new KeyValuePair<>(id, document);
+            return new Pair<>(id, document);
         }
     }
 }

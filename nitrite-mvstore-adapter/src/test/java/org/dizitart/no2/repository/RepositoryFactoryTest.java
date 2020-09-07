@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.repository;
 
-import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.TestUtil;
 import org.dizitart.no2.collection.*;
@@ -28,10 +27,10 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.collection.TransactionalCollection;
 import org.junit.After;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.Collection;
 
 import static org.junit.Assert.assertNotNull;
@@ -108,6 +107,11 @@ public class RepositoryFactoryTest {
         }
 
         @Override
+        public TransactionalCollection beginTransaction() {
+            return null;
+        }
+
+        @Override
         public void createIndex(String field, IndexOptions indexOptions) {
 
         }
@@ -155,6 +159,11 @@ public class RepositoryFactoryTest {
         @Override
         public WriteResult remove(Document element) {
             return null;
+        }
+
+        @Override
+        public void clear() {
+
         }
 
         @Override

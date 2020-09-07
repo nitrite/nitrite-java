@@ -16,8 +16,6 @@
 
 package org.dizitart.no2.repository.data;
 
-import lombok.experimental.UtilityClass;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,10 +26,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author Anindya Chatterjee.
  */
-@UtilityClass
 public class DataGenerator {
     private static final Random random = new Random(System.currentTimeMillis());
     private static final AtomicInteger counter = new AtomicInteger(random.nextInt());
+
+    private DataGenerator() {}
 
     public static Company generateCompanyRecord() {
         Company company = new Company();

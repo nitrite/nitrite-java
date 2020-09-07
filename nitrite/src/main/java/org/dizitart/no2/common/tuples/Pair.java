@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.common;
+package org.dizitart.no2.common.tuples;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,41 +26,28 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
- * Represents a key and a value pair.
+ * Represents a pair.
  *
  * @author Anindya Chatterjee.
- * @since 1.0
+ * @since 4.0
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class KeyValuePair<Key, Value> implements Serializable {
+public class Pair<A, B> implements Serializable {
     private static final long serialVersionUID = 1598774244L;
 
-    /**
-     * The key of the pair.
-     *
-     * @param key the key to set.
-     * @return the key.
-     */
-    private Key key;
-
-    /**
-     * The value of the pair.
-     *
-     * @param value the value to set.
-     * @return the value.
-     */
-    private Value value;
+    private A first;
+    private B second;
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeObject(key);
-        stream.writeObject(value);
+        stream.writeObject(first);
+        stream.writeObject(second);
     }
 
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        key = (Key) stream.readObject();
-        value = (Value) stream.readObject();
+        first = (A) stream.readObject();
+        second = (B) stream.readObject();
     }
 }

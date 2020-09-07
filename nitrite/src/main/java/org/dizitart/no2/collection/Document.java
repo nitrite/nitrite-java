@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 
 import java.io.Serializable;
 import java.util.LinkedHashMap;
@@ -28,7 +28,7 @@ import static org.dizitart.no2.common.Constants.*;
 /**
  * @author Anindya Chatterjee
  */
-public interface Document extends Iterable<KeyValuePair<String, Object>>, Cloneable, Serializable {
+public interface Document extends Iterable<Pair<String, Object>>, Cloneable, Serializable {
 
     static Document createDocument() {
         return new NitriteDocument();

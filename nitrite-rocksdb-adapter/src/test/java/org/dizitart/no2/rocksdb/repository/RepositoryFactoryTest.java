@@ -111,6 +111,11 @@ public class RepositoryFactoryTest {
         }
 
         @Override
+        public TransactionalCollection beginTransaction() {
+            return null;
+        }
+
+        @Override
         public void createIndex(String field, IndexOptions indexOptions) {
 
         }
@@ -158,6 +163,11 @@ public class RepositoryFactoryTest {
         @Override
         public WriteResult remove(Document element) {
             return null;
+        }
+
+        @Override
+        public void clear() {
+
         }
 
         @Override

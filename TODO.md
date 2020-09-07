@@ -175,3 +175,7 @@ ColumnFamilyOptions.prefix_extractor: CustomPrefixExtractor
 ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
 
 ```
+
+## Transaction
+
+https://vladmihalcea.com/a-beginners-guide-to-transaction-isolation-levels-in-enterprise-java/

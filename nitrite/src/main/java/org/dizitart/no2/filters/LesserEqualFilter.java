@@ -18,7 +18,7 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.ComparableIndexer;
 import org.dizitart.no2.store.NitriteMap;
@@ -63,9 +63,9 @@ class LesserEqualFilter extends ComparisonFilter {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
+    public boolean apply(Pair<NitriteId, Document> element) {
         Comparable comparable = getComparable();
-        Document document = element.getValue();
+        Document document = element.getSecond();
         Object fieldValue = document.get(getField());
         if (fieldValue != null) {
             if (fieldValue instanceof Number && comparable instanceof Number) {

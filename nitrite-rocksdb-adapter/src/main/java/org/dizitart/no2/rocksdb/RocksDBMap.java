@@ -3,7 +3,7 @@ package org.dizitart.no2.rocksdb;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
@@ -206,7 +206,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
-    public RecordStream<KeyValuePair<K, V>> entries() {
+    public RecordStream<Pair<K, V>> entries() {
         return RecordStream.fromIterable(new EntrySet<>(rocksDB, columnFamilyHandle,
             objectFormatter, getKeyType(), getValueType()));
     }

@@ -81,6 +81,11 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
+    public boolean hasMap(String mapName) {
+        return reference.getColumnFamilyHandleRegistry().containsKey(mapName);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <Key, Value> NitriteMap<Key, Value> openMap(String mapName,
                                                        Class<?> keyType,

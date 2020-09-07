@@ -19,7 +19,7 @@ package org.dizitart.no2.filters;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 
 import static org.dizitart.no2.common.Constants.DOC_ID;
 
@@ -197,7 +197,7 @@ public interface Filter {
      * @param element the {@link org.dizitart.no2.store.NitriteMap} entry to check.
      * @return a set of {@link NitriteId}s of matching documents.
      */
-    boolean apply(KeyValuePair<NitriteId, Document> element);
+    boolean apply(Pair<NitriteId, Document> element);
 
     /**
      * Creates an and filter which performs a logical AND operation on two filters and selects

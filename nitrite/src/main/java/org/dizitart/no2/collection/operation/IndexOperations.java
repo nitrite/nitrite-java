@@ -22,7 +22,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventType;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.exceptions.IndexingException;
@@ -225,14 +225,14 @@ class IndexOperations implements AutoCloseable {
             Indexer indexer = findIndexer(indexType);
 
             // re-create the index for the values of the field from document
-            for (KeyValuePair<NitriteId, Document> entry : nitriteMap.entries()) {
-                Document document = entry.getValue();
+            for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
+                Document document = entry.getSecond();
                 if (document.getFields().contains(field)) {
                     // remove old values if exists
-                    removeIndexEntry(field, entry.getValue(), entry.getKey(), indexer, indexEntry);
+                    removeIndexEntry(field, entry.getSecond(), entry.getFirst(), indexer, indexEntry);
 
                     // re-create new entry
-                    writeIndexEntry(field, entry.getValue(), entry.getKey(), indexer, indexEntry);
+                    writeIndexEntry(field, entry.getSecond(), entry.getFirst(), indexer, indexEntry);
                 }
             }
         } finally {

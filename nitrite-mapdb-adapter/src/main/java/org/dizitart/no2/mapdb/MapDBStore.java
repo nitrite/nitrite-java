@@ -65,6 +65,11 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
     }
 
     @Override
+    public boolean hasMap(String mapName) {
+        return db.exists(mapName);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
         if (nitriteMapRegistry.containsKey(mapName)) {

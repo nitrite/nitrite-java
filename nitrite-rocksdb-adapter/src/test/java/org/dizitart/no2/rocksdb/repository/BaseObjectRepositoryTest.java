@@ -32,6 +32,7 @@ import java.util.Collection;
 
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.rocksdb.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.rocksdb.TestUtil.deleteFile;
 
 @RunWith(value = Parameterized.class)
 public abstract class BaseObjectRepositoryTest {
@@ -114,6 +115,6 @@ public abstract class BaseObjectRepositoryTest {
             db.close();
         }
 
-//        deleteFile(fileName);
+        deleteFile(fileName);
     }
 }

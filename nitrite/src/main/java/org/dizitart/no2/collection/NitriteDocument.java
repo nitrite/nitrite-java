@@ -17,7 +17,7 @@
 package org.dizitart.no2.collection;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
@@ -167,29 +167,29 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
     }
 
     @Override
-    public Iterator<KeyValuePair<String, Object>> iterator() {
+    public Iterator<Pair<String, Object>> iterator() {
         return new PairIterator(super.entrySet().iterator());
     }
 
     private Set<String> getFieldsInternal(String prefix) {
         Set<String> fields = new HashSet<>();
 
-        for (KeyValuePair<String, Object> entry : this) {
-            if (reservedFields.contains(entry.getKey())) continue;
+        for (Pair<String, Object> entry : this) {
+            if (reservedFields.contains(entry.getFirst())) continue;
 
-            Object value = entry.getValue();
+            Object value = entry.getSecond();
             if (value instanceof NitriteDocument) {
                 if (isNullOrEmpty(prefix)) {
-                    fields.addAll(((NitriteDocument) value).getFieldsInternal(entry.getKey()));
+                    fields.addAll(((NitriteDocument) value).getFieldsInternal(entry.getFirst()));
                 } else {
                     fields.addAll(((NitriteDocument) value).getFieldsInternal(prefix
-                        + NitriteConfig.getFieldSeparator() + entry.getKey()));
+                        + NitriteConfig.getFieldSeparator() + entry.getFirst()));
                 }
             } else if (!(value instanceof Iterable)) {
                 if (isNullOrEmpty(prefix)) {
-                    fields.add(entry.getKey());
+                    fields.add(entry.getFirst());
                 } else {
-                    fields.add(prefix + NitriteConfig.getFieldSeparator() + entry.getKey());
+                    fields.add(prefix + NitriteConfig.getFieldSeparator() + entry.getFirst());
                 }
             }
         }
@@ -312,8 +312,8 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeInt(size());
-        for (KeyValuePair<String, Object> keyValuePair : this) {
-            stream.writeObject(keyValuePair);
+        for (Pair<String, Object> pair : this) {
+            stream.writeObject(pair);
         }
     }
 
@@ -321,12 +321,12 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         int size = stream.readInt();
         for (int i = 0; i < size; i++) {
-            KeyValuePair<String, Object> keyValuePair = (KeyValuePair<String, Object>) stream.readObject();
-            super.put(keyValuePair.getKey(), keyValuePair.getValue());
+            Pair<String, Object> pair = (Pair<String, Object>) stream.readObject();
+            super.put(pair.getFirst(), pair.getSecond());
         }
     }
 
-    private static class PairIterator implements Iterator<KeyValuePair<String, Object>> {
+    private static class PairIterator implements Iterator<Pair<String, Object>> {
         private final Iterator<Map.Entry<String, Object>> iterator;
 
         PairIterator(Iterator<Map.Entry<String, Object>> iterator) {
@@ -339,9 +339,9 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
         }
 
         @Override
-        public KeyValuePair<String, Object> next() {
+        public Pair<String, Object> next() {
             Map.Entry<String, Object> next = iterator.next();
-            return new KeyValuePair<>(next.getKey(), next.getValue());
+            return new Pair<>(next.getKey(), next.getValue());
         }
 
         @Override

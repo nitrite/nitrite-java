@@ -137,6 +137,11 @@ class RxNitriteCollectionImpl implements RxNitriteCollection {
     }
 
     @Override
+    public Completable clear() {
+        return Completable.fromAction(nitriteCollection::clear);
+    }
+
+    @Override
     public Single<Document> getById(NitriteId nitriteId) {
         return Single.fromCallable(() -> nitriteCollection.getById(nitriteId));
     }

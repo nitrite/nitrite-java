@@ -1,19 +1,3 @@
-/*
- * Copyright (c) 2017-2020. Nitrite author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package org.dizitart.no2.collection;
 
 import lombok.Getter;
@@ -37,6 +21,8 @@ import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.Collection;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
@@ -44,36 +30,41 @@ import static org.dizitart.no2.common.util.ValidationUtils.containsNull;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
  */
-class NitriteCollectionImpl implements NitriteCollection {
-    private final String collectionName;
-    private NitriteMap<NitriteId, Document> nitriteMap;
-    private NitriteStore<?> nitriteStore;
+class BaseNitriteCollection {
+    protected final String collectionName;
+    protected NitriteMap<NitriteId, Document> nitriteMap;
+    protected NitriteStore<?> nitriteStore;
+    protected NitriteConfig nitriteConfig;
+    protected Lock writeLock;
+    private Lock readLock;
     private CollectionOperations collectionOperations;
     private EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
-    private NitriteConfig nitriteConfig;
 
     @Getter
     private volatile boolean isDropped;
 
-    NitriteCollectionImpl(String name, NitriteMap<NitriteId, Document> nitriteMap, NitriteConfig nitriteConfig) {
+    BaseNitriteCollection(String name, NitriteMap<NitriteId, Document> nitriteMap, NitriteConfig nitriteConfig) {
         this.collectionName = name;
         this.nitriteConfig = nitriteConfig;
         this.nitriteMap = nitriteMap;
         init();
     }
 
-    @Override
     public WriteResult insert(Document[] documents) {
         checkOpened();
         notNull(documents, "a null document cannot be inserted");
         containsNull(documents, "a null document cannot be inserted");
 
-        return collectionOperations.insert(documents);
+        try {
+            writeLock.lock();
+            return collectionOperations.insert(documents);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    @Override
     public WriteResult update(Document document, boolean insertIfAbsent) {
         checkOpened();
         notNull(document, "a null document cannot be used for update");
@@ -89,127 +80,207 @@ class NitriteCollectionImpl implements NitriteCollection {
         }
     }
 
-    @Override
     public WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
         checkOpened();
         notNull(update, "a null document cannot be used for update");
         notNull(updateOptions, "updateOptions cannot be null");
 
-        return collectionOperations.update(filter, update, updateOptions);
+        try {
+            writeLock.lock();
+            return collectionOperations.update(filter, update, updateOptions);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    @Override
     public WriteResult remove(Document document) {
         checkOpened();
         notNull(document, "a null document cannot be removed");
 
         if (document.hasId()) {
-            return collectionOperations.remove(document);
+            try {
+                writeLock.lock();
+                return collectionOperations.remove(document);
+            } finally {
+                writeLock.unlock();
+            }
         } else {
             throw new NotIdentifiableException("remove operation failed as no id value found for the document");
         }
     }
 
-    @Override
     public WriteResult remove(Filter filter, boolean justOne) {
+        checkOpened();
         if ((filter == null || filter == Filter.ALL) && justOne) {
             throw new InvalidOperationException("remove all cannot be combined with just once");
         }
-        checkOpened();
-        return collectionOperations.remove(filter, justOne);
+
+        try {
+            writeLock.lock();
+            return collectionOperations.remove(filter, justOne);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    @Override
+    public void clear() {
+        checkOpened();
+        try {
+            writeLock.lock();
+            nitriteMap.clear();
+        } finally {
+            writeLock.unlock();
+        }
+    }
+
     public DocumentCursor find() {
         checkOpened();
-        return collectionOperations.find();
+        try {
+            readLock.lock();
+            return collectionOperations.find();
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public DocumentCursor find(Filter filter) {
         checkOpened();
-        return collectionOperations.find(filter);
+
+        try {
+            readLock.lock();
+            return collectionOperations.find(filter);
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public void createIndex(String field, IndexOptions indexOptions) {
         checkOpened();
         notNull(field, "field cannot be null");
 
         // by default async is false while creating index
-        if (indexOptions == null) {
-            collectionOperations.createIndex(field, IndexType.Unique, false);
-        } else {
-            collectionOperations.createIndex(field, indexOptions.getIndexType(),
-                indexOptions.isAsync());
+        try {
+            writeLock.lock();
+            if (indexOptions == null) {
+                collectionOperations.createIndex(field, IndexType.Unique, false);
+            } else {
+                collectionOperations.createIndex(field, indexOptions.getIndexType(),
+                    indexOptions.isAsync());
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
-    @Override
     public void rebuildIndex(String field, boolean isAsync) {
         checkOpened();
         notNull(field, "field cannot be null");
 
-        IndexEntry indexEntry = collectionOperations.findIndex(field);
+        IndexEntry indexEntry;
+        try {
+            readLock.lock();
+            indexEntry = collectionOperations.findIndex(field);
+        } finally {
+            readLock.unlock();
+        }
+
         if (indexEntry != null) {
             validateRebuildIndex(indexEntry);
-            collectionOperations.rebuildIndex(indexEntry, isAsync);
+
+            try {
+                writeLock.lock();
+                collectionOperations.rebuildIndex(indexEntry, isAsync);
+            } finally {
+                writeLock.unlock();
+            }
         } else {
             throw new IndexingException(field + " is not indexed");
         }
     }
 
-    @Override
     public Collection<IndexEntry> listIndices() {
         checkOpened();
-        return collectionOperations.listIndexes();
+
+        try {
+            readLock.lock();
+            return collectionOperations.listIndexes();
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public boolean hasIndex(String field) {
         checkOpened();
         notNull(field, "field cannot be null");
 
-        return collectionOperations.hasIndex(field);
+        try {
+            readLock.lock();
+            return collectionOperations.hasIndex(field);
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public boolean isIndexing(String field) {
         checkOpened();
         notNull(field, "field cannot be null");
-        return collectionOperations.isIndexing(field);
+
+        try {
+            readLock.lock();
+            return collectionOperations.isIndexing(field);
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public void dropIndex(String field) {
         checkOpened();
         notNull(field, "field cannot be null");
-        collectionOperations.dropIndex(field);
+
+        try {
+            writeLock.lock();
+            collectionOperations.dropIndex(field);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-    @Override
     public void dropAllIndices() {
         checkOpened();
-        collectionOperations.dropAllIndices();
+
+        try {
+            writeLock.lock();
+            collectionOperations.dropAllIndices();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
-
-    @Override
     public Document getById(NitriteId nitriteId) {
         checkOpened();
         notNull(nitriteId, "nitriteId cannot be null");
-        return collectionOperations.getById(nitriteId);
+
+        try {
+            readLock.lock();
+            return collectionOperations.getById(nitriteId);
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public void drop() {
         checkOpened();
-        collectionOperations.dropCollection();
+
+        try {
+            writeLock.lock();
+            collectionOperations.dropCollection();
+        } finally {
+            writeLock.unlock();
+        }
         isDropped = true;
         close();
     }
 
-    @Override
     public boolean isOpen() {
         if (nitriteStore == null || nitriteStore.isClosed() || isDropped) {
             close();
@@ -217,7 +288,6 @@ class NitriteCollectionImpl implements NitriteCollection {
         } else return true;
     }
 
-    @Override
     public void close() {
         if (collectionOperations != null) {
             collectionOperations.close();
@@ -229,22 +299,23 @@ class NitriteCollectionImpl implements NitriteCollection {
         closeEventBus();
     }
 
-    @Override
     public String getName() {
         return collectionName;
     }
 
-    @Override
     public long size() {
-        return collectionOperations.getSize();
+        try {
+            readLock.lock();
+            return collectionOperations.getSize();
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public NitriteStore<?> getStore() {
         return nitriteStore;
     }
 
-    @Override
     public void subscribe(CollectionEventListener listener) {
         checkOpened();
         notNull(listener, "listener cannot be null");
@@ -252,7 +323,6 @@ class NitriteCollectionImpl implements NitriteCollection {
         eventBus.register(listener);
     }
 
-    @Override
     public void unsubscribe(CollectionEventListener listener) {
         checkOpened();
         notNull(listener, "listener cannot be null");
@@ -262,17 +332,27 @@ class NitriteCollectionImpl implements NitriteCollection {
         }
     }
 
-    @Override
     public Attributes getAttributes() {
         checkOpened();
-        return collectionOperations.getAttributes();
+
+        try {
+            readLock.lock();
+            return collectionOperations.getAttributes();
+        } finally {
+            readLock.unlock();
+        }
     }
 
-    @Override
     public void setAttributes(Attributes attributes) {
         checkOpened();
         notNull(attributes, "attributes cannot be null");
-        collectionOperations.setAttributes(attributes);
+
+        try {
+            writeLock.lock();
+            collectionOperations.setAttributes(attributes);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     private void closeEventBus() {
@@ -283,12 +363,15 @@ class NitriteCollectionImpl implements NitriteCollection {
     }
 
     private void init() {
+        ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+        this.readLock = readWriteLock.readLock();
+        this.writeLock = readWriteLock.writeLock();
         this.nitriteStore = nitriteConfig.getNitriteStore();
         this.eventBus = new CollectionEventBus();
         this.collectionOperations = new CollectionOperations(collectionName, nitriteMap, nitriteConfig, eventBus);
     }
 
-    private void checkOpened() {
+    protected void checkOpened() {
         if (isOpen()) return;
 
         if (isDropped) {
@@ -309,7 +392,7 @@ class NitriteCollectionImpl implements NitriteCollection {
     }
 
     private static class CollectionEventBus extends NitriteEventBus<CollectionEventInfo<?>, CollectionEventListener> {
-        @Override
+
         public void post(CollectionEventInfo<?> collectionEventInfo) {
             for (final CollectionEventListener listener : getListeners()) {
                 getEventExecutor().submit(() -> listener.onEvent(collectionEventInfo));

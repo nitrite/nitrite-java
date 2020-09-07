@@ -19,7 +19,7 @@ package org.dizitart.no2.filters;
 import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 
 /**
  * @author Anindya Chatterjee
@@ -33,7 +33,7 @@ class NotFilter extends NitriteFilter {
     }
 
     @Override
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
+    public boolean apply(Pair<NitriteId, Document> element) {
         return !filter.apply(element);
     }
 }
