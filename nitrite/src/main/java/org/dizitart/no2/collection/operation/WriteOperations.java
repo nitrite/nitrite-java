@@ -124,51 +124,51 @@ class WriteOperations {
         }
 
         WriteResultImpl writeResult = new WriteResultImpl();
-        update = update.clone();
-        update.remove(DOC_ID);
+        Document document = update.clone();
+        document.remove(DOC_ID);
 
-        if (!REPLICATOR.contentEquals(update.getSource())) {
-            update.remove(DOC_REVISION);
+        if (!REPLICATOR.contentEquals(document.getSource())) {
+            document.remove(DOC_REVISION);
         }
 
-        if (update.size() == 0) {
+        if (document.size() == 0) {
             alert(EventType.Update, new CollectionEventInfo<>());
             return writeResult;
         }
 
         long count = 0;
-        for (Document document : cursor) {
-            if (document != null) {
+        for (Document doc : cursor) {
+            if (doc != null) {
                 count++;
 
                 if (count > 1 && updateOptions.isJustOnce()) {
                     break;
                 }
 
-                Document item = document.clone();
-                Document oldDocument = document.clone();
-                String source = update.getSource();
+                Document item = doc.clone();
+                Document oldDocument = doc.clone();
+                String source = document.getSource();
                 long time = System.currentTimeMillis();
 
                 NitriteId nitriteId = item.getId();
                 log.debug("Document to update {} in {}", item, nitriteMap.getName());
 
-                if (!REPLICATOR.contentEquals(update.getSource())) {
-                    update.remove(DOC_SOURCE);
-                    item.merge(update);
+                if (!REPLICATOR.contentEquals(document.getSource())) {
+                    document.remove(DOC_SOURCE);
+                    item.merge(document);
                     int rev = item.getRevision();
                     item.put(DOC_REVISION, rev + 1);
                     item.put(DOC_MODIFIED, time);
                 } else {
-                    update.remove(DOC_SOURCE);
-                    item.merge(update);
+                    document.remove(DOC_SOURCE);
+                    item.merge(document);
                 }
 
                 nitriteMap.put(nitriteId, item);
                 log.debug("Document {} updated in {}", item, nitriteMap.getName());
 
                 // if 'update' only contains id value, affected count = 0
-                if (update.size() > 0) {
+                if (document.size() > 0) {
                     writeResult.addToList(nitriteId);
                 }
 

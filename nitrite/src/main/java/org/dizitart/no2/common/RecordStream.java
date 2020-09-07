@@ -18,6 +18,8 @@ package org.dizitart.no2.common;
 
 import org.dizitart.no2.common.util.Iterables;
 
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -27,6 +29,31 @@ import java.util.Set;
 public interface RecordStream<T> extends Iterable<T> {
     static <T> RecordStream<T> fromIterable(Iterable<T> iterable) {
         return iterable::iterator;
+    }
+
+    static <T> RecordStream<T> fromCombined(Iterable<T> first, Iterable<T> second) {
+        return RecordStream.fromIterable(() -> new Iterator<T>() {
+            private final Iterator<T> firstIterator = first != null ? first.iterator() : Collections.emptyIterator();
+            private final Iterator<T> secondIterator = second != null ? second.iterator() : Collections.emptyIterator();
+
+            @Override
+            public boolean hasNext() {
+                boolean result = firstIterator.hasNext();
+                if (!result) {
+                    return secondIterator.hasNext();
+                }
+                return true;
+            }
+
+            @Override
+            public T next() {
+                T next = firstIterator.hasNext() ? firstIterator.next() : null;
+                if (next == null) {
+                    return secondIterator.next();
+                }
+                return next;
+            }
+        });
     }
 
     default long size() {

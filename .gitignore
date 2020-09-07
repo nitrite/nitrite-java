@@ -108,7 +108,7 @@ classes/
 deploy/
 javadoc/
 
-# lock file, a part of Oracle Credential Store Framework
+# lockType file, a part of Oracle Credential Store Framework
 cwallet.sso.lck### Java template
 *.class
 
@@ -301,7 +301,7 @@ gen/
 
 # default output directories
 
-# lock file, a part of Oracle Credential Store Framework
+# lockType file, a part of Oracle Credential Store Framework
 cwallet.sso.lck### KDevelop4 template
 *.kdev4
 .kdev4/

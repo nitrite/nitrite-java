@@ -18,7 +18,7 @@ package org.dizitart.no2.collection.operation;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.filters.Filter;
@@ -30,29 +30,29 @@ import java.util.NoSuchElementException;
 /**
  * @author Anindya Chatterjee.
  */
-class FilteredRecordStream implements RecordStream<KeyValuePair<NitriteId, Document>> {
-    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
+class FilteredRecordStream implements RecordStream<Pair<NitriteId, Document>> {
+    private final RecordStream<Pair<NitriteId, Document>> recordStream;
     private final Filter filter;
 
-    FilteredRecordStream(RecordStream<KeyValuePair<NitriteId, Document>> recordStream, Filter filter) {
+    FilteredRecordStream(RecordStream<Pair<NitriteId, Document>> recordStream, Filter filter) {
         this.recordStream = recordStream;
         this.filter = filter;
     }
 
     @Override
-    public Iterator<KeyValuePair<NitriteId, Document>> iterator() {
-        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
+    public Iterator<Pair<NitriteId, Document>> iterator() {
+        Iterator<Pair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new FilteredIterator(iterator, filter);
     }
 
-    static class FilteredIterator implements Iterator<KeyValuePair<NitriteId, Document>> {
-        private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
+    static class FilteredIterator implements Iterator<Pair<NitriteId, Document>> {
+        private final Iterator<Pair<NitriteId, Document>> iterator;
         private final Filter filter;
-        private KeyValuePair<NitriteId, Document> nextPair;
+        private Pair<NitriteId, Document> nextPair;
         private boolean nextPairSet = false;
 
-        public FilteredIterator(Iterator<KeyValuePair<NitriteId, Document>> iterator, Filter filter) {
+        public FilteredIterator(Iterator<Pair<NitriteId, Document>> iterator, Filter filter) {
             this.iterator = iterator;
             this.filter = filter;
         }
@@ -63,7 +63,7 @@ class FilteredRecordStream implements RecordStream<KeyValuePair<NitriteId, Docum
         }
 
         @Override
-        public KeyValuePair<NitriteId, Document> next() {
+        public Pair<NitriteId, Document> next() {
             if (!nextPairSet && !setNextId()) {
                 throw new NoSuchElementException();
             }
@@ -81,9 +81,9 @@ class FilteredRecordStream implements RecordStream<KeyValuePair<NitriteId, Docum
 
         private boolean setNextId() {
             while (iterator.hasNext()) {
-                final KeyValuePair<NitriteId, Document> keyValuePair = iterator.next();
-                if (filter.apply(keyValuePair)) {
-                    nextPair = keyValuePair;
+                final Pair<NitriteId, Document> pair = iterator.next();
+                if (filter.apply(pair)) {
+                    nextPair = pair;
                     nextPairSet = true;
                     return true;
                 }

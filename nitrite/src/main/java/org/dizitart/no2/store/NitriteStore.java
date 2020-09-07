@@ -101,6 +101,14 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
     IndexCatalog getIndexCatalog();
 
     /**
+     * Checks whether a map with the name already exists in the store or not.
+     *
+     * @param mapName the map name
+     * @return true if the map exists; false otherwise
+     */
+    boolean hasMap(String mapName);
+
+    /**
      * Opens a {@link NitriteMap} with the default settings. The map is
      * automatically create if it does not yet exist. If a map with this
      * name is already open, this map is returned.

@@ -67,7 +67,7 @@ public class CollectionFactory {
     private NitriteCollection createCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalog) {
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
         NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name, NitriteId.class, Document.class);
-        NitriteCollection collection = new NitriteCollectionImpl(name, nitriteMap, nitriteConfig);
+        NitriteCollection collection = new DefaultNitriteCollection(name, nitriteMap, nitriteConfig);
 
         if (writeCatalog) {
             // ignore repository request

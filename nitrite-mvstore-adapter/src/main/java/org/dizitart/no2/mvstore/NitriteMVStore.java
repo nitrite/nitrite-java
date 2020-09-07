@@ -84,6 +84,11 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
+    public boolean hasMap(String mapName) {
+        return mvStore.hasMap(mapName);
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
         if (nitriteMapRegistry.containsKey(mapName)) {

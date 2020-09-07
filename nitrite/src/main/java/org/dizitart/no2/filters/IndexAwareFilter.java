@@ -53,7 +53,7 @@ public abstract class IndexAwareFilter extends FieldBasedFilter {
     protected abstract Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection);
 
     public Set<NitriteId> cachedIndexedIds() {
-        if (indexedIdSet == null) {
+        if (indexedIdSet == null || indexedIdSet.isEmpty()) {
             indexedIdSet = findIndexedIdSet();
         }
         return indexedIdSet;

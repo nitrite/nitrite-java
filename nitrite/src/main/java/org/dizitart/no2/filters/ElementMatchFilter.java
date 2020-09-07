@@ -18,7 +18,7 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 
 import java.lang.reflect.Array;
@@ -45,7 +45,7 @@ class ElementMatchFilter extends NitriteFilter {
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
+    public boolean apply(Pair<NitriteId, Document> element) {
         if (elementFilter instanceof ElementMatchFilter) {
             throw new FilterException("nested elemMatch filter is not supported");
         }
@@ -54,7 +54,7 @@ class ElementMatchFilter extends NitriteFilter {
             throw new FilterException("text filter is not supported in elemMatch filter");
         }
 
-        Document document = element.getValue();
+        Document document = element.getSecond();
         Object fieldValue = document.get(field);
         if (fieldValue == null) {
             return false;

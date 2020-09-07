@@ -20,7 +20,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,12 +45,12 @@ public class DocumentSerializer extends StdScalarSerializer<Document> {
 
     private Map<String, Object> fromDocument(Document document) {
         Map<String, Object> map = new HashMap<>();
-        for (KeyValuePair<String, Object> pair : document) {
-            Object value = pair.getValue();
+        for (Pair<String, Object> pair : document) {
+            Object value = pair.getSecond();
             if (value instanceof Document) {
                 value = fromDocument((Document) value);
             }
-            map.put(pair.getKey(), value);
+            map.put(pair.getFirst(), value);
         }
         return map;
     }

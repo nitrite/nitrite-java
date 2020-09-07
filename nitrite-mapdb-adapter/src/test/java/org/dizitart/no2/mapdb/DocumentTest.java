@@ -18,7 +18,7 @@ package org.dizitart.no2.mapdb;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.After;
@@ -167,7 +167,7 @@ public class DocumentTest {
 
     @Test
     public void testRemove() {
-        Iterator<KeyValuePair<String, Object>> iterator = doc.iterator();
+        Iterator<Pair<String, Object>> iterator = doc.iterator();
         assertEquals(doc.size(), 4);
         if (iterator.hasNext()) {
             iterator.next();

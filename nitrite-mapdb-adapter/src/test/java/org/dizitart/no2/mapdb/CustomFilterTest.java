@@ -32,7 +32,7 @@ public class CustomFilterTest extends BaseCollectionTest {
     public void testCustomFilter() {
         insert();
         collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
-        DocumentCursor cursor = collection.find(element -> element.getValue().get("firstName", String.class)
+        DocumentCursor cursor = collection.find(element -> element.getSecond().get("firstName", String.class)
             .equalsIgnoreCase("FN1"));
 
         assertEquals(cursor.size(), 1);

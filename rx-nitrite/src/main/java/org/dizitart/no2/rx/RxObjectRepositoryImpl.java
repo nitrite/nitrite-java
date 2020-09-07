@@ -42,7 +42,7 @@ import java.util.Collection;
 class RxObjectRepositoryImpl<T> implements RxObjectRepository<T> {
     private final ObjectRepository<T> repository;
     private final NitriteConfig nitriteConfig;
-    private PublishSubject<CollectionEventInfo<?>> updates;
+    private final PublishSubject<CollectionEventInfo<?>> updates;
 
     RxObjectRepositoryImpl(ObjectRepository<T> repository, NitriteConfig nitriteConfig) {
         this.repository = repository;
@@ -165,6 +165,11 @@ class RxObjectRepositoryImpl<T> implements RxObjectRepository<T> {
     @Override
     public FlowableWriteResult remove(T element) {
         return new FlowableWriteResult(() -> repository.remove(element));
+    }
+
+    @Override
+    public Completable clear() {
+        return Completable.fromAction(repository::clear);
     }
 
     @Override

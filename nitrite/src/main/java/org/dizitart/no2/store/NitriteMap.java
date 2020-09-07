@@ -18,7 +18,7 @@ package org.dizitart.no2.store;
 
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.collection.meta.MetadataAware;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
@@ -125,7 +125,7 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      *
      * @return a set view of the mappings contained in this map.
      */
-    RecordStream<KeyValuePair<Key, Value>> entries();
+    RecordStream<Pair<Key, Value>> entries();
 
     /**
      * Get the smallest key that is larger than the given key, or null if no

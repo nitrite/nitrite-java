@@ -18,7 +18,7 @@ package org.dizitart.no2.collection.operation;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 
 import java.util.HashSet;
@@ -29,15 +29,15 @@ import java.util.Set;
 /**
  * @author Anindya Chatterjee
  */
-class UnionStreamIterator implements Iterator<KeyValuePair<NitriteId, Document>> {
-    private final Iterator<KeyValuePair<NitriteId, Document>> lhsIterator;
-    private final Iterator<KeyValuePair<NitriteId, Document>> rhsIterator;
+class UnionStreamIterator implements Iterator<Pair<NitriteId, Document>> {
+    private final Iterator<Pair<NitriteId, Document>> lhsIterator;
+    private final Iterator<Pair<NitriteId, Document>> rhsIterator;
     private final Set<NitriteId> nitriteIds = new HashSet<>();
-    private KeyValuePair<NitriteId, Document> nextItem;
+    private Pair<NitriteId, Document> nextItem;
     private boolean nextItemSet = false;
 
-    public UnionStreamIterator(RecordStream<KeyValuePair<NitriteId, Document>> lhsStream,
-                               RecordStream<KeyValuePair<NitriteId, Document>> rhsStream) {
+    public UnionStreamIterator(RecordStream<Pair<NitriteId, Document>> lhsStream,
+                               RecordStream<Pair<NitriteId, Document>> rhsStream) {
         lhsIterator = lhsStream.iterator();
         rhsIterator = rhsStream.iterator();
     }
@@ -48,7 +48,7 @@ class UnionStreamIterator implements Iterator<KeyValuePair<NitriteId, Document>>
     }
 
     @Override
-    public KeyValuePair<NitriteId, Document> next() {
+    public Pair<NitriteId, Document> next() {
         if (!nextItemSet && !setNextEntry()) {
             throw new NoSuchElementException();
         }
@@ -59,16 +59,16 @@ class UnionStreamIterator implements Iterator<KeyValuePair<NitriteId, Document>>
     private boolean setNextEntry() {
         while (lhsIterator.hasNext() || rhsIterator.hasNext()) {
             if (lhsIterator.hasNext()) {
-                KeyValuePair<NitriteId, Document> keyValuePair = lhsIterator.next();
-                nitriteIds.add(keyValuePair.getKey());
-                nextItem = keyValuePair;
+                Pair<NitriteId, Document> pair = lhsIterator.next();
+                nitriteIds.add(pair.getFirst());
+                nextItem = pair;
                 nextItemSet = true;
                 return true;
             }
 
-            KeyValuePair<NitriteId, Document> keyValuePair = rhsIterator.next();
-            if (!nitriteIds.contains(keyValuePair.getKey())) {
-                nextItem = keyValuePair;
+            Pair<NitriteId, Document> pair = rhsIterator.next();
+            if (!nitriteIds.contains(pair.getFirst())) {
+                nextItem = pair;
                 nextItemSet = true;
                 return true;
             }

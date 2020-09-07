@@ -24,7 +24,7 @@ import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.filters.Filter;
@@ -34,8 +34,6 @@ import org.dizitart.no2.store.NitriteMap;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static org.dizitart.no2.common.Constants.COLLECTION_CATALOG;
 
@@ -50,8 +48,6 @@ public class CollectionOperations {
     private IndexOperations indexOperations;
     private WriteOperations writeOperations;
     private ReadOperations readOperations;
-    private Lock readLock;
-    private Lock writeLock;
 
     public CollectionOperations(String collectionName,
                                 NitriteMap<NitriteId, Document> nitriteMap,
@@ -65,175 +61,80 @@ public class CollectionOperations {
     }
 
     public void createIndex(String field, String indexType, boolean async) {
-        try {
-            writeLock.lock();
-            indexOperations.ensureIndex(field, indexType, async);
-        } finally {
-            writeLock.unlock();
-        }
+        indexOperations.ensureIndex(field, indexType, async);
     }
 
     public IndexEntry findIndex(String field) {
-        try {
-            readLock.lock();
-            return indexOperations.findIndexEntry(field);
-        } finally {
-            readLock.unlock();
-        }
+        return indexOperations.findIndexEntry(field);
     }
 
     public void rebuildIndex(IndexEntry indexEntry, boolean async) {
-        try {
-            writeLock.lock();
-            indexOperations.rebuildIndex(indexEntry, async);
-        } finally {
-            writeLock.unlock();
-        }
+        indexOperations.rebuildIndex(indexEntry, async);
     }
 
     public Collection<IndexEntry> listIndexes() {
-        try {
-            readLock.lock();
-            return indexOperations.listIndexes();
-        } finally {
-            readLock.unlock();
-        }
+        return indexOperations.listIndexes();
     }
 
     public boolean hasIndex(String field) {
-        try {
-            readLock.lock();
-            return indexOperations.hasIndexEntry(field);
-        } finally {
-            readLock.unlock();
-        }
+        return indexOperations.hasIndexEntry(field);
     }
 
     public boolean isIndexing(String field) {
-        try {
-            readLock.lock();
-            return indexOperations.isIndexing(field);
-        } finally {
-            readLock.unlock();
-        }
+        return indexOperations.isIndexing(field);
     }
 
     public void dropIndex(String field) {
-        try {
-            writeLock.lock();
-            indexOperations.dropIndex(field);
-        } finally {
-            writeLock.unlock();
-        }
+        indexOperations.dropIndex(field);
     }
 
     public void dropAllIndices() {
-        try {
-            writeLock.lock();
-            indexOperations.dropAllIndices();
-        } finally {
-            writeLock.unlock();
-        }
+        indexOperations.dropAllIndices();
     }
 
     public WriteResult insert(Document[] documents) {
-        try {
-            writeLock.lock();
-            return writeOperations.insert(documents);
-        } finally {
-            writeLock.unlock();
-        }
+        return writeOperations.insert(documents);
     }
 
     public WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
-        try {
-            writeLock.lock();
-            return writeOperations.update(filter, update, updateOptions);
-        } finally {
-            writeLock.unlock();
-        }
+        return writeOperations.update(filter, update, updateOptions);
     }
 
     public WriteResult remove(Document document) {
-        try {
-            writeLock.lock();
-            return writeOperations.remove(document);
-        } finally {
-            writeLock.unlock();
-        }
+        return writeOperations.remove(document);
     }
 
     public WriteResult remove(Filter filter, boolean justOnce) {
-        try {
-            writeLock.lock();
-            return writeOperations.remove(filter, justOnce);
-        } finally {
-            writeLock.unlock();
-        }
+        return writeOperations.remove(filter, justOnce);
     }
 
     public DocumentCursor find() {
-        try {
-            readLock.lock();
-            return readOperations.find();
-        } finally {
-            readLock.unlock();
-        }
+        return readOperations.find();
     }
 
     public DocumentCursor find(Filter filter) {
-        try {
-            readLock.lock();
-            return readOperations.find(filter);
-        } finally {
-            readLock.unlock();
-        }
+        return readOperations.find(filter);
     }
 
     public Document getById(NitriteId nitriteId) {
-        try {
-            readLock.lock();
-            return readOperations.getById(nitriteId);
-        } finally {
-            readLock.unlock();
-        }
+        return readOperations.getById(nitriteId);
     }
 
     public void dropCollection() {
-        try {
-            writeLock.lock();
-            indexOperations.dropAllIndices();
-            dropNitriteMap();
-        } finally {
-            writeLock.unlock();
-        }
+        indexOperations.dropAllIndices();
+        dropNitriteMap();
     }
 
     public long getSize() {
-        try {
-            readLock.lock();
-            return nitriteMap.size();
-        } finally {
-            readLock.unlock();
-        }
+        return nitriteMap.size();
     }
 
     public Attributes getAttributes() {
-        try {
-            readLock.lock();
-            return nitriteMap != null ? nitriteMap.getAttributes() : null;
-        } finally {
-            readLock.unlock();
-        }
+        return nitriteMap != null ? nitriteMap.getAttributes() : null;
     }
 
     public void setAttributes(Attributes attributes) {
-        try {
-            writeLock.lock();
-            nitriteMap.setAttributes(attributes);
-        } finally {
-            writeLock.unlock();
-        }
+        nitriteMap.setAttributes(attributes);
     }
 
     public void close() {
@@ -243,9 +144,6 @@ public class CollectionOperations {
     }
 
     private void init() {
-        ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-        this.readLock = readWriteLock.readLock();
-        this.writeLock = readWriteLock.writeLock();
         this.indexOperations = new IndexOperations(nitriteConfig, nitriteMap, eventBus);
         this.readOperations = new ReadOperations(collectionName, nitriteConfig, nitriteMap, indexOperations);
         this.writeOperations = new WriteOperations(indexOperations, readOperations,
@@ -254,9 +152,9 @@ public class CollectionOperations {
 
     private void dropNitriteMap() {
         NitriteMap<String, Document> catalogueMap = nitriteMap.getStore().openMap(COLLECTION_CATALOG, String.class, Document.class);
-        for (KeyValuePair<String, Document> entry : catalogueMap.entries()) {
-            String catalogue = entry.getKey();
-            Document document = entry.getValue();
+        for (Pair<String, Document> entry : catalogueMap.entries()) {
+            String catalogue = entry.getFirst();
+            Document document = entry.getSecond();
 
             Set<String> bin = new HashSet<>();
             boolean foundKey = false;

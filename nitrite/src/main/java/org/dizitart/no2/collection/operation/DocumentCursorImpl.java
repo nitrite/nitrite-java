@@ -20,6 +20,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.*;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 
@@ -31,9 +32,9 @@ import java.util.Iterator;
  * @author Anindya Chatterjee.
  */
 class DocumentCursorImpl implements DocumentCursor {
-    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
+    private final RecordStream<Pair<NitriteId, Document>> recordStream;
 
-    DocumentCursorImpl(RecordStream<KeyValuePair<NitriteId, Document>> recordStream) {
+    DocumentCursorImpl(RecordStream<Pair<NitriteId, Document>> recordStream) {
         this.recordStream = recordStream;
     }
 
@@ -61,31 +62,31 @@ class DocumentCursorImpl implements DocumentCursor {
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
+        Iterator<Pair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new DocumentCursorIterator(iterator);
     }
 
     private void validateProjection(Document projection) {
-        for (KeyValuePair<String, Object> kvp : projection) {
+        for (Pair<String, Object> kvp : projection) {
             validateKeyValuePair(kvp);
         }
     }
 
-    private void validateKeyValuePair(KeyValuePair<String, Object> kvp) {
-        if (kvp.getValue() != null) {
-            if (!(kvp.getValue() instanceof Document)) {
+    private void validateKeyValuePair(Pair<String, Object> kvp) {
+        if (kvp.getSecond() != null) {
+            if (!(kvp.getSecond() instanceof Document)) {
                 throw new ValidationException("projection contains non-null values");
             } else {
-                validateProjection((Document) kvp.getValue());
+                validateProjection((Document) kvp.getSecond());
             }
         }
     }
 
     private static class DocumentCursorIterator implements Iterator<Document> {
-        private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
+        private final Iterator<Pair<NitriteId, Document>> iterator;
 
-        DocumentCursorIterator(Iterator<KeyValuePair<NitriteId, Document>> iterator) {
+        DocumentCursorIterator(Iterator<Pair<NitriteId, Document>> iterator) {
             this.iterator = iterator;
         }
 
@@ -96,8 +97,8 @@ class DocumentCursorImpl implements DocumentCursor {
 
         @Override
         public Document next() {
-            KeyValuePair<NitriteId, Document> next = iterator.next();
-            Document document = next.getValue();
+            Pair<NitriteId, Document> next = iterator.next();
+            Document document = next.getSecond();
             if (document != null) {
                 return document.clone();
             }

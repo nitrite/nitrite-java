@@ -19,7 +19,7 @@ package org.dizitart.no2.filters;
 import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.ComparableIndexer;
 import org.dizitart.no2.index.TextIndexer;
@@ -75,8 +75,8 @@ class EqualsFilter extends IndexAwareFilter {
     }
 
     @Override
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
-        Document document = element.getValue();
+    public boolean apply(Pair<NitriteId, Document> element) {
+        Document document = element.getSecond();
         Object fieldValue = document.get(getField());
         return deepEquals(fieldValue, getValue());
     }

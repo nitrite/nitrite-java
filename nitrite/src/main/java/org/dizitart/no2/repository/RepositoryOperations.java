@@ -20,7 +20,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.filters.NitriteFilter;
@@ -89,9 +89,9 @@ class RepositoryOperations {
 
     void serializeFields(Document document) {
         if (document != null) {
-            for (KeyValuePair<String, Object> keyValuePair : document) {
-                String key = keyValuePair.getKey();
-                Object value = keyValuePair.getValue();
+            for (Pair<String, Object> pair : document) {
+                String key = pair.getFirst();
+                Object value = pair.getSecond();
                 Object serializedValue;
                 serializedValue = nitriteMapper.convert(value, Document.class);
                 document.put(key, serializedValue);

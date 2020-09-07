@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;

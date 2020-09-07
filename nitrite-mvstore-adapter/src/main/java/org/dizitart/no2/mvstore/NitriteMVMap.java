@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.mvstore;
 
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
@@ -104,8 +104,8 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public RecordStream<KeyValuePair<Key, Value>> entries() {
-        return () -> new Iterator<KeyValuePair<Key, Value>>() {
+    public RecordStream<Pair<Key, Value>> entries() {
+        return () -> new Iterator<Pair<Key, Value>>() {
             final Iterator<Map.Entry<Key, Value>> entryIterator = mvMap.entrySet().iterator();
 
             @Override
@@ -114,9 +114,9 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
             }
 
             @Override
-            public KeyValuePair<Key, Value> next() {
+            public Pair<Key, Value> next() {
                 Map.Entry<Key, Value> entry = entryIterator.next();
-                return new KeyValuePair<>(entry.getKey(), entry.getValue());
+                return new Pair<>(entry.getKey(), entry.getValue());
             }
         };
     }

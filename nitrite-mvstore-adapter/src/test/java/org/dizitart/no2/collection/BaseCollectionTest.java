@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2;
+package org.dizitart.no2.collection;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;

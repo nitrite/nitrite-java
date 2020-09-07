@@ -19,7 +19,7 @@ package org.dizitart.no2.index;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.fulltext.EnglishTextTokenizer;
@@ -221,10 +221,10 @@ public class NitriteTextIndexer implements TextIndexer {
         Set<NitriteId> idSet = new LinkedHashSet<>();
         String term = searchString.substring(0, searchString.length() - 1);
 
-        for (KeyValuePair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
-            String key = (String) entry.getKey();
+        for (Pair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
+            String key = (String) entry.getFirst();
             if (key.startsWith(term.toLowerCase())) {
-                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getValue());
+                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getSecond());
             }
         }
         return idSet;
@@ -236,10 +236,10 @@ public class NitriteTextIndexer implements TextIndexer {
             = getIndexMap(collectionName, field);
         Set<NitriteId> idSet = new LinkedHashSet<>();
 
-        for (KeyValuePair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
-            String key = (String) entry.getKey();
+        for (Pair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
+            String key = (String) entry.getFirst();
             if (key.contains(term.toLowerCase())) {
-                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getValue());
+                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getSecond());
             }
         }
         return idSet;
@@ -256,10 +256,10 @@ public class NitriteTextIndexer implements TextIndexer {
         Set<NitriteId> idSet = new LinkedHashSet<>();
         String term = searchString.substring(1);
 
-        for (KeyValuePair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
-            String key = (String) entry.getKey();
+        for (Pair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
+            String key = (String) entry.getFirst();
             if (key.endsWith(term.toLowerCase())) {
-                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getValue());
+                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getSecond());
             }
         }
         return idSet;

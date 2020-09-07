@@ -18,7 +18,7 @@ package org.dizitart.no2.store;
 
 import lombok.EqualsAndHashCode;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -47,8 +47,8 @@ public class StoreInfo {
         document.remove(DOC_REVISION);
         document.remove(DOC_MODIFIED);
 
-        for (KeyValuePair<String, Object> keyValuePair : document) {
-            info.put(keyValuePair.getKey(), keyValuePair.getValue().toString());
+        for (Pair<String, Object> pair : document) {
+            info.put(pair.getFirst(), pair.getSecond().toString());
         }
     }
 }

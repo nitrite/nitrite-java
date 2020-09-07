@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.BaseCollectionTest;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.ValidationException;

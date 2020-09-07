@@ -17,7 +17,7 @@
 package org.dizitart.no2.common.util;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.mapper.NitriteMapper;
 
@@ -89,11 +89,11 @@ public class DocumentUtils {
 
     private static Document removeValues(Document document) {
         if (document == null) return null;
-        for (KeyValuePair<String, Object> entry : document) {
-            if (entry.getValue() instanceof Document) {
-                document.put(entry.getKey(), removeValues((Document) entry.getValue()));
+        for (Pair<String, Object> entry : document) {
+            if (entry.getSecond() instanceof Document) {
+                document.put(entry.getFirst(), removeValues((Document) entry.getSecond()));
             } else {
-                document.put(entry.getKey(), null);
+                document.put(entry.getFirst(), null);
             }
         }
         return document;

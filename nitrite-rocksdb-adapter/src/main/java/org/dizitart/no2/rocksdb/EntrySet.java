@@ -1,12 +1,12 @@
 package org.dizitart.no2.rocksdb;
 
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.rocksdb.*;
 
 import java.util.Iterator;
 
-class EntrySet<K, V> implements Iterable<KeyValuePair<K, V>> {
+class EntrySet<K, V> implements Iterable<Pair<K, V>> {
     private final ObjectFormatter objectFormatter;
     private final RocksDB rocksDB;
     private final ColumnFamilyHandle columnFamilyHandle;
@@ -24,11 +24,11 @@ class EntrySet<K, V> implements Iterable<KeyValuePair<K, V>> {
 
     @Override
     @SuppressWarnings("NullableProblems")
-    public Iterator<KeyValuePair<K, V>> iterator() {
+    public Iterator<Pair<K, V>> iterator() {
         return new EntryIterator();
     }
 
-    private class EntryIterator implements Iterator<KeyValuePair<K, V>> {
+    private class EntryIterator implements Iterator<Pair<K, V>> {
         private final RocksIterator rawEntryIterator;
 
         public EntryIterator() {
@@ -51,12 +51,12 @@ class EntrySet<K, V> implements Iterable<KeyValuePair<K, V>> {
 
         @Override
         @SuppressWarnings("unchecked")
-        public KeyValuePair<K, V> next() {
+        public Pair<K, V> next() {
             K key = (K) objectFormatter.decodeKey(rawEntryIterator.key(), keyType);
             try {
                 V value = (V) objectFormatter.decode(rawEntryIterator.value(), valueType);
                 rawEntryIterator.next();
-                return new KeyValuePair<>(key, value);
+                return new Pair<>(key, value);
             } catch (Exception e) {
                 System.out.println(new String(rawEntryIterator.value()));
                 throw e;

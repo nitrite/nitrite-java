@@ -16,13 +16,10 @@
 
 package org.dizitart.no2.collection;
 
-import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.junit.After;
 import org.junit.Test;
-
-import java.io.File;
 
 import static org.dizitart.no2.TestUtil.createDb;
 import static org.junit.Assert.assertEquals;

@@ -19,7 +19,7 @@ package org.dizitart.no2.collection.operation;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
@@ -35,11 +35,11 @@ import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
  * @author Anindya Chatterjee.
  */
 class JoinedDocumentStream implements RecordStream<Document> {
-    private final RecordStream<KeyValuePair<NitriteId, Document>> recordStream;
+    private final RecordStream<Pair<NitriteId, Document>> recordStream;
     private final DocumentCursor foreignCursor;
     private final Lookup lookup;
 
-    JoinedDocumentStream(RecordStream<KeyValuePair<NitriteId, Document>> recordStream,
+    JoinedDocumentStream(RecordStream<Pair<NitriteId, Document>> recordStream,
                          DocumentCursor foreignCursor,
                          Lookup lookup) {
         this.recordStream = recordStream;
@@ -50,7 +50,7 @@ class JoinedDocumentStream implements RecordStream<Document> {
 
     @Override
     public Iterator<Document> iterator() {
-        Iterator<KeyValuePair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
+        Iterator<Pair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new JoinedDocumentIterator(iterator);
     }
@@ -61,9 +61,9 @@ class JoinedDocumentStream implements RecordStream<Document> {
     }
 
     private class JoinedDocumentIterator implements Iterator<Document> {
-        private final Iterator<KeyValuePair<NitriteId, Document>> iterator;
+        private final Iterator<Pair<NitriteId, Document>> iterator;
 
-        JoinedDocumentIterator(Iterator<KeyValuePair<NitriteId, Document>> iterator) {
+        JoinedDocumentIterator(Iterator<Pair<NitriteId, Document>> iterator) {
             this.iterator = iterator;
         }
 
@@ -74,8 +74,8 @@ class JoinedDocumentStream implements RecordStream<Document> {
 
         @Override
         public Document next() {
-            KeyValuePair<NitriteId, Document> next = iterator.next();
-            Document document = next.getValue();
+            Pair<NitriteId, Document> next = iterator.next();
+            Document document = next.getSecond();
             if (document != null) {
                 return join(document.clone(), foreignCursor, lookup);
             }

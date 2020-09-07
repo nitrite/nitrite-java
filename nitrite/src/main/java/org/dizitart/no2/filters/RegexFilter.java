@@ -18,7 +18,7 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 
 import java.util.regex.Matcher;
@@ -36,8 +36,8 @@ class RegexFilter extends FieldBasedFilter {
     }
 
     @Override
-    public boolean apply(KeyValuePair<NitriteId, Document> element) {
-        Document document = element.getValue();
+    public boolean apply(Pair<NitriteId, Document> element) {
+        Document document = element.getSecond();
         Object fieldValue = document.get(getField());
         if (fieldValue != null) {
             if (fieldValue instanceof String) {

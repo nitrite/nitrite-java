@@ -19,6 +19,7 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.TransactionalCollection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
@@ -129,6 +130,11 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
+    public void clear() {
+        collection.clear();
+    }
+
+    @Override
     public Cursor<T> find() {
         return new ObjectCursor<>(nitriteMapper, collection.find(), type);
     }
@@ -172,6 +178,12 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     @Override
     public NitriteStore<?> getStore() {
         return collection.getStore();
+    }
+
+    @Override
+    public TransactionalRepository<T> beginTransaction() {
+        TransactionalCollection transactionalCollection = getDocumentCollection().beginTransaction();
+        return new DefaultTransactionalRepository<>(this, transactionalCollection, operations, nitriteMapper);
     }
 
     @Override

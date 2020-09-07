@@ -3,7 +3,7 @@ package org.dizitart.no2.mapdb.serializers;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
@@ -97,17 +97,17 @@ public class NitriteSerializers {
     }
 
     @SuppressWarnings({"rawtypes"})
-    private static class KeyValuePairSerializer extends GroupSerializerObjectArray<KeyValuePair> {
+    private static class KeyValuePairSerializer extends GroupSerializerObjectArray<Pair> {
         private final SerializerJava serializer = new SerializerJava();
 
         @Override
-        public void serialize(@NotNull DataOutput2 out, @NotNull KeyValuePair value) throws IOException {
+        public void serialize(@NotNull DataOutput2 out, @NotNull Pair value) throws IOException {
             serializer.serialize(out, value);
         }
 
         @Override
-        public KeyValuePair deserialize(@NotNull DataInput2 input, int available) throws IOException {
-            return (KeyValuePair) serializer.deserialize(input, available);
+        public Pair deserialize(@NotNull DataInput2 input, int available) throws IOException {
+            return (Pair) serializer.deserialize(input, available);
         }
     }
 
@@ -203,7 +203,7 @@ public class NitriteSerializers {
 
     public static void registerAll() {
         Serializers.registerSerializer(NitriteId.class, new NitriteIdSerializer());
-        Serializers.registerSerializer(KeyValuePair.class, new KeyValuePairSerializer());
+        Serializers.registerSerializer(Pair.class, new KeyValuePairSerializer());
         Serializers.registerSerializer(Document.class, new DocumentSerializer());
         Serializers.registerSerializer(IndexMeta.class, new IndexMetaSerializer());
         Serializers.registerSerializer(IndexEntry.class, new IndexEntrySerializer());

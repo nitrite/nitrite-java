@@ -8,7 +8,7 @@ import com.esotericsoftware.kryo.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.KeyValuePair;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
@@ -35,25 +35,25 @@ public class NitriteSerializers {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static class KeyValuePairSerializer extends Serializer<KeyValuePair> {
+    private static class PairSerializer extends Serializer<Pair> {
 
         @Override
-        public void write(Kryo kryo, Output output, KeyValuePair entry) {
-            kryo.writeClassAndObject(output, entry.getKey());
-            kryo.writeClassAndObject(output, entry.getValue());
+        public void write(Kryo kryo, Output output, Pair entry) {
+            kryo.writeClassAndObject(output, entry.getFirst());
+            kryo.writeClassAndObject(output, entry.getSecond());
         }
 
         @Override
-        public KeyValuePair read(Kryo kryo, Input input, Class<KeyValuePair> type) {
-            KeyValuePair keyValuePair = new KeyValuePair<>();
-            kryo.reference(keyValuePair);
+        public Pair read(Kryo kryo, Input input, Class<Pair> type) {
+            Pair pair = new Pair<>();
+            kryo.reference(pair);
 
             Object key = kryo.readClassAndObject(input);
-            keyValuePair.setKey(key);
+            pair.setFirst(key);
 
             Object value = kryo.readClassAndObject(input);
-            keyValuePair.setValue(value);
-            return new KeyValuePair<>(key, value);
+            pair.setSecond(value);
+            return new Pair<>(key, value);
         }
     }
 
@@ -167,7 +167,7 @@ public class NitriteSerializers {
 
     public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
-        kryoObjectFormatter.registerSerializer(KeyValuePair.class, new KeyValuePairSerializer());
+        kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
         kryoObjectFormatter.registerSerializer(Document.class, new DocumentSerializer());
         kryoObjectFormatter.registerSerializer(IndexMeta.class, new IndexMetaSerializer());
         kryoObjectFormatter.registerSerializer(IndexEntry.class, new IndexEntrySerializer());
