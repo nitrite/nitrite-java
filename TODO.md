@@ -7,6 +7,15 @@
 - LuceneIndexer, test with testIssue174()
 - Ensure every error event in replication
 
+    Rename Entity (Repository)
+    Delete Entity (Repository)
+    Add Field
+    Rename Field
+    Delete Field
+    Change Datatype of Field
+    Change Id field
+    Change Indexed field
+
 DataGate Server:
 
 https://stackoverflow.com/questions/42644779/how-to-secure-a-websocket-endpoint-in-java-ee

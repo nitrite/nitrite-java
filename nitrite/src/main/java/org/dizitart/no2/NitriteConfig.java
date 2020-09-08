@@ -22,10 +22,15 @@ import lombok.ToString;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.Indexer;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.migration.Migration;
+import org.dizitart.no2.migration.VersionInfo;
 import org.dizitart.no2.module.NitriteModule;
 import org.dizitart.no2.module.NitritePlugin;
 import org.dizitart.no2.module.PluginManager;
 import org.dizitart.no2.store.NitriteStore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A class to configure {@link Nitrite} database.
@@ -49,8 +54,15 @@ public class NitriteConfig {
 
     private boolean configured = false;
 
+    @Getter
+    private final Map<VersionInfo, Migration> migrationPaths;
+
+    @Getter
+    private String version;
+
     public NitriteConfig() {
-        pluginManager = new PluginManager(this);
+        this.pluginManager = new PluginManager(this);
+        this.migrationPaths = new HashMap<>();
     }
 
     /**
@@ -79,6 +91,28 @@ public class NitriteConfig {
                 " initialization");
         }
         pluginManager.loadModule(module);
+        return this;
+    }
+
+    public NitriteConfig addMigration(Migration migration) {
+        if (configured) {
+            throw new InvalidOperationException("cannot add migration steps after database" +
+                " initialization");
+        }
+
+        if (migration != null) {
+            VersionInfo versionInfo = migration.getVersionInfo();
+            migrationPaths.put(versionInfo, migration);
+        }
+        return this;
+    }
+
+    public NitriteConfig version(String version) {
+        if (configured) {
+            throw new InvalidOperationException("cannot add version info after database" +
+                " initialization");
+        }
+        this.version = version;
         return this;
     }
 
