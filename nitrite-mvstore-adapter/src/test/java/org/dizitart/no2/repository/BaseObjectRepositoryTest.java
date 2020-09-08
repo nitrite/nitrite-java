@@ -18,11 +18,13 @@ package org.dizitart.no2.repository;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.data.*;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -52,6 +54,9 @@ public abstract class BaseObjectRepositoryTest {
     ObjectRepository<ClassA> aObjectRepository;
     ObjectRepository<ClassC> cObjectRepository;
     private final String fileName = getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}, " +
         "Compressed = {2}, AutoCommit = {3}")

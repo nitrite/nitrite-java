@@ -19,12 +19,12 @@ package org.dizitart.no2.rocksdb;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
 
 import static org.dizitart.no2.rocksdb.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.rocksdb.TestUtil.createDb;
 
 
 /**
@@ -33,6 +33,9 @@ import static org.dizitart.no2.rocksdb.TestUtil.createDb;
 public class NitriteBuilderNegativeTest {
     private final String filePath = getRandomTempDbFile();
     private Nitrite db1, db2;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test(expected = NitriteIOException.class)
     public void testOpenWithLock() {

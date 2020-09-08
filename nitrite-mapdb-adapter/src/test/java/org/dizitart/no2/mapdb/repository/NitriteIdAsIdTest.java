@@ -21,12 +21,14 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.exceptions.InvalidIdException;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.TestUtil;
 import org.dizitart.no2.mapdb.repository.data.WithNitriteId;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -44,6 +46,9 @@ public class NitriteIdAsIdTest {
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
     private ObjectRepository<WithNitriteId> repo;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void before() {

@@ -17,12 +17,14 @@
 package org.dizitart.no2.mvstore;
 
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -41,6 +43,9 @@ import static org.junit.Assert.assertNotNull;
 public class NitriteMapStressTest {
     private final String dbPath = getRandomTempDbFile();
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testWithInsertReadUpdate() {

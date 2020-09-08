@@ -16,6 +16,8 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.Retry;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -42,6 +44,9 @@ public class NumbersTest {
 
     @Parameterized.Parameter(value = 2)
     public int result;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "compare({0}, {1}) = {2}")
     public static Collection<Object[]> data() {

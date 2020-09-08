@@ -18,11 +18,16 @@ package org.dizitart.no2.rocksdb;
 
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.InvalidIdException;
+import org.junit.Rule;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 public class NitriteIdTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testLimit() {

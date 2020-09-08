@@ -19,7 +19,9 @@ package org.dizitart.no2.mapdb.collection;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.mapdb.Retry;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.dizitart.no2.mapdb.TestUtil.createDb;
@@ -30,6 +32,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class NitriteCollectionTest {
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testAttributes() {

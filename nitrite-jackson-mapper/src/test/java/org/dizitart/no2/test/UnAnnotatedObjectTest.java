@@ -34,9 +34,8 @@ import static org.junit.Assert.assertFalse;
 public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
 
     @Test
-    @SuppressWarnings("unchecked")
     public void testFind() {
-        Cursor cursor = aObjectRepository.find();
+        Cursor<ClassA> cursor = aObjectRepository.find();
         assertEquals(cursor.size(), 10);
         assertFalse(cursor.isEmpty());
 
@@ -66,12 +65,12 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
             System.out.println(classA);
         }
 
-        cursor = cObjectRepository.find(where("id").gt(900)).
+        Cursor<ClassC> cursor2 = cObjectRepository.find(where("id").gt(900)).
             sort("id", SortOrder.Descending).skipLimit(2, 7);
-        System.out.println("Available - " + !cursor.isEmpty());
-        System.out.println("Total Size - " + cursor.size());
+        System.out.println("Available - " + !cursor2.isEmpty());
+        System.out.println("Total Size - " + cursor2.size());
 
-        Iterable<ClassC> findRecordC = cursor.project(ClassC.class);
+        Iterable<ClassC> findRecordC = cursor2.project(ClassC.class);
         for (ClassC classC : findRecordC) {
             System.out.println(classC);
         }

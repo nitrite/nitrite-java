@@ -24,6 +24,7 @@ import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
+import org.junit.Rule;
 import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -42,6 +43,9 @@ import static org.junit.Assert.assertEquals;
 public class NitriteStressTest extends AbstractTest {
     private static final int TEST_SET_COUNT = 15000;
     private final PodamFactory podamFactory = new PodamFactoryImpl();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void stressTest() {

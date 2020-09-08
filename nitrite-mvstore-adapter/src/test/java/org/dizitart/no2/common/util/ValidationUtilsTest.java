@@ -16,7 +16,9 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
@@ -28,6 +30,8 @@ import static org.junit.Assert.assertTrue;
  * @author Anindya Chatterjee.
  */
 public class ValidationUtilsTest {
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testNotEmpty() {

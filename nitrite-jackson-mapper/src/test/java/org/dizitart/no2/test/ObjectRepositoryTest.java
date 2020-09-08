@@ -24,6 +24,7 @@ import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.test.data.*;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -42,6 +43,9 @@ import static org.junit.Assert.*;
 public class ObjectRepositoryTest {
     private final String dbPath = BaseObjectRepositoryTest.getRandomTempDbFile();
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

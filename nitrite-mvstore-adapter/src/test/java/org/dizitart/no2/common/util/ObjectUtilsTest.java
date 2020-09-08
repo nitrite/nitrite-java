@@ -17,8 +17,10 @@
 package org.dizitart.no2.common.util;
 
 import lombok.Data;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.repository.data.ChildClass;
 import org.dizitart.no2.repository.data.Employee;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.time.LocalDateTime;
@@ -29,6 +31,9 @@ import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
  * @author Anindya Chatterjee.
  */
 public class ObjectUtilsTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testNewInstance() {

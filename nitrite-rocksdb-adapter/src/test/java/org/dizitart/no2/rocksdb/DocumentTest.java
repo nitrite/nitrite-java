@@ -21,10 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.*;
 import java.util.*;
@@ -39,6 +36,9 @@ import static org.junit.Assert.*;
  */
 public class DocumentTest {
     private Document doc;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

@@ -18,11 +18,15 @@ package org.dizitart.no2.mapdb;
 
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.InvalidIdException;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class NitriteIdTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testLimit() {

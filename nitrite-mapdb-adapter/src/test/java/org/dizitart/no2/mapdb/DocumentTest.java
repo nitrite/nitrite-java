@@ -23,6 +23,7 @@ import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.*;
@@ -39,6 +40,9 @@ import static org.junit.Assert.*;
  */
 public class DocumentTest {
     private Document doc;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

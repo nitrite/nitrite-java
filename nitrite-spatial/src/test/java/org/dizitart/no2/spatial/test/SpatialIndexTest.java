@@ -33,6 +33,7 @@ import org.dizitart.no2.spatial.SpatialModule;
 import org.dizitart.no2.spatial.mapper.GeometryExtension;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.locationtech.jts.awt.ShapeWriter;
 import org.locationtech.jts.geom.Coordinate;
@@ -68,6 +69,9 @@ public class SpatialIndexTest {
     private ObjectRepository<SpatialData> repository;
     private SpatialData object1, object2, object3;
     private Document doc1, doc2, doc3;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     public static void main(String[] args) {
         JFrame f = new JFrame();

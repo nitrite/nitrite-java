@@ -31,6 +31,7 @@ import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -54,6 +55,9 @@ public class StressTest {
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
     private NitriteCollection collection;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void before() {

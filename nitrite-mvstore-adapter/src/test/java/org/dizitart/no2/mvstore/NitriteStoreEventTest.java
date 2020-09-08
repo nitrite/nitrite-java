@@ -18,10 +18,12 @@ package org.dizitart.no2.mvstore;
 
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.store.events.EventInfo;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -40,6 +42,9 @@ import static org.junit.Assert.assertTrue;
 public class NitriteStoreEventTest {
     private String dbFile;
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void before() {

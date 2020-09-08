@@ -17,6 +17,7 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.collection.events.EventType;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -25,6 +26,9 @@ import static org.junit.Assert.assertEquals;
  * @author Anindya Chatterjee.
  */
 public class EventTypeTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testValueOf() {

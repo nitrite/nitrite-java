@@ -23,17 +23,18 @@ import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.index.Indexer;
-import org.dizitart.no2.mvstore.MVStoreModule;
-import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
-import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.mvstore.MVStoreConfig;
+import org.dizitart.no2.mvstore.MVStoreModule;
+import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
+import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.StoreConfig;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
@@ -59,6 +60,9 @@ public class NitriteBuilderTest {
     private String filePath;
     private Nitrite db;
     private Nitrite fakeDb;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void startup() {

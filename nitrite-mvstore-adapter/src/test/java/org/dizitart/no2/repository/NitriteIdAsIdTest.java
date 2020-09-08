@@ -17,6 +17,7 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.TestUtil;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.WriteResult;
@@ -25,6 +26,7 @@ import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.repository.data.WithNitriteId;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -42,6 +44,9 @@ public class NitriteIdAsIdTest {
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
     private ObjectRepository<WithNitriteId> repo;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void before() {

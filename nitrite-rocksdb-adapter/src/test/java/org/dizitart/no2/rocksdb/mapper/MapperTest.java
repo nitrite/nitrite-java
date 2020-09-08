@@ -18,6 +18,8 @@ package org.dizitart.no2.rocksdb.mapper;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.mapper.MappableMapper;
+import org.dizitart.no2.rocksdb.Retry;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -31,6 +33,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class MapperTest {
     private MappableMapper mappableMapper;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testWithConverter() {

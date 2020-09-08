@@ -26,12 +26,14 @@ import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.mapdb.MapDBModule;
 import org.dizitart.no2.mapdb.MapDBModuleBuilder;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -60,6 +62,9 @@ public class RepositoryJoinTest {
     private final String fileName = getRandomTempDbFile();
     private ObjectRepository<Person> personRepository;
     private ObjectRepository<Address> addressRepository;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}")
     public static Collection<Object[]> data() {

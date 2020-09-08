@@ -19,6 +19,7 @@ package org.dizitart.no2.repository;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
@@ -31,6 +32,7 @@ import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.annotations.Id;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -63,6 +65,9 @@ public class RepositoryJoinTest {
     private final String fileName = getRandomTempDbFile();
     private ObjectRepository<Person> personRepository;
     private ObjectRepository<Address> addressRepository;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}, " +
         "Compressed = {2}, AutoCommit = {3}")

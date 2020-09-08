@@ -18,11 +18,13 @@ package org.dizitart.no2.rocksdb.common.event;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.events.EventType;
+import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.rocksdb.Retry;
 import org.dizitart.no2.rocksdb.RocksDBModule;
 import org.dizitart.no2.rocksdb.repository.data.Employee;
-import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -62,6 +64,9 @@ public class EventTest {
                 {true},
         });
     }
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

@@ -28,6 +28,7 @@ import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,6 +48,9 @@ public class NitriteIdAsIdTest {
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
     private ObjectRepository<WithNitriteId> repo;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void before() {

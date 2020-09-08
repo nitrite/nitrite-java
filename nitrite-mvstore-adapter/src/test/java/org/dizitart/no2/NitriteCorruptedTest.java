@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -45,6 +46,9 @@ public class NitriteCorruptedTest {
     private Thread thread;
     private final ExecutorService dbPool = ThreadPoolManager.getThreadPool(Runtime.getRuntime().availableProcessors(),
         "NitriteCorruptedTest");
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

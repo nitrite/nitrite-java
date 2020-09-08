@@ -7,12 +7,14 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.TransactionalCollection;
 import org.dizitart.no2.common.WriteResult;
+import org.dizitart.no2.rocksdb.Retry;
 import org.dizitart.no2.rocksdb.RocksDBModule;
 import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
 import org.dizitart.no2.rocksdb.serializers.JodaTimeKryoKeySerializer;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -50,6 +52,9 @@ public abstract class BaseTransactionTest {
             {true},
         });
     }
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

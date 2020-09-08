@@ -22,6 +22,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapper.Mappable;
@@ -34,6 +35,7 @@ import org.dizitart.no2.repository.data.Company;
 import org.dizitart.no2.repository.data.Note;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -48,6 +50,9 @@ import static org.junit.Assert.assertEquals;
 public class CustomFieldSeparatorTest {
     private Nitrite db;
     private ObjectRepository<EmployeeForCustomSeparator> repository;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

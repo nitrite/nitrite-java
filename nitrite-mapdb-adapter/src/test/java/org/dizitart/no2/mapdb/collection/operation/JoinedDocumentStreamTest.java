@@ -22,7 +22,9 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.dizitart.no2.mapdb.Retry;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -36,6 +38,9 @@ import static org.junit.Assert.assertNotNull;
  */
 public class JoinedDocumentStreamTest {
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testFindResult() {

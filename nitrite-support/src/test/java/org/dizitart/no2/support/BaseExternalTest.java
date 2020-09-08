@@ -23,6 +23,7 @@ import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +49,9 @@ public abstract class BaseExternalTest {
     protected String schemaFile;
     private String sourceDbFile;
     private String destDbFile;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     public static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";

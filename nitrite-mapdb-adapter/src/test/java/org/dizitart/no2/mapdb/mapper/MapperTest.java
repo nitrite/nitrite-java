@@ -18,7 +18,9 @@ package org.dizitart.no2.mapdb.mapper;
 
 import com.google.common.collect.Lists;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapper.MappableMapper;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Date;
@@ -31,6 +33,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class MapperTest {
     private MappableMapper mappableMapper;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testWithConverter() {

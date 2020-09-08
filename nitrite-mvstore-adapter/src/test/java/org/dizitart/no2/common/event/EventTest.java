@@ -18,6 +18,7 @@ package org.dizitart.no2.common.event;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
@@ -25,6 +26,7 @@ import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.data.Employee;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -62,6 +64,9 @@ public class EventTest {
     private Nitrite db;
     private ObjectRepository<Employee> employeeRepository;
     private SampleListenerCollection listener;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}, " +
             "Compressed = {2}, AutoCommit = {3}")

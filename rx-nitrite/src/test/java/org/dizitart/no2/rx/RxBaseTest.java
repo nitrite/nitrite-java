@@ -28,6 +28,7 @@ import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.annotations.Id;
 import org.junit.Before;
+import org.junit.Rule;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -45,6 +46,9 @@ public class RxBaseTest {
     List<Employee> testData;
     RxNitrite db;
     String dbPath = getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     private static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir")

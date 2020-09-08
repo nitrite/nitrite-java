@@ -47,7 +47,7 @@ import static org.junit.Assert.fail;
  * @author Anindya Chatterjee
  */
 public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
-    private String fileName = getRandomTempDbFile();
+    private final String fileName = getRandomTempDbFile();
     private ObjectRepository<TextData> textRepository;
 
     @Before

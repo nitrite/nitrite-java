@@ -22,15 +22,16 @@ import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.*;
 import java.util.*;
 
+import static org.dizitart.no2.TestUtil.parse;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.Iterables.listOf;
-import static org.dizitart.no2.TestUtil.parse;
 import static org.junit.Assert.*;
 
 /**
@@ -38,6 +39,9 @@ import static org.junit.Assert.*;
  */
 public class DocumentTest {
     private Document doc;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

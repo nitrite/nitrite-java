@@ -23,6 +23,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -30,8 +31,6 @@ import java.io.IOException;
 import java.io.Serializable;
 
 import static org.dizitart.no2.rocksdb.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.rocksdb.TestUtil.createDb;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Anindya Chatterjee
@@ -40,6 +39,9 @@ public class SerializabilityTest {
     private Nitrite db;
     private NitriteCollection collection;
     private File dbFile;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

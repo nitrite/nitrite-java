@@ -24,9 +24,8 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.Date;
@@ -53,6 +52,9 @@ public class MultiThreadedTest extends AbstractTest {
     private final Random generator = new Random();
     private final AtomicInteger docCounter = new AtomicInteger(0);
     private ExecutorService executor = ThreadPoolManager.getThreadPool(threadCount, "MultiThreadedTest");
+
+    @Rule
+    public Retry retry = new Retry(3);
 
 
     @Test

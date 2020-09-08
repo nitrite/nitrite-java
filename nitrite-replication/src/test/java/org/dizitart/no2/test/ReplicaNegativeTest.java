@@ -26,6 +26,7 @@ import org.dizitart.no2.test.server.Repository;
 import org.dizitart.no2.test.server.SimpleDataGateServer;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.concurrent.ExecutorService;
@@ -46,6 +47,9 @@ public class ReplicaNegativeTest {
     private String dbFile;
     private ExecutorService executorService;
     private Repository repository;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() throws Exception {

@@ -30,6 +30,7 @@ import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -62,9 +63,12 @@ public class RepositoryJoinTest {
     @Parameterized.Parameter(value = 4)
     public boolean isAutoCompact = false;
     protected Nitrite db;
-    private String fileName = getRandomTempDbFile();
+    private final String fileName = getRandomTempDbFile();
     private ObjectRepository<Person> personRepository;
     private ObjectRepository<Address> addressRepository;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}, " +
         "Compressed = {2}, AutoCommit = {3}, AutoCompact = {4}")

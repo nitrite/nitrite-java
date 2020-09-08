@@ -20,10 +20,12 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.mapdb.MapDBModule;
 import org.dizitart.no2.mapdb.MapDBModuleBuilder;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.repository.data.*;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -49,6 +51,9 @@ public abstract class BaseObjectRepositoryTest {
     ObjectRepository<ClassA> aObjectRepository;
     ObjectRepository<ClassC> cObjectRepository;
     private final String fileName = getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}")
     public static Collection<Object[]> data() {

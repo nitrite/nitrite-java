@@ -16,6 +16,7 @@
 
 package org.dizitart.no2;
 
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -29,6 +30,9 @@ import static org.junit.Assert.fail;
 public class DbWriteCloseReadTest {
     private final DbTestOperations operations = new DbTestOperations();
     private volatile boolean writeCompleted = false;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testWriteCloseRead() throws Exception {

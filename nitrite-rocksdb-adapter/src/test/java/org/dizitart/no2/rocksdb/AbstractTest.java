@@ -19,6 +19,7 @@ package org.dizitart.no2.rocksdb;
 import org.dizitart.no2.Nitrite;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -29,6 +30,9 @@ import java.text.ParseException;
 public abstract class AbstractTest {
     protected final String fileName = DbTestOperations.getRandomTempDbFile();
     protected Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() throws ParseException {

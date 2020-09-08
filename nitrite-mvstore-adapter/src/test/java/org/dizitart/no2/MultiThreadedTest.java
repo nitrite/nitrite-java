@@ -24,6 +24,7 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -66,6 +67,9 @@ public class MultiThreadedTest {
             {true}
         });
     }
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testOperations() throws InterruptedException {

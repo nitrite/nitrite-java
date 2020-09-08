@@ -35,6 +35,7 @@ import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.StoreConfig;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -56,6 +57,9 @@ public class NitriteBuilderTest {
     private String filePath;
     private Nitrite db;
     private Nitrite fakeDb;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void startup() {

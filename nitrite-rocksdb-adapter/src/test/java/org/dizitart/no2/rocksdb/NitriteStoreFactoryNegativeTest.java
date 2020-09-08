@@ -19,13 +19,13 @@ package org.dizitart.no2.rocksdb;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.NitriteException;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.rocksdb.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.rocksdb.TestUtil.createDb;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -33,6 +33,9 @@ import static org.junit.Assert.assertEquals;
  */
 public class NitriteStoreFactoryNegativeTest {
     private final String fileName = getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test(expected = NitriteException.class)
     public void testOpenSecuredWithoutCredential() throws IOException {

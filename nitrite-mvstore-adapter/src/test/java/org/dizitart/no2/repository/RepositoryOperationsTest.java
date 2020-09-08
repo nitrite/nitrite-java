@@ -18,6 +18,7 @@ package org.dizitart.no2.repository;
 
 import lombok.Getter;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.TestUtil;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.util.ObjectUtilsTest;
@@ -31,6 +32,7 @@ import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.InheritIndices;
 import org.dizitart.no2.repository.data.Employee;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -47,6 +49,9 @@ import static org.junit.Assert.assertFalse;
 public class RepositoryOperationsTest {
     private RepositoryOperations operations;
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

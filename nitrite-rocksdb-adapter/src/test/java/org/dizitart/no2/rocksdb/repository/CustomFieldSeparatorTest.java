@@ -24,17 +24,19 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.rocksdb.RocksDBModule;
-import org.dizitart.no2.rocksdb.repository.data.Company;
-import org.dizitart.no2.rocksdb.repository.data.Note;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.Indices;
+import org.dizitart.no2.rocksdb.Retry;
+import org.dizitart.no2.rocksdb.RocksDBModule;
+import org.dizitart.no2.rocksdb.repository.data.Company;
+import org.dizitart.no2.rocksdb.repository.data.Note;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -53,6 +55,9 @@ public class CustomFieldSeparatorTest {
     private final String fileName = getRandomTempDbFile();
     private ObjectRepository<EmployeeForCustomSeparator> repository;
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

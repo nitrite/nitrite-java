@@ -24,6 +24,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.WriteResult;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -51,6 +52,9 @@ public abstract class BaseCollectionTest {
     protected Document doc1, doc2, doc3;
     protected SimpleDateFormat simpleDateFormat;
     private final String fileName = getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Protected = {1}")
     public static Collection<Object[]> data() {

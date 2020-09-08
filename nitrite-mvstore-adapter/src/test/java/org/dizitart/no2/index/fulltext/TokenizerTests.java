@@ -16,6 +16,8 @@
 
 package org.dizitart.no2.index.fulltext;
 
+import org.dizitart.no2.Retry;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -29,6 +31,9 @@ import static org.junit.Assert.assertArrayEquals;
  * @author Anindya Chatterjee
  */
 public class TokenizerTests {
+    @Rule
+    public Retry retry = new Retry(3);
+
     @Test
     public void testTokenize() throws IOException {
         TextTokenizer tokenizer = new BaseTextTokenizer() {

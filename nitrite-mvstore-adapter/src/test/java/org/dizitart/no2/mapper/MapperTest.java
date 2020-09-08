@@ -16,7 +16,9 @@
 
 package org.dizitart.no2.mapper;
 
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -30,6 +32,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class MapperTest {
     private MappableMapper mappableMapper;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testWithConverter() {

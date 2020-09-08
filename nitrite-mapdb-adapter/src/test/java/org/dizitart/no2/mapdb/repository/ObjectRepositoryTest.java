@@ -25,6 +25,7 @@ import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapdb.MapDBModule;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.repository.data.*;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.MappableMapper;
@@ -36,6 +37,7 @@ import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -55,6 +57,9 @@ import static org.junit.Assert.*;
 public class ObjectRepositoryTest {
     private final String dbPath = getRandomTempDbFile();
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

@@ -19,6 +19,8 @@ package org.dizitart.no2.mapdb.fulltext;
 import org.dizitart.no2.index.fulltext.BaseTextTokenizer;
 import org.dizitart.no2.index.fulltext.Languages;
 import org.dizitart.no2.index.fulltext.TextTokenizer;
+import org.dizitart.no2.mapdb.Retry;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -32,6 +34,9 @@ import static org.junit.Assert.assertArrayEquals;
  * @author Anindya Chatterjee
  */
 public class TokenizerTests {
+    @Rule
+    public Retry retry = new Retry(3);
+
     @Test
     public void testTokenize() throws IOException {
         TextTokenizer tokenizer = new BaseTextTokenizer() {

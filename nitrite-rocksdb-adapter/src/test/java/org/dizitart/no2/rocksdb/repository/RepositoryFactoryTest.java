@@ -27,9 +27,11 @@ import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.repository.RepositoryFactory;
 import org.dizitart.no2.rocksdb.DbTestOperations;
+import org.dizitart.no2.rocksdb.Retry;
 import org.dizitart.no2.rocksdb.TestUtil;
 import org.dizitart.no2.store.NitriteStore;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -43,6 +45,9 @@ import static org.junit.Assert.assertNotNull;
 public class RepositoryFactoryTest {
     private Nitrite db;
     private final String fileName = DbTestOperations.getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testRepositoryFactory() {

@@ -9,8 +9,10 @@ import org.dizitart.no2.collection.TransactionalCollection;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.mapdb.MapDBModule;
 import org.dizitart.no2.mapdb.MapDBModuleBuilder;
+import org.dizitart.no2.mapdb.Retry;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -53,6 +55,9 @@ public abstract class BaseTransactionTest {
             {true, true},
         });
     }
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

@@ -22,10 +22,10 @@ import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.TestUtil.createDb;
@@ -36,6 +36,9 @@ import static org.dizitart.no2.TestUtil.createDb;
 public class NitriteBuilderNegativeTest {
     private Nitrite db;
     private String filePath;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test(expected = NitriteIOException.class)
     public void testCreateReadonlyDatabase() {

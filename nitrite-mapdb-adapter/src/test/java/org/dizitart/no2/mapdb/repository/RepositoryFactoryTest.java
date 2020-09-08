@@ -25,10 +25,12 @@ import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.TestUtil;
 import org.dizitart.no2.repository.RepositoryFactory;
 import org.dizitart.no2.store.NitriteStore;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -40,6 +42,9 @@ import static org.junit.Assert.assertNotNull;
  */
 public class RepositoryFactoryTest {
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testRepositoryFactory() {

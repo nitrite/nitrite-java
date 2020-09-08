@@ -4,11 +4,13 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.mapdb.MapDBModule;
 import org.dizitart.no2.mapdb.MapDBModuleBuilder;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.repository.data.*;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.TransactionalRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -50,6 +52,9 @@ public abstract class BaseTransactionalRepositoryTest {
             {true, true},
         });
     }
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

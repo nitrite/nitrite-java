@@ -16,6 +16,8 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.Retry;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
@@ -26,6 +28,9 @@ import static org.junit.Assert.assertTrue;
  * @author Anindya Chatterjee.
  */
 public class StringUtilsTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testIsNullOrEmpty() {

@@ -16,12 +16,14 @@
 
 package org.dizitart.no2.mvstore;
 
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.store.UserCredential;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,13 +32,16 @@ import java.nio.file.Paths;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.common.Constants.USER_MAP;
-import static org.dizitart.no2.mvstore.StoreFactory.*;
+import static org.dizitart.no2.mvstore.StoreFactory.openSecurely;
 
 /**
  * @author Anindya Chatterjee
  */
 public class StoreFactoryTest {
     private String dbFile;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void before() {

@@ -19,10 +19,12 @@ package org.dizitart.no2.rocksdb.repository;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.rocksdb.Retry;
 import org.dizitart.no2.rocksdb.RocksDBModule;
 import org.dizitart.no2.rocksdb.repository.data.*;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -53,6 +55,9 @@ public abstract class BaseObjectRepositoryTest {
             {true},
         });
     }
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

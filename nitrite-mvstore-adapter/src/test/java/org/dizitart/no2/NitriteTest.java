@@ -37,6 +37,7 @@ import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -72,6 +73,9 @@ public class NitriteTest {
     private NitriteCollection collection;
     private SimpleDateFormat simpleDateFormat;
     private final String fileName = getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() throws ParseException {

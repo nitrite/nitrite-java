@@ -23,6 +23,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.index.IndexType;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.dizitart.no2.common.util.DocumentUtils.isSimilar;
@@ -37,6 +38,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class CollectionFieldIndexTest {
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

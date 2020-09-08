@@ -16,12 +16,14 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.filters.IndexAwareFilter;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.MappableMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.dizitart.no2.collection.Document.createDocument;
@@ -30,6 +32,10 @@ import static org.dizitart.no2.common.util.DocumentUtils.*;
 import static org.junit.Assert.*;
 
 public class DocumentUtilsTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
+
     @Test
     public void testIsRecent() throws InterruptedException {
         Document first = createDocument("key1", "value1");

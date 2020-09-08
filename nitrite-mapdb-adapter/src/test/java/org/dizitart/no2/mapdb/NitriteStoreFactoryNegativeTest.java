@@ -21,6 +21,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -36,6 +37,9 @@ import static org.junit.Assert.assertEquals;
 public class NitriteStoreFactoryNegativeTest {
     private Nitrite db;
     private final String fileName = getRandomTempDbFile();
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test(expected = NitriteException.class)
     public void testOpenSecuredWithoutCredential() {

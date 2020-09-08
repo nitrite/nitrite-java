@@ -18,6 +18,7 @@ package org.dizitart.no2.rocksdb;
 
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexType;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -26,6 +27,9 @@ import static org.junit.Assert.assertEquals;
  * @author Anindya Chatterjee.
  */
 public class IndexEntryTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testIndexEquals() {

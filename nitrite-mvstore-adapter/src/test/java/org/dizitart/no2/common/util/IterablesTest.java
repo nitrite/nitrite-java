@@ -16,6 +16,8 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.Retry;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -30,6 +32,10 @@ import static org.junit.Assert.assertNull;
  * @author Anindya Chatterjee.
  */
 public class IterablesTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
+
     @Test
     public void testFirstOrDefault() {
         assertNull(firstOrNull(new ArrayList<>()));

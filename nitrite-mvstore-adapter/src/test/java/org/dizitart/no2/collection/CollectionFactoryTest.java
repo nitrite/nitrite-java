@@ -17,7 +17,9 @@
 package org.dizitart.no2.collection;
 
 import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.junit.Rule;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNotNull;
@@ -26,6 +28,9 @@ import static org.junit.Assert.assertNotNull;
  * @author Anindya Chatterjee
  */
 public class CollectionFactoryTest {
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test(expected = ValidationException.class)
     public void testGetCollectionMapStoreNull() {

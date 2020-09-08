@@ -23,6 +23,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.index.IndexType;
+import org.junit.Rule;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +47,9 @@ import static org.junit.Assert.assertTrue;
 public class DbTestOperations {
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     public static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";

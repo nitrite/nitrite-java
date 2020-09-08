@@ -21,11 +21,13 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.*;
+import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.TestUtil;
 import org.dizitart.no2.mapdb.repository.data.*;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -41,6 +43,9 @@ import static org.junit.Assert.*;
 public class ObjectRepositoryNegativeTest {
     private final String dbPath = getRandomTempDbFile();
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Before
     public void setUp() {

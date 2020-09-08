@@ -16,17 +16,17 @@
 
 package org.dizitart.no2.collection.operation;
 
-import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.Iterator;
 
 import static org.dizitart.no2.TestUtil.createDb;
@@ -39,6 +39,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class JoinedDocumentStreamTest {
     private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
 
     @Test
     public void testFindResult() {
