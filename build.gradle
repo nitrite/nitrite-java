@@ -24,7 +24,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.freefair.gradle:lombok-plugin:5.1.1"
+        classpath "io.freefair.gradle:lombok-plugin:5.2.1"
         classpath "org.asciidoctor:asciidoctor-gradle-plugin:1.6.1"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.2.1"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
