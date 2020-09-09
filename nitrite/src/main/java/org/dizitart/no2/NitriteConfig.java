@@ -19,6 +19,7 @@ package org.dizitart.no2;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
+import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.Indexer;
 import org.dizitart.no2.mapper.NitriteMapper;
@@ -58,7 +59,7 @@ public class NitriteConfig {
     private final Map<VersionInfo, Migration> migrationPaths;
 
     @Getter
-    private String version;
+    private String revision = Constants.INITIAL_REVISION;
 
     public NitriteConfig() {
         this.pluginManager = new PluginManager(this);
@@ -107,12 +108,12 @@ public class NitriteConfig {
         return this;
     }
 
-    public NitriteConfig version(String version) {
+    public NitriteConfig revision(String revision) {
         if (configured) {
-            throw new InvalidOperationException("cannot add version info after database" +
+            throw new InvalidOperationException("cannot add revision info after database" +
                 " initialization");
         }
-        this.version = version;
+        this.revision = revision;
         return this;
     }
 

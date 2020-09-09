@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.mvstore.compat.v3.MigrationUtil;
-import org.dizitart.no2.store.StoreInfo;
+import org.dizitart.no2.store.StoreMetadata;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 
@@ -99,8 +99,8 @@ class MVStoreUtils {
             throw new NitriteIOException("unable to create database file", iae);
         } finally {
             if (store != null) {
-                store.setRetentionTime(-1);
-                store.setVersionsToKeep(2);
+                store.setRetentionTime(0);
+                store.setVersionsToKeep(0);
                 store.setReuseSpace(true);
             }
         }
@@ -108,15 +108,40 @@ class MVStoreUtils {
         return store;
     }
 
-    static StoreInfo getStoreInfo(MVStore store) {
+    static StoreMetadata getStoreInfo(MVStore store) {
         if (store.hasMap(STORE_INFO)) {
             MVMap<String, Document> infoMap = store.openMap(STORE_INFO);
             Document document = infoMap.get(STORE_INFO);
             if (document != null) {
-                return new StoreInfo(document);
+                return new StoreMetadata(document);
             }
         }
         return null;
+    }
+
+    static void writeStoreInfo(MVStore store) {
+        try {
+            StoreMetadata storeMetadata = new StoreMetadata();
+            storeMetadata.setCreateTime(System.currentTimeMillis());
+            storeMetadata.setStoreVersion("MVStore/" + org.h2.engine.Constants.VERSION);
+            storeMetadata.setNitriteVersion(NITRITE_VERSION);
+            storeMetadata.setDatabaseRevision(INITIAL_REVISION);
+
+            Document document = storeMetadata.getInfo();
+
+            MVMap<String, Document> infoMap = store.openMap(STORE_INFO);
+            infoMap.put(STORE_INFO, document);
+        } finally {
+            store.commit();
+        }
+    }
+
+    static void updateStoreInfo(MVStore mvStore, StoreMetadata storeMetadata) {
+        if (storeMetadata != null) {
+            Document document = storeMetadata.getInfo();
+            MVMap<String, Document> infoMap = mvStore.openMap(STORE_INFO);
+            infoMap.put(STORE_INFO, document);
+        }
     }
 
     private static boolean isCompatibilityError(IllegalStateException ise) {
@@ -128,20 +153,6 @@ class MVStoreUtils {
     private static void closeStore(MVStore store) {
         if (store != null && !store.isClosed()) {
             store.closeImmediately();
-        }
-    }
-
-    private static void writeStoreInfo(MVStore store) {
-        try {
-            Document document = Document.createDocument();
-            document.put(CREATE_TIME, System.currentTimeMillis());
-            document.put(FILE_STORE, "MVStore/" + org.h2.engine.Constants.VERSION);
-            document.put(STORE_VERSION, NITRITE_VERSION);
-
-            MVMap<String, Document> infoMap = store.openMap(STORE_INFO);
-            infoMap.put(STORE_INFO, document);
-        } finally {
-            store.commit();
         }
     }
 

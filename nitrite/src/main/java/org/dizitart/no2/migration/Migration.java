@@ -10,6 +10,7 @@ public abstract class Migration {
     private final Queue<MigrationStep> migrationSteps;
     private final String startVersion;
     private final String endVersion;
+    private boolean executed = false;
 
     public Migration(String startVersion, String endVersion) {
         this.startVersion = startVersion;
@@ -23,14 +24,17 @@ public abstract class Migration {
         return new VersionInfo(startVersion, endVersion);
     }
 
-    public void execute() {
-        NitriteInstruction instruction = new NitriteInstruction(migrationSteps);
-        migrate(instruction);
-        processStatements();
+    public Queue<MigrationStep> steps() {
+        if (!executed) {
+            execute();
+        }
+        return migrationSteps;
     }
 
-    private void processStatements() {
-
+    private void execute() {
+        NitriteInstruction instruction = new NitriteInstruction(migrationSteps);
+        migrate(instruction);
+        this.executed = true;
     }
 
     /*

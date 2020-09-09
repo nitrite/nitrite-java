@@ -22,6 +22,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.migration.MigrationManager;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
 import org.dizitart.no2.store.NitriteStore;
@@ -159,5 +160,8 @@ class NitriteDatabase implements Nitrite {
         this.nitriteConfig.initialized();
         this.store = nitriteConfig.getNitriteStore();
         this.store.openOrCreate(username, password);
+
+        MigrationManager migrationManager = new MigrationManager(this);
+        migrationManager.doMigrate();
     }
 }

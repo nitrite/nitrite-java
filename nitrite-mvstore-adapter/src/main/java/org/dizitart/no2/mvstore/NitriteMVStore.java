@@ -22,7 +22,7 @@ import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
-import org.dizitart.no2.store.StoreInfo;
+import org.dizitart.no2.store.StoreMetadata;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
 import org.h2.mvstore.MVMap;
@@ -43,7 +43,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     public NitriteMVStore() {
         super();
-        nitriteMapRegistry = new ConcurrentHashMap<>();
+        this.nitriteMapRegistry = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -116,8 +116,13 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
-    public StoreInfo getStoreInfo() {
+    public StoreMetadata getStoreInfo() {
         return MVStoreUtils.getStoreInfo(mvStore);
+    }
+
+    @Override
+    public void updateStoreInfo(StoreMetadata storeMetadata) {
+        MVStoreUtils.updateStoreInfo(mvStore, storeMetadata);
     }
 
     public void compact() {

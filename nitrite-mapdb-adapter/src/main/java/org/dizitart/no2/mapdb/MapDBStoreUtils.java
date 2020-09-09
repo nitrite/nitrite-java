@@ -2,7 +2,7 @@ package org.dizitart.no2.mapdb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.store.StoreInfo;
+import org.dizitart.no2.store.StoreMetadata;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
 
@@ -37,7 +37,7 @@ class MapDBStoreUtils {
     }
 
     @SuppressWarnings("unchecked")
-    static StoreInfo getStoreInfo(DB store) {
+    static StoreMetadata getStoreInfo(DB store) {
         if (store.exists(STORE_INFO)) {
             BTreeMap<String, Document> infoMap = (BTreeMap<String, Document>) store.treeMap(STORE_INFO)
                 .counterEnable()
@@ -46,19 +46,40 @@ class MapDBStoreUtils {
 
             Document document = infoMap.get(STORE_INFO);
             if (document != null) {
-                return new StoreInfo(document);
+                return new StoreMetadata(document);
             }
         }
         return null;
     }
 
     @SuppressWarnings("unchecked")
+    static void updateStoreInfo(DB store, StoreMetadata metadata) {
+        if (store.exists(STORE_INFO)) {
+            try {
+                Document document = metadata.getInfo();
+
+                BTreeMap<String, Document> infoMap = (BTreeMap<String, Document>) store.treeMap(STORE_INFO)
+                    .counterEnable()
+                    .valuesOutsideNodesEnable()
+                    .createOrOpen();
+
+                infoMap.put(STORE_INFO, document);
+            } finally {
+                store.commit();
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
     private static void writeStoreInfo(DB store) {
         try {
-            Document document = Document.createDocument();
-            document.put(CREATE_TIME, System.currentTimeMillis());
-            document.put(FILE_STORE, "MapDB/" + getMapDbVersion());
-            document.put(STORE_VERSION, NITRITE_VERSION);
+            StoreMetadata storeMetadata = new StoreMetadata();
+            storeMetadata.setCreateTime(System.currentTimeMillis());
+            storeMetadata.setStoreVersion("MapDB/" + getMapDbVersion());
+            storeMetadata.setNitriteVersion(NITRITE_VERSION);
+            storeMetadata.setDatabaseRevision(INITIAL_REVISION);
+
+            Document document = storeMetadata.getInfo();
 
             BTreeMap<String, Document> infoMap = (BTreeMap<String, Document>) store.treeMap(STORE_INFO)
                 .counterEnable()

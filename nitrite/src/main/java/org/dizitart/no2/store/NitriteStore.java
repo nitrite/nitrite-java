@@ -167,9 +167,21 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
     /**
      * Returns information about the underlying data store.
      *
-     * @return a {@link StoreInfo} object containing information about the store.
+     * @return a {@link StoreMetadata} object containing information about the store.
      */
-    StoreInfo getStoreInfo();
+    StoreMetadata getStoreInfo();
 
+    /**
+     * Update the store information.
+     *
+     * @param storeMetadata the store info
+     */
+    void updateStoreInfo(StoreMetadata storeMetadata);
+
+    /**
+     * Gets store config.
+     *
+     * @return the store config
+     */
     Config getStoreConfig();
 }

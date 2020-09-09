@@ -116,102 +116,115 @@ public class Constants {
      * The constant ID_PREFIX used in {@link NitriteId#toString()}.
      */
     public static final String ID_PREFIX = "[";
+
     /**
      * The constant TAG_COLLECTIONS.
      */
     public static final String TAG_COLLECTIONS = "collections";
+
     /**
      * The constant TAG_REPOSITORIES.
      */
     public static final String TAG_REPOSITORIES = "repositories";
+
     /**
      * The constant TAG_KEYED_REPOSITORIES.
      */
     public static final String TAG_KEYED_REPOSITORIES = "keyed-repositories";
+
     /**
      * The constant TAG_TYPE.
      */
     public static final String TAG_TYPE = "type";
+
     /**
      * The constant TAG_INDICES.
      */
     public static final String TAG_INDICES = "indices";
+
     /**
      * The constant TAG_INDEX.
      */
     public static final String TAG_INDEX = "index";
+
     /**
      * The constant TAG_DATA.
      */
     public static final String TAG_DATA = "data";
+
     /**
      * The constant TAG_NAME.
      */
     public static final String TAG_NAME = "name";
+
     /**
      * The constant TAG_KEY.
      */
     public static final String TAG_KEY = "key";
+
     /**
      * The constant TAG_VALUE.
      */
     public static final String TAG_VALUE = "value";
+
     /**
      * The constant DOC_ID denotes the '_id' field in a document.
      */
     public static final String DOC_ID = "_id";
+
     /**
      * The constant DOC_CREATED.
      */
     public static final String DOC_REVISION = "_revision";
+
     /**
      * The constant DOC_MODIFIED.
      */
     public static final String DOC_MODIFIED = "_modified";
+
     /**
      * The constant DOC_SOURCE.
      */
     public static final String DOC_SOURCE = "_source";
+
     /**
      * The constant HASH_ITERATIONS.
      */
     public static final int HASH_ITERATIONS = 10000;
+
     /**
      * The constant HASH_KEY_LENGTH.
      */
     public static final int HASH_KEY_LENGTH = 256;
+
     /**
      * The constant NO2.
      */
     private static final String NO2 = "NO\u2082";
+
     /**
      * The constant ID_SUFFIX used in {@link NitriteId#toString()}.
      */
     public static final String ID_SUFFIX = "]" + NO2;
+
     /**
      * The constant REPLICATOR.
      */
     public static final String REPLICATOR = "Replicator." + NO2;
+
     /**
      * The constant DAEMON_THREAD_NAME.
      */
     public static final String DAEMON_THREAD_NAME = "Worker." + NO2;
+
     /**
      * The constant DAEMON_THREAD_NAME.
      */
     public static final String SYNC_THREAD_NAME = "Sync." + NO2;
 
     /**
-     * The constant FILE_STORE.
+     * The constant INITIAL_REVISION.
      */
-    public static final String FILE_STORE = "Store";
-    /**
-     * The constant STORE_VERSION.
-     */
-    public static final String STORE_VERSION = "Version";
-    /**
-     * The constant CREATE_TIME.
-     */
-    public static final String CREATE_TIME = "Created";
+    public static final String INITIAL_REVISION = "1";
 
 }

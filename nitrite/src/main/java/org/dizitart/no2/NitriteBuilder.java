@@ -70,7 +70,7 @@ public class NitriteBuilder {
     }
 
     public NitriteBuilder version(String version) {
-        this.nitriteConfig.version(version);
+        this.nitriteConfig.revision(version);
         return this;
     }
 

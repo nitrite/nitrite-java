@@ -7,7 +7,7 @@ import org.dizitart.no2.mapdb.serializers.Serializers;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
-import org.dizitart.no2.store.StoreInfo;
+import org.dizitart.no2.store.StoreMetadata;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
 import org.mapdb.BTreeMap;
@@ -135,8 +135,13 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
     }
 
     @Override
-    public StoreInfo getStoreInfo() {
+    public StoreMetadata getStoreInfo() {
         return MapDBStoreUtils.getStoreInfo(db);
+    }
+
+    @Override
+    public void updateStoreInfo(StoreMetadata storeMetadata) {
+        MapDBStoreUtils.updateStoreInfo(db, storeMetadata);
     }
 
     private void initEventBus() {

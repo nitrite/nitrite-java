@@ -9,7 +9,7 @@ import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
-import org.dizitart.no2.store.StoreInfo;
+import org.dizitart.no2.store.StoreMetadata;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
 
@@ -127,8 +127,13 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public StoreInfo getStoreInfo() {
+    public StoreMetadata getStoreInfo() {
         return RocksDBStoreUtils.getStoreInfo(reference, getStoreConfig().objectFormatter());
+    }
+
+    @Override
+    public void updateStoreInfo(StoreMetadata storeMetadata) {
+        RocksDBStoreUtils.updateStoreInfo(reference, getStoreConfig().objectFormatter(), storeMetadata);
     }
 
     private void initEventBus() {

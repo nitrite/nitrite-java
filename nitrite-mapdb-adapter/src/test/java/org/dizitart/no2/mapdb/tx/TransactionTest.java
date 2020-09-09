@@ -5,7 +5,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.TransactionalCollection;
 import org.dizitart.no2.common.WriteResult;
-import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.mapdb.DbTestOperations;
 import org.dizitart.no2.mapdb.MapDBModule;
 import org.dizitart.no2.mapdb.Retry;
@@ -246,7 +246,7 @@ public class TransactionTest {
         assertEquals(col2.find(where("name").eq("col2")).size(), 1);
     }
 
-    @Test(expected = NitriteIOException.class)
+    @Test(expected = TransactionException.class)
     public void testFailureOnClosedTransaction() {
         NitriteCollection collection = db.getCollection("testFailureOnClosedTransaction");
         TransactionalCollection tx = collection.beginTransaction();
