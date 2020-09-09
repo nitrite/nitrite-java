@@ -280,7 +280,7 @@ public class Recovery {
                 if (k.startsWith("chunk.")) {
                     Chunk c = Chunk.fromString(e.getValue());
                     chunks.put(c.id, c);
-                    chunkLength += c.len * BLOCK_SIZE;
+                    chunkLength += (long) c.len * BLOCK_SIZE;
                     maxLength += c.maxLen;
                     maxLengthLive += c.maxLenLive;
                     if (c.maxLenLive > 0) {
