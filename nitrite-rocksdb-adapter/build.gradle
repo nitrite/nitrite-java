@@ -47,7 +47,7 @@ dependencies {
     testImplementation "joda-time:joda-time:2.10.6"
     testImplementation "org.meanbean:meanbean:2.0.3"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.2"
-    testImplementation "commons-io:commons-io:2.7"
+    testImplementation "commons-io:commons-io:2.8.0"
     testImplementation "com.google.guava:guava:29.0-jre"
 }
 
