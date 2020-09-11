@@ -25,13 +25,13 @@ import org.dizitart.no2.collection.Document;
  */
 @Data
 @NoArgsConstructor
-public class StoreMetadata {
+public class DatabaseMetaData {
     private Long createTime;
     private String storeVersion;
     private String nitriteVersion;
-    private String databaseRevision;
+    private Integer schemaVersion;
 
-    public StoreMetadata(Document document) {
+    public DatabaseMetaData(Document document) {
         populateInfo(document);
     }
 
@@ -40,13 +40,13 @@ public class StoreMetadata {
             .put("createTime", createTime)
             .put("storeVersion", storeVersion)
             .put("nitriteVersion", nitriteVersion)
-            .put("databaseRevision", databaseRevision);
+            .put("schemaVersion", schemaVersion);
     }
 
     private void populateInfo(Document document) {
         createTime = document.get("createTime", Long.class);
         storeVersion = document.get("storeVersion", String.class);
         nitriteVersion = document.get("nitriteVersion", String.class);
-        databaseRevision = document.get("databaseRevision", String.class);
+        schemaVersion = document.get("schemaVersion", Integer.class);
     }
 }

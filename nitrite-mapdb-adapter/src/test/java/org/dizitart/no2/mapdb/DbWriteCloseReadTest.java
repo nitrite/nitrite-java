@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.mapdb;
 
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -31,8 +30,8 @@ public class DbWriteCloseReadTest {
     private final DbTestOperations operations = new DbTestOperations();
     private volatile boolean writeCompleted = false;
 
-    @Rule
-    public Retry retry = new Retry(3);
+//    @Rule
+//    public Retry retry = new Retry(3);
 
     @Test
     public void testWriteCloseRead() throws Exception {

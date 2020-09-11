@@ -2,6 +2,7 @@ package org.dizitart.no2.migration;
 
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.tuples.Triplet;
+import org.dizitart.no2.common.util.SecureString;
 
 /**
  * @author Anindya Chatterjee
@@ -11,7 +12,7 @@ public interface DatabaseInstruction extends Composable {
     default DatabaseInstruction changePassword(String username, String oldPassword, String newPassword) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.ChangePassword);
-        migrationStep.setArguments(new Triplet<>(username, oldPassword, newPassword));
+        migrationStep.setArguments(new Triplet<>(username, new SecureString(oldPassword), new SecureString(newPassword)));
         addStep(migrationStep);
         return this;
     }

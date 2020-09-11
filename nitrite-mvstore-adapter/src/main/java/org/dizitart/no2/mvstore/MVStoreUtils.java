@@ -17,17 +17,17 @@
 package org.dizitart.no2.mvstore;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.mvstore.compat.v3.MigrationUtil;
-import org.dizitart.no2.store.StoreMetadata;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 
 import java.io.File;
 
-import static org.dizitart.no2.common.Constants.*;
+import static org.dizitart.no2.common.Constants.META_MAP_NAME;
+import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
@@ -38,23 +38,14 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 class MVStoreUtils {
     private MVStoreUtils() { }
 
-    static MVStore openOrCreate(String username, String password, MVStoreConfig storeConfig) {
+    static MVStore openOrCreate(MVStoreConfig storeConfig) {
         MVStore.Builder builder = createBuilder(storeConfig);
 
         MVStore store = null;
-        File dbFile = null;
+        File dbFile = !isNullOrEmpty(storeConfig.filePath()) ? new File(storeConfig.filePath()) : null;
         try {
-            if (!isNullOrEmpty(storeConfig.filePath())) {
-                dbFile = new File(storeConfig.filePath());
-                if (dbFile.exists()) {
-                    store = StoreFactory.openSecurely(builder, username, password);
-                } else {
-                    store = StoreFactory.createSecurely(builder, username, password);
-                    writeStoreInfo(store);
-                }
-            } else {
-                store = StoreFactory.createSecurely(builder, username, password);
-            }
+            store = builder.open();
+            testForMigration(store);
         } catch (IllegalStateException ise) {
             if (ise.getMessage().contains("file is locked")) {
                 throw new NitriteIOException("database is already opened in other process");
@@ -70,8 +61,7 @@ class MVStoreUtils {
 
                     if (file.exists() && file.isFile()) {
                         if (isCompatibilityError(ise)) {
-                            closeStore(store);
-                            store = tryMigrate(username, password, file, builder, storeConfig);
+                            store = tryMigrate(file, builder, storeConfig);
                         } else {
                             log.error("Database corruption detected. Trying to repair", ise);
                             Recovery.recover(storeConfig.filePath());
@@ -108,52 +98,10 @@ class MVStoreUtils {
         return store;
     }
 
-    static StoreMetadata getStoreInfo(MVStore store) {
-        if (store.hasMap(STORE_INFO)) {
-            MVMap<String, Document> infoMap = store.openMap(STORE_INFO);
-            Document document = infoMap.get(STORE_INFO);
-            if (document != null) {
-                return new StoreMetadata(document);
-            }
-        }
-        return null;
-    }
-
-    static void writeStoreInfo(MVStore store) {
-        try {
-            StoreMetadata storeMetadata = new StoreMetadata();
-            storeMetadata.setCreateTime(System.currentTimeMillis());
-            storeMetadata.setStoreVersion("MVStore/" + org.h2.engine.Constants.VERSION);
-            storeMetadata.setNitriteVersion(NITRITE_VERSION);
-            storeMetadata.setDatabaseRevision(INITIAL_REVISION);
-
-            Document document = storeMetadata.getInfo();
-
-            MVMap<String, Document> infoMap = store.openMap(STORE_INFO);
-            infoMap.put(STORE_INFO, document);
-        } finally {
-            store.commit();
-        }
-    }
-
-    static void updateStoreInfo(MVStore mvStore, StoreMetadata storeMetadata) {
-        if (storeMetadata != null) {
-            Document document = storeMetadata.getInfo();
-            MVMap<String, Document> infoMap = mvStore.openMap(STORE_INFO);
-            infoMap.put(STORE_INFO, document);
-        }
-    }
-
     private static boolean isCompatibilityError(IllegalStateException ise) {
         return ise.getCause() != null
             && ise.getCause().getCause() instanceof ClassNotFoundException
             && ise.getCause().getCause().getMessage().contains("org.dizitart.no2");
-    }
-
-    private static void closeStore(MVStore store) {
-        if (store != null && !store.isClosed()) {
-            store.closeImmediately();
-        }
     }
 
     private static MVStore.Builder createBuilder(MVStoreConfig mvStoreConfig) {
@@ -217,8 +165,7 @@ class MVStoreUtils {
         return builder;
     }
 
-    private static MVStore tryMigrate(String username, String password, File orgFile,
-                               MVStore.Builder builder, MVStoreConfig storeConfig) {
+    private static MVStore tryMigrate(File orgFile, MVStore.Builder builder, MVStoreConfig storeConfig) {
         log.info("Migrating old database format to new database format");
 
         // open old store with builder
@@ -236,10 +183,7 @@ class MVStoreUtils {
 
         // open new store calling openOrCreate and return
         storeConfig.filePath(orgFile.getPath());
-        MVStore store = openOrCreate(username, password, storeConfig);
-        writeStoreInfo(store);
-
-        return store;
+        return openOrCreate(storeConfig);
     }
 
     private static void switchFiles(File newFile, File orgFile) {
@@ -254,6 +198,22 @@ class MVStoreUtils {
             }
         } else {
             throw new NitriteIOException("could not create backup copy of old data file");
+        }
+    }
+
+    private static void testForMigration(MVStore store) {
+        if (store != null) {
+            if (store.hasMap(STORE_INFO)) {
+                return;
+            }
+
+            MVMap<String, Attributes> metaMap = store.openMap(META_MAP_NAME);
+            try {
+                metaMap.remove("MigrationTest");
+            } catch (IllegalStateException e) {
+                store.close();
+                throw e;
+            }
         }
     }
 }

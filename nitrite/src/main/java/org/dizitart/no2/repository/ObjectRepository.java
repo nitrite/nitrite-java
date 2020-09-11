@@ -320,6 +320,8 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
 
     /**
      * Starts a transaction on the {@link ObjectRepository}
-     * */
+     *
+     * @return the transactional repository
+     */
     TransactionalRepository<T> beginTransaction();
 }

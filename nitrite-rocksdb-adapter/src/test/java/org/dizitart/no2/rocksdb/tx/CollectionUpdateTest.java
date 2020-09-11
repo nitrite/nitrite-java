@@ -20,6 +20,7 @@ import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
+import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexType;
@@ -288,7 +289,7 @@ public class CollectionUpdateTest extends BaseTransactionTest {
         collection.subscribe(changeInfo -> fail("should not happen"));
     }
 
-    @Test(expected = NitriteIOException.class)
+    @Test(expected = TransactionException.class)
     public void testRegisterListenerAfterClose() {
         TransactionalCollection collection = db.getCollection("test").beginTransaction();
         collection.close();

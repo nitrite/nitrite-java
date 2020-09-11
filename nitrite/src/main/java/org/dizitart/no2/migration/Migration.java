@@ -1,5 +1,7 @@
 package org.dizitart.no2.migration;
 
+import lombok.Getter;
+
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -8,21 +10,22 @@ import java.util.Queue;
  */
 public abstract class Migration {
     private final Queue<MigrationStep> migrationSteps;
-    private final String startVersion;
-    private final String endVersion;
+
+    @Getter
+    private final Integer startVersion;
+
+    @Getter
+    private final Integer endVersion;
+
     private boolean executed = false;
 
-    public Migration(String startVersion, String endVersion) {
+    public Migration(Integer startVersion, Integer endVersion) {
         this.startVersion = startVersion;
         this.endVersion = endVersion;
         this.migrationSteps = new LinkedList<>();
     }
 
     public abstract void migrate(Instruction instruction);
-
-    public VersionInfo getVersionInfo() {
-        return new VersionInfo(startVersion, endVersion);
-    }
 
     public Queue<MigrationStep> steps() {
         if (!executed) {

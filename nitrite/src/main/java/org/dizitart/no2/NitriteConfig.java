@@ -19,12 +19,12 @@ package org.dizitart.no2;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.Indexer;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.migration.Migration;
-import org.dizitart.no2.migration.VersionInfo;
 import org.dizitart.no2.module.NitriteModule;
 import org.dizitart.no2.module.NitritePlugin;
 import org.dizitart.no2.module.PluginManager;
@@ -32,6 +32,7 @@ import org.dizitart.no2.store.NitriteStore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A class to configure {@link Nitrite} database.
@@ -39,6 +40,7 @@ import java.util.Map;
  * @author Anindya Chatterjee.
  * @since 4.0.0
  */
+@Slf4j
 @ToString
 public class NitriteConfig {
     /**
@@ -53,17 +55,17 @@ public class NitriteConfig {
     @Getter(AccessLevel.PACKAGE)
     private final PluginManager pluginManager;
 
+    @Getter
+    private final Map<Integer, TreeMap<Integer, Migration>> migrations;
+
+    @Getter
+    private Integer schemaVersion = Constants.INITIAL_SCHEMA_VERSION;
+
     private boolean configured = false;
-
-    @Getter
-    private final Map<VersionInfo, Migration> migrationPaths;
-
-    @Getter
-    private String revision = Constants.INITIAL_REVISION;
 
     public NitriteConfig() {
         this.pluginManager = new PluginManager(this);
-        this.migrationPaths = new HashMap<>();
+        this.migrations = new HashMap<>();
     }
 
     /**
@@ -95,6 +97,7 @@ public class NitriteConfig {
         return this;
     }
 
+    @SuppressWarnings("Java8MapApi")
     public NitriteConfig addMigration(Migration migration) {
         if (configured) {
             throw new InvalidOperationException("cannot add migration steps after database" +
@@ -102,18 +105,28 @@ public class NitriteConfig {
         }
 
         if (migration != null) {
-            VersionInfo versionInfo = migration.getVersionInfo();
-            migrationPaths.put(versionInfo, migration);
+            final int start = migration.getStartVersion();
+            final int end = migration.getEndVersion();
+            TreeMap<Integer, Migration> targetMap = migrations.get(start);
+            if (targetMap == null) {
+                targetMap = new TreeMap<>();
+                migrations.put(start, targetMap);
+            }
+            Migration existing = targetMap.get(end);
+            if (existing != null) {
+                log.warn("Overriding migration " + existing + " with " + migration);
+            }
+            targetMap.put(end, migration);
         }
         return this;
     }
 
-    public NitriteConfig revision(String revision) {
+    public NitriteConfig schemaVersion(Integer version) {
         if (configured) {
-            throw new InvalidOperationException("cannot add revision info after database" +
+            throw new InvalidOperationException("cannot add schema version info after database" +
                 " initialization");
         }
-        this.revision = revision;
+        this.schemaVersion = version;
         return this;
     }
 

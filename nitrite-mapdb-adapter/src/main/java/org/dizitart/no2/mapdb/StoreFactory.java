@@ -3,17 +3,10 @@ package org.dizitart.no2.mapdb;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.mapdb.serializers.Serializers;
-import org.dizitart.no2.store.UserCredential;
-import org.mapdb.BTreeMap;
 import org.mapdb.DB;
-import org.mapdb.DBException;
 import org.mapdb.DBMaker;
 
-import static org.dizitart.no2.common.Constants.USER_MAP;
-import static org.dizitart.no2.common.util.Security.*;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
@@ -23,89 +16,7 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 class StoreFactory {
     private StoreFactory() {}
 
-    @SuppressWarnings("unchecked")
-    static DB createSecurely(MapDBConfig dbConfig,
-                             String userId,
-                             String password) {
-        DB store = null;
-        try {
-            store = open(dbConfig);
-            if (!isNullOrEmpty(password) && !isNullOrEmpty(userId)) {
-                byte[] salt = getNextSalt();
-                byte[] hash = hash(password.toCharArray(), salt);
-                UserCredential userCredential = new UserCredential();
-                userCredential.setPasswordHash(hash);
-                userCredential.setPasswordSalt(salt);
-
-                BTreeMap<String, UserCredential> userMap = (BTreeMap<String, UserCredential>) store.treeMap(USER_MAP)
-                    .counterEnable()
-                    .valuesOutsideNodesEnable()
-                    .createOrOpen();
-
-                userMap.put(userId, userCredential);
-            }
-        } catch (DBException dbe) {
-            log.error("Error while creating database", dbe);
-            throw new NitriteIOException("failed to create database", dbe);
-        } finally {
-            if (store != null) {
-                store.commit();
-            }
-        }
-
-        return store;
-    }
-
-    @SuppressWarnings("unchecked")
-    static DB openSecurely(MapDBConfig dbConfig,
-                           String userId,
-                           String password) {
-        DB store = null;
-        boolean success = false;
-
-        try {
-            store = open(dbConfig);
-            if (!isNullOrEmpty(password) && !isNullOrEmpty(userId)) {
-                if (!store.exists(USER_MAP)) {
-                    throw new SecurityException("no user map found in the database");
-                }
-
-                BTreeMap<String, UserCredential> userMap = (BTreeMap<String, UserCredential>) store.treeMap(USER_MAP)
-                    .counterEnable()
-                    .valuesOutsideNodesEnable()
-                    .createOrOpen();
-
-                UserCredential userCredential = userMap.get(userId);
-
-                if (userCredential != null) {
-                    byte[] salt = userCredential.getPasswordSalt();
-                    byte[] expectedHash = userCredential.getPasswordHash();
-
-                    if (!isExpectedPassword(password.toCharArray(), salt, expectedHash)) {
-                        throw new SecurityException("username or password is invalid");
-                    }
-                } else {
-                    throw new SecurityException("username or password is invalid");
-                }
-            } else {
-                if (store.exists(USER_MAP)) {
-                    throw new SecurityException("user map found unexpectedly");
-                }
-            }
-
-            success = true;
-            return store;
-        } catch (DBException dbe) {
-            log.error("Error while opening database", dbe);
-            throw new NitriteIOException("failed to open database", dbe);
-        } finally {
-            if (store != null && !success) {
-                store.close();
-            }
-        }
-    }
-
-    private static DB open(MapDBConfig dbConfig) {
+    public static DB open(MapDBConfig dbConfig) {
         DBMaker.StoreType storeType;
         boolean defaultConfig = true;
 

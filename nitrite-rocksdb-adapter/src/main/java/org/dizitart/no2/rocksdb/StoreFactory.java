@@ -18,9 +18,6 @@ package org.dizitart.no2.rocksdb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.exceptions.SecurityException;
-import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
-import org.dizitart.no2.store.UserCredential;
 import org.rocksdb.*;
 
 import java.nio.charset.StandardCharsets;
@@ -30,112 +27,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.dizitart.no2.common.Constants.USER_MAP;
-import static org.dizitart.no2.common.util.Security.*;
-import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
-
 /**
  * @author Anindya Chatterjee
  */
 @Slf4j(topic = "no2-rocksdb")
 class StoreFactory {
-
     private StoreFactory() {
     }
 
-    public static RocksDBReference createSecurely(RocksDBConfig dbConfig,
-                                                  String userId,
-                                                  String password) {
-        RocksDBReference reference = createDBReference(dbConfig);
-        ObjectFormatter objectFormatter = dbConfig.objectFormatter();
-
-        try {
-            ColumnFamilyHandle userMap = reference.getOrCreateColumnFamily(USER_MAP);
-            if (!isNullOrEmpty(password) && !isNullOrEmpty(userId)) {
-                byte[] salt = getNextSalt();
-                byte[] hash = hash(password.toCharArray(), salt);
-
-                UserCredential userCredential = new UserCredential();
-                userCredential.setPasswordHash(hash);
-                userCredential.setPasswordSalt(salt);
-
-                byte[] key = objectFormatter.encode(userId);
-                byte[] value = objectFormatter.encode(userCredential);
-
-                reference.getRocksDB().put(userMap, key, value);
-            }
-        } catch (RocksDBException e) {
-            log.error("Error while creating database", e);
-            throw new NitriteIOException("failed to create database", e);
-        }
-
-        return reference;
-    }
-
-    public static RocksDBReference openSecurely(RocksDBConfig dbConfig,
-                                                String userId,
-                                                String password) {
-        RocksDBReference reference = createDBReference(dbConfig);
-        ObjectFormatter objectFormatter = dbConfig.objectFormatter();
-        boolean success = false;
-
-        try {
-            ColumnFamilyHandle userMap = reference.getOrCreateColumnFamily(USER_MAP);
-            if (!isNullOrEmpty(password) && !isNullOrEmpty(userId)) {
-                try (RocksIterator iterator = reference.getRocksDB().newIterator(userMap)) {
-                    iterator.seekToFirst();
-                    if (!iterator.isValid()) {
-                        throw new SecurityException("no user map found in the database");
-                    }
-                }
-
-                try {
-                    byte[] key = objectFormatter.encode(userId);
-                    byte[] value = reference.getRocksDB().get(userMap, key);
-                    if (value == null) {
-                        throw new SecurityException("username or password is invalid");
-                    }
-
-                    UserCredential userCredential = objectFormatter.decode(value, UserCredential.class);
-                    if (userCredential != null) {
-                        byte[] salt = userCredential.getPasswordSalt();
-                        byte[] expectedHash = userCredential.getPasswordHash();
-
-                        if (!isExpectedPassword(password.toCharArray(), salt, expectedHash)) {
-                            throw new SecurityException("username or password is invalid");
-                        }
-                    } else {
-                        throw new SecurityException("username or password is invalid");
-                    }
-
-                } catch (RocksDBException e) {
-                    log.error("Error while opening database", e);
-                    throw new NitriteIOException("failed to open database", e);
-                }
-            } else {
-                try (RocksIterator iterator = reference.getRocksDB().newIterator(userMap)) {
-                    iterator.seekToFirst();
-                    if (iterator.isValid()) {
-                        throw new SecurityException("user map found unexpectedly");
-                    }
-                }
-            }
-
-            success = true;
-            return reference;
-        } finally {
-            if (!success) {
-                try {
-                    reference.close();
-                } catch (RocksDBException e) {
-                    log.error("Error while closing database", e);
-                }
-            }
-        }
-    }
-
-
-    private static RocksDBReference createDBReference(RocksDBConfig dbConfig) {
+    public static RocksDBReference createDBReference(RocksDBConfig dbConfig) {
         // create reference
         RocksDBReference reference = new RocksDBReference();
 

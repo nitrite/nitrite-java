@@ -69,8 +69,8 @@ public class NitriteBuilder {
         return this;
     }
 
-    public NitriteBuilder version(String version) {
-        this.nitriteConfig.revision(version);
+    public NitriteBuilder schemaVersion(Integer version) {
+        this.nitriteConfig.schemaVersion(version);
         return this;
     }
 

@@ -9,7 +9,6 @@ import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
-import org.dizitart.no2.store.StoreMetadata;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
 
@@ -30,10 +29,10 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public void openOrCreate(String username, String password) {
+    public void openOrCreate() {
         try {
             if (closed.get()) {
-                this.reference = RocksDBStoreUtils.openOrCreate(username, password, getStoreConfig());
+                this.reference = RocksDBStoreUtils.openOrCreate(getStoreConfig());
                 closed.compareAndSet(true, false);
                 initEventBus();
                 alert(StoreEvents.Opened);
@@ -127,13 +126,8 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public StoreMetadata getStoreInfo() {
-        return RocksDBStoreUtils.getStoreInfo(reference, getStoreConfig().objectFormatter());
-    }
-
-    @Override
-    public void updateStoreInfo(StoreMetadata storeMetadata) {
-        RocksDBStoreUtils.updateStoreInfo(reference, getStoreConfig().objectFormatter(), storeMetadata);
+    public String getStoreVersion() {
+        return "RocksDB/" + getRocksDbVersion();
     }
 
     private void initEventBus() {
@@ -142,5 +136,9 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
                 eventBus.register(eventListener);
             }
         }
+    }
+
+    private static String getRocksDbVersion() {
+        return "6.11.4";
     }
 }

@@ -225,6 +225,6 @@ public class Constants {
     /**
      * The constant INITIAL_REVISION.
      */
-    public static final String INITIAL_REVISION = "1";
+    public static final Integer INITIAL_SCHEMA_VERSION = 1;
 
 }

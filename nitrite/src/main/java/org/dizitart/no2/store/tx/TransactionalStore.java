@@ -24,7 +24,7 @@ public class TransactionalStore<T extends StoreConfig> extends AbstractNitriteSt
     }
 
     @Override
-    public void openOrCreate(String username, String password) {
+    public void openOrCreate() {
         // nothing to do
     }
 
@@ -122,13 +122,8 @@ public class TransactionalStore<T extends StoreConfig> extends AbstractNitriteSt
     }
 
     @Override
-    public StoreMetadata getStoreInfo() {
-        return primaryStore.getStoreInfo();
-    }
-
-    @Override
-    public void updateStoreInfo(StoreMetadata storeMetadata) {
-        throw new InvalidOperationException("cannot update store metadata on transaction store");
+    public String getStoreVersion() {
+        return primaryStore.getStoreVersion();
     }
 
     @Override
