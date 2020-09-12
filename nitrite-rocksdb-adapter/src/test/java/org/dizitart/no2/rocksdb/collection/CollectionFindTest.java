@@ -581,13 +581,13 @@ public class CollectionFindTest extends BaseCollectionTest {
         cursor = collection.find(where("xyz").eq(null));
         assertEquals(cursor.size(), 1);
 
-        cursor = collection.find(where("abc").eq(null).not());
+        cursor = collection.find(where("abc").notEq(null));
         assertEquals(cursor.size(), 1);
 
-        cursor = collection.find(where("abc").eq(null).not().and(where("xyz").eq(null)));
+        cursor = collection.find(where("abc").notEq(null).and(where("xyz").eq(null)));
         assertEquals(cursor.size(), 1);
 
-        cursor = collection.find(where("abc").eq(null).and(where("xyz").eq(null).not()));
+        cursor = collection.find(where("abc").eq(null).and(where("xyz").notEq(null)));
         assertEquals(cursor.size(), 0);
 
         collection.remove(ALL);
@@ -599,7 +599,7 @@ public class CollectionFindTest extends BaseCollectionTest {
         Document projection = collection.find(
             where(DOC_REVISION).gte(1482225343160L)
                 .and(where(DOC_REVISION).lte(1482225343162L)
-                    .and(where(DOC_REVISION).eq(null).not())))
+                    .and(where(DOC_REVISION).notEq(null))))
             .firstOrNull();
 
         assertNull(projection);

@@ -109,7 +109,7 @@ public class Constants {
         META_MAP_NAME,
         STORE_INFO,
         COLLECTION_CATALOG,
-        KEY_OBJ_SEPARATOR
+//        KEY_OBJ_SEPARATOR
     };
 
     /**

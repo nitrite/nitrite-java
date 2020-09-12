@@ -53,6 +53,10 @@ public final class FluentFilter {
         return new EqualsFilter(field, value);
     }
 
+    public Filter notEq(Object value) {
+        return new NotEqualsFilter(field, value);
+    }
+
     /**
      * Creates a greater than filter which matches those documents where the value
      * of the field is greater than (i.e. &gt;) the specified value.

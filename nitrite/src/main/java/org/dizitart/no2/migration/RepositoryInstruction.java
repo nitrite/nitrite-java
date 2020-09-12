@@ -1,6 +1,7 @@
 package org.dizitart.no2.migration;
 
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.common.tuples.Quartet;
 import org.dizitart.no2.common.tuples.Triplet;
 
 /**
@@ -8,30 +9,47 @@ import org.dizitart.no2.common.tuples.Triplet;
  */
 public interface RepositoryInstruction extends Composable {
 
-    default RepositoryInstruction renameEntity(String entityName) {
+    default RepositoryInstruction renameRepository(String entityName, String key) {
         MigrationStep migrationStep = new MigrationStep();
-        migrationStep.setInstructionType(InstructionType.RenameEntity);
-        migrationStep.setArguments(entityName);
+        migrationStep.setInstructionType(InstructionType.RenameRepository);
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), entityName, key));
         addStep(migrationStep);
-        return this;
+        final RepositoryInstruction parent = this;
+
+        return new RepositoryInstruction() {
+            @Override
+            public String entityName() {
+                return entityName;
+            }
+
+            @Override
+            public String key() {
+                return key;
+            }
+
+            @Override
+            public void addStep(MigrationStep step) {
+                parent.addStep(step);
+            }
+        };
     }
 
-    default RepositoryInstruction renameKey(String key) {
-        MigrationStep migrationStep = new MigrationStep();
-        migrationStep.setInstructionType(InstructionType.RenameKey);
-        migrationStep.setArguments(key);
-        addStep(migrationStep);
-        return this;
+    default <T> RepositoryInstruction addField(String fieldName) {
+        return addField(fieldName, null);
     }
 
-    default <T> RepositoryInstruction addField(String fieldName, Class<T> type) {
-        return addField(fieldName, type, null);
-    }
-
-    default <T> RepositoryInstruction addField(String fieldName, Class<T> type, T defaultValue) {
+    default <T> RepositoryInstruction addField(String fieldName, T defaultValue) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryAddField);
-        migrationStep.setArguments(new Triplet<>(fieldName, type, defaultValue));
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), fieldName, defaultValue));
+        addStep(migrationStep);
+        return this;
+    }
+
+    default <T> RepositoryInstruction addField(String fieldName, Generator<T> generator) {
+        MigrationStep migrationStep = new MigrationStep();
+        migrationStep.setInstructionType(InstructionType.RepositoryAddField);
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), fieldName, generator));
         addStep(migrationStep);
         return this;
     }
@@ -39,7 +57,7 @@ public interface RepositoryInstruction extends Composable {
     default RepositoryInstruction renameField(String oldName, String newName) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryRenameField);
-        migrationStep.setArguments(new Pair<>(oldName, newName));
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), oldName, newName));
         addStep(migrationStep);
         return this;
     }
@@ -47,19 +65,15 @@ public interface RepositoryInstruction extends Composable {
     default RepositoryInstruction deleteField(String fieldName) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryDeleteField);
-        migrationStep.setArguments(fieldName);
+        migrationStep.setArguments(new Triplet<>(entityName(), key(), fieldName));
         addStep(migrationStep);
         return this;
     }
 
-    default <T> RepositoryInstruction changeDataType(String fieldName, Class<T> newType) {
-        return changeDataType(fieldName, newType, null);
-    }
-
-    default <T> RepositoryInstruction changeDataType(String fieldName, Class<T> newType, T defaultValue) {
+    default <T> RepositoryInstruction changeDataType(String fieldName, TypeConverter converter) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryChangeDataType);
-        migrationStep.setArguments(new Triplet<>(fieldName, newType, defaultValue));
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), fieldName, converter));
         addStep(migrationStep);
         return this;
     }
@@ -67,7 +81,7 @@ public interface RepositoryInstruction extends Composable {
     default RepositoryInstruction changeIdField(String oldFieldName, String newFieldName) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryChangeIdField);
-        migrationStep.setArguments(new Pair<>(oldFieldName, newFieldName));
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), oldFieldName, newFieldName));
         addStep(migrationStep);
         return this;
     }
@@ -75,7 +89,7 @@ public interface RepositoryInstruction extends Composable {
     default RepositoryInstruction dropIndex(String field) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryDropIndex);
-        migrationStep.setArguments(field);
+        migrationStep.setArguments(new Triplet<>(entityName(), key(), field));
         addStep(migrationStep);
         return this;
     }
@@ -83,7 +97,7 @@ public interface RepositoryInstruction extends Composable {
     default RepositoryInstruction dropAllIndices() {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryDropIndices);
-        migrationStep.setArguments(null);
+        migrationStep.setArguments(new Pair<>(entityName(), key()));
         addStep(migrationStep);
         return this;
     }
@@ -91,8 +105,12 @@ public interface RepositoryInstruction extends Composable {
     default RepositoryInstruction createIndex(String field, String indexType) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryCreateIndex);
-        migrationStep.setArguments(new Pair<>(field, indexType));
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), field, indexType));
         addStep(migrationStep);
         return this;
     }
+
+    String entityName();
+
+    String key();
 }

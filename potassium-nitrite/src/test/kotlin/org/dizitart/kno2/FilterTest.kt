@@ -59,6 +59,19 @@ class FilterTest : BaseTest() {
     }
 
     @Test
+    fun testNotEq() {
+        db?.getCollection("test") {
+            insert(documentOf("a" to 1))
+
+            var cursor = find("a" notEq 2)
+            assertEquals(cursor.size(), 1)
+
+            cursor = find("a" notEq 1)
+            assertEquals(cursor.size(), 0)
+        }
+    }
+
+    @Test
     fun testGt() {
         db?.getCollection("test") {
             insert(documentOf("a" to 1), documentOf("a" to 5))

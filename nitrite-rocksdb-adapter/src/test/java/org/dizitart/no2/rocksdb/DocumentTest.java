@@ -286,4 +286,19 @@ public class DocumentTest {
 
         assertNotEquals(doc1, doc3);
     }
+
+    @Test
+    public void testDeepPut() {
+        doc.put("location.address.pin", 700037);
+        assertEquals(doc.get("location.address.pin"), 700037);
+
+        doc.put("location.address.business.pin", 700037);
+        assertEquals(doc.get("location.address.business.pin"), 700037);
+    }
+
+    @Test
+    public void testDeepRemove() {
+        doc.remove("location.address");
+        assertNull(doc.get("location.address"));
+    }
 }

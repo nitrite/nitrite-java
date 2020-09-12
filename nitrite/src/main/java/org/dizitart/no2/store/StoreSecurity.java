@@ -1,6 +1,7 @@
 package org.dizitart.no2.store;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.common.util.SecureString;
 import org.dizitart.no2.exceptions.SecurityException;
 
 import javax.crypto.SecretKeyFactory;
@@ -57,7 +58,7 @@ public class StoreSecurity {
                     byte[] salt = userCredential.getPasswordSalt();
                     byte[] expectedHash = userCredential.getPasswordHash();
 
-                    if (!isExpectedPassword(password.toCharArray(), salt, expectedHash)) {
+                    if (notExpectedPassword(password.toCharArray(), salt, expectedHash)) {
                         throw new SecurityException("username or password is invalid");
                     }
                 } else {
@@ -75,14 +76,49 @@ public class StoreSecurity {
         }
     }
 
-    private static boolean isExpectedPassword(char[] password, byte[] salt, byte[] expectedHash) {
+    public static void addOrUpdatePassword(NitriteStore<?> store, boolean update, String username,
+                                      SecureString oldPassword, SecureString newPassword) {
+        NitriteMap<String, UserCredential> userMap = null;
+
+        if (update) {
+            userMap = store.openMap(USER_MAP, String.class, UserCredential.class);
+            UserCredential credential = userMap.get(username);
+
+            if (credential != null) {
+                byte[] salt = credential.getPasswordSalt();
+                byte[] expectedHash = credential.getPasswordHash();
+
+                if (notExpectedPassword(oldPassword.asString().toCharArray(), salt, expectedHash)) {
+                    throw new SecurityException("username or password is invalid");
+                }
+            }
+        } else {
+            if (store.hasMap(USER_MAP)) {
+                throw new SecurityException("cannot add new credentials");
+            }
+        }
+
+        if (userMap == null) {
+            userMap = store.openMap(USER_MAP, String.class, UserCredential.class);
+        }
+
+        byte[] salt = getNextSalt();
+        byte[] hash = hash(newPassword.asString().toCharArray(), salt);
+
+        UserCredential userCredential = new UserCredential();
+        userCredential.setPasswordHash(hash);
+        userCredential.setPasswordSalt(salt);
+        userMap.put(username, userCredential);
+    }
+
+    private static boolean notExpectedPassword(char[] password, byte[] salt, byte[] expectedHash) {
         byte[] pwdHash = hash(password, salt);
         Arrays.fill(password, Character.MIN_VALUE);
-        if (pwdHash.length != expectedHash.length) return false;
+        if (pwdHash.length != expectedHash.length) return true;
         for (int i = 0; i < pwdHash.length; i++) {
-            if (pwdHash[i] != expectedHash[i]) return false;
+            if (pwdHash[i] != expectedHash[i]) return true;
         }
-        return true;
+        return false;
     }
 
     private static byte[] getNextSalt() {

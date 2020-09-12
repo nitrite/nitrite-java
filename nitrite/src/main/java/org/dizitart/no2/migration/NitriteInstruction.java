@@ -23,11 +23,36 @@ class NitriteInstruction implements Instruction {
 
     @Override
     public RepositoryInstruction forRepository(String typeName, String key) {
-        return migrationSteps::add;
+        return new RepositoryInstruction() {
+            @Override
+            public String entityName() {
+                return typeName;
+            }
+
+            @Override
+            public String key() {
+                return key;
+            }
+
+            @Override
+            public void addStep(MigrationStep step) {
+                migrationSteps.add(step);
+            }
+        };
     }
 
     @Override
     public CollectionInstruction forCollection(String collectionName) {
-        return migrationSteps::add;
+        return new CollectionInstruction() {
+            @Override
+            public String collectionName() {
+                return collectionName;
+            }
+
+            @Override
+            public void addStep(MigrationStep step) {
+                migrationSteps.add(step);
+            }
+        };
     }
 }

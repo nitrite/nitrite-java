@@ -188,3 +188,9 @@ ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
 ## Transaction
 
 https://vladmihalcea.com/a-beginners-guide-to-transaction-isolation-levels-in-enterprise-java/
+
+### Nested Transaction
+    - https://www.freecodecamp.org/news/design-a-key-value-store-in-go/
+    - Nested Transaction (Parent can't see data, unless child transaction commits)
+    
+### Db Level Transaction

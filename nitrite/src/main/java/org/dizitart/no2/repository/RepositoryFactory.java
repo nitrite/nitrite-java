@@ -67,7 +67,7 @@ public class RepositoryFactory {
             lock.lock();
             if (repositoryMap.containsKey(collectionName)) {
                 ObjectRepository<T> repository = (ObjectRepository<T>) repositoryMap.get(collectionName);
-                if (repository.isDropped()) {
+                if (repository.isDropped() || !repository.isOpen()) {
                     repositoryMap.remove(collectionName);
                     return createRepository(nitriteConfig, type, collectionName, key);
                 } else {

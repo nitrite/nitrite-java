@@ -5,6 +5,7 @@ package org.dizitart.no2.migration;
  */
 public enum InstructionType {
     // db related statements
+    AddPassword,
     ChangePassword,
     DropCollection,
     DropRepository,
@@ -20,8 +21,7 @@ public enum InstructionType {
     CollectionCreateIndex,
 
     // repository related statements
-    RenameEntity,
-    RenameKey,
+    RenameRepository,
     RepositoryAddField,
     RepositoryRenameField,
     RepositoryDeleteField,

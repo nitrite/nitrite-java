@@ -9,6 +9,14 @@ import org.dizitart.no2.common.util.SecureString;
  */
 public interface DatabaseInstruction extends Composable {
 
+    default DatabaseInstruction addPassword(String username, String password) {
+        MigrationStep migrationStep = new MigrationStep();
+        migrationStep.setInstructionType(InstructionType.AddPassword);
+        migrationStep.setArguments(new Pair<>(username, new SecureString(password)));
+        addStep(migrationStep);
+        return this;
+    }
+
     default DatabaseInstruction changePassword(String username, String oldPassword, String newPassword) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.ChangePassword);

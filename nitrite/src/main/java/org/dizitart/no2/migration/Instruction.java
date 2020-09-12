@@ -1,5 +1,7 @@
 package org.dizitart.no2.migration;
 
+import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
+
 /**
  * @author Anindya Chatterjee
  */
@@ -11,11 +13,11 @@ public interface Instruction {
     }
 
     default RepositoryInstruction forRepository(Class<?> type) {
-        return forRepository(type.getName(), null);
+        return forRepository(getEntityName(type), null);
     }
 
     default RepositoryInstruction forRepository(Class<?> type, String key) {
-        return forRepository(type.getName(), key);
+        return forRepository(getEntityName(type), key);
     }
 
     RepositoryInstruction forRepository(String typeName, String key);
