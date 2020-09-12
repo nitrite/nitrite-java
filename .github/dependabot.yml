@@ -7,10 +7,6 @@ updates:
   open-pull-requests-limit: 10
   target-branch: 4.x
   ignore:
-  - dependency-name: org.jetbrains.dokka
-    versions:
-    - ">= 0.11.a"
-    - "< 0.12"
   - dependency-name: org.objenesis:objenesis
     versions:
     - "> 2.6"
