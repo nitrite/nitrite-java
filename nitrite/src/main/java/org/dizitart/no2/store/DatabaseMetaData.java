@@ -16,39 +16,37 @@
 
 package org.dizitart.no2.store;
 
-import lombok.EqualsAndHashCode;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.tuples.Pair;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.dizitart.no2.common.Constants.*;
 
 /**
  * @author Anindya Chatterjee.
  */
-@EqualsAndHashCode
-public class StoreInfo {
-    private final Map<String, String> info;
+@Data
+@NoArgsConstructor
+public class DatabaseMetaData {
+    private Long createTime;
+    private String storeVersion;
+    private String nitriteVersion;
+    private Integer schemaVersion;
 
-    public StoreInfo(Document document) {
-        this.info = new HashMap<>();
+    public DatabaseMetaData(Document document) {
         populateInfo(document);
     }
 
-    public Map<String, String> getInfo() {
-        return info;
+    public Document getInfo() {
+        return Document.createDocument()
+            .put("createTime", createTime)
+            .put("storeVersion", storeVersion)
+            .put("nitriteVersion", nitriteVersion)
+            .put("schemaVersion", schemaVersion);
     }
 
     private void populateInfo(Document document) {
-        document.remove(DOC_ID);
-        document.remove(DOC_SOURCE);
-        document.remove(DOC_REVISION);
-        document.remove(DOC_MODIFIED);
-
-        for (Pair<String, Object> pair : document) {
-            info.put(pair.getFirst(), pair.getSecond().toString());
-        }
+        createTime = document.get("createTime", Long.class);
+        storeVersion = document.get("storeVersion", String.class);
+        nitriteVersion = document.get("nitriteVersion", String.class);
+        schemaVersion = document.get("schemaVersion", Integer.class);
     }
 }

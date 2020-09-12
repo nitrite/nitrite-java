@@ -7,6 +7,15 @@
 - LuceneIndexer, test with testIssue174()
 - Ensure every error event in replication
 
+    Rename Entity (Repository)
+    Delete Entity (Repository)
+    Add Field
+    Rename Field
+    Delete Field
+    Change Datatype of Field
+    Change Id field
+    Change Indexed field
+
 DataGate Server:
 
 https://stackoverflow.com/questions/42644779/how-to-secure-a-websocket-endpoint-in-java-ee
@@ -179,3 +188,9 @@ ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
 ## Transaction
 
 https://vladmihalcea.com/a-beginners-guide-to-transaction-isolation-levels-in-enterprise-java/
+
+### Nested Transaction
+    - https://www.freecodecamp.org/news/design-a-key-value-store-in-go/
+    - Nested Transaction (Parent can't see data, unless child transaction commits)
+    
+### Db Level Transaction

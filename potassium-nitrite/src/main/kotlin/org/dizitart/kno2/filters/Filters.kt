@@ -35,6 +35,12 @@ import kotlin.reflect.KProperty
 inline infix fun <reified T> String.eq(value: T?): Filter = FluentFilter.where(this).eq(value)
 
 /**
+ * Creates an not equality filter which does not matches documents where the value
+ * of a field equals the specified [value].
+ */
+inline infix fun <reified T> String.notEq(value: T?): Filter = FluentFilter.where(this).notEq(value)
+
+/**
  * Creates a greater than filter which matches those documents where the value
  * of the value is greater than (i.e. >) the specified [value].
  */
@@ -135,6 +141,12 @@ inline infix fun <reified T : Filter> Filter.or(filter: T): Filter = this.or(fil
  * of a property equals the specified [value].
  */
 inline infix fun <reified T> KProperty<T?>.eq(value: T?): Filter = FluentFilter.where(this.name).eq(value)
+
+/**
+ * Creates an not equality filter which does not matches objects where the value
+ * of a property equals the specified [value].
+ */
+inline infix fun <reified T> KProperty<T?>.notEq(value: T?): Filter = FluentFilter.where(this.name).notEq(value)
 
 /**
  * Creates a greater than filter which matches those objects where the value

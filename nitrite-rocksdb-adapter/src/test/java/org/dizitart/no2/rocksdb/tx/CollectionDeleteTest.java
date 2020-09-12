@@ -32,7 +32,7 @@ public class CollectionDeleteTest extends BaseTransactionTest {
     public void testDelete() {
         insert();
 
-        WriteResult writeResult = txCollection.remove(where("lastName").eq(null).not());
+        WriteResult writeResult = txCollection.remove(where("lastName").notEq(null));
         assertEquals(writeResult.getAffectedCount(), 3);
 
         txCollection.commit();
@@ -45,7 +45,7 @@ public class CollectionDeleteTest extends BaseTransactionTest {
     public void testDeleteWithOptions() {
         insert();
 
-        WriteResult writeResult = txCollection.remove(where("lastName").eq(null).not(), true);
+        WriteResult writeResult = txCollection.remove(where("lastName").notEq(null), true);
         assertEquals(writeResult.getAffectedCount(), 1);
 
         txCollection.commit();
@@ -72,7 +72,7 @@ public class CollectionDeleteTest extends BaseTransactionTest {
         assertEquals(cursor.size(), 0);
 
         txCollection.commit();
-        WriteResult writeResult = collection.remove(where("lastName").eq(null).not());
+        WriteResult writeResult = collection.remove(where("lastName").notEq(null));
         assertEquals(writeResult.getAffectedCount(), 0);
     }
 

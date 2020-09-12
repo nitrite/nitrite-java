@@ -1,7 +1,6 @@
 package org.dizitart.no2.store.tx;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.*;
@@ -9,8 +8,6 @@ import org.dizitart.no2.store.events.StoreEventListener;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.dizitart.no2.common.Constants.*;
 
 /**
  * @author Anindya Chatterjee
@@ -27,7 +24,7 @@ public class TransactionalStore<T extends StoreConfig> extends AbstractNitriteSt
     }
 
     @Override
-    public void openOrCreate(String username, String password) {
+    public void openOrCreate() {
         // nothing to do
     }
 
@@ -125,12 +122,8 @@ public class TransactionalStore<T extends StoreConfig> extends AbstractNitriteSt
     }
 
     @Override
-    public StoreInfo getStoreInfo() {
-        Document document = Document.createDocument();
-        document.put(CREATE_TIME, System.currentTimeMillis());
-        document.put(FILE_STORE, "TxStore/" + NITRITE_VERSION);
-        document.put(STORE_VERSION, NITRITE_VERSION);
-        return new StoreInfo(document);
+    public String getStoreVersion() {
+        return primaryStore.getStoreVersion();
     }
 
     @Override

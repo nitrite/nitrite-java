@@ -29,7 +29,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.Map;
 import java.util.TreeMap;
@@ -234,7 +234,7 @@ public class Recovery {
                 if (data[i] == '\n') {
                     // set the position to the start of the first page
                     buff.position(pos + i + 1);
-                    String s = new String(data, 0, i, Charset.forName("ISO-8859-1")).trim();
+                    String s = new String(data, 0, i, StandardCharsets.ISO_8859_1).trim();
                     return fromString(s);
                 }
             }
@@ -263,10 +263,9 @@ public class Recovery {
             return "File not found: " + fileName;
         }
         long fileLength = FileUtils.size(fileName);
-        MVStore store = new MVStore.Builder().
+        try (MVStore store = new MVStore.Builder().
             fileName(fileName).
-            readOnly().open();
-        try {
+            readOnly().open()) {
             MVMap<String, String> meta = store.getMetaMap();
             Map<String, Object> header = store.getStoreHeader();
             long fileCreated = DataUtils.readHexLong(header, "created", 0L);
@@ -320,8 +319,6 @@ public class Recovery {
             pw.println("ERROR: " + e);
             e.printStackTrace(pw);
             return e.getMessage();
-        } finally {
-            store.close();
         }
         pw.flush();
         return null;

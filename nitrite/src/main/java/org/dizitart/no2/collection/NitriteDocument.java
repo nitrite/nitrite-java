@@ -43,6 +43,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 class NitriteDocument extends LinkedHashMap<String, Object> implements Document {
     private static final long serialVersionUID = 1477462374L;
     private static final List<String> reservedFields = listOf(DOC_ID, DOC_REVISION, DOC_SOURCE, DOC_MODIFIED);
+//    private final String regex = MessageFormat.format("\\{0}", NitriteConfig.getFieldSeparator());
 
     NitriteDocument() {
         super();
@@ -54,6 +55,10 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     @Override
     public Document put(String key, Object value) {
+        if (isNullOrEmpty(key)) {
+            throw new InvalidOperationException("document does not support empty or null key");
+        }
+
         if (DOC_ID.contentEquals(key) && !validId(value)) {
             throw new InvalidOperationException("_id is an auto generated value and cannot be set");
         }
@@ -63,7 +68,13 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                 + " does not implement java.io.Serializable");
         }
 
-        super.put(key, value);
+        String regex = MessageFormat.format("\\{0}", NitriteConfig.getFieldSeparator());
+        if (key.contains(NitriteConfig.getFieldSeparator())) {
+            String[] splits = key.split(regex);
+            deepPut(splits, value);
+        } else {
+            super.put(key, value);
+        }
         return this;
     }
 
@@ -111,7 +122,13 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     @Override
     public void remove(String key) {
-        super.remove(key);
+        if (key.contains(NitriteConfig.getFieldSeparator())) {
+            String regex = MessageFormat.format("\\{0}", NitriteConfig.getFieldSeparator());
+            String[] splits = key.split(regex);
+            deepRemove(splits);
+        } else {
+            super.remove(key);
+        }
     }
 
     @Override
@@ -201,6 +218,48 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             return getByEmbeddedKey(field);
         } else {
             return null;
+        }
+    }
+
+    private void deepPut(String[] splits, Object value) {
+        if (splits.length == 0) {
+            throw new ValidationException("invalid key provided");
+        }
+        String key = splits[0];
+        if (splits.length == 1) {
+            put(key, value);
+        } else {
+            Object val = get(key);
+            String[] remaining = Arrays.copyOfRange(splits, 1, splits.length);
+            if (val instanceof NitriteDocument) {
+                ((NitriteDocument) val).deepPut(remaining, value);
+            } else if (val == null) {
+                NitriteDocument subDoc = new NitriteDocument();
+                subDoc.deepPut(remaining, value);
+                put(key, subDoc);
+            }
+        }
+    }
+
+    private void deepRemove(String[] splits) {
+        if (splits.length == 0) {
+            throw new ValidationException("invalid key provided");
+        }
+        String key = splits[0];
+        if (splits.length == 1) {
+            remove(key);
+        } else {
+            Object val = get(key);
+            String[] remaining = Arrays.copyOfRange(splits, 1, splits.length);
+            if (val instanceof NitriteDocument) {
+                NitriteDocument subDoc = (NitriteDocument) val;
+                ((NitriteDocument) val).deepRemove(remaining);
+                if (subDoc.size() == 0) {
+                    super.remove(key);
+                }
+            } else if (val == null) {
+                super.remove(key);
+            }
         }
     }
 

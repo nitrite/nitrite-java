@@ -7,7 +7,6 @@ import org.dizitart.no2.mapdb.serializers.Serializers;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
-import org.dizitart.no2.store.StoreInfo;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
 import org.mapdb.BTreeMap;
@@ -31,15 +30,15 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
     }
 
     @Override
-    public void openOrCreate(String username, String password) {
-        this.db = MapDBStoreUtils.openOrCreate(username, password, getStoreConfig());
+    public void openOrCreate() {
+        this.db = StoreFactory.open(getStoreConfig());
         initEventBus();
         alert(StoreEvents.Opened);
     }
 
     @Override
     public boolean isClosed() {
-        return db.isClosed();
+        return db == null || db.isClosed();
     }
 
     @Override
@@ -135,8 +134,8 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
     }
 
     @Override
-    public StoreInfo getStoreInfo() {
-        return MapDBStoreUtils.getStoreInfo(db);
+    public String getStoreVersion() {
+        return "MapDB/" + getMapDbVersion();
     }
 
     private void initEventBus() {
@@ -145,5 +144,9 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
                 eventBus.register(eventListener);
             }
         }
+    }
+
+    private static String getMapDbVersion() {
+        return "3.0.8";
     }
 }

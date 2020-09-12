@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.module.NitriteModule;
 
 /**
@@ -58,6 +59,18 @@ public class NitriteBuilder {
      */
     public NitriteBuilder loadModule(NitriteModule module) {
         this.nitriteConfig.loadModule(module);
+        return this;
+    }
+
+    public NitriteBuilder addMigrations(Migration... migrations) {
+        for (Migration migration : migrations) {
+            this.nitriteConfig.addMigration(migration);
+        }
+        return this;
+    }
+
+    public NitriteBuilder schemaVersion(Integer version) {
+        this.nitriteConfig.schemaVersion(version);
         return this;
     }
 

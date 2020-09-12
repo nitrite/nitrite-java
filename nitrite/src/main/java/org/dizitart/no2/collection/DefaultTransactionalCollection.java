@@ -5,6 +5,7 @@ import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.tuples.Triplet;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.store.NitriteMap;
@@ -24,7 +25,6 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
     private final NitriteCollection primary;
     private final Lock primaryWriteLock;
     private volatile boolean transactionOpened;
-    private long changeSize;
 
     public DefaultTransactionalCollection(String name,
                                           NitriteMap<NitriteId, Document> nitriteMap,
@@ -36,7 +36,6 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
         this.primary = primary;
         this.primaryWriteLock = primaryWriteLock;
         this.transactionOpened = true;
-        this.changeSize = 0;
     }
 
     protected void checkOpened() {
@@ -49,7 +48,7 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
         }
 
         if (!transactionOpened) {
-            throw new NitriteIOException("transaction is closed");
+            throw new TransactionException("transaction is closed");
         }
     }
 
@@ -70,7 +69,6 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
         changeLogs.add(changeLog);
 
         // add inserts numbers
-        changeSize += documents.length;
 
         return result;
     }
@@ -99,7 +97,6 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
         changeLogs.add(changeLog);
 
         // one element is removed
-        changeSize--;
 
         return result;
     }
@@ -118,7 +115,6 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
         changeLogs.add(changeLog);
 
         // add removed numbers
-        changeSize -= result.getAffectedCount();
 
         return result;
     }
@@ -134,7 +130,6 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
 
         changeLogs.add(changeLog);
 
-        changeSize = 0;
     }
 
     @Override
@@ -186,7 +181,6 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
         changeLog.setObject(getName());
         changeLogs.add(changeLog);
 
-        changeSize = 0;
     }
 
     @Override
@@ -326,5 +320,4 @@ class DefaultTransactionalCollection extends BaseNitriteCollection implements Tr
             primary.dropIndex(field);
         }
     }
-
 }

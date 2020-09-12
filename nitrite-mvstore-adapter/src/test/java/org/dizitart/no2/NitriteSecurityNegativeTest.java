@@ -33,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Anindya Chatterjee.
  */
-public class NitriteStoreFactoryNegativeTest {
+public class NitriteSecurityNegativeTest {
     private Nitrite db;
     private final String fileName = getRandomTempDbFile();
 

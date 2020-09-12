@@ -20,6 +20,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.UnknownType;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -32,6 +33,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
+import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 import static org.dizitart.no2.common.util.ValidationUtils.*;
 
 /**
@@ -109,6 +111,23 @@ public abstract class ComparableIndexer implements Indexer {
         }
 
         if (resultSet == null) resultSet = new LinkedHashSet<>();
+        return resultSet;
+    }
+
+    public Set<NitriteId> findNotEqual(String collectionName, String field, Comparable value) {
+        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
+            value != null ? getIndexMap(collectionName, field, value.getClass())
+                : getIndexMap(collectionName, field, UnknownType.class);
+
+        Set<NitriteId> resultSet = new LinkedHashSet<>();
+        if (indexMap != null) {
+            for (Pair<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entries()) {
+                if (!deepEquals(entry.getFirst(), value)) {
+                    resultSet.addAll(entry.getSecond());
+                }
+            }
+        }
+
         return resultSet;
     }
 

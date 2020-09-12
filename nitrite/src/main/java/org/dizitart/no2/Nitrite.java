@@ -21,6 +21,7 @@ import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.store.DatabaseMetaData;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.io.Closeable;
@@ -161,6 +162,13 @@ public interface Nitrite extends Closeable {
      * @return the {@link NitriteStore} instance of the database.
      */
     NitriteStore<?> getStore();
+
+    /**
+     * Gets database meta data.
+     *
+     * @return the database meta data
+     */
+    DatabaseMetaData getDatabaseMetaData();
 
     /**
      * Checks whether a particular {@link NitriteCollection} exists in the store.

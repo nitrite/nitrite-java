@@ -271,4 +271,21 @@ public class DocumentTest {
             }
         }
     }
+
+    @Test
+    public void testDeepPut() {
+        doc.put("location.address.pin", 700037);
+        assertEquals(doc.get("location.address.pin"), 700037);
+
+        doc.put("location.address.business.pin", 700037);
+        assertEquals(doc.get("location.address.business.pin"), 700037);
+    }
+
+    @Test
+    public void testDeepRemove() {
+        doc.remove("location.address.line1");
+        doc.remove("location.address.line2");
+        doc.remove("location.address.house");
+        assertNull(doc.get("location.address"));
+    }
 }

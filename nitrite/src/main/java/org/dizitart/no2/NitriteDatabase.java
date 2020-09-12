@@ -18,16 +18,26 @@ package org.dizitart.no2;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.CollectionFactory;
+import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.util.StringUtils;
+import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.migration.MigrationManager;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
+import org.dizitart.no2.store.DatabaseMetaData;
+import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
+import java.io.File;
 import java.util.Map;
 import java.util.Set;
+
+import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
+import static org.dizitart.no2.common.Constants.STORE_INFO;
+import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
+import static org.dizitart.no2.store.StoreSecurity.authenticate;
 
 /**
  * @author Anindya Chatterjee.
@@ -146,18 +156,77 @@ class NitriteDatabase implements Nitrite {
         }
     }
 
+    @Override
+    public DatabaseMetaData getDatabaseMetaData() {
+        NitriteMap<String, Document> storeInfo = this.store.openMap(STORE_INFO,
+            String.class, Document.class);
+
+        Document document = storeInfo.get(STORE_INFO);
+        if (document == null) {
+            prepareDatabaseMetaData();
+            document = storeInfo.get(STORE_INFO);
+        }
+        return new DatabaseMetaData(document);
+    }
+
     private void validateUserCredentials(String username, String password) {
-        if (StringUtils.isNullOrEmpty(username)) {
+        if (isNullOrEmpty(username)) {
             throw new SecurityException("username cannot be empty");
         }
-        if (StringUtils.isNullOrEmpty(password)) {
+        if (isNullOrEmpty(password)) {
             throw new SecurityException("password cannot be empty");
         }
     }
 
     private void initialize(String username, String password) {
-        this.nitriteConfig.initialized();
-        this.store = nitriteConfig.getNitriteStore();
-        this.store.openOrCreate(username, password);
+        try {
+            nitriteConfig.initialized();
+            store = nitriteConfig.getNitriteStore();
+            boolean isExisting = isExisting();
+
+            store.openOrCreate();
+            prepareDatabaseMetaData();
+
+            MigrationManager migrationManager = new MigrationManager(this);
+            migrationManager.doMigrate();
+
+            authenticate(store, username, password, isExisting);
+        } catch (NitriteException e) {
+            log.error("Error while initializing the database", e);
+            if (store != null && !store.isClosed()) {
+                store.close();
+            }
+            throw e;
+        } catch (Exception e) {
+            log.error("Error while initializing the database", e);
+            if (store != null && !store.isClosed()) {
+                store.close();
+            }
+            throw new NitriteIOException("failed to initialize database", e);
+        }
+    }
+
+    private void prepareDatabaseMetaData() {
+        NitriteMap<String, Document> storeInfo = this.store.openMap(STORE_INFO,
+            String.class, Document.class);
+
+        if (storeInfo.isEmpty()) {
+            DatabaseMetaData databaseMetadata = new DatabaseMetaData();
+            databaseMetadata.setCreateTime(System.currentTimeMillis());
+            databaseMetadata.setStoreVersion(store.getStoreVersion());
+            databaseMetadata.setNitriteVersion(NITRITE_VERSION);
+            databaseMetadata.setSchemaVersion(nitriteConfig.getSchemaVersion());
+
+            storeInfo.put(STORE_INFO, databaseMetadata.getInfo());
+        }
+    }
+
+    private boolean isExisting() {
+        String filePath = store.getStoreConfig().filePath();
+        if (!isNullOrEmpty(filePath)) {
+            File dbFile = new File(filePath);
+            return dbFile.exists();
+        }
+        return false;
     }
 }

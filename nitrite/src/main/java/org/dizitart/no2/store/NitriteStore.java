@@ -33,7 +33,7 @@ import java.util.Set;
  */
 public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin, AutoCloseable {
 
-    void openOrCreate(String username, String password);
+    void openOrCreate();
 
     /**
      * Checks whether this store is closed for further modification.
@@ -165,11 +165,16 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
     void unsubscribe(StoreEventListener listener);
 
     /**
-     * Returns information about the underlying data store.
+     * Gets underlying store version.
      *
-     * @return a {@link StoreInfo} object containing information about the store.
+     * @return the store version
      */
-    StoreInfo getStoreInfo();
+    String getStoreVersion();
 
+    /**
+     * Gets store config.
+     *
+     * @return the store config
+     */
     Config getStoreConfig();
 }

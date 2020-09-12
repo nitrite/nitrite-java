@@ -34,7 +34,7 @@ public class CollectionDeleteTest extends BaseCollectionTest {
     public void testDelete() {
         insert();
 
-        WriteResult writeResult = collection.remove(where("lastName").eq(null).not());
+        WriteResult writeResult = collection.remove(where("lastName").notEq(null));
         assertEquals(writeResult.getAffectedCount(), 3);
 
         DocumentCursor cursor = collection.find();
@@ -45,7 +45,7 @@ public class CollectionDeleteTest extends BaseCollectionTest {
     public void testDeleteWithOptions() {
         insert();
 
-        WriteResult writeResult = collection.remove(where("lastName").eq(null).not(), true);
+        WriteResult writeResult = collection.remove(where("lastName").notEq(null), true);
         assertEquals(writeResult.getAffectedCount(), 1);
 
         DocumentCursor cursor = collection.find();
@@ -68,7 +68,7 @@ public class CollectionDeleteTest extends BaseCollectionTest {
         DocumentCursor cursor = collection.find();
         assertEquals(cursor.size(), 0);
 
-        WriteResult writeResult = collection.remove(where("lastName").eq(null).not());
+        WriteResult writeResult = collection.remove(where("lastName").notEq(null));
         assertEquals(writeResult.getAffectedCount(), 0);
     }
 

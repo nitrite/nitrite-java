@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Anindya Chatterjee.
  */
-public class NitriteStoreFactoryTest {
+public class NitriteSecurityTest {
     private Nitrite db;
     private final String fileName = getRandomTempDbFile();
 

@@ -51,7 +51,7 @@ public class CollectionFactory {
             lock.lock();
             if (collectionMap.containsKey(name)) {
                 NitriteCollection collection = collectionMap.get(name);
-                if (collection.isDropped()) {
+                if (collection.isDropped() || !collection.isOpen()) {
                     collectionMap.remove(name);
                     return createCollection(name, nitriteConfig, writeCatalogue);
                 }
