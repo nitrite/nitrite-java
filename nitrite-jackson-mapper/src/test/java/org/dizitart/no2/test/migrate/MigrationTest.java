@@ -5,7 +5,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
-import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapper.JacksonMapperModule;
@@ -203,7 +203,7 @@ public class MigrationTest {
         assertEquals(collection.find(where("age").notEq(null)).size(), 0);
     }
 
-    @Test(expected = NitriteIOException.class)
+    @Test(expected = MigrationException.class)
     public void testOpenWithoutSchemaVersion() {
         NitriteCollection collection = db.getCollection("test");
         for (int i = 0; i < 10; i++) {
