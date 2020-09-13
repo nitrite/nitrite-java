@@ -6,11 +6,11 @@ name: Gradle Build
 on:
   push:
     branches:
-      - 4.x
+      - develop
 
   pull_request:
     branches:
-      - 4.x
+      - develop
 
 jobs:
   build:
