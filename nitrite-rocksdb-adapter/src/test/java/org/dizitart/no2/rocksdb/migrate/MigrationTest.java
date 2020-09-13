@@ -1,8 +1,8 @@
-package org.dizitart.no2.migrate;
+package org.dizitart.no2.rocksdb.migrate;
 
 import com.github.javafaker.Faker;
+import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
@@ -12,21 +12,21 @@ import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.migration.Instruction;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.migration.TypeConverter;
-import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.rocksdb.Retry;
+import org.dizitart.no2.rocksdb.RocksDBModule;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.UUID;
 
-import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.TestUtil.createDb;
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.rocksdb.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.rocksdb.TestUtil.createDb;
 import static org.junit.Assert.*;
 
 /**
@@ -52,7 +52,7 @@ public class MigrationTest {
             db.close();
         }
 
-        Files.delete(Paths.get(dbPath));
+        FileUtils.deleteDirectory(new File(dbPath));
     }
 
     @Test
@@ -95,9 +95,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compress(true)
             .build();
 
         db = Nitrite.builder()
@@ -144,9 +143,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -180,9 +178,8 @@ public class MigrationTest {
             }
         };
 
-        storeModule = MVStoreModule.withConfig()
+        storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -224,9 +221,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -240,9 +236,8 @@ public class MigrationTest {
         assertEquals(collection.size(), 10);
         db.close();
 
-        storeModule = MVStoreModule.withConfig()
+        storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -276,9 +271,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -301,9 +295,8 @@ public class MigrationTest {
             }
         };
 
-        storeModule = MVStoreModule.withConfig()
+        storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -340,9 +333,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -381,9 +373,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -408,9 +399,8 @@ public class MigrationTest {
             }
         };
 
-        storeModule = MVStoreModule.withConfig()
+        storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -450,9 +440,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -525,9 +514,8 @@ public class MigrationTest {
             }
         };
 
-        MVStoreModule storeModule = MVStoreModule.withConfig()
+        RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()
@@ -550,9 +538,8 @@ public class MigrationTest {
             }
         };
 
-        storeModule = MVStoreModule.withConfig()
+        storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
-            .compressHigh(true)
             .build();
 
         db = Nitrite.builder()

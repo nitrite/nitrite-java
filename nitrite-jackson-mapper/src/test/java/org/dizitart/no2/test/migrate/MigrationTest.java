@@ -1,19 +1,20 @@
-package org.dizitart.no2.migrate;
+package org.dizitart.no2.test.migrate;
 
 import com.github.javafaker.Faker;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.mapper.JacksonMapperModule;
 import org.dizitart.no2.migration.Instruction;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.migration.TypeConverter;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.test.Retry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,9 +25,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.UUID;
 
-import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.TestUtil.createDb;
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.test.BaseObjectRepositoryTest.getRandomTempDbFile;
+import static org.dizitart.no2.test.TestUtil.createDb;
 import static org.junit.Assert.*;
 
 /**
@@ -42,7 +43,7 @@ public class MigrationTest {
 
     @Before
     public void setUp() {
-        db = createDb(dbPath);
+        db = createDb(dbPath, new JacksonMapperModule());
         faker = new Faker();
     }
 

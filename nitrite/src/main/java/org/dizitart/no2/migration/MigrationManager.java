@@ -46,7 +46,7 @@ public class MigrationManager {
                 // close the database
                 database.close();
 
-                throw new MigrationException("failed to open database, as no migration path found from revision "
+                throw new MigrationException("schema version mismatch, as no migration path found from version "
                     + databaseMetadata.getSchemaVersion() + " to " + nitriteConfig.getSchemaVersion());
             }
 
@@ -66,11 +66,11 @@ public class MigrationManager {
         Integer incomingVersion = nitriteConfig.getSchemaVersion();
 
         if (existingVersion == null) {
-            throw new MigrationException("corrupted database, no revision information found");
+            throw new MigrationException("corrupted database, no version information found");
         }
 
         if (incomingVersion == null) {
-            throw new MigrationException("invalid revision provided");
+            throw new MigrationException("invalid version provided");
         }
         return !existingVersion.equals(incomingVersion);
     }
@@ -84,8 +84,7 @@ public class MigrationManager {
         return findUpMigrationPath(migrateUp, start, end);
     }
 
-    private Queue<Migration> findUpMigrationPath(boolean upgrade,
-                                                int start, int end) {
+    private Queue<Migration> findUpMigrationPath(boolean upgrade, int start, int end) {
         Queue<Migration> result = new LinkedList<>();
         while (upgrade ? start < end : start > end) {
             TreeMap<Integer, Migration> targetNodes = nitriteConfig.getMigrations().get(start);
@@ -93,7 +92,6 @@ public class MigrationManager {
                 return null;
             }
 
-            // keys are ordered so we can start searching from one end of them.
             Set<Integer> keySet;
             if (upgrade) {
                 keySet = targetNodes.descendingKeySet();
