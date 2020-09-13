@@ -6,7 +6,6 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.operation.CollectionOperations;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.store.IndexCatalog;
 import org.dizitart.no2.store.NitriteMap;
@@ -24,10 +23,6 @@ public class Rename extends BaseCommand implements Command {
     @Override
     public void execute(Nitrite nitrite) {
         initialize(nitrite, oldName);
-
-        if (nitriteStore.hasMap(newName)) {
-            throw new InvalidOperationException("a collection with name " + newName + " already exists");
-        }
 
         NitriteMap<NitriteId, Document> newMap = nitriteStore.openMap(newName, NitriteId.class, Document.class);
         CollectionOperations newOperations = new CollectionOperations(newName, newMap, nitrite.getConfig(), null);

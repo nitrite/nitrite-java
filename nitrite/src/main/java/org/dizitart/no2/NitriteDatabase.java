@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.CollectionFactory;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.migration.MigrationManager;
@@ -190,7 +191,7 @@ class NitriteDatabase implements Nitrite {
             migrationManager.doMigrate();
 
             authenticate(store, username, password, isExisting);
-        } catch (NitriteIOException e) {
+        } catch (NitriteException e) {
             log.error("Error while initializing the database", e);
             if (store != null && !store.isClosed()) {
                 store.close();
