@@ -33,7 +33,7 @@ dependencies {
         api "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.2"
         api "org.mapdb:mapdb:3.0.8"
         api "com.h2database:h2-mvstore:1.4.200"
-        api "com.squareup.okhttp3:okhttp:4.8.1"
+        api "com.squareup.okhttp3:okhttp:4.9.0"
         api "org.rocksdb:rocksdbjni:6.11.4"
         api "com.esotericsoftware:kryo:4.0.2"
         api "org.locationtech.jts:jts-core:1.17.1"
