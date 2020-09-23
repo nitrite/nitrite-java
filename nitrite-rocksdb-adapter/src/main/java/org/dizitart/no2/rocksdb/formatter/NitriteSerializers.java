@@ -152,13 +152,14 @@ public class NitriteSerializers {
     private static class AttributesSerializer extends Serializer<Attributes> {
         @Override
         public void write(Kryo kryo, Output output, Attributes object) {
-            kryo.writeObject(output, object.getAttributes());
+            kryo.register(ConcurrentHashMap.class);
+            kryo.writeClassAndObject(output, object.getAttributes());
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public Attributes read(Kryo kryo, Input input, Class<Attributes> type) {
-            Map<String, String> map = (Map<String, String>) kryo.readObject(input, ConcurrentHashMap.class);
+            Map<String, String> map = (Map<String, String>) kryo.readClassAndObject(input);
             Attributes attributes = new Attributes();
             attributes.setAttributes(map);
             return attributes;

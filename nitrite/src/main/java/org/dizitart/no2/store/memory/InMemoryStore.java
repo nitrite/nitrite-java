@@ -1,0 +1,114 @@
+package org.dizitart.no2.store.memory;
+
+import org.dizitart.no2.index.BoundingBox;
+import org.dizitart.no2.store.AbstractNitriteStore;
+import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.store.NitriteRTree;
+import org.dizitart.no2.store.events.StoreEventListener;
+import org.dizitart.no2.store.events.StoreEvents;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
+
+/**
+ * @author Anindya Chatterjee
+ */
+public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
+    private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
+    private final Map<String, NitriteRTree<?, ?>> nitriteRTreeMapRegistry;
+    private volatile boolean closed = false;
+
+    public InMemoryStore() {
+        super();
+        this.nitriteMapRegistry = new ConcurrentHashMap<>();
+        this.nitriteRTreeMapRegistry = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void openOrCreate() {
+        initEventBus();
+        alert(StoreEvents.Opened);
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closed;
+    }
+
+    @Override
+    public boolean hasUnsavedChanges() {
+        return false;
+    }
+
+    @Override
+    public boolean isReadOnly() {
+        return false;
+    }
+
+    @Override
+    public void commit() {
+        alert(StoreEvents.Commit);
+    }
+
+    @Override
+    public void close() {
+        closed = true;
+        alert(StoreEvents.Closed);
+    }
+
+    @Override
+    public boolean hasMap(String mapName) {
+        return nitriteMapRegistry.containsKey(mapName) || nitriteRTreeMapRegistry.containsKey(mapName);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
+        if (nitriteMapRegistry.containsKey(mapName)) {
+            return (InMemoryMap<Key, Value>) nitriteMapRegistry.get(mapName);
+        }
+
+        NitriteMap<Key, Value> nitriteMap = new InMemoryMap<>(mapName, this);
+        nitriteMapRegistry.put(mapName, nitriteMap);
+
+        return nitriteMap;
+    }
+
+    @Override
+    public void removeMap(String mapName) {
+        if (nitriteMapRegistry.containsKey(mapName)) {
+            nitriteMapRegistry.get(mapName).clear();
+            nitriteMapRegistry.remove(mapName);
+        }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
+                                                                               Class<?> keyType,
+                                                                               Class<?> valueType) {
+        if (nitriteRTreeMapRegistry.containsKey(rTreeName)) {
+            return (InMemoryRTree<Key, Value>) nitriteRTreeMapRegistry.get(rTreeName);
+        }
+
+        NitriteRTree<Key, Value> rTree = new InMemoryRTree<>();
+        nitriteRTreeMapRegistry.put(rTreeName, rTree);
+
+        return rTree;
+    }
+
+    @Override
+    public String getStoreVersion() {
+        return "InMemory/" + NITRITE_VERSION;
+    }
+
+    private void initEventBus() {
+        if (getStoreConfig().eventListeners() != null) {
+            for (StoreEventListener eventListener : getStoreConfig().eventListeners()) {
+                eventBus.register(eventListener);
+            }
+        }
+    }
+}

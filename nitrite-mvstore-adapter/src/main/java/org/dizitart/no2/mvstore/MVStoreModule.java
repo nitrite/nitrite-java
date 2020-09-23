@@ -17,7 +17,6 @@
 package org.dizitart.no2.mvstore;
 
 import lombok.AccessLevel;
-import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.module.NitriteModule;
 import org.dizitart.no2.module.NitritePlugin;
@@ -36,6 +35,11 @@ public class MVStoreModule implements StoreModule {
 
     @Setter(AccessLevel.PACKAGE)
     private MVStoreConfig storeConfig;
+
+    public MVStoreModule(String path) {
+        this.storeConfig = new MVStoreConfig();
+        this.storeConfig.filePath(path);
+    }
 
     @Override
     public Set<NitritePlugin> plugins() {

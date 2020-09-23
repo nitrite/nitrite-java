@@ -27,7 +27,6 @@ import org.dizitart.no2.rocksdb.serializers.JodaTimeKryoKeySerializer;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -62,7 +61,7 @@ public abstract class BaseCollectionTest {
         });
     }
 
-    @Rule
+//    @Rule
     public Retry retry = new Retry(3);
 
     @Before

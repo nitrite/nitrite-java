@@ -49,10 +49,10 @@ public abstract class BaseObjectRepositoryTest {
     public boolean isAutoCommit = false;
 
     protected Nitrite db;
-    ObjectRepository<Company> companyRepository;
-    ObjectRepository<Employee> employeeRepository;
-    ObjectRepository<ClassA> aObjectRepository;
-    ObjectRepository<ClassC> cObjectRepository;
+    protected ObjectRepository<Company> companyRepository;
+    protected ObjectRepository<Employee> employeeRepository;
+    protected ObjectRepository<ClassA> aObjectRepository;
+    protected ObjectRepository<ClassC> cObjectRepository;
     private final String fileName = getRandomTempDbFile();
 
     @Rule

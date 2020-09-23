@@ -18,6 +18,7 @@ package org.dizitart.no2.mapdb.collection;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.CollectionFactory;
+import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapdb.Retry;
 import org.junit.Rule;
@@ -35,7 +36,7 @@ public class CollectionFactoryTest {
 
     @Test(expected = ValidationException.class)
     public void testGetCollectionMapStoreNull() {
-        CollectionFactory factory = new CollectionFactory();
+        CollectionFactory factory = new CollectionFactory(new LockService());
         assertNotNull(factory);
 
         NitriteConfig config = new NitriteConfig();
@@ -44,7 +45,7 @@ public class CollectionFactoryTest {
 
     @Test(expected = ValidationException.class)
     public void testGetCollectionContextNull() {
-        CollectionFactory factory = new CollectionFactory();
+        CollectionFactory factory = new CollectionFactory(new LockService());
         factory.getCollection("test", null, false);
     }
 }

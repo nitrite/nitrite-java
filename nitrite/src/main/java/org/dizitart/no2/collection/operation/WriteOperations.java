@@ -82,7 +82,6 @@ class WriteOperations {
 
             if (already != null) {
                 log.warn("Another document {} already exists with same id {}", already, nitriteId);
-                // nitriteMap.put(nitriteId, already);
 
                 throw new UniqueConstraintException("id constraint violation, " +
                     "entry with same id already exists in " + nitriteMap.getName());

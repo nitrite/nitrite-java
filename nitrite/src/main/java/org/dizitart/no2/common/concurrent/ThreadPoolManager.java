@@ -88,10 +88,12 @@ public class ThreadPoolManager {
     public static void shutdownThreadPools() {
         for (ExecutorService threadPool : threadPools) {
             synchronized (lock) {
-                threadPool.shutdown();
+                if (threadPool != null) {
+                    threadPool.shutdown();
+                }
             }
             try {
-                if (!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
+                if (threadPool != null && !threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
                     synchronized (lock) {
                         threadPool.shutdownNow();
                     }

@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.dizitart.no2.common.Constants.*;
-import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
 /**
  * @author Anindya Chatterjee
@@ -61,7 +61,7 @@ public class RepositoryFactory {
             throw new ValidationException("nitriteConfig cannot be null");
         }
 
-        String collectionName = findRepositoryName(key, type);
+        String collectionName = findRepositoryName(type, key);
 
         try {
             lock.lock();
@@ -125,14 +125,6 @@ public class RepositoryFactory {
             catalogMap.put(TAG_REPOSITORIES, document);
         } else {
             catalogMap.put(TAG_KEYED_REPOSITORIES, document);
-        }
-    }
-
-    private <T> String findRepositoryName(String key, Class<T> type) {
-        if (StringUtils.isNullOrEmpty(key)) {
-            return getEntityName(type);
-        } else {
-            return getEntityName(type) + KEY_OBJ_SEPARATOR + key;
         }
     }
 }

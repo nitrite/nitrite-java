@@ -7,4 +7,8 @@ public class TransactionException extends NitriteException {
     public TransactionException(String errorMessage) {
         super(errorMessage);
     }
+
+    public TransactionException(String errorMessage, Throwable error) {
+        super(errorMessage, error);
+    }
 }

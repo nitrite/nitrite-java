@@ -7,7 +7,6 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.tuples.Quartet;
 import org.dizitart.no2.common.tuples.Triplet;
 import org.dizitart.no2.common.util.SecureString;
-import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.migration.commands.*;
 import org.dizitart.no2.store.DatabaseMetaData;
@@ -19,8 +18,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeMap;
 
-import static org.dizitart.no2.common.Constants.KEY_OBJ_SEPARATOR;
 import static org.dizitart.no2.common.Constants.STORE_INFO;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
 /**
  * @author Anindya Chatterjee
@@ -267,14 +266,6 @@ public class MigrationManager {
             }
 
             command.execute(database);
-        }
-    }
-
-    private String findRepositoryName(String entityName, String key) {
-        if (StringUtils.isNullOrEmpty(key)) {
-            return entityName;
-        } else {
-            return entityName + KEY_OBJ_SEPARATOR + key;
         }
     }
 }

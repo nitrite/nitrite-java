@@ -3,15 +3,17 @@ package org.dizitart.no2.mapdb;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.common.NullEntry;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.mapdb.BTreeMap;
 import org.mapdb.DBException;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.Map;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -81,28 +83,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public RecordStream<V> values() {
-        return RecordStream.fromIterable(() -> new Iterator<V>() {
-            final Iterator<V> valueIterator = bTreeMap.valueIterator();
-            final Iterator<V> nullValueIterator = nullEntryMap.valueIterator();
-
-            @Override
-            public boolean hasNext() {
-                boolean result = nullValueIterator.hasNext();
-                if (!result) {
-                    return valueIterator.hasNext();
-                }
-                return true;
-            }
-
-            @Override
-            public V next() {
-                if (nullValueIterator.hasNext()) {
-                    return nullValueIterator.next();
-                } else {
-                    return valueIterator.next();
-                }
-            }
-        });
+        return RecordStream.fromCombined(bTreeMap.values(), nullEntryMap.values());
     }
 
     @Override

@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.CollectionFactory;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
@@ -29,6 +30,7 @@ import org.dizitart.no2.repository.RepositoryFactory;
 import org.dizitart.no2.store.DatabaseMetaData;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.transaction.Session;
 
 import java.io.File;
 import java.util.Map;
@@ -47,11 +49,13 @@ class NitriteDatabase implements Nitrite {
     private final CollectionFactory collectionFactory;
     private final RepositoryFactory repositoryFactory;
     private final NitriteConfig nitriteConfig;
+    private final LockService lockService;
     private NitriteStore<?> store;
 
     NitriteDatabase(NitriteConfig config) {
         this.nitriteConfig = config;
-        this.collectionFactory = new CollectionFactory();
+        this.lockService = new LockService();
+        this.collectionFactory = new CollectionFactory(lockService);
         this.repositoryFactory = new RepositoryFactory(collectionFactory);
         this.initialize(null, null);
     }
@@ -59,7 +63,8 @@ class NitriteDatabase implements Nitrite {
     NitriteDatabase(String username, String password, NitriteConfig config) {
         validateUserCredentials(username, password);
         this.nitriteConfig = config;
-        this.collectionFactory = new CollectionFactory();
+        this.lockService = new LockService();
+        this.collectionFactory = new CollectionFactory(lockService);
         this.repositoryFactory = new RepositoryFactory(collectionFactory);
         this.initialize(username, password);
     }
@@ -167,6 +172,11 @@ class NitriteDatabase implements Nitrite {
             document = storeInfo.get(STORE_INFO);
         }
         return new DatabaseMetaData(document);
+    }
+
+    @Override
+    public Session createSession() {
+        return new Session(this, lockService);
     }
 
     private void validateUserCredentials(String username, String password) {

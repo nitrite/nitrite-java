@@ -1,6 +1,7 @@
 package org.dizitart.no2.mapdb;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.common.NullEntry;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.mapdb.serializers.Serializers;

@@ -317,11 +317,4 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      * @return the underlying document collection.
      */
     NitriteCollection getDocumentCollection();
-
-    /**
-     * Starts a transaction on the {@link ObjectRepository}
-     *
-     * @return the transactional repository
-     */
-    TransactionalRepository<T> beginTransaction();
 }

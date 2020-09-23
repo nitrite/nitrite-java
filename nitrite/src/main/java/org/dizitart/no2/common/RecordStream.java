@@ -18,10 +18,7 @@ package org.dizitart.no2.common;
 
 import org.dizitart.no2.common.util.Iterables;
 
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -54,6 +51,44 @@ public interface RecordStream<T> extends Iterable<T> {
                 return next;
             }
         });
+    }
+
+    static <T> RecordStream<T> except(Iterable<T> iterable, Collection<T> elements) {
+        return RecordStream.fromIterable(() -> new Iterator<T>() {
+            private final Iterator<T> iterator = iterable != null ? iterable.iterator() : Collections.emptyIterator();
+            private T nextItem;
+            private boolean nextItemSet = false;
+
+            @Override
+            public boolean hasNext() {
+                return nextItemSet || setNextId();
+            }
+
+            @Override
+            public T next() {
+                if (!nextItemSet && !setNextId()) {
+                    throw new NoSuchElementException();
+                }
+                nextItemSet = false;
+                return nextItem;
+            }
+
+            private boolean setNextId() {
+                while (iterator.hasNext()) {
+                    final T item = iterator.next();
+                    if (!elements.contains(item)) {
+                        nextItem = item;
+                        nextItemSet = true;
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
+    static <V> RecordStream<V> empty() {
+        return RecordStream.fromIterable(Collections.emptySet());
     }
 
     default long size() {

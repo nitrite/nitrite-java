@@ -6,10 +6,12 @@ name: Gradle Build
 on:
   push:
     branches:
+      - 4.x
       - develop
 
   pull_request:
     branches:
+      - 4.x
       - develop
 
 jobs:
@@ -38,11 +40,13 @@ jobs:
         run: ./gradlew clean build
 
       - name: Prepare PGP Keys
+        if: github.ref == 'refs/heads/develop'
         run: openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out $GITHUB_WORKSPACE/secring.gpg -d -md md5
         env:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Publish packages to snapshot
+        if: github.ref == 'refs/heads/develop'
         run: ./gradlew publish -Psigning.keyId=$PGP_KEY_ID -Psigning.password=$PGP_KEY_PASSWORD -Psigning.secretKeyRingFile=$GITHUB_WORKSPACE/secring.gpg
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}

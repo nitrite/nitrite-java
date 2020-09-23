@@ -13,6 +13,11 @@ public class RocksDBModule implements StoreModule {
     @Setter(AccessLevel.PACKAGE)
     private RocksDBConfig storeConfig;
 
+    public RocksDBModule(String path) {
+        this.storeConfig = new RocksDBConfig();
+        this.storeConfig.filePath(path);
+    }
+
     @Override
     public Set<NitritePlugin> plugins() {
         return setOf(getStore());
