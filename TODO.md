@@ -1,20 +1,35 @@
 ##TODO:
-- Database Migration
-    1. https://docs.realm.io/sync/v/3.x/using-synced-realms/migrating-your-data
-    2. https://github.com/nitrite/nitrite-java/issues/213
-    3. https://realm.io/docs/dotnet/latest/api/reference/Realms.Migration.html
-    4. https://developer.android.com/training/data-storage/room/migrating-db-versions#java
-- LuceneIndexer, test with testIssue174()
-- Ensure every error event in replication
 
-    Rename Entity (Repository)
-    Delete Entity (Repository)
-    Add Field
-    Rename Field
-    Delete Field
-    Change Datatype of Field
-    Change Id field
-    Change Indexed field
+1. Add rocksdb config
+
+```c++
+Options.max_background_flushes: 2
+Options.max_background_compactions: 8
+Options.avoid_flush_during_shutdown: 1
+Options.compaction_readahead_size: 16384
+ColumnFamilyOptions.comparator: leveldb.BytewiseComparator
+ColumnFamilyOptions.table_factory: BlockBasedTable
+BlockBasedTableOptions.checksum: kxxHash
+BlockBasedTableOptions.block_size: 16384
+BlockBasedTableOptions.filter_policy: rocksdb.BuiltinBloomFilter
+BlockBasedTableOptions.whole_key_filtering: 0
+BlockBasedTableOptions.format_version: 4
+LRUCacheOptionsOptions.capacity : 8589934592
+ColumnFamilyOptions.write_buffer_size: 134217728
+ColumnFamilyOptions.compression[0]: NoCompression
+ColumnFamilyOptions.compression[1]: NoCompression
+ColumnFamilyOptions.compression[2]: LZ4
+ColumnFamilyOptions.prefix_extractor: CustomPrefixExtractor
+ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
+
+```
+2. resolve pending issues
+3. add more test cases
+4. add p2p replications
+5. add lucene indexer
+
+
+## Other Articles
 
 DataGate Server:
 
@@ -158,39 +173,4 @@ https://docs.yugabyte.com/latest/architecture/docdb/persistence/
 
 https://blog.yugabyte.com/enhancing-rocksdb-for-speed-scale/
 
-## Fix
 
-1. repository package
-
-
-```c++
-Options.max_background_flushes: 2
-Options.max_background_compactions: 8
-Options.avoid_flush_during_shutdown: 1
-Options.compaction_readahead_size: 16384
-ColumnFamilyOptions.comparator: leveldb.BytewiseComparator
-ColumnFamilyOptions.table_factory: BlockBasedTable
-BlockBasedTableOptions.checksum: kxxHash
-BlockBasedTableOptions.block_size: 16384
-BlockBasedTableOptions.filter_policy: rocksdb.BuiltinBloomFilter
-BlockBasedTableOptions.whole_key_filtering: 0
-BlockBasedTableOptions.format_version: 4
-LRUCacheOptionsOptions.capacity : 8589934592
-ColumnFamilyOptions.write_buffer_size: 134217728
-ColumnFamilyOptions.compression[0]: NoCompression
-ColumnFamilyOptions.compression[1]: NoCompression
-ColumnFamilyOptions.compression[2]: LZ4
-ColumnFamilyOptions.prefix_extractor: CustomPrefixExtractor
-ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
-
-```
-
-## Transaction
-
-https://vladmihalcea.com/a-beginners-guide-to-transaction-isolation-levels-in-enterprise-java/
-
-### Nested Transaction
-    - https://www.freecodecamp.org/news/design-a-key-value-store-in-go/
-    - Nested Transaction (Parent can't see data, unless child transaction commits)
-    
-### Db Level Transaction

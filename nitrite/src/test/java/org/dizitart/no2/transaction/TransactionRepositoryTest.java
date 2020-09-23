@@ -556,7 +556,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         try (Session session = db.createSession()) {
             ExecutorService executorService = Executors.newCachedThreadPool();
             for (int i = 0; i < 10; i++) {
-                final int fi = i;
+                final long fi = i;
                 Future<?> future = executorService.submit(() -> {
                     Transaction transaction = session.beginTransaction();
                     try {
@@ -602,7 +602,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         try (Session session = db.createSession()) {
             ExecutorService executorService = Executors.newCachedThreadPool();
             for (int i = 0; i < 10; i++) {
-                final int fi = i;
+                final long fi = i;
                 Future<?> future = executorService.submit(() -> {
                     Transaction transaction = session.beginTransaction();
                     try {
