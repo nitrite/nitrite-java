@@ -22,8 +22,9 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventType;
-import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.common.concurrent.ThreadPoolManager;
+import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.Indexer;
@@ -34,9 +35,9 @@ import org.dizitart.no2.store.NitriteStore;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.dizitart.no2.common.concurrent.ThreadPoolManager.runAsync;
 import static org.dizitart.no2.common.util.ValidationUtils.validateDocumentIndexField;
 
 /**
@@ -49,6 +50,7 @@ class IndexOperations implements AutoCloseable {
     private String collectionName;
     private IndexCatalog indexCatalog;
     private Map<String, AtomicBoolean> indexBuildRegistry;
+    private ExecutorService rebuildExecutor;
 
     IndexOperations(NitriteConfig nitriteConfig, NitriteMap<NitriteId, Document> nitriteMap,
                     EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus) {
@@ -60,6 +62,9 @@ class IndexOperations implements AutoCloseable {
 
     @Override
     public void close() {
+        if (rebuildExecutor != null) {
+            this.rebuildExecutor.shutdown();
+        }
     }
 
     void ensureIndex(String field, String indexType, boolean isAsync) {
@@ -136,7 +141,7 @@ class IndexOperations implements AutoCloseable {
         final String field = indexEntry.getField();
         if (getBuildFlag(field).compareAndSet(false, true)) {
             if (isAsync) {
-                runAsync(() -> buildIndexInternal(field, indexEntry));
+                rebuildExecutor.submit(() -> buildIndexInternal(field, indexEntry));
             } else {
                 buildIndexInternal(field, indexEntry);
             }
@@ -207,6 +212,7 @@ class IndexOperations implements AutoCloseable {
         this.indexCatalog = nitriteStore.getIndexCatalog();
         this.collectionName = nitriteMap.getName();
         this.indexBuildRegistry = new ConcurrentHashMap<>();
+        this.rebuildExecutor = ThreadPoolManager.workerPool();
     }
 
     private void buildIndexInternal(final String field, final IndexEntry indexEntry) {
