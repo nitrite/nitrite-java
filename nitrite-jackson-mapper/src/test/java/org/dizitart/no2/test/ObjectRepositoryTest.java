@@ -32,7 +32,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.test.TestUtil.createDb;
 import static org.junit.Assert.*;
@@ -247,5 +250,16 @@ public class ObjectRepositoryTest {
         Attributes attributes = new Attributes(repository.getDocumentCollection().getName());
         repository.setAttributes(attributes);
         assertEquals(repository.getAttributes(), attributes);
+    }
+
+    @Test
+    public void testIssue217() {
+        ObjectRepository<Employee> employeeRepo = db.getRepository(Employee.class);
+        AtomicInteger counter = new AtomicInteger(0);
+        employeeRepo.subscribe(eventInfo -> counter.incrementAndGet());
+
+        ObjectRepository<Employee> employeeRepo2 = db.getRepository(Employee.class);
+        employeeRepo2.insert(DataGenerator.generateEmployee());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> counter.get() == 1);
     }
 }
