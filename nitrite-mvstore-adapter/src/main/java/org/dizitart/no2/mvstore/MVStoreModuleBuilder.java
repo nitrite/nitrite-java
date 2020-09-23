@@ -74,7 +74,7 @@ public class MVStoreModuleBuilder {
     }
 
     public MVStoreModule build() {
-        MVStoreModule module = new MVStoreModule();
+        MVStoreModule module = new MVStoreModule(filePath());
 
         dbConfig.filePath(filePath());
         dbConfig.autoCommitBufferSize(autoCommitBufferSize());

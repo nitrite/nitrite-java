@@ -45,31 +45,22 @@ import static org.dizitart.no2.index.IndexOptions.indexOptions;
 /**
  * @author Anindya Chatterjee
  */
-class RepositoryOperations {
+public class RepositoryOperations {
     private final NitriteMapper nitriteMapper;
     private final Class<?> type;
     private final NitriteCollection collection;
     private Field idField;
 
-    RepositoryOperations(Class<?> type, NitriteMapper nitriteMapper, NitriteCollection collection) {
+    public RepositoryOperations(Class<?> type,
+                                NitriteMapper nitriteMapper,
+                                NitriteCollection collection) {
         this.type = type;
         this.nitriteMapper = nitriteMapper;
         this.collection = collection;
         validateCollection();
     }
 
-    private static void filterSynthetics(List<Field> fields) {
-        if (fields == null || fields.isEmpty()) return;
-        Iterator<Field> iterator = fields.iterator();
-        if (iterator.hasNext()) {
-            do {
-                Field f = iterator.next();
-                if (f.isSynthetic()) iterator.remove();
-            } while (iterator.hasNext());
-        }
-    }
-
-    void createIndexes() {
+    public void createIndexes() {
         Set<Index> indexes = extractIndices(type);
         for (Index idx : indexes) {
             String field = idx.value();
@@ -87,7 +78,7 @@ class RepositoryOperations {
         }
     }
 
-    void serializeFields(Document document) {
+    public void serializeFields(Document document) {
         if (document != null) {
             for (Pair<String, Object> pair : document) {
                 String key = pair.getFirst();
@@ -99,7 +90,7 @@ class RepositoryOperations {
         }
     }
 
-    <T> Document[] toDocuments(T[] others) {
+    public <T> Document[] toDocuments(T[] others) {
         if (others == null || others.length == 0) return null;
         Document[] documents = new Document[others.length];
         for (int i = 0; i < others.length; i++) {
@@ -108,7 +99,7 @@ class RepositoryOperations {
         return documents;
     }
 
-    <T> Document toDocument(T object, boolean update) {
+    public <T> Document toDocument(T object, boolean update) {
         Document document = nitriteMapper.convert(object, Document.class);
         if (idField != null) {
             if (idField.getType() == NitriteId.class) {
@@ -136,7 +127,7 @@ class RepositoryOperations {
         return document;
     }
 
-    Filter createUniqueFilter(Object object) {
+    public Filter createUniqueFilter(Object object) {
         if (idField == null) {
             throw new NotIdentifiableException("update operation failed as no id value found for the object");
         }
@@ -151,6 +142,39 @@ class RepositoryOperations {
         } catch (IllegalAccessException iae) {
             throw new InvalidIdException("id field is not accessible");
         }
+    }
+
+    public void removeNitriteId(Document document) {
+        document.remove(DOC_ID);
+        if (idField != null && idField.getType() == NitriteId.class) {
+            document.remove(idField.getName());
+        }
+    }
+
+    public <I> Filter createIdFilter(I id) {
+        if (idField != null) {
+            if (id == null) {
+                throw new InvalidIdException("a null id is not a valid id");
+            }
+
+            if (isCompatibleTypes(idField.getType(), id.getClass())) {
+                return where(idField.getName()).eq(id);
+            } else {
+                throw new InvalidIdException(id.getClass().getName() + " is not assignable to id type "
+                    + idField.getType().getName());
+            }
+        } else {
+            throw new NotIdentifiableException(type.getName() + " does not have any id field");
+        }
+    }
+
+    public Filter asObjectFilter(Filter filter) {
+        if (filter instanceof NitriteFilter) {
+            NitriteFilter nitriteFilter = (NitriteFilter) filter;
+            nitriteFilter.setObjectFilter(true);
+            return nitriteFilter;
+        }
+        return filter;
     }
 
     <T> Field getIdField(Class<T> type) {
@@ -269,37 +293,15 @@ class RepositoryOperations {
         return currentClassFields;
     }
 
-    void removeNitriteId(Document document) {
-        document.remove(DOC_ID);
-        if (idField != null && idField.getType() == NitriteId.class) {
-            document.remove(idField.getName());
+    private static void filterSynthetics(List<Field> fields) {
+        if (fields == null || fields.isEmpty()) return;
+        Iterator<Field> iterator = fields.iterator();
+        if (iterator.hasNext()) {
+            do {
+                Field f = iterator.next();
+                if (f.isSynthetic()) iterator.remove();
+            } while (iterator.hasNext());
         }
-    }
-
-    <I> Filter createIdFilter(I id) {
-        if (idField != null) {
-            if (id == null) {
-                throw new InvalidIdException("a null id is not a valid id");
-            }
-
-            if (isCompatibleTypes(idField.getType(), id.getClass())) {
-                return where(idField.getName()).eq(id);
-            } else {
-                throw new InvalidIdException(id.getClass().getName() + " is not assignable to id type "
-                    + idField.getType().getName());
-            }
-        } else {
-            throw new NotIdentifiableException(type.getName() + " does not have any id field");
-        }
-    }
-
-    Filter asObjectFilter(Filter filter) {
-        if (filter instanceof NitriteFilter) {
-            NitriteFilter nitriteFilter = (NitriteFilter) filter;
-            nitriteFilter.setObjectFilter(true);
-            return nitriteFilter;
-        }
-        return filter;
     }
 
     private void validateCollection() {
@@ -397,5 +399,13 @@ class RepositoryOperations {
         }
 
         return annotations;
+    }
+
+    public <T> Cursor<T> find(Class<T> type) {
+        return new ObjectCursor<>(nitriteMapper, collection.find(), type);
+    }
+
+    public <T> Cursor<T> find(Filter filter, Class<T> type) {
+        return new ObjectCursor<>(nitriteMapper, collection.find(asObjectFilter(filter)), type);
     }
 }

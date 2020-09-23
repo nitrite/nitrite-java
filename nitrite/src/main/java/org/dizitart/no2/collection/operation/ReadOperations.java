@@ -115,7 +115,7 @@ class ReadOperations {
                 indexAwareFilter.setIsFieldIndexed(true);
             }
         } else {
-            if (indexAwareFilter.getField().equalsIgnoreCase(DOC_ID)) {
+            if (indexAwareFilter.getField().equals(DOC_ID)) {
                 // default _id index
                 indexAwareFilter.setOnIdField(true);
             }

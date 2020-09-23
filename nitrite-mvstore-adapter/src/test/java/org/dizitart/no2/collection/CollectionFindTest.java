@@ -39,6 +39,7 @@ import static org.dizitart.no2.filters.FluentFilter.$;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CollectionFindTest extends BaseCollectionTest {
 

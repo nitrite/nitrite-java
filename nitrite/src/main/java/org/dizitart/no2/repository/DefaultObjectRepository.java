@@ -19,7 +19,6 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.TransactionalCollection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
@@ -40,8 +39,8 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  */
 class DefaultObjectRepository<T> implements ObjectRepository<T> {
     private final NitriteCollection collection;
+    private final NitriteConfig nitriteConfig;
     private final Class<T> type;
-    private NitriteMapper nitriteMapper;
     private RepositoryOperations operations;
 
     DefaultObjectRepository(Class<T> type,
@@ -49,7 +48,8 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
                             NitriteConfig nitriteConfig) {
         this.type = type;
         this.collection = collection;
-        init(nitriteConfig);
+        this.nitriteConfig = nitriteConfig;
+        initialize();
     }
 
     @Override
@@ -136,12 +136,12 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     @Override
     public Cursor<T> find() {
-        return new ObjectCursor<>(nitriteMapper, collection.find(), type);
+        return operations.find(type);
     }
 
     @Override
     public Cursor<T> find(Filter filter) {
-        return new ObjectCursor<>(nitriteMapper, collection.find(operations.asObjectFilter(filter)), type);
+        return operations.find(filter, type);
     }
 
     @Override
@@ -181,12 +181,6 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public TransactionalRepository<T> beginTransaction() {
-        TransactionalCollection transactionalCollection = getDocumentCollection().beginTransaction();
-        return new DefaultTransactionalRepository<>(this, transactionalCollection, operations, nitriteMapper);
-    }
-
-    @Override
     public void subscribe(CollectionEventListener listener) {
         collection.subscribe(listener);
     }
@@ -216,8 +210,8 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         return collection;
     }
 
-    private void init(NitriteConfig nitriteConfig) {
-        nitriteMapper = nitriteConfig.nitriteMapper();
+    private void initialize() {
+        NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         operations = new RepositoryOperations(type, nitriteMapper, collection);
         operations.createIndexes();
     }

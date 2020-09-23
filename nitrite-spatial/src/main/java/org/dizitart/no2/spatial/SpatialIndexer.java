@@ -39,6 +39,10 @@ public class SpatialIndexer implements Indexer {
     private NitriteMapper nitriteMapper;
     private NitriteStore<?> nitriteStore;
 
+    public SpatialIndexer clone() throws CloneNotSupportedException {
+        return (SpatialIndexer) super.clone();
+    }
+
     public RecordStream<NitriteId> findWithin(String collectionName, String field, Geometry geometry) {
         NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collectionName, field);
         BoundingBox boundingBox = new NitriteBoundingBox(geometry);

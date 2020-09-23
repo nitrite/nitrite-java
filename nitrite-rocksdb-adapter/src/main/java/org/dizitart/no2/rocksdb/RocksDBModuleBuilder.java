@@ -69,7 +69,7 @@ public class RocksDBModuleBuilder {
     }
 
     public RocksDBModule build() {
-        RocksDBModule module = new RocksDBModule();
+        RocksDBModule module = new RocksDBModule(filePath());
 
         dbConfig.createIfMissing(createIfMissing());
         dbConfig.errorIfExists(errorIfExists());

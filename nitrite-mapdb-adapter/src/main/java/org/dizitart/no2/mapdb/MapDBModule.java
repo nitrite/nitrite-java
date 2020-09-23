@@ -16,6 +16,11 @@ public class MapDBModule implements StoreModule {
     @Setter(AccessLevel.PACKAGE)
     private MapDBConfig storeConfig;
 
+    public MapDBModule(String path) {
+        this.storeConfig = new MapDBConfig();
+        this.storeConfig.filePath(path);
+    }
+
     public static MapDBModuleBuilder withConfig() {
         return new MapDBModuleBuilder();
     }

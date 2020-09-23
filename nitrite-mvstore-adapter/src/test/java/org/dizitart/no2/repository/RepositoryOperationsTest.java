@@ -17,11 +17,11 @@
 package org.dizitart.no2.repository;
 
 import lombok.Getter;
+import org.dizitart.no2.DbTestOperations;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.Retry;
 import org.dizitart.no2.TestUtil;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.util.ObjectUtilsTest;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -283,7 +283,7 @@ public class RepositoryOperationsTest {
 
     @Index(value = "testClass")
     private static class ObjectWithNonComparableIndex implements Mappable {
-        private ObjectUtilsTest testClass;
+        private DbTestOperations testClass;
 
         @Override
         public Document write(NitriteMapper mapper) {
@@ -292,7 +292,7 @@ public class RepositoryOperationsTest {
 
         @Override
         public void read(NitriteMapper mapper, Document document) {
-            testClass = document.get("testClass", ObjectUtilsTest.class);
+            testClass = document.get("testClass", DbTestOperations.class);
         }
     }
 

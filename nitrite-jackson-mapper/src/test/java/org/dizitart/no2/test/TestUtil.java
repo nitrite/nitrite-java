@@ -50,13 +50,8 @@ public class TestUtil {
     }
 
     public static Nitrite createDb(String filePath, NitriteModule module) {
-        MVStoreModule storeModule = MVStoreModule.withConfig()
-            .filePath(filePath)
-            .compress(true)
-            .build();
-
         return Nitrite.builder()
-            .loadModule(storeModule)
+            .loadModule(new MVStoreModule(filePath))
             .loadModule(module)
             .fieldSeparator(".")
             .openOrCreate();

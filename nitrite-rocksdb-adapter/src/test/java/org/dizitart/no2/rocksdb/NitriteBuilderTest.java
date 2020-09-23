@@ -284,6 +284,11 @@ public class NitriteBuilderTest {
         }
 
         @Override
+        public Indexer clone() throws CloneNotSupportedException {
+            return null;
+        }
+
+        @Override
         public void initialize(NitriteConfig nitriteConfig) {
 
         }

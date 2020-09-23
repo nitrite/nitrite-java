@@ -16,15 +16,10 @@
 
 package org.dizitart.no2.mapdb;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.exceptions.ObjectMappingException;
 
 import java.io.IOException;
 import java.util.*;
@@ -97,25 +92,10 @@ public class TestUtil {
     }
 
     public static Nitrite createDb(String filePath, String user, String password) {
-        MapDBModule storeModule = MapDBModule.withConfig()
-            .filePath(filePath)
-            .build();
-
         return Nitrite.builder()
-            .loadModule(storeModule)
+            .loadModule(new MapDBModule(filePath))
             .fieldSeparator(".")
             .openOrCreate(user, password);
-    }
-
-    public static Document parse(String json) {
-        try {
-            ObjectMapper objectMapper = createObjectMapper();
-            JsonNode node = objectMapper.readValue(json, JsonNode.class);
-            return loadDocument(node);
-        } catch (IOException e) {
-            log.error("Error while parsing json", e);
-            throw new ObjectMappingException("failed to parse json " + json);
-        }
     }
 
     private static Document loadDocument(JsonNode node) {
@@ -176,22 +156,5 @@ public class TestUtil {
             return list;
         }
         return null;
-    }
-
-
-    private static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(
-            objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
-                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
-        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        objectMapper.findAndRegisterModules();
-        return objectMapper;
     }
 }

@@ -294,13 +294,6 @@ public class NitriteTest {
         db.commit();
     }
 
-    @Test(expected = NitriteIOException.class)
-    public void testCloseNullStore() {
-        try (Nitrite db = Nitrite.builder().openOrCreate()) {
-            assertNotNull(db);
-        }
-    }
-
     @Test(expected = ValidationException.class)
     public void testGetCollectionInvalidName() {
         db.getCollection(META_MAP_NAME);

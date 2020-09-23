@@ -17,6 +17,7 @@
 package org.dizitart.no2.common.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -26,7 +27,7 @@ import org.objenesis.ObjenesisSerializer;
 import org.objenesis.ObjenesisStd;
 import org.objenesis.instantiator.ObjectInstantiator;
 
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -74,6 +75,18 @@ public class ObjectUtils {
             return entity.value();
         }
         return type.getName();
+    }
+
+    public static <T> String findRepositoryName(Class<T> type, String key) {
+        return findRepositoryName(getEntityName(type), key);
+    }
+
+    public static String findRepositoryName(String entityName, String key) {
+        if (StringUtils.isNullOrEmpty(key)) {
+            return entityName;
+        } else {
+            return entityName + KEY_OBJ_SEPARATOR + key;
+        }
     }
 
     /**
@@ -252,6 +265,20 @@ public class ObjectUtils {
             return 1;
         } else {
             return c1.compareTo(c2);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends Serializable> T deepCopy(T oldObj) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+            oos.writeObject(oldObj);
+            oos.flush();
+            try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
+                return (T) ois.readObject();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            throw new NitriteIOException("error while deep copying object", e);
         }
     }
 

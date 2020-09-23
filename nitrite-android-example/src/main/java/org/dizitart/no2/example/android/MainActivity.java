@@ -55,12 +55,8 @@ public class MainActivity extends AppCompatActivity {
             String fileName = getFilesDir().getPath() + "/test.db";
             Log.i("Nitrite", "Nitrite file - " + fileName);
 
-            MVStoreModule storeModule = MVStoreModule.withConfig()
-                .filePath(fileName)
-                .build();
-
             db = Nitrite.builder()
-                .loadModule(storeModule)
+                .loadModule(new MVStoreModule(fileName))
                 .openOrCreate("test-user", "test-password");
             repository = db.getRepository(User.class);
 

@@ -27,7 +27,7 @@ import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 /**
  * @author Anindya Chatterjee.
  */
-public interface Indexer extends NitritePlugin {
+public interface Indexer extends NitritePlugin, Cloneable {
     String getIndexType();
 
     void writeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue);
@@ -37,6 +37,8 @@ public interface Indexer extends NitritePlugin {
     void updateIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object newValue, Object oldValue);
 
     void dropIndex(NitriteMap<NitriteId, Document> collection, String field);
+
+    Indexer clone() throws CloneNotSupportedException;
 
     default String getIndexMapName(String collectionName, String field) {
         return INDEX_PREFIX +
