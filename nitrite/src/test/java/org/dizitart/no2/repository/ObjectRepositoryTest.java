@@ -39,7 +39,10 @@ import org.junit.Test;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.module.NitriteModule.module;
 import static org.junit.Assert.*;
@@ -328,6 +331,17 @@ public class ObjectRepositoryTest {
 
         managerRepo.drop();
         assertEquals(db.listKeyedRepository().size(), 1);
+    }
+
+    @Test
+    public void testIssue217() {
+        ObjectRepository<EmployeeEntity> employeeRepo = db.getRepository(EmployeeEntity.class);
+        AtomicInteger counter = new AtomicInteger(0);
+        employeeRepo.subscribe(eventInfo -> counter.incrementAndGet());
+
+        ObjectRepository<EmployeeEntity> employeeRepo2 = db.getRepository(EmployeeEntity.class);
+        employeeRepo2.insert(new EmployeeEntity());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> counter.get() == 1);
     }
 
     @Data

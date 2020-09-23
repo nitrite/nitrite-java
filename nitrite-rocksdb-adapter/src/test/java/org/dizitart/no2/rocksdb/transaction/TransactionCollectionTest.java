@@ -532,7 +532,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
         try (Session session = db.createSession()) {
             ExecutorService executorService = Executors.newCachedThreadPool();
             for (int i = 0; i < 10; i++) {
-                final int fi = i;
+                final long fi = i;
                 Future<?> future = executorService.submit(() -> {
                     Transaction transaction = session.beginTransaction();
                     try {

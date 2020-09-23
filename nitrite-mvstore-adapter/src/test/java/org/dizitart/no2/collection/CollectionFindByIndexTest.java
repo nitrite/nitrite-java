@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.collection;
 
+import com.github.javafaker.Faker;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.IndexOptions;
@@ -24,6 +25,7 @@ import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -361,5 +363,37 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
 
         List<Document> list = cursor.toList();
         assertEquals(list.size(), 2);
+    }
+
+    @Test
+    public void testIssue45() {
+        NitriteCollection collection = db.getCollection("testIssue45");
+        Faker faker = new Faker();
+        String text1 = faker.lorem().paragraph() + " quick brown";
+        String text2 = faker.lorem().paragraph() + " fox jump";
+        String text3 = faker.lorem().paragraph() + " over lazy";
+        String text4 = faker.lorem().paragraph() + " dog";
+
+        List<String> list1 = Arrays.asList(text1, text2);
+        List<String> list2 = Arrays.asList(text1, text2, text3);
+        List<String> list3 = Arrays.asList(text2, text3);
+        List<String> list4 = Arrays.asList(text1, text2, text3, text4);
+
+        Document doc1 = Document.createDocument("firstName", "John").put("notes", list1);
+        Document doc2 = Document.createDocument("firstName", "Jane").put("notes", list2);
+        Document doc3 = Document.createDocument("firstName", "Jonas").put("notes", list3);
+        Document doc4 = Document.createDocument("firstName", "Johan").put("notes", list4);
+
+        collection.createIndex("notes", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.insert(doc1, doc2, doc3, doc4);
+
+        DocumentCursor cursor = collection.find(where("notes").text("fox"));
+        assertEquals(cursor.size(), 4);
+
+        cursor = collection.find(where("notes").text("dog"));
+        assertEquals(cursor.size(), 1);
+
+        cursor = collection.find(where("notes").text("lazy"));
+        assertEquals(cursor.size(), 3);
     }
 }

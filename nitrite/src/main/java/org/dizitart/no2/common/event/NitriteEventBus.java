@@ -18,9 +18,8 @@ package org.dizitart.no2.common.event;
 
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 
-import java.util.Collections;
 import java.util.Set;
-import java.util.WeakHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -41,7 +40,7 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
      * Instantiates a new Nitrite event bus.
      */
     public NitriteEventBus() {
-        this.listeners = Collections.newSetFromMap(new WeakHashMap<>());
+        this.listeners = new CopyOnWriteArraySet<>();
     }
 
     @Override
