@@ -53,6 +53,10 @@ public class NitriteTextIndexer implements TextIndexer {
         this.textTokenizer = textTokenizer;
     }
 
+    public NitriteTextIndexer clone() throws CloneNotSupportedException {
+        return (NitriteTextIndexer) super.clone();
+    }
+
     @Override
     public String getIndexType() {
         return IndexType.Fulltext;

@@ -17,6 +17,7 @@
 package org.dizitart.no2.collection;
 
 import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
@@ -24,7 +25,7 @@ import org.dizitart.no2.store.NitriteStore;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.Lock;
 
 import static org.dizitart.no2.common.Constants.COLLECTION_CATALOG;
 import static org.dizitart.no2.common.Constants.TAG_COLLECTIONS;
@@ -36,17 +37,18 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  */
 public class CollectionFactory {
     private final Map<String, NitriteCollection> collectionMap;
-    private final ReentrantLock lock;
+    private final LockService lockService;
 
-    public CollectionFactory() {
-        collectionMap = new HashMap<>();
-        lock = new ReentrantLock();
+    public CollectionFactory(LockService lockService) {
+        this.collectionMap = new HashMap<>();
+        this.lockService = lockService;
     }
 
     public NitriteCollection getCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalogue) {
         notNull(nitriteConfig, "configuration is null while creating collection");
         notEmpty(name, "collection name is null or empty");
 
+        Lock lock = lockService.getWriteLock(this.getClass().getName());
         try {
             lock.lock();
             if (collectionMap.containsKey(name)) {
@@ -67,7 +69,7 @@ public class CollectionFactory {
     private NitriteCollection createCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalog) {
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
         NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name, NitriteId.class, Document.class);
-        NitriteCollection collection = new DefaultNitriteCollection(name, nitriteMap, nitriteConfig);
+        NitriteCollection collection = new DefaultNitriteCollection(name, nitriteMap, nitriteConfig, lockService);
 
         if (writeCatalog) {
             // ignore repository request
@@ -93,6 +95,7 @@ public class CollectionFactory {
     }
 
     public void clear() {
+        Lock lock = lockService.getWriteLock(this.getClass().getName());
         try {
             lock.lock();
             for (NitriteCollection collection : collectionMap.values()) {

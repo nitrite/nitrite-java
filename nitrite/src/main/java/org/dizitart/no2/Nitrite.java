@@ -23,6 +23,7 @@ import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.store.DatabaseMetaData;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.transaction.Session;
 
 import java.io.Closeable;
 import java.util.Map;
@@ -169,6 +170,14 @@ public interface Nitrite extends Closeable {
      * @return the database meta data
      */
     DatabaseMetaData getDatabaseMetaData();
+
+
+    /**
+     * Creates a {@link Session} for transaction.
+     *
+     * @return the session
+     */
+    Session createSession();
 
     /**
      * Checks whether a particular {@link NitriteCollection} exists in the store.

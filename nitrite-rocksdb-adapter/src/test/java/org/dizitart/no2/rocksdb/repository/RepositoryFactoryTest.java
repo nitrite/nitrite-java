@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
+import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexEntry;
@@ -51,27 +52,27 @@ public class RepositoryFactoryTest {
 
     @Test
     public void testRepositoryFactory() {
-        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
+        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
         assertNotNull(factory);
     }
 
     @Test(expected = ValidationException.class)
     public void testNullType() {
-        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
+        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
         db = TestUtil.createDb(fileName);
         factory.getRepository(db.getConfig(), null, "dummy");
     }
 
     @Test
     public void testNullCollection() {
-        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
+        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
         db = TestUtil.createDb(fileName);
         factory.getRepository(db.getConfig(), DummyCollection.class, null);
     }
 
     @Test(expected = ValidationException.class)
     public void testNullContext() {
-        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory());
+        RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
         factory.getRepository(null, DummyCollection.class, "dummy");
     }
 
@@ -112,11 +113,6 @@ public class RepositoryFactoryTest {
 
         @Override
         public String getName() {
-            return null;
-        }
-
-        @Override
-        public TransactionalCollection beginTransaction() {
             return null;
         }
 

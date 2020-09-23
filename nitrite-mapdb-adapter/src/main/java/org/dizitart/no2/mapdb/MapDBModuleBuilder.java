@@ -77,7 +77,7 @@ public class MapDBModuleBuilder {
     }
 
     public MapDBModule build() {
-        MapDBModule module = new MapDBModule();
+        MapDBModule module = new MapDBModule(filePath());
 
         dbConfig.filePath(filePath());
         dbConfig.storeType(storeType());

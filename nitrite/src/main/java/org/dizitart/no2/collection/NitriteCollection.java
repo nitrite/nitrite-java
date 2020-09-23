@@ -226,11 +226,4 @@ public interface NitriteCollection extends PersistentCollection<Document> {
      * @return the name.
      */
     String getName();
-
-    /**
-     * Starts a transaction on the {@link NitriteCollection}
-     *
-     * @return the transactional collection
-     */
-    TransactionalCollection beginTransaction();
 }

@@ -22,14 +22,14 @@ buildscript {
 
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.0"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.10"
     }
 }
 
 
 plugins {
     id "org.jetbrains.kotlin.jvm" version "1.4.10"
-    id "org.jetbrains.dokka" version "1.4.0"
+    id "org.jetbrains.dokka" version "1.4.10"
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'

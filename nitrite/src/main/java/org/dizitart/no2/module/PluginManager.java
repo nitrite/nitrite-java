@@ -25,6 +25,7 @@ import org.dizitart.no2.index.*;
 import org.dizitart.no2.mapper.MappableMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.memory.InMemoryStoreModule;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -128,19 +129,28 @@ public class PluginManager {
 
     private void loadInternalPlugins() {
         if (!indexerMap.containsKey(IndexType.Unique)) {
+            log.debug("Loading default unique indexer");
             loadPlugin(new UniqueIndexer());
         }
 
         if (!indexerMap.containsKey(IndexType.NonUnique)) {
+            log.debug("Loading default non-unique indexer");
             loadPlugin(new NonUniqueIndexer());
         }
 
         if (!indexerMap.containsKey(IndexType.Fulltext)) {
+            log.debug("Loading nitrite text indexer");
             loadPlugin(new NitriteTextIndexer());
         }
 
         if (nitriteMapper == null) {
+            log.debug("Loading mappable mapper");
             loadPlugin(new MappableMapper());
+        }
+
+        if (nitriteStore == null) {
+            loadModule(new InMemoryStoreModule());
+            log.warn("No persistent storage module found, creating an in-memory database");
         }
     }
 }
