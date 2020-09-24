@@ -23,6 +23,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -46,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
@@ -61,18 +63,16 @@ import static org.junit.Assert.*;
  * @author Anindya Chatterjee.
  */
 public class NitriteTest {
-    private Nitrite db;
-    private NitriteCollection collection;
-    private SimpleDateFormat simpleDateFormat;
-
     @Rule
     public Retry retry = new Retry(3);
+    private Nitrite db;
+    private NitriteCollection collection;
 
     @Before
     public void setUp() throws ParseException {
         db = createDb("test-user", "test-password");
 
-        simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
         Document doc1 = createDocument("firstName", "fn1")
             .put("lastName", "ln1")
@@ -317,6 +317,56 @@ public class NitriteTest {
         }
     }
 
+    @Test
+    public void testIssue245() throws InterruptedException {
+        class ThreadRunner implements Runnable {
+            @Override
+            public void run() {
+                try {
+                    long id = Thread.currentThread().getId();
+                    NitriteCollection collection = db.getCollection("testIssue245");
+
+                    for (int i = 0; i < 5; i++) {
+
+                        System.out.println("Thread ID = " + id + " Inserting doc " + i);
+                        Document doc = Document.createDocument(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+                        WriteResult result = collection.insert(doc);//db.commit();
+                        System.out.println("Result of insert = " + result.getAffectedCount());
+                        System.out.println("Thread id = " + id + " --> count = " + collection.size());
+
+                        Thread.sleep(10);
+
+                    }//for closing
+
+                    collection.close();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Thread t0 = new Thread(new ThreadRunner());
+        Thread t1 = new Thread(new ThreadRunner());
+        Thread t2 = new Thread(new ThreadRunner());
+
+        t0.start();
+        t1.start();
+        t2.start();
+
+        Thread.sleep(10 * 1000);
+
+        t0.join();
+        t1.join();
+        t2.join();
+
+        NitriteCollection collection = db.getCollection("testIssue245");
+        System.out.println("No of Documents = " + collection.size());
+        collection.close();
+        db.close();
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -372,6 +422,7 @@ public class NitriteTest {
                 this.createdTimestamp = document.get("createdTimestamp", Long.class);
             }
         }
+
         public enum Status {
             COMPLETED,
             PREPARING,

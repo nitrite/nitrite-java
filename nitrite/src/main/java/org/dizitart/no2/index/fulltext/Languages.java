@@ -29,6 +29,7 @@ public enum Languages {
     Armenian,
     Basque,
     Bengali,
+    BrazilianPortuguese,
     Breton,
     Bulgarian,
     Catalan,
