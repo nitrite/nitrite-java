@@ -77,6 +77,9 @@ public class UniversalTextTokenizer extends BaseTextTokenizer {
                 case Bengali:
                     registerLanguage(new Bengali());
                     break;
+                case BrazilianPortuguese:
+                    registerLanguage(new BrazilianPortuguese());
+                    break;
                 case Breton:
                     registerLanguage(new Breton());
                     break;
