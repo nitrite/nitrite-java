@@ -69,10 +69,13 @@ public class ObjectUtils {
         if (type.isAnnotationPresent(Entity.class)) {
             Entity entity = type.getAnnotation(Entity.class);
             String name = entity.value();
-            if (StringUtils.isNullOrEmpty(name) || name.contains(KEY_OBJ_SEPARATOR)) {
+            if (name.contains(KEY_OBJ_SEPARATOR)) {
                 throw new ValidationException(name + " is not a valid entity name");
             }
-            return entity.value();
+
+            if (!StringUtils.isNullOrEmpty(name)) {
+                return entity.value();
+            }
         }
         return type.getName();
     }
