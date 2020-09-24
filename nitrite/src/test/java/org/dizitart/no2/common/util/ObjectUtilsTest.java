@@ -25,6 +25,9 @@ import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.StopFilter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.repository.annotations.Entity;
+import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.data.ChildClass;
 import org.dizitart.no2.repository.data.Employee;
 import org.junit.Test;
@@ -139,6 +142,27 @@ public class ObjectUtilsTest implements Serializable {
         assertNotEquals(this, ObjectUtils.deepCopy(this));
     }
 
+    @Test(expected = ValidationException.class)
+    public void testInvalidEntity1() {
+        ObjectUtils.getEntityName(InvalidEntity1.class);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testInvalidEntity2() {
+        ObjectUtils.getEntityName(InvalidEntity2.class);
+    }
+
+    @Test
+    public void testValidEntity() {
+        assertEquals("org.dizitart.no2.common.util.ObjectUtilsTest$ValidEntity3",
+            ObjectUtils.getEntityName(ValidEntity3.class));
+        assertEquals("org.dizitart.no2.common.util.ObjectUtilsTest$ValidEntity4",
+            ObjectUtils.getEntityName(ValidEntity4.class));
+        assertEquals("org.dizitart.no2.common.util.ObjectUtilsTest$ValidEntity5",
+            ObjectUtils.getEntityName(ValidEntity5.class));
+        assertEquals("a-b", ObjectUtils.getEntityName(ValidEntity6.class));
+    }
+
     @Data
     private static class EnclosingType {
         private ChildClass childClass;
@@ -149,5 +173,43 @@ public class ObjectUtilsTest implements Serializable {
     private static class FieldType {
         private Employee employee;
         private LocalDateTime currentDate;
+    }
+
+    @Data
+    @Entity(value = "a+b")
+    private static class InvalidEntity1 {
+        private String value;
+    }
+
+    @Data
+    @Entity(value = "+")
+    private static class InvalidEntity2 {
+        private String value;
+    }
+
+    @Data
+    @Entity(value = "")
+    private static class ValidEntity3 {
+        private String value;
+    }
+
+    @Data
+    @Entity
+    private static class ValidEntity4 {
+        private String value;
+    }
+
+    @Data
+    @Entity(indices = {
+        @Index(value = "value")
+    })
+    private static class ValidEntity5 {
+        private String value;
+    }
+
+    @Data
+    @Entity(value = "a-b")
+    private static class ValidEntity6 {
+        private String value;
     }
 }

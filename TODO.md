@@ -24,10 +24,13 @@ ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
 
 ```
 2. resolve pending issues
-3. add more test cases
-4. add p2p replications
+3. add more test cases via diffblue
+4. add p2p replications via jgroups
 5. add lucene indexer
 
+6. nitrite cluster via jgroups
+7. spring data rest / graphql api over nitrite cluster
+8. data views (like rdbms view)
 
 ## Other Articles
 

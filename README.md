@@ -1,226 +1,351 @@
 # Nitrite Database
 
-![Build Status](https://travis-ci.org/dizitart/nitrite-database.svg?branch=master)
-![Coverage Status](https://codecov.io/gh/dizitart/nitrite-database/branch/master/graph/badge.svg)
+![Gradle Build](https://github.com/nitrite/nitrite-java/workflows/Gradle%20Build/badge.svg?branch=develop)
+![CodeQL](https://github.com/nitrite/nitrite-java/workflows/CodeQL/badge.svg?branch=develop)
+[![codecov](https://codecov.io/gh/nitrite/nitrite-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/nitrite/nitrite-java)
 ![Javadocs](https://javadoc.io/badge/org.dizitart/nitrite.svg)
-![Gitter](https://badges.gitter.im/dizitart/nitrite-database.svg)
+[![Gitter](https://badges.gitter.im/nitrite-db/nitrite-java.svg)](https://gitter.im/nitrite-db/nitrite-java?utm_source=badge)
 ![Backers on Open Collective](https://opencollective.com/nitrite-database/backers/badge.svg)
 ![Backers on Open Collective](https://opencollective.com/nitrite-database/sponsors/badge.svg)
 
-![Logo 200](http://www.dizitart.org/nitrite-database/logo/nitrite-logo.svg)
+<img src="http://www.dizitart.org/nitrite-database/logo/nitrite-logo.svg" alt="Logo" width="200"/>
 
 **NO**sql **O**bject (**NO<sub>2</sub>** a.k.a Nitrite) database is an open source nosql embedded
 document store written in Java. It has MongoDB like API. It supports both
-in-memory and single file based persistent store powered by
-[MVStore](http://www.h2database.com/html/mvstore.html) engine of h2 database.
+in-memory and file based persistent store.
 
-Nitrite is a server-less embedded database ideal for desktop, mobile or small web applications.
+Nitrite is an embedded database ideal for desktop, mobile or small web applications.
 
 **It features**:
 
--   Embedded key-value/document and object store
-
--   In-memory off-heap store
-
--   Single file store
-
--   Very fast and lightweight MongoDB like API
-
+-   Schemaless document collection and object repository
+-   In-memory / file-based store
+-   Pluggable storage engines - mvstore, mapdb, rocksdb
+-   ACID transaction
+-   Schema migration
 -   Indexing
-
--   Full text search capability
-
--   Full Android compatibility (API Level 19)
-
--   Observable store
-
+-   Full text search
+-   Rx-Java support
 -   Both way replication via Nitrite DataGate server
+-   Very fast, lightweight and fluent API 
+-   Android compatibility (API Level 19)
 
 ## Kotlin Extension
 
 Nitrite has a kotlin extension called **Potassium Nitrite** for kotlin developers.
-Visit [here](https://github.com/dizitart/nitrite-database/tree/master/potassium-nitrite) for more details.
-
-## Data Explorer
-
-To view the data of a nitrite database file, use **Nitrite Explorer**. More details
-can be found [here](https://github.com/dizitart/nitrite-database/tree/master/nitrite-explorer).
-
-## Data Replication
-
-To replicate data over different devices automatically, use **Nitrite DataGate** server. For more details
-visit [here](https://github.com/dizitart/nitrite-database/tree/master/nitrite-datagate).
+Visit [here](https://github.com/nitrite/nitrite-java/tree/develop/potassium-nitrite) for more details.
 
 ## Getting Started with Nitrite
 
+**NOTE:** There are breaking api changes in version 4.x.x. So please exercise caution when upgrading from 3.x.x  
+especially for **package name changes**.
+
 ### How To Install
 
-To use Nitrite in any Java application, just add the below dependency:
+To use Nitrite in any Java application, first add the nitrite bill of materials, 
+then add required dependencies:
 
 **Maven**
 
+```xml
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-bom</artifactId>
+            <version>{version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+
+<dependencies>
     <dependency>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite</artifactId>
-        <version>{version}</version>
     </dependency>
 
+    <dependency>
+        <groupId>org.dizitart</groupId>
+        <artifactId>nitrite-mvstore-adapter</artifactId>
+    </dependency>
+</dependencies>
+```
+    
+    
 **Gradle**
 
-    implementation 'org.dizitart:nitrite:{version}'
+```groovy
+
+implementation(platform("org.dizitart:nitrite-bom:{version}"))
+    
+implementation 'org.dizitart:nitrite'
+implementation 'org.dizitart:nitrite-mvstore-adapter'
+
+```
+    
 
 ### Quick Examples
 
 **Initialize Database**
 
-    //java initialization
-    Nitrite db = Nitrite.builder()
-            .compressed()
-            .filePath("/tmp/test.db")
-            .openOrCreate("user", "password");
+```java
+// create a mvstore backed storage module
+MVStoreModule storeModule = MVStoreModule.withConfig()
+    .filePath("/tmp/test.db")  // for android - .filePath(getFilesDir().getPath() + "/test.db")
+    .compress(true)
+    .build();
 
-    //android initialization
-    Nitrite db = Nitrite.builder()
-            .compressed()
-            .filePath(getFilesDir().getPath() + "/test.db")
-            .openOrCreate("user", "password");
+// or a rocksdb based storage module
+RocksDBModule storeModule = RocksDBModule.withConfig()
+    .filePath("/tmp/test.db")
+    .build();
+
+
+// initialization using builder
+Nitrite db = Nitrite.builder()
+        .loadModule(storeModule)
+        .loadModule(new JacksonMapperModule())  // optional
+        .openOrCreate("user", "password");
+
+```
 
 **Create a Collection**
 
-    // Create a Nitrite Collection
-    NitriteCollection collection = db.getCollection("test");
+```java
+// Create a Nitrite Collection
+NitriteCollection collection = db.getCollection("test");
 
-    // Create an Object Repository
-    ObjectRepository<Employee> repository = db.getRepository(Employee.class);
+// Create an Object Repository
+ObjectRepository<Employee> repository = db.getRepository(Employee.class);
+
+```
 
 **Annotations for POJO**
 
-    // provides index information for ObjectRepository
-    @Indices({
-            @Index(value = "joinDate", type = IndexType.NonUnique),
-            @Index(value = "name", type = IndexType.Unique)
-    })
-    public class Employee implements Serializable {
-        // provides id field to uniquely identify an object inside an ObjectRepository
-        @Id
-        private long empId;
+```java
 
-        private Date joinDate;
+@Entity(value = "retired-employee",     // entity name (optional), 
+    indices = {
+        @Index(value = "firstName", type = IndexType.NonUnique),
+        @Index(value = "lastName", type = IndexType.NonUnique),
+        @Index(value = "note", type = IndexType.Fulltext),
+})
+public class Employee implements Serializable {
+    // provides id field to uniquely identify an object inside an ObjectRepository
+    @Id
+    private long empId;
+    private Date joinDate;
+    private String firstName;
+    private String lastName;
+    private String note;
 
-        private String name;
+    // ... public getters and setters
+}
 
-        private String address;
+```
 
-        // ... public getters and setters
-    }
 
 **CRUD Operations**
 
-    // create a document to populate data
-    Document doc = createDocument("firstName", "John")
-         .put("lastName", "Doe")
-         .put("birthDay", new Date())
-         .put("data", new byte[] {1, 2, 3})
-         .put("fruits", new ArrayList<String>() {{ add("apple"); add("orange"); add("banana"); }})
-         .put("note", "a quick brown fox jump over the lazy dog");
+```java
 
-    // insert the document
-    collection.insert(doc);
+// create a document to populate data
+Document doc = createDocument("firstName", "John")
+     .put("lastName", "Doe")
+     .put("birthDay", new Date())
+     .put("data", new byte[] {1, 2, 3})
+     .put("fruits", new ArrayList<String>() {{ add("apple"); add("orange"); add("banana"); }})
+     .put("note", "a quick brown fox jump over the lazy dog");
 
-    // update the document
-    collection.update(eq("firstName", "John"), createDocument("lastName", "Wick"));
+// insert the document
+collection.insert(doc);
 
-    // remove the document
-    collection.remove(doc);
+// find a document
+collection.find(where("firstName").eq("John").and(where("lastName").eq("Doe"))
 
-    // insert an object
-    Employee emp = new Employee();
-    emp.setEmpId(124589);
-    emp.setFirstName("John");
-    emp.setLastName("Doe");
+// update the document
+collection.update(where("firstName").eq("John"), createDocument("lastName", "Wick"));
 
-    repository.insert(emp);
+// remove the document
+collection.remove(doc);
+
+// insert an object in repository
+Employee emp = new Employee();
+emp.setEmpId(124589);
+emp.setFirstName("John");
+emp.setLastName("Doe");
+
+repository.insert(emp);
+
+```
 
 **Create Indices**
 
-    // create document index
-    collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
-    collection.createIndex("note", indexOptions(IndexType.Fulltext));
+```java
 
-    // create object index. It can also be provided via annotation
-    repository.createIndex("firstName", indexOptions(IndexType.NonUnique));
+// create document index
+collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
+collection.createIndex("note", indexOptions(IndexType.Fulltext));
+
+// create object index. It can also be provided via annotation
+repository.createIndex("firstName", indexOptions(IndexType.NonUnique));
+
+```
 
 **Query a Collection**
 
-    Cursor cursor = collection.find(
-                            // and clause
-                            and(
-                                // firstName == John
-                                eq("firstName", "John"),
-                                // elements of data array is less than 4
-                                elemMatch("data", lt("$", 4)),
-                                // elements of fruits list has one element matching orange
-                                elemMatch("fruits", regex("$", "orange")),
-                                // note field contains string 'quick' using full-text index
-                                text("note", "quick")
-                                )
-                            );
+```java
 
-    for (Document document : cursor) {
-        // process the document
+DocumentCursor cursor = collection.find(
+    where("firstName").eq("John")               // firstName == John
+    .and(
+        where("data").elemMatch("$".lt(4))      // AND elements of data array is less than 4
+            .and(
+                where("note").text("quick")     // AND note field contains string 'quick' using full-text index
+        )       
+    )
+);
+
+for (Document document : cursor) {
+    // process the document
+}
+
+// get document by id
+Document document = collection.getById(nitriteId);
+
+// query an object repository and create the first result
+Cursor<Employee> cursor = repository.find(where("firstName").eq("John"));
+Employee employee = cursor.firstOrNull();
+
+```
+
+**Transaction**
+
+```java
+try (Session session = db.createSession()) {
+    Transaction transaction = session.beginTransaction();
+    try {
+        NitriteCollection txCol = transaction.getCollection("test");
+
+        Document document = createDocument("firstName", "John");
+        txCol.insert(document);
+
+        transaction.commit();
+    } catch (TransactionException e) {
+        transaction.rollback();
     }
+}
 
-    // create document by id
-    Document document = collection.getById(nitriteId);
 
-    // query an object repository and create the first result
-    Employee emp = repository.find(eq("firstName", "John"))
-                             .firstOrDefault();
+```
+
+**Schema Migration**
+
+```java
+
+Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
+    @Override
+    public void migrate(Instruction instruction) {
+        instruction.forDatabase()
+            // make a non-secure db to secure db
+            .addPassword("test-user", "test-password");
+
+        // create instruction for existing repository
+        instruction.forRepository(OldClass.class, null)
+
+            // rename the repository (in case of entity name changes)
+            .renameRepository("migrated", null)
+
+            // change datatype of field empId from String to Long and convert the values
+            .changeDataType("empId", (TypeConverter<String, Long>) Long::parseLong)
+
+            // change id field from uuid to empId
+            .changeIdField("uuid", "empId")
+
+            // delete uuid field
+            .deleteField("uuid")
+    
+            // rename field from lastName to familyName
+            .renameField("lastName", "familyName")
+
+            // add new field fullName and add default value as - firstName + " " + lastName
+            .addField("fullName", document -> document.get("firstName", String.class) + " "
+                + document.get("familyName", String.class))
+
+            // drop index on firstName
+            .dropIndex("firstName")
+
+            // drop index on embedded field literature.text
+            .dropIndex("literature.text")
+
+            // change data type of embedded field from float to integer and convert the values 
+            .changeDataType("literature.ratings", (TypeConverter<Float, Integer>) Math::round);
+    }
+};
+
+Migration migration2 = new Migration(2, 3) {
+    @Override
+    public void migrate(Instruction instruction) {
+        instruction.forCollection("test")
+            .addField("fullName", "Dummy Name");
+    }
+};
+
+MVStoreModule storeModule = MVStoreModule.withConfig()
+    .filePath("/temp/employee.db")
+    .compressHigh(true)
+    .build();
+
+db = Nitrite.builder()
+    .loadModule(storeModule)
+    
+    // schema versioning is must for migration
+    .schemaVersion(2)
+
+    // add defined migration paths
+    .addMigrations(migration1, migration2)
+    .openOrCreate();
+
+```
 
 **Automatic Replication**
 
-    // connect to a DataGate server running at localhost 9090 port
-    DataGateClient dataGateClient = new DataGateClient("http://localhost:9090")
-            .withAuth("userId", "password");
-    DataGateSyncTemplate syncTemplate
-            = new DataGateSyncTemplate(dataGateClient, "remote-collection@userId");
+```java
 
-    // create sync handle
-    SyncHandle syncHandle = Replicator.of(db)
-            .forLocal(collection)
-            // a DataGate sync template implementation
-            .withSyncTemplate(syncTemplate)
-            // replication attempt delay of 1 sec
-            .delay(timeSpan(1, TimeUnit.SECONDS))
-            // both-way replication
-            .ofType(ReplicationType.BOTH_WAY)
-            // sync event listener
-            .withListener(new SyncEventListener() {
-                @Override
-                public void onSyncEvent(SyncEventData eventInfo) {
+NitriteCollection collection = db.getCollection("products");
 
-                }
-            })
-            .configure();
+Replica replica = Replica.builder()
+    .of(collection)
+    // replication via websocket (ws/wss)
+    .remote("ws://127.0.0.1:9090/datagate/john/products")
+    // user authentication via JWT token
+    .jwtAuth("john", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+    .create();
 
-    // start sync in the background using handle
-    syncHandle.startSync();
+replica.connect();
+
+```
 
 **Import/Export Data**
 
-    // Export data to a file
-    Exporter exporter = Exporter.of(db);
-    exporter.exportTo(schemaFile);
+```java
+// Export data to a file
+Exporter exporter = Exporter.of(db);
+exporter.exportTo(schemaFile);
 
-    //Import data from the file
-    Importer importer = Importer.of(db);
-    importer.importFrom(schemaFile);
+//Import data from the file
+Importer importer = Importer.of(db);
+importer.importFrom(schemaFile);
+
+```
 
 More details are available in the reference document.
 
 ## Release Notes
 
-Release notes are available [here](https://github.com/dizitart/nitrite-database/releases).
+Release notes are available [here](https://github.com/nitrite/nitrite-java/releases).
 
 ## Documentation
 
@@ -247,25 +372,21 @@ Release notes are available [here](https://github.com/dizitart/nitrite-database/
 
 To build and test Nitrite
 
-    $ git clone https://github.com/dizitart/nitrite-database.git
-    $ cd nitrite-database
-    $ ./gradlew build
+```shell script
 
-The test suite requires mongod to be running on localhost, listening on the default port. MongoDb is required
-to test replication using the DataGate server. Please run the below command to create the test user in mongo.
+git clone https://github.com/nitrite/nitrite-java.git
+cd nitrite-java
+./gradlew build
 
-    db.getSiblingDB('benchmark').createUser({user: 'bench', pwd: 'bench', roles: [{role: 'readWrite', db: 'benchmark'}, {role: 'dbAdmin', db: 'benchmark'}]})
-
-The test suite also requires android sdk 26 to be installed and ANDROID\_HOME environment variable to be setup
-properly to test the android example.
+```
 
 ## Support / Feedback
 
-For issues with, questions about, or feedback talk to us at [Gitter](https://gitter.im/dizitart/nitrite-database).
+For issues with, questions about, or feedback talk to us at [Gitter](https://gitter.im/nitrite-db/nitrite-java).
 
 ## Bugs / Feature Requests
 
-Think you’ve found a bug? Want to see a new feature in the Nitrite? Please open an issue [here](https://github.com/dizitart/nitrite-database/issues). But
+Think you’ve found a bug? Want to see a new feature in the Nitrite? Please open an issue [here](https://github.com/nitrite/nitrite-java/issues). But
 before you file an issue please check if it is already existing or not.
 
 ## Maintainers
@@ -299,8 +420,12 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 
 ## Special Thanks
 
-![YourKit](https://www.yourkit.com/images/yklogo.png)
+<div>
+<a href="https://www.ej-technologies.com/products/jprofiler/overview.html" style="padding-right:20px">
+    <img src="https://www.ej-technologies.com/images/product_banners/jprofiler_medium.png" alt="JProfiler"/>
+</a>
 
-I highly recommend YourKit Java Profiler for any performance critical application you make.
-
-Check it out at <https://www.yourkit.com/>
+<a href="https://www.yourkit.com/" style="padding-right:20px">
+    <img src="https://www.yourkit.com/images/yklogo.png" alt="YourKit"/>
+</a>
+</div>
