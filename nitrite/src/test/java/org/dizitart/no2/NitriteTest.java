@@ -42,6 +42,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -403,6 +404,56 @@ public class NitriteTest {
         Cursor documents = collection.find(Filters.eq("fifth_key", "fifth_key"));
         assertEquals(1, documents.size());
         assertEquals(doc, documents.firstOrDefault());
+    }
+
+    @Test
+    public void testIssue245() throws InterruptedException {
+        class ThreadRunner implements Runnable {
+            @Override
+            public void run() {
+                try {
+                    long id = Thread.currentThread().getId();
+                    NitriteCollection collection = db.getCollection("testIssue245");
+
+                    for (int i = 0; i < 5; i++) {
+
+                        System.out.println("Thread ID = " + id + " Inserting doc " + i);
+                        Document doc = Document.createDocument(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+                        WriteResult result = collection.insert(doc);//db.commit();
+                        System.out.println("Result of insert = " + result.getAffectedCount());
+                        System.out.println("Thread id = " + id + " --> count = " + collection.size());
+
+                        Thread.sleep(10);
+
+                    }//for closing
+
+                    collection.close();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Thread t0 = new Thread(new ThreadRunner());
+        Thread t1 = new Thread(new ThreadRunner());
+        Thread t2 = new Thread(new ThreadRunner());
+
+        t0.start();
+        t1.start();
+        t2.start();
+
+        Thread.sleep(10 * 1000);
+
+        t0.join();
+        t1.join();
+        t2.join();
+
+        NitriteCollection collection = db.getCollection("testIssue245");
+        System.out.println("No of Documents = " + collection.size());
+        collection.close();
+        db.close();
     }
 
 

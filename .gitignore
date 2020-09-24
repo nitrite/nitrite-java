@@ -452,3 +452,4 @@ captures/
 /nitrite-datagate/src/main/dist/logs/
 
 .attach_pid*
+.diffblue

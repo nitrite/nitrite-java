@@ -18,6 +18,8 @@
 
 package org.dizitart.no2.fulltext;
 
+import org.dizitart.no2.fulltext.languages.*;
+
 /**
  * All supported languages for full-text search.
  *
@@ -30,6 +32,7 @@ public enum Languages {
     Armenian,
     Basque,
     Bengali,
+    BrazilianPortuguese,
     Breton,
     Bulgarian,
     Catalan,
