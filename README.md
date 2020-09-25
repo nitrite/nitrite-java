@@ -163,7 +163,7 @@ Document doc = createDocument("firstName", "John")
 collection.insert(doc);
 
 // find a document
-collection.find(where("firstName").eq("John").and(where("lastName").eq("Doe"))
+collection.find(where("firstName").eq("John").and(where("lastName").eq("Doe"));
 
 // update the document
 collection.update(where("firstName").eq("John"), createDocument("lastName", "Wick"));

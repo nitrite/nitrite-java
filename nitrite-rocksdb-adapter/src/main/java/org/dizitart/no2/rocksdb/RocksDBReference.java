@@ -33,12 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
 @Data
 @Slf4j
 public class RocksDBReference implements AutoCloseable {
-    private List<ColumnFamilyDescriptor> columnFamilyDescriptors;
-    private ColumnFamilyOptions columnFamilyOptions;
+    private Options options;
     private DBOptions dbOptions;
-    private Map<String, ColumnFamilyHandle> columnFamilyHandleRegistry;
+    private ColumnFamilyOptions columnFamilyOptions;
     private RocksDB rocksDB;
-    private ComparatorOptions comparatorOptions;
+
+    private List<ColumnFamilyDescriptor> columnFamilyDescriptors;
+    private Map<String, ColumnFamilyHandle> columnFamilyHandleRegistry;
     private List<AbstractComparator> dbComparators;
 
     public RocksDBReference() {
@@ -56,6 +57,7 @@ public class RocksDBReference implements AutoCloseable {
         dbOptions.close();
         dbComparators.forEach(AbstractImmutableNativeReference::close);
         columnFamilyOptions.close();
+        options.close();
     }
 
     public synchronized ColumnFamilyHandle getOrCreateColumnFamily(String name) {

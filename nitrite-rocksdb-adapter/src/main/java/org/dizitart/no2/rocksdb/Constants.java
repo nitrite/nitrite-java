@@ -21,5 +21,4 @@ package org.dizitart.no2.rocksdb;
  */
 public class Constants {
     public static final byte[] DB_NULL = new byte[]{-1};
-    public static final String STORE_INFO_KEY = "store-info";
 }
