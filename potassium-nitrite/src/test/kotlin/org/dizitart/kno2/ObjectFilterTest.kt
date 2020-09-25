@@ -18,6 +18,7 @@ package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.*
 import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.mvstore.MVStoreModule
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
 import org.dizitart.no2.repository.annotations.Indices
@@ -41,9 +42,7 @@ class ObjectFilterTest : BaseTest() {
     @Before
     fun before() {
         db = nitrite {
-            loadModule(mvStore {
-                path = fileName
-            })
+            loadModule(MVStoreModule(fileName))
         }
     }
 

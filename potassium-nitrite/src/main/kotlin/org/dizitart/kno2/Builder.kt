@@ -21,12 +21,7 @@ import org.dizitart.no2.NitriteBuilder
 import org.dizitart.no2.NitriteConfig
 import org.dizitart.no2.module.NitriteModule
 import org.dizitart.no2.module.NitriteModule.module
-import org.dizitart.no2.mvstore.MVStoreModule
-import org.dizitart.no2.mvstore.MVStoreModuleBuilder
 import org.dizitart.no2.spatial.SpatialIndexer
-import org.dizitart.no2.store.events.StoreEventListener
-import org.h2.mvstore.FileStore
-import java.io.File
 
 /**
  * A builder to create a nitrite database.
@@ -75,49 +70,6 @@ class Builder internal constructor() {
     }
 }
 
-class MVStoreBuilder internal constructor() {
-    private val eventListeners = mutableSetOf<StoreEventListener>()
-
-    var path: String? = null
-    var file: File? = null
-    var autoCommitBufferSize = 1024
-    var encryptionKey: CharArray? = null
-    var readOnly = false
-    var compress = false
-    var compressHigh = false
-    var autoCommit = true
-    var recoveryMode = false
-    var cacheSize = 16
-    var cacheConcurrency = 16
-    var pageSplitSize = 16
-    var fileStore: FileStore? = null
-
-    fun addStoreEventListener(listener: StoreEventListener) {
-        eventListeners.add(listener)
-    }
-
-    fun createStoreModuleBuilder(): MVStoreModuleBuilder {
-        val path = if (file != null) (file as File).path else path
-
-        val builder = MVStoreModule.withConfig()
-            .filePath(path)
-            .autoCommitBufferSize(autoCommitBufferSize)
-            .encryptionKey(encryptionKey)
-            .readOnly(readOnly)
-            .compress(compress)
-            .compressHigh(compressHigh)
-            .autoCommit(autoCommit)
-            .recoveryMode(recoveryMode)
-            .cacheSize(cacheSize)
-            .cacheConcurrency(cacheConcurrency)
-            .pageSplitSize(pageSplitSize)
-            .fileStore(fileStore)
-
-        eventListeners.forEach { builder.addStoreEventListener(it) }
-        return builder
-    }
-}
-
 /**
  * Opens or creates a new database. If it is an in-memory store, then it
  * will create a new one. If it is a file based store, and if the file does not
@@ -138,11 +90,4 @@ fun nitrite(userId: String? = null, password: String? = null,
     } else {
         nitriteBuilder.openOrCreate(userId, password)
     }
-}
-
-fun mvStore(op: (MVStoreBuilder.() -> Unit)? = null): MVStoreModule {
-    val storeBuilder = MVStoreBuilder()
-    op?.invoke(storeBuilder)
-    val moduleBuilder = storeBuilder.createStoreModuleBuilder()
-    return moduleBuilder.build()
 }

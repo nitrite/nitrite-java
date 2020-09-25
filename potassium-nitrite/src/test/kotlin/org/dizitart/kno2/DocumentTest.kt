@@ -18,6 +18,7 @@ package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.eq
 import org.dizitart.no2.common.util.DocumentUtils.isSimilar
+import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -65,9 +66,7 @@ class DocumentTest : BaseTest() {
     @Test
     fun documentInsert() {
         db = nitrite {
-            loadModule(mvStore {
-                path = fileName
-            })
+            loadModule(MVStoreModule(fileName))
         }
 
         val doc = documentOf("a" to 1)

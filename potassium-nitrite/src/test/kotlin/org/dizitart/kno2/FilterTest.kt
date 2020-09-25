@@ -22,6 +22,7 @@ import org.dizitart.no2.collection.Document
 import org.dizitart.no2.common.Constants
 import org.dizitart.no2.index.IndexOptions
 import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.mvstore.MVStoreModule
 import org.dizitart.no2.spatial.SpatialIndexer
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -39,9 +40,7 @@ class FilterTest : BaseTest() {
     @Before
     fun before() {
         db = nitrite {
-            loadModule(mvStore {
-                path = fileName
-            })
+            loadModule(MVStoreModule(fileName))
         }
     }
 
