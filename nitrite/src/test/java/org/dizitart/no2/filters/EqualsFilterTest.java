@@ -1,18 +1,16 @@
 package org.dizitart.no2.filters;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.index.NitriteTextIndexer;
 import org.dizitart.no2.index.NonUniqueIndexer;
 import org.dizitart.no2.store.memory.InMemoryMap;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class EqualsFilterTest {
     @Test
@@ -64,11 +62,11 @@ public class EqualsFilterTest {
         assertEquals(0, equalsFilter.findIdSet(new InMemoryMap<NitriteId, Document>("mapName", null)).size());
     }
 
-    @Test
+    @Test(expected = InvalidIdException.class)
     public void testFindIdSet2() {
         EqualsFilter equalsFilter = new EqualsFilter("field", "value");
         equalsFilter.setOnIdField(true);
-        equalsFilter.findIdSet(new InMemoryMap<NitriteId, Document>("mapName", null));
+        equalsFilter.findIdSet(new InMemoryMap<>("mapName", null));
         assertTrue(equalsFilter.getValue() instanceof String);
     }
 
