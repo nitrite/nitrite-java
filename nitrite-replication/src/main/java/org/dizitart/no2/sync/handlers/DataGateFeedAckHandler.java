@@ -26,7 +26,7 @@ import org.dizitart.no2.sync.message.Receipt;
  */
 @Getter
 public class DataGateFeedAckHandler implements MessageHandler<DataGateFeedAck>, JournalAware {
-    private ReplicationTemplate replicationTemplate;
+    private final ReplicationTemplate replicationTemplate;
 
     public DataGateFeedAckHandler(ReplicationTemplate replicationTemplate) {
         this.replicationTemplate = replicationTemplate;

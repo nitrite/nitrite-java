@@ -29,10 +29,10 @@ import java.util.TimerTask;
  */
 class BatchChangeScheduler {
     private Timer timer;
-    private ReplicationTemplate replica;
-    private MessageFactory factory;
-    private MessageTemplate messageTemplate;
-    private FeedJournal journal;
+    private final ReplicationTemplate replica;
+    private final MessageFactory factory;
+    private final MessageTemplate messageTemplate;
+    private final FeedJournal journal;
 
     public BatchChangeScheduler(ReplicationTemplate replica) {
         this.replica = replica;

@@ -37,7 +37,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.test.TestUtil.createDb;
 import static org.junit.Assert.*;
 
 /**
@@ -52,7 +51,7 @@ public class ObjectRepositoryTest {
 
     @Before
     public void setUp() {
-        db = createDb(dbPath, new JacksonMapperModule());
+        db = TestUtil.createDb(dbPath, new JacksonMapperModule());
     }
 
     @After

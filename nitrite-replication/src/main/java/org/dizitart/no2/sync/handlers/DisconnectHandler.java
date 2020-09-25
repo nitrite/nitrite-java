@@ -23,7 +23,7 @@ import org.dizitart.no2.sync.message.Disconnect;
  * @author Anindya Chatterjee
  */
 public class DisconnectHandler implements MessageHandler<Disconnect> {
-    private ReplicationTemplate replicationTemplate;
+    private final ReplicationTemplate replicationTemplate;
 
     public DisconnectHandler(ReplicationTemplate replicationTemplate) {
         this.replicationTemplate = replicationTemplate;

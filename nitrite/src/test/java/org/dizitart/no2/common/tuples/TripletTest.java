@@ -1,15 +1,13 @@
 package org.dizitart.no2.common.tuples;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class TripletTest {
     @Test
     public void testCanEqual() {
-        assertFalse((new Triplet<Object, Object, Object>()).canEqual("other"));
+        assertFalse((new Triplet<>()).canEqual("other"));
     }
 
     @Test
@@ -33,13 +31,13 @@ public class TripletTest {
     @Test
     public void testEquals2() {
         Triplet o = new Triplet("first", "second", "third");
-        assertFalse((new Triplet<Object, Object, Object>()).equals(o));
+        assertFalse((new Triplet<>()).equals(o));
     }
 
     @Test
     public void testEquals3() {
         Triplet o = new Triplet(null, "second", "third");
-        assertFalse((new Triplet<Object, Object, Object>()).equals(o));
+        assertFalse((new Triplet<>()).equals(o));
     }
 
     @Test
@@ -50,12 +48,12 @@ public class TripletTest {
 
     @Test
     public void testEquals5() {
-        assertFalse((new Triplet<Object, Object, Object>()).equals("o"));
+        assertFalse((new Triplet<>()).equals("o"));
     }
 
     @Test
     public void testEquals6() {
-        Triplet<Object, Object, Object> triplet = new Triplet<Object, Object, Object>();
+        Triplet<Object, Object, Object> triplet = new Triplet<>();
         assertTrue(triplet.equals(new Triplet()));
     }
 
@@ -80,33 +78,33 @@ public class TripletTest {
     @Test
     public void testHashCode() {
         assertEquals(-1932637802, (new Triplet<Object, Object, Object>("first", "second", "third")).hashCode());
-        assertEquals(357642, (new Triplet<Object, Object, Object>()).hashCode());
+        assertEquals(357642, (new Triplet<>()).hashCode());
     }
 
     @Test
     public void testSetFirst() {
-        Triplet<Object, Object, Object> triplet = new Triplet<Object, Object, Object>();
+        Triplet<Object, Object, Object> triplet = new Triplet<>();
         triplet.setFirst("first");
         assertEquals("Triplet(first=first, second=null, third=null)", triplet.toString());
     }
 
     @Test
     public void testSetSecond() {
-        Triplet<Object, Object, Object> triplet = new Triplet<Object, Object, Object>();
+        Triplet<Object, Object, Object> triplet = new Triplet<>();
         triplet.setSecond("second");
         assertEquals("Triplet(first=null, second=second, third=null)", triplet.toString());
     }
 
     @Test
     public void testSetThird() {
-        Triplet<Object, Object, Object> triplet = new Triplet<Object, Object, Object>();
+        Triplet<Object, Object, Object> triplet = new Triplet<>();
         triplet.setThird("third");
         assertEquals("Triplet(first=null, second=null, third=third)", triplet.toString());
     }
 
     @Test
     public void testToString() {
-        assertEquals("Triplet(first=null, second=null, third=null)", (new Triplet<Object, Object, Object>()).toString());
+        assertEquals("Triplet(first=null, second=null, third=null)", (new Triplet<>()).toString());
     }
 }
 

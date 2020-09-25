@@ -1,20 +1,18 @@
 package org.dizitart.no2.common.tuples;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class QuartetTest {
     @Test
     public void testCanEqual() {
-        assertFalse((new Quartet<Object, Object, Object, Object>()).canEqual("other"));
+        assertFalse((new Quartet<>()).canEqual("other"));
     }
 
     @Test
     public void testEquals() {
-        assertFalse((new Quartet<Object, Object, Object, Object>()).equals("o"));
+        assertFalse((new Quartet<>()).equals("o"));
     }
 
     @Test
@@ -50,7 +48,7 @@ public class QuartetTest {
     @Test
     public void testEquals3() {
         Quartet o = new Quartet(null, "second", "third", "fourth");
-        assertFalse((new Quartet<Object, Object, Object, Object>()).equals(o));
+        assertFalse((new Quartet<>()).equals(o));
     }
 
     @Test
@@ -61,7 +59,7 @@ public class QuartetTest {
 
     @Test
     public void testEquals5() {
-        Quartet<Object, Object, Object, Object> quartet = new Quartet<Object, Object, Object, Object>();
+        Quartet<Object, Object, Object, Object> quartet = new Quartet<>();
         assertTrue(quartet.equals(new Quartet()));
     }
 
@@ -86,40 +84,40 @@ public class QuartetTest {
     @Test
     public void testEquals9() {
         Quartet o = new Quartet("first", "second", "third", "fourth");
-        assertFalse((new Quartet<Object, Object, Object, Object>()).equals(o));
+        assertFalse((new Quartet<>()).equals(o));
     }
 
     @Test
     public void testHashCode() {
-        assertEquals(21100921, (new Quartet<Object, Object, Object, Object>()).hashCode());
+        assertEquals(21100921, (new Quartet<>()).hashCode());
         assertEquals(669802412,
             (new Quartet<Object, Object, Object, Object>("first", "second", "third", "fourth")).hashCode());
     }
 
     @Test
     public void testSetFirst() {
-        Quartet<Object, Object, Object, Object> quartet = new Quartet<Object, Object, Object, Object>();
+        Quartet<Object, Object, Object, Object> quartet = new Quartet<>();
         quartet.setFirst("first");
         assertEquals("Quartet(first=first, second=null, third=null, fourth=null)", quartet.toString());
     }
 
     @Test
     public void testSetFourth() {
-        Quartet<Object, Object, Object, Object> quartet = new Quartet<Object, Object, Object, Object>();
+        Quartet<Object, Object, Object, Object> quartet = new Quartet<>();
         quartet.setFourth("fourth");
         assertEquals("Quartet(first=null, second=null, third=null, fourth=fourth)", quartet.toString());
     }
 
     @Test
     public void testSetSecond() {
-        Quartet<Object, Object, Object, Object> quartet = new Quartet<Object, Object, Object, Object>();
+        Quartet<Object, Object, Object, Object> quartet = new Quartet<>();
         quartet.setSecond("second");
         assertEquals("Quartet(first=null, second=second, third=null, fourth=null)", quartet.toString());
     }
 
     @Test
     public void testSetThird() {
-        Quartet<Object, Object, Object, Object> quartet = new Quartet<Object, Object, Object, Object>();
+        Quartet<Object, Object, Object, Object> quartet = new Quartet<>();
         quartet.setThird("third");
         assertEquals("Quartet(first=null, second=null, third=third, fourth=null)", quartet.toString());
     }
@@ -127,7 +125,7 @@ public class QuartetTest {
     @Test
     public void testToString() {
         assertEquals("Quartet(first=null, second=null, third=null, fourth=null)",
-            (new Quartet<Object, Object, Object, Object>()).toString());
+            (new Quartet<>()).toString());
     }
 }
 

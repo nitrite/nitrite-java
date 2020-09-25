@@ -25,7 +25,7 @@ import org.dizitart.no2.sync.message.Receipt;
  * @author Anindya Chatterjee
  */
 public class BatchAckHandler implements MessageHandler<BatchAck> {
-    private ReplicationTemplate replicationTemplate;
+    private final ReplicationTemplate replicationTemplate;
 
     public BatchAckHandler(ReplicationTemplate replicationTemplate) {
         this.replicationTemplate = replicationTemplate;

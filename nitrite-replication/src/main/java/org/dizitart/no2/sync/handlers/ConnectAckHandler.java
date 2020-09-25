@@ -25,7 +25,7 @@ import org.dizitart.no2.sync.message.ConnectAck;
  */
 @Slf4j
 public class ConnectAckHandler implements MessageHandler<ConnectAck> {
-    private ReplicationTemplate replica;
+    private final ReplicationTemplate replica;
 
     public ConnectAckHandler(ReplicationTemplate replica) {
         this.replica = replica;
