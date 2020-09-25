@@ -20,6 +20,7 @@ import org.dizitart.no2.exceptions.SecurityException
 import org.dizitart.no2.index.NitriteTextIndexer
 import org.dizitart.no2.index.fulltext.UniversalTextTokenizer
 import org.dizitart.no2.module.NitriteModule.module
+import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.File
@@ -34,10 +35,7 @@ class BuilderTest : BaseTest() {
     @Test
     fun testBuilder1() {
         db = nitrite {
-            loadModule(mvStore {
-                path = fileName
-                autoCommit = false
-            })
+            loadModule(MVStoreModule(fileName))
         }
 
         val context = db?.config!!
@@ -54,11 +52,7 @@ class BuilderTest : BaseTest() {
     @Test
     fun testBuilder2() {
         db = nitrite {
-            loadModule(mvStore {
-                file = File(fileName)
-                autoCommitBufferSize = 2048
-                compress = true
-            })
+            loadModule(MVStoreModule(fileName))
 
             loadModule(module(NitriteTextIndexer(UniversalTextTokenizer())))
         }
@@ -74,35 +68,27 @@ class BuilderTest : BaseTest() {
     @Test(expected = SecurityException::class)
     fun testBuilderNoUser() {
         db = nitrite("", "password") {
-            loadModule(mvStore {
-                file = File(fileName)
-            })
+            loadModule(MVStoreModule(fileName))
         }
     }
 
     @Test(expected = SecurityException::class)
     fun testBuilderNoPassword() {
         db = nitrite("user", "") {
-            loadModule(mvStore {
-                file = File(fileName)
-            })
+            loadModule(MVStoreModule(fileName))
         }
     }
 
     @Test
     fun testBuilderNoUserPassword() {
         db = nitrite("", "") {
-            loadModule(mvStore {
-                file = File(fileName)
-            })
+            loadModule(MVStoreModule(fileName))
         }
     }
 
     @Test
     fun testBuilderInMemory() {
-        db = nitrite {
-            loadModule(mvStore())
-        }
+        db = nitrite {}
         assertTrue(db?.config?.nitriteStore?.storeConfig?.isInMemory!!)
     }
 }

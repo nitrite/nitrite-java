@@ -24,6 +24,7 @@ import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
 import org.dizitart.no2.mapper.JacksonExtension
+import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
@@ -80,9 +81,7 @@ class BackportJavaTimeTest {
     @Test
     fun testIssue59() {
         val db = nitrite {
-            loadModule(mvStore {
-                path = dbPath
-            })
+            loadModule(MVStoreModule(dbPath))
             loadModule(KNO2Module(ThreeTenAbpExtension()))
         }
 
