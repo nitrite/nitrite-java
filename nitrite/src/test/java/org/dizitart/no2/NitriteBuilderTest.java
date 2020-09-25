@@ -23,8 +23,10 @@ import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.index.Indexer;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.module.PluginManager;
 import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreConfig;
 import org.junit.After;
 import org.junit.Rule;
@@ -110,6 +112,29 @@ public class NitriteBuilderTest {
     public void testOpenOrCreateNullUserId() {
         NitriteBuilder builder = Nitrite.builder();
         builder.openOrCreate(null, "abcd");
+    }
+
+    @Test
+    public void testOpenOrCreate() {
+        Nitrite actualOpenOrCreateResult = Nitrite.builder().openOrCreate("janedoe", "iloveyou");
+        PluginManager pluginManager = actualOpenOrCreateResult.getConfig().getPluginManager();
+        NitriteStore<?> store = actualOpenOrCreateResult.getStore();
+        assertFalse(actualOpenOrCreateResult.isClosed());
+        assertFalse(store.isClosed());
+        assertSame(store, pluginManager.getNitriteStore());
+        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.mapper.MappableMapper);
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testOpenOrCreate2() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        builderResult.openOrCreate("", "iloveyou");
+        NitriteConfig nitriteConfig = builderResult.getNitriteConfig();
+        PluginManager pluginManager = nitriteConfig.getPluginManager();
+        NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
+        assertFalse(nitriteStore.isClosed());
+        assertSame(nitriteStore, pluginManager.getNitriteStore());
+        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.mapper.MappableMapper);
     }
 
     @Test(expected = SecurityException.class)

@@ -8,6 +8,9 @@ import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
 import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.store.StoreConfig;
 import org.dizitart.no2.store.events.StoreEventListener;
+import org.rocksdb.ColumnFamilyOptions;
+import org.rocksdb.DBOptions;
+import org.rocksdb.Options;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,26 +21,19 @@ public class RocksDBConfig implements StoreConfig {
     private Set<StoreEventListener> eventListeners;
 
     @Getter @Setter(AccessLevel.PACKAGE)
-    private boolean createIfMissing = true;
+    private Options options;
 
     @Getter @Setter(AccessLevel.PACKAGE)
-    private boolean errorIfExists;
+    private DBOptions dbOptions;
 
     @Getter @Setter(AccessLevel.PACKAGE)
-    private int writeBufferSize = 4 << 20;
-
-    @Getter @Setter(AccessLevel.PACKAGE)
-    private int maxOpenFiles = 1000;
-
-    @Getter @Setter(AccessLevel.PACKAGE)
-    private boolean paranoidChecks;
+    private ColumnFamilyOptions columnFamilyOptions;
 
     @Getter @Setter(AccessLevel.PACKAGE)
     private String filePath;
 
     @Getter @Setter(AccessLevel.PACKAGE)
     private ObjectFormatter objectFormatter;
-
 
     RocksDBConfig() {
         eventListeners = new HashSet<>();

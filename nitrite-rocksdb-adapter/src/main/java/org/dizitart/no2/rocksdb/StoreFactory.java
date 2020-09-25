@@ -39,14 +39,17 @@ class StoreFactory {
         // create reference
         RocksDBReference reference = new RocksDBReference();
 
+        // create options
+        createOptions(reference, dbConfig);
+
+        // create db options
+        createDbOptions(reference, dbConfig);
+
         // create column family options
         createColumnFamilyOptions(reference, dbConfig);
 
         // create column family descriptors
         createColumnFamilyDescriptors(reference, dbConfig);
-
-        // create db options
-        createDbOptions(reference, dbConfig);
 
         // create db
         createRocksDB(reference, dbConfig);
@@ -54,20 +57,33 @@ class StoreFactory {
         return reference;
     }
 
+    private static void createOptions(RocksDBReference reference, RocksDBConfig dbConfig) {
+        Options options = dbConfig.options();
+        if (options == null) {
+            options = new Options();
+        }
+
+        reference.setOptions(options);
+    }
+
+    private static void createDbOptions(RocksDBReference reference, RocksDBConfig dbConfig) {
+        DBOptions dbOptions = dbConfig.dbOptions();
+        if (dbOptions == null) {
+            dbOptions = new DBOptions();
+            dbOptions.setCreateIfMissing(true);
+        }
+
+        reference.setDbOptions(dbOptions);
+    }
+
     private static void createColumnFamilyOptions(RocksDBReference reference, RocksDBConfig dbConfig) {
-        ColumnFamilyOptions cfOpts = new ColumnFamilyOptions()
-//            .optimizeForSmallDb()
-            .optimizeUniversalStyleCompaction();
+        ColumnFamilyOptions columnFamilyOptions = dbConfig.columnFamilyOptions();
+        if (columnFamilyOptions == null) {
+            columnFamilyOptions = new ColumnFamilyOptions();
+            columnFamilyOptions.optimizeUniversalStyleCompaction();
+        }
 
-//        ComparatorOptions comparatorOptions = new ComparatorOptions();
-
-        // set custom comparator
-//        AbstractComparator comparator = new NitriteRocksDBComparator(comparatorOptions, dbConfig.marshaller());
-
-//        cfOpts.setComparator(comparator);
-//        reference.setDbComparator(comparator);
-//        reference.setComparatorOptions(comparatorOptions);
-        reference.setColumnFamilyOptions(cfOpts);
+        reference.setColumnFamilyOptions(columnFamilyOptions);
     }
 
     private static void createColumnFamilyDescriptors(RocksDBReference reference, RocksDBConfig dbConfig) {
@@ -76,7 +92,7 @@ class StoreFactory {
 
         // extract existing column family descriptors
         try {
-            List<byte[]> columnFamilies = RocksDB.listColumnFamilies(new Options(), dbConfig.filePath());
+            List<byte[]> columnFamilies = RocksDB.listColumnFamilies(reference.getOptions(), dbConfig.filePath());
             for (byte[] columnFamily : columnFamilies) {
                 if (!Arrays.equals(RocksDB.DEFAULT_COLUMN_FAMILY, columnFamily)) {
                     cfDescriptors.add(new ColumnFamilyDescriptor(columnFamily, reference.getColumnFamilyOptions()));
@@ -87,17 +103,6 @@ class StoreFactory {
             throw new NitriteIOException("failed to open database", e);
         }
         reference.setColumnFamilyDescriptors(cfDescriptors);
-    }
-
-    private static void createDbOptions(RocksDBReference reference, RocksDBConfig dbConfig) {
-        DBOptions options = new DBOptions();
-        options.setCreateIfMissing(dbConfig.createIfMissing());
-//        options.setErrorIfExists(dbConfig.errorIfExists());
-//        options.setDbWriteBufferSize(dbConfig.writeBufferSize());
-//        options.setMaxOpenFiles(dbConfig.maxOpenFiles());
-//        options.setParanoidChecks(dbConfig.paranoidChecks());
-
-        reference.setDbOptions(options);
     }
 
     private static void createRocksDB(RocksDBReference reference, RocksDBConfig dbConfig) {

@@ -30,7 +30,7 @@
         <Logger name="org.dizitart.no2.sync" level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
-        <Logger name="org.dizitart.no2.test" level="DEBUG" additivity="false">
+        <Logger name="org.dizitart.no2.integration" level="DEBUG" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
     </Loggers>

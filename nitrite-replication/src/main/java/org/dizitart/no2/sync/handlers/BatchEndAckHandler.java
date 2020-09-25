@@ -26,7 +26,7 @@ import org.dizitart.no2.sync.message.Receipt;
  */
 @Getter
 public class BatchEndAckHandler implements MessageHandler<BatchEndAck>, JournalAware {
-    private ReplicationTemplate replicationTemplate;
+    private final ReplicationTemplate replicationTemplate;
 
     public BatchEndAckHandler(ReplicationTemplate replicationTemplate) {
         this.replicationTemplate = replicationTemplate;

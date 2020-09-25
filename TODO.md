@@ -1,36 +1,13 @@
 ##TODO:
 
-1. Add rocksdb config
-
-```c++
-Options.max_background_flushes: 2
-Options.max_background_compactions: 8
-Options.avoid_flush_during_shutdown: 1
-Options.compaction_readahead_size: 16384
-ColumnFamilyOptions.comparator: leveldb.BytewiseComparator
-ColumnFamilyOptions.table_factory: BlockBasedTable
-BlockBasedTableOptions.checksum: kxxHash
-BlockBasedTableOptions.block_size: 16384
-BlockBasedTableOptions.filter_policy: rocksdb.BuiltinBloomFilter
-BlockBasedTableOptions.whole_key_filtering: 0
-BlockBasedTableOptions.format_version: 4
-LRUCacheOptionsOptions.capacity : 8589934592
-ColumnFamilyOptions.write_buffer_size: 134217728
-ColumnFamilyOptions.compression[0]: NoCompression
-ColumnFamilyOptions.compression[1]: NoCompression
-ColumnFamilyOptions.compression[2]: LZ4
-ColumnFamilyOptions.prefix_extractor: CustomPrefixExtractor
-ColumnFamilyOptions.compression_opts.max_dict_bytes: 32768
-
-```
-2. resolve pending issues
-3. add more test cases via diffblue
+1. fix codacy issues
+2. nitrite explorer
 4. add p2p replications via jgroups
 5. add lucene indexer
-
 6. nitrite cluster via jgroups
 7. spring data rest / graphql api over nitrite cluster
 8. data views (like rdbms view)
+
 
 ## Other Articles
 

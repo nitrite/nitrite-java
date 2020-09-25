@@ -25,7 +25,7 @@ import org.dizitart.no2.sync.message.ErrorMessage;
  */
 @Slf4j
 public class ErrorHandler implements MessageHandler<ErrorMessage> {
-    private ReplicationTemplate replica;
+    private final ReplicationTemplate replica;
 
     public ErrorHandler(ReplicationTemplate replica) {
         this.replica = replica;

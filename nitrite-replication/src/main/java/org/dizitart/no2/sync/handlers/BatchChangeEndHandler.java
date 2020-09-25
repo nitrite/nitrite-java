@@ -26,7 +26,7 @@ import org.dizitart.no2.sync.message.BatchEndAck;
  * @author Anindya Chatterjee
  */
 public class BatchChangeEndHandler implements MessageHandler<BatchChangeEnd> {
-    private ReplicationTemplate replicationTemplate;
+    private final ReplicationTemplate replicationTemplate;
 
     public BatchChangeEndHandler(ReplicationTemplate replicationTemplate) {
         this.replicationTemplate = replicationTemplate;

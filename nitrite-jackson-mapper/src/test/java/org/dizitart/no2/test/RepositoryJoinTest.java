@@ -44,7 +44,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.dizitart.no2.filters.Filter.ALL;
-import static org.dizitart.no2.test.BaseObjectRepositoryTest.getRandomTempDbFile;
 import static org.junit.Assert.*;
 
 /**
@@ -63,7 +62,7 @@ public class RepositoryJoinTest {
     @Parameterized.Parameter(value = 4)
     public boolean isAutoCompact = false;
     protected Nitrite db;
-    private final String fileName = getRandomTempDbFile();
+    private final String fileName = BaseObjectRepositoryTest.getRandomTempDbFile();
     private ObjectRepository<Person> personRepository;
     private ObjectRepository<Address> addressRepository;
 

@@ -22,6 +22,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.store.events.StoreEventListener;
+import org.rocksdb.ColumnFamilyOptions;
+import org.rocksdb.DBOptions;
+import org.rocksdb.Options;
 
 import java.io.File;
 import java.util.HashSet;
@@ -34,12 +37,10 @@ import java.util.Set;
 @Setter
 @Accessors(fluent = true)
 public class RocksDBModuleBuilder {
-    private boolean createIfMissing = true;
-    private boolean errorIfExists;
-    private int writeBufferSize = 4 << 20;
-    private int maxOpenFiles = 1000;
-    private boolean paranoidChecks;
     private String filePath;
+    private Options options;
+    private DBOptions dbOptions;
+    private ColumnFamilyOptions columnFamilyOptions;
     private ObjectFormatter objectFormatter;
     private RocksDBConfig dbConfig;
 
@@ -71,11 +72,9 @@ public class RocksDBModuleBuilder {
     public RocksDBModule build() {
         RocksDBModule module = new RocksDBModule(filePath());
 
-        dbConfig.createIfMissing(createIfMissing());
-        dbConfig.errorIfExists(errorIfExists());
-        dbConfig.writeBufferSize(writeBufferSize());
-        dbConfig.maxOpenFiles(maxOpenFiles());
-        dbConfig.paranoidChecks(paranoidChecks());
+        dbConfig.options(options());
+        dbConfig.dbOptions(dbOptions());
+        dbConfig.columnFamilyOptions(columnFamilyOptions());
         dbConfig.filePath(filePath());
 
         if (objectFormatter() != null) {

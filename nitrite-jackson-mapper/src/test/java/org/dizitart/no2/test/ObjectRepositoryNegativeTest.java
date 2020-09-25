@@ -34,7 +34,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.dizitart.no2.test.TestUtil.createDb;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -50,7 +49,7 @@ public class ObjectRepositoryNegativeTest {
 
     @Before
     public void setUp() {
-        db = createDb(dbPath, new JacksonMapperModule());
+        db = TestUtil.createDb(dbPath, new JacksonMapperModule());
     }
 
     @After
