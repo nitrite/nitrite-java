@@ -40,7 +40,7 @@ dependencies {
     testImplementation "junit:junit:4.13"
     testImplementation "org.apache.lucene:lucene-core:8.6.2"
     testImplementation "org.apache.lucene:lucene-analyzers-common:8.6.3"
-    testImplementation "org.apache.lucene:lucene-queryparser:8.6.2"
+    testImplementation "org.apache.lucene:lucene-queryparser:8.6.3"
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.3"
     testImplementation "org.apache.logging.log4j:log4j-core:2.13.3"
     testImplementation "org.awaitility:awaitility:4.0.3"
