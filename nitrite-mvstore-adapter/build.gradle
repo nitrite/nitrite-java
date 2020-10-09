@@ -46,7 +46,7 @@ dependencies {
     api project(':nitrite')
     api "org.slf4j:slf4j-api"
     api "com.h2database:h2-mvstore"
-    annotationProcessor "org.projectlombok:lombok:1.18.12"
+    annotationProcessor "org.projectlombok:lombok:1.18.14"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
     testImplementation "uk.co.jemos.podam:podam:7.2.5.RELEASE"

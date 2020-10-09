@@ -47,7 +47,7 @@ dependencies {
     api "org.slf4j:slf4j-api"
     api "com.fasterxml.jackson.core:jackson-databind"
 
-    annotationProcessor "org.projectlombok:lombok:1.18.12"
+    annotationProcessor "org.projectlombok:lombok:1.18.14"
 
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
