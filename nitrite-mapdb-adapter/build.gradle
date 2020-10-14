@@ -36,7 +36,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
     testImplementation "uk.co.jemos.podam:podam:7.2.5.RELEASE"
     testImplementation "com.github.javafaker:javafaker:1.0.2"
-    testImplementation "junit:junit:4.13"
+    testImplementation "junit:junit:4.13.1"
     testImplementation "org.apache.lucene:lucene-core:8.6.3"
     testImplementation "org.apache.lucene:lucene-analyzers-common:8.6.3"
     testImplementation "org.apache.lucene:lucene-queryparser:8.6.3"
