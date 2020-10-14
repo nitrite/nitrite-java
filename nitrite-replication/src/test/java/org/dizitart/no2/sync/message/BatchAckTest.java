@@ -1,10 +1,8 @@
 package org.dizitart.no2.sync.message;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class BatchAckTest {
     @Test
@@ -67,25 +65,6 @@ public class BatchAckTest {
     @Test
     public void testEquals8() {
         assertFalse((new BatchAck()).equals("o"));
-    }
-
-    @Test
-    public void testHashCode() {
-        assertEquals(6061, (new BatchAck()).hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        BatchAck batchAck = new BatchAck();
-        batchAck.setReceipt(new Receipt());
-        assertEquals(9499, batchAck.hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        BatchAck batchAck = new BatchAck();
-        batchAck.setHeader(new MessageHeader());
-        assertEquals(-506888950, batchAck.hashCode());
     }
 
     @Test

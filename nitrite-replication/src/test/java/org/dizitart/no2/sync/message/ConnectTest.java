@@ -1,10 +1,8 @@
 package org.dizitart.no2.sync.message;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ConnectTest {
     @Test
@@ -68,25 +66,6 @@ public class ConnectTest {
     @Test
     public void testEquals8() {
         assertFalse((new Connect()).equals("o"));
-    }
-
-    @Test
-    public void testHashCode() {
-        Connect connect = new Connect();
-        connect.setAuthToken("ABC123");
-        assertEquals(1923897906, connect.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        assertEquals(6061, (new Connect()).hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        Connect connect = new Connect();
-        connect.setHeader(new MessageHeader());
-        assertEquals(-506888950, connect.hashCode());
     }
 
     @Test
