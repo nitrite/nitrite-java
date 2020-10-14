@@ -50,7 +50,7 @@ dependencies {
 
     testImplementation project(':nitrite-mvstore-adapter')
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
-    testImplementation "junit:junit:4.13"
+    testImplementation "junit:junit:4.13.1"
     testImplementation "uk.co.jemos.podam:podam:7.2.5.RELEASE"
 }
 
