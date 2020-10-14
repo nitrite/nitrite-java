@@ -31,7 +31,7 @@ import java.util.Set;
  * @see FluentFilter#text(String)
  * @since 1.0
  */
-public interface TextIndexer extends Indexer {
+public interface TextIndexer extends NitriteIndexer {
     /**
      * Finds matching text using full-text index.
      *

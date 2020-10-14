@@ -45,10 +45,10 @@ class EqualsFilter extends IndexAwareFilter {
         Set<NitriteId> idSet = new LinkedHashSet<>();
         if (getIsFieldIndexed()) {
             if (getValue() == null || getValue() instanceof Comparable) {
-                if (getIndexer() instanceof ComparableIndexer) {
-                    ComparableIndexer comparableIndexer = (ComparableIndexer) getIndexer();
+                if (getNitriteIndexer() instanceof ComparableIndexer) {
+                    ComparableIndexer comparableIndexer = (ComparableIndexer) getNitriteIndexer();
                     idSet = comparableIndexer.findEqual(getCollectionName(), getField(), (Comparable) getValue());
-                } else if (getIndexer() instanceof TextIndexer && getValue() instanceof String) {
+                } else if (getNitriteIndexer() instanceof TextIndexer && getValue() instanceof String) {
                     // eq filter is not compatible with TextIndexer
                     setIsFieldIndexed(false);
                 } else {
@@ -83,7 +83,7 @@ class EqualsFilter extends IndexAwareFilter {
 
     @Override
     public void setIsFieldIndexed(Boolean isFieldIndexed) {
-        if (!(getIndexer() instanceof TextIndexer && getValue() instanceof String)) {
+        if (!(getNitriteIndexer() instanceof TextIndexer && getValue() instanceof String)) {
             super.setIsFieldIndexed(isFieldIndexed);
         }
     }

@@ -19,6 +19,7 @@ package org.dizitart.no2.collection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventAware;
 import org.dizitart.no2.collection.events.EventType;
+import org.dizitart.no2.collection.operation.FindOptions;
 import org.dizitart.no2.common.PersistentCollection;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
@@ -42,17 +43,18 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * A nitrite collection supports indexing. Every nitrite collection is also
  * observable.
  * <p>
- * [[app-listing]]
- * [source,java]
- * .Create a collection
- * --
- * // create/open a database
+ * <h3>Create a collection</h3>
+ * <pre>
+ * {@code
  * Nitrite db = Nitrite.builder()
- * .openOrCreate("user", "password");
- * <p>
- * include::/src/docs/asciidoc/examples/collection.adoc[]
- * <p>
- * --
+ *    .loadModule(MVStoreModule("/tmp/tmp.db"))
+ *    .openOrCreate("user", "password");
+ *    
+ * NitriteCollection collection = db.getCollection("products");
+ * }
+ *</pre>
+ *
+ * </p>
  *
  * @author Anindya Chatterjee
  * @see EventAware
@@ -64,29 +66,29 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  */
 public interface NitriteCollection extends PersistentCollection<Document> {
     /**
-     * Insert documents into a collection. If the document contains a '_id' value, then
+     * Insert documents into a collection. If the document contains a {@code _id} value, then
      * the value will be used as a unique key to identify the document in the collection.
-     * If the document does not contain any '_id' value, then nitrite will generate a new
+     * If the document does not contain any {@code _id} value, then nitrite will generate a new
      * {@link NitriteId} and will add it to the document.
      * <p>
      * If any of the value is already indexed in the collection, then after insertion the
      * index will also be updated.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: These operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Insert}.
-     *
+     * </p>
+     * 
      * @param document  the document to insert
      * @param documents other documents to insert in a batch.
      * @return the result of write operation.
-     * @throws ValidationException       if `document` is `null`.
-     * @throws InvalidIdException        if the '_id' value contains `null` value.
-     * @throws InvalidIdException        if the '_id' value contains non comparable type, i.e.
+     * @throws ValidationException       if {@code document} is {@code null}.
+     * @throws InvalidIdException        if the {@code _id} value contains {@code null} value.
+     * @throws InvalidIdException        if the {@code _id} value contains non comparable type, i.e.
      *                                   type that does not implement {@link Comparable}.
-     * @throws InvalidIdException        if the '_id' contains value, which is not of the same java
-     *                                   type as of other documents' '_id' in the collection.
-     * @throws UniqueConstraintException if the value of '_id' value clashes with the id
+     * @throws InvalidIdException        if the {@code _id} contains value, which is not of the same java
+     *                                   type as of other documents' {@code _id} in the collection.
+     * @throws UniqueConstraintException if the value of {@code _id} value clashes with the id
      *                                   of another document in the collection.
      * @throws UniqueConstraintException if a value of the document is indexed and it
      *                                   violates the unique constraint in the collection(if any).
@@ -112,17 +114,17 @@ public interface NitriteCollection extends PersistentCollection<Document> {
     /**
      * Update documents in the collection.
      * <p>
-     * If the `filter` is `null`, it will update all documents in the collection.
+     * If the {@code filter} is {@code null}, it will update all documents in the collection.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Update}.
+     * </p>
      *
      * @param filter the filter to apply to select documents from the collection.
      * @param update the modifications to apply.
      * @return the result of the update operation.
-     * @throws ValidationException if the `update` document is `null`.
+     * @throws ValidationException if the {@code update} document is {@code null}.
      */
     default WriteResult update(Filter filter, Document update) {
         return update(filter, update, new UpdateOptions());
@@ -130,22 +132,22 @@ public interface NitriteCollection extends PersistentCollection<Document> {
 
     /**
      * Updates document in the collection. Update operation can be customized
-     * with the help of `updateOptions`.
+     * with the help of {@code updateOptions}.
      * <p>
-     * If the `filter` is `null`, it will update all documents in the collection unless
-     * `justOnce` is set to `true` in `updateOptions`.
+     * If the {@code filter} is {@code null}, it will update all documents in the collection unless
+     * {@code justOnce} is set to {@code true} in {@code updateOptions}.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Update} or {@link EventType#Insert}.
+     * </p>
      *
      * @param filter        the filter to apply to select documents from the collection.
      * @param update        the modifications to apply.
      * @param updateOptions the update options to customize the operation.
      * @return the result of the update operation.
-     * @throws ValidationException if the `update` document is `null`.
-     * @throws ValidationException if `updateOptions` is `null`.
+     * @throws ValidationException if the {@code update} document is {@code null}.
+     * @throws ValidationException if {@code updateOptions} is {@code null}.
      * @see UpdateOptions
      */
     WriteResult update(Filter filter, Document update, UpdateOptions updateOptions);
@@ -153,12 +155,12 @@ public interface NitriteCollection extends PersistentCollection<Document> {
     /**
      * Removes matching elements from the collection.
      * <p>
-     * If the `filter` is `null`, it will remove all objects from the collection.
+     * If the {@code filter} is {@code null}, it will remove all objects from the collection.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Remove}.
+     * </p>
      *
      * @param filter the filter to apply to select elements from collection.
      * @return the result of the remove operation.
@@ -169,15 +171,15 @@ public interface NitriteCollection extends PersistentCollection<Document> {
 
     /**
      * Removes document from a collection. Remove operation can be customized by
-     * `removeOptions`.
+     * {@code removeOptions}.
      * <p>
-     * If the `filter` is `null`, it will remove all documents in the collection unless
-     * `justOnce` is set to `true` in `removeOptions`.
+     * If the {@code filter} is {@code null}, it will remove all documents in the collection unless
+     * {@code justOnce} is set to {@code true} in {@code removeOptions}.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Remove}.
+     * </p>
      *
      * @param filter  the filter to apply to select documents from collection.
      * @param justOne indicates if only one element will be removed or all of them.
@@ -190,7 +192,11 @@ public interface NitriteCollection extends PersistentCollection<Document> {
      *
      * @return a cursor to all documents in the collection.
      */
-    DocumentCursor find();
+    default DocumentCursor find() {
+        return find(new FindOptions());
+    }
+
+    DocumentCursor find(FindOptions findOptions);
 
     /**
      * Applies a filter on the collection and returns a cursor to the
@@ -198,25 +204,29 @@ public interface NitriteCollection extends PersistentCollection<Document> {
      * <p>
      * See {@link Filter} for all available filters.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: If there is an index on the value specified in the filter, this operation
      * will take advantage of the index.
+     * </p>
      *
      * @param filter the filter to apply to select documents from collection.
      * @return a cursor to all selected documents.
-     * @throws ValidationException if `filter` is null.
+     * @throws ValidationException if {@code filter} is null.
      * @see Filter
      * @see DocumentCursor#project(Document)
      */
-    DocumentCursor find(Filter filter);
+    default DocumentCursor find(Filter filter) {
+        return find(filter, new FindOptions());
+    }
+
+    DocumentCursor find(Filter filter, FindOptions findOptions);
 
     /**
      * Gets a single element from the collection by its id. If no element
-     * is found, it will return `null`.
+     * is found, it will return {@code null}.
      *
      * @param nitriteId the nitrite id
      * @return the unique document associated with the nitrite id.
-     * @throws ValidationException if `nitriteId` is `null`.
+     * @throws ValidationException if `nitriteId` is {@code null}.
      */
     Document getById(NitriteId nitriteId);
 

@@ -7,19 +7,19 @@ import java.io.Serializable;
  *
  * @author Anindya Chatterjee
  */
-public class NullEntry implements Comparable<NullEntry>, Serializable {
+public class DBNull implements Comparable<DBNull>, Serializable {
     private static final long serialVersionUID = 1598819770L;
-    private static final NullEntry instance = new NullEntry();
+    private static final DBNull instance = new DBNull();
 
-    private NullEntry() {
+    private DBNull() {
     }
 
     @Override
-    public int compareTo(NullEntry o) {
+    public int compareTo(DBNull o) {
         return 0;
     }
 
-    public static NullEntry getInstance() {
+    public static DBNull getInstance() {
         return instance;
     }
 }

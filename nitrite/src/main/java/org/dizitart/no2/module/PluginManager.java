@@ -36,7 +36,7 @@ import java.util.Map;
 @Slf4j
 @Getter
 public class PluginManager {
-    private final Map<String, Indexer> indexerMap;
+    private final Map<String, NitriteIndexer> indexerMap;
     private NitriteMapper nitriteMapper;
     private NitriteStore<?> nitriteStore;
     private final NitriteConfig nitriteConfig;
@@ -76,8 +76,8 @@ public class PluginManager {
         }
 
         if (!indexerMap.isEmpty()) {
-            for (Indexer indexer : indexerMap.values()) {
-                initializePlugin(indexer);
+            for (NitriteIndexer nitriteIndexer : indexerMap.values()) {
+                initializePlugin(nitriteIndexer);
             }
         }
     }
@@ -117,13 +117,13 @@ public class PluginManager {
     }
 
     private synchronized void loadIfIndexer(NitritePlugin plugin) {
-        if (plugin instanceof Indexer) {
-            Indexer indexer = (Indexer) plugin;
-            if (indexerMap.containsKey(indexer.getIndexType())) {
+        if (plugin instanceof NitriteIndexer) {
+            NitriteIndexer nitriteIndexer = (NitriteIndexer) plugin;
+            if (indexerMap.containsKey(nitriteIndexer.getIndexType())) {
                 throw new PluginException("multiple Indexer found for type "
-                    + indexer.getIndexType());
+                    + nitriteIndexer.getIndexType());
             }
-            this.indexerMap.put(indexer.getIndexType(), indexer);
+            this.indexerMap.put(nitriteIndexer.getIndexType(), nitriteIndexer);
         }
     }
 

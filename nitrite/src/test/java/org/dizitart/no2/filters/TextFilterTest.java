@@ -15,7 +15,7 @@ public class TextFilterTest {
     @Test
     public void testFindIndexedIdSet2() {
         TextFilter textFilter = new TextFilter("field", "value");
-        textFilter.setIndexer(null);
+        textFilter.setNitriteIndexer(null);
         textFilter.setIsFieldIndexed(true);
         assertThrows(FilterException.class, () -> textFilter.findIndexedIdSet());
     }

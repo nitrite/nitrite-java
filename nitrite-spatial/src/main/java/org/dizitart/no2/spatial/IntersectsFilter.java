@@ -35,8 +35,8 @@ class IntersectsFilter extends SpatialFilter {
     @Override
     protected Set<NitriteId> findIndexedIdSet() {
         if (getIsFieldIndexed()) {
-            if (getIndexer() instanceof SpatialIndexer && getValue() != null) {
-                SpatialIndexer spatialIndexer = (SpatialIndexer) getIndexer();
+            if (getNitriteIndexer() instanceof SpatialIndexer && getValue() != null) {
+                SpatialIndexer spatialIndexer = (SpatialIndexer) getNitriteIndexer();
                 RecordStream<NitriteId> idSet = spatialIndexer.findIntersects(getCollectionName(), getField(), getValue());
                 return idSet.toSet();
             } else {

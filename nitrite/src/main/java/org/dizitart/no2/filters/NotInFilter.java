@@ -49,8 +49,8 @@ class NotInFilter extends IndexAwareFilter {
 
         Set<NitriteId> idSet = new LinkedHashSet<>();
         if (getIsFieldIndexed()) {
-            if (getIndexer() instanceof ComparableIndexer && comparableSet != null) {
-                ComparableIndexer comparableIndexer = (ComparableIndexer) getIndexer();
+            if (getNitriteIndexer() instanceof ComparableIndexer && comparableSet != null) {
+                ComparableIndexer comparableIndexer = (ComparableIndexer) getNitriteIndexer();
                 idSet = comparableIndexer.findNotIn(getCollectionName(), getField(), comparableSet);
             } else {
                 if (comparableSet != null && !comparableSet.isEmpty()) {

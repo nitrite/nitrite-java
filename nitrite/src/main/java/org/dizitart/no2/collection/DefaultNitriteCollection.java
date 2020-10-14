@@ -22,6 +22,7 @@ import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.collection.operation.CollectionOperations;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.common.event.EventBus;
@@ -31,7 +32,7 @@ import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.store.NitriteMap;
@@ -42,8 +43,7 @@ import java.util.concurrent.locks.Lock;
 
 import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
-import static org.dizitart.no2.common.util.ValidationUtils.containsNull;
-import static org.dizitart.no2.common.util.ValidationUtils.notNull;
+import static org.dizitart.no2.common.util.ValidationUtils.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -167,7 +167,6 @@ class DefaultNitriteCollection implements NitriteCollection {
 
     public DocumentCursor find(Filter filter) {
         checkOpened();
-
         try {
             readLock.lock();
             return collectionOperations.find(filter);
@@ -176,17 +175,17 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public void createIndex(String field, IndexOptions indexOptions) {
+    public void createIndex(Fields fields, IndexOptions indexOptions) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
 
         // by default async is false while creating index
         try {
             writeLock.lock();
             if (indexOptions == null) {
-                collectionOperations.createIndex(field, IndexType.Unique, false);
+                collectionOperations.createIndex(fields, IndexType.Unique, false);
             } else {
-                collectionOperations.createIndex(field, indexOptions.getIndexType(),
+                collectionOperations.createIndex(fields, indexOptions.getIndexType(),
                     indexOptions.isAsync());
             }
         } finally {
@@ -194,33 +193,33 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public void rebuildIndex(String field, boolean isAsync) {
+    public void rebuildIndex(Fields fields, boolean isAsync) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
 
-        IndexEntry indexEntry;
+        IndexDescriptor indexDescriptor;
         try {
             readLock.lock();
-            indexEntry = collectionOperations.findIndex(field);
+            indexDescriptor = collectionOperations.findIndex(fields);
         } finally {
             readLock.unlock();
         }
 
-        if (indexEntry != null) {
-            validateRebuildIndex(indexEntry);
+        if (indexDescriptor != null) {
+            validateRebuildIndex(indexDescriptor);
 
             try {
                 writeLock.lock();
-                collectionOperations.rebuildIndex(indexEntry, isAsync);
+                collectionOperations.rebuildIndex(indexDescriptor, isAsync);
             } finally {
                 writeLock.unlock();
             }
         } else {
-            throw new IndexingException(field + " is not indexed");
+            throw new IndexingException(fields + " is not indexed");
         }
     }
 
-    public Collection<IndexEntry> listIndices() {
+    public Collection<IndexDescriptor> listIndices() {
         checkOpened();
 
         try {
@@ -231,37 +230,37 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public boolean hasIndex(String field) {
+    public boolean hasIndex(Fields fields) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
 
         try {
             readLock.lock();
-            return collectionOperations.hasIndex(field);
+            return collectionOperations.hasIndex(fields);
         } finally {
             readLock.unlock();
         }
     }
 
-    public boolean isIndexing(String field) {
+    public boolean isIndexing(Fields fields) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "field cannot be null");
 
         try {
             readLock.lock();
-            return collectionOperations.isIndexing(field);
+            return collectionOperations.isIndexing(fields);
         } finally {
             readLock.unlock();
         }
     }
 
-    public void dropIndex(String field) {
+    public void dropIndex(Fields fields) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
 
         try {
             writeLock.lock();
-            collectionOperations.dropIndex(field);
+            collectionOperations.dropIndex(fields);
         } finally {
             writeLock.unlock();
         }
@@ -407,11 +406,11 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    private void validateRebuildIndex(IndexEntry indexEntry) {
-        notNull(indexEntry, "index cannot be null");
+    private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
+        notNull(indexDescriptor, "index cannot be null");
 
-        if (isIndexing(indexEntry.getField())) {
-            throw new IndexingException("indexing on value " + indexEntry.getField() + " is currently running");
+        if (isIndexing(indexDescriptor.getFields())) {
+            throw new IndexingException("indexing on value " + indexDescriptor.getFields() + " is currently running");
         }
     }
 

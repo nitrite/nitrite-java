@@ -23,8 +23,8 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.filters.*;
-import org.dizitart.no2.index.IndexEntry;
-import org.dizitart.no2.index.Indexer;
+import org.dizitart.no2.index.IndexDescriptor;
+import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.*;
@@ -38,31 +38,37 @@ class ReadOperations {
     private final String collectionName;
     private final NitriteConfig nitriteConfig;
     private final NitriteMap<NitriteId, Document> nitriteMap;
-    private final IndexOperations indexOperations;
+    private final DocumentIndexWriter documentIndexWriter;
 
     ReadOperations(String collectionName,
                    NitriteConfig nitriteConfig,
                    NitriteMap<NitriteId, Document> nitriteMap,
-                   IndexOperations indexOperations) {
+                   DocumentIndexWriter documentIndexWriter) {
         this.nitriteMap = nitriteMap;
         this.nitriteConfig = nitriteConfig;
         this.collectionName = collectionName;
-        this.indexOperations = indexOperations;
+        this.documentIndexWriter = documentIndexWriter;
     }
 
-    public DocumentCursor find() {
-        RecordStream<Pair<NitriteId, Document>> recordStream = nitriteMap.entries();
+    public DocumentCursor find(FindOptions findOptions) {
+        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(null, findOptions);
         return new DocumentCursorImpl(recordStream);
     }
 
-    public DocumentCursor find(Filter filter) {
+    public DocumentCursor find(Filter filter, FindOptions findOptions) {
         if (filter == null || filter == Filter.ALL) {
-            return find();
+            return find(findOptions);
         }
+
+        // get all indices for this collection
+        // find the suitable index (prefix included)
+        // find the index map
+        // supply indexmap, collectionmap to filter
+
 
         prepareFilter(filter);
 
-        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(filter);
+        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(filter, findOptions);
         return new DocumentCursorImpl(recordStream);
     }
 
@@ -106,12 +112,12 @@ class ReadOperations {
     private void prepareIndexedFilter(IndexAwareFilter indexAwareFilter) {
         String field = indexAwareFilter.getField();
 
-        IndexEntry indexEntry = indexOperations.findIndexEntry(field);
-        if (indexEntry != null) {
-            String indexType = indexEntry.getIndexType();
-            Indexer indexer = indexOperations.findIndexer(indexType);
-            if (indexer != null) {
-                indexAwareFilter.setIndexer(indexer);
+        IndexDescriptor indexDescriptor = documentIndexWriter.findIndexDescriptor(field);
+        if (indexDescriptor != null) {
+            String indexType = indexDescriptor.getIndexType();
+            NitriteIndexer nitriteIndexer = documentIndexWriter.findIndexer(indexType);
+            if (nitriteIndexer != null) {
+                indexAwareFilter.setNitriteIndexer(nitriteIndexer);
                 indexAwareFilter.setIsFieldIndexed(true);
             }
         } else {
@@ -122,11 +128,13 @@ class ReadOperations {
         }
     }
 
-    private RecordStream<Pair<NitriteId, Document>> findSuitableStream(Filter filter) {
+    private RecordStream<Pair<NitriteId, Document>> findSuitableStream(Filter filter, FindOptions findOptions) {
         if (filter instanceof AndFilter) {
             AndFilter andFilter = (AndFilter) filter;
             Filter lhs = andFilter.getLhs();
             Filter rhs = andFilter.getRhs();
+
+            // TODO: check if compound index is supported
 
             if (lhs instanceof IndexAwareFilter && ((IndexAwareFilter) lhs).getIsFieldIndexed()) {
                 // Indexed AND Filter => IndexScan (LHS) -> Filter (RHS)
@@ -195,6 +203,8 @@ class ReadOperations {
     }
 
     private RecordStream<Pair<NitriteId, Document>> getIndexedStream(IndexAwareFilter indexAwareFilter) {
+        // TODO: check if prefix of compound index is possible
+
         return new IndexedStream(indexAwareFilter, nitriteMap);
     }
 }

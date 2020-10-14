@@ -122,6 +122,11 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
+    public RecordStream<Pair<Key, Value>> reversedEntries() {
+        return () -> new ReverseIterator<>(mvMap);
+    }
+
+    @Override
     public Key higherKey(Key key) {
         return mvMap.higherKey(key);
     }

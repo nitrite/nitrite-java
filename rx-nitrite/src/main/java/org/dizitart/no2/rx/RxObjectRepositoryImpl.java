@@ -27,7 +27,7 @@ import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -123,7 +123,7 @@ class RxObjectRepositoryImpl<T> implements RxObjectRepository<T> {
     }
 
     @Override
-    public Single<Collection<IndexEntry>> listIndices() {
+    public Single<Collection<IndexDescriptor>> listIndices() {
         return Single.fromCallable(repository::listIndices);
     }
 

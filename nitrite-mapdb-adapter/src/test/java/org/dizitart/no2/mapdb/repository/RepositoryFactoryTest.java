@@ -24,7 +24,7 @@ import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.TestUtil;
@@ -123,7 +123,7 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public Collection<IndexEntry> listIndices() {
+        public Collection<IndexDescriptor> listIndices() {
             return null;
         }
 

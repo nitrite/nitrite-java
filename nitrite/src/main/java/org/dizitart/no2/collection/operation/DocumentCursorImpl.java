@@ -33,13 +33,19 @@ import java.util.Iterator;
  */
 class DocumentCursorImpl implements DocumentCursor {
     private final RecordStream<Pair<NitriteId, Document>> recordStream;
+    private FindOptions findOptions;
 
     DocumentCursorImpl(RecordStream<Pair<NitriteId, Document>> recordStream) {
         this.recordStream = recordStream;
     }
 
     @Override
-    public DocumentCursor sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder) {
+    public DocumentCursor sort(Fields fields, Collator collator, NullOrder nullOrder) {
+        findOptions = new FindOptions();
+        findOptions.collator(collator);
+        findOptions.nullOrder(nullOrder);
+        findOptions.sortBy(fields);
+
         return new DocumentCursorImpl(new SortedDocumentCursor(field, sortOrder, collator,
             nullOrder, recordStream));
     }

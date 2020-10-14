@@ -18,6 +18,7 @@ package org.dizitart.no2.index;
 
 import lombok.*;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.Fields;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -32,12 +33,13 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  *
  * @author Anindya Chatterjee
  * @see NitriteCollection#createIndex(String, IndexOptions)
+ * @see NitriteCollection#createIndex(Fields, IndexOptions)
  * @since 1.0
  */
 @ToString
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class IndexEntry implements Comparable<IndexEntry>, Serializable {
+public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializable {
     private static final long serialVersionUID = 1576690829L;
 
     /**
@@ -50,12 +52,12 @@ public class IndexEntry implements Comparable<IndexEntry>, Serializable {
     private String indexType;
 
     /**
-     * Gets the target field for the index.
+     * Gets the target fields for the index.
      *
-     * @return the target field.
+     * @return the target fields.
      */
     @Getter
-    private String field;
+    private Fields fields;
 
     /**
      * Gets the collection name.
@@ -69,36 +71,36 @@ public class IndexEntry implements Comparable<IndexEntry>, Serializable {
      * Instantiates a new Index.
      *
      * @param indexType      the index type
-     * @param field          the value
+     * @param fields          the value
      * @param collectionName the collection name
      */
-    public IndexEntry(String indexType, String field, String collectionName) {
+    public IndexDescriptor(String indexType, Fields fields, String collectionName) {
         notNull(indexType, "indexType cannot be null");
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
         notNull(collectionName, "collectionName cannot be null");
         notEmpty(collectionName, "collectionName cannot be empty");
 
         this.indexType = indexType;
-        this.field = field;
+        this.fields = fields;
         this.collectionName = collectionName;
     }
 
     @Override
-    public int compareTo(IndexEntry other) {
-        String string = collectionName + field + indexType;
-        String otherString = other.collectionName + other.field + other.indexType;
+    public int compareTo(IndexDescriptor other) {
+        String string = collectionName + fields + indexType;
+        String otherString = other.collectionName + other.fields + other.indexType;
         return string.compareTo(otherString);
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeUTF(indexType);
-        stream.writeUTF(field);
+        stream.writeObject(fields);
         stream.writeUTF(collectionName);
     }
 
-    private void readObject(ObjectInputStream stream) throws IOException {
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         indexType = stream.readUTF();
-        field = stream.readUTF();
+        fields = (Fields) stream.readObject();
         collectionName = stream.readUTF();
     }
 }

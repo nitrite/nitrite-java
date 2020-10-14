@@ -22,7 +22,7 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.index.Indexer;
+import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Set;
@@ -40,7 +40,7 @@ public abstract class IndexAwareFilter extends FieldBasedFilter {
     private Boolean onIdField = false;
 
     @Getter @Setter
-    private Indexer indexer;
+    private NitriteIndexer nitriteIndexer;
 
     private Set<NitriteId> indexedIdSet;
     private Set<NitriteId> idSet;

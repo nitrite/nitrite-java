@@ -30,7 +30,7 @@ import java.util.concurrent.Callable;
 /**
  * @author Anindya Chatterjee
  */
-public final class FlowableDocumentCursor extends FlowableReadableStream<Document> {
+public final class FlowableDocumentCursor extends FlowableRecordStream<Document> {
 
     private final Callable<DocumentCursor> supplier;
 
@@ -89,16 +89,16 @@ public final class FlowableDocumentCursor extends FlowableReadableStream<Documen
         return new FlowableDocumentCursor(sortSupplier);
     }
 
-    public FlowableReadableStream<Document> project(Document projection) {
+    public FlowableRecordStream<Document> project(Document projection) {
         Callable<RecordStream<Document>> projectionSupplier = () -> {
             DocumentCursor documentCursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
             return documentCursor.project(projection);
         };
-        return FlowableReadableStream.create(projectionSupplier);
+        return FlowableRecordStream.create(projectionSupplier);
     }
 
-    public FlowableReadableStream<Document> join(FlowableDocumentCursor foreignCursor, Lookup lookup) {
+    public FlowableRecordStream<Document> join(FlowableDocumentCursor foreignCursor, Lookup lookup) {
         Callable<RecordStream<Document>> joinSupplier = () -> {
             DocumentCursor documentCursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
@@ -108,6 +108,6 @@ public final class FlowableDocumentCursor extends FlowableReadableStream<Documen
 
             return documentCursor.join(foreignDocumentCursor, lookup);
         };
-        return FlowableReadableStream.create(joinSupplier);
+        return FlowableRecordStream.create(joinSupplier);
     }
 }

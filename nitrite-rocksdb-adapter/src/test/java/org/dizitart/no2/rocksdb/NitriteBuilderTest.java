@@ -26,7 +26,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
-import org.dizitart.no2.index.Indexer;
+import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -256,7 +256,7 @@ public class NitriteBuilderTest {
         assertEquals(document.get("colorCodes::1::color"), "Green");
     }
 
-    private static class CustomIndexer implements Indexer {
+    private static class CustomIndexer implements NitriteIndexer {
 
         @Override
         public String getIndexType() {
@@ -284,7 +284,7 @@ public class NitriteBuilderTest {
         }
 
         @Override
-        public Indexer clone() throws CloneNotSupportedException {
+        public NitriteIndexer clone() throws CloneNotSupportedException {
             return null;
         }
 

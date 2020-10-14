@@ -16,6 +16,8 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.common.UnknownType;
+
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -115,6 +117,14 @@ public class Iterables {
         return Collections.emptyList();
     }
 
+    @SafeVarargs
+    public static <T> Set<T> setOf(T... items) {
+        if (items != null) {
+            return new HashSet<>(Arrays.asList(items));
+        }
+        return Collections.emptySet();
+    }
+
     public static long size(Iterable<?> iterable) {
         if (iterable instanceof Collection) {
             return ((Collection<?>) iterable).size();
@@ -125,6 +135,15 @@ public class Iterables {
             count++;
         }
         return count;
+    }
+
+    public static Class<?> getElementType(Iterable<?> iterable) {
+        if (iterable == null) return UnknownType.class;
+        Iterator<?> iterator = iterable.iterator();
+        if (iterator.hasNext()) {
+            return iterator.next().getClass();
+        }
+        return UnknownType.class;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

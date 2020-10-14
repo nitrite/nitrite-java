@@ -5,9 +5,10 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.repository.Cursor;
@@ -43,33 +44,33 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void createIndex(String field, IndexOptions indexOptions) {
-        backingCollection.createIndex(field, indexOptions);
+    public void createIndex(Fields fields, IndexOptions indexOptions) {
+        backingCollection.createIndex(fields, indexOptions);
     }
 
     @Override
-    public void rebuildIndex(String field, boolean isAsync) {
-        backingCollection.rebuildIndex(field, isAsync);
+    public void rebuildIndex(Fields fields, boolean isAsync) {
+        backingCollection.rebuildIndex(fields, isAsync);
     }
 
     @Override
-    public Collection<IndexEntry> listIndices() {
+    public Collection<IndexDescriptor> listIndices() {
         return backingCollection.listIndices();
     }
 
     @Override
-    public boolean hasIndex(String field) {
-        return backingCollection.hasIndex(field);
+    public boolean hasIndex(Fields fields) {
+        return backingCollection.hasIndex(fields);
     }
 
     @Override
-    public boolean isIndexing(String field) {
-        return backingCollection.isIndexing(field);
+    public boolean isIndexing(Fields fields) {
+        return backingCollection.isIndexing(fields);
     }
 
     @Override
-    public void dropIndex(String field) {
-        backingCollection.dropIndex(field);
+    public void dropIndex(Fields fields) {
+        backingCollection.dropIndex(fields);
     }
 
     @Override
@@ -88,6 +89,7 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     @Override
     public WriteResult update(T element, boolean insertIfAbsent) {
         notNull(element, "a null object cannot be used for update");
+
         return update(operations.createUniqueFilter(element), element, insertIfAbsent);
     }
 

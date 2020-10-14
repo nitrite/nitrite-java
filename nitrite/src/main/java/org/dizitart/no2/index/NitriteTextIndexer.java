@@ -19,6 +19,7 @@ package org.dizitart.no2.index;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.IndexingException;
@@ -117,8 +118,8 @@ public class NitriteTextIndexer implements TextIndexer {
     }
 
     @Override
-    public void dropIndex(NitriteMap<NitriteId, Document> collection, String field) {
-        indexCatalog.dropIndexEntry(collection.getName(), field);
+    public void dropIndex(NitriteMap<NitriteId, Document> collection, Fields field) {
+        indexCatalog.dropIndexDescriptor(collection.getName(), field);
     }
 
     @Override

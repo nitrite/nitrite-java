@@ -208,7 +208,13 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @Override
     public RecordStream<Pair<K, V>> entries() {
         return RecordStream.fromIterable(new EntrySet<>(rocksDB, columnFamilyHandle,
-            objectFormatter, getKeyType(), getValueType()));
+            objectFormatter, getKeyType(), getValueType(), false));
+    }
+
+    @Override
+    public RecordStream<Pair<K, V>> reversedEntries() {
+        return RecordStream.fromIterable(new EntrySet<>(rocksDB, columnFamilyHandle,
+            objectFormatter, getKeyType(), getValueType(), true));
     }
 
     @Override

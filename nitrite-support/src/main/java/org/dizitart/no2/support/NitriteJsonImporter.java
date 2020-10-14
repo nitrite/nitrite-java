@@ -24,7 +24,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.PersistentCollection;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.repository.ObjectRepository;
 
@@ -179,11 +179,11 @@ class NitriteJsonImporter {
                 if (TAG_INDEX.equals(fieldName)) {
                     parser.nextToken();
                     String data = parser.readValueAs(String.class);
-                    IndexEntry index = (IndexEntry) readEncodedObject(data);
+                    IndexDescriptor index = (IndexDescriptor) readEncodedObject(data);
                     if (collection != null && index != null
-                        && index.getField() != null
-                        && !collection.hasIndex(index.getField())) {
-                        collection.createIndex(index.getField(),
+                        && index.getFields() != null
+                        && !collection.hasIndex(index.getFields())) {
+                        collection.createIndex(index.getFields(),
                             IndexOptions.indexOptions(index.getIndexType()));
                     }
                 }

@@ -74,7 +74,7 @@ class SortedDocumentCursor implements RecordStream<Pair<NitriteId, Document>> {
             this.collator = collator;
             this.nullOrder = nullOrder;
             this.iterator = iterator;
-            init();
+            initialize();
         }
 
         @Override
@@ -87,7 +87,7 @@ class SortedDocumentCursor implements RecordStream<Pair<NitriteId, Document>> {
             return sortedIterator.next();
         }
 
-        private void init() {
+        private void initialize() {
             NavigableMap<Object, List<Pair<NitriteId, Document>>> sortedMap;
             if (collator != null) {
                 sortedMap = new TreeMap<>(collator);

@@ -21,8 +21,9 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.Constants;
+import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.index.Indexer;
+import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.module.NitriteModule;
@@ -144,15 +145,19 @@ public class NitriteConfig {
     }
 
     /**
-     * Finds an {@link Indexer} by indexType.
+     * Finds an {@link NitriteIndexer} by indexType.
      *
-     * @param indexType the type of {@link Indexer} to find.
-     * @return the {@link Indexer}
+     * @param indexType the type of {@link NitriteIndexer} to find.
+     * @return the {@link NitriteIndexer}
      */
-    public Indexer findIndexer(String indexType) {
-        Indexer indexer = pluginManager.getIndexerMap().get(indexType);
-        indexer.initialize(this);
-        return indexer;
+    public NitriteIndexer findIndexer(String indexType) {
+        NitriteIndexer nitriteIndexer = pluginManager.getIndexerMap().get(indexType);
+        if (nitriteIndexer != null) {
+            nitriteIndexer.initialize(this);
+            return nitriteIndexer;
+        } else {
+            throw new IndexingException("no indexer found for index type " + indexType);
+        }
     }
 
     /**

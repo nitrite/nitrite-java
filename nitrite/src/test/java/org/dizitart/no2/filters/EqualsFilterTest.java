@@ -16,7 +16,7 @@ public class EqualsFilterTest {
     @Test
     public void testFindIndexedIdSet() {
         EqualsFilter equalsFilter = new EqualsFilter("field", "value");
-        equalsFilter.setIndexer(new NitriteTextIndexer());
+        equalsFilter.setNitriteIndexer(new NitriteTextIndexer());
         equalsFilter.setIsFieldIndexed(null);
         assertEquals(0, equalsFilter.findIndexedIdSet().size());
     }
@@ -39,7 +39,7 @@ public class EqualsFilterTest {
     public void testFindIndexedIdSet4() {
         EqualsFilter equalsFilter = new EqualsFilter("field", "value");
         equalsFilter.setIsFieldIndexed(true);
-        equalsFilter.setIndexer(new NitriteTextIndexer());
+        equalsFilter.setNitriteIndexer(new NitriteTextIndexer());
         equalsFilter.setIsFieldIndexed(null);
         assertEquals(0, equalsFilter.findIndexedIdSet().size());
     }
@@ -106,7 +106,7 @@ public class EqualsFilterTest {
     public void testSetIsFieldIndexed2() {
         EqualsFilter equalsFilter = new EqualsFilter("field", 42);
         equalsFilter.setObjectFilter(true);
-        equalsFilter.setIndexer(null);
+        equalsFilter.setNitriteIndexer(null);
         equalsFilter.setIsFieldIndexed(true);
         assertTrue(equalsFilter.getIsFieldIndexed());
     }
@@ -114,7 +114,7 @@ public class EqualsFilterTest {
     @Test
     public void testSetIsFieldIndexed3() {
         EqualsFilter equalsFilter = new EqualsFilter("field", 42);
-        equalsFilter.setIndexer(new NitriteTextIndexer());
+        equalsFilter.setNitriteIndexer(new NitriteTextIndexer());
         equalsFilter.setIsFieldIndexed(true);
         assertTrue(equalsFilter.getValue() instanceof Integer);
         assertTrue(equalsFilter.getIsFieldIndexed());

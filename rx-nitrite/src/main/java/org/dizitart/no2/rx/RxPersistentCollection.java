@@ -22,7 +22,7 @@ import io.reactivex.Single;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 
 import java.util.Collection;
@@ -35,7 +35,7 @@ public interface RxPersistentCollection<T> {
 
     Completable rebuildIndex(String field, boolean async);
 
-    Single<Collection<IndexEntry>> listIndices();
+    Single<Collection<IndexDescriptor>> listIndices();
 
     Single<Boolean> hasIndex(String field);
 

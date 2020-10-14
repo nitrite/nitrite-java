@@ -38,8 +38,8 @@ class TextFilter extends StringFilter {
     protected Set<NitriteId> findIndexedIdSet() {
         Set<NitriteId> idSet = new LinkedHashSet<>();
         if (getIsFieldIndexed()) {
-            if (getIndexer() instanceof TextIndexer) {
-                TextIndexer textIndexer = (TextIndexer) getIndexer();
+            if (getNitriteIndexer() instanceof TextIndexer) {
+                TextIndexer textIndexer = (TextIndexer) getNitriteIndexer();
                 idSet = textIndexer.findText(getCollectionName(), getField(), getStringValue());
             } else {
                 throw new FilterException(getField() + " is not full-text indexed");

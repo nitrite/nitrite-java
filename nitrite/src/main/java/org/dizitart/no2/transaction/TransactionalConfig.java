@@ -3,7 +3,7 @@ package org.dizitart.no2.transaction;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.index.Indexer;
+import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.module.NitriteModule;
 import org.dizitart.no2.store.NitriteStore;
@@ -18,7 +18,7 @@ import java.util.Map;
 class TransactionalConfig extends NitriteConfig {
     private final NitriteConfig config;
     private final TransactionalStore<?> transactionalStore;
-    private final Map<String, Indexer> indexerMap;
+    private final Map<String, NitriteIndexer> indexerMap;
 
     public TransactionalConfig(NitriteConfig config, TransactionalStore<?> transactionalStore) {
         this.config = config;
@@ -27,18 +27,18 @@ class TransactionalConfig extends NitriteConfig {
     }
 
     @Override
-    public Indexer findIndexer(String indexType) {
+    public NitriteIndexer findIndexer(String indexType) {
         if (indexerMap.containsKey(indexType)) {
             return indexerMap.get(indexType);
         }
 
         try {
-            Indexer indexer = config.findIndexer(indexType).clone();
-            if (indexer != null) {
-                indexer.initialize(this);
-                indexerMap.put(indexType, indexer);
+            NitriteIndexer nitriteIndexer = config.findIndexer(indexType).clone();
+            if (nitriteIndexer != null) {
+                nitriteIndexer.initialize(this);
+                indexerMap.put(indexType, nitriteIndexer);
             }
-            return indexer;
+            return nitriteIndexer;
         } catch (CloneNotSupportedException e) {
             log.error("Failed to clone indexer", e);
             throw new NitriteIOException("error while cloning indexer", e);

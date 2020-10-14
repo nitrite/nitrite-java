@@ -75,10 +75,10 @@ class BoundedDocumentStream implements RecordStream<Pair<NitriteId, Document>> {
             this.offset = offset;
             this.size = size;
             pos = 0;
-            init();
+            initialize();
         }
 
-        private void init() {
+        private void initialize() {
             while (pos < offset && iterator.hasNext()) {
                 iterator.next();
                 pos++;

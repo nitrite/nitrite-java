@@ -29,7 +29,7 @@ import java.util.concurrent.Callable;
 /**
  * @author Anindya Chatterjee
  */
-public final class FlowableCursor<T> extends FlowableReadableStream<T> {
+public final class FlowableCursor<T> extends FlowableRecordStream<T> {
 
     private final Callable<Cursor<T>> supplier;
 
@@ -88,18 +88,18 @@ public final class FlowableCursor<T> extends FlowableReadableStream<T> {
         return new FlowableCursor<>(sortSupplier);
     }
 
-    public <P> FlowableReadableStream<P> project(Class<P> projectionType) {
+    public <P> FlowableRecordStream<P> project(Class<P> projectionType) {
         Callable<RecordStream<P>> projectionSupplier = () -> {
             Cursor<T> cursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
             return cursor.project(projectionType);
         };
 
-        return FlowableReadableStream.create(projectionSupplier);
+        return FlowableRecordStream.create(projectionSupplier);
     }
 
-    public <Foreign, Joined> FlowableReadableStream<Joined> join(FlowableCursor<Foreign> foreignCursor, Lookup lookup,
-                                                                 Class<Joined> type) {
+    public <Foreign, Joined> FlowableRecordStream<Joined> join(FlowableCursor<Foreign> foreignCursor, Lookup lookup,
+                                                               Class<Joined> type) {
         Callable<RecordStream<Joined>> joinSupplier = () -> {
             Cursor<T> cursor = ObjectHelper.requireNonNull(supplier.call(),
                 "The supplier supplied is null");
@@ -109,6 +109,6 @@ public final class FlowableCursor<T> extends FlowableReadableStream<T> {
 
             return cursor.join(foreign, lookup, type);
         };
-        return FlowableReadableStream.create(joinSupplier);
+        return FlowableRecordStream.create(joinSupplier);
     }
 }

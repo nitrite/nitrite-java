@@ -9,7 +9,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 
@@ -87,39 +87,39 @@ public class NitriteSerializers {
 
         @Override
         public void write(Kryo kryo, Output output, IndexMeta object) {
-            kryo.writeObject(output, object.getIndexEntry());
+            kryo.writeObject(output, object.getIndexDescriptor());
             output.writeString(object.getIndexMap());
             output.writeBoolean(object.getIsDirty().get());
         }
 
         @Override
         public IndexMeta read(Kryo kryo, Input input, Class<IndexMeta> type) {
-            IndexEntry indexEntry = kryo.readObject(input, IndexEntry.class);
+            IndexDescriptor indexDescriptor = kryo.readObject(input, IndexDescriptor.class);
             String indexMap = input.readString();
             boolean isDirty = input.readBoolean();
             IndexMeta indexMeta = new IndexMeta();
-            indexMeta.setIndexEntry(indexEntry);
+            indexMeta.setIndexDescriptor(indexDescriptor);
             indexMeta.setIndexMap(indexMap);
             indexMeta.setIsDirty(new AtomicBoolean(isDirty));
             return indexMeta;
         }
     }
 
-    private static class IndexEntrySerializer extends Serializer<IndexEntry> {
+    private static class IndexEntrySerializer extends Serializer<IndexDescriptor> {
 
         @Override
-        public void write(Kryo kryo, Output output, IndexEntry object) {
+        public void write(Kryo kryo, Output output, IndexDescriptor object) {
             output.writeString(object.getCollectionName());
-            output.writeString(object.getField());
+            output.writeString(object.getFields());
             output.writeString(object.getIndexType());
         }
 
         @Override
-        public IndexEntry read(Kryo kryo, Input input, Class<IndexEntry> type) {
+        public IndexDescriptor read(Kryo kryo, Input input, Class<IndexDescriptor> type) {
             String collectionName = input.readString();
             String field = input.readString();
             String indexType = input.readString();
-            return new IndexEntry(indexType, field, collectionName);
+            return new IndexDescriptor(indexType, field, collectionName);
         }
     }
 
@@ -171,7 +171,7 @@ public class NitriteSerializers {
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
         kryoObjectFormatter.registerSerializer(Document.class, new DocumentSerializer());
         kryoObjectFormatter.registerSerializer(IndexMeta.class, new IndexMetaSerializer());
-        kryoObjectFormatter.registerSerializer(IndexEntry.class, new IndexEntrySerializer());
+        kryoObjectFormatter.registerSerializer(IndexDescriptor.class, new IndexEntrySerializer());
         kryoObjectFormatter.registerSerializer(UserCredential.class, new UserCredentialSerializer());
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
     }

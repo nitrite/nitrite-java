@@ -1,7 +1,7 @@
 package org.dizitart.no2.mapdb;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.NullEntry;
+import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.mapdb.serializers.Serializers;
@@ -94,7 +94,7 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
         BTreeMap<Key, Value> bTreeMap = treeMapMaker.createOrOpen();
 
         // mapdb btreemap does not support null key, so all null key entries are maintained in a separate map
-        DB.TreeMapMaker<NullEntry, Value> nullMapMaker = (DB.TreeMapMaker<NullEntry, Value>) db
+        DB.TreeMapMaker<DBNull, Value> nullMapMaker = (DB.TreeMapMaker<DBNull, Value>) db
             .treeMap(mapName + "null-map")
             .counterEnable()
             .valuesOutsideNodesEnable();
@@ -103,7 +103,7 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
             nullMapMaker.valueSerializer(valueSerializer);
         }
 
-        BTreeMap<NullEntry, Value> nullMap = nullMapMaker.createOrOpen();
+        BTreeMap<DBNull, Value> nullMap = nullMapMaker.createOrOpen();
 
         MapDBMap<Key, Value> mapDBMap = new MapDBMap<>(mapName, bTreeMap, nullMap, this);
         nitriteMapRegistry.put(mapName, mapDBMap);

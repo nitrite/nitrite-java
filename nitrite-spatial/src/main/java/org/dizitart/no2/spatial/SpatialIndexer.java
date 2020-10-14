@@ -22,7 +22,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.BoundingBox;
-import org.dizitart.no2.index.Indexer;
+import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
@@ -33,7 +33,7 @@ import org.locationtech.jts.geom.Geometry;
  * @author Anindya Chatterjee
  * @since 4.0.0
  */
-public class SpatialIndexer implements Indexer {
+public class SpatialIndexer implements NitriteIndexer {
     public static final String SpatialIndex = "Spatial";
 
     private NitriteMapper nitriteMapper;

@@ -22,7 +22,7 @@ import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventAware;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.collection.meta.MetadataAware;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -30,6 +30,9 @@ import org.dizitart.no2.store.NitriteStore;
 
 import java.io.Closeable;
 import java.util.Collection;
+
+import static org.dizitart.no2.common.Fields.multiple;
+import static org.dizitart.no2.common.Fields.single;
 
 /**
  * The interface Persistent collection.
@@ -42,73 +45,146 @@ import java.util.Collection;
  */
 public interface PersistentCollection<T> extends EventAware, MetadataAware, Closeable {
     /**
-     * Creates an index on `value`, if not already exists.
-     * If `indexOptions` is `null`, it will use default options.
+     * Creates an index on the {@code field}, if not already exists.
+     * If {@code indexOptions} is {@code null}, it will use default options.
+     * <p>
      * <p>
      * The default indexing option is -
-     * <p>
-     * - `indexOptions.setAsync(false);`
-     * - `indexOptions.setIndexType(IndexType.Unique);`
-     * <p>
-     * [icon="{@docRoot}/note.png"]
-     * [NOTE]
-     * ====
-     * - '_id' value of the document is always indexed. But full text
-     * indexing is not supported on '_id' value.
-     * - Compound index is not supported.
-     * - Indexing on arrays or collection is not supported
-     * - Indexing on non-comparable value is not supported
-     * ====
      *
-     * @param field        the value to be indexed.
+     * <ul>
+     * <li>{@code indexOptions.setAsync(false);}</li>
+     * <li>{@code indexOptions.setIndexType(IndexType.Unique);}</li>
+     * </ul>
+     *
+     * <p>
+     *     NOTE:
+     *     <ul>
+     *         <li><b>_id</b> value of the document is always indexed. But full-text indexing is not supported on <b>_id</b> value.</li>
+     *         <li>Indexing on non-comparable value is not supported.</li>
+     *     </ul>
+     * </p>
+     *
+     * @param field        the field to be indexed.
      * @param indexOptions index options.
-     * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on `value`.
+     * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on the field.
      * @see org.dizitart.no2.index.IndexOptions
      * @see IndexType
      */
-    void createIndex(String field, IndexOptions indexOptions);
+    default void createIndex(String field, IndexOptions indexOptions) {
+        createIndex(single(field), indexOptions);
+    }
 
     /**
-     * Rebuilds index on `field` if it exists.
+     * Creates an index on {@code fields}, if not already exists.
+     * If {@code indexOptions} is {@code null}, it will use default options.
+     * <p>
+     * <p>
+     * The default indexing option is -
      *
-     * @param field   the value to be indexed.
-     * @param isAsync if set to `true`, the indexing will run in background; otherwise, in foreground.
-     * @throws org.dizitart.no2.exceptions.IndexingException if the `field` is not indexed.
+     * <ul>
+     * <li>{@code indexOptions.setAsync(false);}</li>
+     * <li>{@code indexOptions.setIndexType(IndexType.Unique);}</li>
+     * </ul>
+     *
+     * <p>
+     *     NOTE:
+     *     <ul>
+     *         <li><b>_id</b> value of the document is always indexed. But full-text indexing is not supported on <b>_id</b> value.</li>
+     *         <li>Indexing on non-comparable value is not supported.</li>
+     *     </ul>
+     * </p>
+     *
+     * @param fields       the fields
+     * @param indexOptions the index options
+     * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on the fields.
+     * @see org.dizitart.no2.index.IndexOptions
+     * @see IndexType
      */
-    void rebuildIndex(String field, boolean isAsync);
+    void createIndex(Fields fields, IndexOptions indexOptions);
+
+    /**
+     * Rebuilds index on the {@code field} if it exists.
+     *
+     * @param field   the field to be indexed.
+     * @param isAsync if set to {@code true}, the indexing will run in background; otherwise, in foreground.
+     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code field} is not indexed.
+     */
+    default void rebuildIndex(String field, boolean isAsync) {
+        rebuildIndex(single(field), isAsync);
+    }
+
+    /**
+     * Rebuilds index on {@code fields} if it exists.
+     *
+     * @param fields  the fields to be indexed.
+     * @param isAsync if set to {@code true}, the indexing will run in background; otherwise, in foreground.
+     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code fields} is not indexed.
+     */
+    void rebuildIndex(Fields fields, boolean isAsync);
 
     /**
      * Gets a set of all indices in the collection.
      *
      * @return a set of all indices.
-     * @see IndexEntry
+     * @see IndexDescriptor
      */
-    Collection<IndexEntry> listIndices();
+    Collection<IndexDescriptor> listIndices();
 
     /**
-     * Checks if a value is already indexed or not.
+     * Checks if the {@code field} is already indexed or not.
      *
-     * @param field the value to check.
-     * @return `true` if the `value` is indexed; otherwise, `false`.
+     * @param field the field to check.
+     * @return {@code true} if the {@code field} is indexed; otherwise, {@code false}.
      */
-    boolean hasIndex(String field);
+    default boolean hasIndex(String field) {
+        return hasIndex(single(field));
+    }
 
     /**
-     * Checks if indexing operation is currently ongoing for a `field`.
+     * Checks if the fields are already indexed or not.
      *
-     * @param field the value to check.
-     * @return `true` if indexing is currently running; otherwise, `false`.
+     * @param fields the fields to check
+     * @return {@code true} if the {@code fields} are indexed; otherwise, {@code false}.
      */
-    boolean isIndexing(String field);
+    boolean hasIndex(Fields fields);
 
     /**
-     * Drops the index on a `field`.
+     * Checks if indexing operation is currently ongoing for the {@code field}.
      *
-     * @param field the index of the `field` to drop.
-     * @throws org.dizitart.no2.exceptions.IndexingException if indexing is currently running on the `field`.
-     * @throws org.dizitart.no2.exceptions.IndexingException if the `field` is not indexed.
+     * @param field the field to check.
+     * @return {@code true} if indexing is currently running; otherwise, {@code false}.
      */
-    void dropIndex(String field);
+    default boolean isIndexing(String field) {
+        return isIndexing(single(field));
+    }
+
+    /**
+     * Checks if indexing operation is currently ongoing for the {@code fields}.
+     *
+     * @param fields the fields to check.
+     * @return {@code true} if indexing is currently running; otherwise, {@code false}.
+     */
+    boolean isIndexing(Fields fields);
+
+    /**
+     * Drops the index on the {@code field}.
+     *
+     * @param field the index of the {@code field} to drop.
+     * @throws org.dizitart.no2.exceptions.IndexingException if indexing is currently running on the {@code field}.
+     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code field} is not indexed.
+     */
+    default void dropIndex(String field) {
+        dropIndex(multiple(field));
+    }
+    
+    /**
+     * Drops the index on the {@code fields}.
+     *
+     * @param fields the index of the {@code fields} to drop.
+     * @throws org.dizitart.no2.exceptions.IndexingException if indexing is currently running on the {@code fields}.
+     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code fields} is not indexed.
+     */
+    void dropIndex(Fields fields);
 
     /**
      * Drops all indices from the collection.
@@ -118,27 +194,27 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
     void dropAllIndices();
 
     /**
-     * Inserts elements into this collection. If the element has an '_id' field,
+     * Inserts elements into this collection. If the element has an <b>_id</b> field,
      * then the value will be used as an unique key to identify the element
-     * in the collection. If the element does not have any '_id' field,
-     * then nitrite will generate a new {@link org.dizitart.no2.collection.NitriteId} and will add it to the '_id'
+     * in the collection. If the element does not have any <b>_id</b> field,
+     * then nitrite will generate a new {@link org.dizitart.no2.collection.NitriteId} and will add it to the <b>_id</b>
      * field.
      * <p>
      * If any of the value is already indexed in the collection, then after insertion the
      * index will also be updated.
      * <p>
-     * [icon="{@docRoot}/note.png"]
-     * NOTE: This operations will notify all {@link CollectionEventListener}
-     * instances registered to this collection with change type
-     * {@link EventType#Insert}.
+     * <p>
+     *     NOTE: This operations will notify all {@link CollectionEventListener}
+     *     instances registered to this collection with change type {@link EventType#Insert}.
+     * </p>
      *
      * @param elements an array of element for batch insertion.
      * @return the result of the write operation.
-     * @throws org.dizitart.no2.exceptions.ValidationException       if `elements` is `null`.
-     * @throws org.dizitart.no2.exceptions.InvalidIdException        if the '_id' field's value contains `null`.
-     * @throws org.dizitart.no2.exceptions.InvalidIdException        if the '_id' field's value contains non comparable type, i.e. type that does not implement {@link Comparable}.
-     * @throws org.dizitart.no2.exceptions.InvalidIdException        if the '_id' field contains value which is not of the same java type as of other element's '_id' field value in the collection.
-     * @throws org.dizitart.no2.exceptions.UniqueConstraintException if the value of '_id' field clashes with the '_id' field of another element in the repository.
+     * @throws org.dizitart.no2.exceptions.ValidationException       if elements is null.
+     * @throws org.dizitart.no2.exceptions.InvalidIdException        if the <b>_id</b> field's value contains {@code null}.
+     * @throws org.dizitart.no2.exceptions.InvalidIdException        if the <b>_id</b> field's value contains non comparable type, i.e. type that does not implement {@link Comparable}.
+     * @throws org.dizitart.no2.exceptions.InvalidIdException        if the <b>_id</b> field contains value which is not of the same java type as of other element's <b>_id</b> field value in the collection.
+     * @throws org.dizitart.no2.exceptions.UniqueConstraintException if the value of <b>_id</b> field clashes with the <b>_id</b> field of another element in the repository.
      * @throws org.dizitart.no2.exceptions.UniqueConstraintException if a value of the element is indexed and it violates the unique constraint in the collection(if any).
      * @see NitriteId
      * @see WriteResult
@@ -146,61 +222,59 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
     WriteResult insert(T[] elements);
 
     /**
-     * Updates `element` in the collection. Specified `element` must have an id.
+     * Updates the {@code element} in the collection. Specified {@code element} must have an id.
      * <p>
-     * [icon="{@docRoot}/note.png"]
-     * NOTE: This operations will notify all {@link CollectionEventListener}
-     * instances registered to this collection with change type
-     * {@link EventType#Update}.
+     *     NOTE: This operations will notify all {@link CollectionEventListener}
+     *     instances registered to this collection with change type
+     *     {@link EventType#Update}.
+     * </p>
      *
      * @param element the element to update.
      * @return the result of the update operation.
-     * @throws org.dizitart.no2.exceptions.ValidationException      if the `element` is `null`.
-     * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the `element` does not have any id.
+     * @throws org.dizitart.no2.exceptions.ValidationException      if the element is {@code null}.
+     * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the element does not have any id.
      */
     default WriteResult update(T element) {
         return update(element, false);
     }
 
     /**
-     * Updates `element` in the collection. Specified `element` must have an id.
-     * If the `element` is not found in the collection, it will be inserted only if `upsert`
-     * is set to `true`.
+     * Updates {@code element} in the collection. Specified {@code element} must have an id.
+     * If the {@code element} is not found in the collection, it will be inserted only if {@code insertIfAbsent}
+     * is set to {@code true}.
      * <p>
-     * [icon="{@docRoot}/note.png"]
+     *
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
-     * {@link EventType#Update}
-     * or {@link EventType#Insert}.
+     * {@link EventType#Update} or {@link EventType#Insert}.
+     * </p>
      *
      * @param element        the element to update.
-     * @param insertIfAbsent if set to `true`, `element` will be inserted if not found.
+     * @param insertIfAbsent if set to {@code true}, {@code element} will be inserted if not found.
      * @return the result of the update operation.
-     * @throws org.dizitart.no2.exceptions.ValidationException      if the `element` is `null`.
-     * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the `element`
-     *                                                              does not have any id field.
+     * @throws org.dizitart.no2.exceptions.ValidationException      if the {@code element} is {@code null}.
+     * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the {@code element} does not have any id field.
      */
     WriteResult update(T element, boolean insertIfAbsent);
 
     /**
-     * Deletes the `element` from the collection. The `element` must have an id.
+     * Deletes the {@code element} from the collection. The {@code element} must have an id.
+     *
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Remove}.
+     * </p>
      *
      * @param element the element
      * @return the result of the remove operation.
-     * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the `element` does not
-     *                                                              have any id field.
+     * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the {@code element} does not have any id field.
      */
     WriteResult remove(T element);
 
     /**
      * Removes all element from the collection.
-     *
-     * */
+     */
     void clear();
 
     /**
@@ -213,14 +287,14 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
     void drop();
 
     /**
-     * Returns `true` if the collection is dropped; otherwise, `false`.
+     * Returns {@code true} if the collection is dropped; otherwise, {@code false}.
      *
      * @return a boolean value indicating if the collection has been dropped or not.
      */
     boolean isDropped();
 
     /**
-     * Returns `true` if the collection is open; otherwise, `false`.
+     * Returns {@code true} if the collection is open; otherwise, {@code false}.
      *
      * @return a boolean value indicating if the collection has been closed or not.
      */

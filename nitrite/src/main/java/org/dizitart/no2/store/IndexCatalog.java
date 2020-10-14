@@ -16,7 +16,8 @@
 
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 
 import java.util.Collection;
@@ -39,88 +40,88 @@ public class IndexCatalog {
         this.nitriteStore = nitriteStore;
     }
 
-    public boolean hasIndexEntry(String collectionName, String field) {
-        NitriteMap<String, IndexMeta> indexMetaMap = getIndexMetaMap(collectionName);
-        if (!indexMetaMap.containsKey(field)) return false;
+    public boolean hasIndexDescriptor(String collectionName, Fields fields) {
+        NitriteMap<Fields, IndexMeta> indexMetaMap = getIndexMetaMap(collectionName);
+        if (!indexMetaMap.containsKey(fields)) return false;
 
-        IndexMeta indexMeta = indexMetaMap.get(field);
+        IndexMeta indexMeta = indexMetaMap.get(fields);
         return indexMeta != null;
     }
 
-    public IndexEntry createIndexEntry(String collectionName, String field, String indexType) {
-        IndexEntry index = new IndexEntry(indexType, field, collectionName);
+    public IndexDescriptor createIndexDescriptor(String collectionName, Fields fields, String indexType) {
+        IndexDescriptor index = new IndexDescriptor(indexType, fields, collectionName);
 
         IndexMeta indexMeta = new IndexMeta();
-        indexMeta.setIndexEntry(index);
+        indexMeta.setIndexDescriptor(index);
         indexMeta.setIsDirty(new AtomicBoolean(false));
         indexMeta.setIndexMap(getIndexMapName(index));
 
-        getIndexMetaMap(collectionName).put(field, indexMeta);
+        getIndexMetaMap(collectionName).put(fields, indexMeta);
 
         return index;
     }
 
-    public IndexEntry findIndexEntry(String collectionName, String field) {
-        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
+    public IndexDescriptor findIndexDescriptor(String collectionName, Fields fields) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(fields);
         if (meta != null) {
-            return meta.getIndexEntry();
+            return meta.getIndexDescriptor();
         }
         return null;
     }
 
-    public boolean isDirtyIndex(String collectionName, String field) {
-        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
+    public boolean isDirtyIndex(String collectionName, Fields fields) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(fields);
         return meta != null && meta.getIsDirty().get();
     }
 
-    public Collection<IndexEntry> listIndexEntries(String collectionName) {
-        Set<IndexEntry> indexSet = new LinkedHashSet<>();
+    public Collection<IndexDescriptor> listIndexDescriptors(String collectionName) {
+        Set<IndexDescriptor> indexSet = new LinkedHashSet<>();
         for (IndexMeta indexMeta : getIndexMetaMap(collectionName).values()) {
-            indexSet.add(indexMeta.getIndexEntry());
+            indexSet.add(indexMeta.getIndexDescriptor());
         }
         return Collections.unmodifiableSet(indexSet);
     }
 
-    public void dropIndexEntry(String collectionName, String field) {
-        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
-        if (meta != null && meta.getIndexEntry() != null) {
+    public void dropIndexDescriptor(String collectionName, Fields fields) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(fields);
+        if (meta != null && meta.getIndexDescriptor() != null) {
             String indexMapName = meta.getIndexMap();
             nitriteStore.openMap(indexMapName, Object.class, Object.class).drop();
         }
-        getIndexMetaMap(collectionName).remove(field);
+        getIndexMetaMap(collectionName).remove(fields);
     }
 
-    public void beginIndexing(String collectionName, String field) {
-        markDirty(collectionName, field, true);
+    public void beginIndexing(String collectionName, Fields fields) {
+        markDirty(collectionName, fields, true);
     }
 
-    public void endIndexing(String collectionName, String field) {
-        markDirty(collectionName, field, false);
+    public void endIndexing(String collectionName, Fields fields) {
+        markDirty(collectionName, fields, false);
     }
 
-    private NitriteMap<String, IndexMeta> getIndexMetaMap(String collectionName) {
+    private NitriteMap<Fields, IndexMeta> getIndexMetaMap(String collectionName) {
         String indexMetaName = getIndexMetaName(collectionName);
-        return nitriteStore.openMap(indexMetaName, String.class, IndexMeta.class);
+        return nitriteStore.openMap(indexMetaName, Fields.class, IndexMeta.class);
     }
 
     private String getIndexMetaName(String collectionName) {
         return INDEX_META_PREFIX + INTERNAL_NAME_SEPARATOR + collectionName;
     }
 
-    private String getIndexMapName(IndexEntry index) {
+    private void markDirty(String collectionName, Fields fields, boolean dirty) {
+        IndexMeta meta = getIndexMetaMap(collectionName).get(fields);
+        if (meta != null && meta.getIndexDescriptor() != null) {
+            meta.getIsDirty().set(dirty);
+        }
+    }
+
+    private String getIndexMapName(IndexDescriptor index) {
         return INDEX_PREFIX +
             INTERNAL_NAME_SEPARATOR +
             index.getCollectionName() +
             INTERNAL_NAME_SEPARATOR +
-            index.getField() +
+            index.getFields().getEncodedName() +
             INTERNAL_NAME_SEPARATOR +
             index.getIndexType();
-    }
-
-    private void markDirty(String collectionName, String field, boolean dirty) {
-        IndexMeta meta = getIndexMetaMap(collectionName).get(field);
-        if (meta != null && meta.getIndexEntry() != null) {
-            meta.getIsDirty().set(dirty);
-        }
     }
 }

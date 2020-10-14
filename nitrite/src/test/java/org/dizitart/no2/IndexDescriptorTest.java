@@ -16,7 +16,7 @@
 
 package org.dizitart.no2;
 
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexType;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,22 +26,22 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Anindya Chatterjee.
  */
-public class IndexEntryTest {
+public class IndexDescriptorTest {
 
     @Rule
     public Retry retry = new Retry(3);
 
     @Test
     public void testIndexEquals() {
-        IndexEntry index = new IndexEntry(IndexType.Fulltext, "test", "testColl");
-        IndexEntry index2 = new IndexEntry(IndexType.Fulltext, "test", "testColl");
+        IndexDescriptor index = new IndexDescriptor(IndexType.Fulltext, "test", "testColl");
+        IndexDescriptor index2 = new IndexDescriptor(IndexType.Fulltext, "test", "testColl");
         assertEquals(index, index2);
     }
 
     @Test
     public void testIndexCompare() {
-        IndexEntry index = new IndexEntry(IndexType.Fulltext, "test", "testColl");
-        IndexEntry index2 = new IndexEntry(IndexType.Fulltext, "test", "testColl");
+        IndexDescriptor index = new IndexDescriptor(IndexType.Fulltext, "test", "testColl");
+        IndexDescriptor index2 = new IndexDescriptor(IndexType.Fulltext, "test", "testColl");
 
         assertEquals(index.toString(), "IndexEntry(indexType=Fulltext, field=test, collectionName=testColl)");
         assertEquals(index.compareTo(index2), 0);

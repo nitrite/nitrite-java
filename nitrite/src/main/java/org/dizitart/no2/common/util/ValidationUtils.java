@@ -21,6 +21,7 @@ import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
@@ -68,6 +69,12 @@ public class ValidationUtils {
      */
     public static void notEmpty(Collection<?> value, String message) {
         if (value.isEmpty()) {
+            throw new ValidationException(message);
+        }
+    }
+
+    public static <T> void notEmpty(T[] value, String message) {
+        if (value.length == 0) {
             throw new ValidationException(message);
         }
     }

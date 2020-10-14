@@ -49,8 +49,8 @@ class InFilter extends IndexAwareFilter {
 
         Set<NitriteId> idSet = new LinkedHashSet<>();
         if (getIsFieldIndexed()) {
-            if (getIndexer() instanceof ComparableIndexer && comparableSet != null) {
-                ComparableIndexer comparableIndexer = (ComparableIndexer) getIndexer();
+            if (getNitriteIndexer() instanceof ComparableIndexer && comparableSet != null) {
+                ComparableIndexer comparableIndexer = (ComparableIndexer) getNitriteIndexer();
                 idSet = comparableIndexer.findIn(getCollectionName(), getField(), comparableSet);
             } else {
                 if (comparableSet != null && !comparableSet.isEmpty()) {

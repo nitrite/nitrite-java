@@ -24,11 +24,12 @@ import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collection;
@@ -57,35 +58,35 @@ public class CollectionOperations {
         this.nitriteMap = nitriteMap;
         this.nitriteConfig = nitriteConfig;
         this.eventBus = eventBus;
-        init();
+        initialize();
     }
 
-    public void createIndex(String field, String indexType, boolean async) {
-        indexOperations.ensureIndex(field, indexType, async);
+    public void createIndex(Fields fields, String indexType, boolean async) {
+        indexOperations.createIndex(fields, indexType, async);
     }
 
-    public IndexEntry findIndex(String field) {
-        return indexOperations.findIndexEntry(field);
+    public IndexDescriptor findIndex(Fields fields) {
+        return indexOperations.findIndexDescriptor(fields);
     }
 
-    public void rebuildIndex(IndexEntry indexEntry, boolean async) {
-        indexOperations.rebuildIndex(indexEntry, async);
+    public void rebuildIndex(IndexDescriptor indexDescriptor, boolean async) {
+        indexOperations.buildIndex(indexDescriptor, async, true);
     }
 
-    public Collection<IndexEntry> listIndexes() {
+    public Collection<IndexDescriptor> listIndexes() {
         return indexOperations.listIndexes();
     }
 
-    public boolean hasIndex(String field) {
-        return indexOperations.hasIndexEntry(field);
+    public boolean hasIndex(Fields fields) {
+        return indexOperations.hasIndexEntry(fields);
     }
 
-    public boolean isIndexing(String field) {
-        return indexOperations.isIndexing(field);
+    public boolean isIndexing(Fields fields) {
+        return indexOperations.isIndexing(fields);
     }
 
-    public void dropIndex(String field) {
-        indexOperations.dropIndex(field);
+    public void dropIndex(Fields fields) {
+        indexOperations.dropIndex(fields);
     }
 
     public void dropAllIndices() {
@@ -143,15 +144,16 @@ public class CollectionOperations {
         }
     }
 
-    private void init() {
+    private void initialize() {
         this.indexOperations = new IndexOperations(nitriteConfig, nitriteMap, eventBus);
-        this.readOperations = new ReadOperations(collectionName, nitriteConfig, nitriteMap, indexOperations);
-        this.writeOperations = new WriteOperations(indexOperations, readOperations,
-            nitriteMap, eventBus);
+        DocumentIndexWriter indexWriter = new DocumentIndexWriter(nitriteConfig, nitriteMap, indexOperations);
+        this.readOperations = new ReadOperations(collectionName, nitriteConfig, nitriteMap, indexWriter);
+        this.writeOperations = new WriteOperations(indexWriter, readOperations, nitriteMap, eventBus);
     }
 
     private void dropNitriteMap() {
-        NitriteMap<String, Document> catalogueMap = nitriteMap.getStore().openMap(COLLECTION_CATALOG, String.class, Document.class);
+        NitriteMap<String, Document> catalogueMap = nitriteMap.getStore().openMap(COLLECTION_CATALOG,
+            String.class, Document.class);
         for (Pair<String, Document> entry : catalogueMap.entries()) {
             String catalogue = entry.getFirst();
             Document document = entry.getSecond();

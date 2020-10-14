@@ -42,7 +42,7 @@ public class NotEqualsFilterTest {
     @Test
     public void testFindIndexedIdSet5() {
         NotEqualsFilter notEqualsFilter = new NotEqualsFilter("field", "value");
-        notEqualsFilter.setIndexer(new NitriteTextIndexer());
+        notEqualsFilter.setNitriteIndexer(new NitriteTextIndexer());
         notEqualsFilter.setIsFieldIndexed(null);
         assertEquals(0, notEqualsFilter.findIndexedIdSet().size());
     }
@@ -51,7 +51,7 @@ public class NotEqualsFilterTest {
     public void testFindIndexedIdSet6() {
         NotEqualsFilter notEqualsFilter = new NotEqualsFilter("field", "value");
         notEqualsFilter.setIsFieldIndexed(true);
-        notEqualsFilter.setIndexer(new NitriteTextIndexer());
+        notEqualsFilter.setNitriteIndexer(new NitriteTextIndexer());
         notEqualsFilter.setIsFieldIndexed(null);
         assertEquals(0, notEqualsFilter.findIndexedIdSet().size());
     }
@@ -98,7 +98,7 @@ public class NotEqualsFilterTest {
     @Test
     public void testSetIsFieldIndexed() {
         NotEqualsFilter notEqualsFilter = new NotEqualsFilter("field", 42);
-        notEqualsFilter.setIndexer(new NitriteTextIndexer());
+        notEqualsFilter.setNitriteIndexer(new NitriteTextIndexer());
         notEqualsFilter.setIsFieldIndexed(true);
         assertTrue(notEqualsFilter.getValue() instanceof Integer);
         assertTrue(notEqualsFilter.getIsFieldIndexed());
@@ -108,7 +108,7 @@ public class NotEqualsFilterTest {
     public void testSetIsFieldIndexed2() {
         NotEqualsFilter notEqualsFilter = new NotEqualsFilter("field", 42);
         notEqualsFilter.setObjectFilter(true);
-        notEqualsFilter.setIndexer(null);
+        notEqualsFilter.setNitriteIndexer(null);
         notEqualsFilter.setIsFieldIndexed(true);
         assertTrue(notEqualsFilter.getIsFieldIndexed());
     }
@@ -123,7 +123,7 @@ public class NotEqualsFilterTest {
     @Test
     public void testSetIsFieldIndexed4() {
         NotEqualsFilter notEqualsFilter = new NotEqualsFilter("field", "value");
-        notEqualsFilter.setIndexer(new NitriteTextIndexer());
+        notEqualsFilter.setNitriteIndexer(new NitriteTextIndexer());
         notEqualsFilter.setIsFieldIndexed(true);
         assertTrue(notEqualsFilter.getValue() instanceof String);
     }

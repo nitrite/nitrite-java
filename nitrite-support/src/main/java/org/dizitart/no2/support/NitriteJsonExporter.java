@@ -24,7 +24,7 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.PersistentCollection;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.repository.ObjectRepository;
 
 import java.io.ByteArrayOutputStream;
@@ -139,7 +139,7 @@ class NitriteJsonExporter {
         generator.writeFieldName(TAG_TYPE);
         generator.writeString(repository.getType().getName());
 
-        Collection<IndexEntry> indices = repository.listIndices();
+        Collection<IndexDescriptor> indices = repository.listIndices();
         writeIndices(indices);
 
         DocumentCursor cursor = repository.getDocumentCollection().find();
@@ -156,7 +156,7 @@ class NitriteJsonExporter {
         generator.writeFieldName(TAG_TYPE);
         generator.writeString(repository.getType().getName());
 
-        Collection<IndexEntry> indices = repository.listIndices();
+        Collection<IndexDescriptor> indices = repository.listIndices();
         writeIndices(indices);
 
         DocumentCursor cursor = repository.getDocumentCollection().find();
@@ -169,7 +169,7 @@ class NitriteJsonExporter {
         generator.writeFieldName(TAG_NAME);
         generator.writeString(nitriteCollection.getName());
 
-        Collection<IndexEntry> indices = nitriteCollection.listIndices();
+        Collection<IndexDescriptor> indices = nitriteCollection.listIndices();
         writeIndices(indices);
 
         DocumentCursor cursor = nitriteCollection.find();
@@ -177,11 +177,11 @@ class NitriteJsonExporter {
         generator.writeEndObject();
     }
 
-    private void writeIndices(Collection<IndexEntry> indices) throws IOException {
+    private void writeIndices(Collection<IndexDescriptor> indices) throws IOException {
         generator.writeFieldName(TAG_INDICES);
         generator.writeStartArray();
         if (options.isExportIndices()) {
-            for (IndexEntry index : indices) {
+            for (IndexDescriptor index : indices) {
                 generator.writeStartObject();
                 generator.writeFieldName(TAG_INDEX);
                 generator.writeObject(writeEncodedObject(index));

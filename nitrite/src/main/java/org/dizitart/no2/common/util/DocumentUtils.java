@@ -17,10 +17,13 @@
 package org.dizitart.no2.common.util;
 
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.mapper.NitriteMapper;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
@@ -85,6 +88,20 @@ public class DocumentUtils {
             result = result && Objects.deepEquals(document.get(field), other.get(field));
         }
         return result;
+    }
+
+    public static FieldValues getValues(Document document, Fields fields) {
+        FieldValues fieldValues = new FieldValues();
+        fieldValues.setNitriteId(document.getId());
+        fieldValues.setFields(fields);
+        fieldValues.setValues(new ArrayList<>());
+
+        for (String field : fields.getFieldNames()) {
+            Object value = document.get(field);
+            fieldValues.getValues().add(new Pair<>(field, value));
+        }
+
+        return fieldValues;
     }
 
     private static Document removeValues(Document document) {

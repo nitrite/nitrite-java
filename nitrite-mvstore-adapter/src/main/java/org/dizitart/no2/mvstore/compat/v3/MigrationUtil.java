@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 import org.h2.mvstore.MVMap;
@@ -175,19 +175,19 @@ public class MigrationUtil {
 
     private static IndexMeta indexMeta(Compat.IndexMeta value) {
         Compat.Index index = value.getIndex();
-        IndexEntry indexEntry = indexEntry(index);
+        IndexDescriptor indexDescriptor = indexEntry(index);
 
         IndexMeta indexMeta = new IndexMeta();
-        indexMeta.setIndexEntry(indexEntry);
+        indexMeta.setIndexDescriptor(indexDescriptor);
         indexMeta.setIndexMap(value.getIndexMap());
         indexMeta.setIsDirty(value.getIsDirty());
 
         return indexMeta;
     }
 
-    private static IndexEntry indexEntry(Compat.Index value) {
+    private static IndexDescriptor indexEntry(Compat.Index value) {
         String indexType = value.getIndexType().name();
-        return new IndexEntry(indexType, value.getField(), value.getCollectionName());
+        return new IndexDescriptor(indexType, value.getField(), value.getCollectionName());
     }
 
     private static NitriteId nitriteId(Compat.NitriteId value) {

@@ -12,14 +12,17 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
     private final ColumnFamilyHandle columnFamilyHandle;
     private final Class<?> keyType;
     private final Class<?> valueType;
+    private final boolean reverse;
 
     public EntrySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle,
-                    ObjectFormatter objectFormatter, Class<?> keyType, Class<?> valueType) {
+                    ObjectFormatter objectFormatter, Class<?> keyType,
+                    Class<?> valueType, boolean reverse) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
         this.objectFormatter = objectFormatter;
         this.keyType = keyType;
         this.valueType = valueType;
+        this.reverse = reverse;
     }
 
     @Override
@@ -33,7 +36,11 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
 
         public EntryIterator() {
             rawEntryIterator = rocksDB.newIterator(columnFamilyHandle);
-            rawEntryIterator.seekToFirst();
+            if (reverse) {
+                rawEntryIterator.seekToLast();
+            } else {
+                rawEntryIterator.seekToFirst();
+            }
         }
 
         @Override
@@ -55,7 +62,11 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
             K key = (K) objectFormatter.decodeKey(rawEntryIterator.key(), keyType);
             try {
                 V value = (V) objectFormatter.decode(rawEntryIterator.value(), valueType);
-                rawEntryIterator.next();
+                if (reverse) {
+                    rawEntryIterator.prev();
+                } else {
+                    rawEntryIterator.next();
+                }
                 return new Pair<>(key, value);
             } catch (Exception e) {
                 System.out.println(new String(rawEntryIterator.value()));

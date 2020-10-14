@@ -127,6 +127,9 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      */
     RecordStream<Pair<Key, Value>> entries();
 
+
+    RecordStream<Pair<Key, Value>> reversedEntries();
+
     /**
      * Get the smallest key that is larger than the given key, or null if no
      * such key exists.

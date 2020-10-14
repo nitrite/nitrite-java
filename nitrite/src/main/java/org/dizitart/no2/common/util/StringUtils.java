@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
+import java.util.Arrays;
 import java.util.StringTokenizer;
 
 /**
@@ -58,6 +59,10 @@ public class StringUtils {
      * @since 4.0.0
      */
     public static String join(String separator, String[] strings) {
+        return join(separator, Arrays.asList(strings));
+    }
+
+    public static String join(String separator, Iterable<String> strings) {
         StringBuilder sb = new StringBuilder();
         int end = 0;
         for (String s : strings) {

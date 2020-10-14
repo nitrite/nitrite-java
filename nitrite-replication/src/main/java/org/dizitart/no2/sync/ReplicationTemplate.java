@@ -76,7 +76,7 @@ public class ReplicationTemplate implements ReplicationOperation {
 
     public ReplicationTemplate(Config config) {
         this.config = config;
-        init();
+        initialize();
     }
 
     public void connect() {
@@ -186,7 +186,7 @@ public class ReplicationTemplate implements ReplicationOperation {
         }
     }
 
-    private void init() {
+    private void initialize() {
         this.messageFactory = new MessageFactory();
         this.connected = new AtomicBoolean(false);
         this.exchangeFlag = new AtomicBoolean(false);

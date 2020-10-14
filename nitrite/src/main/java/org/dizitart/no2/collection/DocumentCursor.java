@@ -16,12 +16,12 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.NullOrder;
-import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.common.*;
+import org.dizitart.no2.common.tuples.Pair;
 
 import java.text.Collator;
+
+import static org.dizitart.no2.common.Fields.multiple;
 
 /**
  * An interface to iterate over database {@code find()} results. It provides a
@@ -52,7 +52,7 @@ import java.text.Collator;
  */
 public interface DocumentCursor extends RecordStream<Document> {
 
-    DocumentCursor sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder);
+    DocumentCursor sort(Fields fields, Collator collator, NullOrder nullOrder);
 
     DocumentCursor skipLimit(long skip, long size);
 
@@ -91,14 +91,18 @@ public interface DocumentCursor extends RecordStream<Document> {
     }
 
     default DocumentCursor sort(String field, SortOrder sortOrder) {
-        return sort(field, sortOrder, NullOrder.Default);
+        return sort(multiple(new Pair<>(field, sortOrder)), NullOrder.Default);
     }
 
-    default DocumentCursor sort(String field, SortOrder sortOrder, Collator collator) {
-        return sort(field, sortOrder, collator, NullOrder.Default);
+    default DocumentCursor sort(Fields fields) {
+        return sort(fields, null, NullOrder.Default);
     }
 
-    default DocumentCursor sort(String field, SortOrder sortOrder, NullOrder nullOrder) {
-        return sort(field, sortOrder, null, nullOrder);
+    default DocumentCursor sort(Fields fields, Collator collator) {
+        return sort(fields, collator, NullOrder.Default);
+    }
+
+    default DocumentCursor sort(Fields fields, NullOrder nullOrder) {
+        return sort(fields, null, nullOrder);
     }
 }

@@ -36,18 +36,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class IndexMeta implements Serializable {
     private static final long serialVersionUID = 1576690663L;
 
-    private IndexEntry indexEntry;
+    private IndexDescriptor indexDescriptor;
     private String indexMap;
     private AtomicBoolean isDirty;
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeObject(indexEntry);
+        stream.writeObject(indexDescriptor);
         stream.writeUTF(indexMap);
         stream.writeObject(isDirty);
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        indexEntry = (IndexEntry) stream.readObject();
+        indexDescriptor = (IndexDescriptor) stream.readObject();
         indexMap = stream.readUTF();
         isDirty = (AtomicBoolean) stream.readObject();
     }

@@ -3,7 +3,7 @@ package org.dizitart.no2.mapdb;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.NullEntry;
+import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.NitriteIOException;
@@ -14,6 +14,7 @@ import org.mapdb.DBException;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.NavigableMap;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -26,14 +27,14 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     private final BTreeMap<K, V> bTreeMap;
 
     @Getter(AccessLevel.PACKAGE)
-    private final BTreeMap<NullEntry, V> nullEntryMap;
+    private final BTreeMap<DBNull, V> nullEntryMap;
 
     private final NitriteStore<?> nitriteStore;
     private final String mapName;
 
 
     public MapDBMap(String mapName, BTreeMap<K, V> bTreeMap,
-                    BTreeMap<NullEntry, V> nullEntryMap, NitriteStore<?> nitriteStore) {
+                    BTreeMap<DBNull, V> nullEntryMap, NitriteStore<?> nitriteStore) {
         this.bTreeMap = bTreeMap;
         this.mapName = mapName;
         this.nitriteStore = nitriteStore;
@@ -43,7 +44,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     @Override
     public boolean containsKey(K k) {
         if (k == null) {
-            return nullEntryMap.containsKey(NullEntry.getInstance());
+            return nullEntryMap.containsKey(DBNull.getInstance());
         }
         return bTreeMap.containsKey(k);
     }
@@ -51,7 +52,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     @Override
     public V get(K k) {
         if (k == null) {
-            return nullEntryMap.get(NullEntry.getInstance());
+            return nullEntryMap.get(DBNull.getInstance());
         }
 
         Map.Entry<K, V> firstEntry = bTreeMap.firstEntry();
@@ -90,7 +91,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     public V remove(K k) {
         V value;
         if (k == null) {
-            value = nullEntryMap.remove(NullEntry.getInstance());
+            value = nullEntryMap.remove(DBNull.getInstance());
         } else {
             value = bTreeMap.remove(k);
         }
@@ -102,7 +103,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     public RecordStream<K> keySet() {
         return RecordStream.fromIterable(() -> new Iterator<K>() {
             final Iterator<K> keyIterator = bTreeMap.keyIterator();
-            final Iterator<NullEntry> nullEntryIterator = nullEntryMap.keyIterator();
+            final Iterator<DBNull> nullEntryIterator = nullEntryMap.keyIterator();
 
             @Override
             public boolean hasNext() {
@@ -129,7 +130,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
         notNull(v, "value cannot be null");
         try {
             if (k == null) {
-                nullEntryMap.put(NullEntry.getInstance(), v);
+                nullEntryMap.put(DBNull.getInstance(), v);
             } else {
                 Map.Entry<K, V> firstEntry = bTreeMap.firstEntry();
                 if (firstEntry != null) {
@@ -157,7 +158,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
 
         V value;
         if (k == null) {
-            value = nullEntryMap.putIfAbsent(NullEntry.getInstance(), v);
+            value = nullEntryMap.putIfAbsent(DBNull.getInstance(), v);
         } else {
             value = bTreeMap.putIfAbsent(k, v);
         }
@@ -167,30 +168,12 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public RecordStream<Pair<K, V>> entries() {
-        return () -> new Iterator<Pair<K, V>>() {
-            final Iterator<Map.Entry<K, V>> entryIterator = bTreeMap.entrySet().iterator();
-            final Iterator<Map.Entry<NullEntry, V>> nullEntryIterator = nullEntryMap.entrySet().iterator();
+        return getStream(bTreeMap, nullEntryMap);
+    }
 
-            @Override
-            public boolean hasNext() {
-                boolean result = nullEntryIterator.hasNext();
-                if (!result) {
-                    return entryIterator.hasNext();
-                }
-                return true;
-            }
-
-            @Override
-            public Pair<K, V> next() {
-                if (nullEntryIterator.hasNext()) {
-                    Map.Entry<NullEntry, V> entry = nullEntryIterator.next();
-                    return new Pair<>(null, entry.getValue());
-                } else {
-                    Map.Entry<K, V> entry = entryIterator.next();
-                    return new Pair<>(entry.getKey(), entry.getValue());
-                }
-            }
-        };
+    @Override
+    public RecordStream<Pair<K, V>> reversedEntries() {
+        return getStream(bTreeMap.descendingMap(), nullEntryMap.descendingMap());
     }
 
     @Override
@@ -239,5 +222,35 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     public void close() {
         bTreeMap.close();
         nullEntryMap.close();
+    }
+
+    private RecordStream<Pair<K, V>> getStream(NavigableMap<K, V> primaryMap,
+                                               NavigableMap<DBNull, V> nullEntryMap) {
+        return RecordStream.fromIterable(() -> new Iterator<Pair<K, V>>() {
+            private final Iterator<Map.Entry<K, V>> entryIterator =
+                primaryMap.entrySet().iterator();
+            private final Iterator<Map.Entry<DBNull, V>> nullEntryIterator =
+                nullEntryMap.entrySet().iterator();
+
+            @Override
+            public boolean hasNext() {
+                boolean result = nullEntryIterator.hasNext();
+                if (!result) {
+                    return entryIterator.hasNext();
+                }
+                return true;
+            }
+
+            @Override
+            public Pair<K, V> next() {
+                if (nullEntryIterator.hasNext()) {
+                    Map.Entry<DBNull, V> entry = nullEntryIterator.next();
+                    return new Pair<>(null, entry.getValue());
+                } else {
+                    Map.Entry<K, V> entry = entryIterator.next();
+                    return new Pair<>(entry.getKey(), entry.getValue());
+                }
+            }
+        });
     }
 }

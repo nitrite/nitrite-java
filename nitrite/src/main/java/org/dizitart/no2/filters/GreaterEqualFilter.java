@@ -41,8 +41,8 @@ class GreaterEqualFilter extends ComparisonFilter {
     protected Set<NitriteId> findIndexedIdSet() {
         Set<NitriteId> idSet = new LinkedHashSet<>();
         if (getIsFieldIndexed()) {
-            if (getIndexer() instanceof ComparableIndexer && getValue() instanceof Comparable) {
-                ComparableIndexer comparableIndexer = (ComparableIndexer) getIndexer();
+            if (getNitriteIndexer() instanceof ComparableIndexer && getValue() instanceof Comparable) {
+                ComparableIndexer comparableIndexer = (ComparableIndexer) getNitriteIndexer();
                 idSet = comparableIndexer.findGreaterEqual(getCollectionName(), getField(), (Comparable) getValue());
             } else {
                 if (getValue() instanceof Comparable) {

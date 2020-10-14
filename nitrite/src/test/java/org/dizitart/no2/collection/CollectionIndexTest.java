@@ -19,7 +19,7 @@ package org.dizitart.no2.collection;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
@@ -136,9 +136,9 @@ public class CollectionIndexTest extends BaseCollectionTest {
     public void testRebuildIndex() {
         collection.createIndex("body", indexOptions(IndexType.Fulltext, false));
         insert();
-        Collection<IndexEntry> indices = collection.listIndices();
-        for (IndexEntry idx : indices) {
-            collection.rebuildIndex(idx.getField(), false);
+        Collection<IndexDescriptor> indices = collection.listIndices();
+        for (IndexDescriptor idx : indices) {
+            collection.rebuildIndex(idx.getFields(), false);
         }
     }
 
@@ -148,9 +148,9 @@ public class CollectionIndexTest extends BaseCollectionTest {
         insert();
         await().until(bodyIndexingCompleted());
 
-        Collection<IndexEntry> indices = collection.listIndices();
-        for (IndexEntry idx : indices) {
-            collection.rebuildIndex(idx.getField(), true);
+        Collection<IndexDescriptor> indices = collection.listIndices();
+        for (IndexDescriptor idx : indices) {
+            collection.rebuildIndex(idx.getFields(), true);
             await().until(bodyIndexingCompleted());
         }
     }
@@ -158,14 +158,14 @@ public class CollectionIndexTest extends BaseCollectionTest {
     @Test
     public void testRebuildIndexOnRunningIndex() {
         collection.createIndex("body", indexOptions(IndexType.Fulltext, false));
-        Collection<IndexEntry> indices = collection.listIndices();
-        IndexEntry idx = indices.iterator().next();
+        Collection<IndexDescriptor> indices = collection.listIndices();
+        IndexDescriptor idx = indices.iterator().next();
         insert();
-        collection.rebuildIndex(idx.getField(), true);
+        collection.rebuildIndex(idx.getFields(), true);
 
         boolean error = false;
         try {
-            collection.rebuildIndex(idx.getField(), true);
+            collection.rebuildIndex(idx.getFields(), true);
         } catch (IndexingException ie) {
             error = true;
         } finally {

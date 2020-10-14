@@ -46,29 +46,25 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * <p>
  * An object repository is observable like its underlying {@link NitriteCollection}.
  * <p>
- * [[app-listing]]
- * [source,java]
- * .Create a repository
- * --
+ * <h3>Create a repository</h3>
+ * <pre>
+ * {@code
  * // create/open a database
  * Nitrite db = Nitrite.builder()
- * .openOrCreate("user", "password");
- * <p>
- * // create an object repository
- * ObjectRepository&lt;Employee&gt; employeeStore = db.getRepository(Employee.class);
- * <p>
- * // observe any change to the repository
- * employeeStore.register(new ChangeListener() {
+ *      .openOrCreate("user", "password");
  *
- * @param <T> the type of the object to store.
- * @author Anindya Chatterjee.
+ * // create an object repository
+ * ObjectRepository<Employee> employeeStore = db.getRepository(Employee.class);
  *
  * // insert an object
  * Employee emp = new Employee();
  * emp.setName("John Doe");
  * employeeStore.insert(emp);
- * <p>
- * --
+ * }
+ * </pre>
+ *
+ * @param <T> the type of the object to store.
+ * @author Anindya Chatterjee.
  * @see EventAware
  * @see Document
  * @see NitriteId
@@ -88,16 +84,16 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      * If any of the value is already indexed in the repository, then after insertion the
      * index will also be updated.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Insert}.
+     * </p>
      *
      * @param object the object to insert
      * @param others other objects to insert in a batch.
      * @return the result of the write operation.
-     * @throws ValidationException       if `object` is `null`.
-     * @throws InvalidIdException        if the id value contains `null` value.
+     * @throws ValidationException       if {@code object} is {@code null}.
+     * @throws InvalidIdException        if the id value contains {@code null} value.
      * @throws InvalidIdException        if the id value contains non comparable type, i.e. type that does not implement {@link Comparable}.
      * @throws InvalidIdException        if the id contains value which is not of the same java type as of other objects' id in the collection.
      * @throws UniqueConstraintException if the value of id value clashes with the id of another object in the collection.
@@ -124,26 +120,24 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
 
     /**
      * Updates object in the repository. If the filter does not find
-     * any object in the collection, then the `update` object will be inserted.
+     * any object in the collection, then the {@code update} object will be inserted.
      * <p>
-     * If the `filter` is `null`, it will update all objects in the collection.
+     * If the {@code filter} is {@code null}, it will update all objects in the collection.
      * <p>
-     * [icon="{@docRoot}/alert.png"]
-     * [CAUTION]
-     * ====
-     * If the `update` object has a non `null` value in the id value, this value
+     * <b>CAUTION:</b>
+     * If the {@code update} object has a non {@code null} value in the id value, this value
      * will be removed before update.
-     * ====
+     * </p>
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Update}.
+     * </p>
      *
      * @param filter the filter to apply to select objects from the collection.
      * @param update the modifications to apply.
      * @return the result of the update operation.
-     * @throws ValidationException if the `update` object is `null`.
+     * @throws ValidationException if the {@code update} object is {@code null}.
      */
     default WriteResult update(Filter filter, T update) {
         return update(filter, update, false);
@@ -151,95 +145,88 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
 
     /**
      * Updates object in the repository. Update operation can be customized
-     * with the help of `updateOptions`.
+     * with the help of {@code updateOptions}.
      * <p>
-     * If the `filter` is `null`, it will update all objects in the collection unless
-     * `justOnce` is set to `true` in `updateOptions`.
+     * If the {@code filter} is {@code null}, it will update all objects in the collection unless
+     * {@code justOnce} is set to {@code true} in {@code updateOptions}.
      * <p>
-     * [icon="{@docRoot}/alert.png"]
-     * [CAUTION]
-     * ====
-     * If the `update` object has a non `null` value in the id value, this value
+     * <b>CAUTION:</b>
+     * If the {@code update} object has a non {@code null} value in the id value, this value
      * will be removed before update.
-     * ====
+     * </p>
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
-     * {@link EventType#Update} or
-     * {@link EventType#Insert}.
+     * {@link EventType#Update} or {@link EventType#Insert}.
+     * </p>
      *
      * @param filter         the filter to apply to select objects from the collection.
      * @param update         the modifications to apply.
-     * @param insertIfAbsent if set to `true`, `update` object will be inserted if not found.
+     * @param insertIfAbsent if set to {@code true}, {@code update} object will be inserted if not found.
      * @return the result of the update operation.
-     * @throws ValidationException if the `update` object is `null`.
-     * @throws ValidationException if `updateOptions` is `null`.
+     * @throws ValidationException if the {@code update} object is {@code null}.
+     * @throws ValidationException if {@code updateOptions} is {@code null}.
      */
     WriteResult update(Filter filter, T update, boolean insertIfAbsent);
 
     /**
-     * Updates object in the repository by setting the field specified in `document`.
+     * Updates object in the repository by setting the field specified in {@code document}.
      * <p>
-     * If the `filter` is `null`, it will update all objects in the collection.
+     * If the {@code filter} is {@code null}, it will update all objects in the collection.
      * <p>
-     * [icon="{@docRoot}/alert.png"]
-     * [CAUTION]
-     * ====
-     * The `update` document should not contain `_id` field.
-     * ====
+     * <b>CAUTION:</b>
+     * The {@code update} document should not contain {@code _id} field.
+     * </p>
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Update}.
+     * </p>
      *
      * @param filter the filter to apply to select objects from the collection.
      * @param update the modifications to apply.
      * @return the result of the update operation.
-     * @throws ValidationException if the `update` object is `null`.
+     * @throws ValidationException if the {@code update} object is {@code null}.
      */
     default WriteResult update(Filter filter, Document update) {
         return update(filter, update, false);
     }
 
     /**
-     * Updates object in the repository by setting the field specified in `document`.
+     * Updates object in the repository by setting the field specified in {@code document}.
      * Update operation can either update the first matching object or all matching
-     * objects depending on the value of `justOnce`.
+     * objects depending on the value of {@code justOnce}.
      * <p>
-     * If the `filter` is `null`, it will update all objects in the collection unless
-     * `justOnce` is set to `true`.
+     * If the {@code filter} is {@code null}, it will update all objects in the collection unless
+     * {@code justOnce} is set to {@code true}.
      * <p>
-     * [icon="{@docRoot}/alert.png"]
-     * [CAUTION]
-     * ====
-     * The `update` document should not contain `_id` field.
-     * ====
+     * <b>CAUTION:</b>
+     * The {@code update} document should not contain {@code _id} field.
+     * </p>
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Update}.
-     *
+     * </p>
+     * 
      * @param filter   the filter to apply to select objects from the collection.
      * @param update   the modifications to apply.
      * @param justOnce indicates if update should be applied on first matching object or all.
      * @return the result of the update operation.
-     * @throws ValidationException if the `update` object is `null`.
+     * @throws ValidationException if the {@code update} object is {@code null}.
      */
     WriteResult update(Filter filter, Document update, boolean justOnce);
 
     /**
      * Removes matching elements from the collection.
      * <p>
-     * If the `filter` is `null`, it will remove all objects from the collection.
+     * If the {@code filter} is {@code null}, it will remove all objects from the collection.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Remove}.
-     *
+     * </p>
+     * 
      * @param filter the filter to apply to select elements from collection.
      * @return the result of the remove operation.
      */
@@ -249,16 +236,16 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
 
     /**
      * Removes object from the collection. Remove operation can be customized by
-     * `removeOptions`.
+     * {@code removeOptions}.
      * <p>
-     * If the `filter` is `null`, it will remove all objects in the collection unless
-     * `justOnce` is set to `true` in `removeOptions`.
+     * If the {@code filter} is {@code null}, it will remove all objects in the collection unless
+     * {@code justOnce} is set to {@code true} in {@code removeOptions}.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Remove}.
-     *
+     * </p>
+     * 
      * @param filter  the filter to apply to select objects from collection.
      * @param justOne indicates if only one element will be removed or all of them.
      * @return the result of the remove operation.
@@ -278,13 +265,13 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      * <p>
      * See {@link Filter} for all available filters.
      * <p>
-     * [icon="{@docRoot}/note.png"]
      * NOTE: If there is an index on the value specified in the filter, this operation
      * will take advantage of the index.
+     * </p>
      *
      * @param filter the filter to apply to select objects from collection.
      * @return a cursor to all selected objects.
-     * @throws ValidationException if `filter` is null.
+     * @throws ValidationException if {@code filter} is null.
      * @see Filter
      * @see Cursor#project(Class)
      */
@@ -292,14 +279,14 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
 
     /**
      * Gets a single element from the repository by its id. If no element
-     * is found, it will return `null`. The object must have a field annotated with {@link Id},
+     * is found, it will return {@code null}. The object must have a field annotated with {@link Id},
      * otherwise this call will throw {@link InvalidIdException}.
      *
      * @param <I> the type parameter
      * @param id  the id value
      * @return the unique object associated with the id.
-     * @throws ValidationException      if `id` is `null`.
-     * @throws InvalidIdException       if the id value is `null`, or the type is not compatible.
+     * @throws ValidationException      if `id` is {@code null}.
+     * @throws InvalidIdException       if the id value is {@code null}, or the type is not compatible.
      * @throws NotIdentifiableException if the object has no field marked with {@link Id}.
      */
     <I> T getById(I id);

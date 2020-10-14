@@ -22,7 +22,7 @@ import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.data.*;
@@ -68,7 +68,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testListIndexes() {
-        Collection<IndexEntry> indices = companyRepository.listIndices();
+        Collection<IndexDescriptor> indices = companyRepository.listIndices();
         assertEquals(indices.size(), 2);
 
         companyRepository.createIndex("dateCreated", IndexOptions.indexOptions(IndexType.NonUnique));
@@ -80,7 +80,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     public void testDropIndex() {
         testListIndexes();
         companyRepository.dropIndex("dateCreated");
-        Collection<IndexEntry> indices = companyRepository.listIndices();
+        Collection<IndexDescriptor> indices = companyRepository.listIndices();
         assertEquals(indices.size(), 2);
     }
 
@@ -88,7 +88,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     public void testDropAllIndex() {
         testListIndexes();
         companyRepository.dropAllIndices();
-        Collection<IndexEntry> indices = companyRepository.listIndices();
+        Collection<IndexDescriptor> indices = companyRepository.listIndices();
         assertEquals(indices.size(), 0);
     }
 

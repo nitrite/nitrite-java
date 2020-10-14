@@ -26,17 +26,17 @@ import java.util.concurrent.Callable;
 /**
  * @author Anindya Chatterjee
  */
-public abstract class FlowableReadableStream<T> extends FlowableIterable<T> {
+public abstract class FlowableRecordStream<T> extends FlowableIterable<T> {
 
     private final Callable<? extends RecordStream<T>> supplier;
 
-    FlowableReadableStream(Callable<? extends RecordStream<T>> supplier) {
+    FlowableRecordStream(Callable<? extends RecordStream<T>> supplier) {
         super(supplier);
         this.supplier = supplier;
     }
 
-    static <R> FlowableReadableStream<R> create(Callable<? extends RecordStream<R>> supplier) {
-        return new FlowableReadableStream<R>(supplier) {
+    static <R> FlowableRecordStream<R> create(Callable<? extends RecordStream<R>> supplier) {
+        return new FlowableRecordStream<R>(supplier) {
         };
     }
 

@@ -21,9 +21,10 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
@@ -53,33 +54,33 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void createIndex(String field, IndexOptions indexOptions) {
-        collection.createIndex(field, indexOptions);
+    public void createIndex(Fields fields, IndexOptions indexOptions) {
+        collection.createIndex(fields, indexOptions);
     }
 
     @Override
-    public void rebuildIndex(String field, boolean isAsync) {
-        collection.rebuildIndex(field, isAsync);
+    public void rebuildIndex(Fields fields, boolean isAsync) {
+        collection.rebuildIndex(fields, isAsync);
     }
 
     @Override
-    public Collection<IndexEntry> listIndices() {
+    public Collection<IndexDescriptor> listIndices() {
         return collection.listIndices();
     }
 
     @Override
-    public boolean hasIndex(String field) {
-        return collection.hasIndex(field);
+    public boolean hasIndex(Fields fields) {
+        return collection.hasIndex(fields);
     }
 
     @Override
-    public boolean isIndexing(String field) {
-        return collection.isIndexing(field);
+    public boolean isIndexing(Fields fields) {
+        return collection.isIndexing(fields);
     }
 
     @Override
-    public void dropIndex(String field) {
-        collection.dropIndex(field);
+    public void dropIndex(Fields fields) {
+        collection.dropIndex(fields);
     }
 
     @Override

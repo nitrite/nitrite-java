@@ -5,7 +5,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.migration.TypeConverter;
 
 /**
@@ -31,9 +31,9 @@ public class ChangeDataType extends BaseCommand implements Command {
             nitriteMap.put(entry.getFirst(), document);
         }
 
-        IndexEntry indexEntry = indexCatalog.findIndexEntry(collectionName, fieldName);
-        if (indexEntry != null) {
-            operations.rebuildIndex(indexEntry, false);
+        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptor(collectionName, fieldName);
+        if (indexDescriptor != null) {
+            operations.rebuildIndex(indexDescriptor, false);
         }
     }
 }
