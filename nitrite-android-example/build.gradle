@@ -46,8 +46,7 @@ android {
         exclude 'META-INF/LGPL2.1'
     }
 
-    compileSdkVersion 28
-
+    compileSdkVersion 29
 
     defaultConfig {
         applicationId "org.dizitart.no2.example.android"
