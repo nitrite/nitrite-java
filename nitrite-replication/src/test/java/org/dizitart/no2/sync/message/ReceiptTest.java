@@ -1,12 +1,10 @@
 package org.dizitart.no2.sync.message;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.util.HashSet;
 
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class ReceiptTest {
     @Test
@@ -62,25 +60,6 @@ public class ReceiptTest {
         Receipt receipt = new Receipt();
         receipt.setAdded(null);
         assertFalse((new Receipt()).equals(receipt));
-    }
-
-    @Test
-    public void testHashCode() {
-        Receipt receipt = new Receipt();
-        receipt.setAdded(null);
-        assertEquals(6018, receipt.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        assertEquals(3481, (new Receipt()).hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        Receipt receipt = new Receipt();
-        receipt.setRemoved(null);
-        assertEquals(3524, receipt.hashCode());
     }
 
     @Test

@@ -1,10 +1,8 @@
 package org.dizitart.no2.sync.message;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class DataGateFeedAckTest {
     @Test
@@ -67,25 +65,6 @@ public class DataGateFeedAckTest {
         DataGateFeedAck dataGateFeedAck = new DataGateFeedAck();
         dataGateFeedAck.setReceipt(new Receipt());
         assertFalse(dataGateFeedAck.equals(new DataGateFeedAck()));
-    }
-
-    @Test
-    public void testHashCode() {
-        DataGateFeedAck dataGateFeedAck = new DataGateFeedAck();
-        dataGateFeedAck.setReceipt(new Receipt());
-        assertEquals(9499, dataGateFeedAck.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        DataGateFeedAck dataGateFeedAck = new DataGateFeedAck();
-        dataGateFeedAck.setHeader(new MessageHeader());
-        assertEquals(-506888950, dataGateFeedAck.hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        assertEquals(6061, (new DataGateFeedAck()).hashCode());
     }
 
     @Test

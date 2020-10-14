@@ -70,25 +70,6 @@ public class ConnectAckTest {
     }
 
     @Test
-    public void testHashCode() {
-        assertEquals(6061, (new ConnectAck()).hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        ConnectAck connectAck = new ConnectAck();
-        connectAck.setTombstoneTtl(0L);
-        assertEquals(6018, connectAck.hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        ConnectAck connectAck = new ConnectAck();
-        connectAck.setHeader(new MessageHeader());
-        assertEquals(-506888950, connectAck.hashCode());
-    }
-
-    @Test
     public void testSetHeader() {
         ConnectAck connectAck = new ConnectAck();
         connectAck.setHeader(new MessageHeader());

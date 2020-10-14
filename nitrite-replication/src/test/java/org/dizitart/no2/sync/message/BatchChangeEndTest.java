@@ -1,10 +1,8 @@
 package org.dizitart.no2.sync.message;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class BatchChangeEndTest {
     @Test
@@ -77,39 +75,6 @@ public class BatchChangeEndTest {
         BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
         batchChangeEnd.setDebounce(0);
         assertFalse(batchChangeEnd.equals(new BatchChangeEnd()));
-    }
-
-    @Test
-    public void testHashCode() {
-        BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
-        batchChangeEnd.setBatchSize(3);
-        assertEquals(21098561, batchChangeEnd.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        assertEquals(21100921, (new BatchChangeEnd()).hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
-        batchChangeEnd.setLastSynced(0L);
-        assertEquals(20951238, batchChangeEnd.hashCode());
-    }
-
-    @Test
-    public void testHashCode4() {
-        BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
-        batchChangeEnd.setDebounce(0);
-        assertEquals(21100878, batchChangeEnd.hashCode());
-    }
-
-    @Test
-    public void testHashCode5() {
-        BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
-        batchChangeEnd.setHeader(new MessageHeader());
-        assertEquals(751126286, batchChangeEnd.hashCode());
     }
 
     @Test

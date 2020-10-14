@@ -79,39 +79,6 @@ public class BatchChangeStartTest {
     }
 
     @Test
-    public void testHashCode() {
-        BatchChangeStart batchChangeStart = new BatchChangeStart();
-        batchChangeStart.setFeed(new LastWriteWinState());
-        assertEquals(21104359, batchChangeStart.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        BatchChangeStart batchChangeStart = new BatchChangeStart();
-        batchChangeStart.setBatchSize(3);
-        assertEquals(20961681, batchChangeStart.hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        BatchChangeStart batchChangeStart = new BatchChangeStart();
-        batchChangeStart.setHeader(new MessageHeader());
-        assertEquals(751126286, batchChangeStart.hashCode());
-    }
-
-    @Test
-    public void testHashCode4() {
-        BatchChangeStart batchChangeStart = new BatchChangeStart();
-        batchChangeStart.setDebounce(0);
-        assertEquals(21098384, batchChangeStart.hashCode());
-    }
-
-    @Test
-    public void testHashCode5() {
-        assertEquals(21100921, (new BatchChangeStart()).hashCode());
-    }
-
-    @Test
     public void testSetBatchSize() {
         BatchChangeStart batchChangeStart = new BatchChangeStart();
         batchChangeStart.setBatchSize(3);

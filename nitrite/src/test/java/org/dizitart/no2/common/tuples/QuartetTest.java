@@ -88,13 +88,6 @@ public class QuartetTest {
     }
 
     @Test
-    public void testHashCode() {
-        assertEquals(21100921, (new Quartet<>()).hashCode());
-        assertEquals(669802412,
-            (new Quartet<Object, Object, Object, Object>("first", "second", "third", "fourth")).hashCode());
-    }
-
-    @Test
     public void testSetFirst() {
         Quartet<Object, Object, Object, Object> quartet = new Quartet<>();
         quartet.setFirst("first");

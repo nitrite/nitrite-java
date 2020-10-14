@@ -1,10 +1,8 @@
 package org.dizitart.no2.sync.message;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class DisconnectTest {
     @Test
@@ -44,18 +42,6 @@ public class DisconnectTest {
     @Test
     public void testEquals5() {
         assertFalse((new Disconnect()).equals("o"));
-    }
-
-    @Test
-    public void testHashCode() {
-        Disconnect disconnect = new Disconnect();
-        disconnect.setHeader(new MessageHeader());
-        assertEquals(64204717, disconnect.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        assertEquals(102, (new Disconnect()).hashCode());
     }
 
     @Test

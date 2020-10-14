@@ -48,7 +48,7 @@ dependencies {
     api "org.slf4j:slf4j-api"
     api "com.fasterxml.jackson.core:jackson-databind"
     api "com.squareup.okhttp3:okhttp"
-    annotationProcessor "org.projectlombok:lombok:1.18.12"
+    annotationProcessor "org.projectlombok:lombok:1.18.14"
 
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
@@ -58,7 +58,7 @@ dependencies {
     testImplementation "org.awaitility:awaitility:4.0.3"
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.3"
     testImplementation "org.apache.logging.log4j:log4j-core:2.13.3"
-    testImplementation "junit:junit:4.13"
+    testImplementation "junit:junit:4.13.1"
 }
 
 test {

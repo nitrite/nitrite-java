@@ -76,12 +76,6 @@ public class TripletTest {
     }
 
     @Test
-    public void testHashCode() {
-        assertEquals(-1932637802, (new Triplet<Object, Object, Object>("first", "second", "third")).hashCode());
-        assertEquals(357642, (new Triplet<>()).hashCode());
-    }
-
-    @Test
     public void testSetFirst() {
         Triplet<Object, Object, Object> triplet = new Triplet<>();
         triplet.setFirst("first");

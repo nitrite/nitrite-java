@@ -64,12 +64,6 @@ public class PairTest {
     }
 
     @Test
-    public void testHashCode() {
-        assertEquals(6061, (new Pair<>()).hashCode());
-        assertEquals(547741853, (new Pair<Object, Object>("first", "second")).hashCode());
-    }
-
-    @Test
     public void testSetFirst() {
         Pair<Object, Object> pair = new Pair<>();
         pair.setFirst("first");
