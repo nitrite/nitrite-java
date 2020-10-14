@@ -1,12 +1,9 @@
 package org.dizitart.no2.store.events;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import org.dizitart.no2.NitriteConfig;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class EventInfoTest {
     @Test
@@ -47,11 +44,6 @@ public class EventInfoTest {
     public void testEquals6() {
         EventInfo o = new EventInfo(null, new NitriteConfig());
         assertFalse((new EventInfo()).equals(o));
-    }
-
-    @Test
-    public void testHashCode() {
-        assertEquals(6061, (new EventInfo()).hashCode());
     }
 
     @Test

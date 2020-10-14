@@ -80,39 +80,6 @@ public class BatchChangeContinueTest {
     }
 
     @Test
-    public void testHashCode() {
-        assertEquals(21100921, (new BatchChangeContinue()).hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        BatchChangeContinue batchChangeContinue = new BatchChangeContinue();
-        batchChangeContinue.setDebounce(0);
-        assertEquals(21100878, batchChangeContinue.hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        BatchChangeContinue batchChangeContinue = new BatchChangeContinue();
-        batchChangeContinue.setFeed(new LastWriteWinState());
-        assertEquals(33068599, batchChangeContinue.hashCode());
-    }
-
-    @Test
-    public void testHashCode4() {
-        BatchChangeContinue batchChangeContinue = new BatchChangeContinue();
-        batchChangeContinue.setHeader(new MessageHeader());
-        assertEquals(751126286, batchChangeContinue.hashCode());
-    }
-
-    @Test
-    public void testHashCode5() {
-        BatchChangeContinue batchChangeContinue = new BatchChangeContinue();
-        batchChangeContinue.setBatchSize(3);
-        assertEquals(21098561, batchChangeContinue.hashCode());
-    }
-
-    @Test
     public void testSetBatchSize() {
         BatchChangeContinue batchChangeContinue = new BatchChangeContinue();
         batchChangeContinue.setBatchSize(3);

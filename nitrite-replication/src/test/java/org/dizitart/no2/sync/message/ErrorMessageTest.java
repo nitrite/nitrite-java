@@ -1,10 +1,8 @@
 package org.dizitart.no2.sync.message;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ErrorMessageTest {
     @Test
@@ -68,25 +66,6 @@ public class ErrorMessageTest {
     @Test
     public void testEquals8() {
         assertFalse((new ErrorMessage()).equals("o"));
-    }
-
-    @Test
-    public void testHashCode() {
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setHeader(new MessageHeader());
-        assertEquals(-506888950, errorMessage.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        assertEquals(6061, (new ErrorMessage()).hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        ErrorMessage errorMessage = new ErrorMessage();
-        errorMessage.setError("An error occurred");
-        assertEquals(1927174130, errorMessage.hashCode());
     }
 
     @Test

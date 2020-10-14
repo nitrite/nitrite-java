@@ -120,46 +120,6 @@ public class ConfigTest {
     }
 
     @Test
-    public void testHashCode2() {
-        Config config = new Config();
-        config.setChunkSize(3);
-        assertEquals(1952680340, config.hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        assertEquals(651856844, (new Config()).hashCode());
-    }
-
-    @Test
-    public void testHashCode4() {
-        Config config = new Config();
-        config.setAcceptAllCertificates(true);
-        assertEquals(651855782, config.hashCode());
-    }
-
-    @Test
-    public void testHashCode5() {
-        Config config = new Config();
-        config.setAuthToken("ABC123");
-        assertEquals(1865354825, config.hashCode());
-    }
-
-    @Test
-    public void testHashCode6() {
-        Config config = new Config();
-        config.setUserName("janedoe");
-        assertEquals(1706617037, config.hashCode());
-    }
-
-    @Test
-    public void testHashCode7() {
-        Config config = new Config();
-        config.setDebounce(0);
-        assertEquals(2043156763, config.hashCode());
-    }
-
-    @Test
     public void testSetAcceptAllCertificates() {
         Config config = new Config();
         config.setAcceptAllCertificates(true);

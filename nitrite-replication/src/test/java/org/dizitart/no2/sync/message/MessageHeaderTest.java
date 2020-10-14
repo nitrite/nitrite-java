@@ -121,53 +121,6 @@ public class MessageHeaderTest {
     }
 
     @Test
-    public void testHashCode() {
-        MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setId("42");
-        assertEquals(368163037, messageHeader.hashCode());
-    }
-
-    @Test
-    public void testHashCode2() {
-        MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setCorrelationId("42");
-        assertEquals(-2114525181, messageHeader.hashCode());
-    }
-
-    @Test
-    public void testHashCode3() {
-        MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setTimestamp(10L);
-        assertEquals(64089785, messageHeader.hashCode());
-    }
-
-    @Test
-    public void testHashCode4() {
-        MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setUserName("janedoe");
-        assertEquals(662096149, messageHeader.hashCode());
-    }
-
-    @Test
-    public void testHashCode5() {
-        assertEquals(64204658, (new MessageHeader()).hashCode());
-    }
-
-    @Test
-    public void testHashCode6() {
-        MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setCollection("collection");
-        assertEquals(-1690661067, messageHeader.hashCode());
-    }
-
-    @Test
-    public void testHashCode7() {
-        MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setOrigin("origin");
-        assertEquals(-944415123, messageHeader.hashCode());
-    }
-
-    @Test
     public void testSetCollection() {
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.setCollection("collection");

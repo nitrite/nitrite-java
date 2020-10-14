@@ -100,14 +100,6 @@ public class QuintetTest {
     }
 
     @Test
-    public void testHashCode() {
-        assertEquals(961065563,
-            (new Quintet<Object, Object, Object, Object, Object>("first", "second", "third", "fourth", "fifth"))
-                .hashCode());
-        assertEquals(1244954382, (new Quintet<>()).hashCode());
-    }
-
-    @Test
     public void testSetFifth() {
         Quintet<Object, Object, Object, Object, Object> quintet = new Quintet<>();
         quintet.setFifth("fifth");
