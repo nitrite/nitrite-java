@@ -46,9 +46,9 @@ dependencies {
     api "org.slf4j:slf4j-api"
     api "org.objenesis:objenesis"
     api "org.jasypt:jasypt"
-    annotationProcessor "org.projectlombok:lombok:1.18.14"
+    annotationProcessor "org.projectlombok:lombok:1.18.16"
 
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     testImplementation "junit:junit:4.13.1"
     testImplementation "uk.co.jemos.podam:podam:7.2.5.RELEASE"
     testImplementation "com.github.javafaker:javafaker:1.0.2"

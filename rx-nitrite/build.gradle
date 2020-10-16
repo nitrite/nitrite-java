@@ -46,10 +46,10 @@ dependencies {
     api project(':nitrite')
     api "org.slf4j:slf4j-api"
     api "io.reactivex.rxjava2:rxjava"
-    annotationProcessor "org.projectlombok:lombok:1.18.14"
+    annotationProcessor "org.projectlombok:lombok:1.18.16"
 
     testImplementation project(':nitrite-mvstore-adapter')
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     testImplementation "junit:junit:4.13.1"
     testImplementation "uk.co.jemos.podam:podam:7.2.5.RELEASE"
 }
