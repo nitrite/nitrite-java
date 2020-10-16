@@ -47,9 +47,9 @@ dependencies {
     api "com.fasterxml.jackson.core:jackson-databind"
     api "commons-codec:commons-codec"
 
-    annotationProcessor "org.projectlombok:lombok:1.18.14"
+    annotationProcessor "org.projectlombok:lombok:1.18.16"
 
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testImplementation "junit:junit:4.13.1"
 }

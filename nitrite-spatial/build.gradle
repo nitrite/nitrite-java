@@ -48,9 +48,9 @@ dependencies {
     api "org.slf4j:slf4j-api"
     api "org.locationtech.jts:jts-core"
 
-    annotationProcessor "org.projectlombok:lombok:1.18.14"
+    annotationProcessor "org.projectlombok:lombok:1.18.16"
 
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testImplementation project(path: ':nitrite-jackson-mapper', configuration: 'default')
     testImplementation "junit:junit:4.13.1"
