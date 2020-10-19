@@ -48,7 +48,7 @@ dependencies {
     testImplementation "org.meanbean:meanbean:2.0.3"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.11.3"
     testImplementation "commons-io:commons-io:2.8.0"
-    testImplementation "com.google.guava:guava:29.0-jre"
+    testImplementation "com.google.guava:guava:30.0-jre"
 }
 
 test {
