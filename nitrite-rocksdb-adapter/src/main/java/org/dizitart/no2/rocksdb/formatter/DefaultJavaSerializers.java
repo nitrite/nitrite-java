@@ -29,7 +29,7 @@ public class DefaultJavaSerializers {
         }
 
         @Override
-        public List<?> read(Kryo kryo, final Input input, final Class<List> type) {
+        public List<?> read(Kryo kryo, final Input input, final Class<? extends List> type) {
             final int length = input.readInt(true);
             Class<?> componentType = kryo.readClass( input ).getType();
             if (componentType.isPrimitive()) {
@@ -109,7 +109,7 @@ public class DefaultJavaSerializers {
         }
 
         @Override
-        public UUID read(Kryo kryo, Input input, Class<UUID> type) {
+        public UUID read(Kryo kryo, Input input, Class<? extends UUID> type) {
             return UUID.fromString(input.readString());
         }
     }

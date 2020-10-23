@@ -44,7 +44,7 @@ public class NitriteSerializers {
         }
 
         @Override
-        public Pair read(Kryo kryo, Input input, Class<Pair> type) {
+        public Pair read(Kryo kryo, Input input, Class<? extends Pair> type) {
             Pair pair = new Pair<>();
             kryo.reference(pair);
 
@@ -57,11 +57,11 @@ public class NitriteSerializers {
         }
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static class DocumentSerializer extends Serializer<Document> {
         private final MapSerializer mapSerializer = new MapSerializer() {
             @Override
-            protected Map create(Kryo kryo, Input input, Class<Map> type) {
+            protected Map create(Kryo kryo, Input input, Class type, int size) {
                 return (Map) Document.createDocument();
             }
         };
@@ -72,7 +72,7 @@ public class NitriteSerializers {
         }
 
         @Override
-        public Document read(Kryo kryo, Input input, Class<Document> type) {
+        public Document read(Kryo kryo, Input input, Class<? extends Document> type) {
             Document document = Document.createDocument();
             Map<?, ?> map = mapSerializer.read(kryo, input, Map.class);
             for (Map.Entry<?, ?> entry : map.entrySet()) {
@@ -93,7 +93,7 @@ public class NitriteSerializers {
         }
 
         @Override
-        public IndexMeta read(Kryo kryo, Input input, Class<IndexMeta> type) {
+        public IndexMeta read(Kryo kryo, Input input, Class<? extends IndexMeta> type) {
             IndexEntry indexEntry = kryo.readObject(input, IndexEntry.class);
             String indexMap = input.readString();
             boolean isDirty = input.readBoolean();
@@ -115,7 +115,7 @@ public class NitriteSerializers {
         }
 
         @Override
-        public IndexEntry read(Kryo kryo, Input input, Class<IndexEntry> type) {
+        public IndexEntry read(Kryo kryo, Input input, Class<? extends IndexEntry> type) {
             String collectionName = input.readString();
             String field = input.readString();
             String indexType = input.readString();
@@ -134,7 +134,7 @@ public class NitriteSerializers {
         }
 
         @Override
-        public UserCredential read(Kryo kryo, Input input, Class<UserCredential> type) {
+        public UserCredential read(Kryo kryo, Input input, Class<? extends UserCredential> type) {
             int hashLength = input.readInt();
             int saltLength = input.readInt();
 
@@ -158,7 +158,7 @@ public class NitriteSerializers {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Attributes read(Kryo kryo, Input input, Class<Attributes> type) {
+        public Attributes read(Kryo kryo, Input input, Class<? extends Attributes> type) {
             Map<String, String> map = (Map<String, String>) kryo.readClassAndObject(input);
             Attributes attributes = new Attributes();
             attributes.setAttributes(map);

@@ -19,7 +19,7 @@ public abstract class ComparableKeySerializer<T extends Comparable<?>> extends K
     }
 
     @Override
-    public T read(Kryo kryo, Input input, Class<T> type) {
+    public T read(Kryo kryo, Input input, Class<? extends T> type) {
         return kryo.readObject(input, type);
     }
 
