@@ -157,6 +157,7 @@ public class RocksDBTest extends AbstractTest {
     @Test
     public void test() throws IOException {
         Kryo kryo = new Kryo();
+        kryo.setRegistrationRequired(false);
         Faker faker = new Faker();
 
         First first = new First();
