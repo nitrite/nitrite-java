@@ -34,7 +34,7 @@ dependencies {
         api "org.mapdb:mapdb:3.0.8"
         api "com.h2database:h2-mvstore:1.4.200"
         api "com.squareup.okhttp3:okhttp:4.9.0"
-        api "org.rocksdb:rocksdbjni:6.11.6"
+        api "org.rocksdb:rocksdbjni:6.13.3"
         api "com.esotericsoftware:kryo:4.0.2"
         api "org.locationtech.jts:jts-core:1.17.1"
         api "commons-codec:commons-codec:1.15"

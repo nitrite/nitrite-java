@@ -99,6 +99,16 @@ public class IndexCatalog {
         markDirty(collectionName, fields, false);
     }
 
+    public String getIndexMapName(IndexDescriptor descriptor) {
+        return INDEX_PREFIX +
+            INTERNAL_NAME_SEPARATOR +
+            descriptor.getCollectionName() +
+            INTERNAL_NAME_SEPARATOR +
+            descriptor.getIndexFields().getEncodedName() +
+            INTERNAL_NAME_SEPARATOR +
+            descriptor.getIndexType();
+    }
+
     private NitriteMap<Fields, IndexMeta> getIndexMetaMap(String collectionName) {
         String indexMetaName = getIndexMetaName(collectionName);
         return nitriteStore.openMap(indexMetaName, Fields.class, IndexMeta.class);
@@ -113,15 +123,5 @@ public class IndexCatalog {
         if (meta != null && meta.getIndexDescriptor() != null) {
             meta.getIsDirty().set(dirty);
         }
-    }
-
-    private String getIndexMapName(IndexDescriptor index) {
-        return INDEX_PREFIX +
-            INTERNAL_NAME_SEPARATOR +
-            index.getCollectionName() +
-            INTERNAL_NAME_SEPARATOR +
-            index.getFields().getEncodedName() +
-            INTERNAL_NAME_SEPARATOR +
-            index.getIndexType();
     }
 }

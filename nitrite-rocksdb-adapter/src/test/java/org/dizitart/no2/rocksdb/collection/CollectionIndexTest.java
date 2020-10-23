@@ -142,7 +142,7 @@ public class CollectionIndexTest extends BaseCollectionTest {
         insert();
         Collection<IndexDescriptor> indices = collection.listIndices();
         for (IndexDescriptor idx : indices) {
-            collection.rebuildIndex(idx.getFields(), false);
+            collection.rebuildIndex(idx.getIndexFields(), false);
         }
     }
 
@@ -154,7 +154,7 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
         Collection<IndexDescriptor> indices = collection.listIndices();
         for (IndexDescriptor idx : indices) {
-            collection.rebuildIndex(idx.getFields(), true);
+            collection.rebuildIndex(idx.getIndexFields(), true);
             await().until(bodyIndexingCompleted());
         }
     }
@@ -165,11 +165,11 @@ public class CollectionIndexTest extends BaseCollectionTest {
         Collection<IndexDescriptor> indices = collection.listIndices();
         IndexDescriptor idx = indices.iterator().next();
         insert();
-        collection.rebuildIndex(idx.getFields(), true);
+        collection.rebuildIndex(idx.getIndexFields(), true);
 
         boolean error = false;
         try {
-            collection.rebuildIndex(idx.getFields(), true);
+            collection.rebuildIndex(idx.getIndexFields(), true);
         } catch (IndexingException ie) {
             error = true;
         } finally {

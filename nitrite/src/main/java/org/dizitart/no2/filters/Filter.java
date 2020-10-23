@@ -203,14 +203,6 @@ public interface Filter {
      * Creates an and filter which performs a logical AND operation on two filters and selects
      * the documents that satisfy both filters.
      * <p>
-     * [[app-listing]]
-     * [source,java]
-     * .Example
-     * --
-     * // matches all documents where 'age' field has value as 30 and
-     * // 'name' field has value as John Doe
-     * collection.find(where("age").eq(30).and(where("name").eq("John Doe")));
-     * --
      *
      * @param filter other filter
      * @return the and filter
@@ -223,14 +215,6 @@ public interface Filter {
      * Creates an or filter which performs a logical OR operation on two filters and selects
      * the documents that satisfy at least one of the filter.
      * <p>
-     * [[app-listing]]
-     * [source,java]
-     * .Example
-     * --
-     * // matches all documents where 'age' field has value as 30 or
-     * // 'name' field has value as John Doe
-     * collection.find(where("age").eq(30).or(where("name").eq("John Doe")));
-     * --
      *
      * @param filter other filter
      * @return the or filter
@@ -244,13 +228,6 @@ public interface Filter {
      * the documents that *_do not_* satisfy the `filter`. This also includes documents
      * that do not contain the value.
      * <p>
-     * [[app-listing]]
-     * [source,java]
-     * .Example
-     * --
-     * // matches all documents where 'age' field has value not equals to 30
-     * collection.find(where("age").eq("age").not());
-     * --
      *
      * @return the not filter
      */

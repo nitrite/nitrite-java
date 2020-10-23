@@ -34,7 +34,7 @@ public class Rename extends BaseCommand implements Command {
         IndexCatalog indexCatalog = nitrite.getStore().getIndexCatalog();
         Collection<IndexDescriptor> indexEntries = indexCatalog.listIndexDescriptors(oldName);
         for (IndexDescriptor indexDescriptor : indexEntries) {
-            String field = indexDescriptor.getFields();
+            String field = indexDescriptor.getIndexFields();
             String indexType = indexDescriptor.getIndexType();
             newOperations.createIndex(field, indexType, false);
         }

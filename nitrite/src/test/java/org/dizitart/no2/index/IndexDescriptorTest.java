@@ -10,7 +10,7 @@ public class IndexDescriptorTest {
         IndexDescriptor actualIndexDescriptor = new IndexDescriptor("indexType", "field", "collectionName");
         assertEquals("indexType", actualIndexDescriptor.getIndexType());
         assertEquals("collectionName", actualIndexDescriptor.getCollectionName());
-        assertEquals("field", actualIndexDescriptor.getFields());
+        assertEquals("field", actualIndexDescriptor.getIndexFields());
     }
 
     @Test

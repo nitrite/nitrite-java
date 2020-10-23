@@ -11,6 +11,7 @@ import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
+import org.rocksdb.RocksDB;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -139,6 +140,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     private static String getRocksDbVersion() {
-        return "6.11.4";
+        RocksDB.Version version = RocksDB.rocksdbVersion();
+        return version.toString();
     }
 }

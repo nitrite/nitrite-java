@@ -57,7 +57,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
      * @return the target fields.
      */
     @Getter
-    private Fields fields;
+    private Fields indexFields;
 
     /**
      * Gets the collection name.
@@ -81,26 +81,30 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
         notEmpty(collectionName, "collectionName cannot be empty");
 
         this.indexType = indexType;
-        this.fields = fields;
+        this.indexFields = fields;
         this.collectionName = collectionName;
     }
 
     @Override
     public int compareTo(IndexDescriptor other) {
-        String string = collectionName + fields + indexType;
-        String otherString = other.collectionName + other.fields + other.indexType;
+        String string = collectionName + indexFields + indexType;
+        String otherString = other.collectionName + other.indexFields + other.indexType;
         return string.compareTo(otherString);
+    }
+
+    public boolean isCompoundIndex() {
+        return indexFields.getFieldNames().size() > 1;
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeUTF(indexType);
-        stream.writeObject(fields);
+        stream.writeObject(indexFields);
         stream.writeUTF(collectionName);
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         indexType = stream.readUTF();
-        fields = (Fields) stream.readObject();
+        indexFields = (Fields) stream.readObject();
         collectionName = stream.readUTF();
     }
 }

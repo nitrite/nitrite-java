@@ -43,4 +43,17 @@ public class FieldValues {
 
         return values.get(index).getSecond();
     }
+
+    public Fields getFields() {
+        if (fields != null) {
+            return fields;
+        }
+
+        this.fields = new Fields();
+        fields.setFieldList(new ArrayList<>());
+        for (Pair<String, Object> value : getValues()) {
+            fields.getFieldList().add(new Pair<>(value.getFirst(), null));
+        }
+        return fields;
+    }
 }

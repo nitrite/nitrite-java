@@ -27,7 +27,7 @@ public class Fields implements Comparable<Fields>, Serializable {
     private List<Pair<String, SortOrder>> fieldList;
     private transient List<String> fieldNames;
 
-    private Fields() {
+    public Fields() {
         fieldList = new ArrayList<>();
     }
 
@@ -74,6 +74,23 @@ public class Fields implements Comparable<Fields>, Serializable {
 
     public String getEncodedName() {
         return StringUtils.join(INTERNAL_NAME_SEPARATOR, getFieldNames());
+    }
+
+    public boolean isPrefix(Fields otherFields) {
+        if (otherFields == null) return false;
+        List<Pair<String, SortOrder>> otherFieldList = otherFields.getFieldList();
+        if (otherFieldList != null) {
+            if (otherFieldList.size() > fieldList.size()) return false;
+            for (int i = 0; i < otherFieldList.size(); i++) {
+                String field = fieldList.get(i).getFirst();
+                String otherField = otherFieldList.get(i).getFirst();
+                if (!field.contentEquals(otherField)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

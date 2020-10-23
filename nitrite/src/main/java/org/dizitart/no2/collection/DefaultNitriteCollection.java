@@ -409,8 +409,8 @@ class DefaultNitriteCollection implements NitriteCollection {
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
         notNull(indexDescriptor, "index cannot be null");
 
-        if (isIndexing(indexDescriptor.getFields())) {
-            throw new IndexingException("indexing on value " + indexDescriptor.getFields() + " is currently running");
+        if (isIndexing(indexDescriptor.getIndexFields())) {
+            throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }
 

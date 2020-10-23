@@ -30,7 +30,7 @@ import java.util.NoSuchElementException;
 /**
  * @author Anindya Chatterjee.
  */
-class FilteredRecordStream implements RecordStream<Pair<NitriteId, Document>> {
+public class FilteredRecordStream implements RecordStream<Pair<NitriteId, Document>> {
     private final RecordStream<Pair<NitriteId, Document>> recordStream;
     private final Filter filter;
 

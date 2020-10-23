@@ -10,9 +10,6 @@ import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
-import static org.dizitart.no2.common.Constants.INDEX_PREFIX;
-import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
-
 /**
  * @author Anindya Chatterjee
  */
@@ -21,7 +18,7 @@ public abstract class BaseNitriteIndexer implements NitriteIndexer {
     @Override
     public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
         NitriteMap<?, ?> indexMap;
-        if (isCompoundIndex(indexDescriptor)) {
+        if (indexDescriptor.isCompoundIndex()) {
             indexMap = getCompoundIndexMap(indexDescriptor, nitriteConfig.getNitriteStore(), UnknownType.class);
         } else {
             indexMap = getSimpleIndexMap(indexDescriptor, nitriteConfig.getNitriteStore(), UnknownType.class);
@@ -30,15 +27,11 @@ public abstract class BaseNitriteIndexer implements NitriteIndexer {
         indexMap.drop();
     }
 
-    public boolean isCompoundIndex(IndexDescriptor indexDescriptor) {
-        return indexDescriptor.getFields().getFieldNames().size() > 1;
-    }
-
     @SuppressWarnings("rawtypes")
     public NitriteMap<Comparable, NavigableSet<?>> getSimpleIndexMap(IndexDescriptor indexDescriptor,
                                                                      NitriteStore<?> nitriteStore,
                                                                      Class<?> keyType) {
-        String mapName = getIndexMapName(indexDescriptor);
+        String mapName = getIndexMapName(indexDescriptor, nitriteStore);
         return nitriteStore.openMap(mapName, keyType, ConcurrentSkipListSet.class);
     }
 
@@ -46,17 +39,11 @@ public abstract class BaseNitriteIndexer implements NitriteIndexer {
     public NitriteMap<Comparable, NavigableMap<?, ?>> getCompoundIndexMap(IndexDescriptor indexDescriptor,
                                                                           NitriteStore<?> nitriteStore,
                                                                           Class<?> keyType) {
-        String mapName = getIndexMapName(indexDescriptor);
+        String mapName = getIndexMapName(indexDescriptor, nitriteStore);
         return nitriteStore.openMap(mapName, keyType, ConcurrentSkipListMap.class);
     }
 
-    protected String getIndexMapName(IndexDescriptor indexDescriptor) {
-        return INDEX_PREFIX +
-            INTERNAL_NAME_SEPARATOR +
-            indexDescriptor.getCollectionName() +
-            INTERNAL_NAME_SEPARATOR +
-            indexDescriptor.getFields().getEncodedName() +
-            INTERNAL_NAME_SEPARATOR +
-            getIndexType();
+    protected String getIndexMapName(IndexDescriptor indexDescriptor, NitriteStore<?> nitriteStore) {
+        return nitriteStore.getIndexCatalog().getIndexMapName(indexDescriptor);
     }
 }

@@ -383,7 +383,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         journalEntry.setChangeType(ChangeType.DropIndex);
         journalEntry.setCommit(() -> {
             for (IndexDescriptor entry : primary.listIndices()) {
-                if (entry.getFields().equals(fields)) {
+                if (entry.getIndexFields().equals(fields)) {
                     indexEntry.set(entry);
                     break;
                 }
@@ -392,7 +392,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         });
         journalEntry.setRollback(() -> {
             if (indexEntry.get() != null) {
-                primary.createIndex(indexEntry.get().getFields(),
+                primary.createIndex(indexEntry.get().getIndexFields(),
                     indexOptions(indexEntry.get().getIndexType()));
             }
         });
@@ -420,7 +420,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         });
         journalEntry.setRollback(() -> {
             for (IndexDescriptor indexDescriptor : indexEntries) {
-                primary.createIndex(indexDescriptor.getFields(),
+                primary.createIndex(indexDescriptor.getIndexFields(),
                     indexOptions(indexDescriptor.getIndexType()));
             }
         });
@@ -479,7 +479,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
             NitriteCollection collection = nitrite.getCollection(collectionName);
 
             for (IndexDescriptor indexDescriptor : indexEntries) {
-                collection.createIndex(indexDescriptor.getFields(),
+                collection.createIndex(indexDescriptor.getIndexFields(),
                     indexOptions(indexDescriptor.getIndexType()));
             }
 
@@ -632,8 +632,8 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
         notNull(indexDescriptor, "indexEntry cannot be null");
 
-        if (isIndexing(indexDescriptor.getFields())) {
-            throw new IndexingException("indexing on value " + indexDescriptor.getFields() + " is currently running");
+        if (isIndexing(indexDescriptor.getIndexFields())) {
+            throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }
 }

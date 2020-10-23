@@ -83,7 +83,7 @@ public abstract class ComparableIndexer extends BaseNitriteIndexer {
     public void writeIndexEntry(IndexDescriptor indexDescriptor,
                                 FieldValues fieldValues,
                                 NitriteConfig nitriteConfig) {
-        if (isCompoundIndex(indexDescriptor)) {
+        if (indexDescriptor.isCompoundIndex()) {
             writeCompoundIndexEntry(indexDescriptor, fieldValues, nitriteConfig);
         } else {
             writeSimpleIndexEntry(indexDescriptor, fieldValues, nitriteConfig);
@@ -94,7 +94,7 @@ public abstract class ComparableIndexer extends BaseNitriteIndexer {
     public void removeIndexEntry(IndexDescriptor indexDescriptor,
                                  FieldValues fieldValues,
                                  NitriteConfig nitriteConfig) {
-        if (isCompoundIndex(indexDescriptor)) {
+        if (indexDescriptor.isCompoundIndex()) {
             removeCompoundIndexEntry(indexDescriptor, fieldValues, nitriteConfig);
         } else {
             removeSimpleIndexEntry(indexDescriptor, fieldValues, nitriteConfig);

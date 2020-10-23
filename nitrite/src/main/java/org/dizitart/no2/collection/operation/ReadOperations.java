@@ -60,12 +60,6 @@ class ReadOperations {
             return find(findOptions);
         }
 
-        // get all indices for this collection
-        // find the suitable index (prefix included)
-        // find the index map
-        // supply indexmap, collectionmap to filter
-
-
         prepareFilter(filter);
 
         RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(filter, findOptions);

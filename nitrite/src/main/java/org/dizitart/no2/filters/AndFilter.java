@@ -22,20 +22,14 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Anindya Chatterjee
  */
 @Getter
 public class AndFilter extends LogicalFilter {
-    private final Filter rhs;
-    private final Filter lhs;
 
     AndFilter(Filter lhs, Filter rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
+        super(lhs, rhs);
 
         if (rhs instanceof TextFilter) {
             throw new FilterException("text filter must be the first filter in and operation");
@@ -44,11 +38,6 @@ public class AndFilter extends LogicalFilter {
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        return lhs.apply(element) && rhs.apply(element);
-    }
-
-    @Override
-    public List<Filter> getFilters() {
-        return Arrays.asList(lhs, rhs);
+        return getLhs().apply(element) && getRhs().apply(element);
     }
 }

@@ -16,11 +16,25 @@
 
 package org.dizitart.no2.filters;
 
+import lombok.Getter;
+
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author Anindya Chatterjee.
  */
+@Getter
 public abstract class LogicalFilter extends NitriteFilter {
-    public abstract List<Filter> getFilters();
+    private final Filter rhs;
+    private final Filter lhs;
+
+    public LogicalFilter(Filter lhs, Filter rhs) {
+        this.lhs = lhs;
+        this.rhs = rhs;
+    }
+
+    public List<Filter> getFilters() {
+        return Arrays.asList(lhs, rhs);
+    }
 }

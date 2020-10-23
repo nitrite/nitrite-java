@@ -116,7 +116,7 @@ class DocumentIndexWriter {
     private void writeIndexEntryInternal(IndexDescriptor indexDescriptor, Document document,
                                          NitriteIndexer nitriteIndexer) {
         if (indexDescriptor != null) {
-            Fields fields = indexDescriptor.getFields();
+            Fields fields = indexDescriptor.getIndexFields();
             FieldValues fieldValues = DocumentUtils.getValues(document, fields);
 
 //            Object fieldValue = document.get(field);
@@ -136,7 +136,7 @@ class DocumentIndexWriter {
     private void removeIndexEntryInternal(IndexDescriptor indexDescriptor, Document document,
                                           NitriteIndexer nitriteIndexer) {
         if (indexDescriptor != null) {
-            Fields fields = indexDescriptor.getFields();
+            Fields fields = indexDescriptor.getIndexFields();
             FieldValues fieldValues = DocumentUtils.getValues(document, fields);
 
 //            Object fieldValue = document.get(field);

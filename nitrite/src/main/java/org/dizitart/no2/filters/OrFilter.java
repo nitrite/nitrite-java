@@ -21,29 +21,17 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
  * @author Anindya Chatterjee
  */
 @Getter
 public class OrFilter extends LogicalFilter {
-    private final Filter rhs;
-    private final Filter lhs;
-
     OrFilter(Filter lhs, Filter rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-    }
-
-    @Override
-    public List<Filter> getFilters() {
-        return Arrays.asList(lhs, rhs);
+        super(lhs, rhs);
     }
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        return lhs.apply(element) || rhs.apply(element);
+        return getLhs().apply(element) || getRhs().apply(element);
     }
 }

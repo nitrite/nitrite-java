@@ -110,7 +110,7 @@ public class NitriteSerializers {
         @Override
         public void write(Kryo kryo, Output output, IndexDescriptor object) {
             output.writeString(object.getCollectionName());
-            output.writeString(object.getFields());
+            output.writeString(object.getIndexFields());
             output.writeString(object.getIndexType());
         }
 

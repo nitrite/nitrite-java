@@ -79,7 +79,7 @@ class IndexOperations implements AutoCloseable {
     // call to this method is already synchronized, only one thread per field
     // can access it only if rebuild is already not running for that field
     void buildIndex(IndexDescriptor indexDescriptor, boolean isAsync, boolean rebuild) {
-        final Fields fields = indexDescriptor.getFields();
+        final Fields fields = indexDescriptor.getIndexFields();
         if (getBuildFlag(fields).compareAndSet(false, true)) {
             if (isAsync) {
                 rebuildExecutor.submit(() -> buildIndexInternal(indexDescriptor, rebuild));
@@ -88,7 +88,7 @@ class IndexOperations implements AutoCloseable {
             }
             return;
         }
-        throw new IndexingException("indexing is already running on " + indexDescriptor.getFields());
+        throw new IndexingException("indexing is already running on " + indexDescriptor.getIndexFields());
     }
 
     void dropIndex(Fields fields) {
@@ -121,7 +121,7 @@ class IndexOperations implements AutoCloseable {
 
         List<Future<?>> futures = new ArrayList<>();
         for (IndexDescriptor index : listIndexes()) {
-            futures.add(runAsync(() -> dropIndex(index.getFields())));
+            futures.add(runAsync(() -> dropIndex(index.getIndexFields())));
         }
 
         for (Future<?> future : futures) {
@@ -180,7 +180,7 @@ class IndexOperations implements AutoCloseable {
     }
 
     private void buildIndexInternal(IndexDescriptor indexDescriptor, boolean rebuild) {
-        Fields fields = indexDescriptor.getFields();
+        Fields fields = indexDescriptor.getIndexFields();
         try {
             alert(EventType.IndexStart, fields);
             // first put dirty marker
@@ -196,7 +196,7 @@ class IndexOperations implements AutoCloseable {
 
             for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
                 Document document = entry.getSecond();
-                FieldValues fieldValues = DocumentUtils.getValues(document, indexDescriptor.getFields());
+                FieldValues fieldValues = DocumentUtils.getValues(document, indexDescriptor.getIndexFields());
                 nitriteIndexer.writeIndexEntry(indexDescriptor, fieldValues, nitriteConfig);
             }
         } finally {
