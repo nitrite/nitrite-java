@@ -36,8 +36,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
-import static org.dizitart.no2.common.Constants.STORE_INFO;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.store.StoreSecurity.authenticate;
 
@@ -225,7 +224,7 @@ class NitriteDatabase implements Nitrite {
             databaseMetadata.setCreateTime(System.currentTimeMillis());
             databaseMetadata.setStoreVersion(store.getStoreVersion());
             databaseMetadata.setNitriteVersion(NITRITE_VERSION);
-            databaseMetadata.setSchemaVersion(nitriteConfig.getSchemaVersion());
+            databaseMetadata.setSchemaVersion(INITIAL_SCHEMA_VERSION);
 
             storeInfo.put(STORE_INFO, databaseMetadata.getInfo());
         }
