@@ -20,6 +20,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.Serializer;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import lombok.SneakyThrows;
 import org.dizitart.no2.exceptions.NitriteIOException;
 
 import java.io.ByteArrayInputStream;
@@ -40,6 +41,7 @@ public class KryoObjectFormatter implements ObjectFormatter {
 
     public KryoObjectFormatter() {
         this.keySerializerRegistry = new HashMap<>();
+        kryo.setRegistrationRequired(false);
         registerInternalSerializers();
     }
 
@@ -122,10 +124,10 @@ public class KryoObjectFormatter implements ObjectFormatter {
         }
     }
 
+    @SneakyThrows
     private void registerInternalSerializers() {
         NitriteSerializers.registerAll(this);
         DefaultJavaSerializers.registerAll(this);
         DefaultTimeKeySerializers.registerAll(this);
-//        DefaultNumberKeySerializers.registerAll(this);
     }
 }

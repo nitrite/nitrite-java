@@ -17,7 +17,7 @@ public class JodaTimeKryoKeySerializer extends ComparableKeySerializer<DateTime>
     }
 
     @Override
-    public DateTime read(Kryo kryo, Input input, Class<DateTime> type) {
+    public DateTime read(Kryo kryo, Input input, Class<? extends DateTime> type) {
         return new DateTime(input.readLong());
     }
 

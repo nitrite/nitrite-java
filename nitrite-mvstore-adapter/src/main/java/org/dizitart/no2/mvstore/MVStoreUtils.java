@@ -51,17 +51,19 @@ class MVStoreUtils {
                 throw new NitriteIOException("database is already opened in other process");
             }
 
-            if (!isNullOrEmpty(storeConfig.filePath())) {
+            if (dbFile != null) {
                 try {
-                    File file = new File(storeConfig.filePath());
-                    if (file.isDirectory()) {
+                    if (dbFile.isDirectory()) {
                         throw new NitriteIOException(storeConfig.filePath()
                             + " is a directory, must be a file");
                     }
 
-                    if (file.exists() && file.isFile()) {
+                    if (dbFile.exists() && dbFile.isFile()) {
                         if (isCompatibilityError(ise)) {
-                            store = tryMigrate(file, builder, storeConfig);
+                            if (store != null) {
+                                store.closeImmediately();
+                            }
+                            store = tryMigrate(dbFile, builder, storeConfig);
                         } else {
                             log.error("Database corruption detected. Trying to repair", ise);
                             Recovery.recover(storeConfig.filePath());
