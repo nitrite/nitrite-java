@@ -54,7 +54,7 @@ then add required dependencies:
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-bom</artifactId>
-            <version>{version}</version>
+            <version>4.0.0-SNAPSHOT</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -79,7 +79,7 @@ then add required dependencies:
 
 ```groovy
 
-implementation(platform("org.dizitart:nitrite-bom:{version}"))
+implementation(platform("org.dizitart:nitrite-bom:4.0.0-SNAPSHOT"))
     
 implementation 'org.dizitart:nitrite'
 implementation 'org.dizitart:nitrite-mvstore-adapter'
