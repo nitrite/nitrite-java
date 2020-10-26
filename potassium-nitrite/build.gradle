@@ -59,7 +59,7 @@ dependencies {
 
     testApi project(':nitrite-mvstore-adapter')
     testImplementation "junit:junit:4.13.1"
-    testImplementation "joda-time:joda-time:2.10.7"
+    testImplementation "joda-time:joda-time:2.10.8"
     testImplementation "org.threeten:threetenbp:1.4.5"
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.3"
     testImplementation "org.apache.logging.log4j:log4j-core:2.13.3"
