@@ -37,12 +37,14 @@ public abstract class BaseTextTokenizer implements TextTokenizer {
     @Override
     public Set<String> tokenize(String text) throws IOException {
         Set<String> words = new HashSet<>();
-        StringTokenizer tokenizer = new StringTokenizer(text, WHITESPACE_CHARS);
-        while (tokenizer.hasMoreTokens()) {
-            String word = tokenizer.nextToken();
-            word = convertWord(word);
-            if (word != null) {
-                words.add(word);
+        if(text != null) {
+            StringTokenizer tokenizer = new StringTokenizer(text, WHITESPACE_CHARS);
+            while (tokenizer.hasMoreTokens()) {
+                String word = tokenizer.nextToken();
+                word = convertWord(word);
+                if (word != null) {
+                    words.add(word);
+                }
             }
         }
         return words;
