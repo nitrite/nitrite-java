@@ -164,7 +164,7 @@ public class JacksonMapper extends MappableMapper {
     }
 
     private void loadJacksonExtension(JacksonExtension jacksonExtension, ObjectMapper objectMapper) {
-        for (Class<?> dataType : jacksonExtension.getDataTypes()) {
+        for (Class<?> dataType : jacksonExtension.getSupportedTypes()) {
             addValueType(dataType);
         }
         objectMapper.registerModule(jacksonExtension.getModule());
