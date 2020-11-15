@@ -26,12 +26,16 @@ import org.dizitart.no2.common.tuples.Pair;
  */
 @Getter
 public class OrFilter extends LogicalFilter {
-    OrFilter(Filter lhs, Filter rhs) {
-        super(lhs, rhs);
+    OrFilter(Filter... filters) {
+        super(filters);
     }
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        return getLhs().apply(element) || getRhs().apply(element);
+        boolean result = false;
+        for (Filter filter : getFilters()) {
+            result = result || filter.apply(element);
+        }
+        return result;
     }
 }

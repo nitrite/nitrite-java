@@ -8,6 +8,8 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.migration.TypeConverter;
 
+import static org.dizitart.no2.common.Fields.single;
+
 /**
  * @author Anindya Chatterjee
  */
@@ -31,7 +33,7 @@ public class ChangeDataType extends BaseCommand implements Command {
             nitriteMap.put(entry.getFirst(), document);
         }
 
-        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptor(collectionName, fieldName);
+        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, single(fieldName));
         if (indexDescriptor != null) {
             operations.rebuildIndex(indexDescriptor, false);
         }

@@ -20,8 +20,10 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.FilterException;
 
 import static org.dizitart.no2.common.Constants.DOC_ID;
+import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 
 /**
  * An interface to specify filtering criteria during find operation. When
@@ -190,6 +192,24 @@ public interface Filter {
         return new EqualsFilter(DOC_ID, nitriteId.getIdValue());
     }
 
+    static Filter and(Filter... filters) {
+        notEmpty(filters, "at least two filters must be specified");
+        if (filters.length < 2) {
+            throw new FilterException("at least two filters must be specified");
+        }
+
+        return new AndFilter(filters);
+    }
+
+    static Filter or(Filter... filters) {
+        notEmpty(filters, "at least two filters must be specified");
+        if (filters.length < 2) {
+            throw new FilterException("at least two filters must be specified");
+        }
+
+        return new OrFilter(filters);
+    }
+
     /**
      * Filters a document map and returns the set of {@link NitriteId}s of
      * matching {@link Document}s.
@@ -198,30 +218,6 @@ public interface Filter {
      * @return a set of {@link NitriteId}s of matching documents.
      */
     boolean apply(Pair<NitriteId, Document> element);
-
-    /**
-     * Creates an and filter which performs a logical AND operation on two filters and selects
-     * the documents that satisfy both filters.
-     * <p>
-     *
-     * @param filter other filter
-     * @return the and filter
-     */
-    default Filter and(Filter filter) {
-        return new AndFilter(this, filter);
-    }
-
-    /**
-     * Creates an or filter which performs a logical OR operation on two filters and selects
-     * the documents that satisfy at least one of the filter.
-     * <p>
-     *
-     * @param filter other filter
-     * @return the or filter
-     */
-    default Filter or(Filter filter) {
-        return new OrFilter(this, filter);
-    }
 
     /**
      * Creates a not filter which performs a logical NOT operation on a `filter` and selects

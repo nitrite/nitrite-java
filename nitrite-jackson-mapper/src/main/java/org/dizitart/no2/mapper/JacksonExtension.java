@@ -24,6 +24,6 @@ import java.util.List;
  * @author Anindya Chatterjee
  */
 public interface JacksonExtension {
-    List<Class<?>> getDataTypes();
+    List<Class<?>> getSupportedTypes();
     Module getModule();
 }

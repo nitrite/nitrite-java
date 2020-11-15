@@ -24,16 +24,16 @@ public class Fields implements Comparable<Fields>, Serializable {
     private static final long serialVersionUID = 1601646404L;
 
     // order of the given fields matter
-    private List<Pair<String, SortOrder>> fieldList;
-    private transient List<String> fieldNames;
+    private List<Pair<String, SortOrder>> descriptor;
+    private transient FieldNames fieldNames;
 
     public Fields() {
-        fieldList = new ArrayList<>();
+        descriptor = new ArrayList<>();
     }
 
     public static Fields single(String field) {
         Fields fields = new Fields();
-        fields.fieldList.add(new Pair<>(field, SortOrder.Ascending));
+        fields.descriptor.add(new Pair<>(field, SortOrder.Ascending));
         return fields;
     }
 
@@ -43,28 +43,28 @@ public class Fields implements Comparable<Fields>, Serializable {
         notEmpty(fields, "fields cannot be empty");
 
         Fields f = new Fields();
-        f.fieldList.addAll(Arrays.asList(fields));
+        f.descriptor.addAll(Arrays.asList(fields));
         return f;
     }
 
-    public List<String> getFieldNames() {
+    public FieldNames getFieldNames() {
         if (fieldNames != null) {
             return fieldNames;
         }
 
         fieldNames = new ArrayList<>();
-        for (Pair<String, SortOrder> pair : fieldList) {
+        for (Pair<String, SortOrder> pair : descriptor) {
             fieldNames.add(pair.getFirst());
         }
         return fieldNames;
     }
 
     public Pair<String, SortOrder> getFirstKey() {
-        return fieldList.get(0);
+        return descriptor.get(0);
     }
 
     public SortOrder getSortOrder(String fieldName) {
-        for (Pair<String, SortOrder> pair : fieldList) {
+        for (Pair<String, SortOrder> pair : descriptor) {
             if (pair.getFirst().equals(fieldName)) {
                 return pair.getSecond();
             }
@@ -78,11 +78,11 @@ public class Fields implements Comparable<Fields>, Serializable {
 
     public boolean isPrefix(Fields otherFields) {
         if (otherFields == null) return false;
-        List<Pair<String, SortOrder>> otherFieldList = otherFields.getFieldList();
+        List<Pair<String, SortOrder>> otherFieldList = otherFields.getDescriptor();
         if (otherFieldList != null) {
-            if (otherFieldList.size() > fieldList.size()) return false;
+            if (otherFieldList.size() > descriptor.size()) return false;
             for (int i = 0; i < otherFieldList.size(); i++) {
-                String field = fieldList.get(i).getFirst();
+                String field = descriptor.get(i).getFirst();
                 String otherField = otherFieldList.get(i).getFirst();
                 if (!field.contentEquals(otherField)) {
                     return false;
@@ -97,7 +97,7 @@ public class Fields implements Comparable<Fields>, Serializable {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("[");
         int count = 0;
-        for (Pair<String, SortOrder> field : fieldList) {
+        for (Pair<String, SortOrder> field : descriptor) {
             count++;
             stringBuilder.append("{")
                 .append(field.getFirst())
@@ -105,7 +105,7 @@ public class Fields implements Comparable<Fields>, Serializable {
                 .append(field.getSecond())
                 .append("}");
 
-                if (count != fieldList.size()) {
+                if (count != descriptor.size()) {
                     stringBuilder.append(", ");
                 }
         }
@@ -134,11 +134,11 @@ public class Fields implements Comparable<Fields>, Serializable {
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeObject(fieldList);
+        stream.writeObject(descriptor);
     }
 
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        fieldList = (List<Pair<String, SortOrder>>) stream.readObject();
+        descriptor = (List<Pair<String, SortOrder>>) stream.readObject();
     }
 }

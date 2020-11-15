@@ -43,7 +43,6 @@ import static org.dizitart.no2.common.util.ValidationUtils.*;
 @SuppressWarnings("rawtypes")
 public class NitriteTextIndexer implements TextIndexer {
     private final TextTokenizer textTokenizer;
-    private IndexCatalog indexCatalog;
     private NitriteStore<?> nitriteStore;
 
     public NitriteTextIndexer() {

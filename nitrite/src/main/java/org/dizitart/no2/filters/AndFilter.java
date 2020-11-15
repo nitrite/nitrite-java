@@ -28,16 +28,22 @@ import org.dizitart.no2.exceptions.FilterException;
 @Getter
 public class AndFilter extends LogicalFilter {
 
-    AndFilter(Filter lhs, Filter rhs) {
-        super(lhs, rhs);
+    AndFilter(Filter... filters) {
+        super(filters);
 
-        if (rhs instanceof TextFilter) {
-            throw new FilterException("text filter must be the first filter in and operation");
+        for (int i = 1; i < filters.length; i++) {
+            if (filters[i] instanceof TextFilter) {
+                throw new FilterException("text filter must be the first filter in AND operation");
+            }
         }
     }
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        return getLhs().apply(element) && getRhs().apply(element);
+        boolean result = true;
+        for (Filter filter : getFilters()) {
+            result = result && filter.apply(element);
+        }
+        return result;
     }
 }

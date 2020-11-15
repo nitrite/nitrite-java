@@ -8,6 +8,8 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.migration.Generator;
 
+import static org.dizitart.no2.common.Fields.single;
+
 /**
  * @author Anindya Chatterjee
  */
@@ -21,7 +23,7 @@ public class AddField extends BaseCommand implements Command {
     public void execute(Nitrite nitrite) {
         initialize(nitrite, collectionName);
 
-        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptor(collectionName, fieldName);
+        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, single(fieldName));
 
         for (Pair<NitriteId, Document> pair : nitriteMap.entries()) {
             Document document = pair.getSecond();
@@ -35,7 +37,7 @@ public class AddField extends BaseCommand implements Command {
         }
 
         if (indexDescriptor != null) {
-            operations.createIndex(fieldName, indexDescriptor.getIndexType(), false);
+            operations.createIndex(single(fieldName), indexDescriptor.getIndexType(), false);
         }
     }
 }

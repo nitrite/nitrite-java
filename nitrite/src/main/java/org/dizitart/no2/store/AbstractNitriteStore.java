@@ -29,6 +29,7 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
 
     protected final NitriteEventBus<EventInfo, StoreEventListener> eventBus;
     protected NitriteConfig nitriteConfig;
+    private IndexCatalog indexCatalog;
 
     protected AbstractNitriteStore() {
         eventBus = new StoreEventBus();
@@ -87,7 +88,10 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
 
     @Override
     public IndexCatalog getIndexCatalog() {
-        return new IndexCatalog(this);
+        if (indexCatalog == null) {
+            indexCatalog = new IndexCatalog(this);
+        }
+        return indexCatalog;
     }
 
     @Override

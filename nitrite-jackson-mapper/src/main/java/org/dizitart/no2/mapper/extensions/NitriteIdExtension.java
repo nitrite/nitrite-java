@@ -34,7 +34,7 @@ import static org.dizitart.no2.common.util.Iterables.listOf;
 public class NitriteIdExtension implements JacksonExtension {
 
     @Override
-    public List<Class<?>> getDataTypes() {
+    public List<Class<?>> getSupportedTypes() {
         return listOf(NitriteId.class);
     }
 

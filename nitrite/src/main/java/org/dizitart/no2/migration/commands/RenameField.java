@@ -8,6 +8,8 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.store.IndexCatalog;
 
+import static org.dizitart.no2.common.Fields.single;
+
 /**
  * @author Anindya Chatterjee
  */
@@ -21,7 +23,8 @@ public class RenameField extends BaseCommand implements Command {
     public void execute(Nitrite nitrite) {
         initialize(nitrite, collectionName);
 
-        boolean indexExists = indexCatalog.hasIndexDescriptor(collectionName, oldName);
+        IndexCatalog indexCatalog = nitrite.getStore().getIndexCatalog();
+        boolean indexExists = indexCatalog.hasIndexDescriptor(collectionName, single(oldName));
         for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
             Document document = entry.getSecond();
             if (document.containsKey(oldName)) {
@@ -34,12 +37,11 @@ public class RenameField extends BaseCommand implements Command {
         }
 
         if (indexExists) {
-            IndexCatalog indexCatalog = nitrite.getStore().getIndexCatalog();
-            IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptor(collectionName, oldName);
+            IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, single(oldName));
             String indexType = indexDescriptor.getIndexType();
 
-            operations.dropIndex(oldName);
-            operations.createIndex(newName, indexType, false);
+            operations.dropIndex(single(oldName));
+            operations.createIndex(single(newName), indexType, false);
         }
     }
 }

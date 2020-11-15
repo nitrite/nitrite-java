@@ -17,13 +17,13 @@
 package org.dizitart.no2.store;
 
 import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.Constants.*;
@@ -61,12 +61,54 @@ public class IndexCatalog {
         return index;
     }
 
-    public IndexDescriptor findIndexDescriptor(String collectionName, Fields fields) {
+    public IndexDescriptor findIndexDescriptorExact(String collectionName, Fields fields) {
         IndexMeta meta = getIndexMetaMap(collectionName).get(fields);
         if (meta != null) {
             return meta.getIndexDescriptor();
         }
         return null;
+    }
+
+    public Set<IndexDescriptor> findMatchingIndexDescriptor(String collectionName, Fields queryFields) {
+        Collection<IndexDescriptor> indexDescriptors = listIndexDescriptors(collectionName);
+        Map<Fields, Set<IndexDescriptor>> descriptorMap = new ConcurrentHashMap<>();
+
+        // get actual index descriptors
+        for (IndexDescriptor indexDescriptor : indexDescriptors) {
+            // create all possible combinations of fields in the same order
+            // if the index field is [a,b,c] then combinations would be
+            // like - [[a], [a,b], [a,b,c]]
+            List<Fields> fieldsCombinations = new ArrayList<>();
+
+            Fields indexFields = indexDescriptor.getIndexFields();
+
+            // create combinations of fields
+            for (Pair<String, SortOrder> pair : indexFields.getDescriptor()) {
+                Fields fields = new Fields();
+                if (!fieldsCombinations.isEmpty()) {
+                    // get the last field combination and add the current field from the pair
+                    // [a,b] + c -> [a,b,c]
+                    Fields lastFields = fieldsCombinations.get(fieldsCombinations.size() - 1);
+                    fields.getDescriptor().addAll(lastFields.getDescriptor());
+                }
+                fields.getDescriptor().add(pair);
+                fieldsCombinations.add(fields);
+            }
+
+            // for each combination, create a map with the index
+            // so, if the Ix1 is on fields [a,b,c], then cache would
+            // be like - [a] -> Ix1, [a,b] -> Ix1, [a,b,c] -> Ix1
+            for (Fields fields : fieldsCombinations) {
+                Set<IndexDescriptor> descriptorList = descriptorMap.get(fields);
+                if (descriptorList == null) {
+                    descriptorList = new HashSet<>();
+                }
+                descriptorList.add(indexDescriptor);
+                descriptorMap.put(fields, descriptorList);
+            }
+        }
+
+        return descriptorMap.get(queryFields);
     }
 
     public boolean isDirtyIndex(String collectionName, Fields fields) {

@@ -7,6 +7,8 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 
+import static org.dizitart.no2.common.Fields.single;
+
 /**
  * @author Anindya Chatterjee
  */
@@ -19,7 +21,7 @@ public class DeleteField extends BaseCommand implements Command {
     public void execute(Nitrite nitrite) {
         initialize(nitrite, collectionName);
 
-        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptor(collectionName, fieldName);
+        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, single(fieldName));
         for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
             Document document = entry.getSecond();
             document.remove(fieldName);
@@ -27,7 +29,7 @@ public class DeleteField extends BaseCommand implements Command {
         }
 
         if (indexDescriptor != null) {
-            operations.dropIndex(fieldName);
+            operations.dropIndex(single(fieldName));
         }
     }
 }

@@ -38,7 +38,6 @@ class DocumentIndexWriter {
     private final NitriteMap<NitriteId, Document> nitriteMap;
     private final IndexOperations indexOperations;
     private String collectionName;
-    private IndexCatalog indexCatalog;
 
     DocumentIndexWriter(NitriteConfig nitriteConfig,
                         NitriteMap<NitriteId, Document> nitriteMap,
@@ -109,12 +108,13 @@ class DocumentIndexWriter {
 
     private void initialize() {
         NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
-        this.indexCatalog = nitriteStore.getIndexCatalog();
         this.collectionName = nitriteMap.getName();
     }
 
     private void writeIndexEntryInternal(IndexDescriptor indexDescriptor, Document document,
                                          NitriteIndexer nitriteIndexer) {
+        IndexCatalog indexCatalog = nitriteMap.getStore().getIndexCatalog();
+
         if (indexDescriptor != null) {
             Fields fields = indexDescriptor.getIndexFields();
             FieldValues fieldValues = DocumentUtils.getValues(document, fields);
@@ -135,6 +135,8 @@ class DocumentIndexWriter {
 
     private void removeIndexEntryInternal(IndexDescriptor indexDescriptor, Document document,
                                           NitriteIndexer nitriteIndexer) {
+        IndexCatalog indexCatalog = nitriteMap.getStore().getIndexCatalog();
+
         if (indexDescriptor != null) {
             Fields fields = indexDescriptor.getIndexFields();
             FieldValues fieldValues = DocumentUtils.getValues(document, fields);

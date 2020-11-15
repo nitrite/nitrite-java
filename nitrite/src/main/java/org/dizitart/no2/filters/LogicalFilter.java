@@ -26,15 +26,9 @@ import java.util.List;
  */
 @Getter
 public abstract class LogicalFilter extends NitriteFilter {
-    private final Filter rhs;
-    private final Filter lhs;
+    private final List<Filter> filters;
 
-    public LogicalFilter(Filter lhs, Filter rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-    }
-
-    public List<Filter> getFilters() {
-        return Arrays.asList(lhs, rhs);
+    public LogicalFilter(Filter... filters) {
+        this.filters = Arrays.asList(filters);
     }
 }

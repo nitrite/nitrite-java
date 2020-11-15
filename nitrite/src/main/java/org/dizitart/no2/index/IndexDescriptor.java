@@ -36,8 +36,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @see NitriteCollection#createIndex(Fields, IndexOptions)
  * @since 1.0
  */
-@ToString
-@EqualsAndHashCode
+@Data
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializable {
     private static final long serialVersionUID = 1576690829L;

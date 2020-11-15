@@ -17,7 +17,6 @@ import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.store.IndexCatalog;
 import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.store.NitriteStore;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,7 +39,6 @@ class IndexOperations implements AutoCloseable {
     private final EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
 
     private String collectionName;
-    private IndexCatalog indexCatalog;
     private Map<Fields, AtomicBoolean> indexBuildRegistry;
     private ExecutorService rebuildExecutor;
     private Collection<IndexDescriptor> indexDescriptorCache;
@@ -62,6 +60,7 @@ class IndexOperations implements AutoCloseable {
 
     void createIndex(Fields fields, String indexType, boolean isAsync) {
         IndexDescriptor indexDescriptor;
+        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         if (!hasIndexEntry(fields)) {
             // if no index create index
             indexDescriptor = indexCatalog.createIndexDescriptor(collectionName, fields, indexType);
@@ -96,6 +95,7 @@ class IndexOperations implements AutoCloseable {
             throw new IndexingException("cannot drop index as indexing is running on " + fields);
         }
 
+        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         IndexDescriptor indexDescriptor = findIndexDescriptor(fields);
         if (indexDescriptor != null) {
             String indexType = indexDescriptor.getIndexType();
@@ -139,6 +139,7 @@ class IndexOperations implements AutoCloseable {
     }
 
     boolean isIndexing(Fields field) {
+        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         // has an index will only return true, if there is an index on
         // the value and indexing is not running on it
         return indexCatalog.hasIndexDescriptor(collectionName, field)
@@ -146,6 +147,7 @@ class IndexOperations implements AutoCloseable {
     }
 
     boolean hasIndexEntry(Fields field) {
+        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         return indexCatalog.hasIndexDescriptor(collectionName, field);
     }
 
@@ -154,7 +156,8 @@ class IndexOperations implements AutoCloseable {
     }
 
     IndexDescriptor findIndexDescriptor(Fields field) {
-        return indexCatalog.findIndexDescriptor(collectionName, field);
+        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
+        return indexCatalog.findIndexDescriptorExact(collectionName, field);
     }
 
     AtomicBoolean getBuildFlag(Fields field) {
@@ -167,8 +170,6 @@ class IndexOperations implements AutoCloseable {
     }
 
     private void initialize() {
-        NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
-        this.indexCatalog = nitriteStore.getIndexCatalog();
         this.collectionName = nitriteMap.getName();
         this.indexBuildRegistry = new ConcurrentHashMap<>();
         this.rebuildExecutor = ThreadPoolManager.workerPool();
@@ -176,10 +177,12 @@ class IndexOperations implements AutoCloseable {
     }
 
     private void updateIndexDescriptorCache() {
+        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         indexDescriptorCache = indexCatalog.listIndexDescriptors(collectionName);
     }
 
     private void buildIndexInternal(IndexDescriptor indexDescriptor, boolean rebuild) {
+        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         Fields fields = indexDescriptor.getIndexFields();
         try {
             alert(EventType.IndexStart, fields);
