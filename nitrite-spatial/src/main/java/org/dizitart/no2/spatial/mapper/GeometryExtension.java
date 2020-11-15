@@ -38,7 +38,7 @@ public class GeometryExtension implements JacksonExtension {
     public static final String GEOMETRY_ID = "geometry:";
 
     @Override
-    public List<Class<?>> getDataTypes() {
+    public List<Class<?>> getSupportedTypes() {
         return listOf(Geometry.class);
     }
 

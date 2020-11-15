@@ -73,7 +73,7 @@ class BackportJavaTimeTest {
             }
         }
 
-        override fun getDataTypes(): List<Class<*>> {
+        override fun getSupportedTypes(): List<Class<*>> {
             return listOf(LocalDateTime::class.java)
         }
     }
