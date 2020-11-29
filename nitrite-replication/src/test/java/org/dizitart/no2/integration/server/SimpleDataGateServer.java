@@ -23,9 +23,9 @@ import org.glassfish.tyrus.server.Server;
  * @author Anindya Chatterjee
  */
 public class SimpleDataGateServer {
-    private int port;
+    private final int port;
     private Server server;
-    private Repository repository;
+    private final Repository repository;
 
     public SimpleDataGateServer(int port) {
         this.port = port;

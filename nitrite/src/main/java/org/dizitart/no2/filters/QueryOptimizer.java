@@ -99,7 +99,7 @@ public class QueryOptimizer {
         for (Filter filter : filters) {
             if (filter instanceof FieldBasedFilter) {
                 FieldBasedFilter fieldBasedFilter = (FieldBasedFilter) filter;
-                fields.getDescriptor().add(new Pair<>(fieldBasedFilter.getField(), SortOrder.Ascending));
+                fields.getSortSpecs().add(new Pair<>(fieldBasedFilter.getField(), SortOrder.Ascending));
             }
         }
         return null;

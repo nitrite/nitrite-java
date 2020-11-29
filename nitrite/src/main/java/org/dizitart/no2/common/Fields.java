@@ -24,16 +24,16 @@ public class Fields implements Comparable<Fields>, Serializable {
     private static final long serialVersionUID = 1601646404L;
 
     // order of the given fields matter
-    private List<Pair<String, SortOrder>> descriptor;
+    private List<Pair<String, SortOrder>> sortSpecs;
     private transient FieldNames fieldNames;
 
     public Fields() {
-        descriptor = new ArrayList<>();
+        sortSpecs = new ArrayList<>();
     }
 
     public static Fields single(String field) {
         Fields fields = new Fields();
-        fields.descriptor.add(new Pair<>(field, SortOrder.Ascending));
+        fields.sortSpecs.add(new Pair<>(field, SortOrder.Ascending));
         return fields;
     }
 
@@ -43,7 +43,7 @@ public class Fields implements Comparable<Fields>, Serializable {
         notEmpty(fields, "fields cannot be empty");
 
         Fields f = new Fields();
-        f.descriptor.addAll(Arrays.asList(fields));
+        f.sortSpecs.addAll(Arrays.asList(fields));
         return f;
     }
 
@@ -52,19 +52,19 @@ public class Fields implements Comparable<Fields>, Serializable {
             return fieldNames;
         }
 
-        fieldNames = new ArrayList<>();
-        for (Pair<String, SortOrder> pair : descriptor) {
+        fieldNames = new FieldNames();
+        for (Pair<String, SortOrder> pair : sortSpecs) {
             fieldNames.add(pair.getFirst());
         }
         return fieldNames;
     }
 
     public Pair<String, SortOrder> getFirstKey() {
-        return descriptor.get(0);
+        return sortSpecs.get(0);
     }
 
     public SortOrder getSortOrder(String fieldName) {
-        for (Pair<String, SortOrder> pair : descriptor) {
+        for (Pair<String, SortOrder> pair : sortSpecs) {
             if (pair.getFirst().equals(fieldName)) {
                 return pair.getSecond();
             }
@@ -78,11 +78,11 @@ public class Fields implements Comparable<Fields>, Serializable {
 
     public boolean isPrefix(Fields otherFields) {
         if (otherFields == null) return false;
-        List<Pair<String, SortOrder>> otherFieldList = otherFields.getDescriptor();
+        List<Pair<String, SortOrder>> otherFieldList = otherFields.getSortSpecs();
         if (otherFieldList != null) {
-            if (otherFieldList.size() > descriptor.size()) return false;
+            if (otherFieldList.size() > sortSpecs.size()) return false;
             for (int i = 0; i < otherFieldList.size(); i++) {
-                String field = descriptor.get(i).getFirst();
+                String field = sortSpecs.get(i).getFirst();
                 String otherField = otherFieldList.get(i).getFirst();
                 if (!field.contentEquals(otherField)) {
                     return false;
@@ -97,7 +97,7 @@ public class Fields implements Comparable<Fields>, Serializable {
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("[");
         int count = 0;
-        for (Pair<String, SortOrder> field : descriptor) {
+        for (Pair<String, SortOrder> field : sortSpecs) {
             count++;
             stringBuilder.append("{")
                 .append(field.getFirst())
@@ -105,7 +105,7 @@ public class Fields implements Comparable<Fields>, Serializable {
                 .append(field.getSecond())
                 .append("}");
 
-                if (count != descriptor.size()) {
+                if (count != sortSpecs.size()) {
                     stringBuilder.append(", ");
                 }
         }
@@ -134,11 +134,11 @@ public class Fields implements Comparable<Fields>, Serializable {
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeObject(descriptor);
+        stream.writeObject(sortSpecs);
     }
 
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        descriptor = (List<Pair<String, SortOrder>>) stream.readObject();
+        sortSpecs = (List<Pair<String, SortOrder>>) stream.readObject();
     }
 }

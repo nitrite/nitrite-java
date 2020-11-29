@@ -50,9 +50,9 @@ public class FieldValues {
         }
 
         this.fields = new Fields();
-        fields.setDescriptor(new ArrayList<>());
+        fields.setSortSpecs(new ArrayList<>());
         for (Pair<String, Object> value : getValues()) {
-            fields.getDescriptor().add(new Pair<>(value.getFirst(), null));
+            fields.getSortSpecs().add(new Pair<>(value.getFirst(), null));
         }
         return fields;
     }

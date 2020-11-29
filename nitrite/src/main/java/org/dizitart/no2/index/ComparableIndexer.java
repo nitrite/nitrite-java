@@ -105,7 +105,7 @@ public abstract class ComparableIndexer extends BaseNitriteIndexer {
                                          FieldValues fieldValues,
                                          NitriteConfig nitriteConfig) {
         Fields fields = fieldValues.getFields();
-        List<String> fieldNames = fields.getFieldNames();
+        FieldNames fieldNames = fields.getFieldNames();
 
         String firstField = fieldNames.get(0);
         Object firstValue = fieldValues.get(firstField);
@@ -146,7 +146,7 @@ public abstract class ComparableIndexer extends BaseNitriteIndexer {
                                        FieldValues fieldValues,
                                        NitriteConfig nitriteConfig) {
         Fields fields = fieldValues.getFields();
-        List<String> fieldNames = fields.getFieldNames();
+        FieldNames fieldNames = fields.getFieldNames();
 
         String firstField = fieldNames.get(0);
         Object element = fieldValues.get(firstField);
@@ -251,7 +251,7 @@ public abstract class ComparableIndexer extends BaseNitriteIndexer {
                                           FieldValues fieldValues,
                                           NitriteConfig nitriteConfig) {
         Fields fields = fieldValues.getFields();
-        List<String> fieldNames = fields.getFieldNames();
+        FieldNames fieldNames = fields.getFieldNames();
 
         String firstField = fieldNames.get(0);
         Object firstValue = fieldValues.get(firstField);
@@ -292,7 +292,7 @@ public abstract class ComparableIndexer extends BaseNitriteIndexer {
                                         FieldValues fieldValues,
                                         NitriteConfig nitriteConfig) {
         Fields fields = fieldValues.getFields();
-        List<String> fieldNames = fields.getFieldNames();
+        FieldNames fieldNames = fields.getFieldNames();
 
         String firstField = fieldNames.get(0);
         Object element = fieldValues.get(firstField);
