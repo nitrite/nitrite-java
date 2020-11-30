@@ -62,6 +62,7 @@ import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.filters.Filter.ALL;
+import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.*;
 
@@ -465,21 +466,21 @@ public class NitriteTest {
         NitriteCollection collection = db.getCollection("test");
 
         // text filter has be the first filter in and clause
-        List<Document> cursor = collection.find(where("second_key").text("fox")
-            .and(where("first_key").eq(1))).toList();
+        List<Document> cursor = collection.find(
+            and(where("second_key").text("fox"), where("first_key").eq(1))).toList();
         assertEquals(cursor.size(), 1);
         assertEquals(cursor.get(0).get("third_key"), 0.5);
 
         ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
         ObjectRepository<Receipt> orangeRepository = db.getRepository(Receipt.class, "orange");
 
-        List<Receipt> list = repository.find(where("synced").eq(true)
-            .and(where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
+        List<Receipt> list = repository.find(
+            and(where("synced").eq(true), where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).clientRef, "1");
 
-        list = orangeRepository.find(where("synced").eq(false)
-            .and(where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
+        list = orangeRepository.find(
+            and(where("synced").eq(false), where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
         assertEquals(list.size(), 0);
         assertNotNull(repository.getAttributes());
 
@@ -501,7 +502,7 @@ public class NitriteTest {
         }
 
         collection.insert(doc1, doc2);
-        collection.update(where("key").eq("key").and(where("second_key").eq("second_key")),
+        collection.update(and(where("key").eq("key"), where("second_key").eq("second_key")),
             doc, UpdateOptions.updateOptions(true));
 
         for (Document document : collection.find()) {

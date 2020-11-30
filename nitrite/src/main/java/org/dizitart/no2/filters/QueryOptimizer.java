@@ -4,10 +4,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.operation.FindOptions;
-import org.dizitart.no2.common.FieldValues;
-import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.common.*;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexType;
@@ -26,27 +23,27 @@ public class QueryOptimizer {
     private final NitriteConfig nitriteConfig;
 
     /*
-    * 1. If And filter
-    *   1.1 flatten the filter using depth first traversal
-    *   1.2 check each filter, group OR & AND, single field filters
-    *   1.3 scan through single field filter or and filter if there is any match for composite index
-    *       1.3.1 if matching composite index found, get index stream
-    *       1.3.2 group remaining filters as a new and filter and apply on indexed stream from 1.3.1
-    *   1.4 if no matching composite index found, scan for simple index
-    *       1.4.1 if found, get indexed stream
-    *       1.4.2 group remaining filter as a new and filter and apply on index stream from 1.4.1
-    *   1.5 if no matching index found, collscan and apply filter
-    *
-    * 2. If OR filter
-    *   1.1 If every simple field is indexed or and filter composite indexed
-    *       1.1.1
-    *   1.2 If one of the fields is not indexed, get collscan and apply filter
-    *
-    * 3. If simple filter
-    *   3.1 Check if index exists, send indexed stream
-    *   3.2 If no index found, collscan
-    *
-    * */
+     * 1. If And filter
+     *   1.1 flatten the filter using depth first traversal
+     *   1.2 check each filter, group OR & AND, single field filters
+     *   1.3 scan through single field filter or and filter if there is any match for composite index
+     *       1.3.1 if matching composite index found, get index stream
+     *       1.3.2 group remaining filters as a new and filter and apply on indexed stream from 1.3.1
+     *   1.4 if no matching composite index found, scan for simple index
+     *       1.4.1 if found, get indexed stream
+     *       1.4.2 group remaining filter as a new and filter and apply on index stream from 1.4.1
+     *   1.5 if no matching index found, collscan and apply filter
+     *
+     * 2. If OR filter
+     *   1.1 If every simple field is indexed or and filter composite indexed
+     *       1.1.1
+     *   1.2 If one of the fields is not indexed, get collscan and apply filter
+     *
+     * 3. If simple filter
+     *   3.1 Check if index exists, send indexed stream
+     *   3.2 If no index found, collscan
+     *
+     * */
 
     public QueryOptimizer(NitriteConfig nitriteConfig) {
         this.nitriteConfig = nitriteConfig;
@@ -55,115 +52,29 @@ public class QueryOptimizer {
     public FilterStep optimizeFilter(NitriteMap<NitriteId, Document> primaryCollection,
                                      Filter filter,
                                      FindOptions findOptions) {
-
+        return null;
     }
 
     private void flattenFilter(String collectionName, Filter filter) {
         if (filter instanceof AndFilter) {
             List<Filter> flattenedFilter = ((AndFilter) filter).getFilters();
-            Pair<Filter,  Filter> optimizedAnd = optimize(collectionName, flattenedFilter);
+            Pair<Filter, Filter> optimizedAnd = optimizeAnd(collectionName, flattenedFilter);
         }
 
     }
 
-    private Pair<Filter, Filter> optimize(String collectionName, List<Filter> flattenedFilter) {
+    private Pair<Filter, Filter> optimizeAnd(String collectionName, List<Filter> flattenedFilter) {
         IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
-        for (int i = 0; i < flattenedFilter.size(); i++) {
-            List<Filter> filters = flattenedFilter.subList(0, i + 1);
-            Fields fields = getFields(filters);
-        }
-
-
-        for (Filter filter : flattenedFilter) {
-            if (filter instanceof FieldBasedFilter) {
-                FieldBasedFilter fieldBasedFilter = (FieldBasedFilter) filter;
-                Fields fields = Fields.single(fieldBasedFilter.getField());
-                Set<IndexDescriptor> descriptors = indexCatalog.findMatchingIndexDescriptor(collectionName, fields);
-                if (descriptors != null) {
-
-                }
-            }
-            if (filter instanceof AndFilter) {
-
-            }
-        }
-
-//        TODO: use fieldNames as object to create cache and compare
+        Set<IndexedFieldNames> indexedFieldNames = indexCatalog.findIndexSupportedFields(collectionName);
+        Set<FilterFieldNames> filterFieldNames = getFieldNames(flattenedFilter);
 
 
         return null;
     }
 
-    private Fields getFields(List<Filter> filters) {
-        Fields fields = new Fields();
-        for (Filter filter : filters) {
-            if (filter instanceof FieldBasedFilter) {
-                FieldBasedFilter fieldBasedFilter = (FieldBasedFilter) filter;
-                fields.getSortSpecs().add(new Pair<>(fieldBasedFilter.getField(), SortOrder.Ascending));
-            }
-        }
+    private Set<FilterFieldNames> getFieldNames(List<Filter> filters) {
         return null;
     }
-
-    private void optimize2(String collectionName, List<Filter> flattenedFilter) {
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
-        Map<IndexDescriptor, List<Filter>> group = new HashMap<>();
-
-        for (int i = 0; i < flattenedFilter.size(); i++) {
-            Filter filter = flattenedFilter.get(0);
-            if (filter instanceof FieldBasedFilter) {
-                FieldBasedFilter fieldBasedFilter = (FieldBasedFilter) filter;
-                Fields fields = Fields.single(fieldBasedFilter.getField());
-                IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, fields);
-                if (indexDescriptor != null) {
-                    List<Filter> filters = group.get(indexDescriptor);
-                    if (filters == null) {
-                        filters = new ArrayList<>();
-                    }
-                    filters.add(filter);
-                    group.put(indexDescriptor, filters);
-                }
-            }
-        }
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
