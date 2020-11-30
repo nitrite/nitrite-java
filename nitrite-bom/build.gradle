@@ -27,7 +27,7 @@ dependencies {
         api "org.slf4j:slf4j-api:1.7.30"
         api "org.objenesis:objenesis:2.6"
         api "org.jasypt:jasypt:1.9.3"
-        api "com.fasterxml.jackson.core:jackson-databind:2.11.3"
+        api "com.fasterxml.jackson.core:jackson-databind:2.12.0"
         api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3"
         api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.0"
         api "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.3"
