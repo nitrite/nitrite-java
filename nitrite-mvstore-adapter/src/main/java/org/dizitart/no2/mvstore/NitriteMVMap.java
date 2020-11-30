@@ -21,6 +21,7 @@ import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.h2.mvstore.MVMap;
+import org.h2.mvstore.MVStore;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -34,10 +35,12 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     private final MVMap<Key, Value> mvMap;
     private final NitriteStore<?> nitriteStore;
+    private final MVStore mvStore;
 
     NitriteMVMap(MVMap<Key, Value> mvMap, NitriteStore<?> nitriteStore) {
         this.mvMap = mvMap;
         this.nitriteStore = nitriteStore;
+        this.mvStore = mvMap.getStore();
     }
 
     @Override
@@ -57,8 +60,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void clear() {
-        mvMap.clear();
-        updateLastModifiedTime();
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            mvMap.clear();
+            updateLastModifiedTime();
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
@@ -73,9 +81,14 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public Value remove(Key key) {
-        Value value = mvMap.remove(key);
-        updateLastModifiedTime();
-        return value;
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            Value value = mvMap.remove(key);
+            updateLastModifiedTime();
+            return value;
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
@@ -86,8 +99,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     @Override
     public void put(Key key, Value value) {
         notNull(value, "value cannot be null");
-        mvMap.put(key, value);
-        updateLastModifiedTime();
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            mvMap.put(key, value);
+            updateLastModifiedTime();
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
@@ -98,9 +116,14 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     @Override
     public Value putIfAbsent(Key key, Value value) {
         notNull(value, "value cannot be null");
-        Value v = mvMap.putIfAbsent(key, value);
-        updateLastModifiedTime();
-        return v;
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            Value v = mvMap.putIfAbsent(key, value);
+            updateLastModifiedTime();
+            return v;
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
@@ -148,7 +171,12 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void drop() {
-        nitriteStore.removeMap(getName());
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            nitriteStore.removeMap(getName());
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
