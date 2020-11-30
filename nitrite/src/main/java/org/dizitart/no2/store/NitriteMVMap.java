@@ -20,6 +20,7 @@ package org.dizitart.no2.store;
 
 import org.dizitart.no2.meta.Attributes;
 import org.h2.mvstore.MVMap;
+import org.h2.mvstore.MVStore;
 
 import java.util.*;
 
@@ -35,10 +36,12 @@ import static org.dizitart.no2.util.StringUtils.isNullOrEmpty;
 class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     private final MVMap<Key, Value> mvMap;
     private final NitriteStore nitriteStore;
+    private final MVStore mvStore;
 
     NitriteMVMap(MVMap<Key, Value> mvMap, NitriteStore nitriteStore) {
         this.mvMap = mvMap;
         this.nitriteStore = nitriteStore;
+        this.mvStore = mvMap.store;
     }
 
     @Override
@@ -58,8 +61,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void clear() {
-        updateAttributes();
-        mvMap.clear();
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            updateAttributes();
+            mvMap.clear();
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
@@ -74,8 +82,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public Value remove(Key key) {
-        updateAttributes();
-        return mvMap.remove(key);
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            updateAttributes();
+            return mvMap.remove(key);
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
@@ -85,8 +98,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void put(Key key, Value value) {
-        updateAttributes();
-        mvMap.put(key, value);
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            updateAttributes();
+            mvMap.put(key, value);
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
@@ -101,8 +119,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public Value putIfAbsent(Key nitriteId, Value document) {
-        updateAttributes();
-        return mvMap.putIfAbsent(nitriteId, document);
+        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        try {
+            updateAttributes();
+            return mvMap.putIfAbsent(nitriteId, document);
+        } finally {
+            mvStore.deregisterVersionUsage(txCounter);
+        }
     }
 
     @Override
