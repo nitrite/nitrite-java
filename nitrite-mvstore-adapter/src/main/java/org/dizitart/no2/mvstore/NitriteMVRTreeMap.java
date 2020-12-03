@@ -20,6 +20,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.NitriteRTree;
+import org.h2.mvstore.MVStore;
 import org.h2.mvstore.rtree.MVRTreeMap;
 import org.h2.mvstore.rtree.SpatialKey;
 
@@ -32,16 +33,23 @@ import java.util.Iterator;
 class NitriteMVRTreeMap<Key extends BoundingBox, Value>
     implements NitriteRTree<Key, Value> {
     private final MVRTreeMap<Key> mvMap;
+    private final MVStore mvStore;
 
     NitriteMVRTreeMap(MVRTreeMap<Key> mvMap) {
         this.mvMap = mvMap;
+        this.mvStore = mvMap.getStore();
     }
 
     @Override
     public void add(Key key, NitriteId nitriteId) {
         if (nitriteId != null && nitriteId.getIdValue() != null) {
             SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
-            mvMap.add(spatialKey, key);
+            MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+            try {
+                mvMap.add(spatialKey, key);
+            } finally {
+                mvStore.deregisterVersionUsage(txCounter);
+            }
         }
     }
 
@@ -49,7 +57,12 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value>
     public void remove(Key key, NitriteId nitriteId) {
         if (nitriteId != null && nitriteId.getIdValue() != null) {
             SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
-            mvMap.remove(spatialKey);
+            MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+            try {
+                mvMap.remove(spatialKey);
+            } finally {
+                mvStore.deregisterVersionUsage(txCounter);
+            }
         }
     }
 

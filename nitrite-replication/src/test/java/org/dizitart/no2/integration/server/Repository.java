@@ -16,11 +16,11 @@
 
 package org.dizitart.no2.integration.server;
 
+import jakarta.websocket.Session;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 
-import javax.websocket.Session;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 

@@ -209,12 +209,17 @@ class MVStoreUtils {
                 return;
             }
 
+            MVStore.TxCounter txCounter = store.registerVersionUsage();
             MVMap<String, Attributes> metaMap = store.openMap(META_MAP_NAME);
             try {
                 metaMap.remove("MigrationTest");
             } catch (IllegalStateException e) {
                 store.close();
                 throw e;
+            } finally {
+                if (!store.isClosed()) {
+                    store.deregisterVersionUsage(txCounter);
+                }
             }
         }
     }
