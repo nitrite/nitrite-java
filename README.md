@@ -8,6 +8,7 @@
 [![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/nitrite/nitrite-java/discussions)
 ![Backers on Open Collective](https://opencollective.com/nitrite-database/backers/badge.svg)
 ![Backers on Open Collective](https://opencollective.com/nitrite-database/sponsors/badge.svg)
+[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/nitrite/nitrite-java)
 
 <img src="http://www.dizitart.org/nitrite-database/logo/nitrite-logo.svg" alt="Logo" width="200"/>
 
@@ -54,7 +55,7 @@ then add required dependencies:
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-bom</artifactId>
-            <version>{version}</version>
+            <version>4.0.0-SNAPSHOT</version>
             <type>pom</type>
             <scope>import</scope>
         </dependency>
@@ -79,7 +80,7 @@ then add required dependencies:
 
 ```groovy
 
-implementation(platform("org.dizitart:nitrite-bom:{version}"))
+implementation(platform("org.dizitart:nitrite-bom:4.0.0-SNAPSHOT"))
     
 implementation 'org.dizitart:nitrite'
 implementation 'org.dizitart:nitrite-mvstore-adapter'
