@@ -91,6 +91,7 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
         if (indexCatalog == null) {
             indexCatalog = new IndexCatalog(this);
         }
+
         return indexCatalog;
     }
 

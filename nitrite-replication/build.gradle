@@ -52,9 +52,9 @@ dependencies {
 
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
-    testImplementation "jakarta.websocket:jakarta.websocket-api:1.1.2"
-    testImplementation "org.glassfish.tyrus:tyrus-server:1.17"
-    testImplementation "org.glassfish.tyrus:tyrus-container-grizzly-server:1.17"
+    testImplementation "jakarta.websocket:jakarta.websocket-api:2.0.0"
+    testImplementation "org.glassfish.tyrus:tyrus-server:2.0.0"
+    testImplementation "org.glassfish.tyrus:tyrus-container-grizzly-server:2.0.0"
     testImplementation "org.awaitility:awaitility:4.0.3"
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.13.3"
     testImplementation "org.apache.logging.log4j:log4j-core:2.13.3"
