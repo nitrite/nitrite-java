@@ -5,7 +5,7 @@
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3ee6a6f3f0044b0c9e75d48e47e5d012)](https://www.codacy.com/gh/nitrite/nitrite-java/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nitrite/nitrite-java&amp;utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/gh/nitrite/nitrite-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/nitrite/nitrite-java)
 ![Javadocs](https://javadoc.io/badge/org.dizitart/nitrite.svg)
-[![Gitter](https://badges.gitter.im/nitrite-db/nitrite-java.svg)](https://gitter.im/nitrite-db/nitrite-java?utm_source=badge)
+[![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/nitrite/nitrite-java/discussions)
 ![Backers on Open Collective](https://opencollective.com/nitrite-database/backers/badge.svg)
 ![Backers on Open Collective](https://opencollective.com/nitrite-database/sponsors/badge.svg)
 
