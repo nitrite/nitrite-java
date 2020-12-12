@@ -1,6 +1,6 @@
 = Nitrite
 Anindya Chatterjee <anindya@dizitart.com>
-v3.4.3, {docdate} {doctime}
+v3.4.4, {docdate} {doctime}
 :description: Nitrite database is an open source Nosql embedded persistent document store written in Java. It has MongoDB like API. It supports both in-memory and single file based persistent store powered by MVStore engine of h2 database. Nitrite can be used in desktop as well as mobile applications like android.
 :keywords: nitrite, nosql, embedded, embedded document store, android, android nosql database, java, key value store, document store, object store, persistent store, index, indexing, fulltext search, embedded mongo,
 :page-layout: docs
@@ -12,7 +12,7 @@ v3.4.3, {docdate} {doctime}
 :toclevels: 4
 :title-logo-image: image:images/nitrite-logo.svg[pdfwidth=4.25in,align=center]
 :homepage: http://nitrite.dizitart.org
-:version: 3.4.3
+:version: 3.4.4
 :source-highlighter: pygments
 :pygments-style: tango
 :linkattrs:
