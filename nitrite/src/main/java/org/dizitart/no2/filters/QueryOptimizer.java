@@ -52,15 +52,30 @@ public class QueryOptimizer {
     public FilterStep optimizeFilter(NitriteMap<NitriteId, Document> primaryCollection,
                                      Filter filter,
                                      FindOptions findOptions) {
+        List<Filter> flattenedFilters = new ArrayList<>();
+        if (filter instanceof AndFilter) {
+            List<Filter> filters = flattenAndFilter((AndFilter) filter);
+            flattenedFilters.addAll(filters);
+        } else {
+            flattenedFilters.add(filter);
+        }
+
         return null;
     }
 
-    private void flattenFilter(String collectionName, Filter filter) {
-        if (filter instanceof AndFilter) {
-            List<Filter> flattenedFilter = ((AndFilter) filter).getFilters();
-            Pair<Filter, Filter> optimizedAnd = optimizeAnd(collectionName, flattenedFilter);
+    private List<Filter> flattenAndFilter(AndFilter andFilter) {
+        List<Filter> flattenedFilters = new ArrayList<>();
+        if (andFilter != null) {
+            for (Filter filter : andFilter.getFilters()) {
+                if (filter instanceof AndFilter) {
+                    List<Filter> filters = flattenAndFilter((AndFilter) filter);
+                    flattenedFilters.addAll(filters);
+                } else {
+                    flattenedFilters.add(filter);
+                }
+            }
         }
-
+        return flattenedFilters;
     }
 
     private Pair<Filter, Filter> optimizeAnd(String collectionName, List<Filter> flattenedFilter) {
@@ -73,6 +88,7 @@ public class QueryOptimizer {
     }
 
     private Set<FilterFieldNames> getFieldNames(List<Filter> filters) {
+        // send only eligible field names, ignore OR filers as they can't be used for composite index
         return null;
     }
 
