@@ -20,8 +20,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.apache.logging.log4j.core.config.ConfigurationSource;
-import org.apache.logging.log4j.core.config.Configurator;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
@@ -31,11 +29,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.cert.CertificateException;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.integration.TestUtils.createDb;
@@ -46,17 +41,6 @@ import static org.dizitart.no2.integration.TestUtils.createDb;
 @Slf4j
 public class DataGateIntegrationTest {
     // TODO: Use https://www.testcontainers.org/ and use datagate-container for integration test
-
-    static {
-        try {
-            InputStream inputStream = new FileInputStream("/home/anindya/codebase/nitrite/nitrite-java/nitrite-replication/src/test/resources/log4j2.xml");
-            ConfigurationSource source = new ConfigurationSource(inputStream);
-            Configurator.initialize(null, source);
-        } catch (Exception ex) {
-            // Handle here
-        }
-    }
-
 
     public static void main(String[] args) {
         Path dbPath = null;
@@ -187,14 +171,12 @@ public class DataGateIntegrationTest {
 
                     @Override
                     public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
-                                                   String authType) throws
-                        CertificateException {
+                                                   String authType) {
                     }
 
                     @Override
                     public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
-                                                   String authType) throws
-                        CertificateException {
+                                                   String authType) {
                     }
 
                     @Override
