@@ -16,11 +16,12 @@
 
 package org.dizitart.no2.rocksdb.formatter;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import lombok.SneakyThrows;
+
+import com.esotericsoftware.kryo.kryo5.Kryo;
+import com.esotericsoftware.kryo.kryo5.Serializer;
+import com.esotericsoftware.kryo.kryo5.io.Input;
+import com.esotericsoftware.kryo.kryo5.io.Output;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.NitriteIOException;
 
 import java.io.ByteArrayInputStream;
@@ -35,6 +36,7 @@ import static org.dizitart.no2.rocksdb.Constants.DB_NULL;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class KryoObjectFormatter implements ObjectFormatter {
     private static final Kryo kryo = new Kryo();
     private final Map<Class<?>, KryoKeySerializer<?>> keySerializerRegistry;
@@ -112,9 +114,9 @@ public class KryoObjectFormatter implements ObjectFormatter {
         }
     }
 
-    public <T> void registerSerializer(Class<? extends T> type, Serializer<T> serializer) {
+    public void registerSerializer(Class<?> type, Serializer<?> serializer) {
         if (serializer instanceof KryoKeySerializer) {
-            KryoKeySerializer<T> kryoKeySerializer = (KryoKeySerializer<T>) serializer;
+            KryoKeySerializer<?> kryoKeySerializer = (KryoKeySerializer<?>) serializer;
             if (kryoKeySerializer.registerToKryo()) {
                 kryo.register(type, serializer);
             }
@@ -124,10 +126,14 @@ public class KryoObjectFormatter implements ObjectFormatter {
         }
     }
 
-    @SneakyThrows
     private void registerInternalSerializers() {
-        NitriteSerializers.registerAll(this);
-        DefaultJavaSerializers.registerAll(this);
-        DefaultTimeKeySerializers.registerAll(this);
+        try {
+            NitriteSerializers.registerAll(this);
+            DefaultJavaSerializers.registerAll(this);
+            DefaultTimeKeySerializers.registerAll(this);
+        } catch (Exception e) {
+            log.error("Error while registering default serializers", e);
+            throw new NitriteIOException("failed to register default serializers", e);
+        }
     }
 }

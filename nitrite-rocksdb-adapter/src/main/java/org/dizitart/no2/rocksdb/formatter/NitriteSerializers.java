@@ -1,10 +1,11 @@
 package org.dizitart.no2.rocksdb.formatter;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.Serializer;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.serializers.MapSerializer;
+
+import com.esotericsoftware.kryo.kryo5.Kryo;
+import com.esotericsoftware.kryo.kryo5.Serializer;
+import com.esotericsoftware.kryo.kryo5.io.Input;
+import com.esotericsoftware.kryo.kryo5.io.Output;
+import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
@@ -13,6 +14,7 @@ import org.dizitart.no2.index.IndexEntry;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -152,21 +154,20 @@ public class NitriteSerializers {
     private static class AttributesSerializer extends Serializer<Attributes> {
         @Override
         public void write(Kryo kryo, Output output, Attributes object) {
-            kryo.register(ConcurrentHashMap.class);
-            kryo.writeClassAndObject(output, object.getAttributes());
+            kryo.writeObject(output, object.getAttributes(), new MapSerializer<HashMap<String, String>>());
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public Attributes read(Kryo kryo, Input input, Class<? extends Attributes> type) {
-            Map<String, String> map = (Map<String, String>) kryo.readClassAndObject(input);
+            Map<String, String> map = (Map<String, String>) kryo.readObject(input, HashMap.class, new MapSerializer<HashMap<String, String>>());
             Attributes attributes = new Attributes();
             attributes.setAttributes(map);
             return attributes;
         }
     }
 
-    public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
+    public static void registerAll(KryoObjectFormatter kryoObjectFormatter) throws ClassNotFoundException {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
         kryoObjectFormatter.registerSerializer(Document.class, new DocumentSerializer());
@@ -174,5 +175,6 @@ public class NitriteSerializers {
         kryoObjectFormatter.registerSerializer(IndexEntry.class, new IndexEntrySerializer());
         kryoObjectFormatter.registerSerializer(UserCredential.class, new UserCredentialSerializer());
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
+        kryoObjectFormatter.registerSerializer(Class.forName("org.dizitart.no2.collection.NitriteDocument"), new DocumentSerializer());
     }
 }

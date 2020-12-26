@@ -1,8 +1,9 @@
 package org.dizitart.no2.rocksdb.serializers;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
+
+import com.esotericsoftware.kryo.kryo5.Kryo;
+import com.esotericsoftware.kryo.kryo5.io.Input;
+import com.esotericsoftware.kryo.kryo5.io.Output;
 import org.dizitart.no2.rocksdb.formatter.ComparableKeySerializer;
 import org.joda.time.DateTime;
 

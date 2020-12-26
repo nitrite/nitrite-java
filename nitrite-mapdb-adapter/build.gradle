@@ -41,7 +41,7 @@ dependencies {
     testImplementation "org.apache.lucene:lucene-analyzers-common:8.7.0"
     testImplementation "org.apache.lucene:lucene-queryparser:8.7.0"
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.14.0"
-    testImplementation "org.apache.logging.log4j:log4j-core:2.14.0"
+    testAnnotationProcessor "org.apache.logging.log4j:log4j-core:2.14.0"
     testImplementation "org.awaitility:awaitility:4.0.3"
     testImplementation "joda-time:joda-time:2.10.8"
     testImplementation "org.meanbean:meanbean:2.0.3"

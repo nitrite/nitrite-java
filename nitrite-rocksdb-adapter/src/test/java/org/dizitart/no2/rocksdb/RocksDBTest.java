@@ -16,9 +16,9 @@
 
 package org.dizitart.no2.rocksdb;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.ByteBufferOutput;
-import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.kryo5.Kryo;
+import com.esotericsoftware.kryo.kryo5.io.ByteBufferOutput;
+import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.github.javafaker.Faker;
 import lombok.Data;
 import org.dizitart.no2.store.NitriteMap;
