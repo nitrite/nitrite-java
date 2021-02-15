@@ -49,7 +49,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.18"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
-    testImplementation "junit:junit:4.13.1"
+    testImplementation "junit:junit:4.13.2"
     testImplementation "uk.co.jemos.podam:podam:7.2.6.RELEASE"
     testImplementation "com.github.javafaker:javafaker:1.0.2"
     testImplementation "org.apache.lucene:lucene-core:8.8.0"

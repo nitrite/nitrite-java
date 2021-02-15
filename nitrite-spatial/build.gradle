@@ -53,7 +53,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testImplementation project(path: ':nitrite-jackson-mapper', configuration: 'default')
-    testImplementation "junit:junit:4.13.1"
+    testImplementation "junit:junit:4.13.2"
 }
 
 test {
