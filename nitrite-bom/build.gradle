@@ -36,7 +36,7 @@ dependencies {
         api "com.squareup.okhttp3:okhttp:4.9.1"
         api "org.rocksdb:rocksdbjni:6.15.2"
         api "com.esotericsoftware.kryo:kryo5:5.0.3"
-        api "org.locationtech.jts:jts-core:1.18.0"
+        api "org.locationtech.jts:jts-core:1.18.1"
         api "commons-codec:commons-codec:1.15"
         api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31"
         api "org.jetbrains.kotlin:kotlin-reflect:1.4.31"
