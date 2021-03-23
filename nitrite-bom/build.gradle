@@ -39,7 +39,7 @@ dependencies {
         api "org.locationtech.jts:jts-core:1.18.1"
         api "commons-codec:commons-codec:1.15"
         api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31"
-        api "org.jetbrains.kotlin:kotlin-reflect:1.4.31"
+        api "org.jetbrains.kotlin:kotlin-reflect:1.4.32"
         api "io.reactivex.rxjava2:rxjava:2.2.21"
     }
 }
