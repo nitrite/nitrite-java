@@ -54,6 +54,16 @@ subprojects {
         mavenCentral()
         mavenLocal()
     }
+
+    //Include JAXB dependencies if not included in JDK
+    if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+        plugins.withType(JavaPlugin) {
+            dependencies {
+                testImplementation "javax.xml.bind:jaxb-api:2.3.1"
+                testImplementation "org.glassfish.jaxb:jaxb-runtime:2.3.1"
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {
