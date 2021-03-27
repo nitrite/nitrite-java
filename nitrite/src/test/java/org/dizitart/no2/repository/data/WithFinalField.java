@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 package org.dizitart.no2.repository.data;
 
 import lombok.Getter;
@@ -51,12 +52,15 @@ public class WithFinalField implements Mappable {
         name = document.get("name", String.class);
         try {
             Field field = getClass().getDeclaredField("number");
+            field.setAccessible(true);
+
             Field modifiersField = Field.class.getDeclaredField("modifiers");
             modifiersField.setAccessible(true);
             modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
             field.set(this, document.get("number", Long.class));
         } catch (Exception e) {
-            throw new ObjectMappingException("failed to set value");
+            throw new ObjectMappingException("failed to set value", e);
         }
     }
 }
