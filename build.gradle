@@ -60,7 +60,7 @@ subprojects {
         plugins.withType(JavaPlugin) {
             dependencies {
                 testImplementation "javax.xml.bind:jaxb-api:2.3.1"
-                testImplementation "org.glassfish.jaxb:jaxb-runtime:2.3.1"
+                testImplementation "org.glassfish.jaxb:jaxb-runtime:3.0.0"
             }
         }
     }
