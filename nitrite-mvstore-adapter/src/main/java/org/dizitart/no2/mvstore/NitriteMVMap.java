@@ -79,7 +79,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public RecordStream<Key> keySet() {
+    public RecordStream<Key> keys() {
         return RecordStream.fromIterable(mvMap.keySet());
     }
 

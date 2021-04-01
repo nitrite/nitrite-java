@@ -22,7 +22,10 @@ import lombok.NoArgsConstructor;
 import org.dizitart.no2.NitriteConfig;
 
 /**
+ * The nitrite event details.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 @NoArgsConstructor

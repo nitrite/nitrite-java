@@ -79,9 +79,9 @@ public class CollectionFieldIndexTest {
             });
 
         NitriteCollection collection = db.getCollection("test");
-        collection.createIndex("color", indexOptions(IndexType.Unique));
-        collection.createIndex("books.tag", indexOptions(IndexType.NonUnique));
-        collection.createIndex("books.name", indexOptions(IndexType.Fulltext));
+        collection.createIndex("color");
+        collection.createIndex(indexOptions(IndexType.NonUnique), "books.tag");
+        collection.createIndex(indexOptions(IndexType.Fulltext), "books.name");
 
         WriteResult writeResult = collection.insert(doc1, doc2, doc3);
         assertEquals(writeResult.getAffectedCount(), 3);

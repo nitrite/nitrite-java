@@ -136,7 +136,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
-    public RecordStream<K> keySet() {
+    public RecordStream<K> keys() {
         return RecordStream.fromIterable(new KeySet<>(rocksDB, columnFamilyHandle, objectFormatter, getKeyType()));
     }
 

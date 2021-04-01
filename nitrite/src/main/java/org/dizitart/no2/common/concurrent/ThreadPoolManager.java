@@ -31,7 +31,7 @@ import static org.dizitart.no2.common.Constants.DAEMON_THREAD_NAME;
  * A factory class for creating {@link ExecutorService}.
  *
  * @author Anindya Chatterjee.
- * @since 4.0.0
+ * @since 4.0
  */
 @Slf4j
 public class ThreadPoolManager {
@@ -70,6 +70,13 @@ public class ThreadPoolManager {
         return threadPool;
     }
 
+    /**
+     * Returns a new {@link ErrorAwareThreadFactory} where thread name
+     * will be set to the <code>name</code> specified.
+     *
+     * @param name the name
+     * @return the error aware thread factory
+     */
     public static ErrorAwareThreadFactory threadFactory(String name) {
         return new ErrorAwareThreadFactory() {
             @Override
@@ -82,10 +89,19 @@ public class ThreadPoolManager {
         };
     }
 
+    /**
+     * Submits a runnable task asynchronously on common pool.
+     *
+     * @param runnable the runnable task
+     * @return the future
+     */
     public static Future<?> runAsync(Runnable runnable) {
         return commonPool.submit(runnable);
     }
 
+    /**
+     * Shuts down all thread pools.
+     */
     public static void shutdownThreadPools() {
         for (ExecutorService threadPool : threadPools) {
             synchronized (lock) {

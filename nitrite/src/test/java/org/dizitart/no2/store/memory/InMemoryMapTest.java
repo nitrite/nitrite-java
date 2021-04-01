@@ -1,12 +1,9 @@
 package org.dizitart.no2.store.memory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
 import org.apache.commons.lang3.mutable.MutableByte;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class InMemoryMapTest {
     @Test
@@ -82,7 +79,7 @@ public class InMemoryMapTest {
 
     @Test
     public void testKeySet() {
-        assertTrue((new InMemoryMap<Object, Object>("mapName", null)).keySet().isEmpty());
+        assertTrue((new InMemoryMap<Object, Object>("mapName", null)).keys().isEmpty());
     }
 
     @Test

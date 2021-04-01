@@ -60,12 +60,12 @@ public class MultiThreadedTest {
     public Retry retry = new Retry(3);
 
     @Test
-    public void testOperations() throws InterruptedException {
+    public void testOperations() throws Exception {
         db = createDb();
 
         collection = db.getCollection("test");
         collection.remove(Filter.ALL);
-        collection.createIndex("unixTime", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex("unixTime");
         db.commit();
 
         for (int i = 0; i < threadCount; i++) {
@@ -78,8 +78,8 @@ public class MultiThreadedTest {
                         if (j == iterationCount / 2
                             && !collection.hasIndex("text")
                             && !collection.hasIndex("date")) {
-                            collection.createIndex("text", IndexOptions.indexOptions(IndexType.Fulltext));
-                            collection.createIndex("date", IndexOptions.indexOptions(IndexType.NonUnique));
+                            collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "text");
+                            collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "date");
                         }
 
                         long unixTime = (long) document.get("unixTime");
@@ -120,7 +120,7 @@ public class MultiThreadedTest {
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws Exception {
         if (db != null && !db.isClosed()) {
             db.close();
         }

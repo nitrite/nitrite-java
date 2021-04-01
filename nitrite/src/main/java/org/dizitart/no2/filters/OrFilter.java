@@ -22,10 +22,18 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 
 /**
+ * Represents an OR filter.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 @Getter
 public class OrFilter extends LogicalFilter {
+    /**
+     * Instantiates a new Or filter.
+     *
+     * @param filters the filters
+     */
     OrFilter(Filter... filters) {
         super(filters);
     }

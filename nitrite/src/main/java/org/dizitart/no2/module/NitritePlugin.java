@@ -19,8 +19,16 @@ package org.dizitart.no2.module;
 import org.dizitart.no2.NitriteConfig;
 
 /**
+ * Represents a nitrite database plugin component.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 public interface NitritePlugin {
+    /**
+     * Initializes the plugin instance.
+     *
+     * @param nitriteConfig the nitrite config
+     */
     void initialize(NitriteConfig nitriteConfig);
 }

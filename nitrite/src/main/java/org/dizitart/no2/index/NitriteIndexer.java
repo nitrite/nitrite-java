@@ -17,23 +17,67 @@
 package org.dizitart.no2.index;
 
 import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.FieldValues;
-import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.module.NitritePlugin;
 
+import java.util.LinkedHashSet;
+
 /**
+ * Represents an indexer for creating a nitrite index.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 public interface NitriteIndexer extends NitritePlugin {
+    /**
+     * Gets the index type.
+     *
+     * @return the index type
+     */
     String getIndexType();
 
+    /**
+     * Validates an index on the fields.
+     *
+     * @param fields the fields
+     */
+    void validateIndex(Fields fields);
+
+    /**
+     * Drops the index specified by the index descriptor.
+     *
+     * @param indexDescriptor the index descriptor
+     * @param nitriteConfig   the nitrite config
+     */
     void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig);
 
-    void writeIndexEntry(IndexDescriptor indexDescriptor, FieldValues fieldValues, NitriteConfig nitriteConfig);
+    /**
+     * Writes an index entry.
+     *
+     * @param fieldValues     the field values
+     * @param indexDescriptor the index descriptor
+     * @param nitriteConfig   the nitrite config
+     */
+    void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig);
 
-    void removeIndexEntry(IndexDescriptor indexDescriptor, FieldValues fieldValues, NitriteConfig nitriteConfig);
+    /**
+     * Removes an index entry.
+     *
+     * @param fieldValues     the field values
+     * @param indexDescriptor the index descriptor
+     * @param nitriteConfig   the nitrite config
+     */
+    void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig);
 
-    RecordStream<NitriteId> findByFilter(String collectionName, Filter filter, NitriteConfig nitriteConfig);
+    /**
+     * Finds a list of {@link NitriteId} after executing the {@link FindPlan} on the index.
+     *
+     * @param findPlan      the find plan
+     * @param nitriteConfig the nitrite config
+     * @return the linked hash set
+     */
+    LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig);
 }

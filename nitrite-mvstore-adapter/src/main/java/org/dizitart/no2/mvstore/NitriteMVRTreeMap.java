@@ -29,8 +29,7 @@ import java.util.Iterator;
  * @since 1.0
  * @author Anindya Chatterjee
  */
-class NitriteMVRTreeMap<Key extends BoundingBox, Value>
-    implements NitriteRTree<Key, Value> {
+class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {
     private final MVRTreeMap<Key> mvMap;
 
     NitriteMVRTreeMap(MVRTreeMap<Key> mvMap) {
@@ -90,5 +89,10 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value>
                 return NitriteId.createId(Long.toString(next.getId()));
             }
         });
+    }
+
+    @Override
+    public void close() throws Exception {
+        //nothing to close
     }
 }

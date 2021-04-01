@@ -20,6 +20,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -93,12 +94,7 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public DocumentCursor find() {
-            return null;
-        }
-
-        @Override
-        public DocumentCursor find(Filter filter) {
+        public DocumentCursor find(Filter filter, FindOptions findOptions) {
             return null;
         }
 
@@ -118,7 +114,17 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public void rebuildIndex(String field, boolean isAsync) {
+        public void createIndex(Fields fields, IndexOptions indexOptions) {
+
+        }
+
+        @Override
+        public void rebuildIndex(String field) {
+
+        }
+
+        @Override
+        public void rebuildIndex(Fields fields) {
 
         }
 
@@ -133,12 +139,27 @@ public class RepositoryFactoryTest {
         }
 
         @Override
+        public boolean hasIndex(Fields fields) {
+            return false;
+        }
+
+        @Override
         public boolean isIndexing(String field) {
             return false;
         }
 
         @Override
+        public boolean isIndexing(Fields fields) {
+            return false;
+        }
+
+        @Override
         public void dropIndex(String field) {
+
+        }
+
+        @Override
+        public void dropIndex(Fields fields) {
 
         }
 

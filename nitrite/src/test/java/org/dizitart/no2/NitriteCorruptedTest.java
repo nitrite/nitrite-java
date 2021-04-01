@@ -72,7 +72,7 @@ public class NitriteCorruptedTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         if (collection.isOpen()) {
             collection.remove(ALL);
             collection.close();

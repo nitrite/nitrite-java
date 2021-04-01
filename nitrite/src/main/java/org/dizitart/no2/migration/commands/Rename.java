@@ -5,16 +5,19 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.operation.CollectionOperations;
+import org.dizitart.no2.collection.operation.IndexManager;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
-import org.dizitart.no2.store.IndexCatalog;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Collection;
 
 /**
+ * A command to rename a {@link org.dizitart.no2.collection.NitriteCollection}.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @AllArgsConstructor
 public class Rename extends BaseCommand implements Command {
@@ -32,12 +35,12 @@ public class Rename extends BaseCommand implements Command {
             newMap.put(entry.getFirst(), entry.getSecond());
         }
 
-        IndexCatalog indexCatalog = nitrite.getStore().getIndexCatalog();
-        Collection<IndexDescriptor> indexEntries = indexCatalog.listIndexDescriptors(oldName);
+        IndexManager indexManager = new IndexManager(oldName, nitrite.getConfig());
+        Collection<IndexDescriptor> indexEntries = indexManager.getIndexDescriptors();
         for (IndexDescriptor indexDescriptor : indexEntries) {
             Fields field = indexDescriptor.getIndexFields();
             String indexType = indexDescriptor.getIndexType();
-            newOperations.createIndex(field, indexType, false);
+            newOperations.createIndex(field, indexType);
         }
 
         operations.dropCollection();

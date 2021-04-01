@@ -48,7 +48,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
     @Test
     public void testRollbackInsert() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         try (Session session = db.createSession()) {
             Transaction transaction = null;
             try {
@@ -102,7 +102,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
     @Test
     public void testRollbackUpdate() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         collection.insert(createDocument("firstName", "Jane"));
 
         try (Session session = db.createSession()) {
@@ -158,7 +158,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
     @Test
     public void testRollbackRemove() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         Document document = createDocument("firstName", "John");
         collection.insert(document);
 
@@ -196,7 +196,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
         try (Session session = db.createSession()) {
             try (Transaction transaction = session.beginTransaction()) {
                 NitriteCollection txCol = transaction.getCollection("test");
-                txCol.createIndex("firstName", indexOptions(IndexType.Fulltext));
+                txCol.createIndex(indexOptions(IndexType.Fulltext), "firstName");
 
                 assertTrue(txCol.hasIndex("firstName"));
                 assertFalse(collection.hasIndex("firstName"));
@@ -220,7 +220,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 transaction = session.beginTransaction();
                 NitriteCollection txCol = transaction.getCollection("test");
 
-                txCol.createIndex("firstName", indexOptions(IndexType.Unique));
+                txCol.createIndex("firstName");
 
                 assertTrue(txCol.hasIndex("firstName"));
                 assertFalse(collection.hasIndex("firstName"));
@@ -261,7 +261,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
     @Test
     public void testRollbackClear() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         Document document = createDocument("firstName", "John");
         Document document2 = createDocument("firstName", "Jane");
         collection.insert(document);
@@ -293,7 +293,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
     public void testCommitDropIndex() {
         Document document = createDocument("firstName", "John");
         collection.insert(document);
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
 
         try (Session session = db.createSession()) {
             try (Transaction transaction = session.beginTransaction()) {
@@ -315,8 +315,8 @@ public class TransactionCollectionTest extends BaseCollectionTest {
         Document document = createDocument("firstName", "John").put("lastName", "Doe");
         Document document2 = createDocument("firstName", "Jane").put("lastName", "Doe");
         collection.insert(document);
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
-        collection.createIndex("lastName", indexOptions(IndexType.NonUnique));
+        collection.createIndex("firstName");
+        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
 
         try (Session session = db.createSession()) {
             Transaction transaction = null;
@@ -346,8 +346,8 @@ public class TransactionCollectionTest extends BaseCollectionTest {
     public void testCommitDropAllIndices() {
         Document document = createDocument("firstName", "John");
         collection.insert(document);
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
-        collection.createIndex("lastName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
+        collection.createIndex("lastName");
 
         try (Session session = db.createSession()) {
             try (Transaction transaction = session.beginTransaction()) {
@@ -371,8 +371,8 @@ public class TransactionCollectionTest extends BaseCollectionTest {
     public void testRollbackDropAllIndices() {
         Document document = createDocument("firstName", "John").put("lastName", "Doe");
         collection.insert(document);
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
-        collection.createIndex("lastName", indexOptions(IndexType.NonUnique));
+        collection.createIndex("firstName");
+        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
 
         try (Session session = db.createSession()) {
             Transaction transaction = null;
@@ -433,7 +433,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
     @Test
     public void testRollbackDropCollection() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         Document document = createDocument("firstName", "John");
         collection.insert(document);
 
@@ -484,7 +484,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
     @Test
     public void testRollbackSetAttribute() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         try (Session session = db.createSession()) {
             Transaction transaction = null;
             try {
@@ -522,8 +522,8 @@ public class TransactionCollectionTest extends BaseCollectionTest {
     @Test
     public void testConcurrentInsertAndRemove() {
         NitriteCollection collection = db.getCollection("test");
-        collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
-        collection.createIndex("id", indexOptions(IndexType.Unique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "firstName");
+        collection.createIndex("id");
         Faker faker = new Faker();
         List<Future<?>> futures = new ArrayList<>();
 
@@ -667,7 +667,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
         NitriteCollection col1 = db.getCollection("test1");
         NitriteCollection col2 = db.getCollection("test2");
         NitriteCollection col3 = db.getCollection("test3");
-        col3.createIndex("id", indexOptions(IndexType.Unique));
+        col3.createIndex("id");
 
         Faker faker = new Faker();
 

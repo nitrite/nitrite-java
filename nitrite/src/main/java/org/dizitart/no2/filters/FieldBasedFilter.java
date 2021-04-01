@@ -20,18 +20,17 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapper.NitriteMapper;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
+ * Represents a filter based on value of a nitrite document field.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -44,58 +43,22 @@ public abstract class FieldBasedFilter extends NitriteFilter {
     @Getter(AccessLevel.NONE)
     private boolean processed = false;
 
+    /**
+     * Instantiates a new Field based filter.
+     *
+     * @param field the field
+     * @param value the value
+     */
     protected FieldBasedFilter(String field, Object value) {
         this.field = field;
         this.value = value;
     }
 
     /**
-     * Creates an and filter which performs a logical AND operation on two filters and selects
-     * the documents that satisfy both filters.
-     * <p>
+     * Gets the value fo the filter.
      *
-     * @param filter other filter
-     * @return the and filter
+     * @return the value
      */
-    public Filter and(Filter filter) {
-        return new AndFilter(this, filter);
-    }
-
-    /**
-     * Creates an or filter which performs a logical OR operation on two filters and selects
-     * the documents that satisfy at least one of the filter.
-     * <p>
-     *
-     * @param filter other filter
-     * @return the or filter
-     */
-    public Filter or(Filter filter) {
-        return new OrFilter(this, filter);
-    }
-
-    protected Set<Comparable<?>> convertValues(Set<Comparable<?>> values) {
-        if (getObjectFilter()) {
-            NitriteMapper nitriteMapper = getNitriteConfig().nitriteMapper();
-            Set<Comparable<?>> convertedValues = new HashSet<>();
-
-            for (Comparable<?> comparable : values) {
-                if (comparable == null
-                    || !nitriteMapper.isValue(comparable)) {
-                    throw new FilterException("search term " + comparable
-                        + " is not a comparable");
-                }
-
-                if (nitriteMapper.isValue(comparable)) {
-                    Comparable<?> convertValue = nitriteMapper.convert(comparable, Comparable.class);
-                    convertedValues.add(convertValue);
-                }
-            }
-
-            return convertedValues;
-        }
-        return values;
-    }
-
     public Object getValue() {
         if (this.processed) return value;
 

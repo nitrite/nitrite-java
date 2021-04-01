@@ -17,9 +17,7 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
@@ -43,7 +41,13 @@ import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.index.IndexOptions.indexOptions;
 
 /**
+ * The {@link ObjectRepository} operations.
+ * <p>
+ * This class is for internal use only.
+ * </p>
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public class RepositoryOperations {
     private final NitriteMapper nitriteMapper;
@@ -51,6 +55,13 @@ public class RepositoryOperations {
     private final NitriteCollection collection;
     private Field idField;
 
+    /**
+     * Instantiates a new {@link RepositoryOperations}.
+     *
+     * @param type          the type
+     * @param nitriteMapper the nitrite mapper
+     * @param collection    the collection
+     */
     public RepositoryOperations(Class<?> type,
                                 NitriteMapper nitriteMapper,
                                 NitriteCollection collection) {
@@ -63,9 +74,9 @@ public class RepositoryOperations {
     public void createIndexes() {
         Set<Index> indexes = extractIndices(type);
         for (Index idx : indexes) {
-            String field = idx.value();
-            if (!collection.hasIndex(field)) {
-                collection.createIndex(idx.value(), indexOptions(idx.type(), false));
+            String[] fields = idx.value();
+            if (!collection.hasIndex(fields)) {
+                collection.createIndex(indexOptions(idx.type()), fields);
             }
         }
 
@@ -73,7 +84,7 @@ public class RepositoryOperations {
         if (idField != null) {
             String field = idField.getName();
             if (!collection.hasIndex(field)) {
-                collection.createIndex(field, indexOptions(IndexType.Unique));
+                collection.createIndex(indexOptions(IndexType.Unique), field);
             }
         }
     }
@@ -337,10 +348,19 @@ public class RepositoryOperations {
     private <T> void populateIndex(NitriteMapper nitriteMapper, Class<T> type,
                                    List<Index> indexList, Set<Index> indexSet) {
         for (Index index : indexList) {
-            String name = index.value();
-            Field field = getField(type, name);
-            if (field != null) {
-                validateObjectIndexField(nitriteMapper, field.getType(), field.getName());
+            String[] names = index.value();
+            List<Field> entityFields = new ArrayList<>();
+
+            for (String name : names) {
+                Field field = getField(type, name);
+                if (field != null) {
+                    entityFields.add(field);
+                    validateObjectIndexField(nitriteMapper, field.getType(), field.getName());
+                }
+            }
+
+            if (entityFields.size() == names.length) {
+                // validation for all field are success
                 indexSet.add(index);
             }
         }
@@ -368,12 +388,11 @@ public class RepositoryOperations {
         Document document;
         try {
             document = skeletonDocument(nitriteMapper, fieldType);
+            if (document == null || document.size() > 0) {
+                throw new InvalidOperationException("invalid type specified " + fieldType.getName() + " for indexing");
+            }
         } catch (Throwable e) {
-            throw new IndexingException("invalid type specified " + fieldType.getName() + " for indexing", e);
-        }
-
-        if (document == null || document.size() > 0) {
-            throw new InvalidOperationException("compound index on field " + field + " is not supported");
+            throw new IndexingException("failed to index field " + fieldType.getName(), e);
         }
     }
 
@@ -401,11 +420,17 @@ public class RepositoryOperations {
         return annotations;
     }
 
-    public <T> Cursor<T> find(Class<T> type) {
-        return new ObjectCursor<>(nitriteMapper, collection.find(), type);
-    }
-
-    public <T> Cursor<T> find(Filter filter, Class<T> type) {
-        return new ObjectCursor<>(nitriteMapper, collection.find(asObjectFilter(filter)), type);
+    /**
+     * Find cursor.
+     *
+     * @param <T>         the type parameter
+     * @param filter      the filter
+     * @param findOptions the find options
+     * @param type        the type
+     * @return the cursor
+     */
+    public <T> Cursor<T> find(Filter filter, FindOptions findOptions, Class<T> type) {
+        DocumentCursor documentCursor = collection.find(asObjectFilter(filter), findOptions);
+        return new ObjectCursor<>(nitriteMapper, documentCursor, type);
     }
 }

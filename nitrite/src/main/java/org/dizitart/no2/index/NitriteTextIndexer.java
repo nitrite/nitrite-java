@@ -17,44 +17,48 @@
 package org.dizitart.no2.index;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.index.fulltext.TextTokenizer;
-import org.dizitart.no2.store.IndexCatalog;
-import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.store.NitriteStore;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
-
-import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
-import static org.dizitart.no2.common.util.StringUtils.stringTokenizer;
-import static org.dizitart.no2.common.util.ValidationUtils.*;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Represents a nitrite text indexer.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public class NitriteTextIndexer implements TextIndexer {
+public class NitriteTextIndexer implements NitriteIndexer {
     private final TextTokenizer textTokenizer;
-    private NitriteStore<?> nitriteStore;
+    private final Map<IndexDescriptor, TextIndex> indexRegistry;
 
+    /**
+     * Instantiates a new {@link NitriteTextIndexer}.
+     */
     public NitriteTextIndexer() {
         this.textTokenizer = new EnglishTextTokenizer();
+        this.indexRegistry = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Instantiates a new {@link NitriteTextIndexer}.
+     *
+     * @param textTokenizer the text tokenizer
+     */
     public NitriteTextIndexer(TextTokenizer textTokenizer) {
         this.textTokenizer = textTokenizer;
+        this.indexRegistry = new ConcurrentHashMap<>();
     }
 
-    public NitriteTextIndexer clone() throws CloneNotSupportedException {
-        return (NitriteTextIndexer) super.clone();
+    @Override
+    public void initialize(NitriteConfig nitriteConfig) {
     }
 
     @Override
@@ -63,246 +67,43 @@ public class NitriteTextIndexer implements TextIndexer {
     }
 
     @Override
-    public Set<NitriteId> findText(String collectionName, String field, String searchString) {
-        notNull(field, "field cannot be null");
-        notNull(searchString, "search term cannot be null");
-
-        try {
-            if (searchString.startsWith("*") || searchString.endsWith("*")) {
-                return searchByWildCard(collectionName, field, searchString);
-            } else {
-                return searchExactByIndex(collectionName, field, searchString);
-            }
-        } catch (IOException ioe) {
-            throw new IndexingException("could not search on full-text index", ioe);
+    public void validateIndex(Fields fields) {
+        if (fields.getFieldNames().size() > 1) {
+            throw new IndexingException("text index can only be created on a single field");
         }
     }
 
     @Override
-    public void writeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
-        createOrUpdate(collection, nitriteId, field, fieldValue);
+    public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        TextIndex textIndex = findTextIndex(indexDescriptor, nitriteConfig);
+        textIndex.drop();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
-        try {
-            validateStringValue(fieldValue, field);
-            Set<String> words = decompose(fieldValue);
-
-            NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
-                = getIndexMap(collection.getName(), field);
-
-            for (String word : words) {
-                ConcurrentSkipListSet<NitriteId> nitriteIds = (ConcurrentSkipListSet<NitriteId>) indexMap.get(word);
-                if (nitriteIds != null) {
-                    nitriteIds.remove(nitriteId);
-
-                    if (nitriteIds.isEmpty()) {
-                        indexMap.remove(word);
-                    } else {
-                        indexMap.put(word, nitriteIds);
-                    }
-                }
-            }
-        } catch (IOException ioe) {
-            throw new IndexingException("failed to remove full-text index data for " + field + " with id " + nitriteId);
-        }
+    public void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        TextIndex textIndex = findTextIndex(indexDescriptor, nitriteConfig);
+        textIndex.write(fieldValues);
     }
 
     @Override
-    public void updateIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object newValue, Object oldValue) {
-        removeIndex(collection, nitriteId, field, oldValue);
-        createOrUpdate(collection, nitriteId, field, newValue);
+    public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        TextIndex textIndex = findTextIndex(indexDescriptor, nitriteConfig);
+        textIndex.remove(fieldValues);
     }
 
     @Override
-    public void dropIndex(NitriteMap<NitriteId, Document> collection, Fields field) {
-        indexCatalog.dropIndexDescriptor(collection.getName(), field);
+    public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
+        TextIndex textIndex = findTextIndex(findPlan.getIndexDescriptor(), nitriteConfig);
+        return textIndex.findNitriteIds(findPlan);
     }
 
-    @Override
-    public void initialize(NitriteConfig nitriteConfig) {
-        this.nitriteStore = nitriteConfig.getNitriteStore();
-        this.indexCatalog = this.nitriteStore.getIndexCatalog();
-    }
-
-    @SuppressWarnings("rawtypes")
-    private NitriteMap<Comparable, ConcurrentSkipListSet> getIndexMap(String collectionName, String field) {
-        String mapName = getIndexMapName(collectionName, field);
-        return nitriteStore.openMap(mapName, String.class, ConcurrentSkipListSet.class);
-    }
-
-    private void validateStringValue(Object value, String field) {
-        if (value == null || value instanceof String) return;
-
-        if (value instanceof Iterable) {
-            validateStringIterableIndexField((Iterable) value, field);
-        } else if (value.getClass().isArray()) {
-            validateStringArrayIndexField(value, field);
-        } else {
-            throw new IndexingException("string data is expected");
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void createOrUpdate(NitriteMap<NitriteId, Document> collection, NitriteId id, String field, Object fieldValue) {
-        try {
-            validateStringValue(fieldValue, field);
-            Set<String> words = decompose(fieldValue);
-
-            NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
-                = getIndexMap(collection.getName(), field);
-
-            for (String word : words) {
-                ConcurrentSkipListSet<NitriteId> nitriteIds = (ConcurrentSkipListSet<NitriteId>) indexMap.get(word);
-
-                if (nitriteIds == null) {
-                    nitriteIds = new ConcurrentSkipListSet<>();
-                }
-                nitriteIds.add(id);
-                indexMap.put(word, nitriteIds);
-            }
-        } catch (IOException ioe) {
-            throw new IndexingException("could not write full-text index data for " + fieldValue, ioe);
-        }
-    }
-
-    private Set<String> decompose(Object fieldValue) throws IOException {
-        Set<String> result = new HashSet<>();
-        if (fieldValue == null) {
-            result.add(null);
-        } else if (fieldValue instanceof String) {
-            result.add((String) fieldValue);
-        } else if (fieldValue instanceof Iterable) {
-            Iterable<?> iterable = (Iterable<?>) fieldValue;
-            for (Object item : iterable) {
-                result.addAll(decompose(item));
-            }
-        } else if (fieldValue.getClass().isArray()) {
-            Object[] array = convertToObjectArray(fieldValue);
-            for (Object item : array) {
-                result.addAll(decompose(item));
-            }
+    private TextIndex findTextIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        if (indexRegistry.containsKey(indexDescriptor)) {
+            return indexRegistry.get(indexDescriptor);
         }
 
-        Set<String> words = new HashSet<>();
-        for (String item : result) {
-            words.addAll(textTokenizer.tokenize(item));
-        }
-
-        return words;
-    }
-
-    private Set<NitriteId> searchByWildCard(String collectionName, String field, String searchString) {
-        if (searchString.contentEquals("*")) {
-            throw new FilterException("* is not a valid search string");
-        }
-
-        StringTokenizer stringTokenizer = stringTokenizer(searchString);
-        if (stringTokenizer.countTokens() > 1) {
-            throw new FilterException("multiple words with wildcard is not supported");
-        }
-
-        if (searchString.startsWith("*") && !searchString.endsWith("*")) {
-            return searchByLeadingWildCard(collectionName, field, searchString);
-        } else if (searchString.endsWith("*") && !searchString.startsWith("*")) {
-            return searchByTrailingWildCard(collectionName, field, searchString);
-        } else {
-            String term = searchString.substring(1, searchString.length() - 1);
-            return searchContains(collectionName, field, term);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Set<NitriteId> searchByTrailingWildCard(String collectionName, String field, String searchString) {
-        if (searchString.equalsIgnoreCase("*")) {
-            throw new FilterException("invalid search term '*'");
-        }
-
-        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
-            = getIndexMap(collectionName, field);
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        String term = searchString.substring(0, searchString.length() - 1);
-
-        for (Pair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
-            String key = (String) entry.getFirst();
-            if (key.startsWith(term.toLowerCase())) {
-                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getSecond());
-            }
-        }
-        return idSet;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Set<NitriteId> searchContains(String collectionName, String field, String term) {
-        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
-            = getIndexMap(collectionName, field);
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-
-        for (Pair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
-            String key = (String) entry.getFirst();
-            if (key.contains(term.toLowerCase())) {
-                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getSecond());
-            }
-        }
-        return idSet;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Set<NitriteId> searchByLeadingWildCard(String collectionName, String field, String searchString) {
-        if (searchString.equalsIgnoreCase("*")) {
-            throw new FilterException("invalid search term '*'");
-        }
-
-        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
-            = getIndexMap(collectionName, field);
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        String term = searchString.substring(1);
-
-        for (Pair<Comparable, ConcurrentSkipListSet> entry : indexMap.entries()) {
-            String key = (String) entry.getFirst();
-            if (key.endsWith(term.toLowerCase())) {
-                idSet.addAll((ConcurrentSkipListSet<NitriteId>) entry.getSecond());
-            }
-        }
-        return idSet;
-    }
-
-    @SuppressWarnings("unchecked")
-    private Set<NitriteId> searchExactByIndex(String collectionName, String field, String searchString) throws IOException {
-        NitriteMap<Comparable, ConcurrentSkipListSet> indexMap
-            = getIndexMap(collectionName, field);
-
-        Set<String> words = textTokenizer.tokenize(searchString);
-        Map<NitriteId, Integer> scoreMap = new HashMap<>();
-        for (String word : words) {
-            ConcurrentSkipListSet<NitriteId> nitriteIds = (ConcurrentSkipListSet<NitriteId>) indexMap.get(word);
-            if (nitriteIds != null) {
-                for (NitriteId id : nitriteIds) {
-                    Integer score = scoreMap.get(id);
-                    if (score == null) {
-                        scoreMap.put(id, 1);
-                    } else {
-                        scoreMap.put(id, score + 1);
-                    }
-                }
-            }
-        }
-
-        Map<NitriteId, Integer> sortedScoreMap = sortByScore(scoreMap);
-        return sortedScoreMap.keySet();
-    }
-
-    private <K, V extends Comparable<V>> Map<K, V> sortByScore(Map<K, V> unsortedMap) {
-        List<Map.Entry<K, V>> list = new LinkedList<>(unsortedMap.entrySet());
-        Collections.sort(list, (e1, e2) -> (e2.getValue()).compareTo(e1.getValue()));
-
-        Map<K, V> result = new LinkedHashMap<>();
-        for (Map.Entry<K, V> entry : list) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-
-        return result;
+        TextIndex textIndex = new TextIndex(textTokenizer, indexDescriptor, nitriteConfig.getNitriteStore());
+        indexRegistry.put(indexDescriptor, textIndex);
+        return textIndex;
     }
 }

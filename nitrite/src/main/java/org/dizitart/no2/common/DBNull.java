@@ -6,6 +6,7 @@ import java.io.Serializable;
  * This class acts as a surrogate for null key.
  *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 public class DBNull implements Comparable<DBNull>, Serializable {
     private static final long serialVersionUID = 1598819770L;

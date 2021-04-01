@@ -54,7 +54,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     @Test
     public void testRollbackInsert() {
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
 
         try (Session session = db.createSession()) {
             Transaction transaction = null;
@@ -114,7 +114,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     @Test
     public void testRollbackUpdate() {
         ObjectRepository<TxData> repository = db.getRepository(TxData.class, "rollback");
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         repository.insert(new TxData(1L, "Jane"));
 
         try (Session session = db.createSession()) {
@@ -178,7 +178,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     @Test
     public void testRollbackRemove() {
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         TxData txData1 = new TxData(1L, "John");
         repository.insert(txData1);
 
@@ -218,7 +218,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         try (Session session = db.createSession()) {
             try (Transaction transaction = session.beginTransaction()) {
                 ObjectRepository<TxData> txRepo = transaction.getRepository(TxData.class);
-                txRepo.createIndex("name", indexOptions(IndexType.Fulltext));
+                txRepo.createIndex(indexOptions(IndexType.Fulltext), "name");
 
                 assertTrue(txRepo.hasIndex("name"));
                 assertFalse(repository.hasIndex("name"));
@@ -243,7 +243,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             try {
                 transaction = session.beginTransaction();
                 ObjectRepository<TxData> txRepo = transaction.getRepository(TxData.class);
-                txRepo.createIndex("name", indexOptions(IndexType.Fulltext));
+                txRepo.createIndex(indexOptions(IndexType.Fulltext), "name");
 
                 assertTrue(txRepo.hasIndex("name"));
                 assertFalse(repository.hasIndex("name"));
@@ -288,7 +288,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         TxData txData2 = new TxData(2L, "Jane");
 
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         repository.insert(txData1);
 
         try(Session session = db.createSession()) {
@@ -318,7 +318,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     public void testCommitDropIndex() {
         TxData txData1 = new TxData(1L, "John");
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         repository.insert(txData1);
 
         try (Session session = db.createSession()) {
@@ -342,7 +342,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         TxData txData2 = new TxData(2L, "Jane");
 
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         repository.insert(txData1);
 
         try(Session session = db.createSession()) {
@@ -372,7 +372,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     public void testCommitDropAllIndices() {
         TxData txData1 = new TxData(1L, "John");
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         repository.insert(txData1);
 
         try (Session session = db.createSession()) {
@@ -396,7 +396,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         TxData txData2 = new TxData(2L, "Jane");
 
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         repository.insert(txData1);
 
         try(Session session = db.createSession()) {
@@ -459,7 +459,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         TxData txData1 = new TxData(1L, "John");
 
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         repository.insert(txData1);
 
         try(Session session = db.createSession()) {
@@ -511,7 +511,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     @Test
     public void testRollbackSetAttribute() {
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.Unique));
+        repository.createIndex("name");
         try (Session session = db.createSession()) {
             Transaction transaction = null;
             try {
@@ -549,7 +549,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     @Test
     public void testConcurrentInsertAndRemove() {
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex("name", indexOptions(IndexType.NonUnique));
+        repository.createIndex(indexOptions(IndexType.NonUnique), "name");
         Faker faker = new Faker();
         List<Future<?>> futures = new ArrayList<>();
 
@@ -690,7 +690,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         ObjectRepository<TxData> repo2 = db.getRepository(TxData.class, "2");
         ObjectRepository<SubEmployee> repo3 = db.getRepository(SubEmployee.class);
         NitriteCollection col1 = db.getCollection("test1");
-        col1.createIndex("id", indexOptions(IndexType.Unique));
+        col1.createIndex("id");
 
         Faker faker = new Faker();
 

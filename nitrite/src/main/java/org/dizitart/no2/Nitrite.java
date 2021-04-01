@@ -25,7 +25,6 @@ import org.dizitart.no2.store.DatabaseMetaData;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.transaction.Session;
 
-import java.io.Closeable;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,19 +39,19 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-public interface Nitrite extends Closeable {
+public interface Nitrite extends AutoCloseable {
 
+    /**
+     * Returns an instance of a {@link NitriteBuilder}.
+     *
+     * @return the nitrite builder
+     */
     static NitriteBuilder builder() {
         return new NitriteBuilder();
     }
 
     /**
-     * Closes the database. Unsaved changes are written to disk for a file based store.
-     */
-    void close();
-
-    /**
-     * Commits the changes. For file based store, it saves the changes
+     * Commits the unsaved changes. For file based store, it saves the changes
      * to disk if there are any unsaved changes.
      * <p>
      * No need to call it after every change, if auto-commit is not disabled
@@ -139,14 +138,14 @@ public interface Nitrite extends Closeable {
     /**
      * Checks whether the store has any unsaved changes.
      *
-     * @return `true` if there are unsaved changes; otherwise `false`.
+     * @return <code>true</code> if there are unsaved changes; otherwise <code>false</code>.
      */
     boolean hasUnsavedChanges();
 
     /**
      * Checks whether the store is closed.
      *
-     * @return `true` if closed; otherwise `false`.
+     * @return <code>true</code> if closed; otherwise <code>false</code>.
      */
     boolean isClosed();
 
@@ -171,7 +170,6 @@ public interface Nitrite extends Closeable {
      */
     DatabaseMetaData getDatabaseMetaData();
 
-
     /**
      * Creates a {@link Session} for transaction.
      *
@@ -183,7 +181,7 @@ public interface Nitrite extends Closeable {
      * Checks whether a particular {@link NitriteCollection} exists in the store.
      *
      * @param name the name of the collection.
-     * @return `true` if the collection exists; otherwise `false`.
+     * @return <code>true</code> if the collection exists; otherwise <code>false</code>.
      */
     default boolean hasCollection(String name) {
         checkOpened();
@@ -195,7 +193,7 @@ public interface Nitrite extends Closeable {
      *
      * @param <T>  the type parameter
      * @param type the type of the object
-     * @return `true` if the repository exists; otherwise `false`.
+     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
      */
     default <T> boolean hasRepository(Class<T> type) {
         checkOpened();
@@ -206,9 +204,9 @@ public interface Nitrite extends Closeable {
      * Checks whether a particular keyed-{@link ObjectRepository} exists in the store.
      *
      * @param <T>  the type parameter.
-     * @param key  the key, which will be appended to the repositories name.
      * @param type the type of the object.
-     * @return `true` if the repository exists; otherwise `false`.
+     * @param key  the key, which will be appended to the repositories name.
+     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
      */
     default <T> boolean hasRepository(Class<T> type, String key) {
         checkOpened();
@@ -216,6 +214,11 @@ public interface Nitrite extends Closeable {
             && listKeyedRepository().get(key).contains(type.getName());
     }
 
+    /**
+     * Validate the collection name.
+     *
+     * @param name the name
+     */
     default void validateCollectionName(String name) {
         notNull(name, "name cannot be null");
         notEmpty(name, "name cannot be empty");
@@ -227,6 +230,9 @@ public interface Nitrite extends Closeable {
         }
     }
 
+    /**
+     * Checks if the store is opened.
+     */
     default void checkOpened() {
         if (getStore() == null || getStore().isClosed()) {
             throw new NitriteIOException("store is closed");

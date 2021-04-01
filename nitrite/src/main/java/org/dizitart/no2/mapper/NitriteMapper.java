@@ -19,12 +19,36 @@ package org.dizitart.no2.mapper;
 import org.dizitart.no2.module.NitritePlugin;
 
 /**
+ * Represents a mapper which will convert a object of one type to an object of another type.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 public interface NitriteMapper extends NitritePlugin {
+    /**
+     * Converts an object of type <code>Source</code> to an object of type <code>Target</code>.
+     *
+     * @param <Source> the type parameter
+     * @param <Target> the type parameter
+     * @param source   the source
+     * @param type     the type
+     * @return the target
+     */
     <Source, Target> Target convert(Source source, Class<Target> type);
 
+    /**
+     * Checks if the provided type is registered as a value type.
+     *
+     * @param type the type
+     * @return the boolean
+     */
     boolean isValueType(Class<?> type);
 
+    /**
+     * Checks if an object is of a value type.
+     *
+     * @param object the object
+     * @return the boolean
+     */
     boolean isValue(Object object);
 }

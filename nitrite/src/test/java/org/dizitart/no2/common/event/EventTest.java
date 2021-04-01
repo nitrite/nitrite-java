@@ -145,7 +145,7 @@ public class EventTest {
     }
 
     @Test
-    public void testClose() {
+    public void testClose() throws Exception {
         if (employeeRepository.isOpen()) {
             employeeRepository.close();
         }
@@ -196,7 +196,7 @@ public class EventTest {
     }
 
     @After
-    public void clear() {
+    public void clear() throws Exception {
         if (employeeRepository != null) {
             if (!employeeRepository.isDropped()
                     && employeeRepository.isOpen()) {

@@ -30,6 +30,7 @@ import org.dizitart.no2.repository.RepositoryFactory;
 import org.dizitart.no2.store.DatabaseMetaData;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.UserAuthenticationService;
 import org.dizitart.no2.transaction.Session;
 
 import java.io.File;
@@ -39,10 +40,10 @@ import java.util.Set;
 import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
 import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.store.StoreSecurity.authenticate;
 
 /**
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 @Slf4j
 class NitriteDatabase implements Nitrite {
@@ -190,7 +191,7 @@ class NitriteDatabase implements Nitrite {
 
     private void initialize(String username, String password) {
         try {
-            nitriteConfig.initialized();
+            nitriteConfig.initialize();
             store = nitriteConfig.getNitriteStore();
             boolean isExisting = isExisting();
 
@@ -200,17 +201,28 @@ class NitriteDatabase implements Nitrite {
             MigrationManager migrationManager = new MigrationManager(this);
             migrationManager.doMigrate();
 
-            authenticate(store, username, password, isExisting);
+            UserAuthenticationService userAuthenticationService = new UserAuthenticationService(store);
+            userAuthenticationService.authenticate(username, password, isExisting);
         } catch (NitriteException e) {
             log.error("Error while initializing the database", e);
             if (store != null && !store.isClosed()) {
-                store.close();
+                try {
+                    store.close();
+                } catch (Exception ex) {
+                    log.error("Error while closing the database", ex);
+                    throw new NitriteIOException("failed to close database", ex);
+                }
             }
             throw e;
         } catch (Exception e) {
             log.error("Error while initializing the database", e);
             if (store != null && !store.isClosed()) {
-                store.close();
+                try {
+                    store.close();
+                } catch (Exception ex) {
+                    log.error("Error while closing the database");
+                    throw new NitriteIOException("failed to close database", ex);
+                }
             }
             throw new NitriteIOException("failed to initialize database", e);
         }

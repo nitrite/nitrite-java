@@ -35,7 +35,7 @@ public class NitriteSecurityTest {
     public Retry retry = new Retry(3);
 
     @Test
-    public void testInMemory() {
+    public void testInMemory() throws Exception {
         db = createDb("test-user", "test-password");
         NitriteCollection dbCollection = db.getCollection("test");
         dbCollection.insert(createDocument("test", "test"));
@@ -50,7 +50,7 @@ public class NitriteSecurityTest {
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws Exception {
         if (db != null && !db.isClosed()) {
             db.close();
         }

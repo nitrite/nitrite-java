@@ -17,10 +17,24 @@
 package org.dizitart.no2.index;
 
 /**
+ * Represents a type of nitrite index.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public interface IndexType {
+    /**
+     * A unique index.
+     */
     String Unique = "Unique";
+
+    /**
+     * A non-unique index.
+     */
     String NonUnique = "NonUnique";
+
+    /**
+     * A nitrite full-text index.
+     */
     String Fulltext = "Fulltext";
 }

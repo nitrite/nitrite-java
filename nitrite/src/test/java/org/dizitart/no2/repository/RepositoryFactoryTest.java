@@ -28,6 +28,7 @@ import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.processors.Processor;
 import org.dizitart.no2.store.NitriteStore;
 import org.junit.After;
 import org.junit.Rule;
@@ -73,13 +74,18 @@ public class RepositoryFactoryTest {
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws Exception {
         if (db != null && !db.isClosed()) {
             db.close();
         }
     }
 
     private static class DummyCollection implements NitriteCollection {
+
+        @Override
+        public WriteResult insert(Document document, Document... documents) {
+            return null;
+        }
 
         @Override
         public WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
@@ -102,6 +108,11 @@ public class RepositoryFactoryTest {
         }
 
         @Override
+        public DocumentCursor find(Filter filter, FindOptions findOptions) {
+            return null;
+        }
+
+        @Override
         public Document getById(NitriteId nitriteId) {
             return null;
         }
@@ -112,12 +123,22 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public void createIndex(String field, IndexOptions indexOptions) {
+        public void addProcessor(Processor processor) {
 
         }
 
         @Override
-        public void rebuildIndex(String field, boolean isAsync) {
+        public void removeProcessor(Processor processor) {
+
+        }
+
+        @Override
+        public void createIndex(IndexOptions indexOptions, String... fields) {
+
+        }
+
+        @Override
+        public void rebuildIndex(String... fields) {
 
         }
 
@@ -127,17 +148,17 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public boolean hasIndex(String field) {
+        public boolean hasIndex(String... fields) {
             return false;
         }
 
         @Override
-        public boolean isIndexing(String field) {
+        public boolean isIndexing(String... fields) {
             return false;
         }
 
         @Override
-        public void dropIndex(String field) {
+        public void dropIndex(String... fields) {
 
         }
 

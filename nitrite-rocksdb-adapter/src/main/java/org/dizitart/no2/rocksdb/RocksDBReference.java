@@ -50,6 +50,7 @@ public class RocksDBReference implements AutoCloseable {
 
     @Override
     public void close() throws RocksDBException {
+        // if nitrite maps are already closed, this will affect nothing
         columnFamilyHandleRegistry.values().forEach(AbstractImmutableNativeReference::close);
         columnFamilyHandleRegistry.clear();
 

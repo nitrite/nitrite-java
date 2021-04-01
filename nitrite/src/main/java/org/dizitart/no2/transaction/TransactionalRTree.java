@@ -9,6 +9,7 @@ import java.util.*;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 class TransactionalRTree<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {
     private final Map<SpatialKey, Key> map;
@@ -97,6 +98,11 @@ class TransactionalRTree<Key extends BoundingBox, Value> implements NitriteRTree
     private SpatialKey getKey(Key key, long id) {
         return new SpatialKey(id, key.getMinX(),
             key.getMaxX(), key.getMinY(), key.getMaxY());
+    }
+
+    @Override
+    public void close() throws Exception {
+        map.clear();
     }
 
     /*

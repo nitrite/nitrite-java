@@ -16,8 +16,10 @@
 
 package org.dizitart.no2.index;
 
-import lombok.*;
-import org.dizitart.no2.collection.NitriteCollection;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.dizitart.no2.common.Fields;
 
 import java.io.IOException;
@@ -32,8 +34,6 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * Represents a nitrite database index.
  *
  * @author Anindya Chatterjee
- * @see NitriteCollection#createIndex(String, IndexOptions)
- * @see NitriteCollection#createIndex(Fields, IndexOptions)
  * @since 1.0
  */
 @Data

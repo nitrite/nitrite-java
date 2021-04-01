@@ -24,9 +24,15 @@ import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import static org.dizitart.no2.TestUtil.isSorted;
+import static org.dizitart.no2.collection.FindOptions.orderBy;
+import static org.dizitart.no2.filters.Filter.and;
+import static org.dizitart.no2.filters.Filter.or;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -39,14 +45,14 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindByUniqueIndex() throws ParseException {
         insert();
-        collection.createIndex("firstName", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "firstName");
         DocumentCursor cursor = collection.find(where("firstName").eq("fn1"));
         assertEquals(cursor.size(), 1);
 
         cursor = collection.find(where("firstName").eq("fn10"));
         assertEquals(cursor.size(), 0);
 
-        collection.createIndex("birthDay", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "birthDay");
         cursor = collection.find(where("birthDay").gt(
             simpleDateFormat.parse("2012-07-01T16:02:48.440Z")));
         assertEquals(cursor.size(), 1);
@@ -90,15 +96,23 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 3);
 
         cursor = collection.find(
-            where("birthDay").lte(new Date())
-                .or(where("firstName").eq("fn12"))
-                .and(where("lastName").eq("ln1")));
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ));
         assertEquals(cursor.size(), 1);
 
         cursor = collection.find(
-            where("birthDay").lte(new Date())
-                .or(where("firstName").eq("fn12"))
-                .and(where("lastName").eq("ln1")).not());
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ).not());
         assertEquals(cursor.size(), 2);
 
         cursor = collection.find(where("data.1").eq((byte) 4));
@@ -117,8 +131,8 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindByNonUniqueIndex() throws ParseException {
         insert();
-        collection.createIndex("lastName", IndexOptions.indexOptions(IndexType.NonUnique));
-        collection.createIndex("birthDay", IndexOptions.indexOptions(IndexType.NonUnique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "lastName");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "birthDay");
 
         DocumentCursor cursor = collection.find(where("lastName").eq("ln2"));
         assertEquals(cursor.size(), 2);
@@ -169,15 +183,23 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 3);
 
         cursor = collection.find(
-            where("birthDay").lte(new Date())
-                .or(where("firstName").eq("fn12"))
-                .and(where("lastName").eq("ln1")));
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ));
         assertEquals(cursor.size(), 1);
 
         cursor = collection.find(
-            where("birthDay").lte(new Date())
-                .or(where("firstName").eq("fn12"))
-                .and(where("lastName").eq("ln1")).not());
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ).not());
         assertEquals(cursor.size(), 2);
 
         cursor = collection.find(where("data.1").eq((byte) 4));
@@ -196,7 +218,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindByFullTextIndexAfterInsert() {
         insert();
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
         assertTrue(collection.hasIndex("body"));
 
         DocumentCursor cursor = collection.find(where("body").text("Lorem"));
@@ -218,7 +240,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
 
     @Test
     public void testFindByFullTextIndexBeforeInsert() {
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
         assertTrue(collection.hasIndex("body"));
         insert();
 
@@ -245,9 +267,9 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindByIndexSortAscending() {
         insert();
-        collection.createIndex("birthDay", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "birthDay");
 
-        DocumentCursor cursor = collection.find().sort("birthDay", SortOrder.Ascending);
+        DocumentCursor cursor = collection.find(orderBy("birthDay", SortOrder.Ascending));
         assertEquals(cursor.size(), 3);
         List<Date> dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -259,9 +281,9 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindByIndexSortDescending() {
         insert();
-        collection.createIndex("birthDay", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "birthDay");
 
-        DocumentCursor cursor = collection.find().sort("birthDay", SortOrder.Descending);
+        DocumentCursor cursor = collection.find(orderBy("birthDay", SortOrder.Descending));
         assertEquals(cursor.size(), 3);
         List<Date> dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -273,10 +295,13 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindByIndexLimitAndSort() {
         insert();
-        collection.createIndex("birthDay", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "birthDay");
 
-        DocumentCursor cursor = collection.find().
-            sort("birthDay", SortOrder.Descending).skipLimit(1, 2);
+        DocumentCursor cursor = collection.find(
+            orderBy("birthDay", SortOrder.Descending)
+                .skip(1)
+                .limit(2)
+        );
         assertEquals(cursor.size(), 2);
         List<Date> dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -284,8 +309,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         }
         assertTrue(isSorted(dateList, false));
 
-        cursor = collection.find().
-            sort("birthDay", SortOrder.Ascending).skipLimit(1, 2);
+        cursor = collection.find(orderBy("birthDay", SortOrder.Ascending).skip(1).limit(2));
         assertEquals(cursor.size(), 2);
         dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -293,8 +317,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         }
         assertTrue(isSorted(dateList, true));
 
-        cursor = collection.find().
-            sort("firstName", SortOrder.Ascending).skipLimit(0, 30);
+        cursor = collection.find(orderBy("firstName", SortOrder.Ascending).skip(0).limit(30));
         assertEquals(cursor.size(), 3);
         List<String> nameList = new ArrayList<>();
         for (Document document : cursor) {
@@ -306,7 +329,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindAfterDroppedIndex() {
         insert();
-        collection.createIndex("firstName", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "firstName");
         DocumentCursor cursor = collection.find(where("firstName").eq("fn1"));
         assertEquals(cursor.size(), 1);
 
@@ -318,7 +341,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindTextWithWildCard() {
         insert();
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
 
         DocumentCursor cursor = collection.find(where("body").text("Lo"));
         assertEquals(cursor.size(), 0);
@@ -336,7 +359,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
     @Test
     public void testFindTextWithEmptyString() {
         insert();
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
 
         DocumentCursor cursor = collection.find(where("body").text(""));
         assertEquals(cursor.size(), 0);
@@ -350,8 +373,8 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         Document doc3 = Document.createDocument("firstName", "Jonas").put("lastName", "Doe");
         Document doc4 = Document.createDocument("firstName", "Johan").put("lastName", "Day");
 
-        collection.createIndex("firstName", IndexOptions.indexOptions(IndexType.Unique));
-        collection.createIndex("lastName", IndexOptions.indexOptions(IndexType.NonUnique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "firstName");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "lastName");
 
         collection.insert(doc1, doc2, doc3, doc4);
 
@@ -381,7 +404,7 @@ public class CollectionFindByIndexTest extends BaseCollectionTest {
         Document doc3 = Document.createDocument("firstName", "Jonas").put("notes", list3);
         Document doc4 = Document.createDocument("firstName", "Johan").put("notes", list4);
 
-        collection.createIndex("notes", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "notes");
         collection.insert(doc1, doc2, doc3, doc4);
 
         DocumentCursor cursor = collection.find(where("notes").text("fox"));

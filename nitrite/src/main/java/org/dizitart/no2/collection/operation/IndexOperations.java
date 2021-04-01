@@ -8,14 +8,12 @@ import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.DocumentUtils;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.store.IndexCatalog;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.ArrayList;
@@ -24,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -35,56 +32,45 @@ import static org.dizitart.no2.common.concurrent.ThreadPoolManager.runAsync;
  */
 class IndexOperations implements AutoCloseable {
     private final NitriteConfig nitriteConfig;
+    private final IndexManager indexManager;
     private final NitriteMap<NitriteId, Document> nitriteMap;
     private final EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
-
-    private String collectionName;
-    private Map<Fields, AtomicBoolean> indexBuildRegistry;
-    private ExecutorService rebuildExecutor;
-    private Collection<IndexDescriptor> indexDescriptorCache;
+    private final Map<Fields, AtomicBoolean> indexBuildTracker;
 
     IndexOperations(NitriteConfig nitriteConfig, NitriteMap<NitriteId, Document> nitriteMap,
-                    EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus) {
+                    EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus,
+                    IndexManager indexManager) {
         this.nitriteConfig = nitriteConfig;
         this.nitriteMap = nitriteMap;
         this.eventBus = eventBus;
-        initialize();
+        this.indexManager = indexManager;
+        this.indexBuildTracker = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void close() {
-        if (rebuildExecutor != null) {
-            this.rebuildExecutor.shutdown();
-        }
+    public void close() throws Exception {
+        indexManager.close();
     }
 
-    void createIndex(Fields fields, String indexType, boolean isAsync) {
+    void createIndex(Fields fields, String indexType) {
         IndexDescriptor indexDescriptor;
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         if (!hasIndexEntry(fields)) {
             // if no index create index
-            indexDescriptor = indexCatalog.createIndexDescriptor(collectionName, fields, indexType);
+            indexDescriptor = indexManager.createIndexDescriptor(fields, indexType);
         } else {
             // if index already there throw
             throw new IndexingException("index already exists on " + fields);
         }
 
-        buildIndex(indexDescriptor, isAsync, false);
-
-        // update descriptor cache
-        updateIndexDescriptorCache();
+        buildIndex(indexDescriptor, false);
     }
 
     // call to this method is already synchronized, only one thread per field
     // can access it only if rebuild is already not running for that field
-    void buildIndex(IndexDescriptor indexDescriptor, boolean isAsync, boolean rebuild) {
+    void buildIndex(IndexDescriptor indexDescriptor, boolean rebuild) {
         final Fields fields = indexDescriptor.getIndexFields();
         if (getBuildFlag(fields).compareAndSet(false, true)) {
-            if (isAsync) {
-                rebuildExecutor.submit(() -> buildIndexInternal(indexDescriptor, rebuild));
-            } else {
-                buildIndexInternal(indexDescriptor, rebuild);
-            }
+            buildIndexInternal(indexDescriptor, rebuild);
             return;
         }
         throw new IndexingException("indexing is already running on " + indexDescriptor.getIndexFields());
@@ -95,30 +81,27 @@ class IndexOperations implements AutoCloseable {
             throw new IndexingException("cannot drop index as indexing is running on " + fields);
         }
 
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         IndexDescriptor indexDescriptor = findIndexDescriptor(fields);
         if (indexDescriptor != null) {
             String indexType = indexDescriptor.getIndexType();
             NitriteIndexer nitriteIndexer = nitriteConfig.findIndexer(indexType);
             nitriteIndexer.dropIndex(indexDescriptor, nitriteConfig);
 
-            indexCatalog.dropIndexDescriptor(collectionName, fields);
-            indexBuildRegistry.remove(fields);
-
-            // update descriptor cache
-            updateIndexDescriptorCache();
+            indexManager.dropIndexDescriptor(fields);
+            indexBuildTracker.remove(fields);
         } else {
             throw new IndexingException(fields + " is not indexed");
         }
     }
 
     void dropAllIndices() {
-        for (Map.Entry<Fields, AtomicBoolean> entry : indexBuildRegistry.entrySet()) {
+        for (Map.Entry<Fields, AtomicBoolean> entry : indexBuildTracker.entrySet()) {
             if (entry.getValue() != null && entry.getValue().get()) {
                 throw new IndexingException("cannot drop index as indexing is running on " + entry.getKey());
             }
         }
 
+        // we can drop all indices in parallel
         List<Future<?>> futures = new ArrayList<>();
         for (IndexDescriptor index : listIndexes()) {
             futures.add(runAsync(() -> dropIndex(index.getIndexFields())));
@@ -132,62 +115,47 @@ class IndexOperations implements AutoCloseable {
             }
         }
 
-        indexBuildRegistry.clear();
-
-        // update descriptor cache
-        updateIndexDescriptorCache();
+        indexBuildTracker.clear();
     }
 
     boolean isIndexing(Fields field) {
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         // has an index will only return true, if there is an index on
         // the value and indexing is not running on it
-        return indexCatalog.hasIndexDescriptor(collectionName, field)
+        return indexManager.hasIndexDescriptor(field)
             && getBuildFlag(field).get();
     }
 
     boolean hasIndexEntry(Fields field) {
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
-        return indexCatalog.hasIndexDescriptor(collectionName, field);
+        return indexManager.hasIndexDescriptor(field);
     }
 
     Collection<IndexDescriptor> listIndexes() {
-        return indexDescriptorCache;
+        return indexManager.getIndexDescriptors();
     }
 
     IndexDescriptor findIndexDescriptor(Fields field) {
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
-        return indexCatalog.findIndexDescriptorExact(collectionName, field);
+        return indexManager.findExactIndexDescriptor(field);
     }
 
     AtomicBoolean getBuildFlag(Fields field) {
-        AtomicBoolean flag = indexBuildRegistry.get(field);
+        AtomicBoolean flag = indexBuildTracker.get(field);
         if (flag != null) return flag;
 
         flag = new AtomicBoolean(false);
-        indexBuildRegistry.put(field, flag);
+        indexBuildTracker.put(field, flag);
         return flag;
     }
 
-    private void initialize() {
-        this.collectionName = nitriteMap.getName();
-        this.indexBuildRegistry = new ConcurrentHashMap<>();
-        this.rebuildExecutor = ThreadPoolManager.workerPool();
-        updateIndexDescriptorCache();
-    }
-
-    private void updateIndexDescriptorCache() {
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
-        indexDescriptorCache = indexCatalog.listIndexDescriptors(collectionName);
+    boolean shouldRebuildIndex(Fields fields) {
+        return indexManager.isDirtyIndex(fields) && !getBuildFlag(fields).get();
     }
 
     private void buildIndexInternal(IndexDescriptor indexDescriptor, boolean rebuild) {
-        IndexCatalog indexCatalog = nitriteConfig.getNitriteStore().getIndexCatalog();
         Fields fields = indexDescriptor.getIndexFields();
         try {
             alert(EventType.IndexStart, fields);
             // first put dirty marker
-            indexCatalog.beginIndexing(collectionName, fields);
+            indexManager.beginIndexing(fields);
 
             String indexType = indexDescriptor.getIndexType();
             NitriteIndexer nitriteIndexer = nitriteConfig.findIndexer(indexType);
@@ -200,12 +168,12 @@ class IndexOperations implements AutoCloseable {
             for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
                 Document document = entry.getSecond();
                 FieldValues fieldValues = DocumentUtils.getValues(document, indexDescriptor.getIndexFields());
-                nitriteIndexer.writeIndexEntry(indexDescriptor, fieldValues, nitriteConfig);
+                nitriteIndexer.writeIndexEntry(fieldValues, indexDescriptor, nitriteConfig);
             }
         } finally {
             // remove dirty marker to denote indexing completed successfully
             // if dirty marker is found in any index, it needs to be rebuild
-            indexCatalog.endIndexing(collectionName, fields);
+            indexManager.endIndexing(fields);
             getBuildFlag(fields).set(false);
             alert(EventType.IndexEnd, fields);
         }

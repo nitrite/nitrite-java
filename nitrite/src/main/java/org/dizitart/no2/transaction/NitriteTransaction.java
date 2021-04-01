@@ -20,6 +20,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Slf4j
 class NitriteTransaction implements Transaction {
@@ -228,16 +229,20 @@ class NitriteTransaction implements Transaction {
 
     @Override
     public void close() {
-        state = State.Closed;
-        for (TransactionContext context : contextMap.values()) {
-            context.getActive().set(false);
-        }
+        try {
+            state = State.Closed;
+            for (TransactionContext context : contextMap.values()) {
+                context.getActive().set(false);
+            }
 
-        this.contextMap.clear();
-        this.collectionRegistry.clear();
-        this.repositoryRegistry.clear();
-        this.undoRegistry.clear();
-        this.transactionalStore.close();
+            this.contextMap.clear();
+            this.collectionRegistry.clear();
+            this.repositoryRegistry.clear();
+            this.undoRegistry.clear();
+            this.transactionalStore.close();
+        } catch (Exception e) {
+            throw new TransactionException("transaction failed to close", e);
+        }
     }
 
     private void prepare() {

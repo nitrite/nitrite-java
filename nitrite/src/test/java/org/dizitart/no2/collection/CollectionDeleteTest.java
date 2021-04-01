@@ -72,7 +72,7 @@ public class CollectionDeleteTest extends BaseCollectionTest {
 
     @Test
     public void testClear() {
-        collection.createIndex("firstName", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "firstName");
         insert();
 
         DocumentCursor cursor = collection.find();

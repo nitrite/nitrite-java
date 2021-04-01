@@ -67,7 +67,7 @@ public class ObjectRepositoryTest {
     }
 
     @After
-    public void close() {
+    public void close() throws Exception {
         db.close();
         db = null;
     }

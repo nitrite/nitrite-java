@@ -21,6 +21,8 @@ import org.dizitart.no2.module.NitritePlugin;
 
 import java.util.Set;
 
+import static org.dizitart.no2.common.util.Iterables.setOf;
+
 /**
  * @author Anindya Chatterjee
  */

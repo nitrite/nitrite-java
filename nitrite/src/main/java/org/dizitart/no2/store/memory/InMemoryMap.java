@@ -15,7 +15,12 @@ import java.util.concurrent.ConcurrentSkipListMap;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
+ * The in-memory {@link NitriteMap}.
+ *
+ * @param <Key>   the type parameter
+ * @param <Value> the type parameter
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     private final NavigableMap<Key, Value> backingMap;
@@ -23,6 +28,12 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     private final NitriteStore<?> nitriteStore;
     private final String mapName;
 
+    /**
+     * Instantiates a new {@link InMemoryMap}.
+     *
+     * @param mapName      the map name
+     * @param nitriteStore the nitrite store
+     */
     public InMemoryMap(String mapName, NitriteStore<?> nitriteStore) {
         this.mapName = mapName;
         this.nitriteStore = nitriteStore;
@@ -83,7 +94,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public RecordStream<Key> keySet() {
+    public RecordStream<Key> keys() {
         return RecordStream.fromIterable(() -> new Iterator<Key>() {
             final Iterator<Key> keyIterator = backingMap.keySet().iterator();
             final Iterator<DBNull> nullEntryIterator = nullEntryMap.keySet().iterator();

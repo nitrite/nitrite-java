@@ -17,10 +17,12 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.processors.Processor;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,6 +37,7 @@ import static org.dizitart.no2.index.IndexOptions.indexOptions;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 class DefaultTransactionalCollection implements NitriteCollection {
@@ -229,23 +232,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public DocumentCursor find() {
-        checkOpened();
-        try {
-            readLock.lock();
-            return collectionOperations.find();
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    @Override
-    public DocumentCursor find(Filter filter) {
+    public DocumentCursor find(Filter filter, FindOptions findOptions) {
         checkOpened();
 
         try {
             readLock.lock();
-            return collectionOperations.find(filter);
+            return collectionOperations.find(filter, findOptions);
         } finally {
             readLock.unlock();
         }
@@ -270,18 +262,44 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public void createIndex(Fields fields, IndexOptions indexOptions) {
+    public void addProcessor(Processor processor) {
         checkOpened();
-        notNull(fields, "fields cannot be null");
+        notNull(processor, "a null processor cannot be added");
+        collectionOperations.addProcessor(processor);
+
+        JournalEntry journalEntry = new JournalEntry();
+        journalEntry.setChangeType(ChangeType.AddProcessor);
+        journalEntry.setCommit(() -> primary.addProcessor(processor));
+        journalEntry.setRollback(() -> primary.removeProcessor(processor));
+        transactionContext.getJournal().add(journalEntry);
+    }
+
+    @Override
+    public void removeProcessor(Processor processor) {
+        checkOpened();
+        notNull(processor, "a null processor cannot be removed");
+        collectionOperations.addProcessor(processor);
+
+        JournalEntry journalEntry = new JournalEntry();
+        journalEntry.setChangeType(ChangeType.RemoveProcessor);
+        journalEntry.setCommit(() -> primary.removeProcessor(processor));
+        journalEntry.setRollback(() -> primary.addProcessor(processor));
+        transactionContext.getJournal().add(journalEntry);
+    }
+
+    @Override
+    public void createIndex(IndexOptions indexOptions, String... fieldNames) {
+        checkOpened();
+        notNull(fieldNames, "fieldNames cannot be null");
 
         // by default async is false while creating index
         try {
+            Fields fields = Fields.withNames(fieldNames);
             writeLock.lock();
             if (indexOptions == null) {
-                collectionOperations.createIndex(fields, IndexType.Unique, false);
+                collectionOperations.createIndex(fields, IndexType.Unique);
             } else {
-                collectionOperations.createIndex(fields, indexOptions.getIndexType(),
-                    indexOptions.isAsync());
+                collectionOperations.createIndex(fields, indexOptions.getIndexType());
             }
         } finally {
             writeLock.unlock();
@@ -289,18 +307,19 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.CreateIndex);
-        journalEntry.setCommit(() -> primary.createIndex(fields, indexOptions));
-        journalEntry.setRollback(() -> primary.dropIndex(fields));
+        journalEntry.setCommit(() -> primary.createIndex(indexOptions, fieldNames));
+        journalEntry.setRollback(() -> primary.dropIndex(fieldNames));
         transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
-    public void rebuildIndex(Fields fields, boolean isAsync) {
+    public void rebuildIndex(String... fieldNames) {
         checkOpened();
-        notNull(fields, "fields cannot be null");
+        notNull(fieldNames, "fieldNames cannot be null");
 
         IndexDescriptor indexDescriptor;
         try {
+            Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
             indexDescriptor = collectionOperations.findIndex(fields);
         } finally {
@@ -312,18 +331,18 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
             try {
                 writeLock.lock();
-                collectionOperations.rebuildIndex(indexDescriptor, isAsync);
+                collectionOperations.rebuildIndex(indexDescriptor);
             } finally {
                 writeLock.unlock();
             }
         } else {
-            throw new IndexingException(fields + " is not indexed");
+            throw new IndexingException(Arrays.toString(fieldNames) + " is not indexed");
         }
 
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.RebuildIndex);
-        journalEntry.setCommit(() -> primary.rebuildIndex(fields, isAsync));
-        journalEntry.setRollback(() -> primary.rebuildIndex(fields, isAsync));
+        journalEntry.setCommit(() -> primary.rebuildIndex(fieldNames));
+        journalEntry.setRollback(() -> primary.rebuildIndex(fieldNames));
         transactionContext.getJournal().add(journalEntry);
     }
 
@@ -340,11 +359,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public boolean hasIndex(Fields fields) {
+    public boolean hasIndex(String... fieldNames) {
         checkOpened();
-        notNull(fields, "fields cannot be null");
+        notNull(fieldNames, "fieldNames cannot be null");
 
         try {
+            Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
             return collectionOperations.hasIndex(fields);
         } finally {
@@ -353,11 +373,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public boolean isIndexing(Fields fields) {
+    public boolean isIndexing(String... fieldNames) {
         checkOpened();
-        notNull(fields, "fields cannot be null");
+        notNull(fieldNames, "fieldNames cannot be null");
 
         try {
+            Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
             return collectionOperations.isIndexing(fields);
         } finally {
@@ -366,10 +387,11 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public void dropIndex(Fields fields) {
+    public void dropIndex(String... fieldNames) {
         checkOpened();
-        notNull(fields, "fields cannot be null");
+        notNull(fieldNames, "fieldNames cannot be null");
 
+        Fields fields = Fields.withNames(fieldNames);
         try {
             writeLock.lock();
             collectionOperations.dropIndex(fields);
@@ -388,12 +410,11 @@ class DefaultTransactionalCollection implements NitriteCollection {
                     break;
                 }
             }
-            primary.dropIndex(fields);
+            primary.dropIndex(fieldNames);
         });
         journalEntry.setRollback(() -> {
             if (indexEntry.get() != null) {
-                primary.createIndex(indexEntry.get().getIndexFields(),
-                    indexOptions(indexEntry.get().getIndexType()));
+                primary.createIndex(indexOptions(indexEntry.get().getIndexType()), fieldNames);
             }
         });
         transactionContext.getJournal().add(journalEntry);
@@ -420,8 +441,8 @@ class DefaultTransactionalCollection implements NitriteCollection {
         });
         journalEntry.setRollback(() -> {
             for (IndexDescriptor indexDescriptor : indexEntries) {
-                primary.createIndex(indexDescriptor.getIndexFields(),
-                    indexOptions(indexDescriptor.getIndexType()));
+                String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+                primary.createIndex(indexOptions(indexDescriptor.getIndexType()), fieldNames);
             }
         });
         transactionContext.getJournal().add(journalEntry);
@@ -479,8 +500,8 @@ class DefaultTransactionalCollection implements NitriteCollection {
             NitriteCollection collection = nitrite.getCollection(collectionName);
 
             for (IndexDescriptor indexDescriptor : indexEntries) {
-                collection.createIndex(indexDescriptor.getIndexFields(),
-                    indexOptions(indexDescriptor.getIndexType()));
+                String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+                collection.createIndex(indexOptions(indexDescriptor.getIndexType()), fieldNames);
             }
 
             for (Document document : documentList) {
@@ -498,13 +519,17 @@ class DefaultTransactionalCollection implements NitriteCollection {
     @Override
     public boolean isOpen() {
         if (nitriteStore == null || nitriteStore.isClosed() || isDropped) {
-            close();
+            try {
+                close();
+            } catch (Exception e) {
+                throw new NitriteIOException("failed to close the database", e);
+            }
             return false;
         } else return true;
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         if (collectionOperations != null) {
             collectionOperations.close();
         }
@@ -622,7 +647,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         }
     }
 
-    private void closeEventBus() {
+    private void closeEventBus() throws Exception {
         if (eventBus != null) {
             eventBus.close();
         }
@@ -632,7 +657,8 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
         notNull(indexDescriptor, "indexEntry cannot be null");
 
-        if (isIndexing(indexDescriptor.getIndexFields())) {
+        String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+        if (isIndexing(fieldNames)) {
             throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }

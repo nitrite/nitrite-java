@@ -11,7 +11,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * The in-memory nitrite store config.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Accessors(fluent = true)
 public class InMemoryConfig implements StoreConfig {
@@ -19,6 +22,9 @@ public class InMemoryConfig implements StoreConfig {
     @Setter(AccessLevel.PACKAGE)
     private Set<StoreEventListener> eventListeners;
 
+    /**
+     * Instantiates a new {@link InMemoryConfig}.
+     */
     InMemoryConfig() {
         this.eventListeners = new HashSet<>();
     }

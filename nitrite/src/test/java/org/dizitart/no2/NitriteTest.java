@@ -20,6 +20,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
@@ -94,13 +95,13 @@ public class NitriteTest {
         collection = db.getCollection("test");
         collection.remove(ALL);
 
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
-        collection.createIndex("firstName", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "firstName");
         collection.insert(doc1, doc2, doc3);
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         if (collection.isOpen()) {
             collection.remove(ALL);
             collection.close();
@@ -140,7 +141,7 @@ public class NitriteTest {
     }
 
     @Test
-    public void testClose() {
+    public void testClose() throws Exception {
         NitriteCollection testCollection = db.getCollection("test");
         testCollection.insert(createDocument("a", "b"));
         db.close();
@@ -199,28 +200,28 @@ public class NitriteTest {
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testGetCollectionNullStore() {
+    public void testGetCollectionNullStore() throws Exception {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.getCollection("test");
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testGetRepositoryNullStore() {
+    public void testGetRepositoryNullStore() throws Exception {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class);
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testGetKeyedRepositoryNullStore() {
+    public void testGetKeyedRepositoryNullStore() throws Exception {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class, "key");
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testCommitNullStore() {
+    public void testCommitNullStore() throws Exception {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.commit();
@@ -260,8 +261,8 @@ public class NitriteTest {
         }).start();
 
         for (int i = 0; i < 1000; ++i) {
-            repository.find(where("status").eq(Receipt.Status.COMPLETED).not())
-                .sort("createdTimestamp", SortOrder.Descending).toList();
+            repository.find(where("status").eq(Receipt.Status.COMPLETED).not(),
+                FindOptions.orderBy("createdTimestamp", SortOrder.Descending)).toList();
             try {
                 Thread.sleep(5);
             } catch (InterruptedException ignored) {
@@ -302,10 +303,10 @@ public class NitriteTest {
         Document doc = createDocument("fifth_key", "fifth_key");
 
         if (!collection.hasIndex("key")) {
-            collection.createIndex("key", IndexOptions.indexOptions(IndexType.NonUnique));
+            collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "key");
         }
         if (!collection.hasIndex("second_key")) {
-            collection.createIndex("second_key", IndexOptions.indexOptions(IndexType.NonUnique));
+            collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "second_key");
         }
 
         collection.insert(doc1, doc2);
@@ -318,7 +319,7 @@ public class NitriteTest {
     }
 
     @Test
-    public void testIssue245() throws InterruptedException {
+    public void testIssue245() throws Exception {
         class ThreadRunner implements Runnable {
             @Override
             public void run() {

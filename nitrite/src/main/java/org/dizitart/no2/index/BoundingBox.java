@@ -19,14 +19,36 @@ package org.dizitart.no2.index;
 import java.io.Serializable;
 
 /**
+ * Represents a bounding box for spatial indexing.
+ *
  * @author Anindya Chatterjee
  */
 public interface BoundingBox extends Serializable {
+    /**
+     * Gets min x.
+     *
+     * @return the min x
+     */
     float getMinX();
 
+    /**
+     * Gets max x.
+     *
+     * @return the max x
+     */
     float getMaxX();
 
+    /**
+     * Gets min y.
+     *
+     * @return the min y
+     */
     float getMinY();
 
+    /**
+     * Gets max y.
+     *
+     * @return the max y
+     */
     float getMaxY();
 }

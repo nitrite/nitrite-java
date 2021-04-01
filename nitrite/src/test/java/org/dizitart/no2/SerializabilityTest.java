@@ -46,7 +46,7 @@ public class SerializabilityTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws Exception {
         if (db != null && !db.isClosed()) {
             db.close();
         }

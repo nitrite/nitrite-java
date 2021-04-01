@@ -21,7 +21,10 @@ import lombok.NoArgsConstructor;
 import org.dizitart.no2.collection.Document;
 
 /**
+ * The nitrite database metadata.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 @Data
 @NoArgsConstructor
@@ -31,10 +34,20 @@ public class DatabaseMetaData {
     private String nitriteVersion;
     private Integer schemaVersion;
 
+    /**
+     * Instantiates a new {@link DatabaseMetaData}.
+     *
+     * @param document the document
+     */
     public DatabaseMetaData(Document document) {
         populateInfo(document);
     }
 
+    /**
+     * Gets the database info ina document.
+     *
+     * @return the info
+     */
     public Document getInfo() {
         return Document.createDocument()
             .put("createTime", createTime)

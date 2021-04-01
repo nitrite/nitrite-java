@@ -20,16 +20,50 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 
 /**
+ * Represents an R-Tree in the nitrite database.
+ *
+ * @param <Key>   the type parameter
+ * @param <Value> the type parameter
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
-public interface NitriteRTree<Key, Value> {
+public interface NitriteRTree<Key, Value> extends AutoCloseable {
+    /**
+     * Adds a key to the rtree.
+     *
+     * @param key       the key
+     * @param nitriteId the nitrite id
+     */
     void add(Key key, NitriteId nitriteId);
 
+    /**
+     * Removes a key from the rtree.
+     *
+     * @param key       the key
+     * @param nitriteId the nitrite id
+     */
     void remove(Key key, NitriteId nitriteId);
 
+    /**
+     * Finds the intersecting keys from the rtree.
+     *
+     * @param key the key
+     * @return the record stream
+     */
     RecordStream<NitriteId> findIntersectingKeys(Key key);
 
+    /**
+     * Finds the contained keys from the rtree.
+     *
+     * @param key the key
+     * @return the record stream
+     */
     RecordStream<NitriteId> findContainedKeys(Key key);
 
+    /**
+     * Gets the size of the rtree.
+     *
+     * @return the size
+     */
     long size();
 }

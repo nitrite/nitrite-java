@@ -4,14 +4,17 @@ import lombok.AllArgsConstructor;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.migration.TypeConverter;
 
-import static org.dizitart.no2.common.Fields.single;
-
 /**
+ * A migration command to change the datatype of a document field
+ * in a collection.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @AllArgsConstructor
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -33,9 +36,9 @@ public class ChangeDataType extends BaseCommand implements Command {
             nitriteMap.put(entry.getFirst(), document);
         }
 
-        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, single(fieldName));
+        IndexDescriptor indexDescriptor = operations.findIndex(Fields.withNames(fieldName));
         if (indexDescriptor != null) {
-            operations.rebuildIndex(indexDescriptor, false);
+            operations.rebuildIndex(indexDescriptor);
         }
     }
 }

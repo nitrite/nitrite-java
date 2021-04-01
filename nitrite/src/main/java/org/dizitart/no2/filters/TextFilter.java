@@ -16,45 +16,162 @@
 
 package org.dizitart.no2.filters;
 
+import lombok.Setter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.index.TextIndexer;
+import org.dizitart.no2.index.fulltext.TextTokenizer;
 import org.dizitart.no2.store.NitriteMap;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+
+import static org.dizitart.no2.common.util.StringUtils.stringTokenizer;
+import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
+ * Represents a nitrite full-text search filter.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
-class TextFilter extends StringFilter {
+public class TextFilter extends StringFilter {
+    @Setter
+    private TextTokenizer textTokenizer;
+
+    /**
+     * Instantiates a new Text filter.
+     *
+     * @param field the field
+     * @param value the value
+     */
     TextFilter(String field, String value) {
         super(field, value);
     }
 
     @Override
-    protected Set<NitriteId> findIndexedIdSet() {
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getIsFieldIndexed()) {
-            if (getNitriteIndexer() instanceof TextIndexer) {
-                TextIndexer textIndexer = (TextIndexer) getNitriteIndexer();
-                idSet = textIndexer.findText(getCollectionName(), getField(), getStringValue());
-            } else {
-                throw new FilterException(getField() + " is not full-text indexed");
+    public boolean apply(Pair<NitriteId, Document> element) {
+        throw new FilterException(getField() + " is not full-text indexed");
+    }
+
+    /**
+     * Apply on index linked hash set.
+     *
+     * @param indexMap the index map
+     * @return the linked hash set
+     */
+    public LinkedHashSet<NitriteId> applyOnIndex(NitriteMap<String, List<?>> indexMap) {
+        notNull(getField(), "field cannot be null");
+        notNull(getStringValue(), "search term cannot be null");
+        String searchString = getStringValue();
+
+        if (searchString.startsWith("*") || searchString.endsWith("*")) {
+            return searchByWildCard(indexMap, searchString);
+        } else {
+            return searchExactByIndex(indexMap, searchString);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private LinkedHashSet<NitriteId> searchExactByIndex(NitriteMap<String, List<?>> indexMap, String searchString) {
+
+        Set<String> words = textTokenizer.tokenize(searchString);
+        Map<NitriteId, Integer> scoreMap = new HashMap<>();
+        for (String word : words) {
+            List<NitriteId> nitriteIds = (List<NitriteId>) indexMap.get(word);
+            if (nitriteIds != null) {
+                for (NitriteId id : nitriteIds) {
+                    Integer score = scoreMap.get(id);
+                    if (score == null) {
+                        scoreMap.put(id, 1);
+                    } else {
+                        scoreMap.put(id, score + 1);
+                    }
+                }
+            }
+        }
+
+        return sortedIdsByScore(scoreMap);
+    }
+
+    private LinkedHashSet<NitriteId> searchByWildCard(NitriteMap<String, List<?>> indexMap, String searchString) {
+        if (searchString.contentEquals("*")) {
+            throw new FilterException("* is not a valid search string");
+        }
+
+        StringTokenizer stringTokenizer = stringTokenizer(searchString);
+        if (stringTokenizer.countTokens() > 1) {
+            throw new FilterException("multiple words with wildcard is not supported");
+        }
+
+        if (searchString.startsWith("*") && !searchString.endsWith("*")) {
+            return searchByLeadingWildCard(indexMap, searchString);
+        } else if (searchString.endsWith("*") && !searchString.startsWith("*")) {
+            return searchByTrailingWildCard(indexMap, searchString);
+        } else {
+            String term = searchString.substring(1, searchString.length() - 1);
+            return searchContains(indexMap, term);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private LinkedHashSet<NitriteId> searchByLeadingWildCard(NitriteMap<String, List<?>> indexMap, String searchString) {
+        if (searchString.equalsIgnoreCase("*")) {
+            throw new FilterException("invalid search term '*'");
+        }
+
+        LinkedHashSet<NitriteId> idSet = new LinkedHashSet<>();
+        String term = searchString.substring(1);
+
+        for (Pair<String, List<?>> entry : indexMap.entries()) {
+            String key = entry.getFirst();
+            if (key.endsWith(term.toLowerCase())) {
+                idSet.addAll((List<NitriteId>) entry.getSecond());
             }
         }
         return idSet;
     }
 
-    @Override
-    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
-        throw new FilterException("text filter cannot be applied on _id field");
+    @SuppressWarnings("unchecked")
+    private LinkedHashSet<NitriteId> searchByTrailingWildCard(NitriteMap<String, List<?>> indexMap, String searchString) {
+        if (searchString.equalsIgnoreCase("*")) {
+            throw new FilterException("invalid search term '*'");
+        }
+
+        LinkedHashSet<NitriteId> idSet = new LinkedHashSet<>();
+        String term = searchString.substring(0, searchString.length() - 1);
+
+        for (Pair<String, List<?>> entry : indexMap.entries()) {
+            String key = entry.getFirst();
+            if (key.startsWith(term.toLowerCase())) {
+                idSet.addAll((List<NitriteId>) entry.getSecond());
+            }
+        }
+        return idSet;
     }
 
-    @Override
-    public boolean apply(Pair<NitriteId, Document> element) {
-        throw new FilterException(getField() + " is not full-text indexed");
+    @SuppressWarnings("unchecked")
+    private LinkedHashSet<NitriteId> searchContains(NitriteMap<String, List<?>> indexMap, String term) {
+        LinkedHashSet<NitriteId> idSet = new LinkedHashSet<>();
+
+        for (Pair<String, List<?>> entry : indexMap.entries()) {
+            String key = entry.getFirst();
+            if (key.contains(term.toLowerCase())) {
+                idSet.addAll((List<NitriteId>) entry.getSecond());
+            }
+        }
+        return idSet;
+    }
+
+    private LinkedHashSet<NitriteId> sortedIdsByScore(Map<NitriteId, Integer> unsortedMap) {
+        List<Map.Entry<NitriteId, Integer>> list = new LinkedList<>(unsortedMap.entrySet());
+        Collections.sort(list, (e1, e2) -> (e2.getValue()).compareTo(e1.getValue()));
+
+        LinkedHashSet<NitriteId> result = new LinkedHashSet<>();
+        for (Map.Entry<NitriteId, Integer> entry : list) {
+            result.add(entry.getKey());
+        }
+
+        return result;
     }
 }

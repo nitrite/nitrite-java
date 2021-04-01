@@ -1,7 +1,7 @@
 package org.dizitart.no2.common;
 
-import lombok.Data;
-import org.dizitart.no2.common.tuples.Pair;
+import lombok.AccessLevel;
+import lombok.Setter;
 import org.dizitart.no2.common.util.StringUtils;
 
 import java.io.IOException;
@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
@@ -17,74 +18,81 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
+ * Represents a list of document fields.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
-@Data
 public class Fields implements Comparable<Fields>, Serializable {
     private static final long serialVersionUID = 1601646404L;
 
-    // order of the given fields matter
-    private List<Pair<String, SortOrder>> sortSpecs;
-    private transient FieldNames fieldNames;
+    /**
+     * The Field names.
+     */
+// order of the given fields matter
+    @Setter(AccessLevel.PACKAGE)
+    protected List<String> fieldNames;
 
+    /**
+     * Instantiates a new Fields.
+     */
     public Fields() {
-        sortSpecs = new ArrayList<>();
+        fieldNames = new ArrayList<>();
     }
 
-    public static Fields single(String field) {
-        Fields fields = new Fields();
-        fields.sortSpecs.add(new Pair<>(field, SortOrder.Ascending));
-        return fields;
-    }
-
-    @SafeVarargs
-    public static Fields multiple(Pair<String, SortOrder>... fields) {
+    /**
+     * Creates a {@link Fields} instance with field names.
+     *
+     * @param fields the fields
+     * @return the fields
+     */
+    public static Fields withNames(String... fields) {
         notNull(fields, "fields cannot be null");
         notEmpty(fields, "fields cannot be empty");
 
         Fields f = new Fields();
-        f.sortSpecs.addAll(Arrays.asList(fields));
+        f.fieldNames.addAll(Arrays.asList(fields));
         return f;
     }
 
-    public FieldNames getFieldNames() {
-        if (fieldNames != null) {
-            return fieldNames;
-        }
 
-        fieldNames = new FieldNames();
-        for (Pair<String, SortOrder> pair : sortSpecs) {
-            fieldNames.add(pair.getFirst());
-        }
-        return fieldNames;
+    /**
+     * Adds a new field name.
+     *
+     * @param field the field
+     * @return the fields
+     */
+    public Fields addField(String field) {
+        fieldNames.add(field);
+        return this;
     }
 
-    public Pair<String, SortOrder> getFirstKey() {
-        return sortSpecs.get(0);
+    /**
+     * Gets the field names.
+     *
+     * @return the field names
+     */
+    public List<String> getFieldNames() {
+        return Collections.unmodifiableList(fieldNames);
     }
 
-    public SortOrder getSortOrder(String fieldName) {
-        for (Pair<String, SortOrder> pair : sortSpecs) {
-            if (pair.getFirst().equals(fieldName)) {
-                return pair.getSecond();
-            }
-        }
-        return null;
-    }
+    /**
+     * Starts with boolean.
+     *
+     * @param other the other
+     * @return the boolean
+     */
+    public boolean startsWith(Fields other) {
+        if (other != null) {
+            int length = Math.min(fieldNames.size(), other.fieldNames.size());
 
-    public String getEncodedName() {
-        return StringUtils.join(INTERNAL_NAME_SEPARATOR, getFieldNames());
-    }
+            // if other is greater then it is not a prefix of this field
+            if (other.fieldNames.size() > length) return false;
 
-    public boolean isPrefix(Fields otherFields) {
-        if (otherFields == null) return false;
-        List<Pair<String, SortOrder>> otherFieldList = otherFields.getSortSpecs();
-        if (otherFieldList != null) {
-            if (otherFieldList.size() > sortSpecs.size()) return false;
-            for (int i = 0; i < otherFieldList.size(); i++) {
-                String field = sortSpecs.get(i).getFirst();
-                String otherField = otherFieldList.get(i).getFirst();
-                if (!field.contentEquals(otherField)) {
+            for (int i = 0; i < length; i++) {
+                String thisField = fieldNames.get(i);
+                String otherField = other.fieldNames.get(i);
+                if (!thisField.equals(otherField)) {
                     return false;
                 }
             }
@@ -93,24 +101,18 @@ public class Fields implements Comparable<Fields>, Serializable {
         return false;
     }
 
+    /**
+     * Gets the encoded name for this {@link Fields}.
+     *
+     * @return the encoded name
+     */
+    public String getEncodedName() {
+        return StringUtils.join(INTERNAL_NAME_SEPARATOR, getFieldNames());
+    }
+
     @Override
     public String toString() {
-        StringBuilder stringBuilder = new StringBuilder("[");
-        int count = 0;
-        for (Pair<String, SortOrder> field : sortSpecs) {
-            count++;
-            stringBuilder.append("{")
-                .append(field.getFirst())
-                .append(": ")
-                .append(field.getSecond())
-                .append("}");
-
-                if (count != sortSpecs.size()) {
-                    stringBuilder.append(", ");
-                }
-        }
-        stringBuilder.append("]");
-        return stringBuilder.toString();
+        return fieldNames.toString();
     }
 
     @Override
@@ -134,11 +136,11 @@ public class Fields implements Comparable<Fields>, Serializable {
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeObject(sortSpecs);
+        stream.writeObject(fieldNames);
     }
 
     @SuppressWarnings("unchecked")
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        sortSpecs = (List<Pair<String, SortOrder>>) stream.readObject();
+        fieldNames = (List<String>) stream.readObject();
     }
 }

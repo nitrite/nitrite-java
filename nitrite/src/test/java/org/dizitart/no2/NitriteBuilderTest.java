@@ -17,20 +17,25 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
 import org.dizitart.no2.module.PluginManager;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreConfig;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.util.LinkedHashSet;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
@@ -47,7 +52,7 @@ public class NitriteBuilderTest {
     public Retry retry = new Retry(3);
 
     @After
-    public void cleanup() {
+    public void cleanup() throws Exception {
         (new NitriteConfig()).fieldSeparator(".");
 
         if (db != null && !db.isClosed()) {
@@ -56,7 +61,7 @@ public class NitriteBuilderTest {
     }
 
     @Test
-    public void testConfig() {
+    public void testConfig() throws Exception {
 
         NitriteBuilder nitriteBuilder = Nitrite.builder();
         nitriteBuilder.loadModule(module(new CustomIndexer()));
@@ -70,7 +75,7 @@ public class NitriteBuilderTest {
     }
 
     @Test
-    public void testConfigWithFile() {
+    public void testConfigWithFile() throws Exception {
         db = Nitrite.builder()
             .openOrCreate();
         StoreConfig storeConfig = db.getStore().getStoreConfig();
@@ -86,7 +91,7 @@ public class NitriteBuilderTest {
     }
 
     @Test
-    public void testConfigWithFileNull() {
+    public void testConfigWithFileNull() throws Exception {
         db = Nitrite.builder().openOrCreate();
         StoreConfig storeConfig = db.getStore().getStoreConfig();
 
@@ -171,29 +176,30 @@ public class NitriteBuilderTest {
         }
 
         @Override
-        public void writeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
+        public void validateIndex(Fields fields) {
 
         }
 
         @Override
-        public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
+        public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public void updateIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object newValue, Object oldValue) {
+        public void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public void dropIndex(NitriteMap<NitriteId, Document> collection, String field) {
+        public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public NitriteIndexer clone() throws CloneNotSupportedException {
+        public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
             return null;
         }
+
 
         @Override
         public void initialize(NitriteConfig nitriteConfig) {

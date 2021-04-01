@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
+import static org.dizitart.no2.collection.FindOptions.skipBy;
 import static org.junit.Assert.*;
 
 /**
@@ -32,28 +33,28 @@ public class ProjectionTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testHasMore() {
-        RecordStream<SubEmployee> iterable = employeeRepository.find().skipLimit(0, 5)
+        RecordStream<SubEmployee> iterable = employeeRepository.find(skipBy(0).limit(5))
             .project(SubEmployee.class);
         assertFalse(iterable.isEmpty());
     }
 
     @Test
     public void testSize() {
-        RecordStream<SubEmployee> iterable = employeeRepository.find().skipLimit(0, 5)
+        RecordStream<SubEmployee> iterable = employeeRepository.find(skipBy(0).limit(5))
             .project(SubEmployee.class);
         assertEquals(iterable.size(), 5);
     }
 
     @Test
     public void testToString() {
-        RecordStream<SubEmployee> iterable = employeeRepository.find().skipLimit(0, 5)
+        RecordStream<SubEmployee> iterable = employeeRepository.find(skipBy(0).limit(5))
             .project(SubEmployee.class);
         assertNotNull(iterable.toString());
     }
 
     @Test(expected = InvalidOperationException.class)
     public void testRemove() {
-        RecordStream<SubEmployee> iterable = employeeRepository.find().skipLimit(0, 5)
+        RecordStream<SubEmployee> iterable = employeeRepository.find(skipBy(0).limit(5))
             .project(SubEmployee.class);
         Iterator<SubEmployee> iterator = iterable.iterator();
         if (iterator.hasNext()) {

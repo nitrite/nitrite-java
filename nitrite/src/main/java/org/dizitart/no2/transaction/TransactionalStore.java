@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     private final NitriteStore<T> primaryStore;
@@ -49,8 +50,14 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
     }
 
     @Override
-    public void close() {
-        // nothing to do
+    public void close() throws Exception {
+        for (NitriteMap<?, ?> nitriteMap : mapRegistry.values()) {
+            nitriteMap.close();
+        }
+
+        for (NitriteRTree<?, ?> rTree : rTreeRegistry.values()) {
+            rTree.close();
+        }
     }
 
     @Override

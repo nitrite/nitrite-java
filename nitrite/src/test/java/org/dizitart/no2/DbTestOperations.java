@@ -25,13 +25,13 @@ import org.dizitart.no2.index.IndexType;
 import org.junit.Rule;
 
 import java.io.File;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.dizitart.no2.TestUtil.isSorted;
 import static org.dizitart.no2.collection.Document.createDocument;
-import static org.dizitart.no2.filters.Filter.ALL;
+import static org.dizitart.no2.collection.FindOptions.orderBy;
+import static org.dizitart.no2.filters.Filter.*;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.junit.Assert.assertEquals;
@@ -55,12 +55,12 @@ public class DbTestOperations {
         return file.getPath() + File.separator + UUID.randomUUID().toString() + ".db";
     }
 
-    void createDb() {
+    void createDb() throws Exception {
         db = TestUtil.createDb();
         db.close();
     }
 
-    void writeCollection() {
+    void writeCollection() throws Exception {
         NitriteCollection collection;
 
         db = TestUtil.createDb();
@@ -70,20 +70,20 @@ public class DbTestOperations {
         db.close();
     }
 
-    void writeIndex() {
+    void writeIndex() throws Exception {
         NitriteCollection collection;
 
         db = TestUtil.createDb();
 
         collection = db.getCollection("test");
         collection.remove(ALL);
-        collection.createIndex("body", indexOptions(IndexType.Fulltext));
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
-        collection.createIndex("lastName", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
+        collection.createIndex("firstName");
+        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
         db.close();
     }
 
-    void insertInCollection() throws ParseException {
+    void insertInCollection() throws Exception {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
         Document doc1 = createDocument("firstName", "fn1")
@@ -116,7 +116,7 @@ public class DbTestOperations {
         db.close();
     }
 
-    void readCollection() throws ParseException {
+    void readCollection() throws Exception {
         NitriteCollection collection;
 
         db = TestUtil.createDb();
@@ -157,15 +157,24 @@ public class DbTestOperations {
         cursor = collection.find(where("birthDay").lte(new Date()).or(where("firstName").eq("fn12")));
         assertEquals(cursor.size(), 3);
 
-        cursor = collection.find(where("birthDay").lte(new Date())
-            .or(where("firstName").eq("fn12"))
-            .and(where("lastName").eq("ln1")));
+        cursor = collection.find(
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ));
         assertEquals(cursor.size(), 1);
 
-        cursor = collection.find(where("birthDay").lte(new Date())
-            .or(where("firstName").eq("fn12"))
-            .and(where("lastName").eq("ln1"))
-            .not());
+        cursor = collection.find(
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ).not());
         assertEquals(cursor.size(), 2);
 
         cursor = collection.find(where("data.1").eq((byte) 4));
@@ -180,8 +189,8 @@ public class DbTestOperations {
         cursor = collection.find(where("firstName").notIn("fn1", "fn2"));
         assertEquals(cursor.size(), 1);
 
-        collection.createIndex("birthDay", indexOptions(IndexType.Unique));
-        cursor = collection.find().sort("birthDay", SortOrder.Descending).skipLimit(1, 2);
+        collection.createIndex("birthDay");
+        cursor = collection.find(orderBy("birthDay", SortOrder.Descending).skip(1).limit(2));
         assertEquals(cursor.size(), 2);
         List<Date> dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -201,7 +210,7 @@ public class DbTestOperations {
         db.close();
     }
 
-    void deleteDb() {
+    void deleteDb() throws Exception {
         if (db != null && !db.isClosed()) {
             db.close();
         }

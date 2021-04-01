@@ -39,10 +39,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     private MVStore mvStore;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
+    private final Map<String, NitriteRTree<?, ?>> nitriteRTreeMapRegistry;
 
     public NitriteMVStore() {
         super();
         this.nitriteMapRegistry = new ConcurrentHashMap<>();
+        this.nitriteRTreeMapRegistry = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -74,10 +76,20 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         if (getStoreConfig().autoCompact()) {
             compact();
         }
+
+        // close nitrite maps
+        for (NitriteMap<?, ?> nitriteMap : nitriteMapRegistry.values()) {
+            nitriteMap.close();
+        }
+
+        for (NitriteRTree<?, ?> rTree : nitriteRTreeMapRegistry.values()) {
+            rTree.close();
+        }
+
         mvStore.close();
         alert(StoreEvents.Closed);
     }
@@ -109,9 +121,15 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String name, Class<?> keyType, Class<?> valueType) {
-        MVRTreeMap<Value> map = mvStore.openMap(name, new MVRTreeMap.Builder<>());
-        return new NitriteMVRTreeMap(map);
+    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String mapName, Class<?> keyType, Class<?> valueType) {
+        if (nitriteRTreeMapRegistry.containsKey(mapName)) {
+            return (NitriteMVRTreeMap) nitriteRTreeMapRegistry.get(mapName);
+        }
+
+        MVRTreeMap<Value> map = mvStore.openMap(mapName, new MVRTreeMap.Builder<>());
+        NitriteMVRTreeMap<Key, Value> nitriteMVRTreeMap = new NitriteMVRTreeMap(map);
+        nitriteRTreeMapRegistry.put(mapName, nitriteMVRTreeMap);
+        return nitriteMVRTreeMap;
     }
 
     @Override

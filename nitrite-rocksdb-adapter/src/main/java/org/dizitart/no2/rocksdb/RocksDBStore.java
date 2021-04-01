@@ -67,12 +67,18 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         try {
             if (!closed.get()) {
+                // close nitrite maps
+                for (NitriteMap<?, ?> nitriteMap : nitriteMapRegistry.values()) {
+                    nitriteMap.close();
+                }
+
                 reference.close();
                 closed.compareAndSet(false, true);
             }
+
             alert(StoreEvents.Closed);
         } catch (Exception e) {
             log.error("Error while closing the database", e);

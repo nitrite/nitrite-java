@@ -17,8 +17,17 @@
 package org.dizitart.no2.store.events;
 
 /**
+ * Represents an event listener for store events.
+ *
+ * @see StoreEvents
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public interface StoreEventListener {
+    /**
+     * Executes when an event is fired.
+     *
+     * @param eventInfo the event info
+     */
     void onEvent(EventInfo eventInfo);
 }

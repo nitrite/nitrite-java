@@ -17,11 +17,15 @@
 package org.dizitart.no2;
 
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.NitriteMapper;
@@ -30,7 +34,6 @@ import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.StoreConfig;
 import org.junit.After;
 import org.junit.Before;
@@ -43,6 +46,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.LinkedHashSet;
 import java.util.Random;
 
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
@@ -323,27 +327,27 @@ public class NitriteBuilderTest {
         }
 
         @Override
-        public void writeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
+        public void validateIndex(Fields fields) {
 
         }
 
         @Override
-        public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
+        public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public void updateIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object newValue, Object oldValue) {
+        public void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public void dropIndex(NitriteMap<NitriteId, Document> collection, String field) {
+        public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public NitriteIndexer clone() throws CloneNotSupportedException {
+        public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
             return null;
         }
 

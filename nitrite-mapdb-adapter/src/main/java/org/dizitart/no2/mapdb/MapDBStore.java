@@ -59,8 +59,13 @@ public class MapDBStore extends AbstractNitriteStore<MapDBConfig> {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         db.close();
+
+        for (NitriteMap<?, ?> nitriteMap : nitriteMapRegistry.values()) {
+            nitriteMap.close();
+        }
+
         alert(StoreEvents.Closed);
     }
 

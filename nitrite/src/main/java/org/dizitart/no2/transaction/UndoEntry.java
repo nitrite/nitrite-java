@@ -4,6 +4,7 @@ import lombok.Data;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 class UndoEntry {

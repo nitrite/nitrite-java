@@ -119,10 +119,11 @@ public class Iterables {
 
     @SafeVarargs
     public static <T> Set<T> setOf(T... items) {
+        Set<T> set = new HashSet<>();
         if (items != null) {
-            return new HashSet<>(Arrays.asList(items));
+            set.addAll(Arrays.asList(items));
         }
-        return Collections.emptySet();
+        return set;
     }
 
     public static long size(Iterable<?> iterable) {

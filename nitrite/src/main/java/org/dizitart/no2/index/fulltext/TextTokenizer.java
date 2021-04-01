@@ -16,16 +16,12 @@
 
 package org.dizitart.no2.index.fulltext;
 
-import org.dizitart.no2.index.TextIndexer;
-
-import java.io.IOException;
 import java.util.Set;
 
 /**
  * A stop-word based string tokenizer.
  *
  * @author Anindya Chatterjee.
- * @see TextIndexer
  * @see EnglishTextTokenizer
  * @since 1.0
  */
@@ -43,9 +39,8 @@ public interface TextTokenizer {
      *
      * @param text the text to tokenize
      * @return the set of tokens.
-     * @throws IOException if a low-level I/O error occurs.
      */
-    Set<String> tokenize(String text) throws IOException;
+    Set<String> tokenize(String text);
 
     /**
      * Gets all stop-words for a language.

@@ -29,8 +29,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static org.junit.Assert.*;
 
 /**
@@ -48,7 +46,7 @@ public class ObjectRepositoryNegativeTest {
     }
 
     @After
-    public void close() throws IOException {
+    public void close() throws Exception {
         db.close();
         db = null;
     }

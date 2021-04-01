@@ -25,6 +25,8 @@ import java.util.Date;
 import java.util.List;
 
 import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.collection.FindOptions.orderBy;
+import static org.dizitart.no2.collection.FindOptions.skipBy;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.assertEquals;
 
@@ -41,24 +43,25 @@ public class CollectionFindNegativeTest extends BaseCollectionTest {
     @Test(expected = ValidationException.class)
     public void testFindOptionsNegativeOffset() {
         insert();
-        collection.find().skipLimit(-1, 1);
+        collection.find(skipBy(-1).limit(1));
     }
 
     @Test(expected = ValidationException.class)
     public void testFindOptionsNegativeSize() {
         insert();
-        collection.find().skipLimit(0, -1);
+        collection.find(skipBy(0).limit(-1));
     }
 
+    @Test(expected = ValidationException.class)
     public void testFindOptionsInvalidOffset() {
         insert();
-        assertEquals(collection.find().skipLimit(10, 1).size(), 0);
+        assertEquals(collection.find(skipBy(10).limit(1)).size(), 0);
     }
 
     @Test(expected = ValidationException.class)
     public void testFindInvalidSort() {
         insert();
-        collection.find().sort("data", SortOrder.Descending).toList();
+        collection.find(orderBy("data", SortOrder.Descending)).toList();
     }
 
     @Test(expected = FilterException.class)
@@ -77,8 +80,8 @@ public class CollectionFindNegativeTest extends BaseCollectionTest {
     @Test(expected = ValidationException.class)
     public void testInvalidProjection() {
         insert();
-        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date())).
-            sort("firstName", SortOrder.Ascending).skipLimit(0, 3);
+        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date()),
+            orderBy("firstName", SortOrder.Ascending).skip(0).limit(3));
 
         Document projection = createDocument("firstName", null)
             .put("lastName", "ln2");

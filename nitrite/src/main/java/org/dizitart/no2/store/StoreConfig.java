@@ -23,7 +23,7 @@ import org.dizitart.no2.store.events.StoreEventListener;
  * Represents a {@link NitriteStore} configuration.
  *
  * @author Anindya Chatterjee.
- * @since 4.0.0
+ * @since 4.0
  */
 public interface StoreConfig {
     /**
@@ -36,7 +36,7 @@ public interface StoreConfig {
     /**
      * Indicates if the {@link NitriteStore} is a readonly store.
      *
-     * @return `true`, if readonly store; otherwise `false`.
+     * @return <code>true</code>, if readonly store; otherwise <code>false</code>.
      */
     Boolean isReadOnly();
 
@@ -50,7 +50,7 @@ public interface StoreConfig {
     /**
      * Indicates if the {@link NitriteStore} is an in-memory store.
      *
-     * @return `true`, if in-memory store; otherwise `false`.
+     * @return <code>true</code>, if in-memory store; otherwise <code>false</code>.
      */
     default boolean isInMemory() {
         return StringUtils.isNullOrEmpty(filePath());

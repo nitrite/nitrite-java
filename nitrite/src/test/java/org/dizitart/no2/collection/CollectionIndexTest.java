@@ -41,16 +41,16 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
     @Test
     public void testCreateIndex() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex(indexOptions(IndexType.Unique), "firstName");
         assertTrue(collection.hasIndex("firstName"));
 
-        collection.createIndex("lastName", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
         assertTrue(collection.hasIndex("lastName"));
 
-        collection.createIndex("body", indexOptions(IndexType.Fulltext));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
         assertTrue(collection.hasIndex("body"));
 
-        collection.createIndex("birthDay", null);
+        collection.createIndex("birthDay");
         assertTrue(collection.hasIndex("birthDay"));
 
         insert();
@@ -60,13 +60,13 @@ public class CollectionIndexTest extends BaseCollectionTest {
     public void testListIndexes() {
         assertEquals(collection.listIndices().size(), 0);
 
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         assertTrue(collection.hasIndex("firstName"));
 
-        collection.createIndex("lastName", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
         assertTrue(collection.hasIndex("lastName"));
 
-        collection.createIndex("body", indexOptions(IndexType.Fulltext));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
         assertTrue(collection.hasIndex("body"));
 
         assertEquals(collection.listIndices().size(), 3);
@@ -74,7 +74,7 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
     @Test
     public void testDropIndex() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         assertTrue(collection.hasIndex("firstName"));
 
         collection.dropIndex("firstName");
@@ -95,18 +95,18 @@ public class CollectionIndexTest extends BaseCollectionTest {
     @Test
     public void testHasIndex() {
         assertFalse(collection.hasIndex("lastName"));
-        collection.createIndex("lastName", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
         assertTrue(collection.hasIndex("lastName"));
 
         assertFalse(collection.hasIndex("body"));
-        collection.createIndex("body", indexOptions(IndexType.Fulltext));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
         assertTrue(collection.hasIndex("body"));
     }
 
     @Test
     public void testDeleteWithIndex() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
-        collection.createIndex("body", indexOptions(IndexType.Fulltext));
+        collection.createIndex(indexOptions(IndexType.Unique), "firstName");
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
 
         insert();
 
@@ -126,7 +126,7 @@ public class CollectionIndexTest extends BaseCollectionTest {
     @Test
     public void testCreateIndexAsync() {
         insert();
-        collection.createIndex("body", indexOptions(IndexType.Fulltext, true));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
         assertTrue(collection.isIndexing("body"));
 
         await().until(bodyIndexingCompleted());
@@ -134,38 +134,38 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
     @Test
     public void testRebuildIndex() {
-        collection.createIndex("body", indexOptions(IndexType.Fulltext, false));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
         insert();
         Collection<IndexDescriptor> indices = collection.listIndices();
         for (IndexDescriptor idx : indices) {
-            collection.rebuildIndex(idx.getIndexFields(), false);
+            collection.rebuildIndex(idx.getIndexFields().getFieldNames().toArray(new String[0]));
         }
     }
 
     @Test
     public void testRebuildIndexAsync() {
-        collection.createIndex("body", indexOptions(IndexType.Fulltext, true));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
         insert();
         await().until(bodyIndexingCompleted());
 
         Collection<IndexDescriptor> indices = collection.listIndices();
         for (IndexDescriptor idx : indices) {
-            collection.rebuildIndex(idx.getIndexFields(), true);
+            collection.rebuildIndex(idx.getIndexFields().getFieldNames().toArray(new String[0]));
             await().until(bodyIndexingCompleted());
         }
     }
 
     @Test
     public void testRebuildIndexOnRunningIndex() {
-        collection.createIndex("body", indexOptions(IndexType.Fulltext, false));
+        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
         Collection<IndexDescriptor> indices = collection.listIndices();
         IndexDescriptor idx = indices.iterator().next();
         insert();
-        collection.rebuildIndex(idx.getIndexFields(), true);
+        collection.rebuildIndex(idx.getIndexFields().getFieldNames().toArray(new String[0]));
 
         boolean error = false;
         try {
-            collection.rebuildIndex(idx.getIndexFields(), true);
+            collection.rebuildIndex(idx.getIndexFields().getFieldNames().toArray(new String[0]));
         } catch (IndexingException ie) {
             error = true;
         } finally {
@@ -180,8 +180,8 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
     @Test
     public void testNullValueInIndexedField() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
-        collection.createIndex("birthDay", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.Unique), "firstName");
+        collection.createIndex(indexOptions(IndexType.NonUnique), "birthDay");
         insert();
 
         Document document = createDocument("firstName", null)
@@ -200,12 +200,12 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
     @Test
     public void testDropAllAndCreateIndex() {
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         assertTrue(collection.hasIndex("firstName"));
         collection.dropAllIndices();
         assertFalse(collection.hasIndex("firstName"));
 
-        collection.createIndex("firstName", indexOptions(IndexType.Unique));
+        collection.createIndex("firstName");
         assertTrue(collection.hasIndex("firstName"));
 
         collection = db.getCollection("test");
@@ -228,7 +228,7 @@ public class CollectionIndexTest extends BaseCollectionTest {
         DocumentCursor cursor = collection.find(where("field").eq(5));
         assertEquals(cursor.size(), 1);
 
-        collection.createIndex("field", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "field");
 
         cursor = collection.find(where("field").eq(5));
         assertEquals(cursor.size(), 1);
@@ -263,10 +263,10 @@ public class CollectionIndexTest extends BaseCollectionTest {
             System.out.println(eventInfo.getEventType() + " for field " + eventInfo.getItem());
         });
 
-        collection.createIndex("first", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "first");
         assertEquals(collection.find().size(), 10000);
 
-        collection.createIndex("second", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "second");
         assertEquals(collection.find().size(), 10000);
     }
 
@@ -277,10 +277,10 @@ public class CollectionIndexTest extends BaseCollectionTest {
         collection.insert(createDocument("first", "abcd").put("second", 456).put("third", new int[]{3, 1}));
         collection.insert(createDocument("first", "xyz").put("second", 789).put("third", null));
 
-        collection.createIndex("first", indexOptions(IndexType.Unique));
+        collection.createIndex(indexOptions(IndexType.Unique), "first");
         assertEquals(collection.find(where("first").eq(null)).size(), 1);
 
-        collection.createIndex("third", indexOptions(IndexType.NonUnique));
+        collection.createIndex(indexOptions(IndexType.NonUnique), "third");
         assertEquals(collection.find(where("third").eq(null)).size(), 2);
     }
 }

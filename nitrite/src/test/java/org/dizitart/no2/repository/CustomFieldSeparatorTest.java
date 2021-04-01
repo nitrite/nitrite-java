@@ -63,7 +63,7 @@ public class CustomFieldSeparatorTest {
     }
 
     @After
-    public void reset() {
+    public void reset() throws Exception {
         (new NitriteConfig()).fieldSeparator(".");
         if (db != null && !db.isClosed()) {
             db.close();

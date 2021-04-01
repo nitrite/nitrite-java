@@ -51,8 +51,8 @@ public class NitriteStressTest {
     public void stressTest() {
         Nitrite database = createDb();
         ObjectRepository<TestDto> testRepository = database.getRepository(TestDto.class);
-        testRepository.createIndex("lastName", IndexOptions.indexOptions(IndexType.Fulltext));
-        testRepository.createIndex("birthDate", IndexOptions.indexOptions(IndexType.NonUnique));
+        testRepository.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "lastName");
+        testRepository.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "birthDate");
 
         int counter = 0;
         try {

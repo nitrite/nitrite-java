@@ -32,9 +32,10 @@ import java.util.stream.Collectors;
 
 import static org.dizitart.no2.TestUtil.isSorted;
 import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.collection.FindOptions.*;
 import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.common.util.DocumentUtils.isSimilar;
-import static org.dizitart.no2.filters.Filter.ALL;
+import static org.dizitart.no2.filters.Filter.*;
 import static org.dizitart.no2.filters.FluentFilter.$;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.hamcrest.CoreMatchers.is;
@@ -106,17 +107,24 @@ public class CollectionFindTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 3);
 
         cursor = collection.find(
-            where("birthDay").lte(new Date())
-                .or(where("firstName").eq("fn12"))
-                .and(where("lastName").eq("ln1")));
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ));
         assertEquals(cursor.size(), 1);
 
         cursor = collection.find(
-            where("birthDay").lte(new Date())
-                .or(where("firstName").eq("fn12"))
-                .and(where("lastName").eq("ln1")).not());
+            and(
+                or(
+                    where("birthDay").lte(new Date()),
+                    where("firstName").eq("fn12")
+                ),
+                where("lastName").eq("ln1")
+            ).not());
         assertEquals(cursor.size(), 2);
-
 
         cursor = collection.find(where("data.1").eq((byte) 4));
         assertEquals(cursor.size(), 2);
@@ -138,16 +146,16 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testFindWithSkipLimit() {
         insert();
 
-        DocumentCursor cursor = collection.find().skipLimit(0, 1);
+        DocumentCursor cursor = collection.find(skipBy(0).limit(1));
         assertEquals(cursor.size(), 1);
 
-        cursor = collection.find().skipLimit(1, 3);
+        cursor = collection.find(skipBy(1).limit(3));
         assertEquals(cursor.size(), 2);
 
-        cursor = collection.find().skipLimit(0, 30);
+        cursor = collection.find(skipBy(0).limit(30));
         assertEquals(cursor.size(), 3);
 
-        cursor = collection.find().skipLimit(2, 3);
+        cursor = collection.find(skipBy(2).limit(3));
         assertEquals(cursor.size(), 1);
     }
 
@@ -155,21 +163,21 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testFindWithSkip() {
         insert();
 
-        DocumentCursor cursor = collection.find().skip(0);
+        DocumentCursor cursor = collection.find(skipBy(0));
         assertEquals(cursor.size(), 3);
 
-        cursor = collection.find().skip(1);
+        cursor = collection.find(skipBy(1));
         assertEquals(cursor.size(), 2);
 
-        cursor = collection.find().skip(30);
+        cursor = collection.find(skipBy(30));
         assertEquals(cursor.size(), 0);
 
-        cursor = collection.find().skip(2);
+        cursor = collection.find(skipBy(2));
         assertEquals(cursor.size(), 1);
 
         boolean invalid = false;
         try {
-            cursor = collection.find().skip(-1);
+            cursor = collection.find(skipBy(-1));
             assertEquals(cursor.size(), 1);
         } catch (ValidationException e) {
             invalid = true;
@@ -181,22 +189,22 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testFindWithLimit() {
         insert();
 
-        DocumentCursor cursor = collection.find().limit(0);
+        DocumentCursor cursor = collection.find(limitBy(0));
         assertEquals(cursor.size(), 0);
 
-        cursor = collection.find().limit(1);
+        cursor = collection.find(limitBy(1));
         assertEquals(cursor.size(), 1);
 
         boolean invalid = false;
         try {
-            cursor = collection.find().limit(-1);
+            cursor = collection.find(limitBy(-1));
             assertEquals(cursor.size(), 1);
         } catch (ValidationException e) {
             invalid = true;
         }
         assertTrue(invalid);
 
-        cursor = collection.find().limit(30);
+        cursor = collection.find(limitBy(30));
         assertEquals(cursor.size(), 3);
     }
 
@@ -204,7 +212,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testFindSortAscending() {
         insert();
 
-        DocumentCursor cursor = collection.find().sort("birthDay", SortOrder.Ascending);
+        DocumentCursor cursor = collection.find(orderBy("birthDay", SortOrder.Ascending));
         assertEquals(cursor.size(), 3);
         List<Date> dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -217,7 +225,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testFindSortDescending() {
         insert();
 
-        DocumentCursor cursor = collection.find().sort("birthDay", SortOrder.Descending);
+        DocumentCursor cursor = collection.find(orderBy("birthDay", SortOrder.Descending));
         assertEquals(cursor.size(), 3);
         List<Date> dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -230,8 +238,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testFindLimitAndSort() {
         insert();
 
-        DocumentCursor cursor = collection.find().
-            sort("birthDay", SortOrder.Descending).skipLimit(1, 2);
+        DocumentCursor cursor = collection.find(orderBy("birthDay", SortOrder.Descending).skip(1).limit(2));
         assertEquals(cursor.size(), 2);
         List<Date> dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -239,8 +246,7 @@ public class CollectionFindTest extends BaseCollectionTest {
         }
         assertTrue(isSorted(dateList, false));
 
-        cursor = collection.find().
-            sort("birthDay", SortOrder.Ascending).skipLimit(1, 2);
+        cursor = collection.find(orderBy("birthDay", SortOrder.Ascending).skip(1).limit(2));
         assertEquals(cursor.size(), 2);
         dateList = new ArrayList<>();
         for (Document document : cursor) {
@@ -248,8 +254,7 @@ public class CollectionFindTest extends BaseCollectionTest {
         }
         assertTrue(isSorted(dateList, true));
 
-        cursor = collection.find().
-            sort("firstName", SortOrder.Ascending).skipLimit(0, 30);
+        cursor = collection.find(orderBy("firstName", SortOrder.Ascending).skip(0).limit(30));
         assertEquals(cursor.size(), 3);
         List<String> nameList = new ArrayList<>();
         for (Document document : cursor) {
@@ -261,7 +266,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     @Test
     public void testFindSortOnNonExistingField() {
         insert();
-        DocumentCursor cursor = collection.find().sort("my-value", SortOrder.Descending);
+        DocumentCursor cursor = collection.find(orderBy("my-value", SortOrder.Descending));
         assertEquals(cursor.size(), 3);
     }
 
@@ -282,8 +287,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     @Test
     public void testFindLimitAndSortInvalidField() {
         insert();
-        DocumentCursor cursor = collection.find().
-            sort("birthDay2", SortOrder.Descending).skipLimit(1, 2);
+        DocumentCursor cursor = collection.find(orderBy("birthDay2", SortOrder.Descending).skip(1).limit(2));
         assertEquals(cursor.size(), 2);
     }
 
@@ -306,8 +310,8 @@ public class CollectionFindTest extends BaseCollectionTest {
     @Test
     public void testFindWithFilterAndOption() {
         insert();
-        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date())).
-            sort("firstName", SortOrder.Ascending).skipLimit(1, 2);
+        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date()),
+            orderBy("firstName", SortOrder.Ascending).skip(1).limit(2));
         assertEquals(cursor.size(), 2);
     }
 
@@ -330,8 +334,8 @@ public class CollectionFindTest extends BaseCollectionTest {
     @Test
     public void testProject() {
         insert();
-        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date())).
-            sort("firstName", SortOrder.Ascending).skipLimit(0, 3);
+        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date()),
+            orderBy("firstName", SortOrder.Ascending).skip(0).limit(3));
         int iteration = 0;
         for (Document document : cursor) {
             switch (iteration) {
@@ -353,8 +357,8 @@ public class CollectionFindTest extends BaseCollectionTest {
     @Test
     public void testProjectWithCustomDocument() {
         insert();
-        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date())).
-            sort("firstName", SortOrder.Ascending).skipLimit(0, 3);
+        DocumentCursor cursor = collection.find(where("birthDay").lte(new Date()),
+            orderBy("firstName", SortOrder.Ascending).skip(0).limit(3));
 
         Document projection = createDocument("firstName", null)
             .put("lastName", null);
@@ -614,8 +618,8 @@ public class CollectionFindTest extends BaseCollectionTest {
     @Test
     public void testIssue72() {
         NitriteCollection coll = db.getCollection("test");
-        coll.createIndex("id", IndexOptions.indexOptions(IndexType.Unique));
-        coll.createIndex("group", IndexOptions.indexOptions(IndexType.NonUnique));
+        coll.createIndex(IndexOptions.indexOptions(IndexType.Unique), "id");
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "group");
 
         coll.remove(ALL);
 
@@ -625,13 +629,13 @@ public class CollectionFindTest extends BaseCollectionTest {
         doc = createDocument().put("id", "test-2").put("group", "groupA").put("startTime", DateTime.now());
         assertEquals(1, coll.insert(doc).getAffectedCount());
 
-        DocumentCursor cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending);
+        DocumentCursor cursor = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Descending));
         assertEquals(2, cursor.size());
         assertNull(cursor.toList().get(1).get("startTime"));
         assertNotNull(cursor.toList().get(0).get("startTime"));
 
-        cursor = coll.find(where("group").eq("groupA")).sort("startTime", SortOrder.Ascending);
+        cursor = coll.find(where("group").eq("groupA"), orderBy("startTime", SortOrder.Ascending));
         assertEquals(2, cursor.size());
         assertNull(cursor.toList().get(0).get("startTime"));
         assertNotNull(cursor.toList().get(1).get("startTime"));
@@ -649,8 +653,7 @@ public class CollectionFindTest extends BaseCollectionTest {
         doc = createDocument().put("id", "test-1").put("group", "groupA");
         assertEquals(1, coll.insert(doc).getAffectedCount());
 
-        DocumentCursor cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending);
+        DocumentCursor cursor = coll.find(where("group").eq("groupA"), orderBy("startTime", SortOrder.Descending));
         assertEquals(2, cursor.size());
     }
 
@@ -666,42 +669,41 @@ public class CollectionFindTest extends BaseCollectionTest {
         doc = createDocument().put("id", "test-1").put("group", "groupA");
         assertEquals(1, coll.insert(doc).getAffectedCount());
 
-        DocumentCursor cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending);
+        DocumentCursor cursor = coll.find(where("group").eq("groupA"), orderBy("startTime", SortOrder.Descending));
         assertEquals(2, cursor.size());
 
-        DocumentCursor cursor2 = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending, NullOrder.Default);
+        DocumentCursor cursor2 = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Descending).nullOrder(NullOrder.Default));
         assertEquals(2, cursor2.size());
 
         assertThat(cursor.toList(), is(cursor2.toList()));
 
-        DocumentCursor cursor3 = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending, NullOrder.First);
+        DocumentCursor cursor3 = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Descending).nullOrder(NullOrder.First));
         assertEquals(2, cursor3.size());
 
         assertThat(cursor.toList(), is(cursor3.toList()));
 
-        DocumentCursor cursor4 = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending, NullOrder.Last);
+        DocumentCursor cursor4 = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Descending).nullOrder(NullOrder.Last));
         assertEquals(2, cursor4.size());
 
         assertThat(cursor.toList(), is(cursor4.toList()));
 
-        DocumentCursor cursor5 = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Ascending, NullOrder.Last);
+        DocumentCursor cursor5 = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Ascending).nullOrder(NullOrder.Last));
         assertEquals(2, cursor5.size());
 
         assertThat(cursor.toList(), is(cursor5.toList()));
 
-        DocumentCursor cursor6 = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Ascending, NullOrder.First);
+        DocumentCursor cursor6 = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Ascending).nullOrder(NullOrder.First));
         assertEquals(2, cursor6.size());
 
         assertThat(cursor.toList(), is(cursor6.toList()));
 
-        DocumentCursor cursor7 = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Ascending, NullOrder.Default);
+        DocumentCursor cursor7 = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Ascending).nullOrder(NullOrder.Default));
         assertEquals(2, cursor7.size());
 
         assertThat(cursor.toList(), is(cursor7.toList()));
@@ -711,7 +713,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testNullOrder() {
         NitriteCollection coll = db.getCollection("test");
         try {
-            coll.createIndex("startTime", IndexOptions.indexOptions(IndexType.NonUnique));
+            coll.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "startTime");
         } catch (IndexingException e) {
             // ignore
         }
@@ -727,44 +729,43 @@ public class CollectionFindTest extends BaseCollectionTest {
         Document doc3 = createDocument().put("id", "test-3").put("group", "groupA").put("startTime", DateTime.now().plusMinutes(1));
         assertEquals(1, coll.insert(doc3).getAffectedCount());
 
-        DocumentCursor cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending);
+        DocumentCursor cursor = coll.find(where("group").eq("groupA"), orderBy("startTime", SortOrder.Descending));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc3, doc2, doc1),
             is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
 
-        cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending, NullOrder.First);
+        cursor = coll.find(where("group").eq("groupA") ,
+            orderBy("startTime", SortOrder.Descending).nullOrder(NullOrder.First));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc1, doc3, doc2),
             is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
 
-        cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending, NullOrder.Default);
+        cursor = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Descending).nullOrder(NullOrder.Default));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc3, doc2, doc1),
             is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
 
-        cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Descending, NullOrder.Last);
+        cursor = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Descending).nullOrder(NullOrder.Last));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc3, doc2, doc1),
             is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
 
-        cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Ascending, NullOrder.First);
+        cursor = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Ascending).nullOrder(NullOrder.First));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc1, doc2, doc3),
             is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
 
-        cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Ascending, NullOrder.Default);
+        cursor = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Ascending).nullOrder(NullOrder.Default));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc1, doc2, doc3),
             is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
 
-        cursor = coll.find(where("group").eq("groupA"))
-            .sort("startTime", SortOrder.Ascending, NullOrder.Last);
+        cursor = coll.find(where("group").eq("groupA"),
+            orderBy("startTime", SortOrder.Ascending).nullOrder(NullOrder.Last));
         assertEquals(3, cursor.size());
         assertThat(Arrays.asList(doc2, doc3, doc1),
             is(cursor.toList().stream().map(CollectionFindTest::trimMeta).collect(Collectors.toList())));
@@ -786,8 +787,8 @@ public class CollectionFindTest extends BaseCollectionTest {
         NitriteCollection coll = db.getCollection("test");
         coll.insert(doc1, doc2, doc3);
 
-        DocumentCursor cursor = coll.find().sort("fruit", SortOrder.Ascending,
-            Collator.getInstance(Locale.FRANCE));
+        DocumentCursor cursor = coll.find(orderBy("fruit", SortOrder.Ascending)
+            .collator(Collator.getInstance(Locale.FRANCE)));
         assertEquals(cursor.toList().get(1).get("fruit"), "Ôrange");
     }
 
@@ -839,7 +840,7 @@ public class CollectionFindTest extends BaseCollectionTest {
 
         NitriteCollection collection = db.getCollection("tag");
         collection.insert(doc1, doc2, doc3, doc4, doc5);
-        collection.createIndex("age", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "age");
 
         DocumentCursor cursor = collection.find(where("age").between(31, 35));
         assertEquals(cursor.size(), 5);

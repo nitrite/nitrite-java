@@ -33,6 +33,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 
+import static org.dizitart.no2.collection.FindOptions.orderBy;
+import static org.dizitart.no2.collection.FindOptions.skipBy;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.FluentFilter.$;
 import static org.dizitart.no2.filters.FluentFilter.where;
@@ -44,7 +46,7 @@ import static org.junit.Assert.*;
 public class RepositorySearchTest extends BaseObjectRepositoryTest {
     @Test
     public void testFindWithOptions() {
-        Cursor<Employee> cursor = employeeRepository.find().skipLimit(0, 1);
+        Cursor<Employee> cursor = employeeRepository.find(skipBy(0).limit(1));
         assertEquals(cursor.size(), 1);
         assertNotNull(cursor.firstOrNull());
     }
@@ -251,7 +253,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testGreaterFilter() {
-        Employee emp = employeeRepository.find().sort("empId", SortOrder.Ascending).firstOrNull();
+        Employee emp = employeeRepository.find(orderBy("empId", SortOrder.Ascending)).firstOrNull();
         long id = emp.getEmpId();
 
         List<Employee> employeeList = employeeRepository.find(where("empId").gt(id))
@@ -263,7 +265,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testGreaterEqualFilter() {
-        Employee emp = employeeRepository.find().sort("empId", SortOrder.Ascending).firstOrNull();
+        Employee emp = employeeRepository.find(orderBy("empId", SortOrder.Ascending)).firstOrNull();
         long id = emp.getEmpId();
 
         List<Employee> employeeList = employeeRepository.find(where("empId").gte(id))
@@ -275,7 +277,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testLesserThanFilter() {
-        Employee emp = employeeRepository.find().sort("empId", SortOrder.Descending).firstOrNull();
+        Employee emp = employeeRepository.find(orderBy("empId", SortOrder.Descending)).firstOrNull();
         long id = emp.getEmpId();
 
         List<Employee> employeeList = employeeRepository.find(where("empId").lt(id))
@@ -287,7 +289,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testLesserEqualFilter() {
-        Employee emp = employeeRepository.find().sort("empId", SortOrder.Descending).firstOrNull();
+        Employee emp = employeeRepository.find(orderBy("empId", SortOrder.Descending)).firstOrNull();
         long id = emp.getEmpId();
 
         List<Employee> employeeList = employeeRepository.find(where("empId").lte(id))
@@ -321,7 +323,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testInFilter() {
-        Employee emp = employeeRepository.find().sort("empId", SortOrder.Descending).firstOrNull();
+        Employee emp = employeeRepository.find(orderBy("empId", SortOrder.Descending)).firstOrNull();
         long id = emp.getEmpId();
 
         List<Employee> employeeList = employeeRepository.find(where("empId").in(id, id - 1, id - 2))
@@ -336,7 +338,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testNotInFilter() {
-        Employee emp = employeeRepository.find().sort("empId", SortOrder.Descending).firstOrNull();
+        Employee emp = employeeRepository.find(orderBy("empId", SortOrder.Descending)).firstOrNull();
         long id = emp.getEmpId();
 
         List<Employee> employeeList = employeeRepository.find(where("empId").notIn(id, id - 1, id - 2))
@@ -525,12 +527,12 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         Filter married = where("status").eq("Married");
 
         assertEquals(repository.find(married).size(), 2);
-        assertEquals(repository.find(married).sort("status", SortOrder.Descending).size(), 2);
+        assertEquals(repository.find(married, orderBy("status", SortOrder.Descending)).size(), 2);
 
-        assertEquals(repository.find().sort("status", SortOrder.Descending).firstOrNull().getStatus(), "Un-Married");
+        assertEquals(repository.find(orderBy("status", SortOrder.Descending)).firstOrNull().getStatus(), "Un-Married");
 
-        assertEquals(repository.find().sort("status", SortOrder.Ascending).size(), 3);
-        assertEquals(repository.find().sort("status", SortOrder.Ascending).firstOrNull().getStatus(), "Married");
+        assertEquals(repository.find(orderBy("status", SortOrder.Ascending)).size(), 3);
+        assertEquals(repository.find(orderBy("status", SortOrder.Ascending)).firstOrNull().getStatus(), "Married");
     }
 
     @Test
@@ -551,7 +553,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testIdSet() {
-        Cursor<Employee> employees = employeeRepository.find().sort("empId", SortOrder.Ascending);
+        Cursor<Employee> employees = employeeRepository.find(orderBy("empId", SortOrder.Ascending));
         assertEquals(employees.size(), 10);
     }
 

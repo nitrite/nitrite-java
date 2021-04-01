@@ -17,6 +17,7 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.events.CollectionEventListener;
@@ -257,7 +258,9 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      *
      * @return a cursor to all objects in the collection.
      */
-    Cursor<T> find();
+    default Cursor<T> find() {
+        return find(Filter.ALL, null);
+    }
 
     /**
      * Applies a filter on the collection and returns a cursor to the
@@ -271,11 +274,37 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      *
      * @param filter the filter to apply to select objects from collection.
      * @return a cursor to all selected objects.
-     * @throws ValidationException if {@code filter} is null.
      * @see Filter
      * @see Cursor#project(Class)
      */
-    Cursor<T> find(Filter filter);
+    default Cursor<T> find(Filter filter) {
+        return find(filter, null);
+    }
+
+    /**
+     * Returns a customized cursor to all objects in the collection.
+     *
+     * @param findOptions specifies pagination, sort options for the cursor.
+     * @return a cursor to all selected objects.
+     */
+    default Cursor<T> find(FindOptions findOptions) {
+        return find(Filter.ALL, findOptions);
+    }
+
+    /**
+     * Applies a filter on the collection and returns a customized cursor to the
+     * selected objects.
+     *
+     * <p>
+     * NOTE: If there is an index on the value specified in the filter, this operation
+     * will take advantage of the index.
+     * </p>
+     *
+     * @param filter      the filter to apply to select objects from collection.
+     * @param findOptions specifies pagination, sort options for the cursor.
+     * @return a cursor to all selected objects.
+     */
+    Cursor<T> find(Filter filter, FindOptions findOptions);
 
     /**
      * Gets a single element from the repository by its id. If no element
@@ -285,7 +314,7 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      * @param <I> the type parameter
      * @param id  the id value
      * @return the unique object associated with the id.
-     * @throws ValidationException      if `id` is {@code null}.
+     * @throws ValidationException      if <code>id</code> is {@code null}.
      * @throws InvalidIdException       if the id value is {@code null}, or the type is not compatible.
      * @throws NotIdentifiableException if the object has no field marked with {@link Id}.
      */

@@ -31,8 +31,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
-
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.FluentFilter.where;
@@ -79,7 +77,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
 
     @After
     @Override
-    public void clear() throws IOException {
+    public void clear() throws Exception {
         if (textRepository != null && !textRepository.isDropped()) {
             textRepository.remove(ALL);
         }

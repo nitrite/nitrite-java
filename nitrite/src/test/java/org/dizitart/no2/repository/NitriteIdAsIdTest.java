@@ -49,7 +49,7 @@ public class NitriteIdAsIdTest {
     }
 
     @After
-    public void after() {
+    public void after() throws Exception {
         db.close();
     }
 

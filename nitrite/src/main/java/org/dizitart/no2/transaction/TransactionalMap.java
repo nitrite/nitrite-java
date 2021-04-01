@@ -13,6 +13,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.deepCopy;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @SuppressWarnings("SortedCollectionWithNonComparableKeys")
 class TransactionalMap<K, V> implements NitriteMap<K, V> {
@@ -109,13 +110,13 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
-    public RecordStream<K> keySet() {
+    public RecordStream<K> keys() {
         if (cleared) {
             return RecordStream.empty();
         }
 
-        return RecordStream.fromCombined(RecordStream.except(primary.keySet(), tombstones),
-            backingMap.keySet());
+        return RecordStream.fromCombined(RecordStream.except(primary.keys(), tombstones),
+            backingMap.keys());
     }
 
     @Override

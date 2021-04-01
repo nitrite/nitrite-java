@@ -92,12 +92,7 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public DocumentCursor find() {
-            return null;
-        }
-
-        @Override
-        public DocumentCursor find(Filter filter) {
+        public DocumentCursor find(Filter filter, FindOptions findOptions) {
             return null;
         }
 
@@ -113,11 +108,6 @@ public class RepositoryFactoryTest {
 
         @Override
         public void createIndex(String field, IndexOptions indexOptions) {
-
-        }
-
-        @Override
-        public void rebuildIndex(String field, boolean isAsync) {
 
         }
 

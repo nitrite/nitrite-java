@@ -20,11 +20,10 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.streams.JoinedDocumentStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.filters.Filter;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -33,7 +32,6 @@ import java.util.Iterator;
 
 import static org.dizitart.no2.TestUtil.createDb;
 import static org.dizitart.no2.collection.Document.createDocument;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -71,19 +69,9 @@ public class JoinedDocumentStreamTest {
         }
     }
 
-    @Test
-    public void testToString() {
-        FilteredRecordStream recordStream = new FilteredRecordStream(null, null);
-        FilteredRecordStream recordStream1 = new FilteredRecordStream(recordStream, Filter.byId(NitriteId.newId()));
-        FilteredRecordStream recordStream2 = new FilteredRecordStream(recordStream1, Filter.byId(NitriteId.newId()));
-        FilteredRecordStream recordStream3 = new FilteredRecordStream(null, null);
-        DocumentCursorImpl foreignCursor = new DocumentCursorImpl(
-                new FilteredRecordStream(recordStream3, Filter.byId(NitriteId.newId())));
-        assertEquals("[]", (new JoinedDocumentStream(recordStream2, foreignCursor, new Lookup())).toString());
-    }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws Exception {
         if (db != null && !db.isClosed()) {
             db.close();
         }

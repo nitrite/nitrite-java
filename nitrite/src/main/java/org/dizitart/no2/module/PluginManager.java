@@ -31,7 +31,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * The nitrite database plugin manager. It loads the nitrite plugins
+ * before opening the database.
+ *
+ * @see NitriteModule
+ * @see NitritePlugin
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 @Slf4j
 @Getter
@@ -41,11 +47,21 @@ public class PluginManager {
     private NitriteStore<?> nitriteStore;
     private final NitriteConfig nitriteConfig;
 
+    /**
+     * Instantiates a new {@link PluginManager}.
+     *
+     * @param nitriteConfig the nitrite config
+     */
     public PluginManager(NitriteConfig nitriteConfig) {
         this.indexerMap = new HashMap<>();
         this.nitriteConfig = nitriteConfig;
     }
 
+    /**
+     * Loads a {@link NitriteModule} instance.
+     *
+     * @param module the module
+     */
     public void loadModule(NitriteModule module) {
         if (module != null && module.plugins() != null) {
             for (NitritePlugin plugin : module.plugins()) {
@@ -54,6 +70,9 @@ public class PluginManager {
         }
     }
 
+    /**
+     * Find and loads all nitrite plugins configured.
+     */
     public void findAndLoadPlugins() {
         try {
             loadInternalPlugins();
@@ -63,6 +82,9 @@ public class PluginManager {
         }
     }
 
+    /**
+     * Initializes all plugins instances.
+     */
     public void initializePlugins() {
         if (nitriteStore != null) {
             initializePlugin(nitriteStore);

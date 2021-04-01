@@ -31,14 +31,14 @@ public class CollectionIndexNegativeTest extends BaseCollectionTest {
 
     @Test(expected = UniqueConstraintException.class)
     public void testCreateInvalidUniqueIndex() {
-        collection.createIndex("lastName", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "lastName");
         assertTrue(collection.hasIndex("lastName"));
         insert();
     }
 
     @Test(expected = UniqueConstraintException.class)
     public void testCreateIndexOnArray() {
-        collection.createIndex("data", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "data");
         assertTrue(collection.hasIndex("data"));
         // data array field has repetition, so unique constraint exception
         insert();
@@ -47,14 +47,14 @@ public class CollectionIndexNegativeTest extends BaseCollectionTest {
     @Test
     public void testCreateOnInvalidField() {
         insert();
-        collection.createIndex("my-value", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "my-value");
         assertTrue(collection.hasIndex("my-value"));
     }
 
     @Test(expected = IndexingException.class)
     public void testCreateFullTextOnNonTextField() {
         insert();
-        collection.createIndex("birthDay", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "birthDay");
         assertTrue(collection.hasIndex("birthDay"));
     }
 
@@ -65,6 +65,6 @@ public class CollectionIndexNegativeTest extends BaseCollectionTest {
 
     @Test(expected = IndexingException.class)
     public void testRebuildIndexInvalid() {
-        collection.rebuildIndex("unknown", true);
+        collection.rebuildIndex("unknown");
     }
 }

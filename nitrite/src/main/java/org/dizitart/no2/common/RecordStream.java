@@ -21,13 +21,32 @@ import org.dizitart.no2.common.util.Iterables;
 import java.util.*;
 
 /**
+ * Represents a record stream which can be iterated in a for loop.
+ *
+ * @param <T> the type parameter
  * @author Anindya Chatterjee.
+ * @since 1.0
  */
 public interface RecordStream<T> extends Iterable<T> {
+    /**
+     * Creates a {@link RecordStream} from an {@link Iterable}.
+     *
+     * @param <T>      the type parameter
+     * @param iterable the iterable
+     * @return the record stream
+     */
     static <T> RecordStream<T> fromIterable(Iterable<T> iterable) {
         return iterable::iterator;
     }
 
+    /**
+     * Creates a {@link RecordStream} by combining two {@link Iterable}s.
+     *
+     * @param <T>    the type parameter
+     * @param first  the first
+     * @param second the second
+     * @return the record stream
+     */
     static <T> RecordStream<T> fromCombined(Iterable<T> first, Iterable<T> second) {
         return RecordStream.fromIterable(() -> new Iterator<T>() {
             private final Iterator<T> firstIterator = first != null ? first.iterator() : Collections.emptyIterator();
@@ -53,6 +72,14 @@ public interface RecordStream<T> extends Iterable<T> {
         });
     }
 
+    /**
+     * Creates a {@link RecordStream} by eliminating <code>elements</code> from an {@link Iterable}.
+     *
+     * @param <T>      the type parameter
+     * @param iterable the iterable
+     * @param elements the elements
+     * @return the record stream
+     */
     static <T> RecordStream<T> except(Iterable<T> iterable, Collection<T> elements) {
         return RecordStream.fromIterable(() -> new Iterator<T>() {
             private final Iterator<T> iterator = iterable != null ? iterable.iterator() : Collections.emptyIterator();
@@ -87,31 +114,56 @@ public interface RecordStream<T> extends Iterable<T> {
         });
     }
 
+    /**
+     * Creates an empty {@link RecordStream}.
+     *
+     * @param <V> the type parameter
+     * @return the record stream
+     */
     static <V> RecordStream<V> empty() {
         return RecordStream.fromIterable(Collections.emptySet());
     }
 
+    /**
+     * Gets the size of the {@link RecordStream}.
+     *
+     * @return the long
+     */
     default long size() {
         return Iterables.size(this);
     }
 
+    /**
+     * Creates a {@link List} from a {@link RecordStream} by iterating it.
+     *
+     * @return the list
+     */
     default List<T> toList() {
         return Iterables.toList(this);
     }
 
+    /**
+     * Creates a {@link Set} from a {@link RecordStream} by iterating it.
+     *
+     * @return the set
+     */
     default Set<T> toSet() {
         return Iterables.toSet(this);
     }
 
+    /**
+     * Checks if this {@link RecordStream} has any elements or not.
+     *
+     * @return the boolean
+     */
     default boolean isEmpty() {
         return !iterator().hasNext();
     }
 
     /**
-     * Gets the first element of the result or
-     * `null` if it is empty.
+     * Gets the first element of the result or <code>null</code> if it is empty.
      *
-     * @return the first element or `null`
+     * @return the first element or <code>null</code>
      */
     default T firstOrNull() {
         return Iterables.firstOrNull(this);

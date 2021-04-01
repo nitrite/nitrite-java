@@ -47,7 +47,7 @@ public class NitriteCollectionTest {
     }
 
     @After
-    public void cleanUp() {
+    public void cleanUp() throws Exception {
         if (db != null && !db.isClosed()) {
             db.close();
         }

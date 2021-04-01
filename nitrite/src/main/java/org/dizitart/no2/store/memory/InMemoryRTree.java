@@ -12,12 +12,19 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * The in-memory {@link NitriteRTree}.
  *
+ * @param <Key>   the type parameter
+ * @param <Value> the type parameter
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {
     private final Map<SpatialKey, Key> backingMap;
 
+    /**
+     * Instantiates a new {@link InMemoryRTree}.
+     */
     public InMemoryRTree() {
         this.backingMap = new ConcurrentHashMap<>();
     }
@@ -100,36 +107,84 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
             key.getMaxX(), key.getMinY(), key.getMaxY());
     }
 
+    @Override
+    public void close() throws Exception {
+
+    }
+
+    /**
+     * The type Spatial key.
+     */
     static class SpatialKey {
 
         private final long id;
         private final float[] minMax;
 
+        /**
+         * Instantiates a new Spatial key.
+         *
+         * @param id     the id
+         * @param minMax the min max
+         */
         public SpatialKey(long id, float... minMax) {
             this.id = id;
             this.minMax = minMax;
         }
 
+        /**
+         * Min float.
+         *
+         * @param dim the dim
+         * @return the float
+         */
         public float min(int dim) {
             return minMax[dim + dim];
         }
 
+        /**
+         * Sets min.
+         *
+         * @param dim the dim
+         * @param x   the x
+         */
         public void setMin(int dim, float x) {
             minMax[dim + dim] = x;
         }
 
+        /**
+         * Max float.
+         *
+         * @param dim the dim
+         * @return the float
+         */
         public float max(int dim) {
             return minMax[dim + dim + 1];
         }
 
+        /**
+         * Sets max.
+         *
+         * @param dim the dim
+         * @param x   the x
+         */
         public void setMax(int dim, float x) {
             minMax[dim + dim + 1] = x;
         }
 
+        /**
+         * Gets id.
+         *
+         * @return the id
+         */
         public long getId() {
             return id;
         }
 
+        /**
+         * Is null boolean.
+         *
+         * @return the boolean
+         */
         public boolean isNull() {
             return minMax.length == 0;
         }
@@ -153,6 +208,12 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
             return equalsIgnoringId(o);
         }
 
+        /**
+         * Equals ignoring id boolean.
+         *
+         * @param o the o
+         * @return the boolean
+         */
         public boolean equalsIgnoringId(SpatialKey o) {
             return Arrays.equals(minMax, o.minMax);
         }

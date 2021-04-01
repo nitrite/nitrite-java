@@ -4,7 +4,10 @@ import lombok.AllArgsConstructor;
 import org.dizitart.no2.Nitrite;
 
 /**
+ * A command to drop a nitrite collection.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @AllArgsConstructor
 public class Drop extends BaseCommand implements Command {

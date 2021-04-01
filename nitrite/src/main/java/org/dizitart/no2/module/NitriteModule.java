@@ -16,39 +16,43 @@
 
 package org.dizitart.no2.module;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
+import static org.dizitart.no2.common.util.Iterables.setOf;
+
 /**
+ * Represents a nitrite plugin modules which may contains
+ * one or more nitrite plugins.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public interface NitriteModule {
+    /**
+     * Creates a {@link NitriteModule} from a set of {@link NitritePlugin}s.
+     *
+     * @param plugins the plugins
+     * @return the nitrite module
+     */
     static NitriteModule module(NitritePlugin... plugins) {
-        return new NitriteModule() {
-            @Override
-            public Set<NitritePlugin> plugins() {
-                return setOf(plugins);
-            }
-        };
+        return () -> setOf(plugins);
     }
 
+    /**
+     * Returns the set of {@link NitritePlugin} encapsulated by this module.
+     *
+     * @return the set
+     */
     Set<NitritePlugin> plugins();
 
-    @SuppressWarnings("unchecked")
-    default <T> Set<T> setOf(T... items) {
-        Set<T> set = new HashSet<>();
-        if (items != null) {
-            set.addAll(Arrays.asList(items));
-        }
-        return set;
-    }
-
+    /**
+     * Creates a {@link ModuleConfig} to configure a {@link NitriteModule}.
+     *
+     * @param <T> the type parameter
+     * @return the module config
+     */
     static <T extends ModuleConfig> T withConfig() {
         return null;
     }
 
-    interface ModuleConfig {
-        NitriteModule build();
-    }
 }

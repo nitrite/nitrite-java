@@ -16,22 +16,14 @@
 
 package org.dizitart.no2.repository.annotations;
 
-import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.repository.ObjectRepository;
 
 import java.lang.annotation.*;
 
 /**
  * Specifies a field to be indexed.
- * <p>
- * [[app-listing]]
- * [source,java]
- * .Example of Index annotation
- * --
  *
  * @author Anindya Chatterjee.
- * @see ObjectRepository#createIndex(String, IndexOptions)
  * @since 1.0
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -43,7 +35,7 @@ public @interface Index {
      *
      * @return the field name
      */
-    String value();
+    String[] value();
 
     /**
      * Type of the index.

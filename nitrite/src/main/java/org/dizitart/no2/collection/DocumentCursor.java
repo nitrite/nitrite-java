@@ -16,45 +16,45 @@
 
 package org.dizitart.no2.collection;
 
-import org.dizitart.no2.common.*;
-import org.dizitart.no2.common.tuples.Pair;
-
-import java.text.Collator;
-
-import static org.dizitart.no2.common.Fields.multiple;
+import org.dizitart.no2.common.Lookup;
+import org.dizitart.no2.common.RecordStream;
 
 /**
  * An interface to iterate over database {@code find()} results. It provides a
  * mechanism to iterate over all {@link NitriteId}s of the result.
- * <p>
- * [[app-listing]]
- * [source,java]
- * .Example of {@link DocumentCursor}
- * --
+ * <pre>
+ * {@code
  * // create/open a database
  * Nitrite db = Nitrite.builder()
- * .openOrCreate("user", "password");
- * <p>
+ *      .openOrCreate("user", "password");
+ *
+ * // create/open a database
+ * Nitrite db = Nitrite.builder()
+ *  .openOrCreate("user", "password");
+ *
  * // create a collection named - test
  * NitriteCollection collection = db.getCollection("test");
- * <p>
+ *
  * // returns all ids un-filtered
  * DocumentCursor result = collection.find();
- * <p>
+ *
  * for (Document doc : result) {
- * // use your logic with the retrieved doc here
+ *  // use your logic with the retrieved doc here
  * }
- * </p>
- * --
+ *
+ * }*
+ * </pre>
  *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public interface DocumentCursor extends RecordStream<Document> {
-
-    DocumentCursor sort(Fields fields, Collator collator, NullOrder nullOrder);
-
-    DocumentCursor skipLimit(long skip, long size);
+    /**
+     * Gets a filter plan for the query.
+     *
+     * @return the filter plan
+     */
+    FindPlan getFindPlan();
 
     /**
      * Gets a lazy iterable containing all the selected keys of the result documents.
@@ -77,32 +77,4 @@ public interface DocumentCursor extends RecordStream<Document> {
      * @since 2.1.0
      */
     RecordStream<Document> join(DocumentCursor foreignCursor, Lookup lookup);
-
-    default DocumentCursor skip(long skip) {
-        return skipLimit(skip, size());
-    }
-
-    default DocumentCursor limit(long limit) {
-        return skipLimit(0, limit);
-    }
-
-    default DocumentCursor sort(String field) {
-        return sort(field, SortOrder.Ascending);
-    }
-
-    default DocumentCursor sort(String field, SortOrder sortOrder) {
-        return sort(multiple(new Pair<>(field, sortOrder)), NullOrder.Default);
-    }
-
-    default DocumentCursor sort(Fields fields) {
-        return sort(fields, null, NullOrder.Default);
-    }
-
-    default DocumentCursor sort(Fields fields, Collator collator) {
-        return sort(fields, collator, NullOrder.Default);
-    }
-
-    default DocumentCursor sort(Fields fields, NullOrder nullOrder) {
-        return sort(fields, null, nullOrder);
-    }
 }

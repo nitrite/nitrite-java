@@ -20,45 +20,19 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.index.ComparableIndexer;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.index.IndexScanner;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.dizitart.no2.common.util.Numbers.compare;
 
 /**
  * @author Anindya Chatterjee
  */
-class LesserThanFilter extends ComparisonFilter {
+class LesserThanFilter extends ComparableFilter {
     LesserThanFilter(String field, Comparable<?> value) {
         super(field, value);
-    }
-
-    @Override
-    @SuppressWarnings("rawtypes")
-    protected Set<NitriteId> findIndexedIdSet() {
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getIsFieldIndexed()) {
-            if (getNitriteIndexer() instanceof ComparableIndexer && getValue() instanceof Comparable) {
-                ComparableIndexer comparableIndexer = (ComparableIndexer) getNitriteIndexer();
-                idSet = comparableIndexer.findLesserThan(getCollectionName(), getField(), (Comparable) getValue());
-            } else {
-                if (getValue() instanceof Comparable) {
-                    throw new FilterException("lt filter is not supported on indexed field "
-                        + getField());
-                } else {
-                    throw new FilterException(getValue() + " is not comparable");
-                }
-            }
-        }
-        return idSet;
-    }
-
-    @Override
-    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
-        throw new FilterException("lt filter cannot be applied on _id field");
     }
 
     @Override
@@ -79,5 +53,32 @@ class LesserThanFilter extends ComparisonFilter {
         }
 
         return false;
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public Object applyOnIndex(IndexScanner indexScanner) {
+        Comparable comparable = getComparable();
+        NavigableMap<Comparable<?>, Object> subMap = new ConcurrentSkipListMap<>();
+        List<NitriteId> nitriteIds = new ArrayList<>();
+
+        Comparable ceilingKey = indexScanner.lowerKey(comparable);
+        while (ceilingKey != null) {
+            // get the starting value, it can be a navigable-map (compound index)
+            // or list (single field index)
+            Object value = indexScanner.get(ceilingKey);
+            processIndexValue(value, subMap, nitriteIds);
+
+            ceilingKey = indexScanner.lowerKey(ceilingKey);
+        }
+
+        if (!subMap.isEmpty()) {
+            // if sub-map is populated then filtering on compound index, return sub-map
+            return subMap;
+        } else {
+            // else it is filtering on either single field index,
+            // or it is a terminal filter on compound index, return only nitrite-ids
+            return nitriteIds;
+        }
     }
 }

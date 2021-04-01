@@ -19,7 +19,6 @@ package org.dizitart.no2.collection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventAware;
 import org.dizitart.no2.collection.events.EventType;
-import org.dizitart.no2.collection.operation.FindOptions;
 import org.dizitart.no2.common.PersistentCollection;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
@@ -193,10 +192,8 @@ public interface NitriteCollection extends PersistentCollection<Document> {
      * @return a cursor to all documents in the collection.
      */
     default DocumentCursor find() {
-        return find(new FindOptions());
+        return find(Filter.ALL, null);
     }
-
-    DocumentCursor find(FindOptions findOptions);
 
     /**
      * Applies a filter on the collection and returns a cursor to the
@@ -215,9 +212,33 @@ public interface NitriteCollection extends PersistentCollection<Document> {
      * @see DocumentCursor#project(Document)
      */
     default DocumentCursor find(Filter filter) {
-        return find(filter, new FindOptions());
+        return find(filter, null);
     }
 
+    /**
+     * Returns a customized cursor to all documents in the collection.
+     *
+     * @param findOptions specifies pagination, sort options for the cursor.
+     * @return a cursor to all selected documents.
+     * @see org.dizitart.no2.common.SortOrder
+     */
+    default DocumentCursor find(FindOptions findOptions) {
+        return find(Filter.ALL, findOptions);
+    }
+
+    /**
+     * Applies a filter on the collection and returns a customized cursor to the
+     * selected documents.
+     *
+     * <p>
+     * NOTE: If there is an index on the value specified in the filter, this operation
+     * will take advantage of the index.
+     * </p>
+     *
+     * @param filter      the filter to apply to select documents from collection.
+     * @param findOptions specifies pagination, sort options for the cursor.
+     * @return a cursor to all selected documents.
+     */
     DocumentCursor find(Filter filter, FindOptions findOptions);
 
     /**

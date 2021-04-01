@@ -35,10 +35,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
 import java.util.*;
 
 import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.collection.FindOptions.skipBy;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.junit.Assert.*;
 
@@ -104,7 +104,7 @@ public class RepositoryJoinTest {
     }
 
     @After
-    public void clear() throws IOException {
+    public void clear() throws Exception {
         if (personRepository != null && !personRepository.isDropped()) {
             personRepository.remove(ALL);
         }
@@ -141,7 +141,7 @@ public class RepositoryJoinTest {
             }
         }
 
-        result = personRepository.find().skipLimit(0, 5).join(addressRepository.find(), lookup,
+        result = personRepository.find(skipBy(0).limit(5)).join(addressRepository.find(), lookup,
             PersonDetails.class);
 
         assertEquals(result.size(), 5);

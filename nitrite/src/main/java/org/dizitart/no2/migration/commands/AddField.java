@@ -4,11 +4,10 @@ import lombok.AllArgsConstructor;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.migration.Generator;
-
-import static org.dizitart.no2.common.Fields.single;
 
 /**
  * @author Anindya Chatterjee
@@ -23,7 +22,7 @@ public class AddField extends BaseCommand implements Command {
     public void execute(Nitrite nitrite) {
         initialize(nitrite, collectionName);
 
-        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, single(fieldName));
+        IndexDescriptor indexDescriptor = operations.findIndex(Fields.withNames(fieldName));
 
         for (Pair<NitriteId, Document> pair : nitriteMap.entries()) {
             Document document = pair.getSecond();
@@ -37,7 +36,7 @@ public class AddField extends BaseCommand implements Command {
         }
 
         if (indexDescriptor != null) {
-            operations.createIndex(single(fieldName), indexDescriptor.getIndexType(), false);
+            operations.createIndex(Fields.withNames(fieldName), indexDescriptor.getIndexType());
         }
     }
 }

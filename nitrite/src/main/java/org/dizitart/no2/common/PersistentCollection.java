@@ -25,14 +25,11 @@ import org.dizitart.no2.collection.meta.MetadataAware;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.processors.Processor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.store.NitriteStore;
 
-import java.io.Closeable;
 import java.util.Collection;
-
-import static org.dizitart.no2.common.Fields.multiple;
-import static org.dizitart.no2.common.Fields.single;
 
 /**
  * The interface Persistent collection.
@@ -43,16 +40,40 @@ import static org.dizitart.no2.common.Fields.single;
  * @see ObjectRepository
  * @since 1.0
  */
-public interface PersistentCollection<T> extends EventAware, MetadataAware, Closeable {
+public interface PersistentCollection<T> extends EventAware, MetadataAware, AutoCloseable {
+
     /**
-     * Creates an index on the {@code field}, if not already exists.
+     * Adds a data processor to this collection.
+     *
+     * @param processor the processor
+     */
+    void addProcessor(Processor processor);
+
+    /**
+     * Removes a data processor from this collection.
+     *
+     * @param processor the processor
+     */
+    void removeProcessor(Processor processor);
+
+    /**
+     * Creates an unique index on the {@code fields}, if not already exists.
+     *
+     * @param fields       the fields to be indexed.
+     * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on the field.
+     */
+    default void createIndex(String... fields) {
+        createIndex(null, fields);
+    }
+
+    /**
+     * Creates an index on the {@code fields}, if not already exists.
      * If {@code indexOptions} is {@code null}, it will use default options.
      * <p>
      * <p>
      * The default indexing option is -
      *
      * <ul>
-     * <li>{@code indexOptions.setAsync(false);}</li>
      * <li>{@code indexOptions.setIndexType(IndexType.Unique);}</li>
      * </ul>
      *
@@ -64,63 +85,22 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
      *     </ul>
      * </p>
      *
-     * @param field        the field to be indexed.
      * @param indexOptions index options.
+     * @param fields       the fields to be indexed.
      * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on the field.
      * @see org.dizitart.no2.index.IndexOptions
      * @see IndexType
      */
-    default void createIndex(String field, IndexOptions indexOptions) {
-        createIndex(single(field), indexOptions);
-    }
-
-    /**
-     * Creates an index on {@code fields}, if not already exists.
-     * If {@code indexOptions} is {@code null}, it will use default options.
-     * <p>
-     * <p>
-     * The default indexing option is -
-     *
-     * <ul>
-     * <li>{@code indexOptions.setAsync(false);}</li>
-     * <li>{@code indexOptions.setIndexType(IndexType.Unique);}</li>
-     * </ul>
-     *
-     * <p>
-     *     NOTE:
-     *     <ul>
-     *         <li><b>_id</b> value of the document is always indexed. But full-text indexing is not supported on <b>_id</b> value.</li>
-     *         <li>Indexing on non-comparable value is not supported.</li>
-     *     </ul>
-     * </p>
-     *
-     * @param fields       the fields
-     * @param indexOptions the index options
-     * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on the fields.
-     * @see org.dizitart.no2.index.IndexOptions
-     * @see IndexType
-     */
-    void createIndex(Fields fields, IndexOptions indexOptions);
+    void createIndex(IndexOptions indexOptions, String... fields);
 
     /**
      * Rebuilds index on the {@code field} if it exists.
      *
-     * @param field   the field to be indexed.
-     * @param isAsync if set to {@code true}, the indexing will run in background; otherwise, in foreground.
+     * @param fields the fields to be indexed.
      * @throws org.dizitart.no2.exceptions.IndexingException if the {@code field} is not indexed.
      */
-    default void rebuildIndex(String field, boolean isAsync) {
-        rebuildIndex(single(field), isAsync);
-    }
+    void rebuildIndex(String... fields);
 
-    /**
-     * Rebuilds index on {@code fields} if it exists.
-     *
-     * @param fields  the fields to be indexed.
-     * @param isAsync if set to {@code true}, the indexing will run in background; otherwise, in foreground.
-     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code fields} is not indexed.
-     */
-    void rebuildIndex(Fields fields, boolean isAsync);
 
     /**
      * Gets a set of all indices in the collection.
@@ -131,32 +111,12 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
     Collection<IndexDescriptor> listIndices();
 
     /**
-     * Checks if the {@code field} is already indexed or not.
+     * Checks if the {@code fields} is already indexed or not.
      *
-     * @param field the field to check.
+     * @param fields the fields to check.
      * @return {@code true} if the {@code field} is indexed; otherwise, {@code false}.
      */
-    default boolean hasIndex(String field) {
-        return hasIndex(single(field));
-    }
-
-    /**
-     * Checks if the fields are already indexed or not.
-     *
-     * @param fields the fields to check
-     * @return {@code true} if the {@code fields} are indexed; otherwise, {@code false}.
-     */
-    boolean hasIndex(Fields fields);
-
-    /**
-     * Checks if indexing operation is currently ongoing for the {@code field}.
-     *
-     * @param field the field to check.
-     * @return {@code true} if indexing is currently running; otherwise, {@code false}.
-     */
-    default boolean isIndexing(String field) {
-        return isIndexing(single(field));
-    }
+    boolean hasIndex(String... fields);
 
     /**
      * Checks if indexing operation is currently ongoing for the {@code fields}.
@@ -164,27 +124,16 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
      * @param fields the fields to check.
      * @return {@code true} if indexing is currently running; otherwise, {@code false}.
      */
-    boolean isIndexing(Fields fields);
+    boolean isIndexing(String... fields);
 
-    /**
-     * Drops the index on the {@code field}.
-     *
-     * @param field the index of the {@code field} to drop.
-     * @throws org.dizitart.no2.exceptions.IndexingException if indexing is currently running on the {@code field}.
-     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code field} is not indexed.
-     */
-    default void dropIndex(String field) {
-        dropIndex(multiple(field));
-    }
-    
     /**
      * Drops the index on the {@code fields}.
      *
-     * @param fields the index of the {@code fields} to drop.
+     * @param fields the index on the {@code fields} to drop.
      * @throws org.dizitart.no2.exceptions.IndexingException if indexing is currently running on the {@code fields}.
-     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code fields} is not indexed.
+     * @throws org.dizitart.no2.exceptions.IndexingException if the {@code fields} are not indexed.
      */
-    void dropIndex(Fields fields);
+    void dropIndex(String... fields);
 
     /**
      * Drops all indices from the collection.
@@ -204,8 +153,8 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
      * index will also be updated.
      * <p>
      * <p>
-     *     NOTE: This operations will notify all {@link CollectionEventListener}
-     *     instances registered to this collection with change type {@link EventType#Insert}.
+     * NOTE: This operations will notify all {@link CollectionEventListener}
+     * instances registered to this collection with change type {@link EventType#Insert}.
      * </p>
      *
      * @param elements an array of element for batch insertion.
@@ -224,9 +173,9 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
     /**
      * Updates the {@code element} in the collection. Specified {@code element} must have an id.
      * <p>
-     *     NOTE: This operations will notify all {@link CollectionEventListener}
-     *     instances registered to this collection with change type
-     *     {@link EventType#Update}.
+     * NOTE: This operations will notify all {@link CollectionEventListener}
+     * instances registered to this collection with change type
+     * {@link EventType#Update}.
      * </p>
      *
      * @param element the element to update.
@@ -243,7 +192,7 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
      * If the {@code element} is not found in the collection, it will be inserted only if {@code insertIfAbsent}
      * is set to {@code true}.
      * <p>
-     *
+     * <p>
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type
      * {@link EventType#Update} or {@link EventType#Insert}.
@@ -299,15 +248,6 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Clos
      * @return a boolean value indicating if the collection has been closed or not.
      */
     boolean isOpen();
-
-    /**
-     * Closes the collection for further access. If a collection once closed
-     * can only be opened via {@link org.dizitart.no2.Nitrite#getCollection(String)} or
-     * {@link org.dizitart.no2.Nitrite#getRepository(Class)} operation.
-     * <p>
-     * Any access to a closed collection would result into a {@link IllegalStateException}.
-     */
-    void close();
 
     /**
      * Returns the size of the {@link PersistentCollection}.

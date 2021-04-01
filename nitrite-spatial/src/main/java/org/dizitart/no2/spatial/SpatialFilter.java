@@ -20,16 +20,13 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.filters.IndexAwareFilter;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.filters.ComparableFilter;
 import org.locationtech.jts.geom.Geometry;
-
-import java.util.Set;
 
 /**
  * @author Anindya Chatterjee
  */
-public abstract class SpatialFilter extends IndexAwareFilter {
+public abstract class SpatialFilter extends ComparableFilter {
     private final Geometry geometry;
 
     protected SpatialFilter(String field, Geometry geometry) {
@@ -40,11 +37,6 @@ public abstract class SpatialFilter extends IndexAwareFilter {
     @Override
     public Geometry getValue() {
         return geometry;
-    }
-
-    @Override
-    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
-        throw new FilterException("spatial filters cannot be applied on _id field");
     }
 
     @Override

@@ -17,11 +17,29 @@
 package org.dizitart.no2.store.events;
 
 /**
+ * Nitrite store related events.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public enum StoreEvents {
+    /**
+     * The store opened event.
+     */
     Opened,
+
+    /**
+     * The store commit event.
+     */
     Commit,
+
+    /**
+     * The store closing event.
+     */
     Closing,
+
+    /**
+     * The store closed event.
+     */
     Closed
 }

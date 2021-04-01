@@ -64,9 +64,9 @@ public class StressTest {
 
     @Test
     public void testIssue41() {
-        collection.createIndex("number", IndexOptions.indexOptions(IndexType.NonUnique));
-        collection.createIndex("name", IndexOptions.indexOptions(IndexType.NonUnique));
-        collection.createIndex("counter", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "number");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "name");
+        collection.createIndex("counter");
 
         Random random = new Random();
         AtomicLong counter = new AtomicLong(System.currentTimeMillis());
@@ -107,7 +107,7 @@ public class StressTest {
     }
 
     @After
-    public void clear() {
+    public void clear() throws Exception {
         if (db != null && !db.isClosed()) {
             long start = System.currentTimeMillis();
             db.close();

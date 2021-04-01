@@ -45,16 +45,18 @@ import java.util.TreeMap;
 @ToString
 public class NitriteConfig {
     /**
-     * Gets the embedded field separator character. Default value
-     * is `.` unless set explicitly.
-     *
-     * @return the embedded field separator character.
+     * Indicates if this {@link NitriteConfig} is already configured.
      */
+    protected boolean configured = false;
+
+    /**
+     * Returns the {@link PluginManager} instance.
+     */
+    @Getter(AccessLevel.PACKAGE)
+    protected final PluginManager pluginManager;
+
     @Getter
     private static String fieldSeparator = ".";
-
-    @Getter(AccessLevel.PACKAGE)
-    private final PluginManager pluginManager;
 
     @Getter
     private final Map<Integer, TreeMap<Integer, Migration>> migrations;
@@ -62,8 +64,9 @@ public class NitriteConfig {
     @Getter
     private Integer schemaVersion = Constants.INITIAL_SCHEMA_VERSION;
 
-    private boolean configured = false;
-
+    /**
+     * Instantiates a new {@link NitriteConfig}.
+     */
     public NitriteConfig() {
         this.pluginManager = new PluginManager(this);
         this.migrations = new HashMap<>();
@@ -84,7 +87,7 @@ public class NitriteConfig {
     }
 
     /**
-     * Loads {@link NitritePlugin} instances.
+     * Loads {@link NitritePlugin} instances defined in the {@link NitriteModule}.
      *
      * @param module the {@link NitriteModule} instances.
      * @return the {@link NitriteConfig} instance.
@@ -98,6 +101,12 @@ public class NitriteConfig {
         return this;
     }
 
+    /**
+     * Adds schema migration instructions.
+     *
+     * @param migration the migration
+     * @return the nitrite config
+     */
     @SuppressWarnings("Java8MapApi")
     public NitriteConfig addMigration(Migration migration) {
         if (configured) {
@@ -122,6 +131,12 @@ public class NitriteConfig {
         return this;
     }
 
+    /**
+     * Sets the current schema version.
+     *
+     * @param version the version
+     * @return the nitrite config
+     */
     public NitriteConfig schemaVersion(Integer version) {
         if (configured) {
             throw new InvalidOperationException("cannot add schema version info after database" +
@@ -134,7 +149,6 @@ public class NitriteConfig {
     /**
      * Auto configures nitrite database with default configuration values and
      * default built-in plugins.
-     *
      */
     public void autoConfigure() {
         if (configured) {
@@ -178,7 +192,10 @@ public class NitriteConfig {
         return pluginManager.getNitriteStore();
     }
 
-    void initialized() {
+    /**
+     * Initializes this {@link NitriteConfig} instance.
+     */
+    void initialize() {
         this.configured = true;
         this.pluginManager.initializePlugins();
     }

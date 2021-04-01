@@ -18,16 +18,14 @@ package org.dizitart.no2.repository;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.NullOrder;
 import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.mapper.NitriteMapper;
 
 import java.lang.reflect.Modifier;
-import java.text.Collator;
 import java.util.Iterator;
 
 import static org.dizitart.no2.common.util.DocumentUtils.skeletonDocument;
@@ -53,6 +51,11 @@ class ObjectCursor<T> implements Cursor<T> {
     }
 
     @Override
+    public FindPlan getFindPlan() {
+        return cursor.getFindPlan();
+    }
+
+    @Override
     public <P> RecordStream<P> project(Class<P> projectionType) {
         notNull(projectionType, "projection cannot be null");
         Document dummyDoc = emptyDocument(nitriteMapper, projectionType);
@@ -63,16 +66,6 @@ class ObjectCursor<T> implements Cursor<T> {
     public <Foreign, Joined> RecordStream<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type) {
         ObjectCursor<Foreign> foreignObjectCursor = (ObjectCursor<Foreign>) foreignCursor;
         return new MutatedObjectStream<>(nitriteMapper, cursor.join(foreignObjectCursor.cursor, lookup), type);
-    }
-
-    @Override
-    public Cursor<T> sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder) {
-        return new ObjectCursor<>(nitriteMapper, cursor.sort(field, sortOrder, collator, nullOrder), type);
-    }
-
-    @Override
-    public Cursor<T> skipLimit(long skip, long size) {
-        return new ObjectCursor<>(nitriteMapper, cursor.skipLimit(skip, size), type);
     }
 
     @Override

@@ -26,19 +26,23 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Represents a persistent storage for Nitrite database.
+ * Represents a storage for Nitrite database.
  *
+ * @param <Config> the type parameter
  * @author Anindya Chatterjee
  * @since 1.0
  */
 public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin, AutoCloseable {
 
+    /**
+     * Opens or creates this nitrite store.
+     */
     void openOrCreate();
 
     /**
      * Checks whether this store is closed for further modification.
      *
-     * @return `true` if closed; `false` otherwise.
+     * @return <code>true</code> if closed; <code>false</code> otherwise.
      */
     boolean isClosed();
 
@@ -66,14 +70,14 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
     /**
      * Checks whether there are any unsaved changes.
      *
-     * @return `true` if there are any changes; `false` otherwise.
+     * @return <code>true</code> if here are any changes; <code>false</code> otherwise.
      */
     boolean hasUnsavedChanges();
 
     /**
      * Checks whether the store is opened in readonly mode.
      *
-     * @return `true` if the store is opened in readonly mode.; `false` otherwise.
+     * @return <code>true</code> if he store is opened in readonly mode; <code>false</code> otherwise.
      */
     boolean isReadOnly();
 
@@ -84,21 +88,9 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
     void commit();
 
     /**
-     * Closes the file and the store. Unsaved changes are written to disk first.
-     */
-    void close();
-
-    /**
-     * This method runs before {@link #close()}, to run cleanup routines.
+     * This method runs before store {@link #close()}, to run cleanup routines.
      */
     void beforeClose();
-
-    /**
-     * Gets the {@link IndexCatalog} instances from the store.
-     *
-     * @return the IndexCatalog instance.
-     */
-    IndexCatalog getIndexCatalog();
 
     /**
      * Checks whether a map with the name already exists in the store or not.
@@ -110,8 +102,8 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
 
     /**
      * Opens a {@link NitriteMap} with the default settings. The map is
-     * automatically create if it does not yet exist. If a map with this
-     * name is already open, this map is returned.
+     * automatically created if it does not yet exist. If a map with this
+     * name is already opened, this map is returned.
      *
      * @param <Key>     the key type
      * @param <Value>   the value type
@@ -131,7 +123,7 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
 
     /**
      * Opens a {@link NitriteRTree} with the default settings. The RTree is
-     * automatically create if it does not yet exist. If a RTree with this
+     * automatically created if it does not yet exist. If a RTree with this
      * name is already open, this RTree is returned.
      *
      * @param <Key>     the key type
@@ -165,16 +157,24 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
     void unsubscribe(StoreEventListener listener);
 
     /**
-     * Gets underlying store version.
+     * Gets the underlying store engine version.
      *
      * @return the store version
      */
     String getStoreVersion();
 
     /**
-     * Gets store config.
+     * Gets the store configuration.
      *
      * @return the store config
      */
     Config getStoreConfig();
+
+
+    /**
+     * Gets the store catalog.
+     *
+     * @return the catalog
+     */
+    StoreCatalog getCatalog();
 }

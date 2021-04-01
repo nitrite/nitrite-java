@@ -17,7 +17,10 @@
 package org.dizitart.no2.index;
 
 /**
+ * Represents a nitrite unique indexer.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 public final class UniqueIndexer extends ComparableIndexer {
     @Override

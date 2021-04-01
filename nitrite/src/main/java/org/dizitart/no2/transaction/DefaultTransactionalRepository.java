@@ -2,15 +2,16 @@ package org.dizitart.no2.transaction;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.processors.Processor;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryOperations;
@@ -24,6 +25,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     private final Class<T> type;
@@ -44,13 +46,23 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void createIndex(Fields fields, IndexOptions indexOptions) {
-        backingCollection.createIndex(fields, indexOptions);
+    public void addProcessor(Processor processor) {
+        backingCollection.addProcessor(processor);
     }
 
     @Override
-    public void rebuildIndex(Fields fields, boolean isAsync) {
-        backingCollection.rebuildIndex(fields, isAsync);
+    public void removeProcessor(Processor processor) {
+        backingCollection.removeProcessor(processor);
+    }
+
+    @Override
+    public void createIndex(IndexOptions indexOptions, String... fieldNames) {
+        backingCollection.createIndex(indexOptions, fieldNames);
+    }
+
+    @Override
+    public void rebuildIndex(String... fieldNames) {
+        backingCollection.rebuildIndex(fieldNames);
     }
 
     @Override
@@ -59,18 +71,18 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public boolean hasIndex(Fields fields) {
-        return backingCollection.hasIndex(fields);
+    public boolean hasIndex(String... fieldNames) {
+        return backingCollection.hasIndex(fieldNames);
     }
 
     @Override
-    public boolean isIndexing(Fields fields) {
-        return backingCollection.isIndexing(fields);
+    public boolean isIndexing(String... fieldNames) {
+        return backingCollection.isIndexing(fieldNames);
     }
 
     @Override
-    public void dropIndex(Fields fields) {
-        backingCollection.dropIndex(fields);
+    public void dropIndex(String... fieldNames) {
+        backingCollection.dropIndex(fieldNames);
     }
 
     @Override
@@ -131,13 +143,8 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public Cursor<T> find() {
-        return operations.find(type);
-    }
-
-    @Override
-    public Cursor<T> find(Filter filter) {
-        return operations.find(filter, type);
+    public Cursor<T> find(Filter filter, FindOptions findOptions) {
+        return operations.find(filter, findOptions, type);
     }
 
     @Override
@@ -166,7 +173,7 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         backingCollection.close();
     }
 

@@ -31,7 +31,7 @@ public class CollectionFindByIndexNegativeTest extends BaseCollectionTest {
     @Test(expected = FilterException.class)
     public void testFindTextWithWildCardMultipleWord() {
         insert();
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
 
         DocumentCursor cursor = collection.find(where("body").text("*ipsum dolor*"));
         assertEquals(cursor.size(), 1);
@@ -40,7 +40,7 @@ public class CollectionFindByIndexNegativeTest extends BaseCollectionTest {
     @Test(expected = FilterException.class)
     public void testFindTextWithOnlyWildCard() {
         insert();
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
 
         DocumentCursor cursor = collection.find(where("body").text("*"));
         assertEquals(cursor.size(), 1);

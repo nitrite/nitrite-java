@@ -21,13 +21,11 @@ import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexType;
 import org.junit.Test;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.util.DocumentUtils.isSimilar;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.junit.Assert.*;
 
 public class CollectionUpdateTest extends BaseCollectionTest {
@@ -241,7 +239,7 @@ public class CollectionUpdateTest extends BaseCollectionTest {
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testRegisterListenerAfterClose() {
+    public void testRegisterListenerAfterClose() throws Exception {
         NitriteCollection collection = db.getCollection("test");
         collection.close();
         collection.subscribe(changeInfo -> fail("should not happen"));
@@ -254,7 +252,7 @@ public class CollectionUpdateTest extends BaseCollectionTest {
         NitriteCollection coll = db.getCollection("test");
         coll.insert(doc1, doc2);
 
-        coll.createIndex("fruit", indexOptions(IndexType.Unique));
+        coll.createIndex("fruit");
 
         assertEquals(coll.find(where("fruit").eq("Apple")).size(), 1);
 

@@ -20,7 +20,7 @@ import org.dizitart.no2.NitriteBuilderTest;
 import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.filters.IndexAwareFilter;
+import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.mapper.Mappable;
 import org.dizitart.no2.mapper.MappableMapper;
 import org.dizitart.no2.mapper.NitriteMapper;
@@ -74,7 +74,7 @@ public class DocumentUtilsTest {
         doc.getId();
         Filter filter = createUniqueFilter(doc);
         assertNotNull(filter);
-        assertTrue(filter instanceof IndexAwareFilter);
+        assertTrue(filter instanceof ComparableFilter);
     }
 
     @Test

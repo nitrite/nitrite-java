@@ -17,10 +17,7 @@
 package org.dizitart.no2.collection.operation;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.collection.UpdateOptions;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventType;
@@ -29,6 +26,7 @@ import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.processors.ProcessorChain;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.HashSet;
@@ -45,15 +43,18 @@ class WriteOperations {
     private final ReadOperations readOperations;
     private final EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
     private final NitriteMap<NitriteId, Document> nitriteMap;
+    private final ProcessorChain processorChain;
 
     WriteOperations(DocumentIndexWriter documentIndexWriter,
                     ReadOperations readOperations,
                     NitriteMap<NitriteId, Document> nitriteMap,
-                    EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus) {
+                    EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus,
+                    ProcessorChain processorChain) {
         this.documentIndexWriter = documentIndexWriter;
         this.readOperations = readOperations;
         this.eventBus = eventBus;
         this.nitriteMap = nitriteMap;
+        this.processorChain = processorChain;
     }
 
     WriteResult insert(Document... documents) {
@@ -78,8 +79,13 @@ class WriteOperations {
                 newDoc.remove(DOC_SOURCE);
             }
 
-            log.debug("Inserting document {} in {}", newDoc, nitriteMap.getName());
-            Document already = nitriteMap.putIfAbsent(nitriteId, newDoc);
+            // run processors
+            Document unprocessed = newDoc.clone();
+            Document processed = processorChain.processBeforeWrite(unprocessed);
+            log.debug("Document processed from {} to {} before insert", newDoc, processed);
+
+            log.debug("Inserting processed document {} in {}", processed, nitriteMap.getName());
+            Document already = nitriteMap.putIfAbsent(nitriteId, processed);
 
             if (already != null) {
                 log.warn("Another document {} already exists with same id {}", already, nitriteId);
@@ -88,7 +94,7 @@ class WriteOperations {
                     "entry with same id already exists in " + nitriteMap.getName());
             } else {
                 try {
-                    documentIndexWriter.writeIndexEntry(newDoc);
+                    documentIndexWriter.writeIndexEntry(processed);
                 } catch (UniqueConstraintException | IndexingException e) {
                     log.error("Index operation has failed during insertion for the document "
                         + document + " in " + nitriteMap.getName(), e);
@@ -99,9 +105,8 @@ class WriteOperations {
 
             nitriteIds.add(nitriteId);
 
-            Document eventDoc = newDoc.clone();
             CollectionEventInfo<Document> eventInfo = new CollectionEventInfo<>();
-            eventInfo.setItem(eventDoc);
+            eventInfo.setItem(newDoc);
             eventInfo.setTimestamp(time);
             eventInfo.setEventType(EventType.Insert);
             eventInfo.setOriginator(source);
@@ -116,12 +121,7 @@ class WriteOperations {
     }
 
     WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
-        DocumentCursor cursor;
-        if (filter == null || filter == Filter.ALL) {
-            cursor = readOperations.find();
-        } else {
-            cursor = readOperations.find(filter);
-        }
+        DocumentCursor cursor = readOperations.find(filter, null);
 
         WriteResultImpl writeResult = new WriteResultImpl();
         Document document = update.clone();
@@ -145,27 +145,32 @@ class WriteOperations {
                     break;
                 }
 
-                Document item = doc.clone();
+                Document newDoc = doc.clone();
                 Document oldDocument = doc.clone();
                 String source = document.getSource();
                 long time = System.currentTimeMillis();
 
-                NitriteId nitriteId = item.getId();
-                log.debug("Document to update {} in {}", item, nitriteMap.getName());
+                NitriteId nitriteId = newDoc.getId();
+                log.debug("Document to update {} in {}", newDoc, nitriteMap.getName());
 
                 if (!REPLICATOR.contentEquals(document.getSource())) {
                     document.remove(DOC_SOURCE);
-                    item.merge(document);
-                    int rev = item.getRevision();
-                    item.put(DOC_REVISION, rev + 1);
-                    item.put(DOC_MODIFIED, time);
+                    newDoc.merge(document);
+                    int rev = newDoc.getRevision();
+                    newDoc.put(DOC_REVISION, rev + 1);
+                    newDoc.put(DOC_MODIFIED, time);
                 } else {
                     document.remove(DOC_SOURCE);
-                    item.merge(document);
+                    newDoc.merge(document);
                 }
 
-                nitriteMap.put(nitriteId, item);
-                log.debug("Document {} updated in {}", item, nitriteMap.getName());
+                // run processor
+                Document unprocessed = newDoc.clone();
+                Document processed = processorChain.processBeforeWrite(unprocessed);
+                log.debug("Document processed from {} to {} before update", newDoc, processed);
+
+                nitriteMap.put(nitriteId, processed);
+                log.debug("Document {} updated in {}", processed, nitriteMap.getName());
 
                 // if 'update' only contains id value, affected count = 0
                 if (document.size() > 0) {
@@ -173,18 +178,17 @@ class WriteOperations {
                 }
 
                 try {
-                    documentIndexWriter.updateIndexEntry(oldDocument, item);
+                    documentIndexWriter.updateIndexEntry(oldDocument, processed);
                 } catch (UniqueConstraintException | IndexingException e) {
                     log.error("Index operation failed during update, reverting changes for the document "
                         + oldDocument + " in " + nitriteMap.getName(), e);
                     nitriteMap.put(nitriteId, oldDocument);
-                    documentIndexWriter.updateIndexEntry(item, oldDocument);
+                    documentIndexWriter.updateIndexEntry(processed, oldDocument);
                     throw e;
                 }
 
                 CollectionEventInfo<Document> eventInfo = new CollectionEventInfo<>();
-                Document eventDoc = item.clone();
-                eventInfo.setItem(eventDoc);
+                eventInfo.setItem(newDoc);
                 eventInfo.setEventType(EventType.Update);
                 eventInfo.setTimestamp(time);
                 eventInfo.setOriginator(source);
@@ -209,13 +213,7 @@ class WriteOperations {
     }
 
     WriteResult remove(Filter filter, boolean justOnce) {
-        DocumentCursor cursor;
-        if (filter == null || filter == Filter.ALL) {
-            cursor = readOperations.find();
-        } else {
-            cursor = readOperations.find(filter);
-        }
-
+        DocumentCursor cursor = readOperations.find(filter, null);
         WriteResultImpl result = new WriteResultImpl();
 
         long count = 0;
@@ -223,8 +221,12 @@ class WriteOperations {
             if (document != null) {
                 count++;
 
-                Document item = document.clone();
-                CollectionEventInfo<Document> eventInfo = removeAndCreateEvent(item, result);
+                // run processor
+                Document unprocessed = document.clone();
+                Document processed = processorChain.processAfterRead(unprocessed);
+                log.debug("Document processed from {} to {} after remove", document, processed);
+
+                CollectionEventInfo<Document> eventInfo = removeAndCreateEvent(processed, result);
                 if (eventInfo != null) {
                     alert(EventType.Remove, eventInfo);
                 }

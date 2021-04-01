@@ -35,15 +35,18 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.processors.Processor;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.locks.Lock;
 
 import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
-import static org.dizitart.no2.common.util.ValidationUtils.*;
+import static org.dizitart.no2.common.util.ValidationUtils.containsNull;
+import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
  * @author Anindya Chatterjee.
@@ -72,6 +75,20 @@ class DefaultNitriteCollection implements NitriteCollection {
         this.lockService = lockService;
 
         initialize();
+    }
+
+    @Override
+    public void addProcessor(Processor processor) {
+        checkOpened();
+        notNull(processor, "a null processor cannot be added");
+        collectionOperations.addProcessor(processor);
+    }
+
+    @Override
+    public void removeProcessor(Processor processor) {
+        checkOpened();
+        notNull(processor, "a null processor cannot be removed");
+        collectionOperations.removeProcessor(processor);
     }
 
     public WriteResult insert(Document[] documents) {
@@ -155,52 +172,42 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public DocumentCursor find() {
+    public DocumentCursor find(Filter filter, FindOptions findOptions) {
         checkOpened();
         try {
             readLock.lock();
-            return collectionOperations.find();
+            return collectionOperations.find(filter, findOptions);
         } finally {
             readLock.unlock();
         }
     }
 
-    public DocumentCursor find(Filter filter) {
-        checkOpened();
-        try {
-            readLock.lock();
-            return collectionOperations.find(filter);
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    public void createIndex(Fields fields, IndexOptions indexOptions) {
+    public void createIndex(IndexOptions indexOptions, String... fields) {
         checkOpened();
         notNull(fields, "fields cannot be null");
 
-        // by default async is false while creating index
+        Fields indexFields = Fields.withNames(fields);
         try {
             writeLock.lock();
             if (indexOptions == null) {
-                collectionOperations.createIndex(fields, IndexType.Unique, false);
+                collectionOperations.createIndex(indexFields, IndexType.Unique);
             } else {
-                collectionOperations.createIndex(fields, indexOptions.getIndexType(),
-                    indexOptions.isAsync());
+                collectionOperations.createIndex(indexFields, indexOptions.getIndexType());
             }
         } finally {
             writeLock.unlock();
         }
     }
 
-    public void rebuildIndex(Fields fields, boolean isAsync) {
+    public void rebuildIndex(String... fields) {
         checkOpened();
         notNull(fields, "fields cannot be null");
 
         IndexDescriptor indexDescriptor;
+        Fields indexFields = Fields.withNames(fields);
         try {
             readLock.lock();
-            indexDescriptor = collectionOperations.findIndex(fields);
+            indexDescriptor = collectionOperations.findIndex(indexFields);
         } finally {
             readLock.unlock();
         }
@@ -210,12 +217,12 @@ class DefaultNitriteCollection implements NitriteCollection {
 
             try {
                 writeLock.lock();
-                collectionOperations.rebuildIndex(indexDescriptor, isAsync);
+                collectionOperations.rebuildIndex(indexDescriptor);
             } finally {
                 writeLock.unlock();
             }
         } else {
-            throw new IndexingException(fields + " is not indexed");
+            throw new IndexingException(Arrays.toString(fields) + " is not indexed");
         }
     }
 
@@ -230,37 +237,40 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public boolean hasIndex(Fields fields) {
+    public boolean hasIndex(String... fields) {
         checkOpened();
         notNull(fields, "fields cannot be null");
 
+        Fields indexFields = Fields.withNames(fields);
         try {
             readLock.lock();
-            return collectionOperations.hasIndex(fields);
+            return collectionOperations.hasIndex(indexFields);
         } finally {
             readLock.unlock();
         }
     }
 
-    public boolean isIndexing(Fields fields) {
+    public boolean isIndexing(String... fields) {
         checkOpened();
         notNull(fields, "field cannot be null");
 
+        Fields indexFields = Fields.withNames(fields);
         try {
             readLock.lock();
-            return collectionOperations.isIndexing(fields);
+            return collectionOperations.isIndexing(indexFields);
         } finally {
             readLock.unlock();
         }
     }
 
-    public void dropIndex(Fields fields) {
+    public void dropIndex(String... fields) {
         checkOpened();
         notNull(fields, "fields cannot be null");
 
+        Fields indexFields = Fields.withNames(fields);
         try {
             writeLock.lock();
-            collectionOperations.dropIndex(fields);
+            collectionOperations.dropIndex(indexFields);
         } finally {
             writeLock.unlock();
         }
@@ -299,17 +309,25 @@ class DefaultNitriteCollection implements NitriteCollection {
             writeLock.unlock();
         }
         isDropped = true;
-        close();
+        try {
+            close();
+        } catch (Exception e) {
+            throw new NitriteIOException("failed to close the database", e);
+        }
     }
 
     public boolean isOpen() {
         if (nitriteStore == null || nitriteStore.isClosed() || isDropped) {
-            close();
+            try {
+                close();
+            } catch (Exception e) {
+                throw new NitriteIOException("failed to close the database", e);
+            }
             return false;
         } else return true;
     }
 
-    public void close() {
+    public void close() throws Exception {
         if (collectionOperations != null) {
             collectionOperations.close();
         }
@@ -378,7 +396,7 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    private void closeEventBus() {
+    private void closeEventBus() throws Exception {
         if (eventBus != null) {
             eventBus.close();
         }
@@ -409,7 +427,8 @@ class DefaultNitriteCollection implements NitriteCollection {
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
         notNull(indexDescriptor, "index cannot be null");
 
-        if (isIndexing(indexDescriptor.getIndexFields())) {
+        String[] indexFields = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+        if (isIndexing(indexFields)) {
             throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }

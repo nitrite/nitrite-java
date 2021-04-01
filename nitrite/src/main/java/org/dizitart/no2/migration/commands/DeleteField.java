@@ -4,13 +4,16 @@ import lombok.AllArgsConstructor;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexDescriptor;
 
-import static org.dizitart.no2.common.Fields.single;
-
 /**
+ * A command to delete a field from the document of
+ * a collection.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @AllArgsConstructor
 public class DeleteField extends BaseCommand implements Command {
@@ -21,7 +24,7 @@ public class DeleteField extends BaseCommand implements Command {
     public void execute(Nitrite nitrite) {
         initialize(nitrite, collectionName);
 
-        IndexDescriptor indexDescriptor = indexCatalog.findIndexDescriptorExact(collectionName, single(fieldName));
+        IndexDescriptor indexDescriptor = operations.findIndex(Fields.withNames(fieldName));
         for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
             Document document = entry.getSecond();
             document.remove(fieldName);
@@ -29,7 +32,7 @@ public class DeleteField extends BaseCommand implements Command {
         }
 
         if (indexDescriptor != null) {
-            operations.dropIndex(single(fieldName));
+            operations.dropIndex(Fields.withNames(fieldName));
         }
     }
 }

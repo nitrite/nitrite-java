@@ -18,17 +18,17 @@ package org.dizitart.no2.collection;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.concurrent.LockService;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.StoreCatalog;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
-import static org.dizitart.no2.common.Constants.COLLECTION_CATALOG;
-import static org.dizitart.no2.common.Constants.TAG_COLLECTIONS;
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -84,11 +84,8 @@ public class CollectionFactory {
             }
 
             collectionMap.put(name, collection);
-            NitriteMap<String, Document> catalogMap = store.openMap(COLLECTION_CATALOG, String.class, Document.class);
-            Document document = catalogMap.get(TAG_COLLECTIONS);
-            if (document == null) document = Document.createDocument();
-            document.put(name, true);
-            catalogMap.put(TAG_COLLECTIONS, document);
+            StoreCatalog storeCatalog = store.getCatalog();
+            storeCatalog.writeCollectionEntry(name);
         }
 
         return collection;
@@ -102,6 +99,8 @@ public class CollectionFactory {
                 collection.close();
             }
             collectionMap.clear();
+        } catch (Exception e) {
+            throw new NitriteIOException("failed to close a collection", e);
         } finally {
             lock.unlock();
         }

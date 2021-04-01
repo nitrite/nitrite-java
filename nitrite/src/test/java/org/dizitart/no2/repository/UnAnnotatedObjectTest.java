@@ -18,12 +18,11 @@ package org.dizitart.no2.repository;
 
 
 import org.dizitart.no2.common.SortOrder;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.data.ClassA;
 import org.dizitart.no2.repository.data.ClassC;
 import org.junit.Test;
 
+import static org.dizitart.no2.collection.FindOptions.orderBy;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -40,12 +39,10 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
         assertEquals(cursor.size(), 10);
         assertFalse(cursor.isEmpty());
 
-        IndexOptions indexOptions = new IndexOptions();
-        indexOptions.setIndexType(IndexType.Unique);
-        aObjectRepository.createIndex("b.number", indexOptions);
+        aObjectRepository.createIndex("b.number");
 
-        cursor = aObjectRepository.find(where("b.number").eq(160).not()).
-            sort("b.number", SortOrder.Ascending).skipLimit(0, 10);
+        cursor = aObjectRepository.find(where("b.number").eq(160).not(),
+            orderBy("b.number", SortOrder.Ascending).skip(0).limit(10));
 
         System.out.println("Available - " + !cursor.isEmpty());
         System.out.println("Total Size - " + cursor.size());
@@ -55,8 +52,8 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
             System.out.println(classA);
         }
 
-        cursor = aObjectRepository.find(where("b.number").eq(160).not()).
-            sort("b.number", SortOrder.Descending).skipLimit(2, 7);
+        cursor = aObjectRepository.find(where("b.number").eq(160).not(),
+            orderBy("b.number", SortOrder.Descending).skip(2).limit(7));
 
         System.out.println("Available - " + !cursor.isEmpty());
         System.out.println("Total Size - " + cursor.size());
@@ -66,8 +63,8 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
             System.out.println(classA);
         }
 
-        cursor = cObjectRepository.find(where("id").gt(900)).
-            sort("id", SortOrder.Descending).skipLimit(2, 7);
+        cursor = cObjectRepository.find(where("id").gt(900),
+            orderBy("id", SortOrder.Descending).skip(2).limit(7));
         System.out.println("Available - " + !cursor.isEmpty());
         System.out.println("Total Size - " + cursor.size());
 

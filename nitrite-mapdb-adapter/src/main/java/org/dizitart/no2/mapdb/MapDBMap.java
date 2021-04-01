@@ -100,7 +100,7 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
-    public RecordStream<K> keySet() {
+    public RecordStream<K> keys() {
         return RecordStream.fromIterable(() -> new Iterator<K>() {
             final Iterator<K> keyIterator = bTreeMap.keyIterator();
             final Iterator<DBNull> nullEntryIterator = nullEntryMap.keyIterator();
