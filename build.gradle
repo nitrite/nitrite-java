@@ -71,7 +71,7 @@ task clean(type: Delete) {
 }
 
 configurations.errorprone {
-    resolutionStrategy.force "com.google.errorprone:error_prone_core:2.5.1"
+    resolutionStrategy.force "com.google.errorprone:error_prone_core:2.6.0"
 }
 
 nexusStaging {
