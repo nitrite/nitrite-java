@@ -34,9 +34,9 @@ dependencies {
         exclude group: "org.objenesis"
     }
 
-    annotationProcessor "org.projectlombok:lombok:1.18.18"
+    annotationProcessor "org.projectlombok:lombok:1.18.20"
 
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
     testImplementation "uk.co.jemos.podam:podam:7.2.6.RELEASE"
     testImplementation "com.github.javafaker:javafaker:1.0.2"
     testImplementation "junit:junit:4.13.2"

@@ -48,10 +48,10 @@ dependencies {
     api "org.slf4j:slf4j-api"
     api "com.fasterxml.jackson.core:jackson-databind"
     api "com.squareup.okhttp3:okhttp"
-    annotationProcessor "org.projectlombok:lombok:1.18.18"
+    annotationProcessor "org.projectlombok:lombok:1.18.20"
 
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.16"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
     testImplementation "jakarta.websocket:jakarta.websocket-api:2.0.0"
     testImplementation "org.glassfish.tyrus:tyrus-server:2.0.0"
     testImplementation "org.glassfish.tyrus:tyrus-container-grizzly-server:2.0.0"
