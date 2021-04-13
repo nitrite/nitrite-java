@@ -57,7 +57,7 @@ dependencies {
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.14.1"
     testAnnotationProcessor "org.apache.logging.log4j:log4j-core:2.14.1"
     testImplementation "com.github.javafaker:javafaker:1.0.2"
-    testImplementation platform("com.fasterxml.jackson:jackson-bom:2.12.2")
+    testImplementation platform("com.fasterxml.jackson:jackson-bom:2.12.3")
     testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
 }
 
