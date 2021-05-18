@@ -80,6 +80,13 @@ tasks.named("dokkaJavadoc") {
 test {
     testLogging.showStandardStreams = false
     testLogging.exceptionFormat = 'full'
+    jacoco {
+        destinationFile = file("${buildDir}/jacoco/test.exec")
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.7"
 }
 
 jacocoTestReport {
