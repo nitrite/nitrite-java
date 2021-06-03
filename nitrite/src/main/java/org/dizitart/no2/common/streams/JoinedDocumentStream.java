@@ -20,11 +20,11 @@ package org.dizitart.no2.common.streams;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.processors.ProcessorChain;
+import org.dizitart.no2.common.processors.ProcessorChain;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -67,7 +67,7 @@ public class JoinedDocumentStream implements RecordStream<Document> {
     public Iterator<Document> iterator() {
         Iterator<Pair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
-        return new JoinedDocumentIterator(iterator, processorChain);
+        return new JoinedDocumentIterator(iterator, processorChain, foreignCursor, lookup);
     }
 
     @Override
@@ -75,9 +75,11 @@ public class JoinedDocumentStream implements RecordStream<Document> {
         return toList().toString();
     }
 
-    private class JoinedDocumentIterator implements Iterator<Document> {
+    private static class JoinedDocumentIterator implements Iterator<Document> {
         private final Iterator<Pair<NitriteId, Document>> iterator;
         private final ProcessorChain processorChain;
+        private final DocumentCursor foreignCursor;
+        private final Lookup lookup;
 
         /**
          * Instantiates a new Joined document iterator.
@@ -85,10 +87,14 @@ public class JoinedDocumentStream implements RecordStream<Document> {
          * @param iterator       the iterator
          * @param processorChain the processor chain
          */
-        JoinedDocumentIterator(Iterator<Pair<NitriteId, Document>> iterator,
-                               ProcessorChain processorChain) {
+        public JoinedDocumentIterator(Iterator<Pair<NitriteId, Document>> iterator,
+                                      ProcessorChain processorChain,
+                                      DocumentCursor foreignCursor,
+                                      Lookup lookup) {
             this.iterator = iterator;
             this.processorChain = processorChain;
+            this.foreignCursor = foreignCursor;
+            this.lookup = lookup;
         }
 
         @Override

@@ -1,6 +1,6 @@
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.module.NitriteModule;
+import org.dizitart.no2.common.module.NitriteModule;
 
 /**
  * Represents a nitrite store module to load as a storage engine for the database.

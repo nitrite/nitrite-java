@@ -2,7 +2,7 @@ package org.dizitart.no2.store.memory;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.dizitart.no2.module.NitritePlugin;
+import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreModule;
 

@@ -17,8 +17,8 @@
 package org.dizitart.no2.mapdb.repository.data;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
 /**

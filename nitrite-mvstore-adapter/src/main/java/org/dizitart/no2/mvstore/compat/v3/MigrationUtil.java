@@ -19,8 +19,11 @@ package org.dizitart.no2.mvstore.compat.v3;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.index.DBValue;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
@@ -76,6 +79,9 @@ public class MigrationUtil {
                 Object newKey = key;
                 if (key instanceof Compat.NitriteId) {
                     newKey = nitriteId((Compat.NitriteId) key);
+                } else {
+                    // index map, wrap with DBValue
+                    newKey = newKey == null ? DBNull.getInstance() : new DBValue((Comparable<?>) newKey);
                 }
                 Object value = oldMap.get(key);
 
@@ -187,7 +193,7 @@ public class MigrationUtil {
 
     private static IndexDescriptor indexEntry(Compat.Index value) {
         String indexType = value.getIndexType().name();
-        return new IndexDescriptor(indexType, value.getField(), value.getCollectionName());
+        return new IndexDescriptor(indexType, Fields.withNames(value.getField()), value.getCollectionName());
     }
 
     private static NitriteId nitriteId(Compat.NitriteId value) {

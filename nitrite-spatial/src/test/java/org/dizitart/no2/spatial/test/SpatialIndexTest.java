@@ -25,7 +25,7 @@ import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.filters.FluentFilter;
 import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;

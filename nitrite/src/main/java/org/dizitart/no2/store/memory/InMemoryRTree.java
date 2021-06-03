@@ -108,7 +108,7 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
 
     }
 

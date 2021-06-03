@@ -17,13 +17,13 @@
 package org.dizitart.no2.collection;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.Retry;
+import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.dizitart.no2.TestUtil.createDb;
+import static org.dizitart.no2.integration.TestUtil.createDb;
 import static org.junit.Assert.assertEquals;
 
 /**

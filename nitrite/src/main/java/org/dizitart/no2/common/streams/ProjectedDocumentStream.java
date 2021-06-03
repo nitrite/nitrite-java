@@ -19,10 +19,10 @@ package org.dizitart.no2.common.streams;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.processors.ProcessorChain;
+import org.dizitart.no2.common.processors.ProcessorChain;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -56,7 +56,7 @@ public class ProjectedDocumentStream implements RecordStream<Document> {
     public Iterator<Document> iterator() {
         Iterator<Pair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
-        return new ProjectedDocumentIterator(iterator, processorChain);
+        return new ProjectedDocumentIterator(iterator, processorChain, projection);
     }
 
     @Override
@@ -64,10 +64,11 @@ public class ProjectedDocumentStream implements RecordStream<Document> {
         return toList().toString();
     }
 
-    private class ProjectedDocumentIterator implements Iterator<Document> {
+    private static class ProjectedDocumentIterator implements Iterator<Document> {
         private final Iterator<Pair<NitriteId, Document>> iterator;
         private final ProcessorChain processorChain;
         private Document nextElement = null;
+        private final Document projection;
 
         /**
          * Instantiates a new Projected document iterator.
@@ -75,9 +76,12 @@ public class ProjectedDocumentStream implements RecordStream<Document> {
          * @param iterator       the iterator
          * @param processorChain the processor chain
          */
-        ProjectedDocumentIterator(Iterator<Pair<NitriteId, Document>> iterator, ProcessorChain processorChain) {
+        ProjectedDocumentIterator(Iterator<Pair<NitriteId, Document>> iterator,
+                                  ProcessorChain processorChain,
+                                  Document projection) {
             this.iterator = iterator;
             this.processorChain = processorChain;
+            this.projection = projection;
             nextMatch();
         }
 

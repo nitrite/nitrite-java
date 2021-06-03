@@ -20,10 +20,11 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.index.IndexScanner;
+import org.dizitart.no2.index.IndexMap;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NavigableMap;
 
 import static org.dizitart.no2.common.util.Numbers.compare;
 
@@ -58,19 +59,19 @@ class GreaterThanFilter extends ComparableFilter {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Object applyOnIndex(IndexScanner indexScanner) {
+    public List<?> applyOnIndex(IndexMap indexMap) {
         Comparable comparable = getComparable();
-        NavigableMap<Comparable<?>, Object> subMap = new ConcurrentSkipListMap<>();
+        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        Comparable ceilingKey = indexScanner.higherKey(comparable);
+        Comparable ceilingKey = indexMap.higherKey(comparable);
         while (ceilingKey != null) {
             // get the starting value, it can be a navigable-map (compound index)
             // or list (single field index)
-            Object value = indexScanner.get(ceilingKey);
+            Object value = indexMap.get(ceilingKey);
             processIndexValue(value, subMap, nitriteIds);
 
-            ceilingKey = indexScanner.higherKey(ceilingKey);
+            ceilingKey = indexMap.higherKey(ceilingKey);
         }
 
         if (!subMap.isEmpty()) {
@@ -81,5 +82,10 @@ class GreaterThanFilter extends ComparableFilter {
             // or it is a terminal filter on compound index, return only nitrite-ids
             return nitriteIds;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " > " + getValue() + ")";
     }
 }

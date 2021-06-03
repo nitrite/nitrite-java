@@ -18,7 +18,7 @@ package org.dizitart.no2.test;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.ObjectRepository;

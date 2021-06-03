@@ -76,6 +76,11 @@ class ElementMatchFilter extends NitriteFilter {
         }
     }
 
+    @Override
+    public String toString() {
+        return "elemMatch(" + field + " : " + elementFilter.toString() + ")";
+    }
+
     @SuppressWarnings("rawtypes")
     private boolean matches(Iterable iterable, Filter filter) {
         for (Object item : iterable) {
@@ -284,4 +289,6 @@ class ElementMatchFilter extends NitriteFilter {
             throw new FilterException(item + " is not a string");
         }
     }
+
+
 }

@@ -139,7 +139,7 @@ public interface RecordStream<T> extends Iterable<T> {
      * @return the list
      */
     default List<T> toList() {
-        return Iterables.toList(this);
+        return Collections.unmodifiableList(Iterables.toList(this));
     }
 
     /**
@@ -148,7 +148,7 @@ public interface RecordStream<T> extends Iterable<T> {
      * @return the set
      */
     default Set<T> toSet() {
-        return Iterables.toSet(this);
+        return Collections.unmodifiableSet(Iterables.toSet(this));
     }
 
     /**

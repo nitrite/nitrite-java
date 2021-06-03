@@ -16,11 +16,10 @@
 
 package org.dizitart.kno2
 
-import org.dizitart.no2.common.util.Iterables
 import org.dizitart.no2.common.util.Iterables.setOf
-import org.dizitart.no2.mapper.JacksonExtension
-import org.dizitart.no2.module.NitriteModule
-import org.dizitart.no2.module.NitritePlugin
+import org.dizitart.no2.common.mapper.JacksonExtension
+import org.dizitart.no2.common.module.NitriteModule
+import org.dizitart.no2.common.module.NitritePlugin
 import org.dizitart.no2.spatial.SpatialIndexer
 
 /**

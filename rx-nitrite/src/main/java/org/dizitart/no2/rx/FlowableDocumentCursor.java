@@ -20,7 +20,6 @@ import io.reactivex.internal.functions.ObjectHelper;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.NullOrder;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 

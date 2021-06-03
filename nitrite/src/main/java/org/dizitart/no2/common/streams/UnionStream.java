@@ -25,7 +25,7 @@ import org.dizitart.no2.common.tuples.Pair;
 import java.util.*;
 
 /**
- * Represents an union of multiple nitrite document stream.
+ * Represents an union of multiple distinct nitrite document stream.
  *
  * @author Anindya Chatterjee
  * @since 4.0
@@ -54,7 +54,7 @@ public class UnionStream implements RecordStream<Pair<NitriteId, Document>> {
     /**
      * The type Union stream iterator.
      */
-    public static class UnionStreamIterator implements Iterator<Pair<NitriteId, Document>> {
+    private static class UnionStreamIterator implements Iterator<Pair<NitriteId, Document>> {
         private final Queue<Iterator<Pair<NitriteId, Document>>> iteratorQueue;
         private Iterator<Pair<NitriteId, Document>> currentIterator;
 

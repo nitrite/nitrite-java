@@ -29,7 +29,7 @@ import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 
 import java.util.Collection;

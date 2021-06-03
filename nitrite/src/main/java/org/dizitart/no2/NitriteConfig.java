@@ -24,11 +24,11 @@ import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.migration.Migration;
-import org.dizitart.no2.module.NitriteModule;
-import org.dizitart.no2.module.NitritePlugin;
-import org.dizitart.no2.module.PluginManager;
+import org.dizitart.no2.common.module.NitriteModule;
+import org.dizitart.no2.common.module.NitritePlugin;
+import org.dizitart.no2.common.module.PluginManager;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.HashMap;

@@ -101,7 +101,7 @@ class TransactionalRTree<Key extends BoundingBox, Value> implements NitriteRTree
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         map.clear();
     }
 

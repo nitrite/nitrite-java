@@ -55,9 +55,16 @@ public class StoreCatalog {
      */
     public void writeCollectionEntry(String name) {
         Document document = catalogMap.get(TAG_COLLECTIONS);
-        if (document == null) document = Document.createDocument();
-        document.put(name, true);
-        catalogMap.put(TAG_COLLECTIONS, document);
+        if (document == null) {
+            document = Document.createDocument();
+        }
+
+        // parse the document to create collection meta data object
+        MapMetaData metaData = new MapMetaData(document);
+        metaData.getMapNames().add(name);
+
+        // convert the meta data object to document and save
+        catalogMap.put(TAG_COLLECTIONS, metaData.getInfo());
     }
 
     /**
@@ -67,9 +74,16 @@ public class StoreCatalog {
      */
     public void writeRepositoryEntry(String name) {
         Document document = catalogMap.get(TAG_REPOSITORIES);
-        if (document == null) document = Document.createDocument();
-        document.put(name, true);
-        catalogMap.put(TAG_REPOSITORIES, document);
+        if (document == null) {
+            document = Document.createDocument();
+        }
+
+        // parse the document to create collection meta data object
+        MapMetaData metaData = new MapMetaData(document);
+        metaData.getMapNames().add(name);
+
+        // convert the meta data object to document and save
+        catalogMap.put(TAG_REPOSITORIES, metaData.getInfo());
     }
 
     /**
@@ -79,9 +93,15 @@ public class StoreCatalog {
      */
     public void writeKeyedRepositoryEntries(String name) {
         Document document = catalogMap.get(TAG_KEYED_REPOSITORIES);
-        if (document == null) document = Document.createDocument();
-        document.put(name, true);
-        catalogMap.put(TAG_KEYED_REPOSITORIES, document);
+        if (document == null) {
+            document = Document.createDocument();
+        }
+
+        // parse the document to create collection meta data object
+        MapMetaData metaData = new MapMetaData(document);
+        metaData.getMapNames().add(name);
+
+        catalogMap.put(TAG_KEYED_REPOSITORIES, metaData.getInfo());
     }
 
     /**
@@ -93,7 +113,8 @@ public class StoreCatalog {
         Document document = catalogMap.get(TAG_COLLECTIONS);
         if (document == null) return new HashSet<>();
 
-        return document.getFields();
+        MapMetaData metaData = new MapMetaData(document);
+        return metaData.getMapNames();
     }
 
     /**
@@ -105,7 +126,8 @@ public class StoreCatalog {
         Document document = catalogMap.get(TAG_REPOSITORIES);
         if (document == null) return new HashSet<>();
 
-        return document.getFields();
+        MapMetaData metaData = new MapMetaData(document);
+        return metaData.getMapNames();
     }
 
     /**
@@ -117,8 +139,11 @@ public class StoreCatalog {
         Document document = catalogMap.get(TAG_KEYED_REPOSITORIES);
         if (document == null) return new HashMap<>();
 
+        MapMetaData metaData = new MapMetaData(document);
+        Set<String> keyedRepositoryNames = metaData.getMapNames();
+
         Map<String, Set<String>> resultMap = new HashMap<>();
-        for (String field : document.getFields()) {
+        for (String field : keyedRepositoryNames) {
             String key = getKeyName(field);
             String type = getKeyedRepositoryType(field);
 
@@ -146,9 +171,11 @@ public class StoreCatalog {
             String catalogue = entry.getFirst();
             Document document = entry.getSecond();
 
-            if (document.containsKey(name)) {
-                document.remove(name);
-                catalogMap.put(catalogue, document);
+            MapMetaData metaData = new MapMetaData(document);
+
+            if (metaData.getMapNames().contains(name)) {
+                metaData.getMapNames().remove(name);
+                catalogMap.put(catalogue, metaData.getInfo());
                 break;
             }
         }

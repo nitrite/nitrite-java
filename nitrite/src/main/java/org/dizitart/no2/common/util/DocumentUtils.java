@@ -21,7 +21,7 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.util.ArrayList;
 import java.util.Objects;

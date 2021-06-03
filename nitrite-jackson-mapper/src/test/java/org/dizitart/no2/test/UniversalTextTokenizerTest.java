@@ -22,7 +22,7 @@ import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.index.NitriteTextIndexer;
 import org.dizitart.no2.index.fulltext.Languages;
 import org.dizitart.no2.index.fulltext.UniversalTextTokenizer;
-import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.Cursor;
@@ -39,7 +39,7 @@ import java.nio.file.Paths;
 
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.module.NitriteModule.module;
+import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 

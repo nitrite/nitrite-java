@@ -61,6 +61,8 @@ public interface Transaction extends AutoCloseable {
      */
     void rollback();
 
-    @Override
+    /**
+     * Closes this {@link Transaction}.
+     * */
     void close();
 }

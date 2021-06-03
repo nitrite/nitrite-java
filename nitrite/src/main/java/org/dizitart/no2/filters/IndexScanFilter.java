@@ -18,11 +18,14 @@
 package org.dizitart.no2.filters;
 
 import lombok.Getter;
+import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -31,6 +34,7 @@ import java.util.List;
  * @author Anindya Chatterjee
  * @since 4.0
  */
+@ToString
 public class IndexScanFilter implements Filter {
     @Getter
     private final List<Filter> filters;
@@ -40,8 +44,8 @@ public class IndexScanFilter implements Filter {
      *
      * @param filters the filters
      */
-    public IndexScanFilter(List<Filter> filters) {
-        this.filters = filters;
+    public IndexScanFilter(Collection<Filter> filters) {
+        this.filters = new ArrayList<>(filters);
     }
 
     @Override

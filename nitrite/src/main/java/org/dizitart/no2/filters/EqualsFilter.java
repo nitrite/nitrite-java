@@ -16,18 +16,19 @@
 
 package org.dizitart.no2.filters;
 
-import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.IndexScanner;
+import org.dizitart.no2.index.IndexMap;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee.
  */
-@ToString
 class EqualsFilter extends ComparableFilter {
     EqualsFilter(String field, Object value) {
         super(field, value);
@@ -41,7 +42,19 @@ class EqualsFilter extends ComparableFilter {
     }
 
     @Override
-    public Object applyOnIndex(IndexScanner indexScanner) {
-        return indexScanner.get((Comparable<?>) getValue());
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        Object value = indexMap.get((Comparable<?>) getValue());
+        if (value instanceof List) {
+            return ((List<?>) value);
+        }
+
+        List<Object> result = new ArrayList<>();
+        result.add(value);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " == " + getValue() + ")";
     }
 }

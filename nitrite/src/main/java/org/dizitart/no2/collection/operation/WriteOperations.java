@@ -26,7 +26,7 @@ import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.processors.ProcessorChain;
+import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.HashSet;

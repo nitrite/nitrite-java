@@ -28,7 +28,7 @@ import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.processors.ProcessorChain;
+import org.dizitart.no2.common.processors.ProcessorChain;
 
 import java.util.Collections;
 import java.util.Iterator;

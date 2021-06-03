@@ -21,7 +21,7 @@ import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.ObjectRepository;
-import org.dizitart.no2.store.DatabaseMetaData;
+import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.transaction.Session;
 
@@ -113,6 +113,30 @@ public interface Nitrite extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(Class<T> type, String key);
 
     /**
+     * Destroys a collection without opening the {@link NitriteCollection} first.
+     *
+     * @param name the name of the collection
+     */
+    void destroyCollection(String name);
+
+    /**
+     * Destroys an {@link ObjectRepository} without opening it first.
+     *
+     * @param <T>  the type parameter
+     * @param type the type
+     */
+    <T> void destroyRepository(Class<T> type);
+
+    /**
+     * Destroys an {@link ObjectRepository} without opening it first.
+     *
+     * @param <T>  the type parameter
+     * @param type the type
+     * @param key  the key
+     */
+    <T> void destroyRepository(Class<T> type, String key);
+
+    /**
      * Gets the set of all {@link NitriteCollection}s' names saved in the store.
      *
      * @return the set of all collections' names.
@@ -168,7 +192,7 @@ public interface Nitrite extends AutoCloseable {
      *
      * @return the database meta data
      */
-    DatabaseMetaData getDatabaseMetaData();
+    StoreMetaData getDatabaseMetaData();
 
     /**
      * Creates a {@link Session} for transaction.
@@ -176,6 +200,11 @@ public interface Nitrite extends AutoCloseable {
      * @return the session
      */
     Session createSession();
+
+    /**
+     * Closes the database.
+     * */
+    void close();
 
     /**
      * Checks whether a particular {@link NitriteCollection} exists in the store.

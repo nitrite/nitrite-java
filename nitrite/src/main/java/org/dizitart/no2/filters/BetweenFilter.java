@@ -58,6 +58,10 @@ class BetweenFilter<T> extends AndFilter {
         }
     }
 
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
     @Data
     public static class Bound<T> {

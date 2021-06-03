@@ -25,10 +25,7 @@ import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
@@ -68,10 +65,7 @@ public class IndexManager implements AutoCloseable {
      * @return the boolean
      */
     public boolean hasIndexDescriptor(Fields fields) {
-        if (!indexMetaMap.containsKey(fields)) return false;
-
-        IndexMeta indexMeta = indexMetaMap.get(fields);
-        return indexMeta != null;
+        return !findMatchingIndexDescriptors(fields).isEmpty();
     }
 
     /**
@@ -87,9 +81,9 @@ public class IndexManager implements AutoCloseable {
     }
 
     public Collection<IndexDescriptor> findMatchingIndexDescriptors(Fields fields) {
-        Collection<IndexDescriptor> indexDescriptors = getIndexDescriptors();
+        List<IndexDescriptor> indexDescriptors = new ArrayList<>();
 
-        for (IndexDescriptor indexDescriptor : indexDescriptors) {
+        for (IndexDescriptor indexDescriptor : getIndexDescriptors()) {
             if (indexDescriptor.getIndexFields().startsWith(fields)) {
                 indexDescriptors.add(indexDescriptor);
             }

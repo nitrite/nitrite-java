@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.spatial;
 
-import org.dizitart.no2.module.NitriteModule;
-import org.dizitart.no2.module.NitritePlugin;
+import org.dizitart.no2.common.module.NitriteModule;
+import org.dizitart.no2.common.module.NitritePlugin;
 
 import java.util.Set;
 

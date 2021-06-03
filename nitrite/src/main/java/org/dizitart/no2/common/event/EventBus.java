@@ -49,4 +49,9 @@ public interface EventBus<EventInfo, EventListener> extends AutoCloseable {
      * @param eventInfo the event related information
      */
     void post(EventInfo eventInfo);
+
+    /**
+    * Closes this {@link EventBus} instance.
+    * */
+    void close();
 }

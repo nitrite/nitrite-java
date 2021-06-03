@@ -18,7 +18,7 @@ package org.dizitart.no2.test;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.module.NitriteModule;
+import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
 
 /**

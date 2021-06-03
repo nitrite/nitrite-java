@@ -26,7 +26,7 @@ import org.dizitart.no2.filters.LogicalFilter;
 import org.dizitart.no2.filters.NitriteFilter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.processors.ProcessorChain;
+import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.ArrayList;
@@ -130,6 +130,9 @@ class ReadOperations {
                     }
                     // union of all suitable stream of all sub plans
                     rawStream = new UnionStream(subStreams);
+
+                    // return only distinct items
+                    rawStream = new DistinctStream(rawStream);
                 }
             }
         }

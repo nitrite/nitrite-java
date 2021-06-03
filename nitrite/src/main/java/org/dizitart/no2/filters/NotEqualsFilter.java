@@ -1,20 +1,19 @@
 package org.dizitart.no2.filters;
 
-import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.IndexScanner;
+import org.dizitart.no2.index.IndexMap;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NavigableMap;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee
  */
-@ToString
 class NotEqualsFilter extends ComparableFilter {
     protected NotEqualsFilter(String field, Object value) {
         super(field, value);
@@ -27,11 +26,11 @@ class NotEqualsFilter extends ComparableFilter {
         return !deepEquals(fieldValue, getValue());
     }
 
-    public Object applyOnIndex(IndexScanner indexScanner) {
-        NavigableMap<Comparable<?>, Object> subMap = new ConcurrentSkipListMap<>();
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        for (Pair<Comparable<?>, ?> entry : indexScanner.entries()) {
+        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
             if (!deepEquals(getValue(), entry.getFirst())) {
                 processIndexValue(entry.getSecond(), subMap, nitriteIds);
             }
@@ -45,5 +44,10 @@ class NotEqualsFilter extends ComparableFilter {
             // or it is a terminal filter on compound index, return only nitrite-ids
             return nitriteIds;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " != " + getValue() + ")";
     }
 }

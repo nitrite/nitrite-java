@@ -20,6 +20,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.NitriteConfig;
 
+import java.util.Objects;
+
 /**
  * Represents a nitrite filter.
  *
@@ -55,5 +57,18 @@ public abstract class NitriteFilter implements Filter {
      */
     public Filter or(Filter filter) {
         return new OrFilter(this, filter);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof NitriteFilter) {
+            return Objects.equals(this.toString(), String.valueOf(o));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 }

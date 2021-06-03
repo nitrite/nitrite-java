@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
-import org.dizitart.no2.mapper.JacksonExtension
+import org.dizitart.no2.common.mapper.JacksonExtension
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
 import org.threeten.bp.LocalDateTime

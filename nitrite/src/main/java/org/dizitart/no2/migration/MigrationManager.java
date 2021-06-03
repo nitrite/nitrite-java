@@ -11,7 +11,7 @@ import org.dizitart.no2.common.util.SecureString;
 import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.migration.commands.*;
-import org.dizitart.no2.store.DatabaseMetaData;
+import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.UserAuthenticationService;
 
@@ -31,7 +31,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
  */
 public class MigrationManager {
     private final NitriteConfig nitriteConfig;
-    private final DatabaseMetaData databaseMetadata;
+    private final StoreMetaData storeMetadata;
     private final Nitrite database;
 
     /**
@@ -42,7 +42,7 @@ public class MigrationManager {
     public MigrationManager(Nitrite nitrite) {
         this.database = nitrite;
         this.nitriteConfig = nitrite.getConfig();
-        this.databaseMetadata = nitrite.getDatabaseMetaData();
+        this.storeMetadata = nitrite.getDatabaseMetaData();
     }
 
     /**
@@ -50,7 +50,7 @@ public class MigrationManager {
      */
     public void doMigrate() {
         if (isMigrationNeeded()) {
-            Integer existingVersion = databaseMetadata.getSchemaVersion();
+            Integer existingVersion = storeMetadata.getSchemaVersion();
             Integer incomingVersion = nitriteConfig.getSchemaVersion();
 
             Queue<Migration> migrationPath = findMigrationPath(existingVersion, incomingVersion);
@@ -63,7 +63,7 @@ public class MigrationManager {
                 }
 
                 throw new MigrationException("schema version mismatch, as no migration path found from version "
-                    + databaseMetadata.getSchemaVersion() + " to " + nitriteConfig.getSchemaVersion());
+                    + storeMetadata.getSchemaVersion() + " to " + nitriteConfig.getSchemaVersion());
             }
 
             int length = migrationPath.size();
@@ -78,7 +78,7 @@ public class MigrationManager {
     }
 
     private boolean isMigrationNeeded() {
-        Integer existingVersion = databaseMetadata.getSchemaVersion();
+        Integer existingVersion = storeMetadata.getSchemaVersion();
         Integer incomingVersion = nitriteConfig.getSchemaVersion();
 
         if (existingVersion == null) {
@@ -146,7 +146,7 @@ public class MigrationManager {
             }
         }
 
-        DatabaseMetaData metaData = database.getDatabaseMetaData();
+        StoreMetaData metaData = database.getDatabaseMetaData();
         metaData.setSchemaVersion(nitriteConfig.getSchemaVersion());
 
         NitriteMap<String, Document> storeInfo = database.getStore().openMap(STORE_INFO,

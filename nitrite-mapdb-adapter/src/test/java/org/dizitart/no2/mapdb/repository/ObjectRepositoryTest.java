@@ -27,9 +27,9 @@ import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mapdb.MapDBModule;
 import org.dizitart.no2.mapdb.Retry;
 import org.dizitart.no2.mapdb.repository.data.*;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.MappableMapper;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.MappableMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Entity;
@@ -51,7 +51,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.mapdb.DbTestOperations.getRandomTempDbFile;
-import static org.dizitart.no2.module.NitriteModule.module;
+import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.junit.Assert.*;
 
 /**

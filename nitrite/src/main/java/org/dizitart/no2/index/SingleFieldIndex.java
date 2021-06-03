@@ -20,11 +20,9 @@ package org.dizitart.no2.index;
 import lombok.Getter;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.UnknownType;
-import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
@@ -34,7 +32,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
-import static org.dizitart.no2.common.util.Iterables.getElementType;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 
 /**
@@ -68,26 +65,32 @@ public class SingleFieldIndex implements NitriteIndex {
         Object element = fieldValues.get(firstField);
 
         if (element == null) {
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(UnknownType.class);
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
-            addIndexElement(indexMap, fieldValues, null);
+            addIndexElement(indexMap, fieldValues, DBNull.getInstance());
         } else if (element instanceof Comparable) {
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(element.getClass());
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
-            addIndexElement(indexMap, fieldValues, (Comparable<?>) element);
+            // wrap around db value
+            DBValue dbValue = new DBValue((Comparable<?>) element);
+            addIndexElement(indexMap, fieldValues, dbValue);
         } else if (element.getClass().isArray()) {
             Object[] array = convertToObjectArray(element);
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(array.getClass().getComponentType());
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : array) {
-                addIndexElement(indexMap, fieldValues, (Comparable<?>) item);
+                // wrap around db value
+                DBValue dbValue = item == null ? DBNull.getInstance() : new DBValue((Comparable<?>) item);
+                addIndexElement(indexMap, fieldValues, dbValue);
             }
         } else if (element instanceof Iterable) {
             Iterable<?> iterable = (Iterable<?>) element;
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(getElementType(iterable));
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
-                addIndexElement(indexMap, fieldValues, (Comparable<?>) item);
+                // wrap around db value
+                DBValue dbValue = item == null ? DBNull.getInstance() : new DBValue((Comparable<?>) item);
+                addIndexElement(indexMap, fieldValues, dbValue);
             }
         }
     }
@@ -101,33 +104,39 @@ public class SingleFieldIndex implements NitriteIndex {
         Object element = fieldValues.get(firstField);
 
         if (element == null) {
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(UnknownType.class);
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
-            removeIndexElement(indexMap, fieldValues, null);
+            removeIndexElement(indexMap, fieldValues, DBNull.getInstance());
         } else if (element instanceof Comparable) {
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(element.getClass());
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
-            removeIndexElement(indexMap, fieldValues, (Comparable<?>) element);
+            // wrap around db value
+            DBValue dbValue = new DBValue((Comparable<?>) element);
+            removeIndexElement(indexMap, fieldValues, dbValue);
         } else if (element.getClass().isArray()) {
             Object[] array = convertToObjectArray(element);
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(array.getClass().getComponentType());
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : array) {
-                removeIndexElement(indexMap, fieldValues, (Comparable<?>) item);
+                // wrap around db value
+                DBValue dbValue = item == null ? DBNull.getInstance() : new DBValue((Comparable<?>) item);
+                removeIndexElement(indexMap, fieldValues, dbValue);
             }
         } else if (element instanceof Iterable) {
             Iterable<?> iterable = (Iterable<?>) element;
-            NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(getElementType(iterable));
+            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
-                removeIndexElement(indexMap, fieldValues, (Comparable<?>) item);
+                // wrap around db value
+                DBValue dbValue = item == null ? DBNull.getInstance() : new DBValue((Comparable<?>) item);
+                removeIndexElement(indexMap, fieldValues, dbValue);
             }
         }
     }
 
     @Override
     public void drop() {
-        NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(UnknownType.class);
+        NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
         indexMap.clear();
         indexMap.drop();
     }
@@ -136,21 +145,21 @@ public class SingleFieldIndex implements NitriteIndex {
     public LinkedHashSet<NitriteId> findNitriteIds(FindPlan findPlan) {
         if (findPlan.getIndexScanFilter() == null) return new LinkedHashSet<>();
 
-        NitriteMap<Comparable<?>, List<?>> indexMap = findIndexMap(UnknownType.class);
+        NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
         return scanIndex(findPlan, indexMap);
     }
 
     @SuppressWarnings("unchecked")
-    private void addIndexElement(NitriteMap<Comparable<?>, List<?>> indexMap,
-                                 FieldValues fieldValues, Comparable<?> element) {
+    private void addIndexElement(NitriteMap<DBValue, List<?>> indexMap,
+                                 FieldValues fieldValues, DBValue element) {
         List<NitriteId> nitriteIds = (List<NitriteId>) indexMap.get(element);
         nitriteIds = addNitriteIds(nitriteIds, fieldValues);
         indexMap.put(element, nitriteIds);
     }
 
     @SuppressWarnings("unchecked")
-    private void removeIndexElement(NitriteMap<Comparable<?>, List<?>> indexMap,
-                                    FieldValues fieldValues, Comparable<?> element) {
+    private void removeIndexElement(NitriteMap<DBValue, List<?>> indexMap,
+                                    FieldValues fieldValues, DBValue element) {
         List<NitriteId> nitriteIds = (List<NitriteId>) indexMap.get(element);
         if (nitriteIds != null && !nitriteIds.isEmpty()) {
             nitriteIds.remove(fieldValues.getNitriteId());
@@ -162,39 +171,16 @@ public class SingleFieldIndex implements NitriteIndex {
         }
     }
 
-    private NitriteMap<Comparable<?>, List<?>> findIndexMap(Class<?> keyType) {
+    private NitriteMap<DBValue, List<?>> findIndexMap() {
         String mapName = deriveIndexMapName(indexDescriptor);
-        return nitriteStore.openMap(mapName, keyType, ArrayList.class);
+        return nitriteStore.openMap(mapName, DBValue.class, ArrayList.class);
     }
 
-    @SuppressWarnings("unchecked")
     private LinkedHashSet<NitriteId> scanIndex(FindPlan findPlan,
-                                            NitriteMap<Comparable<?>, List<?>> indexMap) {
-        // linked-hash-set to return only unique ids preserving the order in index
-        LinkedHashSet<NitriteId> nitriteIds = new LinkedHashSet<>();
+                                            NitriteMap<DBValue, List<?>> indexMap) {
         List<Filter> filters = findPlan.getIndexScanFilter().getFilters();
-
-        if (filters != null && filters.size() == 1) {
-            Filter filter = filters.get(0);
-            if (filter instanceof ComparableFilter) {
-                ComparableFilter comparableFilter = (ComparableFilter) filter;
-                // filter will return a list of nitrite-ids
-
-                IndexScanner indexScanner = new IndexScanner(indexMap);
-                boolean reverseScan = findPlan.getIndexScanOrder().get(comparableFilter.getField());
-                indexScanner.setReverseScan(reverseScan);
-
-                Object scanResult = comparableFilter.applyOnIndex(indexScanner);
-
-                if (scanResult instanceof List) {
-                    // for list take the nitrite-ids maintaining the insertion order
-                    List<NitriteId> terminalResult = (List<NitriteId>) scanResult;
-                    nitriteIds.addAll(terminalResult);
-                    return nitriteIds;
-                }
-            }
-        }
-
-        throw new FilterException("invalid result state after index scan");
+        IndexMap iMap = new IndexMap(indexMap);
+        IndexScanner indexScanner = new IndexScanner(iMap);
+        return indexScanner.doScan(filters, findPlan.getIndexScanOrder());
     }
 }

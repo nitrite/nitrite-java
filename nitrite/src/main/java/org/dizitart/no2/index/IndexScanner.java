@@ -17,194 +17,112 @@
 
 package org.dizitart.no2.index;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.filters.ComparableFilter;
+import org.dizitart.no2.filters.Filter;
 
-import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 
 /**
- * Represents an index scanner during find operation.
+ * Represents an {@link IndexMap} scanner.
  *
  * @author Anindya Chatterjee
  * @since 4.0
  */
-@SuppressWarnings("unchecked")
 public class IndexScanner {
-    private NitriteMap<Comparable<?>, ?> nitriteMap;
-    private NavigableMap<Comparable<?>, ?> navigableMap;
-
-    @Getter
-    @Setter
-    private boolean reverseScan;
+    private final IndexMap indexMap;
 
     /**
-     * Instantiates a new Index scanner.
+     * Instantiates a new {@link IndexScanner}.
      *
-     * @param nitriteMap the nitrite map
+     * @param indexMap the index map
      */
-    public IndexScanner(NitriteMap<Comparable<?>, ?> nitriteMap) {
-        this.nitriteMap = nitriteMap;
+    public IndexScanner(IndexMap indexMap) {
+        this.indexMap = indexMap;
     }
 
     /**
-     * Instantiates a new Index scanner.
+     * Scans the {@link IndexMap} and returns the {@link NitriteId}s of the matching elements.
      *
-     * @param navigableMap the navigable map
+     * @param filters        the filters
+     * @param indexScanOrder the index scan order
+     * @return the linked hash set
      */
-    public IndexScanner(NavigableMap<Comparable<?>, ?> navigableMap) {
-        this.navigableMap = navigableMap;
-    }
+    @SuppressWarnings("unchecked")
+    public LinkedHashSet<NitriteId> doScan(List<Filter> filters, Map<String, Boolean> indexScanOrder) {
+        // linked-hash-set to return only unique ids preserving the order in index
+        LinkedHashSet<NitriteId> nitriteIds = new LinkedHashSet<>();
 
-    /**
-     * Get the largest key that is smaller than the given key, or null if no
-     * such key exists.
-     *
-     * @param <T> the type parameter
-     * @param key the key
-     * @return the t
-     */
-    public <T extends Comparable<T>> T lowerKey(T key) {
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.lowerKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.lowerKey(key);
-            }
-        } else {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.higherKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.higherKey(key);
-            }
-        }
-        return null;
-    }
+        if (filters != null && !filters.isEmpty()) {
+            // get the first filter to start scanning
+            Filter filter = filters.get(0);
 
-    /**
-     * Get the smallest key that is larger than the given key, or null if no
-     * such key exists.
-     *
-     * @param <T> the type parameter
-     * @param key the key
-     * @return the t
-     */
-    public <T extends Comparable<T>> T higherKey(T key) {
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.higherKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.higherKey(key);
-            }
-        } else {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.lowerKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.lowerKey(key);
-            }
-        }
-        return null;
-    }
+            if (filter instanceof ComparableFilter) {
+                ComparableFilter comparableFilter = (ComparableFilter) filter;
 
-    /**
-     * Get the smallest key that is larger or equal to this key.
-     *
-     * @param <T> the type parameter
-     * @param key the key
-     * @return the t
-     */
-    public <T extends Comparable<T>> T ceilingKey(T key) {
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.ceilingKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.ceilingKey(key);
-            }
-        } else {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.floorKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.floorKey(key);
-            }
-        }
-        return null;
-    }
+                // set the scan order of the index map
+                boolean reverseScan = (indexScanOrder != null
+                    && indexScanOrder.containsKey(comparableFilter.getField()))
+                    ? indexScanOrder.get(comparableFilter.getField())
+                    : false;
+                indexMap.setReverseScan(reverseScan);
 
-    /**
-     * Get the largest key that is smaller or equal to this key.
-     *
-     * @param <T> the type parameter
-     * @param key the key
-     * @return the t
-     */
-    public <T extends Comparable<T>> T floorKey(T key) {
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.floorKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.floorKey(key);
-            }
-        } else {
-            if (nitriteMap != null) {
-                return (T) nitriteMap.ceilingKey(key);
-            } else if (navigableMap != null) {
-                return (T) navigableMap.ceilingKey(key);
-            }
-        }
-        return null;
-    }
+                // apply the filter on the index map
+                // result can be list of nitrite ids or list of navigable maps
+                List<?> scanResult = comparableFilter.applyOnIndex(indexMap);
+                if (isEmptyList(scanResult)) {
+                    // if list is empty then no need for further scanning
+                    return nitriteIds;
+                } else if (isNitriteIdList(scanResult)) {
+                    // if this is a list of nitrite ids then add those to the
+                    // result and no further scanning is required as we have
+                    // reached the terminal nitrite ids
+                    List<NitriteId> idList = (List<NitriteId>) scanResult;
+                    nitriteIds.addAll(idList);
+                } else if (isNavigableMapList(scanResult)) {
+                    // if this is a list of sub maps, then take each of the sub map
+                    // and the next filter and scan the sub map
+                    List<NavigableMap<DBValue, ?>> subMaps = (List<NavigableMap<DBValue, ?>>) scanResult;
+                    List<Filter> remainingFilter = filters.subList(1, filters.size());
 
-    /**
-     * Gets the value mapped with the specified key or <code>null</code> otherwise.
-     *
-     * @param comparable the comparable
-     * @return the object
-     */
-    public Object get(Comparable<?> comparable) {
-        if (nitriteMap != null) {
-            return nitriteMap.get(comparable);
-        } else if (navigableMap != null) {
-            return navigableMap.get(comparable);
-        }
-        return null;
-    }
-
-    /**
-     * Returns the iterable entries of the indexed items.
-     *
-     * @return the iterable
-     */
-    public Iterable<? extends Pair<Comparable<?>, ?>> entries() {
-        if (nitriteMap != null) {
-            if (!reverseScan) {
-                return nitriteMap.entries();
-            } else {
-                return nitriteMap.reversedEntries();
-            }
-        } else if (navigableMap != null) {
-            Iterator<? extends Map.Entry<Comparable<?>, ?>> entryIterator;
-            if (reverseScan) {
-                entryIterator = navigableMap.descendingMap().entrySet().iterator();
-            } else {
-                entryIterator = navigableMap.entrySet().iterator();
-            }
-
-            return (Iterable<Pair<Comparable<?>, ?>>) () -> new Iterator<Pair<Comparable<?>, ?>>() {
-                @Override
-                public boolean hasNext() {
-                    return entryIterator.hasNext();
+                    for (NavigableMap<DBValue, ?> subMap : subMaps) {
+                        // create an index map from the sub map and scan to get the
+                        // terminal nitrite ids
+                        IndexMap indexMap = new IndexMap(subMap);
+                        IndexScanner subMapScanner = new IndexScanner(indexMap);
+                        LinkedHashSet<NitriteId> subResult = subMapScanner.doScan(remainingFilter, indexScanOrder);
+                        nitriteIds.addAll(subResult);
+                    }
                 }
-
-                @Override
-                public Pair<Comparable<?>, ?> next() {
-                    Map.Entry<Comparable<?>, ?> entry = entryIterator.next();
-                    return Pair.pair(entry.getKey(), entry.getValue());
-                }
-            };
+            } else {
+                // filter is not comparable filter, so index scanning can not continue
+                throw new FilterException("index scan is not supported for " + filter.getClass().getName());
+            }
+        } else {
+            // if no more filter is left, get all terminal nitrite ids from
+            // index map and return them in the order.
+            List<NitriteId> terminalResult = indexMap.getTerminalNitriteIds();
+            nitriteIds.addAll(terminalResult);
         }
-        return null;
+
+        return nitriteIds;
+    }
+
+    private boolean isEmptyList(List<?> list) {
+        return list == null || list.isEmpty();
+    }
+
+    private boolean isNitriteIdList(List<?> list) {
+        Object value = list.get(0);
+        return value instanceof NitriteId;
+    }
+
+    private boolean isNavigableMapList(List<?> list) {
+        Object value = list.get(0);
+        return value instanceof NavigableMap;
     }
 }

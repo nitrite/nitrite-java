@@ -1,6 +1,5 @@
 package org.dizitart.no2.store.memory;
 
-import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Comparables;
@@ -24,7 +23,6 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  */
 public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     private final NavigableMap<Key, Value> backingMap;
-    private final NavigableMap<DBNull, Value> nullEntryMap;
     private final NitriteStore<?> nitriteStore;
     private final String mapName;
 
@@ -37,7 +35,6 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     public InMemoryMap(String mapName, NitriteStore<?> nitriteStore) {
         this.mapName = mapName;
         this.nitriteStore = nitriteStore;
-        this.nullEntryMap = new ConcurrentSkipListMap<>();
 
         this.backingMap = new ConcurrentSkipListMap<>((o1, o2) ->
             Comparables.compare((Comparable<?>) o1, (Comparable<?>) o2));
@@ -45,17 +42,11 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public boolean containsKey(Key key) {
-        if (key == null) {
-            return nullEntryMap.containsKey(DBNull.getInstance());
-        }
         return backingMap.containsKey(key);
     }
 
     @Override
     public Value get(Key key) {
-        if (key == null) {
-            return nullEntryMap.get(DBNull.getInstance());
-        }
         return backingMap.get(key);
     }
 
@@ -67,7 +58,6 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     @Override
     public void clear() {
         backingMap.clear();
-        nullEntryMap.clear();
         updateLastModifiedTime();
     }
 
@@ -78,67 +68,31 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Value> values() {
-        return RecordStream.fromCombined(backingMap.values(), nullEntryMap.values());
+        return RecordStream.fromIterable(backingMap.values());
     }
 
     @Override
     public Value remove(Key key) {
-        Value value;
-        if (key == null) {
-            value = nullEntryMap.remove(DBNull.getInstance());
-        } else {
-            value = backingMap.remove(key);
-        }
+        Value value = backingMap.remove(key);
         updateLastModifiedTime();
         return value;
     }
 
     @Override
     public RecordStream<Key> keys() {
-        return RecordStream.fromIterable(() -> new Iterator<Key>() {
-            final Iterator<Key> keyIterator = backingMap.keySet().iterator();
-            final Iterator<DBNull> nullEntryIterator = nullEntryMap.keySet().iterator();
-
-            @Override
-            public boolean hasNext() {
-                boolean result = nullEntryIterator.hasNext();
-                if (!result) {
-                    return keyIterator.hasNext();
-                }
-                return true;
-            }
-
-            @Override
-            public Key next() {
-                if (nullEntryIterator.hasNext()) {
-                    return null;
-                } else {
-                    return keyIterator.next();
-                }
-            }
-        });
+        return RecordStream.fromIterable(backingMap.keySet());
     }
 
     @Override
     public void put(Key key, Value value) {
         notNull(value, "value cannot be null");
-        if (key == null) {
-            nullEntryMap.put(DBNull.getInstance(), value);
-        } else {
-            Map.Entry<Key, Value> firstEntry = backingMap.firstEntry();
-            if (firstEntry != null) {
-                if (!firstEntry.getKey().getClass().equals(key.getClass())) {
-                    return;
-                }
-            }
-            backingMap.put(key, value);
-        }
+        backingMap.put(key, value);
         updateLastModifiedTime();
     }
 
     @Override
     public long size() {
-        return backingMap.size() + nullEntryMap.size();
+        return backingMap.size();
     }
 
     @Override
@@ -155,12 +109,12 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Pair<Key, Value>> entries() {
-        return getStream(backingMap, nullEntryMap);
+        return getStream(backingMap);
     }
 
     @Override
     public RecordStream<Pair<Key, Value>> reversedEntries() {
-        return getStream(backingMap.descendingMap(), nullEntryMap.descendingMap());
+        return getStream(backingMap.descendingMap());
     }
 
     @Override
@@ -197,7 +151,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public boolean isEmpty() {
-        return backingMap.isEmpty() && nullEntryMap.isEmpty();
+        return backingMap.isEmpty();
     }
 
     @Override
@@ -211,32 +165,19 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     }
 
-    private RecordStream<Pair<Key, Value>> getStream(NavigableMap<Key, Value> primaryMap,
-                                                     NavigableMap<DBNull, Value> nullEntryMap) {
+    private RecordStream<Pair<Key, Value>> getStream(NavigableMap<Key, Value> primaryMap) {
         return RecordStream.fromIterable(() -> new Iterator<Pair<Key, Value>>() {
             private final Iterator<Map.Entry<Key, Value>> entryIterator =
                 primaryMap.entrySet().iterator();
-            private final Iterator<Map.Entry<DBNull, Value>> nullEntryIterator =
-                nullEntryMap.entrySet().iterator();
-
             @Override
             public boolean hasNext() {
-                boolean result = nullEntryIterator.hasNext();
-                if (!result) {
-                    return entryIterator.hasNext();
-                }
-                return true;
+                return entryIterator.hasNext();
             }
 
             @Override
             public Pair<Key, Value> next() {
-                if (nullEntryIterator.hasNext()) {
-                    Map.Entry<DBNull, Value> entry = nullEntryIterator.next();
-                    return new Pair<>(null, entry.getValue());
-                } else {
-                    Map.Entry<Key, Value> entry = entryIterator.next();
-                    return new Pair<>(entry.getKey(), entry.getValue());
-                }
+                Map.Entry<Key, Value> entry = entryIterator.next();
+                return new Pair<>(entry.getKey(), entry.getValue());
             }
         });
     }

@@ -20,8 +20,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.exceptions.ObjectMappingException;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

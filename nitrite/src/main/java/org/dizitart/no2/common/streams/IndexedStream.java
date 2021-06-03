@@ -56,7 +56,7 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
     /**
      * The type Indexed stream iterator.
      */
-    static class IndexedStreamIterator implements Iterator<Pair<NitriteId, Document>> {
+    private static class IndexedStreamIterator implements Iterator<Pair<NitriteId, Document>> {
         private final Iterator<NitriteId> iterator;
         private final NitriteMap<NitriteId, Document> nitriteMap;
 

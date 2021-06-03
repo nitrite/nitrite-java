@@ -54,6 +54,11 @@ public class TextFilter extends StringFilter {
         throw new FilterException(getField() + " is not full-text indexed");
     }
 
+    @Override
+    public String toString() {
+        return "(" + getField() + " like " + getValue() + ")";
+    }
+
     /**
      * Apply on index linked hash set.
      *

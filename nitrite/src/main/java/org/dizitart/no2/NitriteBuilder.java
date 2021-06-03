@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.migration.Migration;
-import org.dizitart.no2.module.NitriteModule;
+import org.dizitart.no2.common.module.NitriteModule;
 
 /**
  * A builder utility to create a {@link Nitrite} database instance.

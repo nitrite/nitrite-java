@@ -18,7 +18,6 @@ package org.dizitart.no2.rx;
 
 import io.reactivex.internal.functions.ObjectHelper;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.NullOrder;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.repository.Cursor;

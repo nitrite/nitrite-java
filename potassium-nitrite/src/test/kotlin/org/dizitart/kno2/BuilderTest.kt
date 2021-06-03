@@ -19,11 +19,10 @@ package org.dizitart.kno2
 import org.dizitart.no2.exceptions.SecurityException
 import org.dizitart.no2.index.NitriteTextIndexer
 import org.dizitart.no2.index.fulltext.UniversalTextTokenizer
-import org.dizitart.no2.module.NitriteModule.module
+import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Assert.*
 import org.junit.Test
-import java.io.File
 
 /**
  *

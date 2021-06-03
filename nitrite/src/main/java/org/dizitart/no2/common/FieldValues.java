@@ -3,6 +3,7 @@ package org.dizitart.no2.common;
 import lombok.Data;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.common.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,10 +55,13 @@ public class FieldValues {
         }
 
         this.fields = new Fields();
-        fields.setFieldNames(new ArrayList<>());
+        List<String> fieldNames = new ArrayList<>();
         for (Pair<String, Object> value : getValues()) {
-            fields.getFieldNames().add(value.getFirst());
+            if (!StringUtils.isNullOrEmpty(value.getFirst())) {
+                fieldNames.add(value.getFirst());
+            }
         }
+        fields.setFieldNames(fieldNames);
         return fields;
     }
 }

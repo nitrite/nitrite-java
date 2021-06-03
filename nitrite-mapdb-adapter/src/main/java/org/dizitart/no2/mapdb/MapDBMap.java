@@ -132,12 +132,6 @@ public class MapDBMap<K, V> implements NitriteMap<K, V> {
             if (k == null) {
                 nullEntryMap.put(DBNull.getInstance(), v);
             } else {
-                Map.Entry<K, V> firstEntry = bTreeMap.firstEntry();
-                if (firstEntry != null) {
-                    if (!firstEntry.getKey().getClass().equals(k.getClass())) {
-                        return;
-                    }
-                }
                 bTreeMap.put(k, v);
             }
             updateLastModifiedTime();

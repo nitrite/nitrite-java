@@ -3,35 +3,44 @@ package org.dizitart.no2.filters;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 public class FluentFilterTest {
     @Test
     public void testEq() {
-        assertTrue(((EqualsFilter) FluentFilter.where("field").eq("value")).getValue() instanceof String);
-        assertFalse(((EqualsFilter) FluentFilter.where("field").eq("value")).getObjectFilter());
-        assertEquals("field", ((EqualsFilter) FluentFilter.where("field").eq("value")).getField());
+        NitriteFilter actualEqResult = FluentFilter.where("Field").eq("Value");
+        assertEquals("(Field == Value)", actualEqResult.toString());
+        assertFalse(actualEqResult.getObjectFilter());
+        assertEquals("Field", ((EqualsFilter) actualEqResult).getField());
     }
 
     @Test
     public void testNotEq() {
-        assertTrue(((NotEqualsFilter) FluentFilter.where("field").notEq("value")).getValue() instanceof String);
-        assertFalse(((NotEqualsFilter) FluentFilter.where("field").notEq("value")).getObjectFilter());
-        assertEquals("field", ((NotEqualsFilter) FluentFilter.where("field").notEq("value")).getField());
+        NitriteFilter actualNotEqResult = FluentFilter.where("Field").notEq("Value");
+        assertEquals("(Field != Value)", actualNotEqResult.toString());
+        assertFalse(actualNotEqResult.getObjectFilter());
+        assertEquals("Field", ((NotEqualsFilter) actualNotEqResult).getField());
     }
 
     @Test
     public void testText() {
-        assertEquals("value", ((TextFilter) FluentFilter.where("field").text("value")).getStringValue());
-        assertFalse(((TextFilter) FluentFilter.where("field").text("value")).getObjectFilter());
-        assertEquals("field", ((TextFilter) FluentFilter.where("field").text("value")).getField());
+        NitriteFilter actualTextResult = FluentFilter.where("Field").text("42");
+        assertEquals("Field", ((TextFilter) actualTextResult).getField());
+        assertFalse(actualTextResult.getObjectFilter());
+        assertEquals("42", ((TextFilter) actualTextResult).getStringValue());
     }
 
     @Test
     public void testRegex() {
-        assertEquals("field", ((RegexFilter) FluentFilter.where("field").regex("value")).getField());
-        assertFalse(((RegexFilter) FluentFilter.where("field").regex("value")).getObjectFilter());
-        assertEquals("FieldBasedFilter(field=field, value=value, processed=true)",
-            FluentFilter.where("field").regex("value").toString());
+        NitriteFilter actualRegexResult = FluentFilter.where("Field").regex("42");
+        assertEquals("(Field regex 42)", actualRegexResult.toString());
+        assertEquals("Field", ((RegexFilter) actualRegexResult).getField());
+        assertFalse(actualRegexResult.getObjectFilter());
+    }
+
+    @Test
+    public void testElemMatch() {
+        assertFalse(FluentFilter.where("Field").elemMatch(mock(Filter.class)).getObjectFilter());
     }
 }
 

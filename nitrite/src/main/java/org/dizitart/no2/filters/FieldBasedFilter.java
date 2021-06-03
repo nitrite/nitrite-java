@@ -21,7 +21,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
@@ -76,7 +76,7 @@ public abstract class FieldBasedFilter extends NitriteFilter {
         return value;
     }
 
-    private void validateSearchTerm(NitriteMapper nitriteMapper, String field, Object value) {
+    protected void validateSearchTerm(NitriteMapper nitriteMapper, String field, Object value) {
         notNull(field, "field cannot be null");
         notEmpty(field, "field cannot be empty");
 

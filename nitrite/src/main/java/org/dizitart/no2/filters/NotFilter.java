@@ -36,4 +36,9 @@ class NotFilter extends NitriteFilter {
     public boolean apply(Pair<NitriteId, Document> element) {
         return !filter.apply(element);
     }
+
+    @Override
+    public String toString() {
+        return "(!(" + filter.toString() + "))";
+    }
 }

@@ -17,7 +17,6 @@
 package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.text
-import org.dizitart.no2.common.NullOrder
 import org.dizitart.no2.common.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
 import org.dizitart.no2.index.IndexOptions

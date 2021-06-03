@@ -57,6 +57,11 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     void clear();
 
     /**
+     * Closes this {@link NitriteMap}.
+     * */
+    void close();
+
+    /**
      * Gets a {@link RecordStream} view of the values contained in
      * this map.
      *

@@ -17,10 +17,10 @@
 package org.dizitart.no2.spatial;
 
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.index.IndexScanner;
+import org.dizitart.no2.index.IndexMap;
 import org.locationtech.jts.geom.Geometry;
 
-import java.util.LinkedHashSet;
+import java.util.List;
 
 /**
  * @author Anindya Chatterjee
@@ -31,7 +31,7 @@ class WithinFilter extends SpatialFilter {
     }
 
     @Override
-    public LinkedHashSet<NitriteId> applyOnIndex(IndexScanner indexScanner) {
+    public List<?> applyOnIndex(IndexMap indexMap) {
         return false
     }
 }

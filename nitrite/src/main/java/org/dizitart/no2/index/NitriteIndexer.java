@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.module.NitritePlugin;
+import org.dizitart.no2.common.module.NitritePlugin;
 
 import java.util.LinkedHashSet;
 

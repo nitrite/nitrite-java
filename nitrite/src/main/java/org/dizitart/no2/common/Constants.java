@@ -133,6 +133,11 @@ public class Constants {
     public static final String TAG_KEYED_REPOSITORIES = "keyed-repositories";
 
     /**
+     * The constant TAG_COLLECTION_METADATA.
+     */
+    public static final String TAG_MAP_METADATA =  "mapNames";
+
+    /**
      * The constant TAG_TYPE.
      */
     public static final String TAG_TYPE = "type";

@@ -66,12 +66,7 @@ public class BoundedDocumentStream implements RecordStream<Pair<NitriteId, Docum
         return new BoundedIterator<>(iterator, skip, limit);
     }
 
-    /**
-     * The type Bounded iterator.
-     *
-     * @param <T> the type parameter
-     */
-    public static class BoundedIterator<T> implements Iterator<T> {
+    private static class BoundedIterator<T> implements Iterator<T> {
         private final Iterator<? extends T> iterator;
         private final long skip;
         private final long limit;

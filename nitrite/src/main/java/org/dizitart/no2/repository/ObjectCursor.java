@@ -23,7 +23,7 @@ import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.lang.reflect.Modifier;
 import java.util.Iterator;

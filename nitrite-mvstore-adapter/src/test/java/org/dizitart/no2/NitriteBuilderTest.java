@@ -27,8 +27,8 @@ import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.mvstore.MVStoreConfig;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
@@ -53,7 +53,7 @@ import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.TestUtil.createDb;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.module.NitriteModule.module;
+import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.junit.Assert.*;
 
 /**

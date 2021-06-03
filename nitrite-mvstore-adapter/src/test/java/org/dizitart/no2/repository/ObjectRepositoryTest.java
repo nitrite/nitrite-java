@@ -25,9 +25,9 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.MappableMapper;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.MappableMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
@@ -49,7 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.awaitility.Awaitility.await;
 import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.module.NitriteModule.module;
+import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.junit.Assert.*;
 
 /**

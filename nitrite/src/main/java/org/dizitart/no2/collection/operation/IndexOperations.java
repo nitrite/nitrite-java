@@ -53,8 +53,8 @@ class IndexOperations implements AutoCloseable {
     }
 
     void createIndex(Fields fields, String indexType) {
-        IndexDescriptor indexDescriptor;
-        if (!hasIndexEntry(fields)) {
+        IndexDescriptor indexDescriptor = indexManager.findExactIndexDescriptor(fields);
+        if (indexDescriptor == null) {
             // if no index create index
             indexDescriptor = indexManager.createIndexDescriptor(fields, indexType);
         } else {

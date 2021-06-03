@@ -7,8 +7,7 @@ import static org.junit.Assert.*;
 public class IndexOptionsTest {
     @Test
     public void testIndexOptions() {
-        IndexOptions actualIndexOptionsResult = IndexOptions.indexOptions("indexType");
-        assertEquals("indexType", actualIndexOptionsResult.getIndexType());
+        assertEquals("Index Type", IndexOptions.indexOptions("Index Type").getIndexType());
     }
 }
 

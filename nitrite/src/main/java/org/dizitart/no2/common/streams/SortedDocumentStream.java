@@ -22,6 +22,7 @@ import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.common.util.Iterables;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -48,11 +49,11 @@ public class SortedDocumentStream implements RecordStream<Pair<NitriteId, Docume
         if (recordStream == null) return Collections.emptyIterator();
 
         DocumentSorter documentSorter = new DocumentSorter(findPlan.getCollator(),
-            findPlan.getNullOrder(), findPlan.getBlockingSortOrder());
+            findPlan.getBlockingSortOrder());
 
-        List<Pair<NitriteId, Document>> recordList = recordStream.toList();
+        List<Pair<NitriteId, Document>> recordList = Iterables.toList(recordStream);
         Collections.sort(recordList, documentSorter);
 
-        return recordStream.iterator();
+        return recordList.iterator();
     }
 }

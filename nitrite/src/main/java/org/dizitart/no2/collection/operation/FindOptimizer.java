@@ -26,7 +26,9 @@ import org.dizitart.no2.index.IndexDescriptor;
 
 import java.util.*;
 
+import static org.dizitart.no2.common.util.Iterables.firstOrNull;
 import static org.dizitart.no2.filters.Filter.and;
+import static org.dizitart.no2.filters.Filter.or;
 
 
 /**
@@ -45,7 +47,6 @@ class FindOptimizer {
 
         if (findOptions != null) {
             findPlan.setCollator(findOptions.collator());
-            findPlan.setNullOrder(findOptions.nullOrder());
         }
         return findPlan;
     }
@@ -64,19 +65,33 @@ class FindOptimizer {
 
     private FindPlan createOrPlan(Collection<IndexDescriptor> indexDescriptors, List<Filter> filters) {
         FindPlan findPlan = new FindPlan();
-        for (Filter filter : filters) {
-            if (filter instanceof AndFilter || filter instanceof OrFilter) {
-                findPlan.getSubPlans().clear();
-                return findPlan;
-            }
 
+        Set<Filter> flattenedFilter = new HashSet<>();
+
+        // flatten the or filter
+        for (Filter filter : filters) {
+            if (filter instanceof OrFilter) {
+                flattenedFilter.addAll(((OrFilter) filter).getFilters());
+            } else {
+                flattenedFilter.add(filter);
+            }
+        }
+
+        for (Filter filter : flattenedFilter) {
             FindPlan subPlan = createFilterPlan(indexDescriptors, filter);
             findPlan.getSubPlans().add(subPlan);
         }
 
+        // check if all sub plan have index support
         for (FindPlan plan : findPlan.getSubPlans()) {
             if (plan.getIndexDescriptor() == null) {
+                // if one of the sub plan doesn't have any index support
+                // then it can not be optimized, instead the
+                // original filter should be set as coll-scan filter
+                // for the parent plan
                 findPlan.getSubPlans().clear();
+                // set the original or filter as coll scan filter
+                findPlan.setCollectionScanFilter(or(filters.toArray(new Filter[0])));
                 return findPlan;
             }
         }
@@ -84,7 +99,8 @@ class FindOptimizer {
     }
 
     private FindPlan createAndPlan(Collection<IndexDescriptor> indexDescriptors, List<Filter> filters) {
-        Map<IndexDescriptor, List<Filter>> indexFilterMap = new HashMap<>();
+        // descending sort based on cardinality of indices, consider the higher cardinality index first
+        NavigableMap<IndexDescriptor, List<Filter>> indexFilterMap = new TreeMap<>(Collections.reverseOrder());
 
         for (IndexDescriptor indexDescriptor : indexDescriptors) {
             List<String> fieldNames = indexDescriptor.getIndexFields().getFieldNames();
@@ -104,6 +120,7 @@ class FindOptimizer {
                 }
 
                 if (!matchFound) {
+                    // match not found, so can't consider this index
                     break;
                 }
             }
@@ -114,15 +131,19 @@ class FindOptimizer {
         }
 
         FindPlan findPlan = new FindPlan();
-        List<Filter> electedFilters = new ArrayList<>();
+        Set<Filter> electedFilters = new HashSet<>();
         for (Map.Entry<IndexDescriptor, List<Filter>> entry : indexFilterMap.entrySet()) {
+            // consider the filter combination if it encompasses more fields
+            // than the previously selected filter
             if (entry.getValue().size() > electedFilters.size()) {
-                electedFilters = entry.getValue();
+                // maintain the order in set
+                electedFilters = new LinkedHashSet<>(entry.getValue());
                 findPlan.setIndexDescriptor(entry.getKey());
             }
         }
 
-        List<Filter> nonElectedFilters = new ArrayList<>();
+        // maintain the order in set
+        Set<Filter> nonElectedFilters = new LinkedHashSet<>();
         for (Filter filter : filters) {
             if (!electedFilters.contains(filter)) {
                 nonElectedFilters.add(filter);
@@ -131,7 +152,7 @@ class FindOptimizer {
 
         IndexScanFilter indexScanFilter;
         if (electedFilters.size() == 1) {
-            indexScanFilter = new IndexScanFilter(Collections.singletonList(electedFilters.get(0)));
+            indexScanFilter = new IndexScanFilter(Collections.singletonList(firstOrNull(electedFilters)));
             findPlan.setIndexScanFilter(indexScanFilter);
         } else if (electedFilters.size() > 1) {
             indexScanFilter =  new IndexScanFilter(electedFilters);
@@ -139,7 +160,7 @@ class FindOptimizer {
         }
 
         if (nonElectedFilters.size() == 1) {
-            findPlan.setCollectionScanFilter(nonElectedFilters.get(0));
+            findPlan.setCollectionScanFilter(firstOrNull(nonElectedFilters));
         } else if (nonElectedFilters.size() > 1) {
             Filter andFilter = and(nonElectedFilters.toArray(new Filter[0]));
             findPlan.setCollectionScanFilter(andFilter);
@@ -173,45 +194,46 @@ class FindOptimizer {
                 // get index field names
                 List<String> indexedFieldNames = indexDescriptor.getIndexFields().getFieldNames();
 
-                // get prefix length
-                int length = Math.min(indexedFieldNames.size(), findSortSpec.size());
-
                 boolean canUseIndex = false;
                 Map<String, Boolean> indexScanOrder = new HashMap<>();
-                for (int i = 0; i < length; i++) {
-                    String indexFieldName = indexedFieldNames.get(i);
-                    Pair<String, SortOrder> findPair = findSortSpec.get(i);
-                    if (!indexFieldName.equals(findPair.getFirst())) {
-                        // field mismatch in sort spec, can't use index for sorting
-                        canUseIndex = false;
-                        break;
-                    } else {
-                        canUseIndex = true;
-                        boolean reverseScan = false;
 
-                        SortOrder findSortOrder = findPair.getSecond();
-                        if (findSortOrder != SortOrder.Ascending) {
-                            // if sort order is different, reverse scan in index
-                            reverseScan = true;
+                if (indexedFieldNames.size() >= findSortSpec.size()) {
+                    // if all fields of the sort spec is covered by index, then only
+                    // sorting can take help of index
+
+                    int length = findSortSpec.size();
+                    for (int i = 0; i < length; i++) {
+                        String indexFieldName = indexedFieldNames.get(i);
+                        Pair<String, SortOrder> findPair = findSortSpec.get(i);
+                        if (!indexFieldName.equals(findPair.getFirst())) {
+                            // field mismatch in sort spec, can't use index for sorting
+                            canUseIndex = false;
+                            break;
+                        } else {
+                            canUseIndex = true;
+                            boolean reverseScan = false;
+
+                            SortOrder findSortOrder = findPair.getSecond();
+                            if (findSortOrder != SortOrder.Ascending) {
+                                // if sort order is different, reverse scan in index
+                                reverseScan = true;
+                            }
+
+                            // add to index scan order
+                            indexScanOrder.put(indexFieldName, reverseScan);
                         }
-
-                        // add to index scan order
-                        indexScanOrder.put(indexFieldName, reverseScan);
                     }
                 }
 
                 if (canUseIndex) {
                     findPlan.setIndexScanOrder(indexScanOrder);
-                    if (length < findSortSpec.size()) {
-                        List<Pair<String, SortOrder>> remainder = findSortSpec.subList(length, findSortSpec.size() - 1);
-                        findPlan.setBlockingSortOrder(remainder);
-                    }
                 } else {
                     findPlan.setBlockingSortOrder(findSortSpec);
                 }
+            } else {
+                // no find options, so consider the index sorting order
+                findPlan.setBlockingSortOrder(findSortSpec);
             }
-            // no find options, so consider the index sorting order
-            findPlan.setBlockingSortOrder(findSortSpec);
         }
     }
 

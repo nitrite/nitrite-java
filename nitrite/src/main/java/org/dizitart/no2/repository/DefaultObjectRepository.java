@@ -26,8 +26,8 @@ import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.processors.Processor;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.Collection;
@@ -223,7 +223,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     private void initialize() {
         NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         operations = new RepositoryOperations(type, nitriteMapper, collection);
-        operations.createIndexes();
+        operations.createIndices();
     }
 
 }

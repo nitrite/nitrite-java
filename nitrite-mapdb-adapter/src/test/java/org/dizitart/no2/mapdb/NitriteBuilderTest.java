@@ -30,8 +30,8 @@ import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.SecurityException;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.store.StoreConfig;
@@ -53,7 +53,7 @@ import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.mapdb.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.mapdb.TestUtil.createDb;
-import static org.dizitart.no2.module.NitriteModule.module;
+import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.junit.Assert.*;
 
 /**

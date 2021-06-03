@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.*;
-import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.test.data.*;
 import org.junit.After;

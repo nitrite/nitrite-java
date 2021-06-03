@@ -17,9 +17,10 @@
 
 package org.dizitart.no2.collection;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.dizitart.no2.common.NullOrder;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.SortableFields;
 
@@ -33,12 +34,18 @@ import java.text.Collator;
  */
 @Data
 @Accessors(fluent = true, chain = true)
+@Setter(AccessLevel.PACKAGE)
 public class FindOptions {
     private SortableFields orderBy;
+    private Long skip;
+    private Long limit;
+
+    @Setter(AccessLevel.PUBLIC)
     private Collator collator;
-    private NullOrder nullOrder;
-    private long skip;
-    private long limit;
+
+    public FindOptions() {
+        this.collator = Collator.getInstance();
+    }
 
     public static FindOptions orderBy(String fieldName, SortOrder sortOrder) {
         SortableFields fields = new SortableFields();
@@ -59,6 +66,26 @@ public class FindOptions {
         FindOptions findOptions = new FindOptions();
         findOptions.limit(limit);
         return findOptions;
+    }
+
+    public FindOptions skip(Long skip) {
+        this.skip = skip;
+        return this;
+    }
+
+    public FindOptions skip(Integer skip) {
+        this.skip = skip == null ? null : (long) skip;
+        return this;
+    }
+
+    public FindOptions limit(Long limit) {
+        this.limit = limit;
+        return this;
+    }
+
+    public FindOptions limit(Integer limit) {
+        this.limit = limit == null ? null : (long) limit;
+        return this;
     }
 
     public FindOptions thenOrderBy(String fieldName, SortOrder sortOrder) {

@@ -19,8 +19,8 @@ package org.dizitart.kno2
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.NitriteBuilder
 import org.dizitart.no2.NitriteConfig
-import org.dizitart.no2.module.NitriteModule
-import org.dizitart.no2.module.NitriteModule.module
+import org.dizitart.no2.common.module.NitriteModule
+import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.spatial.SpatialIndexer
 
 /**

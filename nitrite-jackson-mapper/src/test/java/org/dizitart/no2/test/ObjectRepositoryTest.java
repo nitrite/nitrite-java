@@ -18,7 +18,7 @@ package org.dizitart.no2.test;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.test.data.*;

@@ -18,7 +18,6 @@
 package org.dizitart.no2.collection;
 
 import lombok.Data;
-import org.dizitart.no2.common.NullOrder;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.Filter;
@@ -26,6 +25,7 @@ import org.dizitart.no2.filters.IndexScanFilter;
 import org.dizitart.no2.index.IndexDescriptor;
 
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,11 @@ public class FindPlan {
     private Long limit;
 
     private Collator collator;
-    private NullOrder nullOrder;
 
     private List<FindPlan> subPlans;
+
+    public FindPlan() {
+        this.subPlans = new ArrayList<>();
+        this.blockingSortOrder = new ArrayList<>();
+    }
 }

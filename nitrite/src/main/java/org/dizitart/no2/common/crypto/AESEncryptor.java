@@ -20,6 +20,7 @@ package org.dizitart.no2.common.crypto;
 import org.dizitart.no2.common.util.Base64;
 import org.dizitart.no2.common.util.CryptoUtils;
 import org.dizitart.no2.common.util.SecureString;
+import org.dizitart.no2.exceptions.NitriteException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -61,35 +62,38 @@ public class AESEncryptor implements Encryptor {
      *
      * @param plainText the text as byte array
      * @return the encrypted string
-     * @throws Exception the exception
      */
     @Override
-    public String encrypt(byte[] plainText) throws Exception {
-        // 16 bytes salt
-        byte[] salt = CryptoUtils.getRandomNonce(SALT_LENGTH_BYTE);
+    public String encrypt(byte[] plainText) {
+        try {
+            // 16 bytes salt
+            byte[] salt = CryptoUtils.getRandomNonce(SALT_LENGTH_BYTE);
 
-        // GCM recommended 12 bytes iv?
-        byte[] iv = CryptoUtils.getRandomNonce(IV_LENGTH_BYTE);
+            // GCM recommended 12 bytes iv?
+            byte[] iv = CryptoUtils.getRandomNonce(IV_LENGTH_BYTE);
 
-        // secret key from password
-        SecretKey aesKeyFromPassword = CryptoUtils.getAESKeyFromPassword(password.asString().toCharArray(), salt);
+            // secret key from password
+            SecretKey aesKeyFromPassword = CryptoUtils.getAESKeyFromPassword(password.asString().toCharArray(), salt);
 
-        Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
+            Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
 
-        // ASE-GCM needs GCMParameterSpec
-        cipher.init(Cipher.ENCRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
+            // ASE-GCM needs GCMParameterSpec
+            cipher.init(Cipher.ENCRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
 
-        byte[] cipherText = cipher.doFinal(plainText);
+            byte[] cipherText = cipher.doFinal(plainText);
 
-        // prefix IV and Salt to cipher text
-        byte[] cipherTextWithIvSalt = ByteBuffer.allocate(iv.length + salt.length + cipherText.length)
-            .put(iv)
-            .put(salt)
-            .put(cipherText)
-            .array();
+            // prefix IV and Salt to cipher text
+            byte[] cipherTextWithIvSalt = ByteBuffer.allocate(iv.length + salt.length + cipherText.length)
+                .put(iv)
+                .put(salt)
+                .put(cipherText)
+                .array();
 
-        // string representation, base64, send this string to other for decryption.
-        return Base64.encodeToString(cipherTextWithIvSalt, Base64.URL_SAFE);
+            // string representation, base64, send this string to other for decryption.
+            return Base64.encodeToString(cipherTextWithIvSalt, Base64.URL_SAFE);
+        } catch (Exception e) {
+            throw new SecurityException("failed to encrypt data", e);
+        }
     }
 
     /**
@@ -100,28 +104,31 @@ public class AESEncryptor implements Encryptor {
      * </p>
      * @param encryptedText the encrypted text
      * @return the plain text decrypted string
-     * @throws Exception the exception
      */
     @Override
-    public String decrypt(String encryptedText) throws Exception {
-        byte[] decode = Base64.decode(encryptedText.getBytes(UTF_8), Base64.URL_SAFE);
+    public String decrypt(String encryptedText) {
+        try {
+            byte[] decode = Base64.decode(encryptedText.getBytes(UTF_8), Base64.URL_SAFE);
 
-        // get back the iv and salt from the cipher text
-        ByteBuffer bb = ByteBuffer.wrap(decode);
-        byte[] iv = new byte[IV_LENGTH_BYTE];
-        bb.get(iv);
+            // get back the iv and salt from the cipher text
+            ByteBuffer bb = ByteBuffer.wrap(decode);
+            byte[] iv = new byte[IV_LENGTH_BYTE];
+            bb.get(iv);
 
-        byte[] salt = new byte[SALT_LENGTH_BYTE];
-        bb.get(salt);
+            byte[] salt = new byte[SALT_LENGTH_BYTE];
+            bb.get(salt);
 
-        byte[] cipherText = new byte[bb.remaining()];
-        bb.get(cipherText);
+            byte[] cipherText = new byte[bb.remaining()];
+            bb.get(cipherText);
 
-        // get back the aes key from the same password and salt
-        SecretKey aesKeyFromPassword = CryptoUtils.getAESKeyFromPassword(password.asString().toCharArray(), salt);
-        Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
-        cipher.init(Cipher.DECRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
-        byte[] plainText = cipher.doFinal(cipherText);
-        return new String(plainText, UTF_8);
+            // get back the aes key from the same password and salt
+            SecretKey aesKeyFromPassword = CryptoUtils.getAESKeyFromPassword(password.asString().toCharArray(), salt);
+            Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
+            cipher.init(Cipher.DECRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
+            byte[] plainText = cipher.doFinal(cipherText);
+            return new String(plainText, UTF_8);
+        } catch (Exception e) {
+            throw new SecurityException("failed to decrypt data", e);
+        }
     }
 }

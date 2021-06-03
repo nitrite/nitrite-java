@@ -20,7 +20,7 @@ import java.lang.annotation.*;
 
 /**
  * Indicates that a class should consider all index related
- * annotations - <code>@Id</code>@Id, <code>@Index</code>,
+ * annotations - <code>@Id</code>, <code>@Index</code>,
  * <code>@Indices</code> from its superclass.
  *
  * @author Anindya Chatterjee

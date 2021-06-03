@@ -25,7 +25,7 @@ import org.dizitart.no2.collection.meta.MetadataAware;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.processors.Processor;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.store.NitriteStore;
 

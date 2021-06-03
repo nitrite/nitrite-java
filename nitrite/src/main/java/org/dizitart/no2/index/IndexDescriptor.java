@@ -86,13 +86,35 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
 
     @Override
     public int compareTo(IndexDescriptor other) {
-        String string = collectionName + indexFields + indexType;
-        String otherString = other.collectionName + other.indexFields + other.indexType;
-        return string.compareTo(otherString);
+        if (other == null) return 1;
+
+        // compound index have highest cardinality
+        if (this.isCompoundIndex() && !other.isCompoundIndex()) return 1;
+
+        // unique index has the next highest cardinality
+        if (this.isUniqueIndex() && !other.isUniqueIndex()) return 1;
+
+        // for two unique indices, the one with encompassing higher
+        // number of fields has the higher cardinality
+        if (this.isUniqueIndex()) {
+            return this.indexFields.compareTo(other.indexFields);
+        }
+
+        // for two non-unique indices, the one with encompassing higher
+        // number of fields has the higher cardinality
+        if (!other.isUniqueIndex()) {
+            return this.indexFields.compareTo(other.indexFields);
+        }
+
+        return -1;
     }
 
     public boolean isCompoundIndex() {
         return indexFields.getFieldNames().size() > 1;
+    }
+
+    private boolean isUniqueIndex() {
+        return indexType.equals(IndexType.Unique);
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {

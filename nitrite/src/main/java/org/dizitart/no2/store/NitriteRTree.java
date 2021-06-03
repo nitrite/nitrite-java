@@ -66,4 +66,9 @@ public interface NitriteRTree<Key, Value> extends AutoCloseable {
      * @return the size
      */
     long size();
+
+    /**
+     * Closes this {@link NitriteRTree} instance.
+     * */
+    void close();
 }

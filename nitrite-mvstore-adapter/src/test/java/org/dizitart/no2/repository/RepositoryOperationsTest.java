@@ -25,8 +25,8 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.InheritIndices;
@@ -153,8 +153,6 @@ public class RepositoryOperationsTest {
         NitriteMapper nitriteMapper = db.getConfig().nitriteMapper();
         ObjectRepository<Test> repository = db.getRepository(Test.class);
         operations = new RepositoryOperations(Test.class, nitriteMapper, repository.getDocumentCollection());
-
-        operations.getIdField(Test.class);
     }
 
     @Test(expected = ValidationException.class)

@@ -54,7 +54,8 @@ public class FilteredStream implements RecordStream<Pair<NitriteId, Document>> {
         Iterator<Pair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
 
-        if (filter == Filter.ALL) {
+        // filter can be null from read operation when coll scan filter is null
+        if (filter == null || filter == Filter.ALL) {
             return iterator;
         }
         return new FilteredIterator(iterator, filter);
@@ -63,7 +64,7 @@ public class FilteredStream implements RecordStream<Pair<NitriteId, Document>> {
     /**
      * The type Filtered iterator.
      */
-    static class FilteredIterator implements Iterator<Pair<NitriteId, Document>> {
+    private static class FilteredIterator implements Iterator<Pair<NitriteId, Document>> {
         private final Iterator<Pair<NitriteId, Document>> iterator;
         private final Filter filter;
         private Pair<NitriteId, Document> nextPair;
@@ -114,5 +115,4 @@ public class FilteredStream implements RecordStream<Pair<NitriteId, Document>> {
             return false;
         }
     }
-
 }

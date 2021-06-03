@@ -19,9 +19,10 @@ package org.dizitart.no2.common.streams;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.NullOrder;
+import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.ValidationException;
 
 import java.text.Collator;
 import java.util.Comparator;
@@ -31,8 +32,7 @@ import java.util.List;
  * Sorts documents based on the sort order provided.
  *
  * <p>
- * By default null is considered the lowest value,
- * unless ordering explicitly specified by {@link NullOrder}.
+ * By default null is considered the lowest value.
  * </p>
  *
  * @author Anindya Chatterjee
@@ -40,61 +40,58 @@ import java.util.List;
  */
 public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
     private final Collator collator;
-    private final NullOrder nullOrder;
     private final List<Pair<String, SortOrder>> sortOrder;
 
     /**
      * Instantiates a new Document sorter.
      *
      * @param collator  the collator
-     * @param nullOrder the null order
      * @param sortOrder the sort order
      */
-    public DocumentSorter(Collator collator, NullOrder nullOrder,
-                          List<Pair<String, SortOrder>> sortOrder) {
+    public DocumentSorter(Collator collator, List<Pair<String, SortOrder>> sortOrder) {
         this.collator = collator;
-        this.nullOrder = nullOrder;
         this.sortOrder = sortOrder;
     }
 
     @Override
-    @SuppressWarnings( { "rawtypes", "unchecked" })
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public int compare(Pair<NitriteId, Document> pair1, Pair<NitriteId, Document> pair2) {
         if (sortOrder != null && !sortOrder.isEmpty()) {
             for (Pair<String, SortOrder> pair : sortOrder) {
                 Document doc1 = pair1.getSecond();
                 Document doc2 = pair2.getSecond();
 
-                Comparable c1 = doc1.get(pair.getFirst(), Comparable.class);
-                Comparable c2 = doc2.get(pair.getFirst(), Comparable.class);
+                Object value1 = doc1.get(pair.getFirst());
+                Object value2 = doc2.get(pair.getFirst());
 
-                boolean nullPresent = false;
+                // handle null values
                 int result;
-
-                if (c1 == null && c2 != null) {
-                    nullPresent = true;
-                    if (nullOrder == NullOrder.First || nullOrder == NullOrder.Default) {
-                        result = -1;
-                    } else {
-                        result = 1;
-                    }
-                } else if (c1 != null && c2 == null) {
-                    nullPresent = true;
-                    if (nullOrder == NullOrder.First || nullOrder == NullOrder.Default) {
-                        result = 1;
-                    } else {
-                        result = -1;
-                    }
-                } else if (c2 == null) {
-                    nullPresent = true;
-                    result = 0;
-                } else if (c1 instanceof String && c2 instanceof String && collator != null) {
-                    result = collator.compare(c1, c2);
+                if ((value1 == null || value1 instanceof DBNull) && value2 != null) {
+                    result = -1;
+                } else if (value1 != null && (value2 == null || value2 instanceof DBNull)) {
+                    result = 1;
+                } else if (value1 == null) {
+                    result = -1;
                 } else {
-                    result = c1.compareTo(c2);
+
+                    // validate comparable
+                    if (value1.getClass().isArray() || value1 instanceof Iterable
+                        || value2.getClass().isArray() || value2 instanceof Iterable) {
+                        throw new ValidationException("cannot sort on an array or collection object");
+                    }
+
+                    // compare values
+                    Comparable c1 = (Comparable) value1;
+                    Comparable c2 = (Comparable) value2;
+
+                    if (c1 instanceof String && c2 instanceof String && collator != null) {
+                        result = collator.compare(c1, c2);
+                    } else {
+                        result = c1.compareTo(c2);
+                    }
                 }
 
-                if (!nullPresent && pair.getSecond() == SortOrder.Descending) {
+                if (pair.getSecond() == SortOrder.Descending) {
                     result *= -1;
                 }
 

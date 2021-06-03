@@ -18,10 +18,9 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.index.IndexScanner;
+import org.dizitart.no2.index.IndexMap;
 
 import java.util.List;
-import java.util.Map;
 import java.util.NavigableMap;
 
 /**
@@ -57,10 +56,10 @@ public abstract class ComparableFilter extends FieldBasedFilter {
     /**
      * Apply this filter on an nitrite index.
      *
-     * @param indexScanner the index scanner
+     * @param indexMap the index scanner
      * @return the object
      */
-    public abstract Object applyOnIndex(IndexScanner indexScanner);
+    public abstract List<?> applyOnIndex(IndexMap indexMap);
 
     /**
      * Process values after index scanning.
@@ -71,7 +70,7 @@ public abstract class ComparableFilter extends FieldBasedFilter {
      */
     @SuppressWarnings("unchecked")
     protected void processIndexValue(Object value,
-                                     NavigableMap<Comparable<?>, Object> subMap,
+                                     List<NavigableMap<Comparable<?>, Object>> subMap,
                                      List<NitriteId> nitriteIds) {
         if (value instanceof List) {
             // if its is list then add it directly to nitrite ids
@@ -80,10 +79,7 @@ public abstract class ComparableFilter extends FieldBasedFilter {
         }
 
         if (value instanceof NavigableMap) {
-            NavigableMap<Comparable<?>, ?> result = (NavigableMap<Comparable<?>, ?>) value;
-            for (Map.Entry<Comparable<?>, ?> comparableEntry : result.entrySet()) {
-                subMap.put(comparableEntry.getKey(), comparableEntry.getValue());
-            }
+            subMap.add((NavigableMap<Comparable<?>, Object>) value);
         }
     }
 }

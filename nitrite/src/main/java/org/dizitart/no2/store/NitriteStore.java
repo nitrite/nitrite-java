@@ -18,7 +18,7 @@ package org.dizitart.no2.store;
 
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.index.BoundingBox;
-import org.dizitart.no2.module.NitritePlugin;
+import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.store.events.StoreEventListener;
 

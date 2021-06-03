@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.module.NitriteModule;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.store.NitriteStore;
 
 /**

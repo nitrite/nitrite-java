@@ -20,15 +20,14 @@ import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.IndexScanner;
+import org.dizitart.no2.index.IndexMap;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
  * @author Anindya Chatterjee
  */
-class NotInFilter extends ComparableFilter {
+class NotInFilter extends ComparableArrayFilter {
     @Getter
     private final Set<Comparable<?>> comparableSet;
 
@@ -50,11 +49,11 @@ class NotInFilter extends ComparableFilter {
         return true;
     }
 
-    public Object applyOnIndex(IndexScanner indexScanner) {
-        NavigableMap<Comparable<?>, Object> subMap = new ConcurrentSkipListMap<>();
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        for (Pair<Comparable<?>, ?> entry : indexScanner.entries()) {
+        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
             if (!comparableSet.contains(entry.getFirst())) {
                 processIndexValue(entry.getSecond(), subMap, nitriteIds);
             }
@@ -68,5 +67,10 @@ class NotInFilter extends ComparableFilter {
             // or it is a terminal filter on compound index, return only nitrite-ids
             return nitriteIds;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " not in " + Arrays.toString((Comparable<?>[]) getValue()) + ")";
     }
 }

@@ -181,7 +181,7 @@ public class TextIndex implements NitriteIndex {
             }
 
             nitriteIds = addNitriteIds(nitriteIds, fieldValues);
-            indexMap.put(value, nitriteIds);
+            indexMap.put(word, nitriteIds);
         }
     }
 

@@ -8,7 +8,7 @@ import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.mapper.JacksonMapperModule;
+import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.migration.Instructions;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.migration.TypeConverter;
