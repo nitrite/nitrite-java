@@ -195,7 +195,7 @@ public class NitriteConfig {
     /**
      * Initializes this {@link NitriteConfig} instance.
      */
-    void initialize() {
+    protected void initialize() {
         this.configured = true;
         this.pluginManager.initializePlugins();
     }

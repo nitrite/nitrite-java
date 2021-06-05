@@ -489,7 +489,9 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 NitriteCollection txCol = transaction.getCollection("test");
 
                 Attributes attributes = new Attributes();
-                attributes.setAttributes(Collections.singletonMap("key", "value"));
+                Map<String, String> hashMap = new HashMap<>();
+                hashMap.put("key", "value");
+                attributes.setAttributes(hashMap);
                 txCol.setAttributes(attributes);
 
                 assertNull(collection.getAttributes());

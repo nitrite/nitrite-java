@@ -21,6 +21,7 @@ import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.common.module.PluginManager;
 import org.dizitart.no2.exceptions.IndexingException;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryConfig;
@@ -139,7 +140,7 @@ public class NitriteConfigTest {
         assertNull((new NitriteConfig()).getNitriteStore());
     }
 
-    @Test
+    @Test(expected = NitriteIOException.class)
     public void testInitialize() {
         NitriteConfig nitriteConfig = new NitriteConfig();
         nitriteConfig.initialize();

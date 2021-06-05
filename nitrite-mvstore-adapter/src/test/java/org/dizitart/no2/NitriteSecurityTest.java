@@ -18,7 +18,7 @@ package org.dizitart.no2;
 
 import org.apache.commons.io.FileUtils;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
@@ -95,7 +95,7 @@ public class NitriteSecurityTest {
         db.close();
         try {
             db = createDb(fileName,"test-user2", "test-password2");
-        } catch (SecurityException se) {
+        } catch (NitriteSecurityException se) {
             db = createDb(fileName,"test-user", "test-password");
             assertNotNull(db);
         } finally {

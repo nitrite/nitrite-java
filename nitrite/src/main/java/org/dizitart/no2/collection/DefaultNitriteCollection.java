@@ -396,7 +396,7 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    private void closeEventBus() throws Exception {
+    private void closeEventBus() {
         if (eventBus != null) {
             eventBus.close();
         }

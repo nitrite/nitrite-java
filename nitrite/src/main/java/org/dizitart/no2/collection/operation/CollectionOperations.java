@@ -33,6 +33,9 @@ import org.dizitart.no2.store.StoreCatalog;
 
 import java.util.Collection;
 
+import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
+import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
+
 /**
  * The collection operations.
  *
@@ -74,6 +77,7 @@ public class CollectionOperations implements AutoCloseable {
      * @param processor the processor
      */
     public void addProcessor(Processor processor) {
+        doProcess(processor);
         processorChain.add(processor);
     }
 
@@ -84,6 +88,7 @@ public class CollectionOperations implements AutoCloseable {
      */
     public void removeProcessor(Processor processor) {
         processorChain.remove(processor);
+        undoProcess(processor);
     }
 
     /**
@@ -283,5 +288,19 @@ public class CollectionOperations implements AutoCloseable {
 
         // drop the map
         nitriteMap.drop();
+    }
+
+    private void doProcess(Processor processor) {
+        for (Document document : find(Filter.ALL, null)) {
+            Document processed = processor.processBeforeWrite(document);
+            update(createUniqueFilter(document), processed, updateOptions(false));
+        }
+    }
+
+    private void undoProcess(Processor processor) {
+        for (Document document : find(Filter.ALL, null)) {
+            Document processed = processor.processAfterRead(document);
+            update(createUniqueFilter(document), processed, updateOptions(false));
+        }
     }
 }

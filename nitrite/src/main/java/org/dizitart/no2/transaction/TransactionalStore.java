@@ -1,6 +1,5 @@
 package org.dizitart.no2.transaction;
 
-import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.*;
@@ -136,10 +135,5 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
     @Override
     public T getStoreConfig() {
         return null;
-    }
-
-    @Override
-    public void initialize(NitriteConfig nitriteConfig) {
-
     }
 }

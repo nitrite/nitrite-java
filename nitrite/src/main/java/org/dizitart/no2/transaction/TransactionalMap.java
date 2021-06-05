@@ -7,7 +7,6 @@ import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryMap;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepCopy;
 
@@ -57,11 +56,11 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         V result = backingMap.get(k);
         if (result == null) {
             result = primary.get(k);
-            if (result instanceof ConcurrentSkipListSet) {
-                // create a deep copy of the set so that it does not effect the original one
-                ConcurrentSkipListSet<?> set = deepCopy((ConcurrentSkipListSet<?>) result);
-                backingMap.put(k, (V) set);
-                result = (V) set;
+            if (result instanceof List) {
+                // create a deep copy of the list so that it does not effect the original one
+                List<?> list = deepCopy((ArrayList<?>) result);
+                backingMap.put(k, (V) list);
+                result = (V) list;
             }
         }
 
@@ -90,7 +89,18 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
             return RecordStream.empty();
         }
 
-        return RecordStream.fromCombined(primary.values(), backingMap.values());
+        return RecordStream.fromIterable(() -> new Iterator<V>() {
+            private final Iterator<Pair<K, V>> entryIterator = entries().iterator();
+            @Override
+            public boolean hasNext() {
+                return entryIterator.hasNext();
+            }
+
+            @Override
+            public V next() {
+                return entryIterator.next().getSecond();
+            }
+        });
     }
 
     @Override

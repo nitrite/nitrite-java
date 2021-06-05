@@ -15,12 +15,10 @@ import org.dizitart.no2.store.NitriteStore;
 @Slf4j
 class TransactionalConfig extends NitriteConfig {
     private final NitriteConfig config;
-    private final TransactionalStore<?> transactionalStore;
 
-    public TransactionalConfig(NitriteConfig config, TransactionalStore<?> transactionalStore) {
+    public TransactionalConfig(NitriteConfig config) {
         super();
         this.config = config;
-        this.transactionalStore = transactionalStore;
     }
 
     @Override
@@ -57,6 +55,11 @@ class TransactionalConfig extends NitriteConfig {
 
     @Override
     public NitriteStore<?> getNitriteStore() {
-        return transactionalStore;
+        return pluginManager.getNitriteStore();
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
     }
 }

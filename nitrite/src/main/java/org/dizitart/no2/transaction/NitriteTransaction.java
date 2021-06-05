@@ -8,6 +8,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.concurrent.LockService;
+import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.store.NitriteMap;
@@ -255,8 +256,12 @@ class NitriteTransaction implements Transaction {
 
         NitriteStore<?> nitriteStore = nitrite.getStore();
         NitriteConfig nitriteConfig = nitrite.getConfig();
-        this.transactionalStore = new TransactionalStore<>(nitriteStore);
-        this.transactionalConfig = new TransactionalConfig(nitriteConfig, transactionalStore);
+        this.transactionalConfig = new TransactionalConfig(nitriteConfig);
+        this.transactionalConfig.loadModule(NitriteModule.module(new TransactionalStore<>(nitriteStore)));
+
+        this.transactionalConfig.autoConfigure();
+        this.transactionalConfig.initialize();
+        this.transactionalStore = (TransactionalStore<?>) this.transactionalConfig.getNitriteStore();
         this.state = State.Active;
     }
 

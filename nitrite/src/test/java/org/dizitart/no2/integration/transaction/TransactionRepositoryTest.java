@@ -515,7 +515,9 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 ObjectRepository<TxData> txRepo = transaction.getRepository(TxData.class);
 
                 Attributes attributes = new Attributes();
-                attributes.setAttributes(Collections.singletonMap("key", "value"));
+                Map<String, String> hashMap = new HashMap<>();
+                hashMap.put("key", "value");
+                attributes.setAttributes(hashMap);
                 txRepo.setAttributes(attributes);
 
                 assertNull(repository.getAttributes());

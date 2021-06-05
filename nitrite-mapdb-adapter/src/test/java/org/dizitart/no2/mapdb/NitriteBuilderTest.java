@@ -27,7 +27,7 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.common.mapper.Mappable;
@@ -222,13 +222,13 @@ public class NitriteBuilderTest {
         assertNotNull(config.nitriteMapper());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreateNullUserId() {
         NitriteBuilder builder = Nitrite.builder();
         builder.openOrCreate(null, "abcd");
     }
 
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreateNullPassword() {
         NitriteBuilder builder = Nitrite.builder();
         builder.openOrCreate("abcd", null);

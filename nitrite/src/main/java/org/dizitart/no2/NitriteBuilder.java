@@ -19,7 +19,7 @@ package org.dizitart.no2;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.common.module.NitriteModule;
 
@@ -128,7 +128,7 @@ public class NitriteBuilder {
      * @param username the username
      * @param password the password
      * @return the nitrite database instance.
-     * @throws SecurityException                              if the user credentials are wrong or one of them is empty string.
+     * @throws NitriteSecurityException                              if the user credentials are wrong or one of them is empty string.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a new in-memory database.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if the database is corrupt and recovery fails.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if the directory does not exist.

@@ -178,6 +178,8 @@ public class CompoundIndex implements NitriteIndex {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     private void populateSubMap(NavigableMap subMap, FieldValues fieldValues, int startIndex) {
+        if (startIndex >= fieldValues.getValues().size()) return;
+
         Pair<String, Object> pair = fieldValues.getValues().get(startIndex);
         Object value = pair.getSecond();
         DBValue dbValue;

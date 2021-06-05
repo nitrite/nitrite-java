@@ -22,7 +22,9 @@ import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreConfig;
 import org.dizitart.no2.store.events.StoreEventListener;
+import org.dizitart.no2.store.memory.InMemoryConfig;
 import org.dizitart.no2.store.memory.InMemoryRTree;
+import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -107,10 +109,8 @@ public class TransactionalStoreTest {
 
     @Test
     public void testConstructor() {
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
-        TransactionalStore<StoreConfig> actualTransactionalStore = new TransactionalStore<>(transactionalStore);
+        TransactionalStore<InMemoryConfig> transactionalStore = new TransactionalStore<>(new InMemoryStore());
+        TransactionalStore<InMemoryConfig> actualTransactionalStore = new TransactionalStore<>(transactionalStore);
         actualTransactionalStore.initialize(new NitriteConfig());
         actualTransactionalStore.openOrCreate();
         actualTransactionalStore.subscribe(mock(StoreEventListener.class));

@@ -17,9 +17,8 @@
 
 package org.dizitart.no2.transaction;
 
-import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.store.NitriteStore;
-import org.dizitart.no2.store.StoreConfig;
+import org.dizitart.no2.exceptions.NotIdentifiableException;
+import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -28,36 +27,37 @@ import static org.mockito.Mockito.*;
 public class DefaultTransactionalCollectionTest {
     @Test
     public void testConstructor() {
-        NitriteStore<StoreConfig> nitriteStore = (NitriteStore<StoreConfig>) mock(NitriteStore.class);
-        TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
-        TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
-        TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
-        when(nitriteStore.openMap(anyString(), any(), any()))
-                .thenReturn(new TransactionalMap<>("Map Name", primary2, new TransactionalStore<>(
-                    new TransactionalStore<>(new TransactionalStore<>(null)))));
-        when(nitriteStore.hasMap(anyString())).thenReturn(true);
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(nitriteStore));
-        TransactionalConfig config = new TransactionalConfig(new NitriteConfig(), transactionalStore);
+        TransactionalConfig transactionalConfig = mock(TransactionalConfig.class);
+        when(transactionalConfig.getNitriteStore()).thenThrow(new NotIdentifiableException("An error occurred"));
 
         TransactionContext transactionContext = new TransactionContext();
-        transactionContext.setConfig(config);
+        transactionContext.setConfig(transactionalConfig);
+        assertThrows(NotIdentifiableException.class,
+            () -> new DefaultTransactionalCollection(null, transactionContext, null));
+        verify(transactionalConfig).getNitriteStore();
+    }
+
+    @Test
+    public void testConstructor2() {
+        TransactionalConfig transactionalConfig = mock(TransactionalConfig.class);
+        TransactionalStore<?> transactionalStore = new TransactionalStore<>(
+            new TransactionalStore<>(new TransactionalStore<>(new InMemoryStore())));
+
+        doReturn(transactionalStore).when(transactionalConfig).getNitriteStore();
+        TransactionContext transactionContext = new TransactionContext();
+        transactionContext.setConfig(transactionalConfig);
         DefaultTransactionalCollection actualDefaultTransactionalCollection = new DefaultTransactionalCollection(null,
-                transactionContext, null);
+            transactionContext, null);
         assertNull(actualDefaultTransactionalCollection.getCollectionName());
         assertFalse(actualDefaultTransactionalCollection.isDropped());
-        assertSame(transactionContext, actualDefaultTransactionalCollection.getTransactionContext());
-        NitriteStore<?> store = actualDefaultTransactionalCollection.getStore();
-        assertSame(transactionalStore, store);
+        TransactionContext transactionContext1 = actualDefaultTransactionalCollection.getTransactionContext();
+        assertSame(transactionContext, transactionContext1);
+        assertSame(transactionalStore, actualDefaultTransactionalCollection.getStore());
         assertNull(actualDefaultTransactionalCollection.getPrimary());
         assertNull(actualDefaultTransactionalCollection.getNitrite());
         assertNull(actualDefaultTransactionalCollection.getNitriteMap());
         assertNull(actualDefaultTransactionalCollection.getCollectionOperations().getAttributes());
-        assertNull(store.getStoreVersion());
-        verify(nitriteStore, times(2)).hasMap(anyString());
-        verify(nitriteStore).openMap(anyString(), any(), any());
+        verify(transactionalConfig, times(2)).getNitriteStore();
     }
 }
 

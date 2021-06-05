@@ -22,13 +22,23 @@ package org.dizitart.no2.exceptions;
  * @author Anindya Chatterjee.
  * @since 1.0
  */
-public class SecurityException extends NitriteException {
+public class NitriteSecurityException extends NitriteException {
     /**
-     * Instantiates a new {@link SecurityException}.
+     * Instantiates a new {@link NitriteSecurityException}.
      *
      * @param errorMessage the error message
      */
-    public SecurityException(String errorMessage) {
+    public NitriteSecurityException(String errorMessage) {
         super(errorMessage);
+    }
+
+    /**
+     * Instantiates a new {@link NitriteSecurityException}.
+     *
+     * @param errorMessage the error message
+     * @param cause        the cause
+     */
+    public NitriteSecurityException(String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
     }
 }

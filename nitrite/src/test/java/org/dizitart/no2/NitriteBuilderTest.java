@@ -27,7 +27,7 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.common.module.PluginManager;
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.integration.Retry;
@@ -175,7 +175,7 @@ public class NitriteBuilderTest {
         assertTrue(((InMemoryConfig) store.getStoreConfig()).eventListeners().isEmpty());
     }
 
-    @Test
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreate4() {
         NitriteBuilder builderResult = Nitrite.builder();
         builderResult.openOrCreate("", "iloveyou");
@@ -189,7 +189,7 @@ public class NitriteBuilderTest {
         assertTrue(((InMemoryConfig) nitriteStore.getStoreConfig()).eventListeners().isEmpty());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreate5() {
         NitriteBuilder builderResult = Nitrite.builder();
         builderResult.openOrCreate("", "iloveyou");
@@ -254,13 +254,13 @@ public class NitriteBuilderTest {
         assertNotNull(config.nitriteMapper());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreateNullUserId() {
         NitriteBuilder builder = Nitrite.builder();
         builder.openOrCreate(null, "abcd");
     }
 
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreateNullPassword() {
         NitriteBuilder builder = Nitrite.builder();
         builder.openOrCreate("abcd", null);

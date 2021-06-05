@@ -29,16 +29,14 @@ public interface Encryptor {
      *
      * @param plainText the plain text
      * @return the encrypted string
-     * @throws Exception the exception
      */
-    String encrypt(byte[] plainText) throws Exception;
+    String encrypt(byte[] plainText);
 
     /**
      * Returns the decrypted string, encoded by this encryptor.
      *
      * @param encryptedText the encrypted text
      * @return the string
-     * @throws Exception the exception
      */
-    String decrypt(String encryptedText) throws Exception;
+    String decrypt(String encryptedText);
 }

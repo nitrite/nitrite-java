@@ -20,7 +20,8 @@ package org.dizitart.no2.transaction;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.store.StoreConfig;
+import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.memory.InMemoryConfig;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -31,31 +32,21 @@ import static org.mockito.Mockito.*;
 public class TransactionalConfigTest {
     @Test
     public void testConstructor() {
-        NitriteConfig config = new NitriteConfig();
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
-        TransactionalConfig actualTransactionalConfig = new TransactionalConfig(config, transactionalStore);
+        TransactionalConfig actualTransactionalConfig = new TransactionalConfig(new NitriteConfig());
         assertTrue(actualTransactionalConfig.getMigrations().isEmpty());
         assertEquals(1, actualTransactionalConfig.getSchemaVersion().intValue());
-        assertSame(transactionalStore, actualTransactionalConfig.getNitriteStore());
+        assertNull(actualTransactionalConfig.getNitriteStore());
     }
 
     @Test
     public void testFindIndexer() {
-        NitriteConfig config = new NitriteConfig();
         assertThrows(IndexingException.class,
-            () -> (new TransactionalConfig(config,
-                new TransactionalStore<>(
-                    new TransactionalStore<>(new TransactionalStore<>(null)))))
-                .findIndexer("Index Type"));
+            () -> (new TransactionalConfig(new NitriteConfig())).findIndexer("Index Type"));
     }
 
     @Test
     public void testLoadModule() {
-        NitriteConfig config = new NitriteConfig();
-        TransactionalConfig transactionalConfig = new TransactionalConfig(config, new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))));
+        TransactionalConfig transactionalConfig = new TransactionalConfig(new NitriteConfig());
         NitriteModule nitriteModule = mock(NitriteModule.class);
         when(nitriteModule.plugins()).thenReturn(new HashSet<>());
         assertSame(transactionalConfig, transactionalConfig.loadModule(nitriteModule));
@@ -63,18 +54,23 @@ public class TransactionalConfigTest {
     }
 
     @Test
+    public void testAutoConfigure() {
+        TransactionalConfig transactionalConfig = new TransactionalConfig(new NitriteConfig());
+        transactionalConfig.autoConfigure();
+        NitriteStore<?> nitriteStore = transactionalConfig.getNitriteStore();
+        assertTrue(nitriteStore instanceof org.dizitart.no2.store.memory.InMemoryStore);
+        assertFalse(nitriteStore.isClosed());
+        assertTrue(((InMemoryConfig) nitriteStore.getStoreConfig()).eventListeners().isEmpty());
+    }
+
+    @Test
     public void testNitriteMapper() {
-        NitriteConfig config = new NitriteConfig();
-        assertNull((new TransactionalConfig(config, new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))))).nitriteMapper());
+        assertNull((new TransactionalConfig(new NitriteConfig())).nitriteMapper());
     }
 
     @Test
     public void testGetNitriteStore() {
-        NitriteConfig config = new NitriteConfig();
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null)));
-        assertSame(transactionalStore, (new TransactionalConfig(config, transactionalStore)).getNitriteStore());
+        assertNull((new TransactionalConfig(new NitriteConfig())).getNitriteStore());
     }
 }
 

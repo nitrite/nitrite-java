@@ -20,6 +20,7 @@ package org.dizitart.no2.transaction;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.concurrent.LockService;
+import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -30,8 +31,7 @@ public class NitriteTransactionTest {
     public void testConstructor() {
         Nitrite nitrite = mock(Nitrite.class);
         when(nitrite.getConfig()).thenReturn(new NitriteConfig());
-        doReturn(new TransactionalStore<>(new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))))).when(nitrite).getStore();
+        doReturn(new TransactionalStore<>(new InMemoryStore())).when(nitrite).getStore();
         assertEquals(State.Active, (new NitriteTransaction(nitrite, new LockService())).getState());
         verify(nitrite).getConfig();
         verify(nitrite).getStore();

@@ -1,6 +1,7 @@
 package org.dizitart.no2.common;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Setter;
 import org.dizitart.no2.common.util.StringUtils;
 
@@ -23,13 +24,13 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @author Anindya Chatterjee
  * @since 4.0
  */
+@EqualsAndHashCode
 public class Fields implements Comparable<Fields>, Serializable {
     private static final long serialVersionUID = 1601646404L;
 
     /**
      * The Field names.
      */
-// order of the given fields matter
     @Setter(AccessLevel.PACKAGE)
     protected List<String> fieldNames;
 

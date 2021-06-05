@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.common.crypto;
 
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +33,7 @@ public class AESEncryptorTest {
         assertEquals("iloveyou", aesEncryptor.decrypt(encrypted));
     }
 
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testDecrypt2() {
         (new AESEncryptor("iloveyou")).decrypt("bad base-64");
     }

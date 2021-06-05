@@ -69,7 +69,6 @@ public class StringFieldEncryptionProcessor implements Processor {
         this.fields.addAll(Arrays.asList(fields));
     }
 
-
     @Override
     public Document processBeforeWrite(Document document) {
         try {

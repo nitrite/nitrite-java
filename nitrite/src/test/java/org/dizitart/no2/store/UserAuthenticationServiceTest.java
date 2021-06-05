@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
 
@@ -36,7 +36,7 @@ public class UserAuthenticationServiceTest {
 
     @Test
     public void testAuthenticate() {
-        assertThrows(SecurityException.class,
+        assertThrows(NitriteSecurityException.class,
             () -> (new UserAuthenticationService(new InMemoryStore())).authenticate("janedoe", "iloveyou", true));
     }
 

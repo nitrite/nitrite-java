@@ -20,7 +20,7 @@ package org.dizitart.no2.common.crypto;
 import org.dizitart.no2.common.util.Base64;
 import org.dizitart.no2.common.util.CryptoUtils;
 import org.dizitart.no2.common.util.SecureString;
-import org.dizitart.no2.exceptions.NitriteException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -40,21 +40,48 @@ import java.nio.charset.StandardCharsets;
  * @since 4.0
  */
 public class AESEncryptor implements Encryptor {
-    private static final String ENCRYPT_ALGO = "AES/GCM/NoPadding";
-    private static final int TAG_LENGTH_BIT = 128;
-    private static final int IV_LENGTH_BYTE = 12;
-    private static final int SALT_LENGTH_BYTE = 16;
-    private static final Charset UTF_8 = StandardCharsets.UTF_8;
+    private final String encryptAlgo;
+    private final int tagLengthBit;
+    private final int ivLengthByte;
+    private final int saltLengthByte;
+    private final Charset UTF_8 = StandardCharsets.UTF_8;
 
     private final SecureString password;
 
     /**
-     * Instantiates a new Encryptor.
+     * Instantiates a new {@link AESEncryptor} with these default values
+     * <p>
+     *     <ul>
+     *         <li>Encryption Algo - AES/GCM/NoPadding</li>
+     *         <li>Tag Length (bit) - 128</li>
+     *         <li>IV Length (byte) - 12</li>
+     *         <li>Salt Length (byte) - 16</li>
+     *     </ul>
+     * </p>
      *
      * @param password the password
      */
     public AESEncryptor(String password) {
+        this(password, "AES/GCM/NoPadding", 128, 12, 16);
+    }
+
+    /**
+     * Instantiates a new {@link AESEncryptor}.
+     *
+     * @param password       the password
+     * @param encryptionAlgo the encryption algo
+     * @param tagLengthBit   the tag length bit
+     * @param ivLengthByte   the iv length byte
+     * @param saltLengthByte the salt length byte
+     */
+    public AESEncryptor(String password, String encryptionAlgo,
+                        Integer tagLengthBit, Integer ivLengthByte,
+                        Integer saltLengthByte) {
         this.password = new SecureString(password);
+        this.encryptAlgo = encryptionAlgo;
+        this.tagLengthBit = tagLengthBit;
+        this.ivLengthByte = ivLengthByte;
+        this.saltLengthByte = saltLengthByte;
     }
 
     /**
@@ -67,18 +94,18 @@ public class AESEncryptor implements Encryptor {
     public String encrypt(byte[] plainText) {
         try {
             // 16 bytes salt
-            byte[] salt = CryptoUtils.getRandomNonce(SALT_LENGTH_BYTE);
+            byte[] salt = CryptoUtils.getRandomNonce(saltLengthByte);
 
             // GCM recommended 12 bytes iv?
-            byte[] iv = CryptoUtils.getRandomNonce(IV_LENGTH_BYTE);
+            byte[] iv = CryptoUtils.getRandomNonce(ivLengthByte);
 
             // secret key from password
             SecretKey aesKeyFromPassword = CryptoUtils.getAESKeyFromPassword(password.asString().toCharArray(), salt);
 
-            Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
+            Cipher cipher = Cipher.getInstance(encryptAlgo);
 
             // ASE-GCM needs GCMParameterSpec
-            cipher.init(Cipher.ENCRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
+            cipher.init(Cipher.ENCRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(tagLengthBit, iv));
 
             byte[] cipherText = cipher.doFinal(plainText);
 
@@ -92,7 +119,7 @@ public class AESEncryptor implements Encryptor {
             // string representation, base64, send this string to other for decryption.
             return Base64.encodeToString(cipherTextWithIvSalt, Base64.URL_SAFE);
         } catch (Exception e) {
-            throw new SecurityException("failed to encrypt data", e);
+            throw new NitriteSecurityException("failed to encrypt data", e);
         }
     }
 
@@ -112,10 +139,10 @@ public class AESEncryptor implements Encryptor {
 
             // get back the iv and salt from the cipher text
             ByteBuffer bb = ByteBuffer.wrap(decode);
-            byte[] iv = new byte[IV_LENGTH_BYTE];
+            byte[] iv = new byte[ivLengthByte];
             bb.get(iv);
 
-            byte[] salt = new byte[SALT_LENGTH_BYTE];
+            byte[] salt = new byte[saltLengthByte];
             bb.get(salt);
 
             byte[] cipherText = new byte[bb.remaining()];
@@ -123,12 +150,12 @@ public class AESEncryptor implements Encryptor {
 
             // get back the aes key from the same password and salt
             SecretKey aesKeyFromPassword = CryptoUtils.getAESKeyFromPassword(password.asString().toCharArray(), salt);
-            Cipher cipher = Cipher.getInstance(ENCRYPT_ALGO);
-            cipher.init(Cipher.DECRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(TAG_LENGTH_BIT, iv));
+            Cipher cipher = Cipher.getInstance(encryptAlgo);
+            cipher.init(Cipher.DECRYPT_MODE, aesKeyFromPassword, new GCMParameterSpec(tagLengthBit, iv));
             byte[] plainText = cipher.doFinal(cipherText);
             return new String(plainText, UTF_8);
         } catch (Exception e) {
-            throw new SecurityException("failed to decrypt data", e);
+            throw new NitriteSecurityException("failed to decrypt data", e);
         }
     }
 }

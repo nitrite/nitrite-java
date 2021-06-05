@@ -149,7 +149,7 @@ public class PluginManager {
         }
     }
 
-    private void loadInternalPlugins() {
+    protected void loadInternalPlugins() {
         if (!indexerMap.containsKey(IndexType.Unique)) {
             log.debug("Loading default unique indexer");
             loadPlugin(new UniqueIndexer());

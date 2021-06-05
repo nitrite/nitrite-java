@@ -26,6 +26,7 @@ import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.integration.Retry;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -48,7 +49,7 @@ public abstract class BaseCollectionTest {
     protected Document doc1, doc2, doc3;
     protected SimpleDateFormat simpleDateFormat;
 
-//    @Rule
+    @Rule
     public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "Secured = {0}")

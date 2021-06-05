@@ -23,7 +23,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.MigrationManager;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
@@ -202,10 +202,10 @@ class NitriteDatabase implements Nitrite {
 
     private void validateUserCredentials(String username, String password) {
         if (isNullOrEmpty(username)) {
-            throw new SecurityException("username cannot be empty");
+            throw new NitriteSecurityException("username cannot be empty");
         }
         if (isNullOrEmpty(password)) {
-            throw new SecurityException("password cannot be empty");
+            throw new NitriteSecurityException("password cannot be empty");
         }
     }
 
