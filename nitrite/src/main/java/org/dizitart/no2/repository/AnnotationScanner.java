@@ -20,6 +20,7 @@ package org.dizitart.no2.repository;
 import lombok.Getter;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.repository.annotations.*;
 
@@ -134,13 +135,16 @@ class AnnotationScanner {
         boolean alreadyIdFound = false;
         for (Field field : fieldList) {
             if (field.isAnnotationPresent(Id.class)) {
-                indexValidator.validate(field.getType(), field.getName(), nitriteMapper);
+                Id id = field.getAnnotation(Id.class);
+                String fieldName = StringUtils.isNullOrEmpty(id.fieldName()) ? field.getName() : id.fieldName();
+                indexValidator.validate(field.getType(), fieldName, nitriteMapper);
                 if (alreadyIdFound) {
                     throw new NotIdentifiableException("multiple id fields found for the type");
                 } else {
                     alreadyIdFound = true;
                     objectIdField = new ObjectIdField();
                     objectIdField.setField(field);
+                    objectIdField.setIdFieldName(fieldName);
                     objectIdField.setEmbedded(isEmbeddedId(field));
                 }
             }
@@ -152,11 +156,11 @@ class AnnotationScanner {
         if (fields.size() == 0) return false;
 
         for (Field f : fields) {
-            if (!f.isAnnotationPresent(Order.class)) {
-                return false;
+            if (f.isAnnotationPresent(Embedded.class)) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     private void populateIndex(List<Index> indexList) {

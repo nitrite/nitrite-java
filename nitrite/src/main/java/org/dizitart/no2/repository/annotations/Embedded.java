@@ -27,6 +27,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Order {
-    int value();
+public @interface Embedded {
+    int order();
+    String fieldName() default "";
 }

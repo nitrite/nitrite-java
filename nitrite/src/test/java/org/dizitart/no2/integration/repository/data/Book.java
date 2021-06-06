@@ -40,7 +40,7 @@ import static org.dizitart.no2.collection.Document.createDocument;
     @Index(value = { "price", "publisher" })
 })
 public class Book implements Mappable {
-    @Id
+    @Id(fieldName = "book_id")
     private BookId bookId;
 
     private String publisher;
@@ -53,7 +53,7 @@ public class Book implements Mappable {
 
     @Override
     public Document write(NitriteMapper mapper) {
-        return createDocument("bookId", mapper.convert(bookId, Document.class))
+        return createDocument("book_id", mapper.convert(bookId, Document.class))
             .put("publisher", publisher)
             .put("price", price)
             .put("tags", tags)
@@ -63,7 +63,7 @@ public class Book implements Mappable {
     @Override
     @SuppressWarnings("unchecked")
     public void read(NitriteMapper mapper, Document document) {
-        bookId = mapper.convert(document.get("bookId"), BookId.class);
+        bookId = mapper.convert(document.get("book_id"), BookId.class);
         publisher = document.get("publisher", String.class);
         price = document.get("price", Double.class);
         tags = (List<String>) document.get("tags", List.class);

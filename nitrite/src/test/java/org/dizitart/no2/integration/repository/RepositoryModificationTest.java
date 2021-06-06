@@ -195,7 +195,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     @Test
     public void testUpsertTrue() {
         Date joiningDate = new Date();
-        Cursor result = employeeRepository.find(where("joinDate").eq(joiningDate));
+        Cursor<?> result = employeeRepository.find(where("joinDate").eq(joiningDate));
         assertEquals(result.size(), 0);
 
         Employee employee = new Employee();
@@ -220,7 +220,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     @Test
     public void testUpsertFalse() {
         Date joiningDate = new Date();
-        Cursor result = employeeRepository.find(where("joinDate").eq(joiningDate));
+        Cursor<?> result = employeeRepository.find(where("joinDate").eq(joiningDate));
         assertEquals(result.size(), 0);
 
         Employee employee = new Employee();
@@ -247,7 +247,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         Date joiningDate = new Date();
         prepareUpdateWithOptions(joiningDate);
 
-        Cursor result = employeeRepository.find(where("joinDate").eq(joiningDate));
+        Cursor<?> result = employeeRepository.find(where("joinDate").eq(joiningDate));
         assertEquals(result.size(), 2);
 
         WriteResult writeResult = employeeRepository.remove(where("joinDate").eq(joiningDate));
@@ -261,7 +261,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         Date joiningDate = new Date();
         prepareUpdateWithOptions(joiningDate);
 
-        Cursor result = employeeRepository.find(where("joinDate").eq(joiningDate));
+        Cursor<?> result = employeeRepository.find(where("joinDate").eq(joiningDate));
         assertEquals(result.size(), 2);
 
         WriteResult writeResult = employeeRepository.remove(where("joinDate").eq(joiningDate), true);
@@ -280,7 +280,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
             }
         }
 
-        Cursor cursor = employeeRepository.find(where("employeeNote.text").text("Class aptent"));
+        Cursor<?> cursor = employeeRepository.find(where("employeeNote.text").text("Class aptent"));
         assertEquals(cursor.size(), occurrence);
     }
 
@@ -631,5 +631,27 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         assertEquals(repo.size(), 1);
         assertEquals(repo.find().firstOrNull().getId(), 1);
         assertEquals(repo.find().firstOrNull().getName(), "second");
+    }
+
+    @Test
+    public void testNestedUpdate() {
+        Employee employee = employeeRepository.getById(1L);
+        assertNotNull(employee);
+
+        Note note = employee.getEmployeeNote();
+        String text = note.getText();
+        assertNotNull(text);
+
+        Document update = createDocument("employeeNote.text", "some updated text");
+        WriteResult writeResult = employeeRepository.update(where("empId").eq(1L), update, true);
+        assertEquals(1, writeResult.getAffectedCount());
+
+        employee = employeeRepository.getById(1L);
+        assertNotNull(employee);
+
+        note = employee.getEmployeeNote();
+        assertNotNull(note);
+        assertNotEquals(text, note.getText());
+        assertEquals("some updated text", note.getText());
     }
 }

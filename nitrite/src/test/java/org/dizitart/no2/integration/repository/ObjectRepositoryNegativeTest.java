@@ -203,4 +203,25 @@ public class ObjectRepositoryNegativeTest {
         result = repository.update(obj, true);
         assertNotEquals(id.getIdValue(), result.iterator().next().getIdValue());
     }
+
+    @Test(expected = IndexingException.class)
+    public void testWithoutEmbeddedId() {
+        ObjectRepository<WithoutEmbeddedId> repository = db.getRepository(WithoutEmbeddedId.class);
+        assertNull(repository);
+    }
+
+    @Test(expected = InvalidIdException.class)
+    public void testGetByWrongIdType() {
+        ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
+        WithPublicField object = new WithPublicField();
+        object.name = "test";
+        object.number = 2;
+
+        repository.insert(object);
+
+        NitriteId id = NitriteId.createId("1");
+        WithPublicField instance = repository.getById(id);
+        assertEquals(object.name, instance.name);
+        assertEquals(object.number, instance.number);
+    }
 }

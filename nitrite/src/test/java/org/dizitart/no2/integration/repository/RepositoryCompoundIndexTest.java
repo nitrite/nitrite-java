@@ -17,36 +17,36 @@
 
 package org.dizitart.no2.integration.repository;
 
-import lombok.val;
-import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.integration.repository.data.DataGenerator;
-import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.integration.repository.data.Book;
+import org.dizitart.no2.integration.repository.data.BookId;
 import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Anindya Chatterjee
  */
-public class RepositoryCompoundIndexTest /*extends BaseObjectRepositoryTest*/ {
-    private Nitrite db;
+public class RepositoryCompoundIndexTest extends BaseObjectRepositoryTest {
 
     @Test
-    public void test() {
-        NitriteBuilder nitriteBuilder = Nitrite.builder()
-            .fieldSeparator(".");
-        db = nitriteBuilder.openOrCreate();
+    public void testFindById() {
+        BookId bookId = new BookId();
+        bookId.setAuthor("John Doe");
+        bookId.setIsbn("123456");
+        bookId.setName("Nitrite Database");
 
-        val bookRepository = db.getRepository(Book.class);
+        Book book = new Book();
+        book.setBookId(bookId);
+        book.setDescription("Some random book description");
+        book.setPrice(22.56);
+        book.setPublisher("My Publisher House");
+        book.setTags(Arrays.asList("database", "nosql"));
 
-        for (int i = 0; i < 10; i++) {
-            Book book = DataGenerator.randomBook();
-            bookRepository.insert(book);
-        }
+        bookRepository.insert(book);
 
-        Cursor<Book> bookCursor = bookRepository.find();
-        for (Book book : bookCursor) {
-            System.out.println(book);
-        }
+        Book bookById = bookRepository.getById(bookId);
+        assertEquals(bookById, book);
     }
 }

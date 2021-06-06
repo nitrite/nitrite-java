@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.repository.annotations.Order;
+import org.dizitart.no2.repository.annotations.Embedded;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -61,13 +61,19 @@ public class IndexValidator {
         Document document;
         try {
             document = skeletonDocument(nitriteMapper, fieldType);
-            if (document.size() > 1) {
+            if (document.size() > 0) {
                 // compound index
+                boolean embeddedFieldFound = false;
                 List<Field> fields = reflector.getAllFields(fieldType);
                 for (Field indexField : fields) {
-                    if (!indexField.isAnnotationPresent(Order.class)) {
-                        throw new IndexingException("@Order must be specified for all fields in the embedded id object");
+                    if (indexField.isAnnotationPresent(Embedded.class)) {
+                        embeddedFieldFound = true;
+                        break;
                     }
+                }
+
+                if (!embeddedFieldFound) {
+                    throw new IndexingException("no embedded field found for object id");
                 }
             } else {
                 if (!Comparable.class.isAssignableFrom(fieldType)) {

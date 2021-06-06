@@ -40,7 +40,7 @@ import java.util.Map;
     @Index(value = "companyName")
 })
 public class Company implements Serializable, Mappable {
-    @Id
+    @Id(fieldName = "company_id")
     @Getter
     @Setter
     private Long companyId;
@@ -63,7 +63,7 @@ public class Company implements Serializable, Mappable {
 
     @Override
     public Document write(NitriteMapper mapper) {
-        return Document.createDocument("companyId", companyId)
+        return Document.createDocument("company_id", companyId)
             .put("companyName", companyName)
             .put("dateCreated", dateCreated)
             .put("departments", departments)
@@ -73,7 +73,7 @@ public class Company implements Serializable, Mappable {
     @Override
     @SuppressWarnings("unchecked")
     public void read(NitriteMapper mapper, Document document) {
-        companyId = document.get("companyId", Long.class);
+        companyId = document.get("company_id", Long.class);
         companyName = document.get("companyName", String.class);
         dateCreated = document.get("dateCreated", Date.class);
         departments = document.get("departments", List.class);

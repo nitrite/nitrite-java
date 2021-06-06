@@ -21,34 +21,45 @@ import lombok.Data;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.Mappable;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.repository.annotations.Embedded;
-
-import static org.dizitart.no2.collection.Document.createDocument;
+import org.dizitart.no2.repository.annotations.Id;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
-public class BookId implements Mappable {
-    @Embedded(order = 0)
-    private String isbn;
-
-    @Embedded(order = 1, fieldName = "book_name")
-    private String name;
-
-    private String author;
+public class WithoutEmbeddedId implements Mappable {
+    @Id
+    private NestedId nestedId;
+    private String data;
 
     @Override
     public Document write(NitriteMapper mapper) {
-        return createDocument("isbn", isbn)
-            .put("book_name", name)
-            .put("author", author);
+        return Document.createDocument()
+            .put("nestedId", nestedId.write(mapper))
+            .put("data", data);
     }
 
     @Override
     public void read(NitriteMapper mapper, Document document) {
-        isbn = document.get("isbn", String.class);
-        name = document.get("book_name", String.class);
-        author = document.get("author", String.class);
+        Document nestedId = document.get("nestedId", Document.class);
+        this.nestedId = mapper.convert(nestedId, NestedId.class);
+        this.data = document.get("data", String.class);
+    }
+
+
+    @Data
+    public static class NestedId implements Mappable {
+        private Long id;
+
+        @Override
+        public Document write(NitriteMapper mapper) {
+            return Document.createDocument()
+                .put("id", id);
+        }
+
+        @Override
+        public void read(NitriteMapper mapper, Document document) {
+            id = document.get("id", Long.class);
+        }
     }
 }

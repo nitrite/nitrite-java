@@ -22,14 +22,15 @@ import lombok.Setter;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.repository.annotations.Order;
+import org.dizitart.no2.filters.NitriteFilter;
+import org.dizitart.no2.repository.annotations.Embedded;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.NavigableMap;
-import java.util.Set;
 import java.util.TreeMap;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
@@ -40,14 +41,19 @@ import static org.dizitart.no2.filters.FluentFilter.where;
 class ObjectIdField {
     private final Reflector reflector;
     private final IndexValidator indexValidator;
-    private String[] fieldNames;
+    private String[] embeddedFieldNames;
 
     @Getter
     @Setter
     private Field field;
+
     @Getter
     @Setter
     private boolean isEmbedded;
+
+    @Getter
+    @Setter
+    private String idFieldName;
 
     public ObjectIdField() {
         this.reflector = new Reflector();
@@ -55,52 +61,67 @@ class ObjectIdField {
     }
 
     public String[] getFieldNames(NitriteMapper nitriteMapper) {
-        if (fieldNames != null) {
-            return fieldNames;
+        if (embeddedFieldNames != null) {
+            return embeddedFieldNames;
         }
 
         if (!isEmbedded) {
-            fieldNames = new String[]{field.getName()};
-            return fieldNames;
+            embeddedFieldNames = new String[]{ idFieldName };
+            return embeddedFieldNames;
         }
 
         List<Field> fieldList = reflector.getAllFields(field.getType());
         NavigableMap<Integer, String> orderedFieldName = new TreeMap<>();
-        for (Field field : fieldList) {
-            String name = this.field.getName() + NitriteConfig.getFieldSeparator() + field.getName();
-            indexValidator.validate(field.getType(), name, nitriteMapper);
 
-            int order = getOrder(field);
-            orderedFieldName.put(order, name);
+        boolean embeddedFieldFound = false;
+        for (Field field : fieldList) {
+            if (field.isAnnotationPresent(Embedded.class)) {
+                embeddedFieldFound = true;
+                Embedded embedded = field.getAnnotation(Embedded.class);
+                int order = embedded.order();
+                String fieldName = StringUtils.isNullOrEmpty(embedded.fieldName())
+                    ? field.getName() : embedded.fieldName();
+
+                String name = this.idFieldName + NitriteConfig.getFieldSeparator() + fieldName;
+                indexValidator.validate(field.getType(), name, nitriteMapper);
+
+                orderedFieldName.put(order, name);
+            }
         }
 
-        fieldNames = orderedFieldName.values().toArray(new String[0]);
-        return fieldNames;
+        if (!embeddedFieldFound) {
+            throw new IndexingException("no embedded field found for " + field.getName());
+        }
+
+        embeddedFieldNames = orderedFieldName.values().toArray(new String[0]);
+        return embeddedFieldNames;
     }
 
     public Filter createUniqueFilter(Object value, NitriteMapper nitriteMapper) {
-        if (fieldNames.length == 1) {
-            return where(field.getName()).eq(value);
+        if (embeddedFieldNames.length == 1) {
+            return where(idFieldName).eq(value);
         } else {
             Document document = nitriteMapper.convert(value, Document.class);
-            Set<String> fields = document.getFields();
-            Filter[] filters = new Filter[fields.size()];
+            Filter[] filters = new Filter[embeddedFieldNames.length];
 
             int index = 0;
-            for (String field : fields) {
-                Object fieldValue = document.get(field);
+            for (String field : embeddedFieldNames) {
+                String docFieldName = getEmbeddedFieldName(field);
+                Object fieldValue = document.get(docFieldName);
                 filters[index++] = where(field).eq(fieldValue);
             }
 
-            return Filter.and(filters);
+            NitriteFilter nitriteFilter = (NitriteFilter) Filter.and(filters);
+            nitriteFilter.setObjectFilter(true);
+            return nitriteFilter;
         }
     }
 
-    private int getOrder(Field field) {
-        if (field.isAnnotationPresent(Order.class)) {
-            Order order = field.getAnnotation(Order.class);
-            return order.value();
+    private String getEmbeddedFieldName(String fieldName) {
+        if (fieldName.contains(NitriteConfig.getFieldSeparator())) {
+            return fieldName.substring(fieldName.indexOf(NitriteConfig.getFieldSeparator()) + 1);
+        } else {
+            return fieldName;
         }
-        throw new IndexingException("no order specified for the field " + field.getName());
     }
 }
