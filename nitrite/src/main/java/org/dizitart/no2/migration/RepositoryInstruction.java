@@ -151,13 +151,26 @@ public interface RepositoryInstruction extends Instruction {
     default RepositoryInstruction changeIdField(List<String> oldFieldNames, List<String> newFieldNames) {
         Fields oldFields = Fields.withNames(oldFieldNames.toArray(new String[0]));
         Fields newFields = Fields.withNames(newFieldNames.toArray(new String[0]));
+        return changeIdField(oldFields, newFields);
+    }
 
+    /**
+     * Adds an instruction to change the id field of an entity in the
+     * {@link org.dizitart.no2.repository.ObjectRepository}
+     *
+     * @param oldField the old field names
+     * @param newField the new field names
+     * @return the repository instruction
+     */
+    default RepositoryInstruction changeIdField(Fields oldField, Fields newField) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryChangeIdField);
-        migrationStep.setArguments(new Quartet<>(entityName(), key(), oldFields, newFields));
+        migrationStep.setArguments(new Quartet<>(entityName(), key(), oldField, newField));
         addStep(migrationStep);
         return this;
     }
+
+
 
     /**
      * Adds an instruction to drop an index from the {@link org.dizitart.no2.repository.ObjectRepository}.

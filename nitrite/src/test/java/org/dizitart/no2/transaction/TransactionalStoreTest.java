@@ -40,11 +40,11 @@ public class TransactionalStoreTest {
 
     @Test
     public void testClose() throws Exception {
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
+        TransactionalStore<InMemoryConfig> transactionalStore = new TransactionalStore<>(
             new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+                new TransactionalStore<>(new TransactionalStore<>(new InMemoryStore()))));
         transactionalStore.close();
-        assertNull(transactionalStore.getCatalog());
+        assertNotNull(transactionalStore.getCatalog());
     }
 
     @Test
@@ -125,16 +125,16 @@ public class TransactionalStoreTest {
 
     @Test
     public void testConstructor2() {
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
+        TransactionalStore<InMemoryConfig> transactionalStore = new TransactionalStore<>(
             new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
-        TransactionalStore<StoreConfig> actualTransactionalStore = new TransactionalStore<>(transactionalStore);
-        assertNull(actualTransactionalStore.getCatalog());
+                new TransactionalStore<>(new TransactionalStore<>(new InMemoryStore()))));
+        TransactionalStore<InMemoryConfig> actualTransactionalStore = new TransactionalStore<>(transactionalStore);
+        assertNotNull(actualTransactionalStore.getCatalog());
         assertFalse(actualTransactionalStore.isReadOnly());
         assertFalse(actualTransactionalStore.isClosed());
         assertTrue(actualTransactionalStore.hasUnsavedChanges());
         assertNull(actualTransactionalStore.getStoreConfig());
-        assertNull(transactionalStore.getCatalog());
+        assertNotNull(transactionalStore.getCatalog());
         assertFalse(transactionalStore.isReadOnly());
         assertFalse(transactionalStore.isClosed());
         assertTrue(transactionalStore.hasUnsavedChanges());

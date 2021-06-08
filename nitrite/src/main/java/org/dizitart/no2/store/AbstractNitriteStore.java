@@ -94,11 +94,13 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
     @Override
     public void initialize(NitriteConfig nitriteConfig) {
         this.nitriteConfig = nitriteConfig;
-        this.storeCatalog = new StoreCatalog(this);
     }
 
     @Override
     public StoreCatalog getCatalog() {
+        if (storeCatalog == null) {
+            this.storeCatalog = new StoreCatalog(this);
+        }
         return storeCatalog;
     }
 }

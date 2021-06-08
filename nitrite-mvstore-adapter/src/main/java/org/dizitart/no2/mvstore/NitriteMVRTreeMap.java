@@ -92,7 +92,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         //nothing to close
     }
 }

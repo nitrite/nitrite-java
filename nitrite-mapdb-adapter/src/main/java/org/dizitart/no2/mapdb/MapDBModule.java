@@ -8,6 +8,8 @@ import org.dizitart.no2.store.StoreModule;
 
 import java.util.Set;
 
+import static org.dizitart.no2.common.util.Iterables.setOf;
+
 /**
  * @author Anindya Chatterjee
  */
