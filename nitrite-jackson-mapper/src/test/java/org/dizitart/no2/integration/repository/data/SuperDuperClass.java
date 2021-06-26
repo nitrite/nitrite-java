@@ -27,7 +27,7 @@ import org.dizitart.no2.repository.annotations.Index;
  */
 @Getter
 @Setter
-@Index(value = "text", type = IndexType.Fulltext)
+@Index(value = "text", type = IndexType.FULL_TEXT)
 public class SuperDuperClass {
     private String text;
 }

@@ -21,11 +21,13 @@ import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.*;
 import org.dizitart.no2.index.IndexDescriptor;
 
 import java.util.*;
 
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.Iterables.firstOrNull;
 import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.filters.Filter.or;
@@ -61,6 +63,21 @@ class FindOptimizer {
             List<Filter> filters = Collections.singletonList(filter);
             return createAndPlan(indexDescriptors, filters);
         }
+    }
+
+    private List<Filter> flattenAndFilter(AndFilter andFilter) {
+        List<Filter> flattenedFilters = new ArrayList<>();
+        if (andFilter != null) {
+            for (Filter filter : andFilter.getFilters()) {
+                if (filter instanceof AndFilter) {
+                    List<Filter> filters = flattenAndFilter((AndFilter) filter);
+                    flattenedFilters.addAll(filters);
+                } else {
+                    flattenedFilters.add(filter);
+                }
+            }
+        }
+        return flattenedFilters;
     }
 
     private FindPlan createOrPlan(Collection<IndexDescriptor> indexDescriptors, List<Filter> filters) {
@@ -99,20 +116,121 @@ class FindOptimizer {
     }
 
     private FindPlan createAndPlan(Collection<IndexDescriptor> indexDescriptors, List<Filter> filters) {
+        FindPlan findPlan = new FindPlan();
+        Set<ComparableFilter> indexScanFilters = new LinkedHashSet<>();
+        Set<Filter> columnScanFilters = new LinkedHashSet<>();
+
+        // find out set id filter (if any)
+        planForIdFilter(findPlan, filters);
+
+        // find out if there are any index only filter with index
+        planForIndexOnlyFilters(findPlan, indexScanFilters, indexDescriptors, filters);
+
+        // if no id filter found or no index only filter found, scan for matching index
+        if (findPlan.getByIdFilter() == null && indexScanFilters.isEmpty()) {
+            planForIndexScanningFilters(findPlan, indexScanFilters, indexDescriptors, filters);
+        }
+
+        // plan for column scan filters
+        planForCollectionScanningFilters(findPlan, indexScanFilters, columnScanFilters, filters);
+
+        IndexScanFilter indexScanFilter;
+        if (indexScanFilters.size() == 1) {
+            indexScanFilter = new IndexScanFilter(Collections.singletonList(firstOrNull(indexScanFilters)));
+            findPlan.setIndexScanFilter(indexScanFilter);
+        } else if (indexScanFilters.size() > 1) {
+            indexScanFilter = new IndexScanFilter(indexScanFilters);
+            findPlan.setIndexScanFilter(indexScanFilter);
+        }
+
+        if (columnScanFilters.size() == 1) {
+            findPlan.setCollectionScanFilter(firstOrNull(columnScanFilters));
+        } else if (columnScanFilters.size() > 1) {
+            Filter andFilter = and(columnScanFilters.toArray(new Filter[0]));
+            findPlan.setCollectionScanFilter(andFilter);
+        }
+
+        return findPlan;
+    }
+
+    private void planForIdFilter(FindPlan findPlan, List<Filter> filters) {
+        for (Filter filter : filters) {
+            if (filter instanceof EqualsFilter) {
+                EqualsFilter equalsFilter = (EqualsFilter) filter;
+
+                // handle byId filter specially
+                if (equalsFilter.getField().equals(DOC_ID)) {
+                    findPlan.setByIdFilter(equalsFilter);
+                }
+                break;
+            }
+        }
+    }
+
+    private void planForIndexOnlyFilters(FindPlan findPlan, Set<ComparableFilter> indexScanFilters,
+                                         Collection<IndexDescriptor> indexDescriptors, List<Filter> filters) {
+        // find out if there are any filter which does not support covered queries
+        List<IndexOnlyFilter> indexOnlyFilters = new ArrayList<>();
+        for (Filter filter : filters) {
+            if (filter instanceof IndexOnlyFilter) {
+                IndexOnlyFilter indexScanFilter = (IndexOnlyFilter) filter;
+                if (isCompatibleFilter(indexOnlyFilters, indexScanFilter)) {
+                    // if filter is compatible with already identified index only filter then add
+                    indexOnlyFilters.add(indexScanFilter);
+                } else {
+                    throw new FilterException("a query can not have multiple index only filters");
+                }
+            }
+        }
+
+        // populate index descriptor for the index only filters
+        if (!indexOnlyFilters.isEmpty()) {
+
+            // get any index only filter from the set
+            IndexOnlyFilter anyFilter = indexOnlyFilters.get(0);
+            for (IndexDescriptor indexDescriptor : indexDescriptors) {
+
+                // check the index type match between filter and index descriptor
+                if (anyFilter.supportedIndexType().equals(indexDescriptor.getIndexType())) {
+                    // choose the index descriptor and filters
+                    findPlan.setIndexDescriptor(indexDescriptor);
+                    indexScanFilters.addAll(indexOnlyFilters);
+                    break;
+                }
+            }
+
+            if (findPlan.getIndexDescriptor() == null) {
+                throw new FilterException(anyFilter.getField() + " is not indexed with "
+                    + anyFilter.supportedIndexType() + " index");
+            }
+        }
+    }
+
+    private boolean isCompatibleFilter(List<IndexOnlyFilter> indexOnlyFilters, IndexOnlyFilter filter) {
+        if (indexOnlyFilters.isEmpty()) {
+            return true;
+        } else {
+            IndexOnlyFilter comparableFilter = indexOnlyFilters.get(0);
+            return comparableFilter.canBeGrouped(filter);
+        }
+    }
+
+    private void planForIndexScanningFilters(FindPlan findPlan, Set<ComparableFilter> indexScanFilters,
+                                             Collection<IndexDescriptor> indexDescriptors, List<Filter> filters) {
         // descending sort based on cardinality of indices, consider the higher cardinality index first
-        NavigableMap<IndexDescriptor, List<Filter>> indexFilterMap = new TreeMap<>(Collections.reverseOrder());
+        NavigableMap<IndexDescriptor, List<ComparableFilter>> indexFilterMap = new TreeMap<>(Collections.reverseOrder());
 
         for (IndexDescriptor indexDescriptor : indexDescriptors) {
             List<String> fieldNames = indexDescriptor.getIndexFields().getFieldNames();
 
-            List<Filter> indexedFilters = new ArrayList<>();
+            List<ComparableFilter> indexedFilters = new ArrayList<>();
             for (String fieldName : fieldNames) {
                 boolean matchFound = false;
                 for (Filter filter : filters) {
-                    if (filter instanceof FieldBasedFilter) {
-                        String filterFieldName = ((FieldBasedFilter) filter).getField();
+                    if (filter instanceof ComparableFilter) {
+                        String filterFieldName = ((ComparableFilter) filter).getField();
                         if (filterFieldName.equals(fieldName)) {
-                            indexedFilters.add(filter);
+                            indexedFilters.add((ComparableFilter) filter);
                             matchFound = true;
                             break;
                         }
@@ -130,58 +248,46 @@ class FindOptimizer {
             }
         }
 
-        FindPlan findPlan = new FindPlan();
-        Set<Filter> electedFilters = new HashSet<>();
-        for (Map.Entry<IndexDescriptor, List<Filter>> entry : indexFilterMap.entrySet()) {
+        for (Map.Entry<IndexDescriptor, List<ComparableFilter>> entry : indexFilterMap.entrySet()) {
             // consider the filter combination if it encompasses more fields
             // than the previously selected filter
-            if (entry.getValue().size() > electedFilters.size()) {
+            if (entry.getValue().size() > indexScanFilters.size()) {
                 // maintain the order in set
-                electedFilters = new LinkedHashSet<>(entry.getValue());
+                indexScanFilters.addAll(entry.getValue());
                 findPlan.setIndexDescriptor(entry.getKey());
             }
         }
-
-        // maintain the order in set
-        Set<Filter> nonElectedFilters = new LinkedHashSet<>();
-        for (Filter filter : filters) {
-            if (!electedFilters.contains(filter)) {
-                nonElectedFilters.add(filter);
-            }
-        }
-
-        IndexScanFilter indexScanFilter;
-        if (electedFilters.size() == 1) {
-            indexScanFilter = new IndexScanFilter(Collections.singletonList(firstOrNull(electedFilters)));
-            findPlan.setIndexScanFilter(indexScanFilter);
-        } else if (electedFilters.size() > 1) {
-            indexScanFilter =  new IndexScanFilter(electedFilters);
-            findPlan.setIndexScanFilter(indexScanFilter);
-        }
-
-        if (nonElectedFilters.size() == 1) {
-            findPlan.setCollectionScanFilter(firstOrNull(nonElectedFilters));
-        } else if (nonElectedFilters.size() > 1) {
-            Filter andFilter = and(nonElectedFilters.toArray(new Filter[0]));
-            findPlan.setCollectionScanFilter(andFilter);
-        }
-
-        return findPlan;
     }
 
-    private List<Filter> flattenAndFilter(AndFilter andFilter) {
-        List<Filter> flattenedFilters = new ArrayList<>();
-        if (andFilter != null) {
-            for (Filter filter : andFilter.getFilters()) {
-                if (filter instanceof AndFilter) {
-                    List<Filter> filters = flattenAndFilter((AndFilter) filter);
-                    flattenedFilters.addAll(filters);
-                } else {
-                    flattenedFilters.add(filter);
+    private void planForCollectionScanningFilters(FindPlan findPlan, Set<ComparableFilter> indexScanFilters,
+                                                  Set<Filter> columnScanFilters, List<Filter> filters) {
+        for (Filter filter : filters) {
+            // ignore the elected filters for index scan and
+            // insert rest of the filters for column scan
+            // NOTE: for byId filter, index scan filters will always be empty
+            if (!(filter instanceof ComparableFilter) || !indexScanFilters.contains(filter)) {
+                // ignore the byId filter (if any) for column scan
+                if (filter != findPlan.getByIdFilter()) {
+                    columnScanFilters.add(filter);
                 }
             }
         }
-        return flattenedFilters;
+
+        // validate whether column scanning is supported for each filter,
+        // if there is no index scan available
+        if (indexScanFilters.isEmpty()) {
+            validateCollectionScanFilters(columnScanFilters);
+        }
+    }
+
+    private void validateCollectionScanFilters(Collection<Filter> filters) {
+        for (Filter filter : filters) {
+            if (filter instanceof IndexOnlyFilter) {
+                throw new FilterException("collection scan is not supported for the filter " + filter);
+            } else if (filter instanceof TextFilter) {
+                throw new FilterException(((TextFilter) filter).getField() + " is not full-text indexed");
+            }
+        }
     }
 
     private void readSortOption(FindOptions findOptions, FindPlan findPlan) {
@@ -243,4 +349,5 @@ class FindOptimizer {
             findPlan.setSkip(findOptions.skip());
         }
     }
+
 }

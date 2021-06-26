@@ -117,9 +117,9 @@ public class CustomFieldSeparatorTest {
     @ToString
     @EqualsAndHashCode
     @Indices({
-        @Index(value = "joinDate", type = IndexType.NonUnique),
-        @Index(value = "address", type = IndexType.Fulltext),
-        @Index(value = "employeeNote:text", type = IndexType.Fulltext)
+        @Index(value = "joinDate", type = IndexType.NON_UNIQUE),
+        @Index(value = "address", type = IndexType.FULL_TEXT),
+        @Index(value = "employeeNote:text", type = IndexType.FULL_TEXT)
     })
     public static class EmployeeForCustomSeparator implements Serializable {
         @Id

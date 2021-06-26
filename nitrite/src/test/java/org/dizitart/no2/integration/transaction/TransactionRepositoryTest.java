@@ -237,7 +237,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
         try (Session session = db.createSession()) {
             try (Transaction transaction = session.beginTransaction()) {
                 ObjectRepository<TxData> txRepo = transaction.getRepository(TxData.class);
-                txRepo.createIndex(indexOptions(IndexType.Fulltext), "name");
+                txRepo.createIndex(indexOptions(IndexType.FULL_TEXT), "name");
 
                 assertTrue(txRepo.hasIndex("name"));
                 assertFalse(repository.hasIndex("name"));
@@ -262,7 +262,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             try {
                 transaction = session.beginTransaction();
                 ObjectRepository<TxData> txRepo = transaction.getRepository(TxData.class);
-                txRepo.createIndex(indexOptions(IndexType.Fulltext), "name");
+                txRepo.createIndex(indexOptions(IndexType.FULL_TEXT), "name");
 
                 assertTrue(txRepo.hasIndex("name"));
                 assertFalse(repository.hasIndex("name"));
@@ -570,7 +570,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
     @Test
     public void testConcurrentInsertAndRemove() {
         ObjectRepository<TxData> repository = db.getRepository(TxData.class);
-        repository.createIndex(indexOptions(IndexType.NonUnique), "name");
+        repository.createIndex(indexOptions(IndexType.NON_UNIQUE), "name");
         Faker faker = new Faker();
         List<Future<?>> futures = new ArrayList<>();
 

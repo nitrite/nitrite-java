@@ -63,7 +63,7 @@ public class NitriteTextIndexer implements NitriteIndexer {
 
     @Override
     public String getIndexType() {
-        return IndexType.Fulltext;
+        return IndexType.FULL_TEXT;
     }
 
     @Override

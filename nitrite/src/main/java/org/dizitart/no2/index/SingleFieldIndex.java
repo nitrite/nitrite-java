@@ -23,13 +23,14 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
@@ -64,19 +65,16 @@ public class SingleFieldIndex implements NitriteIndex {
         String firstField = fieldNames.get(0);
         Object element = fieldValues.get(firstField);
 
-        if (element == null) {
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
+        NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
+        if (element == null) {
             addIndexElement(indexMap, fieldValues, DBNull.getInstance());
         } else if (element instanceof Comparable) {
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
-
             // wrap around db value
             DBValue dbValue = new DBValue((Comparable<?>) element);
             addIndexElement(indexMap, fieldValues, dbValue);
         } else if (element.getClass().isArray()) {
             Object[] array = convertToObjectArray(element);
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : array) {
                 // wrap around db value
@@ -85,7 +83,6 @@ public class SingleFieldIndex implements NitriteIndex {
             }
         } else if (element instanceof Iterable) {
             Iterable<?> iterable = (Iterable<?>) element;
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
                 // wrap around db value
@@ -103,19 +100,15 @@ public class SingleFieldIndex implements NitriteIndex {
         String firstField = fieldNames.get(0);
         Object element = fieldValues.get(firstField);
 
+        NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
         if (element == null) {
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
-
             removeIndexElement(indexMap, fieldValues, DBNull.getInstance());
         } else if (element instanceof Comparable) {
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
-
             // wrap around db value
             DBValue dbValue = new DBValue((Comparable<?>) element);
             removeIndexElement(indexMap, fieldValues, dbValue);
         } else if (element.getClass().isArray()) {
             Object[] array = convertToObjectArray(element);
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : array) {
                 // wrap around db value
@@ -124,7 +117,6 @@ public class SingleFieldIndex implements NitriteIndex {
             }
         } else if (element instanceof Iterable) {
             Iterable<?> iterable = (Iterable<?>) element;
-            NitriteMap<DBValue, List<?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
                 // wrap around db value
@@ -173,12 +165,12 @@ public class SingleFieldIndex implements NitriteIndex {
 
     private NitriteMap<DBValue, List<?>> findIndexMap() {
         String mapName = deriveIndexMapName(indexDescriptor);
-        return nitriteStore.openMap(mapName, DBValue.class, ArrayList.class);
+        return nitriteStore.openMap(mapName, DBValue.class, CopyOnWriteArrayList.class);
     }
 
     private LinkedHashSet<NitriteId> scanIndex(FindPlan findPlan,
                                             NitriteMap<DBValue, List<?>> indexMap) {
-        List<Filter> filters = findPlan.getIndexScanFilter().getFilters();
+        List<ComparableFilter> filters = findPlan.getIndexScanFilter().getFilters();
         IndexMap iMap = new IndexMap(indexMap);
         IndexScanner indexScanner = new IndexScanner(iMap);
         return indexScanner.doScan(filters, findPlan.getIndexScanOrder());

@@ -25,11 +25,13 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
@@ -67,19 +69,15 @@ public class CompoundIndex implements NitriteIndex {
         // NOTE: only first field can have array or iterable value, subsequent fields can not
         validateIndexField(firstValue, firstField);
 
+        NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
         if (firstValue == null) {
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
-
             addIndexElement(indexMap, fieldValues, DBNull.getInstance());
         } else if (firstValue instanceof Comparable) {
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
-
             //wrap around a db value
             DBValue dbValue = new DBValue((Comparable<?>) firstValue);
             addIndexElement(indexMap, fieldValues, dbValue);
         } else if (firstValue.getClass().isArray()) {
             Object[] array = convertToObjectArray(firstValue);
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
 
             for (Object item : array) {
                 // wrap around db value
@@ -88,7 +86,6 @@ public class CompoundIndex implements NitriteIndex {
             }
         } else if (firstValue instanceof Iterable) {
             Iterable<?> iterable = (Iterable<?>) firstValue;
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
                 // wrap around db value
@@ -108,20 +105,16 @@ public class CompoundIndex implements NitriteIndex {
 
         // NOTE: only first field can have array or iterable value, subsequent fields can not
         validateIndexField(firstValue, firstField);
+        NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
 
         if (firstValue == null) {
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
-
             removeIndexElement(indexMap, fieldValues, DBNull.getInstance());
         } else if (firstValue instanceof Comparable) {
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
-
             // wrap around db value
             DBValue dbValue = new DBValue((Comparable<?>) firstValue);
             removeIndexElement(indexMap, fieldValues, dbValue);
         } else if (firstValue.getClass().isArray()) {
             Object[] array = convertToObjectArray(firstValue);
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
 
             for (Object item : array) {
                 // wrap around db value
@@ -130,7 +123,6 @@ public class CompoundIndex implements NitriteIndex {
             }
         } else if (firstValue instanceof Iterable) {
             Iterable<?> iterable = (Iterable<?>) firstValue;
-            NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
                 // wrap around db value
@@ -163,8 +155,8 @@ public class CompoundIndex implements NitriteIndex {
             subMap = new ConcurrentSkipListMap<>();
         }
 
-        indexMap.put(element, subMap);
         populateSubMap(subMap, fieldValues, 1);
+        indexMap.put(element, subMap);
     }
 
     private void removeIndexElement(NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap,
@@ -256,7 +248,7 @@ public class CompoundIndex implements NitriteIndex {
 
     private LinkedHashSet<NitriteId> scanIndex(FindPlan findPlan,
                                                NitriteMap<DBValue, NavigableMap<DBValue, ?>> indexMap) {
-        List<Filter> filters = findPlan.getIndexScanFilter().getFilters();
+        List<ComparableFilter> filters = findPlan.getIndexScanFilter().getFilters();
         IndexMap iMap = new IndexMap(indexMap);
         IndexScanner indexScanner = new IndexScanner(iMap);
         return indexScanner.doScan(filters, findPlan.getIndexScanOrder());

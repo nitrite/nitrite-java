@@ -24,13 +24,17 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.TextFilter;
 import org.dizitart.no2.index.fulltext.TextTokenizer;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
@@ -72,28 +76,22 @@ public class TextIndex implements NitriteIndex {
         String firstField = fieldNames.get(0);
         Object element = fieldValues.get(firstField);
 
-        if (element == null) {
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
+        NitriteMap<String, List<?>> indexMap = findIndexMap();
 
+        if (element == null) {
             addIndexElement(indexMap, fieldValues, null);
         } else if (element instanceof String) {
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
-
             addIndexElement(indexMap, fieldValues, (String) element);
         } else if (element.getClass().isArray()) {
             validateStringArrayIndexField(element, firstField);
-
             Object[] array = convertToObjectArray(element);
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
 
             for (Object item : array) {
                 addIndexElement(indexMap, fieldValues, (String) item);
             }
         } else if (element instanceof Iterable) {
             validateStringIterableIndexField((Iterable<?>) element, firstField);
-
             Iterable<?> iterable = (Iterable<?>) element;
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
                 addIndexElement(indexMap, fieldValues, (String) item);
@@ -111,28 +109,21 @@ public class TextIndex implements NitriteIndex {
         String firstField = fieldNames.get(0);
         Object element = fieldValues.get(firstField);
 
+        NitriteMap<String, List<?>> indexMap = findIndexMap();
         if (element == null) {
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
-
             removeIndexElement(indexMap, fieldValues, null);
         } else if (element instanceof String) {
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
-
             removeIndexElement(indexMap, fieldValues, (String) element);
         } else if (element.getClass().isArray()) {
             validateStringArrayIndexField(element, firstField);
-
             Object[] array = convertToObjectArray(element);
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
 
             for (Object item : array) {
                 removeIndexElement(indexMap, fieldValues, (String) item);
             }
         } else if (element instanceof Iterable) {
             validateStringIterableIndexField((Iterable<?>) element, firstField);
-
             Iterable<?> iterable = (Iterable<?>) element;
-            NitriteMap<String, List<?>> indexMap = findIndexMap();
 
             for (Object item : iterable) {
                 removeIndexElement(indexMap, fieldValues, (String) item);
@@ -154,7 +145,7 @@ public class TextIndex implements NitriteIndex {
         if (findPlan.getIndexScanFilter() == null) return new LinkedHashSet<>();
 
         NitriteMap<String, List<?>> indexMap = findIndexMap();
-        List<Filter> filters = findPlan.getIndexScanFilter().getFilters();
+        List<ComparableFilter> filters = findPlan.getIndexScanFilter().getFilters();
 
         if (filters.size() == 1 && filters.get(0) instanceof TextFilter) {
             TextFilter textFilter = (TextFilter) filters.get(0);
@@ -166,7 +157,7 @@ public class TextIndex implements NitriteIndex {
 
     private NitriteMap<String, List<?>> findIndexMap() {
         String mapName = deriveIndexMapName(indexDescriptor);
-        return nitriteStore.openMap(mapName, String.class, ArrayList.class);
+        return nitriteStore.openMap(mapName, String.class, CopyOnWriteArrayList.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -177,7 +168,7 @@ public class TextIndex implements NitriteIndex {
             List<NitriteId> nitriteIds = (List<NitriteId>) indexMap.get(word);
 
             if (nitriteIds == null) {
-                nitriteIds = new ArrayList<>();
+                nitriteIds = new CopyOnWriteArrayList<>();
             }
 
             nitriteIds = addNitriteIds(nitriteIds, fieldValues);

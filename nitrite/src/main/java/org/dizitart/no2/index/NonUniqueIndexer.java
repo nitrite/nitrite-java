@@ -31,6 +31,6 @@ public final class NonUniqueIndexer extends ComparableIndexer {
 
     @Override
     public String getIndexType() {
-        return IndexType.NonUnique;
+        return IndexType.NON_UNIQUE;
     }
 }

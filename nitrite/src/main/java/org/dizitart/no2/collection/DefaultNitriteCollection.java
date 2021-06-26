@@ -190,7 +190,7 @@ class DefaultNitriteCollection implements NitriteCollection {
         try {
             writeLock.lock();
             if (indexOptions == null) {
-                collectionOperations.createIndex(indexFields, IndexType.Unique);
+                collectionOperations.createIndex(indexFields, IndexType.UNIQUE);
             } else {
                 collectionOperations.createIndex(indexFields, indexOptions.getIndexType());
             }
@@ -304,16 +304,27 @@ class DefaultNitriteCollection implements NitriteCollection {
 
         try {
             writeLock.lock();
-            collectionOperations.dropCollection();
+
+            if (collectionOperations != null) {
+                // close collection and indexes
+                collectionOperations.close();
+
+                // drop collection and indexes
+                collectionOperations.dropCollection();
+            }
+
+            // set all reference to null
+            this.nitriteMap = null;
+            this.nitriteConfig = null;
+            this.collectionOperations = null;
+            this.nitriteStore = null;
+
+            // close event bus
+            closeEventBus();
         } finally {
             writeLock.unlock();
         }
         isDropped = true;
-        try {
-            close();
-        } catch (Exception e) {
-            throw new NitriteIOException("failed to close the database", e);
-        }
     }
 
     public boolean isOpen() {
@@ -327,10 +338,13 @@ class DefaultNitriteCollection implements NitriteCollection {
         } else return true;
     }
 
-    public void close() throws Exception {
+    public void close() {
         if (collectionOperations != null) {
+            // close collection and indexes
             collectionOperations.close();
         }
+
+        // set all reference to null
         this.nitriteMap = null;
         this.nitriteConfig = null;
         this.collectionOperations = null;

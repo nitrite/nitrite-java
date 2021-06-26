@@ -29,7 +29,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 /**
  * @author Anindya Chatterjee.
  */
-class EqualsFilter extends ComparableFilter {
+public class EqualsFilter extends ComparableFilter {
     EqualsFilter(String field, Object value) {
         super(field, value);
     }

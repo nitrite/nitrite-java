@@ -125,6 +125,17 @@ public interface RecordStream<T> extends Iterable<T> {
     }
 
     /**
+     * Creates a {@link RecordStream} with a single element.
+     *
+     * @param <V> the type parameter
+     * @param v   the v
+     * @return the record stream
+     */
+    static <V> RecordStream<V> single(V v) {
+        return RecordStream.fromIterable(Collections.singleton(v));
+    }
+
+    /**
      * Gets the size of the {@link RecordStream}.
      *
      * @return the long

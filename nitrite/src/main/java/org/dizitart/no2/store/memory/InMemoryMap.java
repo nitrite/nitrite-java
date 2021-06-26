@@ -162,7 +162,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void close() {
-
+        // nothing to close
     }
 
     private RecordStream<Pair<Key, Value>> getStream(NavigableMap<Key, Value> primaryMap) {

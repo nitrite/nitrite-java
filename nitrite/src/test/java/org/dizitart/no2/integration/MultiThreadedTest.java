@@ -80,8 +80,8 @@ public class MultiThreadedTest {
                         if (j == iterationCount / 2
                             && !collection.hasIndex("text")
                             && !collection.hasIndex("date")) {
-                            collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "text");
-                            collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "date");
+                            collection.createIndex(IndexOptions.indexOptions(IndexType.FULL_TEXT), "text");
+                            collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "date");
                         }
 
                         long unixTime = (long) document.get("unixTime");

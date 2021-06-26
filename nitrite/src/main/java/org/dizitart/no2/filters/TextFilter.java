@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.index.IndexMap;
 import org.dizitart.no2.index.fulltext.TextTokenizer;
 import org.dizitart.no2.store.NitriteMap;
 
@@ -51,7 +52,22 @@ public class TextFilter extends StringFilter {
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        throw new FilterException(getField() + " is not full-text indexed");
+        notNull(getField(), "field cannot be null");
+        notNull(getStringValue(), "search term cannot be null");
+        String searchString = getStringValue();
+        Object docValue = element.getSecond().get(getField());
+
+        if (!(docValue instanceof String)) {
+            throw new FilterException("text filter can not be applied on non string field " + getField());
+        }
+
+        String docString = (String) docValue;
+
+        if (searchString.startsWith("*") || searchString.endsWith("*")) {
+            searchString = searchString.replace("*", "");
+        }
+
+        return docString.toLowerCase().contains(searchString.toLowerCase());
     }
 
     @Override
@@ -178,5 +194,10 @@ public class TextFilter extends StringFilter {
         }
 
         return result;
+    }
+
+    @Override
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        return null;
     }
 }

@@ -32,7 +32,9 @@ import org.h2.mvstore.MVStore;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.dizitart.no2.common.Constants.INDEX_PREFIX;
 import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 
@@ -79,7 +81,7 @@ public class MigrationUtil {
                 Object newKey = key;
                 if (key instanceof Compat.NitriteId) {
                     newKey = nitriteId((Compat.NitriteId) key);
-                } else {
+                } else if (oldMap.getName().contains(INDEX_PREFIX)) {
                     // index map, wrap with DBValue
                     newKey = newKey == null ? DBNull.getInstance() : new DBValue((Comparable<?>) newKey);
                 }
@@ -94,19 +96,26 @@ public class MigrationUtil {
     private static Object migrateValue(Object value) {
         if (value != null) {
             if (value instanceof Compat.UserCredential) {
+                // old user credentials
                 return credential((Compat.UserCredential) value);
             } else if (value instanceof Compat.NitriteId) {
+                // old nitrite id
                 return nitriteId((Compat.NitriteId) value);
             } else if (value instanceof Compat.Index) {
+                // old index entry
                 return indexEntry((Compat.Index) value);
             } else if (value instanceof Compat.IndexMeta) {
+                // old index meta data
                 return indexMeta((Compat.IndexMeta) value);
             } else if (value instanceof Compat.Document) {
+                // old document
                 return document((Compat.Document) value);
             } else if (value instanceof Compat.Attributes) {
+                // old attribute
                 return attributes((Compat.Attributes) value);
             } else if (value instanceof ConcurrentSkipListSet) {
-                return skipList((ConcurrentSkipListSet<?>) value);
+                // old index nitrite id list
+                return arrayList((ConcurrentSkipListSet<?>) value);
             } else if (value instanceof Iterable) {
                 return iterable((Iterable<?>) value);
             } else if (value.getClass().isArray()) {
@@ -143,8 +152,8 @@ public class MigrationUtil {
         return collection;
     }
 
-    private static ConcurrentSkipListSet<?> skipList(ConcurrentSkipListSet<?> value) {
-        ConcurrentSkipListSet<Object> newList = new ConcurrentSkipListSet<>();
+    private static CopyOnWriteArrayList<?> arrayList(ConcurrentSkipListSet<?> value) {
+        CopyOnWriteArrayList<Object> newList = new CopyOnWriteArrayList<>();
         for (Object object : value) {
             Object newValue = migrateValue(object);
             newList.add(newValue);

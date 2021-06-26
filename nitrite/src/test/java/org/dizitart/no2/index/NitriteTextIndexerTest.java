@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 public class NitriteTextIndexerTest {
     @Test
     public void testConstructor() {
-        assertEquals(IndexType.Fulltext, (new NitriteTextIndexer(new EnglishTextTokenizer())).getIndexType());
+        assertEquals(IndexType.FULL_TEXT, (new NitriteTextIndexer(new EnglishTextTokenizer())).getIndexType());
         assertEquals("Fulltext", (new NitriteTextIndexer()).getIndexType());
     }
 

@@ -157,7 +157,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
     }
 
     @Indices(
-        @Index(value = "text", type = IndexType.Fulltext)
+        @Index(value = "text", type = IndexType.FULL_TEXT)
     )
     public static class TextData implements Mappable {
         public int id;

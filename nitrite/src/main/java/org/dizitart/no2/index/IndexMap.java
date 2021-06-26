@@ -25,6 +25,7 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Represents an index map.
@@ -247,7 +248,7 @@ public class IndexMap {
      * @return the terminal nitrite ids
      */
     public List<NitriteId> getTerminalNitriteIds() {
-        List<NitriteId> terminalResult = new ArrayList<>();
+        List<NitriteId> terminalResult = new CopyOnWriteArrayList<>();
 
         // scan each entry of the navigable map and collect all terminal nitrite-ids
         for (Pair<Comparable<?>, ?> entry : entries()) {

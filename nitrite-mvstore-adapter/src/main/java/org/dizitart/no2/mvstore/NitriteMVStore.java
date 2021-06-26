@@ -90,6 +90,9 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
             rTree.close();
         }
 
+        nitriteMapRegistry.clear();
+        nitriteRTreeMapRegistry.clear();
+
         mvStore.close();
         alert(StoreEvents.Closed);
     }
@@ -113,6 +116,16 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
+    public void closeMap(String mapName) {
+        nitriteMapRegistry.remove(mapName);
+    }
+
+    @Override
+    public void closeRTree(String rTreeName) {
+        nitriteRTreeMapRegistry.remove(rTreeName);
+    }
+
+    @Override
     public void removeMap(String name) {
         MVMap<?, ?> mvMap = mvStore.openMap(name);
         mvStore.removeMap(mvMap);
@@ -127,7 +140,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         }
 
         MVRTreeMap<Value> map = mvStore.openMap(mapName, new MVRTreeMap.Builder<>());
-        NitriteMVRTreeMap<Key, Value> nitriteMVRTreeMap = new NitriteMVRTreeMap(map);
+        NitriteMVRTreeMap<Key, Value> nitriteMVRTreeMap = new NitriteMVRTreeMap(map, this);
         nitriteRTreeMapRegistry.put(mapName, nitriteMVRTreeMap);
         return nitriteMVRTreeMap;
     }

@@ -16,10 +16,12 @@
 
 package org.dizitart.no2.rocksdb;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.rocksdb.*;
+import org.rocksdb.util.BytewiseComparator;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,22 +32,23 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author Anindya Chatterjee
  */
-@Data
 @Slf4j
+@Getter
+@Setter
 public class RocksDBReference implements AutoCloseable {
     private Options options;
     private DBOptions dbOptions;
     private ColumnFamilyOptions columnFamilyOptions;
     private RocksDB rocksDB;
+    private BytewiseComparator dbComparator;
 
     private List<ColumnFamilyDescriptor> columnFamilyDescriptors;
     private Map<String, ColumnFamilyHandle> columnFamilyHandleRegistry;
-    private List<AbstractComparator> dbComparators;
 
     public RocksDBReference() {
         this.columnFamilyDescriptors = new ArrayList<>();
         this.columnFamilyHandleRegistry = new ConcurrentHashMap<>();
-        this.dbComparators = new ArrayList<>();
+        this.dbComparator = null;
     }
 
     @Override
@@ -56,7 +59,7 @@ public class RocksDBReference implements AutoCloseable {
 
         rocksDB.closeE();
         dbOptions.close();
-        dbComparators.forEach(AbstractImmutableNativeReference::close);
+        dbComparator.close();
         columnFamilyOptions.close();
         options.close();
     }
@@ -91,7 +94,20 @@ public class RocksDBReference implements AutoCloseable {
         }
     }
 
-    public void addComparator(AbstractComparator comparator) {
-        dbComparators.add(comparator);
+    public void closeColumnFamily(String mapName) {
+        if (columnFamilyHandleRegistry.containsKey(mapName)) {
+            ColumnFamilyHandle handle = columnFamilyHandleRegistry.get(mapName);
+            handle.close();
+            columnFamilyHandleRegistry.remove(mapName);
+        }
+    }
+
+    public BytewiseComparator getDbComparator() {
+        // delayed initialization, otherwise initializing
+        // it in ctor is throwing java.lang.UnsatisfiedLinkError
+        if (dbComparator == null) {
+            dbComparator = new BytewiseComparator(new ComparatorOptions());
+        }
+        return dbComparator;
     }
 }

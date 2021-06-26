@@ -31,8 +31,8 @@ import java.util.List;
  */
 @Data
 @Entity(value = "books", indices = {
-    @Index(value = "tags", type = IndexType.NonUnique),
-    @Index(value = "description", type = IndexType.Fulltext),
+    @Index(value = "tags", type = IndexType.NON_UNIQUE),
+    @Index(value = "description", type = IndexType.FULL_TEXT),
     @Index(value = { "price", "publisher" })
 })
 public class Book {

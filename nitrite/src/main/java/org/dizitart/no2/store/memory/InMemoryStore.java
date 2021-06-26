@@ -70,6 +70,8 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
             rTree.close();
         }
 
+        nitriteMapRegistry.clear();
+        nitriteRTreeMapRegistry.clear();
         alert(StoreEvents.Closed);
     }
 
@@ -89,6 +91,18 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
         nitriteMapRegistry.put(mapName, nitriteMap);
 
         return nitriteMap;
+    }
+
+    @Override
+    public void closeMap(String mapName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
+    }
+
+    @Override
+    public void closeRTree(String rTreeName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
     }
 
     @Override

@@ -24,6 +24,7 @@ import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
 
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.ValidationUtils.validateArrayIndexField;
 import static org.dizitart.no2.common.util.ValidationUtils.validateIterableIndexField;
@@ -75,7 +76,7 @@ public interface NitriteIndex {
      * @return the boolean
      */
     default boolean isUnique() {
-        return getIndexDescriptor().getIndexType().equalsIgnoreCase(IndexType.Unique);
+        return getIndexDescriptor().getIndexType().equalsIgnoreCase(IndexType.UNIQUE);
     }
 
     /**
@@ -106,7 +107,7 @@ public interface NitriteIndex {
      */
     default List<NitriteId> addNitriteIds(List<NitriteId> nitriteIds, FieldValues fieldValues) {
         if (nitriteIds == null) {
-            nitriteIds = new ArrayList<>();
+            nitriteIds = new CopyOnWriteArrayList<>();
         }
 
         if (isUnique() && nitriteIds.size() == 1

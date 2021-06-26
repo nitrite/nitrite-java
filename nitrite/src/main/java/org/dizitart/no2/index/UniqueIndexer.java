@@ -25,7 +25,7 @@ package org.dizitart.no2.index;
 public final class UniqueIndexer extends ComparableIndexer {
     @Override
     public String getIndexType() {
-        return IndexType.Unique;
+        return IndexType.UNIQUE;
     }
 
     @Override

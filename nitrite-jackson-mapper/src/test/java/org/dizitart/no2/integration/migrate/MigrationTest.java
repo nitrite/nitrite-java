@@ -147,8 +147,8 @@ public class MigrationTest {
             collection.insert(document);
         }
 
-        collection.createIndex(indexOptions(IndexType.NonUnique), "firstName");
-        collection.createIndex(indexOptions(IndexType.NonUnique), "bloodGroup");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "firstName");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "bloodGroup");
         db.close();
 
         Migration migration = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
@@ -195,7 +195,7 @@ public class MigrationTest {
                     .addField("address")
                     .addField("vehicles", 1)
                     .renameField("age", "ageGroup")
-                    .createIndex(IndexType.NonUnique, "ageGroup");
+                    .createIndex(IndexType.NON_UNIQUE, "ageGroup");
             }
         };
 

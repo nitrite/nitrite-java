@@ -26,8 +26,8 @@ import org.dizitart.no2.repository.annotations.Index;
  */
 @Data
 @Index(value = "firstName")
-@Index(value = "age", type = IndexType.NonUnique)
-@Index(value = "lastName", type = IndexType.Fulltext)
+@Index(value = "age", type = IndexType.NON_UNIQUE)
+@Index(value = "lastName", type = IndexType.FULL_TEXT)
 public class RepeatableIndexTest {
     private String firstName;
     private Integer age;

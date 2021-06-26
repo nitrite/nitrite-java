@@ -16,13 +16,13 @@
 
 package org.dizitart.no2.spatial;
 
-import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.index.IndexMap;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.List;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 class IntersectsFilter extends SpatialFilter {
@@ -32,6 +32,12 @@ class IntersectsFilter extends SpatialFilter {
 
     @Override
     public List<?> applyOnIndex(IndexMap indexMap) {
-        return false
+        // calculated from SpatialIndex
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " intersects " + getValue() + ")";
     }
 }

@@ -176,7 +176,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         collection.close();
     }
 

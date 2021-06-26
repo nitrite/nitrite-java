@@ -53,14 +53,14 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         assertTrue(companyRepository.hasIndex("companyName"));
         assertFalse(companyRepository.hasIndex("dateCreated"));
 
-        companyRepository.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "dateCreated");
+        companyRepository.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "dateCreated");
         assertTrue(companyRepository.hasIndex("dateCreated"));
         assertFalse(companyRepository.isIndexing("dateCreated"));
     }
 
     @Test
     public void testRebuildIndex() {
-        companyRepository.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "dateCreated");
+        companyRepository.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "dateCreated");
         assertFalse(companyRepository.isIndexing("dateCreated"));
 
         companyRepository.rebuildIndex("dateCreated");
@@ -75,7 +75,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
         Collection<IndexDescriptor> indices = companyRepository.listIndices();
         assertEquals(indices.size(), 2);
 
-        companyRepository.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "dateCreated");
+        companyRepository.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "dateCreated");
         indices = companyRepository.listIndices();
         assertEquals(indices.size(), 3);
     }

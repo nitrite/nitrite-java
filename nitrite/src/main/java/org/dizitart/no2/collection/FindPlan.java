@@ -20,6 +20,7 @@ package org.dizitart.no2.collection;
 import lombok.Data;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.filters.EqualsFilter;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.filters.IndexScanFilter;
 import org.dizitart.no2.index.IndexDescriptor;
@@ -37,11 +38,12 @@ import java.util.Map;
  */
 @Data
 public class FindPlan {
-    private IndexDescriptor indexDescriptor;
+    private EqualsFilter byIdFilter;
     private IndexScanFilter indexScanFilter;
-    private Map<String, Boolean> indexScanOrder;
-
     private Filter collectionScanFilter;
+
+    private IndexDescriptor indexDescriptor;
+    private Map<String, Boolean> indexScanOrder;
     private List<Pair<String, SortOrder>> blockingSortOrder;
 
     private Long skip;

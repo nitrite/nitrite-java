@@ -8,11 +8,15 @@ import com.esotericsoftware.kryo.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.index.DBValue;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -105,21 +109,21 @@ public class NitriteSerializers {
         }
     }
 
-    private static class IndexEntrySerializer extends Serializer<IndexDescriptor> {
+    private static class IndexDescriptorSerializer extends Serializer<IndexDescriptor> {
 
         @Override
         public void write(Kryo kryo, Output output, IndexDescriptor object) {
+            kryo.writeObject(output, object.getIndexFields());
             output.writeString(object.getCollectionName());
-            output.writeString(object.getIndexFields());
             output.writeString(object.getIndexType());
         }
 
         @Override
         public IndexDescriptor read(Kryo kryo, Input input, Class<IndexDescriptor> type) {
+            Fields fields = kryo.readObject(input, Fields.class);
             String collectionName = input.readString();
-            String field = input.readString();
             String indexType = input.readString();
-            return new IndexDescriptor(indexType, field, collectionName);
+            return new IndexDescriptor(indexType, fields, collectionName);
         }
     }
 
@@ -166,13 +170,43 @@ public class NitriteSerializers {
         }
     }
 
+    private static class FieldsSerializer extends Serializer<Fields> {
+        @Override
+        public void write(Kryo kryo, Output output, Fields object) {
+            kryo.writeObject(output, object.getFieldNames());
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Fields read(Kryo kryo, Input input, Class<Fields> type) {
+            List<String> fieldNames = (List<String>) kryo.readObject(input, ArrayList.class);
+            return Fields.withNames(fieldNames.toArray(new String[0]));
+        }
+    }
+
+    private static class DBValueSerializer extends Serializer<DBValue> {
+
+        @Override
+        public void write(Kryo kryo, Output output, DBValue object) {
+            kryo.writeClassAndObject(output, object.getValue());
+        }
+
+        @Override
+        public DBValue read(Kryo kryo, Input input, Class<DBValue> type) {
+            Object value = kryo.readClassAndObject(input);
+            return new DBValue((Comparable<?>) value);
+        }
+    }
+
     public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
         kryoObjectFormatter.registerSerializer(Document.class, new DocumentSerializer());
         kryoObjectFormatter.registerSerializer(IndexMeta.class, new IndexMetaSerializer());
-        kryoObjectFormatter.registerSerializer(IndexDescriptor.class, new IndexEntrySerializer());
+        kryoObjectFormatter.registerSerializer(IndexDescriptor.class, new IndexDescriptorSerializer());
         kryoObjectFormatter.registerSerializer(UserCredential.class, new UserCredentialSerializer());
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
+        kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
+        kryoObjectFormatter.registerSerializer(DBValue.class, new DBValueSerializer());
     }
 }

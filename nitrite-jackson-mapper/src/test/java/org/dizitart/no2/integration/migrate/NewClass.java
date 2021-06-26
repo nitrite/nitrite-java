@@ -28,9 +28,9 @@ import org.dizitart.no2.repository.annotations.Index;
  */
 @Data
 @Entity(value = "new", indices = {
-    @Index(value = "familyName", type = IndexType.NonUnique),
-    @Index(value = "fullName", type = IndexType.NonUnique),
-    @Index(value = "literature.ratings", type = IndexType.NonUnique),
+    @Index(value = "familyName", type = IndexType.NON_UNIQUE),
+    @Index(value = "fullName", type = IndexType.NON_UNIQUE),
+    @Index(value = "literature.ratings", type = IndexType.NON_UNIQUE),
 })
 public class NewClass {
     @Id

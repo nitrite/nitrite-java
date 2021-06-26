@@ -20,8 +20,9 @@ package org.dizitart.no2.collection.operation;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.index.IndexDescriptor;
-import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.store.memory.InMemoryMap;
+import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.index.UniqueIndexer;
+import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -30,59 +31,46 @@ import static org.dizitart.no2.collection.Document.createDocument;
 import static org.mockito.Mockito.*;
 
 public class DocumentIndexWriterTest {
+
     @Test
     public void testWriteIndexEntry() {
         ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<>();
-        indexDescriptorList.add(new IndexDescriptor("Index Type", new Fields(), "Collection Name"));
-        IndexManager indexManager = mock(IndexManager.class);
-        when(indexManager.getIndexDescriptors()).thenReturn(indexDescriptorList);
-
-        NitriteIndexer nitriteIndexer = mock(NitriteIndexer.class);
+        indexDescriptorList.add(new IndexDescriptor(IndexType.UNIQUE, Fields.withNames("a"), "Collection Name"));
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        when(indexOperations.listIndexes()).thenReturn(indexDescriptorList);
         NitriteConfig nitriteConfig = mock(NitriteConfig.class);
-        when(nitriteConfig.findIndexer(anyString())).thenReturn(nitriteIndexer);
-        doNothing().when(nitriteIndexer).writeIndexEntry(any(), any(), any());
+        doReturn(new UniqueIndexer()).when(nitriteConfig).findIndexer(IndexType.UNIQUE);
+        doReturn(new InMemoryStore()).when(nitriteConfig).getNitriteStore();
 
-        IndexOperations indexOperations = new IndexOperations(nitriteConfig,
-            new InMemoryMap<>("Map Name", null), null, indexManager);
-        (new DocumentIndexWriter(nitriteConfig, indexOperations)).writeIndexEntry(createDocument("a", "b"));
-        verify(indexManager).getIndexDescriptors();
+        (new DocumentIndexWriter(nitriteConfig, indexOperations)).writeIndexEntry(createDocument("a", 1));
+        verify(indexOperations).listIndexes();
     }
 
     @Test
     public void testRemoveIndexEntry() {
         ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<>();
-        indexDescriptorList.add(new IndexDescriptor("Index Type", new Fields(), "Collection Name"));
-        IndexManager indexManager = mock(IndexManager.class);
-        when(indexManager.getIndexDescriptors()).thenReturn(indexDescriptorList);
-
-        NitriteIndexer nitriteIndexer = mock(NitriteIndexer.class);
+        indexDescriptorList.add(new IndexDescriptor(IndexType.UNIQUE, Fields.withNames("a"), "Collection Name"));
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        when(indexOperations.listIndexes()).thenReturn(indexDescriptorList);
         NitriteConfig nitriteConfig = mock(NitriteConfig.class);
-        when(nitriteConfig.findIndexer(anyString())).thenReturn(nitriteIndexer);
-        doNothing().when(nitriteIndexer).removeIndexEntry(any(), any(), any());
-
-        IndexOperations indexOperations = new IndexOperations(nitriteConfig,
-            new InMemoryMap<>("Map Name", null), null, indexManager);
-        (new DocumentIndexWriter(nitriteConfig, indexOperations)).removeIndexEntry(createDocument("a", "b"));
-        verify(indexManager).getIndexDescriptors();
+        doReturn(new UniqueIndexer()).when(nitriteConfig).findIndexer(IndexType.UNIQUE);
+        doReturn(new InMemoryStore()).when(nitriteConfig).getNitriteStore();
+        (new DocumentIndexWriter(nitriteConfig, indexOperations)).removeIndexEntry(createDocument("a", 1));
+        verify(indexOperations).listIndexes();
     }
 
     @Test
     public void testUpdateIndexEntry() {
         ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<>();
-        indexDescriptorList.add(new IndexDescriptor("Index Type", new Fields(), "Collection Name"));
-        IndexManager indexManager = mock(IndexManager.class);
-        when(indexManager.getIndexDescriptors()).thenReturn(indexDescriptorList);
-
-        NitriteIndexer nitriteIndexer = mock(NitriteIndexer.class);
+        indexDescriptorList.add(new IndexDescriptor(IndexType.UNIQUE, Fields.withNames("a"), "Collection Name"));
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        when(indexOperations.listIndexes()).thenReturn(indexDescriptorList);
         NitriteConfig nitriteConfig = mock(NitriteConfig.class);
-        when(nitriteConfig.findIndexer(anyString())).thenReturn(nitriteIndexer);
-        doNothing().when(nitriteIndexer).removeIndexEntry(any(), any(), any());
+        doReturn(new UniqueIndexer()).when(nitriteConfig).findIndexer(IndexType.UNIQUE);
+        doReturn(new InMemoryStore()).when(nitriteConfig).getNitriteStore();
 
-        IndexOperations indexOperations = new IndexOperations(nitriteConfig,
-            new InMemoryMap<>("Map Name", null), null, indexManager);
-        (new DocumentIndexWriter(nitriteConfig, indexOperations)).updateIndexEntry(createDocument("x", "y"),
-            createDocument("a", "b"));
-        verify(indexManager).getIndexDescriptors();
+        (new DocumentIndexWriter(nitriteConfig, indexOperations)).updateIndexEntry(createDocument("a", 1), createDocument("a", 2));
+        verify(indexOperations).listIndexes();
     }
 }
 

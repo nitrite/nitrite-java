@@ -21,7 +21,6 @@ class KeySet<K> implements Iterable<K> {
     }
 
     @Override
-    @SuppressWarnings("NullableProblems")
     public Iterator<K> iterator() {
         return new KeyIterator();
     }

@@ -39,8 +39,8 @@ public class SortedDocumentStreamTest {
         new SortedDocumentStream(findPlan, (RecordStream<Pair<NitriteId, Document>>) mock(RecordStream.class));
         List<Pair<String, SortOrder>> blockingSortOrder = findPlan.getBlockingSortOrder();
         assertTrue(blockingSortOrder instanceof java.util.ArrayList);
-        assertEquals("FindPlan(indexDescriptor=null, indexScanFilter=null, indexScanOrder=null, collectionScanFilter=null,"
-            + " blockingSortOrder=[], skip=null, limit=null, collator=null, subPlans=[])", findPlan.toString());
+        assertEquals("FindPlan(byIdFilter=null, indexScanFilter=null, collectionScanFilter=null, indexDescriptor=null,"
+            + " indexScanOrder=null, blockingSortOrder=[], skip=null, limit=null, collator=null, subPlans=[])", findPlan.toString());
         assertTrue(blockingSortOrder.isEmpty());
         List<FindPlan> subPlans = findPlan.getSubPlans();
         assertTrue(subPlans instanceof java.util.ArrayList);

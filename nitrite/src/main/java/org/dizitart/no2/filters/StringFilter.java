@@ -22,7 +22,7 @@ package org.dizitart.no2.filters;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-public abstract class StringFilter extends FieldBasedFilter {
+public abstract class StringFilter extends ComparableFilter {
     /**
      * Instantiates a new String filter.
      *

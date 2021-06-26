@@ -150,17 +150,17 @@ public class PluginManager {
     }
 
     protected void loadInternalPlugins() {
-        if (!indexerMap.containsKey(IndexType.Unique)) {
+        if (!indexerMap.containsKey(IndexType.UNIQUE)) {
             log.debug("Loading default unique indexer");
             loadPlugin(new UniqueIndexer());
         }
 
-        if (!indexerMap.containsKey(IndexType.NonUnique)) {
+        if (!indexerMap.containsKey(IndexType.NON_UNIQUE)) {
             log.debug("Loading default non-unique indexer");
             loadPlugin(new NonUniqueIndexer());
         }
 
-        if (!indexerMap.containsKey(IndexType.Fulltext)) {
+        if (!indexerMap.containsKey(IndexType.FULL_TEXT)) {
             log.debug("Loading nitrite text indexer");
             loadPlugin(new NitriteTextIndexer());
         }

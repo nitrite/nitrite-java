@@ -17,96 +17,85 @@
 package org.dizitart.no2.spatial;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.index.BoundingBox;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
-import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.store.NitriteRTree;
-import org.dizitart.no2.store.NitriteStore;
-import org.locationtech.jts.geom.Geometry;
+
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Represents a spatial data indexer.
+ *
  * @author Anindya Chatterjee
- * @since 4.0.0
+ * @since 4.0
  */
 public class SpatialIndexer implements NitriteIndexer {
-    public static final String SpatialIndex = "Spatial";
+    /**
+     * Spatial index type.
+     */
+    public static final String SPATIAL_INDEX = "Spatial";
+    private final Map<IndexDescriptor, SpatialIndex> indexRegistry;
 
-    private NitriteMapper nitriteMapper;
-    private NitriteStore<?> nitriteStore;
-
-    public SpatialIndexer clone() throws CloneNotSupportedException {
-        return (SpatialIndexer) super.clone();
-    }
-
-    public RecordStream<NitriteId> findWithin(String collectionName, String field, Geometry geometry) {
-        NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collectionName, field);
-        BoundingBox boundingBox = new NitriteBoundingBox(geometry);
-        return indexMap.findContainedKeys(boundingBox);
-    }
-
-    public RecordStream<NitriteId> findIntersects(String collectionName, String field, Geometry geometry) {
-        NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collectionName, field);
-        BoundingBox boundingBox = new NitriteBoundingBox(geometry);
-        return indexMap.findIntersectingKeys(boundingBox);
+    /**
+     * Instantiates a new {@link SpatialIndexer}.
+     */
+    public SpatialIndexer() {
+        this.indexRegistry = new ConcurrentHashMap<>();
     }
 
     @Override
     public String getIndexType() {
-        return SpatialIndex;
+        return SPATIAL_INDEX;
     }
 
     @Override
-    public void writeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
-        if (fieldValue == null) return;
-        NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collection.getName(), field);
-        Geometry geometry = parseGeometry(field, fieldValue);
-        BoundingBox boundingBox = new NitriteBoundingBox(geometry);
-        indexMap.add(boundingBox, nitriteId);
+    public void validateIndex(Fields fields) {
+        if (fields.getFieldNames().size() > 1) {
+            throw new IndexingException("spatial index can only be created on a single field");
+        }
     }
 
     @Override
-    public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
-        if (fieldValue == null) return;
-        NitriteRTree<BoundingBox, Geometry> indexMap = getIndexMap(collection.getName(), field);
-        Geometry geometry = parseGeometry(field, fieldValue);
-        BoundingBox boundingBox = new NitriteBoundingBox(geometry);
-        indexMap.remove(boundingBox, nitriteId);
+    public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        SpatialIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
+        spatialIndex.drop();
     }
 
     @Override
-    public void updateIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object newValue, Object oldValue) {
-        removeIndex(collection, nitriteId, field, oldValue);
-        writeIndex(collection, nitriteId, field, newValue);
+    public void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        SpatialIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
+        spatialIndex.write(fieldValues);
     }
 
     @Override
-    public void dropIndex(NitriteMap<NitriteId, Document> collection, String field) {
-        // no action required
+    public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        SpatialIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
+        spatialIndex.remove(fieldValues);
+    }
+
+    @Override
+    public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
+        SpatialIndex spatialIndex = findSpatialIndex(findPlan.getIndexDescriptor(), nitriteConfig);
+        return spatialIndex.findNitriteIds(findPlan);
     }
 
     @Override
     public void initialize(NitriteConfig nitriteConfig) {
-        this.nitriteStore = nitriteConfig.getNitriteStore();
-        this.nitriteMapper = nitriteConfig.nitriteMapper();
     }
 
-    private NitriteRTree<BoundingBox, Geometry> getIndexMap(String collectionName, String field) {
-        String mapName = getIndexMapName(collectionName, field);
-        return nitriteStore.openRTree(mapName, BoundingBox.class, Geometry.class);
-    }
-
-    private Geometry parseGeometry(String field, Object fieldValue) {
-        if (fieldValue == null) return null;
-        if (fieldValue instanceof String) {
-            return nitriteMapper.convert(fieldValue, Geometry.class);
-        } else if (fieldValue instanceof Geometry) {
-            return (Geometry) fieldValue;
+    private SpatialIndex findSpatialIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        if (indexRegistry.containsKey(indexDescriptor)) {
+            return indexRegistry.get(indexDescriptor);
         }
-        throw new IndexingException("field " + field + " does not contain Geometry data");
+
+        SpatialIndex nitriteIndex = new SpatialIndex(indexDescriptor, nitriteConfig);
+        indexRegistry.put(indexDescriptor, nitriteIndex);
+        return nitriteIndex;
     }
 }

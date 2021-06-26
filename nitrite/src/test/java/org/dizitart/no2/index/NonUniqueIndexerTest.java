@@ -10,7 +10,7 @@ public class NonUniqueIndexerTest {
     @Test
     public void testConstructor() {
         NonUniqueIndexer actualNonUniqueIndexer = new NonUniqueIndexer();
-        assertEquals(IndexType.NonUnique, actualNonUniqueIndexer.getIndexType());
+        assertEquals(IndexType.NON_UNIQUE, actualNonUniqueIndexer.getIndexType());
         assertFalse(actualNonUniqueIndexer.isUnique());
     }
 

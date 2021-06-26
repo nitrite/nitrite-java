@@ -66,8 +66,8 @@ public class StressTest {
 
     @Test
     public void testIssue41() {
-        collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "number");
-        collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "name");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "number");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "name");
         collection.createIndex("counter");
 
         Random random = new Random();
@@ -208,9 +208,9 @@ public class StressTest {
     }
 
     @Indices({
-        @Index(value = "firstName", type = IndexType.NonUnique),
-        @Index(value = "age", type = IndexType.NonUnique),
-        @Index(value = "text", type = IndexType.Fulltext),
+        @Index(value = "firstName", type = IndexType.NON_UNIQUE),
+        @Index(value = "age", type = IndexType.NON_UNIQUE),
+        @Index(value = "text", type = IndexType.FULL_TEXT),
     })
     private static class PerfTestIndexed extends PerfTest {
     }

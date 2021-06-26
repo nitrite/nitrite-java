@@ -115,7 +115,14 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
     <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType);
 
     /**
-     * Removes a map from the store.
+     * Closes a {@link NitriteMap} in the store.
+     *
+     * @param mapName the map name
+     */
+    void closeMap(String mapName);
+
+    /**
+     * Removes a {@link NitriteMap} from the store.
      *
      * @param mapName the map name to remove.
      */
@@ -134,6 +141,14 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin,
      * @return the map.
      */
     <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName, Class<?> keyType, Class<?> valueType);
+
+
+    /**
+     * Closes a RTree in the store.
+     *
+     * @param rTreeName the RTree name
+     */
+    void closeRTree(String rTreeName);
 
     /**
      * Removes a RTree from the store.

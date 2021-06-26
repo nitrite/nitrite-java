@@ -17,9 +17,13 @@
 package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.text
+import org.dizitart.no2.collection.FindOptions
+import org.dizitart.no2.collection.FindOptions.orderBy
+import org.dizitart.no2.collection.FindOptions.skipBy
 import org.dizitart.no2.common.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
 import org.dizitart.no2.index.IndexOptions
+import org.dizitart.no2.index.IndexOptions.indexOptions
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.dizitart.no2.repository.annotations.Id
@@ -76,7 +80,7 @@ class NitriteTest : BaseTest() {
     @Test
     fun testIndexOption() {
         db?.getCollection("test") {
-            createIndex("id", option(IndexType.Unique, true))
+            createIndex(option(IndexType.UNIQUE), "id")
             assertTrue(hasIndex("id"))
             assertFalse(hasIndex("name"))
         }
@@ -90,14 +94,14 @@ class NitriteTest : BaseTest() {
                 documentOf("a" to 3),
                 documentOf("a" to 4),
                 documentOf("a" to 5))
-            var cursor = find().skipLimit(0, 2)
+            var cursor = find(skipBy(0).limit(2))
             assertEquals(cursor.size(), 2)
 
-            cursor = find().sort("a", SortOrder.Descending, NullOrder.First)
+            cursor = find(orderBy("a", SortOrder.Descending))
             assertEquals(cursor.size(), 5)
             assertEquals(cursor.last()["a"], 1)
 
-            cursor = find().sort("a", SortOrder.Descending).skipLimit(0, 2)
+            cursor = find(orderBy("a", SortOrder.Descending).skip(0).limit(2))
             assertEquals(cursor.size(), 2)
             assertEquals(cursor.last()["a"], 4)
         }
@@ -168,7 +172,7 @@ class NitriteTest : BaseTest() {
         val repository = db?.getRepository<NestedObjects>()!!
         repository.insert(first)
 
-        repository.createIndex("ob1", IndexOptions.indexOptions(IndexType.Fulltext));
+        repository.createIndex(indexOptions(IndexType.FULL_TEXT), "ob1");
         var found = repository.find("ob1" text "value1")
         assertFalse(found.isEmpty)
 
@@ -187,7 +191,7 @@ interface MyInterface {
     val id: UUID
 }
 
-@Indices(value = [(Index(value = "name", type = IndexType.NonUnique))])
+@Indices(value = [(Index(value = ["name"], type = IndexType.NON_UNIQUE))])
 abstract class SomeAbsClass(
         @Id override val id: UUID = UUID.randomUUID(),
         open val name: String = "abcd"
@@ -214,7 +218,7 @@ data class CaObject(
         val name: String
 )
 
-@Indices(value = [(Index(value = "time", type = IndexType.Unique))])
+@Indices(value = [(Index(value = ["time"], type = IndexType.UNIQUE))])
 data class ClassWithLocalDateTime(
     val name: String,
     val time: LocalDateTime

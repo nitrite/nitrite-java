@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.common;
 
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.exceptions.NitriteIOException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-@Slf4j
 public class Constants {
     private Constants() {}
 
@@ -42,7 +41,7 @@ public class Constants {
                 v = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).readLine();
             }
         } catch (IOException e) {
-            log.error("Failed to load version information", e);
+            throw new NitriteIOException("failed to load version information", e);
         }
         NITRITE_VERSION = v;
     }

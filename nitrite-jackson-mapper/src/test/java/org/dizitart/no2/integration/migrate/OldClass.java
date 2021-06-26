@@ -28,10 +28,10 @@ import org.dizitart.no2.repository.annotations.Index;
  */
 @Data
 @Entity(value = "old", indices = {
-    @Index(value = "firstName", type = IndexType.NonUnique),
-    @Index(value = "lastName", type = IndexType.NonUnique),
-    @Index(value = "literature.text", type = IndexType.Fulltext),
-    @Index(value = "literature.ratings", type = IndexType.NonUnique),
+    @Index(value = "firstName", type = IndexType.NON_UNIQUE),
+    @Index(value = "lastName", type = IndexType.NON_UNIQUE),
+    @Index(value = "literature.text", type = IndexType.FULL_TEXT),
+    @Index(value = "literature.ratings", type = IndexType.NON_UNIQUE),
 })
 public class OldClass {
     @Id

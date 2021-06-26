@@ -27,6 +27,6 @@ public class ChangeIdField extends BaseCommand implements Command {
             operations.dropIndex(oldFields);
         }
 
-        operations.createIndex(newFields, IndexType.Unique);
+        operations.createIndex(newFields, IndexType.UNIQUE);
     }
 }

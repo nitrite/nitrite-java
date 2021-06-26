@@ -31,24 +31,26 @@ import static org.dizitart.no2.common.concurrent.ThreadPoolManager.runAsync;
  * @author Anindya Chatterjee
  */
 class IndexOperations implements AutoCloseable {
+    private final String collectionName;
     private final NitriteConfig nitriteConfig;
-    private final IndexManager indexManager;
     private final NitriteMap<NitriteId, Document> nitriteMap;
     private final EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
     private final Map<Fields, AtomicBoolean> indexBuildTracker;
+    private IndexManager indexManager;
 
-    IndexOperations(NitriteConfig nitriteConfig, NitriteMap<NitriteId, Document> nitriteMap,
-                    EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus,
-                    IndexManager indexManager) {
+    IndexOperations(String collectionName, NitriteConfig nitriteConfig,
+                    NitriteMap<NitriteId, Document> nitriteMap,
+                    EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus) {
+        this.collectionName = collectionName;
         this.nitriteConfig = nitriteConfig;
         this.nitriteMap = nitriteMap;
         this.eventBus = eventBus;
-        this.indexManager = indexManager;
         this.indexBuildTracker = new ConcurrentHashMap<>();
+        this.indexManager = new IndexManager(collectionName, nitriteConfig);
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         indexManager.close();
     }
 
@@ -115,7 +117,12 @@ class IndexOperations implements AutoCloseable {
             }
         }
 
+        indexManager.dropIndexMeta();
         indexBuildTracker.clear();
+
+        // recreate index manager to discard old native resources
+        // special measure for RocksDB adapter
+        this.indexManager = new IndexManager(collectionName, nitriteConfig);
     }
 
     boolean isIndexing(Fields field) {

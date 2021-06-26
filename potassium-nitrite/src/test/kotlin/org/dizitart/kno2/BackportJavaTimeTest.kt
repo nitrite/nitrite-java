@@ -39,7 +39,7 @@ import java.util.*
 class BackportJavaTimeTest {
     private val dbPath = getRandomTempDbFile()
 
-    @Index(value = "time", type = IndexType.NonUnique)
+    @Index(value = ["time"], type = IndexType.NON_UNIQUE)
     data class TestData(
             @Id val id: String = UUID.randomUUID().toString(),
             val time: LocalDateTime

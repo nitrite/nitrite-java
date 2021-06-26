@@ -34,7 +34,6 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.dizitart.no2.integration.TestUtil.isSorted;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.collection.FindOptions.*;
 import static org.dizitart.no2.common.Constants.*;
@@ -42,6 +41,7 @@ import static org.dizitart.no2.common.util.DocumentUtils.isSimilar;
 import static org.dizitart.no2.filters.Filter.*;
 import static org.dizitart.no2.filters.FluentFilter.$;
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.integration.TestUtil.isSorted;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -622,8 +622,8 @@ public class CollectionFindTest extends BaseCollectionTest {
     @Test
     public void testIssue72() {
         NitriteCollection coll = db.getCollection("test");
-        coll.createIndex(IndexOptions.indexOptions(IndexType.Unique), "id");
-        coll.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "group");
+        coll.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "id");
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "group");
 
         coll.remove(ALL);
 
@@ -668,7 +668,7 @@ public class CollectionFindTest extends BaseCollectionTest {
     public void testDefaultNullOrder() {
         NitriteCollection coll = db.getCollection("test");
         try {
-            coll.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "startTime");
+            coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "startTime");
         } catch (IndexingException e) {
             // ignore
         }
@@ -767,7 +767,7 @@ public class CollectionFindTest extends BaseCollectionTest {
 
         NitriteCollection collection = db.getCollection("tag");
         collection.insert(doc1, doc2, doc3, doc4, doc5);
-        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "age");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "age");
 
         DocumentCursor cursor = collection.find(where("age").between(31, 35));
         assertEquals(cursor.size(), 5);
@@ -780,5 +780,30 @@ public class CollectionFindTest extends BaseCollectionTest {
 
         cursor = collection.find(where("age").between(31, 35, false).not());
         assertEquals(cursor.size(), 2);
+    }
+
+    @Test
+    public void testByIdFilter() {
+        Document doc1 = createDocument("age", 31).put("tag", "one");
+        Document doc2 = createDocument("age", 32).put("tag", "two");
+        Document doc3 = createDocument("age", 33).put("tag", "three");
+        Document doc4 = createDocument("age", 34).put("tag", "four");
+        Document doc5 = createDocument("age", 35).put("tag", "five");
+
+        NitriteCollection collection = db.getCollection("tag");
+        collection.insert(doc1, doc2, doc3, doc4, doc5);
+
+        List<Document> documentList = collection.find().toList();
+        Document document = documentList.get(0);
+        NitriteId nitriteId = document.getId();
+
+        Document result = collection.find(byId(nitriteId)).firstOrNull();
+        assertEquals(document, result);
+
+        result = collection.find(and(byId(nitriteId), where("age").notEq(null))).firstOrNull();
+        assertEquals(document, result);
+
+        result = collection.find(or(byId(nitriteId), where("tag").eq(document.get("tag")))).firstOrNull();
+        assertEquals(document, result);
     }
 }

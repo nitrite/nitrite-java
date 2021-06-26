@@ -20,7 +20,6 @@ package org.dizitart.no2.index;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.ComparableFilter;
-import org.dizitart.no2.filters.Filter;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -53,17 +52,15 @@ public class IndexScanner {
      * @return the linked hash set
      */
     @SuppressWarnings("unchecked")
-    public LinkedHashSet<NitriteId> doScan(List<Filter> filters, Map<String, Boolean> indexScanOrder) {
+    public LinkedHashSet<NitriteId> doScan(List<ComparableFilter> filters, Map<String, Boolean> indexScanOrder) {
         // linked-hash-set to return only unique ids preserving the order in index
         LinkedHashSet<NitriteId> nitriteIds = new LinkedHashSet<>();
 
         if (filters != null && !filters.isEmpty()) {
             // get the first filter to start scanning
-            Filter filter = filters.get(0);
+            ComparableFilter comparableFilter = filters.get(0);
 
-            if (filter instanceof ComparableFilter) {
-                ComparableFilter comparableFilter = (ComparableFilter) filter;
-
+            if (comparableFilter != null) {
                 // set the scan order of the index map
                 boolean reverseScan = (indexScanOrder != null
                     && indexScanOrder.containsKey(comparableFilter.getField()))
@@ -87,7 +84,7 @@ public class IndexScanner {
                     // if this is a list of sub maps, then take each of the sub map
                     // and the next filter and scan the sub map
                     List<NavigableMap<DBValue, ?>> subMaps = (List<NavigableMap<DBValue, ?>>) scanResult;
-                    List<Filter> remainingFilter = filters.subList(1, filters.size());
+                    List<ComparableFilter> remainingFilter = filters.subList(1, filters.size());
 
                     for (NavigableMap<DBValue, ?> subMap : subMaps) {
                         // create an index map from the sub map and scan to get the
@@ -100,7 +97,7 @@ public class IndexScanner {
                 }
             } else {
                 // filter is not comparable filter, so index scanning can not continue
-                throw new FilterException("index scan is not supported for " + filter.getClass().getName());
+                throw new FilterException("index scan is not supported for " + comparableFilter.getClass().getName());
             }
         } else {
             // if no more filter is left, get all terminal nitrite ids from

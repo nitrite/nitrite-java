@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.junit.Assert.*;
 
@@ -32,7 +33,7 @@ public class IndexMapTest {
         TreeMap<DBValue, Object> dbValueObjectMap = new TreeMap<>();
         IndexMap actualIndexMap = new IndexMap(dbValueObjectMap);
         List<NitriteId> terminalNitriteIds = actualIndexMap.getTerminalNitriteIds();
-        assertTrue(terminalNitriteIds instanceof java.util.ArrayList);
+        assertTrue(terminalNitriteIds instanceof CopyOnWriteArrayList);
         assertFalse(actualIndexMap.isReverseScan());
         assertTrue(terminalNitriteIds.isEmpty());
         assertTrue(dbValueObjectMap.isEmpty());
@@ -43,7 +44,7 @@ public class IndexMapTest {
         InMemoryMap<DBValue, Object> inMemoryMap = new InMemoryMap<>("Map Name", null);
         IndexMap actualIndexMap = new IndexMap(inMemoryMap);
         List<NitriteId> terminalNitriteIds = actualIndexMap.getTerminalNitriteIds();
-        assertTrue(terminalNitriteIds instanceof java.util.ArrayList);
+        assertTrue(terminalNitriteIds instanceof CopyOnWriteArrayList);
         assertFalse(actualIndexMap.isReverseScan());
         assertTrue(terminalNitriteIds.isEmpty());
         assertEquals("Map Name", inMemoryMap.getName());

@@ -26,7 +26,7 @@ import static org.junit.Assert.assertEquals;
 public class IndexScanFilterTest {
     @Test
     public void testConstructor() {
-        assertEquals("IndexScanFilter(filters=[])", (new IndexScanFilter(new ArrayList<Filter>())).toString());
+        assertEquals("IndexScanFilter(filters=[])", (new IndexScanFilter(new ArrayList<>())).toString());
     }
 }
 

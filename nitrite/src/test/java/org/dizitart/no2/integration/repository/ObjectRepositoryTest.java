@@ -349,8 +349,8 @@ public class ObjectRepositoryTest {
 
     @Data
     @Entity(value = "entity.employee", indices = {
-        @Index(value = "firstName", type = IndexType.NonUnique),
-        @Index(value = "lastName", type = IndexType.NonUnique),
+        @Index(value = "firstName", type = IndexType.NON_UNIQUE),
+        @Index(value = "lastName", type = IndexType.NON_UNIQUE),
     })
     private static class EmployeeEntity implements Mappable {
         private static final Faker faker = new Faker();

@@ -114,7 +114,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     }
 
     private boolean isUniqueIndex() {
-        return indexType.equals(IndexType.Unique);
+        return indexType.equals(IndexType.UNIQUE);
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {

@@ -9,7 +9,7 @@ public class UniqueIndexerTest {
     @Test
     public void testConstructor() {
         UniqueIndexer actualUniqueIndexer = new UniqueIndexer();
-        assertEquals(IndexType.Unique, actualUniqueIndexer.getIndexType());
+        assertEquals(IndexType.UNIQUE, actualUniqueIndexer.getIndexType());
         assertTrue(actualUniqueIndexer.isUnique());
     }
 

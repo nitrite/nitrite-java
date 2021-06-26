@@ -126,6 +126,5 @@ public class KryoObjectFormatter implements ObjectFormatter {
         NitriteSerializers.registerAll(this);
         DefaultJavaSerializers.registerAll(this);
         DefaultTimeKeySerializers.registerAll(this);
-//        DefaultNumberKeySerializers.registerAll(this);
     }
 }

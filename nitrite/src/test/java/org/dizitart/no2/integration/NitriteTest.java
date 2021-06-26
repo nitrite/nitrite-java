@@ -97,8 +97,8 @@ public class NitriteTest {
         collection = db.getCollection("test");
         collection.remove(ALL);
 
-        collection.createIndex(IndexOptions.indexOptions(IndexType.Fulltext), "body");
-        collection.createIndex(IndexOptions.indexOptions(IndexType.Unique), "firstName");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.FULL_TEXT), "body");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "firstName");
         collection.insert(doc1, doc2, doc3);
     }
 
@@ -284,11 +284,15 @@ public class NitriteTest {
         final CountDownLatch latch = new CountDownLatch(10000);
         for (int i = 0; i < 10000; i++) {
             pool.submit(() -> {
-                int refIndex = random.nextInt(5);
-                Receipt receipt = factory.manufacturePojoWithFullData(Receipt.class);
-                receipt.setClientRef(refs[refIndex]);
-                repository.update(receipt, true);
-                latch.countDown();
+                try {
+                    int refIndex = random.nextInt(5);
+                    Receipt receipt = factory.manufacturePojoWithFullData(Receipt.class);
+                    receipt.setClientRef(refs[refIndex]);
+                    repository.update(receipt, true);
+                    latch.countDown();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
             });
         }
 
@@ -305,10 +309,10 @@ public class NitriteTest {
         Document doc = createDocument("fifth_key", "fifth_key");
 
         if (!collection.hasIndex("key")) {
-            collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "key");
+            collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "key");
         }
         if (!collection.hasIndex("second_key")) {
-            collection.createIndex(IndexOptions.indexOptions(IndexType.NonUnique), "second_key");
+            collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "second_key");
         }
 
         collection.insert(doc1, doc2);
@@ -394,14 +398,14 @@ public class NitriteTest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Indices({
-        @Index(value = "synced", type = IndexType.NonUnique)
+        @Index(value = "synced", type = IndexType.NON_UNIQUE)
     })
     public static class Receipt implements Mappable {
-        private Status status;
         @Id
         private String clientRef;
         private Boolean synced;
         private Long createdTimestamp = System.currentTimeMillis();
+        private Status status;
 
         @Override
         public Document write(NitriteMapper mapper) {

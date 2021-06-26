@@ -494,6 +494,21 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
         List<PersonEntity> sameNamePeople = repository.find(where("name").eq("jhonny")).toList();
         assertEquals(sameNamePeople.size(), 3);
+
+        sameNamePeople = repository.find(where("name").eq("JHONNY")).toList();
+        assertEquals(sameNamePeople.size(), 0);
+
+        sameNamePeople = repository.find(where("name").text("jhonny")).toList();
+        assertEquals(sameNamePeople.size(), 3);
+
+        sameNamePeople = repository.find(where("name").text("JHONNY")).toList();
+        assertEquals(sameNamePeople.size(), 3);
+
+        sameNamePeople = repository.find(where("name").eq("jhon*")).toList();
+        assertEquals(sameNamePeople.size(), 0);
+
+        sameNamePeople = repository.find(where("name").text("jhon*")).toList();
+        assertEquals(sameNamePeople.size(), 3);
     }
 
     @Test

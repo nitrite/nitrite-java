@@ -27,8 +27,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class FindOptimizerTest {
@@ -37,42 +36,43 @@ public class FindOptimizerTest {
         FindOptimizer findOptimizer = new FindOptimizer();
         Filter filter = mock(Filter.class);
         FindOptions findOptions = new FindOptions();
-        FindPlan actualOptimizeResult = findOptimizer.optimize(filter, findOptions, new ArrayList<>());
+        FindPlan actualOptimizeResult = findOptimizer.optimize(filter, findOptions, new ArrayList<IndexDescriptor>());
+        assertTrue(actualOptimizeResult.getBlockingSortOrder().isEmpty());
+        assertTrue(actualOptimizeResult.getSubPlans().isEmpty());
         assertNull(actualOptimizeResult.getSkip());
         assertNull(actualOptimizeResult.getLimit());
-        assertTrue(actualOptimizeResult.getCollator() instanceof java.text.RuleBasedCollator);
     }
 
     @Test
     public void testOptimize2() {
         FindOptimizer findOptimizer = new FindOptimizer();
-        Filter filter = mock(Filter.class);
-        findOptimizer.optimize(filter, null, new ArrayList<>());
+        FindOptions findOptions = new FindOptions();
+        FindPlan actualOptimizeResult = findOptimizer.optimize(null, findOptions, new ArrayList<IndexDescriptor>());
+        assertTrue(actualOptimizeResult.getBlockingSortOrder().isEmpty());
+        assertTrue(actualOptimizeResult.getSubPlans().isEmpty());
+        assertNull(actualOptimizeResult.getSkip());
+        assertNull(actualOptimizeResult.getLimit());
     }
 
     @Test
     public void testOptimize3() {
         FindOptimizer findOptimizer = new FindOptimizer();
         Filter filter = mock(Filter.class);
-        FindOptions findOptions = FindOptions.orderBy("Field Name", SortOrder.Ascending);
-        FindPlan actualOptimizeResult = findOptimizer.optimize(filter, findOptions, new ArrayList<>());
-        assertTrue(actualOptimizeResult.getCollator() instanceof java.text.RuleBasedCollator);
-        assertNull(actualOptimizeResult.getSkip());
-        assertNull(actualOptimizeResult.getLimit());
+        FindPlan actualOptimizeResult = findOptimizer.optimize(filter, null, new ArrayList<IndexDescriptor>());
+        assertTrue(actualOptimizeResult.getBlockingSortOrder().isEmpty());
+        assertTrue(actualOptimizeResult.getSubPlans().isEmpty());
     }
 
     @Test
     public void testOptimize4() {
         FindOptimizer findOptimizer = new FindOptimizer();
         Filter filter = mock(Filter.class);
-        FindOptions findOptions = new FindOptions();
-
-        ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<>();
-        indexDescriptorList.add(new IndexDescriptor("Index Type", new Fields(), "Collection Name"));
-        FindPlan actualOptimizeResult = findOptimizer.optimize(filter, findOptions, indexDescriptorList);
+        FindOptions findOptions = FindOptions.orderBy("Field Name", SortOrder.Ascending);
+        FindPlan actualOptimizeResult = findOptimizer.optimize(filter, findOptions, new ArrayList<IndexDescriptor>());
+        assertEquals(1, actualOptimizeResult.getBlockingSortOrder().size());
+        assertTrue(actualOptimizeResult.getSubPlans().isEmpty());
         assertNull(actualOptimizeResult.getSkip());
         assertNull(actualOptimizeResult.getLimit());
-        assertTrue(actualOptimizeResult.getCollator() instanceof java.text.RuleBasedCollator);
     }
 
     @Test
@@ -81,16 +81,32 @@ public class FindOptimizerTest {
         Filter filter = mock(Filter.class);
         FindOptions findOptions = new FindOptions();
 
+        ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<IndexDescriptor>();
+        indexDescriptorList.add(new IndexDescriptor("Index Type", new Fields(), "Collection Name"));
+        FindPlan actualOptimizeResult = findOptimizer.optimize(filter, findOptions, indexDescriptorList);
+        assertTrue(actualOptimizeResult.getBlockingSortOrder().isEmpty());
+        assertTrue(actualOptimizeResult.getSubPlans().isEmpty());
+        assertNull(actualOptimizeResult.getSkip());
+        assertNull(actualOptimizeResult.getLimit());
+    }
+
+    @Test
+    public void testOptimize6() {
+        FindOptimizer findOptimizer = new FindOptimizer();
+        Filter filter = mock(Filter.class);
+        FindOptions findOptions = new FindOptions();
+
         Fields fields = new Fields();
         fields.addField("Field");
         IndexDescriptor e = new IndexDescriptor("Index Type", fields, "Collection Name");
 
-        ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<>();
+        ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<IndexDescriptor>();
         indexDescriptorList.add(e);
         FindPlan actualOptimizeResult = findOptimizer.optimize(filter, findOptions, indexDescriptorList);
+        assertTrue(actualOptimizeResult.getBlockingSortOrder().isEmpty());
+        assertTrue(actualOptimizeResult.getSubPlans().isEmpty());
         assertNull(actualOptimizeResult.getSkip());
         assertNull(actualOptimizeResult.getLimit());
-        assertTrue(actualOptimizeResult.getCollator() instanceof java.text.RuleBasedCollator);
     }
 }
 

@@ -37,14 +37,14 @@ import java.util.List;
 @ToString
 public class IndexScanFilter implements Filter {
     @Getter
-    private final List<Filter> filters;
+    private final List<ComparableFilter> filters;
 
     /**
      * Instantiates a new Index scan filter.
      *
      * @param filters the filters
      */
-    public IndexScanFilter(Collection<Filter> filters) {
+    public IndexScanFilter(Collection<ComparableFilter> filters) {
         this.filters = new ArrayList<>(filters);
     }
 

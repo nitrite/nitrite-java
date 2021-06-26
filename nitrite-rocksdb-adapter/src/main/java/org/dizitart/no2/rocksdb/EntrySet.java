@@ -26,7 +26,6 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
     }
 
     @Override
-    @SuppressWarnings("NullableProblems")
     public Iterator<Pair<K, V>> iterator() {
         return new EntryIterator();
     }

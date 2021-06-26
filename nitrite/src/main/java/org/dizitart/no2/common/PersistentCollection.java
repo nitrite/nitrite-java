@@ -257,6 +257,11 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Auto
     long size();
 
     /**
+     * Closes this {@link PersistentCollection}.
+     * */
+    void close();
+
+    /**
      * Returns the {@link NitriteStore} instance for this collection.
      *
      * @return the {@link NitriteStore} instance.

@@ -79,9 +79,9 @@ public class DbTestOperations {
 
         collection = db.getCollection("test");
         collection.remove(ALL);
-        collection.createIndex(indexOptions(IndexType.Fulltext), "body");
+        collection.createIndex(indexOptions(IndexType.FULL_TEXT), "body");
         collection.createIndex("firstName");
-        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "lastName");
         db.close();
     }
 

@@ -42,5 +42,5 @@ public @interface Index {
      *
      * @return the index type
      */
-    String type() default IndexType.Unique;
+    String type() default IndexType.UNIQUE;
 }

@@ -112,6 +112,16 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
 
     }
 
+    @Override
+    public void clear() {
+        backingMap.clear();
+    }
+
+    @Override
+    public void drop() {
+        backingMap.clear();
+    }
+
     /**
      * The type Spatial key.
      */

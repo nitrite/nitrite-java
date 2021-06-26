@@ -44,16 +44,16 @@ import static org.junit.Assert.*;
 public class CollectionCompoundIndexTest extends BaseCollectionTest {
     @Test
     public void testCreateAndCheckIndex() {
-        collection.createIndex(indexOptions(IndexType.Unique), "firstName", "lastName");
+        collection.createIndex(indexOptions(IndexType.UNIQUE), "firstName", "lastName");
         assertTrue(collection.hasIndex("firstName"));
         assertTrue(collection.hasIndex("firstName", "lastName"));
         assertFalse(collection.hasIndex("firstName", "lastName", "birthDay"));
         assertFalse(collection.hasIndex("lastName"));
 
-        collection.createIndex(indexOptions(IndexType.NonUnique), "firstName");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "firstName");
         assertTrue(collection.hasIndex("firstName"));
 
-        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "lastName");
         assertTrue(collection.hasIndex("lastName"));
 
         insert();
@@ -61,7 +61,7 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
 
     @Test
     public void testCreateMultiKeyIndexFirstField() {
-        collection.createIndex(indexOptions(IndexType.NonUnique), "data", "lastName");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "data", "lastName");
         assertTrue(collection.hasIndex("data"));
         assertTrue(collection.hasIndex("data", "lastName"));
         assertFalse(collection.hasIndex("lastName"));
@@ -72,10 +72,10 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
     @Test
     public void testListIndexes() {
         assertEquals(collection.listIndices().size(), 0);
-        collection.createIndex(indexOptions(IndexType.Unique), "firstName", "lastName");
+        collection.createIndex(indexOptions(IndexType.UNIQUE), "firstName", "lastName");
         assertEquals(collection.listIndices().size(), 1);
 
-        collection.createIndex(indexOptions(IndexType.NonUnique), "firstName");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "firstName");
         assertEquals(collection.listIndices().size(), 2);
     }
 
@@ -105,7 +105,7 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
     @Test
     public void testHasIndex() {
         assertFalse(collection.hasIndex("lastName"));
-        collection.createIndex(indexOptions(IndexType.NonUnique), "lastName", "firstName");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "lastName", "firstName");
         assertTrue(collection.hasIndex("lastName"));
     }
 
@@ -296,7 +296,7 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
             }
         });
 
-        collection.createIndex(indexOptions(IndexType.NonUnique), "first", "second");
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "first", "second");
         assertEquals(collection.find().size(), 10000);
 
         await().until(completed::get);

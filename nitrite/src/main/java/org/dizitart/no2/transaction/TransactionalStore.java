@@ -57,6 +57,9 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
         for (NitriteRTree<?, ?> rTree : rTreeRegistry.values()) {
             rTree.close();
         }
+
+        mapRegistry.clear();
+        rTreeRegistry.clear();
     }
 
     @Override
@@ -86,6 +89,18 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
         TransactionalMap<Key, Value> transactionalMap = new TransactionalMap<>(mapName, primaryMap, this);
         mapRegistry.put(mapName, transactionalMap);
         return transactionalMap;
+    }
+
+    @Override
+    public void closeMap(String mapName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
+    }
+
+    @Override
+    public void closeRTree(String rTreeName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
     }
 
     @Override

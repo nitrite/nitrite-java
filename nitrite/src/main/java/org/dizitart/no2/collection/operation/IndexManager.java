@@ -74,7 +74,7 @@ public class IndexManager implements AutoCloseable {
      * @return the index descriptors
      */
     public Collection<IndexDescriptor> getIndexDescriptors() {
-        if (indexDescriptorCache == null || indexDescriptorCache.isEmpty()) {
+        if (indexDescriptorCache == null) {
             indexDescriptorCache = listIndexDescriptors();
         }
         return indexDescriptorCache;
@@ -101,10 +101,19 @@ public class IndexManager implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
-        if (indexMetaMap != null) {
-            indexMetaMap.close();
+    public void close() {
+        // close all index maps
+        Iterable<IndexMeta> indexMetas = indexMetaMap.values();
+        for (IndexMeta indexMeta : indexMetas) {
+            if (indexMeta != null && indexMeta.getIndexDescriptor() != null) {
+                String indexMapName = indexMeta.getIndexMap();
+                NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
+                indexMap.close();
+            }
         }
+
+        // close index meta
+        indexMetaMap.close();
     }
 
     /**
@@ -125,7 +134,8 @@ public class IndexManager implements AutoCloseable {
      */
     Collection<IndexDescriptor> listIndexDescriptors() {
         Set<IndexDescriptor> indexSet = new LinkedHashSet<>();
-        for (IndexMeta indexMeta : indexMetaMap.values()) {
+        Iterable<IndexMeta> iterable = indexMetaMap.values();
+        for (IndexMeta indexMeta : iterable) {
             indexSet.add(indexMeta.getIndexDescriptor());
         }
         return Collections.unmodifiableSet(indexSet);
@@ -168,6 +178,11 @@ public class IndexManager implements AutoCloseable {
 
         indexMetaMap.remove(fields);
         updateIndexDescriptorCache();
+    }
+
+    void dropIndexMeta() {
+        indexMetaMap.clear();
+        indexMetaMap.drop();
     }
 
     /**

@@ -21,8 +21,10 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.processors.ProcessorChain;
+import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.store.memory.InMemoryMap;
 import org.junit.Test;
 
@@ -33,31 +35,44 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class ReadOperationsTest {
+
     @Test
     public void testFind() {
-        IndexManager indexManager = mock(IndexManager.class);
-        when(indexManager.getIndexDescriptors()).thenReturn(new ArrayList<>());
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        when(indexOperations.listIndexes()).thenReturn(new ArrayList<>());
         NitriteConfig nitriteConfig = new NitriteConfig();
-        IndexOperations indexOperations = new IndexOperations(nitriteConfig,
-            new InMemoryMap<>("Map Name", null), null, indexManager);
-        NitriteConfig nitriteConfig1 = new NitriteConfig();
         InMemoryMap<NitriteId, Document> nitriteMap = new InMemoryMap<>("Map Name", null);
-        ReadOperations readOperations = new ReadOperations("Collection Name", indexOperations, nitriteConfig1, nitriteMap,
-            new ProcessorChain());
+
+        ReadOperations readOperations = new ReadOperations("Collection Name", indexOperations, nitriteConfig, nitriteMap,
+                new ProcessorChain());
         Filter filter = mock(Filter.class);
         assertTrue(readOperations.find(filter, new FindOptions()).toList().isEmpty());
-        verify(indexManager).getIndexDescriptors();
+        verify(indexOperations).listIndexes();
+    }
+
+    @Test
+    public void testFind2() {
+        ArrayList<IndexDescriptor> indexDescriptorList = new ArrayList<>();
+        indexDescriptorList.add(new IndexDescriptor("Index Type", new Fields(), "Collection Name"));
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        when(indexOperations.listIndexes()).thenReturn(indexDescriptorList);
+        NitriteConfig nitriteConfig = new NitriteConfig();
+        InMemoryMap<NitriteId, Document> nitriteMap = new InMemoryMap<>("Map Name", null);
+
+        ReadOperations readOperations = new ReadOperations("Collection Name", indexOperations, nitriteConfig, nitriteMap,
+                new ProcessorChain());
+        Filter filter = mock(Filter.class);
+        assertTrue(readOperations.find(filter, new FindOptions()).toList().isEmpty());
+        verify(indexOperations).listIndexes();
     }
 
     @Test
     public void testGetById() {
         NitriteConfig nitriteConfig = new NitriteConfig();
-        IndexOperations indexOperations = new IndexOperations(nitriteConfig,
-            new InMemoryMap<>("Map Name", null), null, null);
-        NitriteConfig nitriteConfig1 = new NitriteConfig();
         InMemoryMap<NitriteId, Document> nitriteMap = new InMemoryMap<>("Map Name", null);
-        ReadOperations readOperations = new ReadOperations("Collection Name", indexOperations, nitriteConfig1, nitriteMap,
-            new ProcessorChain());
+
+        ReadOperations readOperations = new ReadOperations("Collection Name", null, nitriteConfig, nitriteMap,
+                new ProcessorChain());
         assertNull(readOperations.getById(NitriteId.newId()));
     }
 }

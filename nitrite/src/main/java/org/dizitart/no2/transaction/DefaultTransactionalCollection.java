@@ -297,7 +297,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
             Fields fields = Fields.withNames(fieldNames);
             writeLock.lock();
             if (indexOptions == null) {
-                collectionOperations.createIndex(fields, IndexType.Unique);
+                collectionOperations.createIndex(fields, IndexType.UNIQUE);
             } else {
                 collectionOperations.createIndex(fields, indexOptions.getIndexType());
             }
@@ -529,7 +529,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (collectionOperations != null) {
             collectionOperations.close();
         }
@@ -647,7 +647,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         }
     }
 
-    private void closeEventBus() throws Exception {
+    private void closeEventBus() {
         if (eventBus != null) {
             eventBus.close();
         }

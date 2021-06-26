@@ -26,15 +26,15 @@ public interface IndexType {
     /**
      * A unique index.
      */
-    String Unique = "Unique";
+    String UNIQUE = "Unique";
 
     /**
      * A non-unique index.
      */
-    String NonUnique = "NonUnique";
+    String NON_UNIQUE = "NonUnique";
 
     /**
      * A nitrite full-text index.
      */
-    String Fulltext = "Fulltext";
+    String FULL_TEXT = "Fulltext";
 }

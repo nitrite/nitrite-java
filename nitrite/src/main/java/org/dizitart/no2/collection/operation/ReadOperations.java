@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.streams.*;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.filters.EqualsFilter;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.filters.LogicalFilter;
 import org.dizitart.no2.filters.NitriteFilter;
@@ -33,6 +34,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+
+import static org.dizitart.no2.common.tuples.Pair.pair;
 
 /**
  * @author Anindya Chatterjee
@@ -102,38 +105,42 @@ class ReadOperations {
     }
 
     private RecordStream<Pair<NitriteId, Document>> findSuitableStream(FindPlan findPlan) {
-        RecordStream<Pair<NitriteId, Document>> rawStream = null;
+        RecordStream<Pair<NitriteId, Document>> rawStream;
 
-        // filtering stage
-        IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
-        if (indexDescriptor != null) {
-            // get optimized filter
-            NitriteIndexer indexer = nitriteConfig.findIndexer(indexDescriptor.getIndexType());
-            LinkedHashSet<NitriteId> nitriteIds = indexer.findByFilter(findPlan, nitriteConfig);
+        if (!findPlan.getSubPlans().isEmpty()) {
+            // or filters get all sub stream by finding suitable stream of all sub plans
+            List<RecordStream<Pair<NitriteId, Document>>> subStreams = new ArrayList<>();
+            for (FindPlan subPlan : findPlan.getSubPlans()) {
+                RecordStream<Pair<NitriteId, Document>> suitableStream = findSuitableStream(subPlan);
+                subStreams.add(suitableStream);
+            }
+            // union of all suitable stream of all sub plans
+            rawStream = new UnionStream(subStreams);
 
-            // create indexed stream from optimized filter
-            RecordStream<Pair<NitriteId, Document>> indexedStream = new IndexedStream(nitriteIds, nitriteMap);
-
-            // create filtered stream from above result and un-optimized filters
-            rawStream = new FilteredStream(indexedStream, findPlan.getCollectionScanFilter());
+            // return only distinct items
+            rawStream = new DistinctStream(rawStream);
         } else {
-            // it means we don't have any index and we won't have any optimized filter
-            if (findPlan.getCollectionScanFilter() != null) {
-                rawStream = new FilteredStream(nitriteMap.entries(), findPlan.getCollectionScanFilter());
+            // and or single filter
+            if (findPlan.getByIdFilter() != null) {
+                EqualsFilter byIdFilter = findPlan.getByIdFilter();
+                NitriteId nitriteId = NitriteId.createId((String) byIdFilter.getValue());
+                rawStream = RecordStream.single(pair(nitriteId, nitriteMap.get(nitriteId)));
             } else {
-                if (!findPlan.getSubPlans().isEmpty()) {
-                    // or filters get all sub stream by finding suitable stream of all sub plans
-                    List<RecordStream<Pair<NitriteId, Document>>> subStreams = new ArrayList<>();
-                    for (FindPlan subPlan : findPlan.getSubPlans()) {
-                        RecordStream<Pair<NitriteId, Document>> suitableStream = findSuitableStream(subPlan);
-                        subStreams.add(suitableStream);
-                    }
-                    // union of all suitable stream of all sub plans
-                    rawStream = new UnionStream(subStreams);
+                IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
+                if (indexDescriptor != null) {
+                    // get optimized filter
+                    NitriteIndexer indexer = nitriteConfig.findIndexer(indexDescriptor.getIndexType());
+                    LinkedHashSet<NitriteId> nitriteIds = indexer.findByFilter(findPlan, nitriteConfig);
 
-                    // return only distinct items
-                    rawStream = new DistinctStream(rawStream);
+                    // create indexed stream from optimized filter
+                    rawStream = new IndexedStream(nitriteIds, nitriteMap);
+                } else {
+                    rawStream = nitriteMap.entries();
                 }
+            }
+
+            if (findPlan.getCollectionScanFilter() != null) {
+                rawStream = new FilteredStream(rawStream, findPlan.getCollectionScanFilter());
             }
         }
 

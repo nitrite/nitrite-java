@@ -33,9 +33,9 @@ import java.util.Date;
  */
 @ToString
 @EqualsAndHashCode
-@Index(value = "joinDate", type = IndexType.NonUnique)
-@Index(value = "address", type = IndexType.Fulltext)
-@Index(value = "employeeNote.text", type = IndexType.Fulltext)
+@Index(value = "joinDate", type = IndexType.NON_UNIQUE)
+@Index(value = "address", type = IndexType.FULL_TEXT)
+@Index(value = "employeeNote.text", type = IndexType.FULL_TEXT)
 public class Employee implements Serializable {
     @Id
     @Getter

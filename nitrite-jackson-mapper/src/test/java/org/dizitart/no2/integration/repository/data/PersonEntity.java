@@ -31,8 +31,8 @@ import java.util.UUID;
  */
 @Data
 @Entity(value = "MyPerson", indices = {
-    @Index(value = "name", type = IndexType.Fulltext),
-    @Index(value = "status", type = IndexType.NonUnique)
+    @Index(value = "name", type = IndexType.FULL_TEXT),
+    @Index(value = "status", type = IndexType.NON_UNIQUE)
 })
 public class PersonEntity {
     @Id
