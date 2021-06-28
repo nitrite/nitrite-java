@@ -70,7 +70,6 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Auto
      * Creates an index on the {@code fields}, if not already exists.
      * If {@code indexOptions} is {@code null}, it will use default options.
      * <p>
-     * <p>
      * The default indexing option is -
      *
      * <ul>
@@ -83,7 +82,6 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Auto
      *         <li><b>_id</b> value of the document is always indexed. But full-text indexing is not supported on <b>_id</b> value.</li>
      *         <li>Indexing on non-comparable value is not supported.</li>
      *     </ul>
-     * </p>
      *
      * @param indexOptions index options.
      * @param fields       the fields to be indexed.
@@ -152,7 +150,6 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Auto
      * If any of the value is already indexed in the collection, then after insertion the
      * index will also be updated.
      * <p>
-     * <p>
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type {@link EventType#Insert}.
      * </p>
@@ -191,7 +188,6 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Auto
      * Updates {@code element} in the collection. Specified {@code element} must have an id.
      * If the {@code element} is not found in the collection, it will be inserted only if {@code insertIfAbsent}
      * is set to {@code true}.
-     * <p>
      * <p>
      * NOTE: This operations will notify all {@link CollectionEventListener}
      * instances registered to this collection with change type

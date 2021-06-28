@@ -17,7 +17,6 @@ dependencies {
         api project(":nitrite-spatial")
         api project(":nitrite-replication")
         api project(":nitrite-support")
-        api project(":rx-nitrite")
         api project(":potassium-nitrite")
 
         api project(":nitrite-mvstore-adapter")
@@ -39,7 +38,6 @@ dependencies {
         api "commons-codec:commons-codec:1.15"
         api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.10"
         api "org.jetbrains.kotlin:kotlin-reflect:1.4.10"
-        api "io.reactivex.rxjava2:rxjava:2.2.20"
     }
 }
 

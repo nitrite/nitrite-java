@@ -94,14 +94,6 @@ public class RocksDBReference implements AutoCloseable {
         }
     }
 
-    public void closeColumnFamily(String mapName) {
-        if (columnFamilyHandleRegistry.containsKey(mapName)) {
-            ColumnFamilyHandle handle = columnFamilyHandleRegistry.get(mapName);
-            handle.close();
-            columnFamilyHandleRegistry.remove(mapName);
-        }
-    }
-
     public BytewiseComparator getDbComparator() {
         // delayed initialization, otherwise initializing
         // it in ctor is throwing java.lang.UnsatisfiedLinkError

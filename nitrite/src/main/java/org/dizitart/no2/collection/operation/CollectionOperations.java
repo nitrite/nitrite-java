@@ -211,7 +211,8 @@ public class CollectionOperations implements AutoCloseable {
     /**
      * Finds documents using filter.
      *
-     * @param filter the filter
+     * @param filter      the filter
+     * @param findOptions the find options
      * @return the document cursor
      */
     public DocumentCursor find(Filter filter, FindOptions findOptions) {

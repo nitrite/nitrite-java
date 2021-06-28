@@ -50,14 +50,12 @@ public class AESEncryptor implements Encryptor {
 
     /**
      * Instantiates a new {@link AESEncryptor} with these default values
-     * <p>
      *     <ul>
      *         <li>Encryption Algo - AES/GCM/NoPadding</li>
      *         <li>Tag Length (bit) - 128</li>
      *         <li>IV Length (byte) - 12</li>
      *         <li>Salt Length (byte) - 16</li>
      *     </ul>
-     * </p>
      *
      * @param password the password
      */

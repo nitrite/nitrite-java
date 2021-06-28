@@ -26,7 +26,6 @@ Nitrite is an embedded database ideal for desktop, mobile or small web applicati
 -   Schema migration
 -   Indexing
 -   Full text search
--   Rx-Java support
 -   Both way replication via Nitrite DataGate server
 -   Very fast, lightweight and fluent API 
 -   Android compatibility (API Level 19)

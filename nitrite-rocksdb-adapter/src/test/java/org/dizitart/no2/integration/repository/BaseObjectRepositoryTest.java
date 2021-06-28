@@ -52,6 +52,7 @@ public abstract class BaseObjectRepositoryTest {
 
 	@Rule
     public Retry retry = new Retry(3);
+
     @Parameterized.Parameters(name = "Protected = {0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{

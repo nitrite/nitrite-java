@@ -41,7 +41,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * <p>
  * A nitrite collection supports indexing. Every nitrite collection is also
  * observable.
- * <p>
+ * </p>
  * <h3>Create a collection</h3>
  * <pre>
  * {@code
@@ -52,8 +52,6 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * NitriteCollection collection = db.getCollection("products");
  * }
  *</pre>
- *
- * </p>
  *
  * @author Anindya Chatterjee
  * @see EventAware

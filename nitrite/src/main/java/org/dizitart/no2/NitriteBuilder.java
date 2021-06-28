@@ -95,7 +95,6 @@ public class NitriteBuilder {
      * exists, then it will create a new file store and open; otherwise it will
      * open the existing file store.
      * <p>
-     * <p>
      * NOTE: If the database is corrupted somehow then at the time of opening, it will
      * try to repair it using the last known good version. If still it fails to
      * recover, then it will throw a {@link org.dizitart.no2.exceptions.NitriteIOException}.

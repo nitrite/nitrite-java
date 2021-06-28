@@ -113,7 +113,7 @@ public interface Nitrite extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(Class<T> type, String key);
 
     /**
-     * Destroys a collection without opening the {@link NitriteCollection} first.
+     * Destroys a {@link NitriteCollection} without opening it first.
      *
      * @param name the name of the collection
      */
@@ -128,7 +128,7 @@ public interface Nitrite extends AutoCloseable {
     <T> void destroyRepository(Class<T> type);
 
     /**
-     * Destroys an {@link ObjectRepository} without opening it first.
+     * Destroys an keyed-{@link ObjectRepository} without opening it first.
      *
      * @param <T>  the type parameter
      * @param type the type

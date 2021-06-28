@@ -44,6 +44,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     /**
      * Specifies the type of the index.
      *
+     * @param indexType index type
      * @return the type of the index.
      * @see IndexType
      */
@@ -53,6 +54,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     /**
      * Gets the target fields for the index.
      *
+     * @param indexFields fields in the index
      * @return the target fields.
      */
     @Getter
@@ -61,6 +63,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     /**
      * Gets the collection name.
      *
+     * @param collectionName collection name
      * @return the collection name.
      */
     @Getter
@@ -70,7 +73,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
      * Instantiates a new Index.
      *
      * @param indexType      the index type
-     * @param fields          the value
+     * @param fields         the value
      * @param collectionName the collection name
      */
     public IndexDescriptor(String indexType, Fields fields, String collectionName) {
@@ -109,6 +112,11 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
         return -1;
     }
 
+    /**
+     * Is compound index boolean.
+     *
+     * @return the boolean
+     */
     public boolean isCompoundIndex() {
         return indexFields.getFieldNames().size() > 1;
     }

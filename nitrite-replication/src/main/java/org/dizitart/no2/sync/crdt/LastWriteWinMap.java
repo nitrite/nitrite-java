@@ -17,15 +17,13 @@
 package org.dizitart.no2.sync.crdt;
 
 import lombok.Data;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Map;
 
+import static org.dizitart.no2.collection.FindOptions.skipBy;
 import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.filters.FluentFilter.where;
 
@@ -59,7 +57,7 @@ public class LastWriteWinMap {
     public LastWriteWinState getChangesSince(Long since, int offset, int size) {
         LastWriteWinState state = new LastWriteWinState();
 
-        DocumentCursor cursor = collection.find(where(DOC_MODIFIED).gte(since)).skipLimit(offset, size);
+        DocumentCursor cursor = collection.find(where(DOC_MODIFIED).gte(since), skipBy(offset).limit(size));
         state.getChanges().addAll(cursor.toSet());
 
         if (offset == 0) {

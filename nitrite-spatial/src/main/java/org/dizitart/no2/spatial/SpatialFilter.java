@@ -25,7 +25,7 @@ import org.locationtech.jts.geom.Geometry;
 /**
  * Represents a spatial filter.
  *
- * @since 4.0
+ * @since 4.0.0
  * @author Anindya Chatterjee
  */
 public abstract class SpatialFilter extends IndexOnlyFilter {

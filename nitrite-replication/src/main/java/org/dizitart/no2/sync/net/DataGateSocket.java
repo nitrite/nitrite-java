@@ -203,11 +203,13 @@ public class DataGateSocket {
                     new X509TrustManager() {
 
                         @Override
+                        @SuppressWarnings("TrustAllX509TrustManager")
                         public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
                                                        String authType) {
                         }
 
                         @Override
+                        @SuppressWarnings("TrustAllX509TrustManager")
                         public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
                                                        String authType) {
                         }
@@ -248,7 +250,7 @@ public class DataGateSocket {
         setCurrentStatus(Status.RECONNECT);
         reconnectTimer = new Timer();
 
-        long delay = reconnectCount * RECONNECT_INTERVAL;
+        long delay = (long) reconnectCount * RECONNECT_INTERVAL;
         reconnectTimer.schedule(new TimerTask() {
             @Override
             public void run() {

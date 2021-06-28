@@ -25,7 +25,7 @@ import org.locationtech.jts.geom.Point;
  * Fluent filter api for spatial data
  *
  * @author Anindya Chatterjee
- * @since 4.0
+ * @since 4.0.0
  */
 public class FluentFilter {
     private String field;
