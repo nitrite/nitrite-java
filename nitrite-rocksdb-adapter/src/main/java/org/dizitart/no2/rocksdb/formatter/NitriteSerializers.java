@@ -5,6 +5,7 @@ import com.esotericsoftware.kryo.kryo5.Kryo;
 import com.esotericsoftware.kryo.kryo5.Serializer;
 import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
+import com.esotericsoftware.kryo.kryo5.serializers.JavaSerializer;
 import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
@@ -17,9 +18,9 @@ import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -98,7 +99,7 @@ public class NitriteSerializers {
         }
 
         @Override
-        public IndexMeta read(Kryo kryo, Input input, Class<IndexMeta> type) {
+        public IndexMeta read(Kryo kryo, Input input, Class<? extends IndexMeta> type) {
             IndexDescriptor indexDescriptor = kryo.readObject(input, IndexDescriptor.class);
             String indexMap = input.readString();
             boolean isDirty = input.readBoolean();
@@ -120,7 +121,7 @@ public class NitriteSerializers {
         }
 
         @Override
-        public IndexDescriptor read(Kryo kryo, Input input, Class<IndexDescriptor> type) {
+        public IndexDescriptor read(Kryo kryo, Input input, Class<? extends IndexDescriptor> type) {
             Fields fields = kryo.readObject(input, Fields.class);
             String collectionName = input.readString();
             String indexType = input.readString();
@@ -178,13 +179,12 @@ public class NitriteSerializers {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Fields read(Kryo kryo, Input input, Class<Fields> type) {
+        public Fields read(Kryo kryo, Input input, Class<? extends Fields> type) {
             List<String> fieldNames = (List<String>) kryo.readObject(input, ArrayList.class);
             return Fields.withNames(fieldNames.toArray(new String[0]));
         }
     }
 
-    @SuppressWarnings("unchecked")
     public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());

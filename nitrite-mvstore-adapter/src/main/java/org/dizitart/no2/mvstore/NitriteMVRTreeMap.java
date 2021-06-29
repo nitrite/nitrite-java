@@ -21,6 +21,7 @@ import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.NitriteRTree;
 import org.dizitart.no2.store.NitriteStore;
+import org.h2.mvstore.MVStore;
 import org.h2.mvstore.rtree.MVRTreeMap;
 import org.h2.mvstore.rtree.SpatialKey;
 
@@ -33,10 +34,12 @@ import java.util.Iterator;
 class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {
     private final MVRTreeMap<Key> mvMap;
     private final NitriteStore<?> nitriteStore;
+    private final MVStore mvStore;
 
     NitriteMVRTreeMap(MVRTreeMap<Key> mvMap, NitriteStore<?> nitriteStore) {
         this.mvMap = mvMap;
         this.nitriteStore = nitriteStore;
+        this.mvStore = mvMap.getStore();
     }
 
     @Override
