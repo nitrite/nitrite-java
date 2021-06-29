@@ -75,12 +75,12 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public WriteResult insert(Document[] documents) {
-        checkOpened();
         notNull(documents, "a null document cannot be inserted");
         containsNull(documents, "a null document cannot be inserted");
 
         try {
             writeLock.lock();
+            checkOpened();
             return collectionOperations.insert(documents);
         } finally {
             writeLock.unlock();
@@ -88,7 +88,6 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public WriteResult update(Document document, boolean insertIfAbsent) {
-        checkOpened();
         notNull(document, "a null document cannot be used for update");
 
         if (insertIfAbsent) {
@@ -103,12 +102,12 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
-        checkOpened();
         notNull(update, "a null document cannot be used for update");
         notNull(updateOptions, "updateOptions cannot be null");
 
         try {
             writeLock.lock();
+            checkOpened();
             return collectionOperations.update(filter, update, updateOptions);
         } finally {
             writeLock.unlock();
@@ -116,12 +115,12 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public WriteResult remove(Document document) {
-        checkOpened();
         notNull(document, "a null document cannot be removed");
 
         if (document.hasId()) {
             try {
                 writeLock.lock();
+                checkOpened();
                 return collectionOperations.remove(document);
             } finally {
                 writeLock.unlock();
@@ -132,13 +131,13 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public WriteResult remove(Filter filter, boolean justOne) {
-        checkOpened();
         if ((filter == null || filter == Filter.ALL) && justOne) {
             throw new InvalidOperationException("remove all cannot be combined with just once");
         }
 
         try {
             writeLock.lock();
+            checkOpened();
             return collectionOperations.remove(filter, justOne);
         } finally {
             writeLock.unlock();
@@ -146,27 +145,40 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public void clear() {
-        checkOpened();
         try {
             writeLock.lock();
+            checkOpened();
             nitriteMap.clear();
         } finally {
             writeLock.unlock();
         }
     }
 
+<<<<<<< Updated upstream
     public DocumentCursor find() {
         checkOpened();
         try {
             readLock.lock();
             return collectionOperations.find();
+=======
+    public DocumentCursor find(Filter filter, FindOptions findOptions) {
+        try {
+            readLock.lock();
+            checkOpened();
+            return collectionOperations.find(filter, findOptions);
+>>>>>>> Stashed changes
         } finally {
             readLock.unlock();
         }
     }
 
+<<<<<<< Updated upstream
     public DocumentCursor find(Filter filter) {
         checkOpened();
+=======
+    public void createIndex(IndexOptions indexOptions, String... fields) {
+        notNull(fields, "fields cannot be null");
+>>>>>>> Stashed changes
 
         try {
             readLock.lock();
@@ -183,6 +195,7 @@ class DefaultNitriteCollection implements NitriteCollection {
         // by default async is false while creating index
         try {
             writeLock.lock();
+            checkOpened();
             if (indexOptions == null) {
                 collectionOperations.createIndex(field, IndexType.Unique, false);
             } else {
@@ -194,14 +207,24 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
+<<<<<<< Updated upstream
     public void rebuildIndex(String field, boolean isAsync) {
         checkOpened();
         notNull(field, "field cannot be null");
+=======
+    public void rebuildIndex(String... fields) {
+        notNull(fields, "fields cannot be null");
+>>>>>>> Stashed changes
 
         IndexEntry indexEntry;
         try {
             readLock.lock();
+<<<<<<< Updated upstream
             indexEntry = collectionOperations.findIndex(field);
+=======
+            checkOpened();
+            indexDescriptor = collectionOperations.findIndex(indexFields);
+>>>>>>> Stashed changes
         } finally {
             readLock.unlock();
         }
@@ -211,7 +234,12 @@ class DefaultNitriteCollection implements NitriteCollection {
 
             try {
                 writeLock.lock();
+<<<<<<< Updated upstream
                 collectionOperations.rebuildIndex(indexEntry, isAsync);
+=======
+                checkOpened();
+                collectionOperations.rebuildIndex(indexDescriptor);
+>>>>>>> Stashed changes
             } finally {
                 writeLock.unlock();
             }
@@ -220,58 +248,92 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
+<<<<<<< Updated upstream
     public Collection<IndexEntry> listIndices() {
         checkOpened();
 
+=======
+    public Collection<IndexDescriptor> listIndices() {
+>>>>>>> Stashed changes
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.listIndexes();
         } finally {
             readLock.unlock();
         }
     }
 
+<<<<<<< Updated upstream
     public boolean hasIndex(String field) {
         checkOpened();
         notNull(field, "field cannot be null");
+=======
+    public boolean hasIndex(String... fields) {
+        notNull(fields, "fields cannot be null");
+>>>>>>> Stashed changes
 
         try {
             readLock.lock();
+<<<<<<< Updated upstream
             return collectionOperations.hasIndex(field);
+=======
+            checkOpened();
+            return collectionOperations.hasIndex(indexFields);
+>>>>>>> Stashed changes
         } finally {
             readLock.unlock();
         }
     }
 
+<<<<<<< Updated upstream
     public boolean isIndexing(String field) {
         checkOpened();
         notNull(field, "field cannot be null");
+=======
+    public boolean isIndexing(String... fields) {
+        notNull(fields, "field cannot be null");
+>>>>>>> Stashed changes
 
         try {
             readLock.lock();
+<<<<<<< Updated upstream
             return collectionOperations.isIndexing(field);
+=======
+            checkOpened();
+            return collectionOperations.isIndexing(indexFields);
+>>>>>>> Stashed changes
         } finally {
             readLock.unlock();
         }
     }
 
+<<<<<<< Updated upstream
     public void dropIndex(String field) {
         checkOpened();
         notNull(field, "field cannot be null");
+=======
+    public void dropIndex(String... fields) {
+        notNull(fields, "fields cannot be null");
+>>>>>>> Stashed changes
 
         try {
             writeLock.lock();
+<<<<<<< Updated upstream
             collectionOperations.dropIndex(field);
+=======
+            checkOpened();
+            collectionOperations.dropIndex(indexFields);
+>>>>>>> Stashed changes
         } finally {
             writeLock.unlock();
         }
     }
 
     public void dropAllIndices() {
-        checkOpened();
-
         try {
             writeLock.lock();
+            checkOpened();
             collectionOperations.dropAllIndices();
         } finally {
             writeLock.unlock();
@@ -279,11 +341,11 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public Document getById(NitriteId nitriteId) {
-        checkOpened();
         notNull(nitriteId, "nitriteId cannot be null");
 
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.getById(nitriteId);
         } finally {
             readLock.unlock();
@@ -291,11 +353,30 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public void drop() {
-        checkOpened();
-
         try {
             writeLock.lock();
+<<<<<<< Updated upstream
             collectionOperations.dropCollection();
+=======
+            checkOpened();
+
+            if (collectionOperations != null) {
+                // close collection and indexes
+                collectionOperations.close();
+
+                // drop collection and indexes
+                collectionOperations.dropCollection();
+            }
+
+            // set all reference to null
+            this.nitriteMap = null;
+            this.nitriteConfig = null;
+            this.collectionOperations = null;
+            this.nitriteStore = null;
+
+            // close event bus
+            closeEventBus();
+>>>>>>> Stashed changes
         } finally {
             writeLock.unlock();
         }
@@ -326,10 +407,9 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public long size() {
-        checkOpened();
-
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.getSize();
         } finally {
             readLock.unlock();
@@ -357,10 +437,9 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public Attributes getAttributes() {
-        checkOpened();
-
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.getAttributes();
         } finally {
             readLock.unlock();
@@ -368,11 +447,11 @@ class DefaultNitriteCollection implements NitriteCollection {
     }
 
     public void setAttributes(Attributes attributes) {
-        checkOpened();
         notNull(attributes, "attributes cannot be null");
 
         try {
             writeLock.lock();
+            checkOpened();
             collectionOperations.setAttributes(attributes);
         } finally {
             writeLock.unlock();
