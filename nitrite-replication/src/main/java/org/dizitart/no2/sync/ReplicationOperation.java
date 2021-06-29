@@ -74,7 +74,7 @@ interface ReplicationOperation {
         if (StringUtils.isNullOrEmpty(tombstoneName)) {
             tombstoneName = getCollection().getName()
                 + INTERNAL_NAME_SEPARATOR + TOMBSTONE
-                + INTERNAL_NAME_SEPARATOR + UUID.randomUUID().toString();
+                + INTERNAL_NAME_SEPARATOR + UUID.randomUUID();
             attributes.set(TOMBSTONE, tombstoneName);
         }
         return tombstoneName;

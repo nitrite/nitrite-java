@@ -6,7 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
+ * Represents a migration step.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Getter(AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)

@@ -1,8 +1,8 @@
 # Nitrite Database
 
-![Gradle Build](https://github.com/nitrite/nitrite-java/workflows/Gradle%20Build/badge.svg?branch=develop)
+![Build](https://github.com/nitrite/nitrite-java/workflows/Gradle%20Build/badge.svg?branch=develop)
 ![CodeQL](https://github.com/nitrite/nitrite-java/workflows/CodeQL/badge.svg?branch=develop)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3ee6a6f3f0044b0c9e75d48e47e5d012)](https://www.codacy.com/gh/nitrite/nitrite-java/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nitrite/nitrite-java&amp;utm_campaign=Badge_Grade)
+[![Codacy](https://app.codacy.com/project/badge/Grade/3ee6a6f3f0044b0c9e75d48e47e5d012)](https://www.codacy.com/gh/nitrite/nitrite-java/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nitrite/nitrite-java&amp;utm_campaign=Badge_Grade)
 [![codecov](https://codecov.io/gh/nitrite/nitrite-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/nitrite/nitrite-java)
 ![Javadocs](https://javadoc.io/badge/org.dizitart/nitrite.svg)
 [![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/nitrite/nitrite-java/discussions)
@@ -27,7 +27,6 @@ Nitrite is an embedded database ideal for desktop, mobile or small web applicati
 -   Schema migration
 -   Indexing
 -   Full text search
--   Rx-Java support
 -   Both way replication via Nitrite DataGate server
 -   Very fast, lightweight and fluent API 
 -   Android compatibility (API Level 19)
@@ -249,13 +248,13 @@ try (Session session = db.createSession()) {
 
 Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
     @Override
-    public void migrate(Instruction instruction) {
-        instruction.forDatabase()
+    public void migrate(Instruction instructions) {
+        instructions.forDatabase()
             // make a non-secure db to secure db
             .addPassword("test-user", "test-password");
 
-        // create instruction for existing repository
-        instruction.forRepository(OldClass.class, null)
+        // create instructions for existing repository
+        instructions.forRepository(OldClass.class, null)
 
             // rename the repository (in case of entity name changes)
             .renameRepository("migrated", null)
@@ -289,8 +288,8 @@ Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
 
 Migration migration2 = new Migration(2, 3) {
     @Override
-    public void migrate(Instruction instruction) {
-        instruction.forCollection("test")
+    public void migrate(Instruction instructions) {
+        instructions.forCollection("test")
             .addField("fullName", "Dummy Name");
     }
 };

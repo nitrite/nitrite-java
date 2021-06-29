@@ -24,11 +24,11 @@ buildscript {
         }
     }
     dependencies {
-        classpath "io.freefair.gradle:lombok-plugin:5.3.0"
+        classpath "io.freefair.gradle:lombok-plugin:5.3.3.3"
         classpath "org.asciidoctor:asciidoctor-gradle-plugin:1.6.1"
-        classpath "net.ltgt.gradle:gradle-errorprone-plugin:1.3.0"
-        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.22.0"
-        classpath "com.adarshr:gradle-test-logger-plugin:2.1.1"
+        classpath "net.ltgt.gradle:gradle-errorprone-plugin:2.0.2"
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0"
+        classpath "com.adarshr:gradle-test-logger-plugin:3.0.0"
         classpath "gradle.plugin.gradle-plugins:jartest:1.0.1"
     }
 }
@@ -54,6 +54,16 @@ subprojects {
         mavenCentral()
         mavenLocal()
     }
+
+    //Include JAXB dependencies if not included in JDK
+    if(JavaVersion.current() >= JavaVersion.VERSION_11) {
+        plugins.withType(JavaPlugin) {
+            dependencies {
+                testImplementation "javax.xml.bind:jaxb-api:2.3.1"
+                testImplementation "org.glassfish.jaxb:jaxb-runtime:3.0.1"
+            }
+        }
+    }
 }
 
 task clean(type: Delete) {
@@ -61,7 +71,7 @@ task clean(type: Delete) {
 }
 
 configurations.errorprone {
-    resolutionStrategy.force "com.google.errorprone:error_prone_core:2.4.0"
+    resolutionStrategy.force "com.google.errorprone:error_prone_core:2.7.1"
 }
 
 nexusStaging {

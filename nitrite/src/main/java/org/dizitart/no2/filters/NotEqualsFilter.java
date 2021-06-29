@@ -1,61 +1,22 @@
 package org.dizitart.no2.filters;
 
-import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.index.ComparableIndexer;
-import org.dizitart.no2.index.TextIndexer;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.index.IndexMap;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NavigableMap;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee
  */
-@ToString
-class NotEqualsFilter extends IndexAwareFilter {
+class NotEqualsFilter extends ComparableFilter {
     protected NotEqualsFilter(String field, Object value) {
         super(field, value);
-    }
-
-    @Override
-    @SuppressWarnings("rawtypes")
-    protected Set<NitriteId> findIndexedIdSet() {
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getIsFieldIndexed()) {
-            if (getValue() == null || getValue() instanceof Comparable) {
-                if (getIndexer() instanceof ComparableIndexer) {
-                    ComparableIndexer comparableIndexer = (ComparableIndexer) getIndexer();
-                    idSet = comparableIndexer.findNotEqual(getCollectionName(), getField(), (Comparable) getValue());
-                } else if (getIndexer() instanceof TextIndexer && getValue() instanceof String) {
-                    // notEq filter is not compatible with TextIndexer
-                    setIsFieldIndexed(false);
-                } else {
-                    throw new FilterException("notEq filter is not supported on indexed field "
-                        + getField());
-                }
-            } else {
-                throw new FilterException(getValue() + " is not comparable");
-            }
-        }
-        return idSet;
-    }
-
-    @Override
-    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getOnIdField() && getValue() instanceof String) {
-            NitriteId nitriteId = NitriteId.createId((String) getValue());
-            if (!collection.containsKey(nitriteId)) {
-                idSet.add(nitriteId);
-            }
-        }
-        return idSet;
     }
 
     @Override
@@ -65,10 +26,28 @@ class NotEqualsFilter extends IndexAwareFilter {
         return !deepEquals(fieldValue, getValue());
     }
 
-    @Override
-    public void setIsFieldIndexed(Boolean isFieldIndexed) {
-        if (!(getIndexer() instanceof TextIndexer && getValue() instanceof String)) {
-            super.setIsFieldIndexed(isFieldIndexed);
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
+        List<NitriteId> nitriteIds = new ArrayList<>();
+
+        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
+            if (!deepEquals(getValue(), entry.getFirst())) {
+                processIndexValue(entry.getSecond(), subMap, nitriteIds);
+            }
         }
+
+        if (!subMap.isEmpty()) {
+            // if sub-map is populated then filtering on compound index, return sub-map
+            return subMap;
+        } else {
+            // else it is filtering on either single field index,
+            // or it is a terminal filter on compound index, return only nitrite-ids
+            return nitriteIds;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " != " + getValue() + ")";
     }
 }

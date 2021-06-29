@@ -21,6 +21,7 @@ import org.dizitart.kno2.filters.*
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.common.Constants
 import org.dizitart.no2.index.IndexOptions
+import org.dizitart.no2.index.IndexOptions.indexOptions
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.dizitart.no2.spatial.SpatialIndexer
@@ -155,7 +156,7 @@ class FilterTest : BaseTest() {
     @Test
     fun testText() {
         db?.getCollection("test") {
-            createIndex("a", option(IndexType.Fulltext))
+            createIndex(option(IndexType.FULL_TEXT), "a")
 
             insert(documentOf("a" to "Lorem ipsum dolor"),
                 documentOf("a" to "quick brown fox jumps over lazy dog"))
@@ -171,7 +172,7 @@ class FilterTest : BaseTest() {
     @Test
     fun testRegex() {
         db?.getCollection("test") {
-            createIndex("a", option(IndexType.Fulltext))
+            createIndex(option(IndexType.FULL_TEXT), "a")
 
             insert(documentOf("a" to "lorem"),
                 documentOf("a" to "dog"))
@@ -252,7 +253,7 @@ class FilterTest : BaseTest() {
             val doc3 = documentOf("key" to 3L).put("location", reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
             insert(doc1, doc2, doc3)
 
-            createIndex("location", IndexOptions.indexOptions(SpatialIndexer.SpatialIndex))
+            createIndex(indexOptions(SpatialIndexer.SPATIAL_INDEX), "location")
 
             val cursor1 = find("location" intersects search)
             assertEquals(cursor1.size(), 2)
@@ -271,7 +272,7 @@ class FilterTest : BaseTest() {
             val doc3 = documentOf("key" to 3L).put("location", reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
             insert(doc1, doc2, doc3)
 
-            createIndex("location", IndexOptions.indexOptions(SpatialIndexer.SpatialIndex))
+            createIndex(indexOptions(SpatialIndexer.SPATIAL_INDEX), "location")
 
             val cursor1 = find("location" within search)
             assertEquals(cursor1.size(), 1)
@@ -290,7 +291,7 @@ class FilterTest : BaseTest() {
             val doc3 = documentOf("key" to 3L).put("location", reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
             insert(doc1, doc2, doc3)
 
-            createIndex("location", IndexOptions.indexOptions(SpatialIndexer.SpatialIndex))
+            createIndex(indexOptions(SpatialIndexer.SPATIAL_INDEX), "location")
 
             val cursor1 = find("location".near(search, 20.0))
             assertEquals(cursor1.size(), 1)
@@ -310,7 +311,7 @@ class FilterTest : BaseTest() {
             val doc3 = documentOf("key" to 3L).put("location", reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"))
             insert(doc1, doc2, doc3)
 
-            createIndex("location", IndexOptions.indexOptions(SpatialIndexer.SpatialIndex))
+            createIndex(indexOptions(SpatialIndexer.SPATIAL_INDEX), "location")
 
             val cursor1 = find("location".near(coordinate, 20.0))
             assertEquals(cursor1.size(), 1)

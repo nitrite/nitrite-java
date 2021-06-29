@@ -11,6 +11,7 @@ import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteRTree;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
+import org.rocksdb.RocksDB;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,12 +67,18 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         try {
             if (!closed.get()) {
+                // close nitrite maps
+                for (NitriteMap<?, ?> nitriteMap : nitriteMapRegistry.values()) {
+                    nitriteMap.close();
+                }
+
                 reference.close();
                 closed.compareAndSet(false, true);
             }
+
             alert(StoreEvents.Closed);
         } catch (Exception e) {
             log.error("Error while closing the database", e);
@@ -108,6 +115,11 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
+    public void closeMap(String mapName) {
+        nitriteMapRegistry.remove(mapName);
+    }
+
+    @Override
     public void removeMap(String mapName) {
         reference.dropColumnFamily(mapName);
         nitriteMapRegistry.remove(mapName);
@@ -117,6 +129,11 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
                                                                                Class<?> keyType,
                                                                                Class<?> valueType) {
+        throw new InvalidOperationException("rtree not supported on rocksdb store");
+    }
+
+    @Override
+    public void closeRTree(String rTreeName) {
         throw new InvalidOperationException("rtree not supported on rocksdb store");
     }
 
@@ -139,6 +156,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     private static String getRocksDbVersion() {
-        return "6.11.4";
+        RocksDB.Version version = RocksDB.rocksdbVersion();
+        return version.toString();
     }
 }

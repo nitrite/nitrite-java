@@ -13,13 +13,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
 
 /**
+ * The nitrite in-memory store.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
     private final Map<String, NitriteRTree<?, ?>> nitriteRTreeMapRegistry;
     private volatile boolean closed = false;
 
+    /**
+     * Instantiates a new {@link InMemoryStore}.
+     */
     public InMemoryStore() {
         super();
         this.nitriteMapRegistry = new ConcurrentHashMap<>();
@@ -53,8 +59,19 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         closed = true;
+
+        for (NitriteMap<?, ?> map : nitriteMapRegistry.values()) {
+            map.close();
+        }
+
+        for (NitriteRTree<?, ?> rTree : nitriteRTreeMapRegistry.values()) {
+            rTree.close();
+        }
+
+        nitriteMapRegistry.clear();
+        nitriteRTreeMapRegistry.clear();
         alert(StoreEvents.Closed);
     }
 
@@ -74,6 +91,18 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
         nitriteMapRegistry.put(mapName, nitriteMap);
 
         return nitriteMap;
+    }
+
+    @Override
+    public void closeMap(String mapName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
+    }
+
+    @Override
+    public void closeRTree(String rTreeName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
     }
 
     @Override

@@ -20,6 +20,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.NitriteRTree;
+import org.dizitart.no2.store.NitriteStore;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.rtree.MVRTreeMap;
 import org.h2.mvstore.rtree.SpatialKey;
@@ -30,13 +31,14 @@ import java.util.Iterator;
  * @since 1.0
  * @author Anindya Chatterjee
  */
-class NitriteMVRTreeMap<Key extends BoundingBox, Value>
-    implements NitriteRTree<Key, Value> {
+class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {
     private final MVRTreeMap<Key> mvMap;
+    private final NitriteStore<?> nitriteStore;
     private final MVStore mvStore;
 
-    NitriteMVRTreeMap(MVRTreeMap<Key> mvMap) {
+    NitriteMVRTreeMap(MVRTreeMap<Key> mvMap, NitriteStore<?> nitriteStore) {
         this.mvMap = mvMap;
+        this.nitriteStore = nitriteStore;
         this.mvStore = mvMap.getStore();
     }
 
@@ -86,8 +88,12 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value>
     }
 
     private SpatialKey getKey(Key key, long id) {
-        return new SpatialKey(id, key.getMinX(),
-            key.getMaxX(), key.getMinY(), key.getMaxY());
+        if (key == null) {
+            return new SpatialKey(id);
+        } else {
+            return new SpatialKey(id, key.getMinX(),
+                key.getMaxX(), key.getMinY(), key.getMaxY());
+        }
     }
 
     private RecordStream<NitriteId> getRecordStream(MVRTreeMap.RTreeCursor treeCursor) {
@@ -103,5 +109,22 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value>
                 return NitriteId.createId(Long.toString(next.getId()));
             }
         });
+    }
+
+    @Override
+    public void close() {
+        nitriteStore.closeRTree(mvMap.getName());
+    }
+
+    @Override
+    public void clear() {
+        mvMap.clear();
+    }
+
+    @Override
+    public void drop() {
+        mvMap.clear();
+        nitriteStore.closeRTree(mvMap.getName());
+        nitriteStore.removeRTree(mvMap.getName());
     }
 }

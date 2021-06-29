@@ -17,38 +17,49 @@
 package org.dizitart.no2.collection.operation;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.collection.UpdateOptions;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
+import org.dizitart.no2.common.processors.Processor;
+import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.store.StoreCatalog;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
-import static org.dizitart.no2.common.Constants.COLLECTION_CATALOG;
+import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
+import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
 
 /**
+ * The collection operations.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
-public class CollectionOperations {
+public class CollectionOperations implements AutoCloseable {
     private final String collectionName;
     private final NitriteConfig nitriteConfig;
     private final NitriteMap<NitriteId, Document> nitriteMap;
     private final EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
+    private ProcessorChain processorChain;
     private IndexOperations indexOperations;
     private WriteOperations writeOperations;
     private ReadOperations readOperations;
 
+    /**
+     * Instantiates a new Collection operations.
+     *
+     * @param collectionName the collection name
+     * @param nitriteMap     the nitrite map
+     * @param nitriteConfig  the nitrite config
+     * @param eventBus       the event bus
+     */
     public CollectionOperations(String collectionName,
                                 NitriteMap<NitriteId, Document> nitriteMap,
                                 NitriteConfig nitriteConfig,
@@ -57,82 +68,198 @@ public class CollectionOperations {
         this.nitriteMap = nitriteMap;
         this.nitriteConfig = nitriteConfig;
         this.eventBus = eventBus;
-        init();
+        initialize();
     }
 
-    public void createIndex(String field, String indexType, boolean async) {
-        indexOperations.ensureIndex(field, indexType, async);
+    /**
+     * Adds a document processor.
+     *
+     * @param processor the processor
+     */
+    public void addProcessor(Processor processor) {
+        doProcess(processor);
+        processorChain.add(processor);
     }
 
-    public IndexEntry findIndex(String field) {
-        return indexOperations.findIndexEntry(field);
+    /**
+     * Removes a document processor.
+     *
+     * @param processor the processor
+     */
+    public void removeProcessor(Processor processor) {
+        processorChain.remove(processor);
+        undoProcess(processor);
     }
 
-    public void rebuildIndex(IndexEntry indexEntry, boolean async) {
-        indexOperations.rebuildIndex(indexEntry, async);
+    /**
+     * Creates index.
+     *
+     * @param fields    the fields
+     * @param indexType the index type
+     */
+    public void createIndex(Fields fields, String indexType) {
+        indexOperations.createIndex(fields, indexType);
     }
 
-    public Collection<IndexEntry> listIndexes() {
+    /**
+     * Finds index descriptor.
+     *
+     * @param fields the fields
+     * @return the index descriptor
+     */
+    public IndexDescriptor findIndex(Fields fields) {
+        return indexOperations.findIndexDescriptor(fields);
+    }
+
+    /**
+     * Rebuilds index.
+     *
+     * @param indexDescriptor the index descriptor
+     */
+    public void rebuildIndex(IndexDescriptor indexDescriptor) {
+        indexOperations.buildIndex(indexDescriptor, true);
+    }
+
+    /**
+     * Lists all indexes.
+     *
+     * @return the collection
+     */
+    public Collection<IndexDescriptor> listIndexes() {
         return indexOperations.listIndexes();
     }
 
-    public boolean hasIndex(String field) {
-        return indexOperations.hasIndexEntry(field);
+    /**
+     * Checks if an index exists on the fields.
+     *
+     * @param fields the fields
+     * @return the boolean
+     */
+    public boolean hasIndex(Fields fields) {
+        return indexOperations.hasIndexEntry(fields);
     }
 
-    public boolean isIndexing(String field) {
-        return indexOperations.isIndexing(field);
+    /**
+     * Checks if indexing is going on the fields.
+     *
+     * @param fields the fields
+     * @return the boolean
+     */
+    public boolean isIndexing(Fields fields) {
+        return indexOperations.isIndexing(fields);
     }
 
-    public void dropIndex(String field) {
-        indexOperations.dropIndex(field);
+    /**
+     * Drops index.
+     *
+     * @param fields the fields
+     */
+    public void dropIndex(Fields fields) {
+        indexOperations.dropIndex(fields);
     }
 
+    /**
+     * Drops all indices.
+     */
     public void dropAllIndices() {
         indexOperations.dropAllIndices();
     }
 
+    /**
+     * Inserts documents to the collection.
+     *
+     * @param documents the documents
+     * @return the write result
+     */
     public WriteResult insert(Document[] documents) {
         return writeOperations.insert(documents);
     }
 
+    /**
+     * Updates documents in the collection.
+     *
+     * @param filter        the filter
+     * @param update        the update
+     * @param updateOptions the update options
+     * @return the write result
+     */
     public WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
         return writeOperations.update(filter, update, updateOptions);
     }
 
+    /**
+     * Removes document from the collection.
+     *
+     * @param document the document
+     * @return the write result
+     */
     public WriteResult remove(Document document) {
         return writeOperations.remove(document);
     }
 
+    /**
+     * Removes document from collection.
+     *
+     * @param filter   the filter
+     * @param justOnce the just once
+     * @return the write result
+     */
     public WriteResult remove(Filter filter, boolean justOnce) {
         return writeOperations.remove(filter, justOnce);
     }
 
-    public DocumentCursor find() {
-        return readOperations.find();
+    /**
+     * Finds documents using filter.
+     *
+     * @param filter      the filter
+     * @param findOptions the find options
+     * @return the document cursor
+     */
+    public DocumentCursor find(Filter filter, FindOptions findOptions) {
+        return readOperations.find(filter, findOptions);
     }
 
-    public DocumentCursor find(Filter filter) {
-        return readOperations.find(filter);
-    }
-
+    /**
+     * Gets document by id.
+     *
+     * @param nitriteId the nitrite id
+     * @return the by id
+     */
     public Document getById(NitriteId nitriteId) {
         return readOperations.getById(nitriteId);
     }
 
+    /**
+     * Drops the collection.
+     */
     public void dropCollection() {
         indexOperations.dropAllIndices();
         dropNitriteMap();
     }
 
+    /**
+     * Gets the size of the collection.
+     *
+     * @return the size
+     */
     public long getSize() {
         return nitriteMap.size();
     }
 
+    /**
+     * Gets the additional attributes for the collection.
+     *
+     * @return the attributes
+     */
     public Attributes getAttributes() {
         return nitriteMap != null ? nitriteMap.getAttributes() : null;
     }
 
+    /**
+     * Sets additional attributes in the collection.
+     *
+     * @param attributes the attributes
+     */
     public void setAttributes(Attributes attributes) {
         nitriteMap.setAttributes(attributes);
     }
@@ -141,37 +268,40 @@ public class CollectionOperations {
         if (indexOperations != null) {
             indexOperations.close();
         }
+        nitriteMap.close();
     }
 
-    private void init() {
-        this.indexOperations = new IndexOperations(nitriteConfig, nitriteMap, eventBus);
-        this.readOperations = new ReadOperations(collectionName, nitriteConfig, nitriteMap, indexOperations);
-        this.writeOperations = new WriteOperations(indexOperations, readOperations,
-            nitriteMap, eventBus);
+    private void initialize() {
+        this.processorChain = new ProcessorChain();
+        this.indexOperations = new IndexOperations(collectionName, nitriteConfig, nitriteMap, eventBus);
+        this.readOperations = new ReadOperations(collectionName, indexOperations,
+            nitriteConfig, nitriteMap, processorChain);
+
+        DocumentIndexWriter indexWriter = new DocumentIndexWriter(nitriteConfig, indexOperations);
+        this.writeOperations = new WriteOperations(indexWriter, readOperations,
+            nitriteMap, eventBus, processorChain);
     }
 
     private void dropNitriteMap() {
-        NitriteMap<String, Document> catalogueMap = nitriteMap.getStore().openMap(COLLECTION_CATALOG, String.class, Document.class);
-        for (Pair<String, Document> entry : catalogueMap.entries()) {
-            String catalogue = entry.getFirst();
-            Document document = entry.getSecond();
+        // remove the collection name from the catalog
+        StoreCatalog catalog = nitriteMap.getStore().getCatalog();
+        catalog.remove(nitriteMap.getName());
 
-            Set<String> bin = new HashSet<>();
-            boolean foundKey = false;
-            for (String field : document.getFields()) {
-                if (field.equals(nitriteMap.getName())) {
-                    foundKey = true;
-                    bin.add(field);
-                }
-            }
-
-            for (String field : bin) {
-                document.remove(field);
-            }
-            catalogueMap.put(catalogue, document);
-
-            if (foundKey) break;
-        }
+        // drop the map
         nitriteMap.drop();
+    }
+
+    private void doProcess(Processor processor) {
+        for (Document document : find(Filter.ALL, null)) {
+            Document processed = processor.processBeforeWrite(document);
+            update(createUniqueFilter(document), processed, updateOptions(false));
+        }
+    }
+
+    private void undoProcess(Processor processor) {
+        for (Document document : find(Filter.ALL, null)) {
+            Document processed = processor.processAfterRead(document);
+            update(createUniqueFilter(document), processed, updateOptions(false));
+        }
     }
 }

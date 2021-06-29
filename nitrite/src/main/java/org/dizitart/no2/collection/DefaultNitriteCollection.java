@@ -330,7 +330,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     public boolean isOpen() {
         if (nitriteStore == null || nitriteStore.isClosed() || isDropped) {
             try {
-            close();
+                close();
             } catch (Exception e) {
                 throw new NitriteIOException("failed to close the database", e);
             }

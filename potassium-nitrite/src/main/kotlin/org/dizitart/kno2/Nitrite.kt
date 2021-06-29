@@ -52,7 +52,9 @@ fun Nitrite.getCollection(name: String, op: (NitriteCollection.() -> Unit)? = nu
  * @param [op] repository builder block
  * @return the object repository of type [T]
  */
-inline fun <reified T : Any> Nitrite.getRepository(noinline op: (ObjectRepository<T>.() -> Unit)? = null): ObjectRepository<T> {
+inline fun <reified T : Any> Nitrite.getRepository(
+    noinline op: (ObjectRepository<T>.() -> Unit)? = null
+): ObjectRepository<T> {
     val repository = this.getRepository(T::class.java)
     op?.invoke(repository)
     return repository
@@ -68,17 +70,19 @@ inline fun <reified T : Any> Nitrite.getRepository(noinline op: (ObjectRepositor
  * @param [op] repository builder block
  * @return the object repository of type [T]
  */
-inline fun <reified T : Any> Nitrite.getRepository(key: String, noinline op: (ObjectRepository<T>.() -> Unit)? = null): ObjectRepository<T> {
+inline fun <reified T : Any> Nitrite.getRepository(
+    key: String,
+    noinline op: (ObjectRepository<T>.() -> Unit)? = null
+): ObjectRepository<T> {
     val repository = this.getRepository(T::class.java, key)
     op?.invoke(repository)
     return repository
 }
 
 /**
- * Creates an [IndexOptions] with the specified [indexType] and [async] flag.
+ * Creates an [IndexOptions] with the specified [indexType].
  *
  * @param [indexType] the type of index to be created.
- * @param [async] if set to [true] then the index would be created asynchronously; otherwise synchronously.
  * @return a new [IndexOptions]
  */
-fun option(indexType: String = IndexType.Unique, async: Boolean = false): IndexOptions = IndexOptions.indexOptions(indexType, async)
+fun option(indexType: String = IndexType.UNIQUE): IndexOptions = IndexOptions.indexOptions(indexType)

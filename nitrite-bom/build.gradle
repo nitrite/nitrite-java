@@ -17,30 +17,26 @@ dependencies {
         api project(":nitrite-spatial")
         api project(":nitrite-replication")
         api project(":nitrite-support")
-        api project(":rx-nitrite")
         api project(":potassium-nitrite")
-
         api project(":nitrite-mvstore-adapter")
         api project(":nitrite-rocksdb-adapter")
-        api project(":nitrite-mapdb-adapter")
 
-        api "org.slf4j:slf4j-api:1.7.30"
+        api "org.slf4j:slf4j-api:1.7.31"
         api "org.objenesis:objenesis:2.6"
         api "org.jasypt:jasypt:1.9.3"
-        api "com.fasterxml.jackson.core:jackson-databind:2.12.0"
-        api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.0"
-        api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.0"
-        api "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.0"
+        api "com.fasterxml.jackson.core:jackson-databind:2.12.3"
+        api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.3"
+        api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.12.3"
+        api "com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3"
         api "org.mapdb:mapdb:3.0.8"
         api "com.h2database:h2-mvstore:1.4.200"
-        api "com.squareup.okhttp3:okhttp:4.9.0"
-        api "org.rocksdb:rocksdbjni:6.14.6"
-        api "com.esotericsoftware.kryo:kryo5:5.0.3"
-        api "org.locationtech.jts:jts-core:1.18.0"
+        api "com.squareup.okhttp3:okhttp:4.9.1"
+        api "org.rocksdb:rocksdbjni:6.20.3"
+        api "com.esotericsoftware.kryo:kryo5:5.1.1"
+        api "org.locationtech.jts:jts-core:1.17.1"
         api "commons-codec:commons-codec:1.15"
-        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.21"
-        api "org.jetbrains.kotlin:kotlin-reflect:1.4.21"
-        api "io.reactivex.rxjava2:rxjava:2.2.20"
+        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.5.20"
+        api "org.jetbrains.kotlin:kotlin-reflect:1.5.20"
     }
 }
 

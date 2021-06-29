@@ -21,13 +21,14 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.Constants;
+import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.index.Indexer;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.index.NitriteIndexer;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.migration.Migration;
-import org.dizitart.no2.module.NitriteModule;
-import org.dizitart.no2.module.NitritePlugin;
-import org.dizitart.no2.module.PluginManager;
+import org.dizitart.no2.common.module.NitriteModule;
+import org.dizitart.no2.common.module.NitritePlugin;
+import org.dizitart.no2.common.module.PluginManager;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.HashMap;
@@ -44,16 +45,18 @@ import java.util.TreeMap;
 @ToString
 public class NitriteConfig {
     /**
-     * Gets the embedded field separator character. Default value
-     * is `.` unless set explicitly.
-     *
-     * @return the embedded field separator character.
+     * Indicates if this {@link NitriteConfig} is already configured.
      */
+    protected boolean configured = false;
+
+    /**
+     * Returns the {@link PluginManager} instance.
+     */
+    @Getter(AccessLevel.PACKAGE)
+    protected final PluginManager pluginManager;
+
     @Getter
     private static String fieldSeparator = ".";
-
-    @Getter(AccessLevel.PACKAGE)
-    private final PluginManager pluginManager;
 
     @Getter
     private final Map<Integer, TreeMap<Integer, Migration>> migrations;
@@ -61,8 +64,9 @@ public class NitriteConfig {
     @Getter
     private Integer schemaVersion = Constants.INITIAL_SCHEMA_VERSION;
 
-    private boolean configured = false;
-
+    /**
+     * Instantiates a new {@link NitriteConfig}.
+     */
     public NitriteConfig() {
         this.pluginManager = new PluginManager(this);
         this.migrations = new HashMap<>();
@@ -83,7 +87,7 @@ public class NitriteConfig {
     }
 
     /**
-     * Loads {@link NitritePlugin} instances.
+     * Loads {@link NitritePlugin} instances defined in the {@link NitriteModule}.
      *
      * @param module the {@link NitriteModule} instances.
      * @return the {@link NitriteConfig} instance.
@@ -97,6 +101,12 @@ public class NitriteConfig {
         return this;
     }
 
+    /**
+     * Adds schema migration instructions.
+     *
+     * @param migration the migration
+     * @return the nitrite config
+     */
     @SuppressWarnings("Java8MapApi")
     public NitriteConfig addMigration(Migration migration) {
         if (configured) {
@@ -121,6 +131,12 @@ public class NitriteConfig {
         return this;
     }
 
+    /**
+     * Sets the current schema version.
+     *
+     * @param version the version
+     * @return the nitrite config
+     */
     public NitriteConfig schemaVersion(Integer version) {
         if (configured) {
             throw new InvalidOperationException("cannot add schema version info after database" +
@@ -133,7 +149,6 @@ public class NitriteConfig {
     /**
      * Auto configures nitrite database with default configuration values and
      * default built-in plugins.
-     *
      */
     public void autoConfigure() {
         if (configured) {
@@ -144,15 +159,19 @@ public class NitriteConfig {
     }
 
     /**
-     * Finds an {@link Indexer} by indexType.
+     * Finds an {@link NitriteIndexer} by indexType.
      *
-     * @param indexType the type of {@link Indexer} to find.
-     * @return the {@link Indexer}
+     * @param indexType the type of {@link NitriteIndexer} to find.
+     * @return the {@link NitriteIndexer}
      */
-    public Indexer findIndexer(String indexType) {
-        Indexer indexer = pluginManager.getIndexerMap().get(indexType);
-        indexer.initialize(this);
-        return indexer;
+    public NitriteIndexer findIndexer(String indexType) {
+        NitriteIndexer nitriteIndexer = pluginManager.getIndexerMap().get(indexType);
+        if (nitriteIndexer != null) {
+            nitriteIndexer.initialize(this);
+            return nitriteIndexer;
+        } else {
+            throw new IndexingException("no indexer found for index type " + indexType);
+        }
     }
 
     /**
@@ -173,7 +192,10 @@ public class NitriteConfig {
         return pluginManager.getNitriteStore();
     }
 
-    void initialized() {
+    /**
+     * Initializes this {@link NitriteConfig} instance.
+     */
+    protected void initialize() {
         this.configured = true;
         this.pluginManager.initializePlugins();
     }

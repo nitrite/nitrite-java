@@ -24,8 +24,10 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
- * @since 1.0
+ * The user credential data for database authentication.
+ *
  * @author Anindya Chatterjee.
+ * @since 1.0
  */
 @Data
 public class UserCredential implements Serializable {

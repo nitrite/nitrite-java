@@ -52,4 +52,9 @@ class RegexFilter extends FieldBasedFilter {
         }
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " regex " + getValue() + ")";
+    }
 }

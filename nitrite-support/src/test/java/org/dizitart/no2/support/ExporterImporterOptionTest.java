@@ -19,7 +19,7 @@ package org.dizitart.no2.support;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.PersistentCollection;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.Test;
 
@@ -87,6 +87,6 @@ public class ExporterImporterOptionTest extends BaseExternalTest {
             new ArrayList<Company>());
 
         assertEquals(destCompRepo.listIndices(), sourceCompRepo.listIndices());
-        assertEquals(destSecondColl.listIndices(), new LinkedHashSet<IndexEntry>());
+        assertEquals(destSecondColl.listIndices(), new LinkedHashSet<IndexDescriptor>());
     }
 }

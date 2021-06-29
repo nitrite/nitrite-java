@@ -18,12 +18,14 @@ package org.dizitart.no2.mvstore;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.dizitart.no2.module.NitriteModule;
-import org.dizitart.no2.module.NitritePlugin;
+import org.dizitart.no2.common.module.NitriteModule;
+import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreModule;
 
 import java.util.Set;
+
+import static org.dizitart.no2.common.util.Iterables.setOf;
 
 /**
  * A {@link NitriteModule} which provides h2's mvstore as a storage engine.

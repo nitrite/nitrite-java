@@ -19,7 +19,7 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.util.Iterator;
 

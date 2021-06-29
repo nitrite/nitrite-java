@@ -16,14 +16,13 @@
 
 package org.dizitart.kno2
 
-import org.dizitart.no2.exceptions.SecurityException
+import org.dizitart.no2.exceptions.NitriteSecurityException
 import org.dizitart.no2.index.NitriteTextIndexer
 import org.dizitart.no2.index.fulltext.UniversalTextTokenizer
-import org.dizitart.no2.module.NitriteModule.module
+import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Assert.*
 import org.junit.Test
-import java.io.File
 
 /**
  *
@@ -65,14 +64,14 @@ class BuilderTest : BaseTest() {
         assertFalse(db?.isClosed!!)
     }
 
-    @Test(expected = SecurityException::class)
+    @Test(expected = NitriteSecurityException::class)
     fun testBuilderNoUser() {
         db = nitrite("", "password") {
             loadModule(MVStoreModule(fileName))
         }
     }
 
-    @Test(expected = SecurityException::class)
+    @Test(expected = NitriteSecurityException::class)
     fun testBuilderNoPassword() {
         db = nitrite("user", "") {
             loadModule(MVStoreModule(fileName))

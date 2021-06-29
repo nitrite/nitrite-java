@@ -13,7 +13,8 @@ class ValueSet<V> implements Iterable<V> {
     private final ColumnFamilyHandle columnFamilyHandle;
     private final Class<?> valueType;
 
-    public ValueSet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, ObjectFormatter objectFormatter, Class<?> valueType) {
+    public ValueSet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle,
+                    ObjectFormatter objectFormatter, Class<?> valueType) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
         this.objectFormatter = objectFormatter;
@@ -21,7 +22,6 @@ class ValueSet<V> implements Iterable<V> {
     }
 
     @Override
-    @SuppressWarnings("NullableProblems")
     public Iterator<V> iterator() {
         return new ValueIterator();
     }

@@ -26,7 +26,7 @@ import org.dizitart.no2.sync.event.ReplicationEventType;
  */
 @Slf4j
 public final class Replica implements AutoCloseable {
-    private ReplicationTemplate replicationTemplate;
+    private final ReplicationTemplate replicationTemplate;
 
     Replica(Config config) {
         this.replicationTemplate = new ReplicationTemplate(config);

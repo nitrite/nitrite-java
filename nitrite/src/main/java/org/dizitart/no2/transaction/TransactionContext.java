@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 class TransactionContext implements AutoCloseable {
@@ -24,7 +25,7 @@ class TransactionContext implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public void close() throws Exception {
         journal.clear();
         nitriteMap.clear();
         nitriteMap.close();

@@ -17,7 +17,7 @@
 package org.dizitart.no2.collection;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.Retry;
+import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.Rule;

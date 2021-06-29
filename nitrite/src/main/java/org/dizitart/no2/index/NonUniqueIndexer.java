@@ -17,7 +17,10 @@
 package org.dizitart.no2.index;
 
 /**
+ * Represents a non unique indexer.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public final class NonUniqueIndexer extends ComparableIndexer {
 
@@ -28,6 +31,6 @@ public final class NonUniqueIndexer extends ComparableIndexer {
 
     @Override
     public String getIndexType() {
-        return IndexType.NonUnique;
+        return IndexType.NON_UNIQUE;
     }
 }

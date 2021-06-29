@@ -16,62 +16,22 @@
 
 package org.dizitart.no2.filters;
 
-import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.index.ComparableIndexer;
-import org.dizitart.no2.index.TextIndexer;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.index.IndexMap;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee.
  */
-@ToString
-class EqualsFilter extends IndexAwareFilter {
+public class EqualsFilter extends ComparableFilter {
     EqualsFilter(String field, Object value) {
         super(field, value);
-    }
-
-    @Override
-    @SuppressWarnings("rawtypes")
-    protected Set<NitriteId> findIndexedIdSet() {
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getIsFieldIndexed()) {
-            if (getValue() == null || getValue() instanceof Comparable) {
-                if (getIndexer() instanceof ComparableIndexer) {
-                    ComparableIndexer comparableIndexer = (ComparableIndexer) getIndexer();
-                    idSet = comparableIndexer.findEqual(getCollectionName(), getField(), (Comparable) getValue());
-                } else if (getIndexer() instanceof TextIndexer && getValue() instanceof String) {
-                    // eq filter is not compatible with TextIndexer
-                    setIsFieldIndexed(false);
-                } else {
-                    throw new FilterException("eq filter is not supported on indexed field "
-                        + getField());
-                }
-            } else {
-                throw new FilterException(getValue() + " is not comparable");
-            }
-        }
-        return idSet;
-    }
-
-    @Override
-    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getOnIdField() && getValue() instanceof String) {
-            NitriteId nitriteId = NitriteId.createId((String) getValue());
-            if (collection.containsKey(nitriteId)) {
-                idSet.add(nitriteId);
-            }
-        }
-        return idSet;
     }
 
     @Override
@@ -82,9 +42,19 @@ class EqualsFilter extends IndexAwareFilter {
     }
 
     @Override
-    public void setIsFieldIndexed(Boolean isFieldIndexed) {
-        if (!(getIndexer() instanceof TextIndexer && getValue() instanceof String)) {
-            super.setIsFieldIndexed(isFieldIndexed);
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        Object value = indexMap.get((Comparable<?>) getValue());
+        if (value instanceof List) {
+            return ((List<?>) value);
         }
+
+        List<Object> result = new ArrayList<>();
+        result.add(value);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " == " + getValue() + ")";
     }
 }

@@ -22,11 +22,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Represents an entity for an {@link org.dizitart.no2.repository.ObjectRepository}.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Entity {
+    /**
+     * Name of the {@link org.dizitart.no2.repository.ObjectRepository}. By default,
+     * the name would be the class name of the entity.
+     *
+     * @return the name
+     */
     String value() default "";
+
+    /**
+     * Index definitions of the entity.
+     *
+     * @return the index definitions
+     */
     Index[] indices() default {};
 }

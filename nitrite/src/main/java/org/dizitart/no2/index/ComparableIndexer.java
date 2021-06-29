@@ -17,304 +17,85 @@
 package org.dizitart.no2.index;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.UnknownType;
-import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.common.util.Iterables;
-import org.dizitart.no2.exceptions.UniqueConstraintException;
-import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.Fields;
 
-import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
-
-import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
-import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
-import static org.dizitart.no2.common.util.ValidationUtils.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Represents an indexer for {@link Comparable} values.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
-@SuppressWarnings("rawtypes")
-public abstract class ComparableIndexer implements Indexer {
-    private NitriteStore<?> nitriteStore;
+public abstract class ComparableIndexer implements NitriteIndexer {
+    private final Map<IndexDescriptor, NitriteIndex> indexRegistry;
 
-    abstract boolean isUnique();
-
-    public ComparableIndexer clone() throws CloneNotSupportedException {
-        return (ComparableIndexer) super.clone();
+    /**
+     * Instantiates a new Comparable indexer.
+     */
+    public ComparableIndexer() {
+        this.indexRegistry = new ConcurrentHashMap<>();
     }
+
+    /**
+     * Indicates if it is an unique index.
+     *
+     * @return the boolean
+     */
+    abstract boolean isUnique();
 
     @Override
     public void initialize(NitriteConfig nitriteConfig) {
-        this.nitriteStore = nitriteConfig.getNitriteStore();
     }
 
     @Override
-    public void writeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
-        validateIndexField(fieldValue, field);
-        addIndexEntry(collection.getName(), nitriteId, field, fieldValue);
+    public void validateIndex(Fields fields) {
+        // nothing to validate
     }
 
     @Override
-    public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
-        validateIndexField(fieldValue, field);
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = null;
-
-        if (fieldValue == null) {
-            indexMap = getIndexMap(collection.getName(), field, UnknownType.class);
-            removeElementFromIndexMap(indexMap, nitriteId, field, null);
-        } else if (fieldValue instanceof Comparable) {
-            indexMap = getIndexMap(collection.getName(), field, fieldValue.getClass());
-            removeElementFromIndexMap(indexMap, nitriteId, field, (Comparable) fieldValue);
-        } else if (fieldValue.getClass().isArray()) {
-            Object[] array = convertToObjectArray(fieldValue);
-
-            for (Object item : array) {
-                if (indexMap == null) {
-                    indexMap = getIndexMap(collection.getName(), field, item.getClass());
-                }
-                removeElementFromIndexMap(indexMap, nitriteId, field, (Comparable) item);
-            }
-        } else if (fieldValue instanceof Iterable) {
-            Iterable iterable = (Iterable) fieldValue;
-            for (Object item : iterable) {
-                if (indexMap == null) {
-                    indexMap = getIndexMap(collection.getName(), field, item.getClass());
-                }
-                removeElementFromIndexMap(indexMap, nitriteId, field, (Comparable) item);
-            }
-        }
+    public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
+        NitriteIndex nitriteIndex = findNitriteIndex(findPlan.getIndexDescriptor(), nitriteConfig);
+        return nitriteIndex.findNitriteIds(findPlan);
     }
 
     @Override
-    public void updateIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object newValue, Object oldValue) {
-        validateIndexField(newValue, field);
-        validateIndexField(oldValue, field);
-        addIndexEntry(collection.getName(), nitriteId, field, newValue);
-        removeIndex(collection, nitriteId, field, oldValue);
+    public void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor,
+                                NitriteConfig nitriteConfig) {
+        NitriteIndex nitriteIndex = findNitriteIndex(indexDescriptor, nitriteConfig);
+        nitriteIndex.write(fieldValues);
     }
 
     @Override
-    public void dropIndex(NitriteMap<NitriteId, Document> collection, String field) {
-        // no action required
+    public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor,
+                                 NitriteConfig nitriteConfig) {
+        NitriteIndex nitriteIndex = findNitriteIndex(indexDescriptor, nitriteConfig);
+        nitriteIndex.remove(fieldValues);
     }
 
-    public Set<NitriteId> findEqual(String collectionName, String field, Comparable value) {
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
-            value != null ? getIndexMap(collectionName, field, value.getClass())
-                : getIndexMap(collectionName, field, UnknownType.class);
-
-        Set<NitriteId> resultSet = null;
-        if (indexMap != null) {
-            resultSet = indexMap.get(value);
-        }
-
-        if (resultSet == null) {
-            resultSet = new LinkedHashSet<>();
-        }
-        return resultSet;
+    @Override
+    public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        NitriteIndex nitriteIndex = findNitriteIndex(indexDescriptor, nitriteConfig);
+        nitriteIndex.drop();
     }
 
-    public Set<NitriteId> findNotEqual(String collectionName, String field, Comparable value) {
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
-            value != null ? getIndexMap(collectionName, field, value.getClass())
-                : getIndexMap(collectionName, field, UnknownType.class);
-
-        Set<NitriteId> resultSet = new LinkedHashSet<>();
-        if (indexMap != null) {
-            for (Pair<Comparable, ConcurrentSkipListSet<NitriteId>> entry : indexMap.entries()) {
-                if (!deepEquals(entry.getFirst(), value)) {
-                    resultSet.addAll(entry.getSecond());
-                }
-            }
+    private NitriteIndex findNitriteIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        if (indexRegistry.containsKey(indexDescriptor)) {
+            return indexRegistry.get(indexDescriptor);
         }
 
-        return resultSet;
-    }
-
-    public Set<NitriteId> findGreaterThan(String collectionName, String field, Comparable comparable) {
-        Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
-            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
-                : getIndexMap(collectionName, field, UnknownType.class);
-
-        if (indexMap != null) {
-            Comparable higherKey = indexMap.higherKey(comparable);
-            while (higherKey != null) {
-                resultSet.addAll(indexMap.get(higherKey));
-                higherKey = indexMap.higherKey(higherKey);
-            }
-        }
-
-        return resultSet;
-    }
-
-    public Set<NitriteId> findGreaterEqual(String collectionName, String field, Comparable comparable) {
-        Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
-            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
-                : getIndexMap(collectionName, field, UnknownType.class);
-
-        if (indexMap != null) {
-            Comparable ceilingKey = indexMap.ceilingKey(comparable);
-            while (ceilingKey != null) {
-                resultSet.addAll(indexMap.get(ceilingKey));
-                ceilingKey = indexMap.higherKey(ceilingKey);
-            }
-        }
-
-        return resultSet;
-    }
-
-    public Set<NitriteId> findLesserThan(String collectionName, String field, Comparable comparable) {
-        Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
-            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
-                : getIndexMap(collectionName, field, UnknownType.class);
-
-        if (indexMap != null) {
-            Comparable lowerKey = indexMap.lowerKey(comparable);
-            while (lowerKey != null) {
-                resultSet.addAll(indexMap.get(lowerKey));
-                lowerKey = indexMap.lowerKey(lowerKey);
-            }
-        }
-
-        return resultSet;
-    }
-
-    public Set<NitriteId> findLesserEqual(String collectionName, String field, Comparable comparable) {
-        Set<NitriteId> resultSet = new LinkedHashSet<>();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap =
-            comparable != null ? getIndexMap(collectionName, field, comparable.getClass())
-                : getIndexMap(collectionName, field, UnknownType.class);
-
-        if (indexMap != null) {
-            Comparable floorKey = indexMap.floorKey(comparable);
-            while (floorKey != null) {
-                resultSet.addAll(indexMap.get(floorKey));
-                floorKey = indexMap.lowerKey(floorKey);
-            }
-        }
-
-        return resultSet;
-    }
-
-    public Set<NitriteId> findIn(String collectionName, String field, Collection<Comparable<?>> values) {
-        notNull(values, "values cannot be null");
-        notEmpty(values, "values cannot be empty");
-
-        Set<NitriteId> resultSet = new LinkedHashSet<>();
-        Class<?> type = Iterables.firstOrNull(values).getClass();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field, type);
-
-        if (indexMap != null) {
-            for (Comparable comparable : indexMap.keySet()) {
-                if (values.contains(comparable)) {
-                    resultSet.addAll(indexMap.get(comparable));
-                }
-            }
-        }
-
-        return resultSet;
-    }
-
-    public Set<NitriteId> findNotIn(String collectionName, String field, Collection<Comparable<?>> values) {
-        notNull(values, "values cannot be null");
-
-        Set<NitriteId> resultSet = new LinkedHashSet<>();
-        Class<?> type = Iterables.firstOrNull(values).getClass();
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap = getIndexMap(collectionName, field, type);
-
-        if (indexMap != null) {
-            for (Comparable comparable : indexMap.keySet()) {
-                if (!values.contains(comparable)) {
-                    resultSet.addAll(indexMap.get(comparable));
-                }
-            }
-        }
-
-        return resultSet;
-    }
-
-    private void validateIndexField(Object value, String field) {
-        if (value == null) return;
-        if (value instanceof Iterable) {
-            validateIterableIndexField((Iterable) value, field);
-        } else if (value.getClass().isArray()) {
-            validateArrayIndexField(value, field);
+        NitriteIndex nitriteIndex;
+        if (indexDescriptor.isCompoundIndex()) {
+            nitriteIndex = new CompoundIndex(indexDescriptor, nitriteConfig.getNitriteStore());
         } else {
-            if (!(value instanceof Comparable)) {
-                throw new ValidationException(value + " is not comparable");
-            }
+            nitriteIndex = new SingleFieldIndex(indexDescriptor, nitriteConfig.getNitriteStore());
         }
-    }
-
-    private void addIndexEntry(String collectionName, NitriteId id, String field, Object element) {
-        NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap
-            = getIndexMap(collectionName, field, UnknownType.class);
-
-        if (element == null) {
-            addElementToIndexMap(indexMap, id, field, null);
-        } else if (element instanceof Comparable) {
-            addElementToIndexMap(indexMap, id, field, (Comparable) element);
-        } else if (element.getClass().isArray()) {
-            Object[] array = convertToObjectArray(element);
-            for (Object item : array) {
-                addElementToIndexMap(indexMap, id, field, (Comparable) item);
-            }
-        } else if (element instanceof Iterable) {
-            Iterable iterable = (Iterable) element;
-            for (Object item : iterable) {
-                addElementToIndexMap(indexMap, id, field, (Comparable) item);
-            }
-        }
-    }
-
-    private void addElementToIndexMap(NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap,
-                                      NitriteId id, String field, Comparable element) {
-        // create the nitriteId list associated with the value
-        ConcurrentSkipListSet<NitriteId> nitriteIdList
-            = indexMap.get(element);
-
-        if (nitriteIdList == null) {
-            nitriteIdList = new ConcurrentSkipListSet<>();
-        }
-
-        if (isUnique() && nitriteIdList.size() == 1
-            && !nitriteIdList.contains(id)) {
-            // if key is already exists for unique type, throw error
-            throw new UniqueConstraintException("unique key constraint violation for " + field);
-        }
-
-        nitriteIdList.add(id);
-        indexMap.put(element, nitriteIdList);
-    }
-
-    private void removeElementFromIndexMap(NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> indexMap,
-                                           NitriteId nitriteId, String field, Comparable element) {
-        // create the nitrite list associated with the value
-        ConcurrentSkipListSet<NitriteId> nitriteIdList = indexMap.get(element);
-        if (nitriteIdList != null && !nitriteIdList.isEmpty()) {
-            nitriteIdList.remove(nitriteId);
-            if (nitriteIdList.size() == 0) {
-                indexMap.remove(element);
-            } else {
-                indexMap.put(element, nitriteIdList);
-            }
-        }
-    }
-
-    @SuppressWarnings("rawtypes")
-    private NitriteMap<Comparable, ConcurrentSkipListSet<NitriteId>> getIndexMap(
-        String collectionName, String field, Class<?> keyType) {
-
-        String mapName = getIndexMapName(collectionName, field);
-        return nitriteStore.openMap(mapName, keyType, ConcurrentSkipListSet.class);
+        indexRegistry.put(indexDescriptor, nitriteIndex);
+        return nitriteIndex;
     }
 }

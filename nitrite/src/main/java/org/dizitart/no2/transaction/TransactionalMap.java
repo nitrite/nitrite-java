@@ -7,12 +7,13 @@ import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryMap;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepCopy;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @SuppressWarnings("SortedCollectionWithNonComparableKeys")
 class TransactionalMap<K, V> implements NitriteMap<K, V> {
@@ -56,11 +57,11 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         V result = backingMap.get(k);
         if (result == null) {
             result = primary.get(k);
-            if (result instanceof ConcurrentSkipListSet) {
-                // create a deep copy of the set so that it does not effect the original one
-                ConcurrentSkipListSet<?> set = deepCopy((ConcurrentSkipListSet<?>) result);
-                backingMap.put(k, (V) set);
-                result = (V) set;
+            if (result instanceof CopyOnWriteArrayList) {
+                // create a deep copy of the list so that it does not effect the original one
+                List<?> list = deepCopy((CopyOnWriteArrayList<?>) result);
+                backingMap.put(k, (V) list);
+                result = (V) list;
             }
         }
 
@@ -89,7 +90,18 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
             return RecordStream.empty();
         }
 
-        return RecordStream.fromCombined(primary.values(), backingMap.values());
+        return RecordStream.fromIterable(() -> new Iterator<V>() {
+            private final Iterator<Pair<K, V>> entryIterator = entries().iterator();
+            @Override
+            public boolean hasNext() {
+                return entryIterator.hasNext();
+            }
+
+            @Override
+            public V next() {
+                return entryIterator.next().getSecond();
+            }
+        });
     }
 
     @Override
@@ -109,13 +121,13 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
-    public RecordStream<K> keySet() {
+    public RecordStream<K> keys() {
         if (cleared) {
             return RecordStream.empty();
         }
 
-        return RecordStream.fromCombined(RecordStream.except(primary.keySet(), tombstones),
-            backingMap.keySet());
+        return RecordStream.fromCombined(RecordStream.except(primary.keys(), tombstones),
+            backingMap.keys());
     }
 
     @Override
@@ -146,49 +158,12 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public RecordStream<Pair<K, V>> entries() {
-        if (cleared) {
-            return RecordStream.empty();
-        }
+        return getStream(primary.entries(), backingMap.entries());
+    }
 
-        return () -> new Iterator<Pair<K, V>>() {
-            private final Iterator<Pair<K, V>> primaryIterator = primary.entries().iterator();
-            private final Iterator<Pair<K, V>> iterator = backingMap.entries().iterator();
-            private Pair<K, V> nextPair;
-            private boolean nextPairSet = false;
-
-            @Override
-            public boolean hasNext() {
-                return nextPairSet || setNextId();
-            }
-
-            @Override
-            public Pair<K, V> next() {
-                if (!nextPairSet && !setNextId()) {
-                    throw new NoSuchElementException();
-                }
-                nextPairSet = false;
-                return nextPair;
-            }
-
-            private boolean setNextId() {
-                if (iterator.hasNext()) {
-                    nextPair = iterator.next();
-                    nextPairSet = true;
-                    return true;
-                }
-
-                while (primaryIterator.hasNext()) {
-                    final Pair<K, V> pair = primaryIterator.next();
-                    if (!tombstones.contains(pair.getFirst())) {
-                        nextPair = pair;
-                        nextPairSet = true;
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        };
+    @Override
+    public RecordStream<Pair<K, V>> reversedEntries() {
+        return getStream(primary.reversedEntries(), backingMap.reversedEntries());
     }
 
     @Override
@@ -310,5 +285,52 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     public void close() {
         backingMap.clear();
         tombstones.clear();
+    }
+
+    private RecordStream<Pair<K, V>> getStream(RecordStream<Pair<K, V>> primaryStream,
+                                               RecordStream<Pair<K, V>> backingStream) {
+        if (cleared) {
+            return RecordStream.empty();
+        }
+
+        return () -> new Iterator<Pair<K, V>>() {
+            private final Iterator<Pair<K, V>> primaryIterator = primaryStream.iterator();
+            private final Iterator<Pair<K, V>> iterator = backingStream.iterator();
+            private Pair<K, V> nextPair;
+            private boolean nextPairSet = false;
+
+            @Override
+            public boolean hasNext() {
+                return nextPairSet || setNextId();
+            }
+
+            @Override
+            public Pair<K, V> next() {
+                if (!nextPairSet && !setNextId()) {
+                    throw new NoSuchElementException();
+                }
+                nextPairSet = false;
+                return nextPair;
+            }
+
+            private boolean setNextId() {
+                if (iterator.hasNext()) {
+                    nextPair = iterator.next();
+                    nextPairSet = true;
+                    return true;
+                }
+
+                while (primaryIterator.hasNext()) {
+                    final Pair<K, V> pair = primaryIterator.next();
+                    if (!tombstones.contains(pair.getFirst())) {
+                        nextPair = pair;
+                        nextPairSet = true;
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        };
     }
 }

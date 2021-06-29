@@ -22,7 +22,7 @@ import org.dizitart.no2.exceptions.NitriteException;
  * @author Anindya Chatterjee.
  */
 public class ReplicationException extends NitriteException {
-    private boolean fatal;
+    private final boolean fatal;
 
     public ReplicationException(String errorMessage, boolean fatal) {
         super(errorMessage);

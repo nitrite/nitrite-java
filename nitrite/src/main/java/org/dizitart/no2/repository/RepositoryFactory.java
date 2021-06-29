@@ -18,39 +18,63 @@ package org.dizitart.no2.repository;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.CollectionFactory;
-import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.util.StringUtils;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.StoreCatalog;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
 /**
+ * The {@link ObjectRepository} factory.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 public class RepositoryFactory {
     private final Map<String, ObjectRepository<?>> repositoryMap;
     private final CollectionFactory collectionFactory;
     private final ReentrantLock lock;
 
+    /**
+     * Instantiates a new {@link RepositoryFactory}.
+     *
+     * @param collectionFactory the collection factory
+     */
     public RepositoryFactory(CollectionFactory collectionFactory) {
         this.collectionFactory = collectionFactory;
         this.repositoryMap = new HashMap<>();
         this.lock = new ReentrantLock();
     }
 
+    /**
+     * Gets an {@link ObjectRepository} by type.
+     *
+     * @param <T>           the type parameter
+     * @param nitriteConfig the nitrite config
+     * @param type          the type
+     * @return the repository
+     */
     public <T> ObjectRepository<T> getRepository(NitriteConfig nitriteConfig, Class<T> type) {
         return getRepository(nitriteConfig, type, null);
     }
 
+    /**
+     * Gets an {@link ObjectRepository} by type and a key.
+     *
+     * @param <T>           the type parameter
+     * @param nitriteConfig the nitrite config
+     * @param type          the type
+     * @param key           the key
+     * @return the repository
+     */
     @SuppressWarnings("unchecked")
     public <T> ObjectRepository<T> getRepository(NitriteConfig nitriteConfig, Class<T> type, String key) {
         if (type == null) {
@@ -81,6 +105,9 @@ public class RepositoryFactory {
         }
     }
 
+    /**
+     * Closes all opened {@link ObjectRepository}s and clear internal data from this class.
+     */
     public void clear() {
         try {
             lock.lock();
@@ -88,6 +115,8 @@ public class RepositoryFactory {
                 repository.close();
             }
             repositoryMap.clear();
+        } catch (Exception e) {
+            throw new NitriteIOException("failed to close an object repository", e);
         } finally {
             lock.unlock();
         }
@@ -115,16 +144,11 @@ public class RepositoryFactory {
     }
 
     private void writeCatalog(NitriteStore<?> store, String name, String key) {
-        NitriteMap<String, Document> catalogMap = store.openMap(COLLECTION_CATALOG, String.class, Document.class);
-        Document document = StringUtils.isNullOrEmpty(key) ? catalogMap.get(TAG_REPOSITORIES)
-            : catalogMap.get(TAG_KEYED_REPOSITORIES);
-        if (document == null) document = Document.createDocument();
-
-        document.put(name, true);
+        StoreCatalog storeCatalog = store.getCatalog();
         if (StringUtils.isNullOrEmpty(key)) {
-            catalogMap.put(TAG_REPOSITORIES, document);
+            storeCatalog.writeRepositoryEntry(name);
         } else {
-            catalogMap.put(TAG_KEYED_REPOSITORIES, document);
+            storeCatalog.writeKeyedRepositoryEntries(name);
         }
     }
 }

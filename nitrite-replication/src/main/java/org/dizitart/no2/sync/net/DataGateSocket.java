@@ -24,6 +24,7 @@ import okio.ByteString;
 import org.dizitart.no2.sync.Config;
 import org.dizitart.no2.sync.ReplicationException;
 import org.dizitart.no2.sync.message.DataGateMessage;
+import org.jetbrains.annotations.NotNull;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -44,24 +45,22 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DataGateSocket {
     private final static int RECONNECT_INTERVAL = 10 * 1000;
     private final static long RECONNECT_MAX_TIME = 120 * 1000;
-
+    private final OkHttpClient httpClient;
+    private final Request request;
+    private final Lock lock;
+    private final ObjectMapper objectMapper;
+    private final Config config;
+    private final Callable<Boolean> networkConnectivityChecker;
     private WebSocket mWebSocket;
-    private OkHttpClient httpClient;
-    private Request request;
     private int currentStatus = Status.DISCONNECTED;
     private boolean manualClose;
     private DataGateSocketListener listener;
-    private Lock lock;
     private int reconnectCount = 0;
     private Timer reconnectTimer;
-    private ObjectMapper objectMapper;
-    private Config config;
     private CountDownLatch latch;
-    private Callable<Boolean> networkConnectivityChecker;
-
-    private WebSocketListener webSocketListener = new WebSocketListener() {
+    private final WebSocketListener webSocketListener = new WebSocketListener() {
         @Override
-        public void onOpen(WebSocket webSocket, final Response response) {
+        public void onOpen(@NotNull WebSocket webSocket, @NotNull final Response response) {
             mWebSocket = webSocket;
             setCurrentStatus(Status.CONNECTED);
             if (latch != null) {
@@ -75,35 +74,35 @@ public class DataGateSocket {
         }
 
         @Override
-        public void onMessage(WebSocket webSocket, final String text) {
+        public void onMessage(@NotNull WebSocket webSocket, @NotNull final String text) {
             if (listener != null) {
                 listener.onMessage(text);
             }
         }
 
         @Override
-        public void onMessage(WebSocket webSocket, ByteString bytes) {
+        public void onMessage(@NotNull WebSocket webSocket, @NotNull ByteString bytes) {
             if (listener != null) {
                 listener.onMessage(bytes);
             }
         }
 
         @Override
-        public void onClosing(WebSocket webSocket, int code, String reason) {
+        public void onClosing(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
             if (listener != null) {
                 listener.onClosing(code, reason);
             }
         }
 
         @Override
-        public void onClosed(WebSocket webSocket, int code, String reason) {
+        public void onClosed(@NotNull WebSocket webSocket, int code, @NotNull String reason) {
             if (listener != null) {
                 listener.onClosed(code, reason);
             }
         }
 
         @Override
-        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+        public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, Response response) {
             if (listener != null) {
                 listener.onFailure(t, response);
             }
@@ -172,7 +171,9 @@ public class DataGateSocket {
             lock.lockInterruptibly();
             try {
                 latch = new CountDownLatch(1);
-                httpClient.newWebSocket(request, webSocketListener);
+                if (httpClient != null) {
+                    httpClient.newWebSocket(request, webSocketListener);
+                }
                 latch.await();
             } finally {
                 lock.unlock();
@@ -202,11 +203,13 @@ public class DataGateSocket {
                     new X509TrustManager() {
 
                         @Override
+                        @SuppressWarnings("TrustAllX509TrustManager")
                         public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
                                                        String authType) {
                         }
 
                         @Override
+                        @SuppressWarnings("TrustAllX509TrustManager")
                         public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
                                                        String authType) {
                         }
@@ -247,7 +250,7 @@ public class DataGateSocket {
         setCurrentStatus(Status.RECONNECT);
         reconnectTimer = new Timer();
 
-        long delay = reconnectCount * RECONNECT_INTERVAL;
+        long delay = (long) reconnectCount * RECONNECT_INTERVAL;
         reconnectTimer.schedule(new TimerTask() {
             @Override
             public void run() {

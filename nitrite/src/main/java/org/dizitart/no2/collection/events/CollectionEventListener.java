@@ -23,14 +23,6 @@ import org.dizitart.no2.repository.ObjectRepository;
  * An interface when implemented makes an object be
  * able to listen to any changes in a {@link NitriteCollection}
  * or {@link ObjectRepository}.
- * <p>
- * [[app-listing]]
- * [source,java]
- * .Example
- * --
- * <p>
- * // observe any change to the collection
- * collection.subscribe(new EventListener() {
  *
  * @author Anindya Chatterjee.
  * @since 4.0

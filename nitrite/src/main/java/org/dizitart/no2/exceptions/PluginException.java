@@ -17,13 +17,27 @@
 package org.dizitart.no2.exceptions;
 
 /**
+ * Exception thrown when a nitrite plugin fails to load properly.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 public class PluginException extends NitriteException {
+    /**
+     * Instantiates a new Plugin exception.
+     *
+     * @param errorMessage the error message
+     */
     public PluginException(String errorMessage) {
         super(errorMessage);
     }
 
+    /**
+     * Instantiates a new Plugin exception.
+     *
+     * @param errorMessage the error message
+     * @param cause        the cause
+     */
     public PluginException(String errorMessage, Throwable cause) {
         super(errorMessage, cause);
     }

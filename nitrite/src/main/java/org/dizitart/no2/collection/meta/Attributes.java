@@ -35,26 +35,61 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @EqualsAndHashCode
 public class Attributes implements Serializable {
+    /**
+     * The constant CREATED_TIME.
+     */
     public static final String CREATED_TIME = "createdTime";
+    /**
+     * The constant LAST_MODIFIED_TIME.
+     */
     public static final String LAST_MODIFIED_TIME = "lastModifiedTime";
+    /**
+     * The constant OWNER.
+     */
     public static final String OWNER = "owner";
+    /**
+     * The constant UNIQUE_ID.
+     */
     public static final String UNIQUE_ID = "uuid";
+    /**
+     * The constant LAST_SYNCED.
+     */
     public static final String LAST_SYNCED = "lastSynced";
+    /**
+     * The constant SYNC_LOCK.
+     */
     public static final String SYNC_LOCK = "syncLock";
+    /**
+     * The constant EXPIRY_WAIT.
+     */
     public static final String EXPIRY_WAIT = "expiryWait";
+    /**
+     * The constant TOMBSTONE.
+     */
     public static final String TOMBSTONE = "tombstone";
+    /**
+     * The constant REPLICA.
+     */
     public static final String REPLICA = "replica";
     private static final long serialVersionUID = 1481284930L;
 
     @Getter @Setter
     private Map<String, String> attributes;
 
+    /**
+     * Instantiates a new Attributes.
+     */
     public Attributes() {
         attributes = new ConcurrentHashMap<>();
         set(CREATED_TIME, Long.toString(System.currentTimeMillis()));
         set(UNIQUE_ID, java.util.UUID.randomUUID().toString());
     }
 
+    /**
+     * Instantiates a new Attributes.
+     *
+     * @param collection the collection
+     */
     public Attributes(String collection) {
         attributes = new ConcurrentHashMap<>();
         set(OWNER, collection);
@@ -62,16 +97,35 @@ public class Attributes implements Serializable {
         set(UNIQUE_ID, java.util.UUID.randomUUID().toString());
     }
 
+    /**
+     * Set attributes.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the attributes
+     */
     public Attributes set(String key, String value) {
         attributes.put(LAST_MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
         attributes.put(key, value);
         return this;
     }
 
+    /**
+     * Get string value of an attribute.
+     *
+     * @param key the key
+     * @return the string
+     */
     public String get(String key) {
         return attributes.get(key);
     }
 
+    /**
+     * Check whether a key exists in the attributes.
+     *
+     * @param key the key
+     * @return the boolean
+     */
     public boolean hasKey(String key) {
         return attributes.containsKey(key);
     }

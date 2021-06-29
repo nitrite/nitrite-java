@@ -18,14 +18,16 @@ package org.dizitart.no2.repository;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.Collection;
@@ -53,33 +55,45 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void createIndex(String field, IndexOptions indexOptions) {
-        collection.createIndex(field, indexOptions);
+    public void addProcessor(Processor processor) {
+        notNull(processor, "a null processor cannot be added");
+        collection.addProcessor(processor);
     }
 
     @Override
-    public void rebuildIndex(String field, boolean isAsync) {
-        collection.rebuildIndex(field, isAsync);
+    public void removeProcessor(Processor processor) {
+        notNull(processor, "a null processor cannot be removed");
+        collection.removeProcessor(processor);
     }
 
     @Override
-    public Collection<IndexEntry> listIndices() {
+    public void createIndex(IndexOptions indexOptions, String... fields) {
+        collection.createIndex(indexOptions, fields);
+    }
+
+    @Override
+    public void rebuildIndex(String... fields) {
+        collection.rebuildIndex(fields);
+    }
+
+    @Override
+    public Collection<IndexDescriptor> listIndices() {
         return collection.listIndices();
     }
 
     @Override
-    public boolean hasIndex(String field) {
-        return collection.hasIndex(field);
+    public boolean hasIndex(String... fields) {
+        return collection.hasIndex(fields);
     }
 
     @Override
-    public boolean isIndexing(String field) {
-        return collection.isIndexing(field);
+    public boolean isIndexing(String... fields) {
+        return collection.isIndexing(fields);
     }
 
     @Override
-    public void dropIndex(String field) {
-        collection.dropIndex(field);
+    public void dropIndex(String... fields) {
+        collection.dropIndex(fields);
     }
 
     @Override
@@ -134,14 +148,10 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         collection.clear();
     }
 
-    @Override
-    public Cursor<T> find() {
-        return operations.find(type);
-    }
 
     @Override
-    public Cursor<T> find(Filter filter) {
-        return operations.find(filter, type);
+    public Cursor<T> find(Filter filter, FindOptions findOptions) {
+        return operations.find(filter, findOptions, type);
     }
 
     @Override
@@ -213,7 +223,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     private void initialize() {
         NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         operations = new RepositoryOperations(type, nitriteMapper, collection);
-        operations.createIndexes();
+        operations.createIndices();
     }
 
 }

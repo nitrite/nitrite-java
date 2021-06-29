@@ -1,26 +1,16 @@
 package org.dizitart.no2.migration;
 
-import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
-
 /**
+ * Represents a collection of database migration steps.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
-public interface Instruction {
-    DatabaseInstruction forDatabase();
-
-    default RepositoryInstruction forRepository(String typeName) {
-        return forRepository(typeName, null);
-    }
-
-    default RepositoryInstruction forRepository(Class<?> type) {
-        return forRepository(getEntityName(type), null);
-    }
-
-    default RepositoryInstruction forRepository(Class<?> type, String key) {
-        return forRepository(getEntityName(type), key);
-    }
-
-    RepositoryInstruction forRepository(String typeName, String key);
-
-    CollectionInstruction forCollection(String collectionName);
+interface Instruction {
+    /**
+     * Adds a migration step to the instruction set.
+     *
+     * @param step the step
+     */
+    void addStep(MigrationStep step);
 }

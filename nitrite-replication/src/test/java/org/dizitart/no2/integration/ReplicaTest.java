@@ -22,11 +22,11 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.integration.server.Repository;
+import org.dizitart.no2.integration.server.SimpleDataGateServer;
 import org.dizitart.no2.sync.Replica;
 import org.dizitart.no2.sync.ReplicationTemplate;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
-import org.dizitart.no2.integration.server.Repository;
-import org.dizitart.no2.integration.server.SimpleDataGateServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -56,13 +56,12 @@ import static org.junit.Assert.*;
 @Slf4j
 public class ReplicaTest {
     private static SimpleDataGateServer server;
+    @Rule
+    public Retry retry = new Retry(3);
     private String dbFile;
     private ExecutorService executorService;
     private Repository repository;
     private Nitrite db;
-
-    @Rule
-    public Retry retry = new Retry(3);
 
     public static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";
@@ -103,9 +102,10 @@ public class ReplicaTest {
 
         db = createDb(dbFile);
         NitriteCollection collection = db.getCollection("testSingleUserSingleReplica");
-        Document document = createDocument().put("firstName", "Anindya")
-                .put("lastName", "Chatterjee")
-                .put("address", createDocument("street", "1234 Abcd Street")
+        Document document = createDocument()
+            .put("firstName", "Anindya")
+            .put("lastName", "Chatterjee")
+            .put("address", createDocument("street", "1234 Abcd Street")
                 .put("pin", 123456));
         collection.insert(document);
 

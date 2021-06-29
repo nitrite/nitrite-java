@@ -1,6 +1,5 @@
 package org.dizitart.no2.transaction;
 
-import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.*;
@@ -11,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     private final NitriteStore<T> primaryStore;
@@ -49,8 +49,17 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
     }
 
     @Override
-    public void close() {
-        // nothing to do
+    public void close() throws Exception {
+        for (NitriteMap<?, ?> nitriteMap : mapRegistry.values()) {
+            nitriteMap.close();
+        }
+
+        for (NitriteRTree<?, ?> rTree : rTreeRegistry.values()) {
+            rTree.close();
+        }
+
+        mapRegistry.clear();
+        rTreeRegistry.clear();
     }
 
     @Override
@@ -80,6 +89,18 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
         TransactionalMap<Key, Value> transactionalMap = new TransactionalMap<>(mapName, primaryMap, this);
         mapRegistry.put(mapName, transactionalMap);
         return transactionalMap;
+    }
+
+    @Override
+    public void closeMap(String mapName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
+    }
+
+    @Override
+    public void closeRTree(String rTreeName) {
+        // nothing to close as it is volatile map, moreover,
+        // removing it form registry means loosing the map
     }
 
     @Override
@@ -129,10 +150,5 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
     @Override
     public T getStoreConfig() {
         return null;
-    }
-
-    @Override
-    public void initialize(NitriteConfig nitriteConfig) {
-
     }
 }

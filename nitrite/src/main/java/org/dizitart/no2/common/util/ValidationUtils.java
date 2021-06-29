@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.common.util;
 
-import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -72,6 +71,12 @@ public class ValidationUtils {
         }
     }
 
+    public static <T> void notEmpty(T[] value, String message) {
+        if (value.length == 0) {
+            throw new ValidationException(message);
+        }
+    }
+
     /**
      * Validates if an object is `null`.
      *
@@ -99,31 +104,11 @@ public class ValidationUtils {
         }
     }
 
-    /**
-     * Validates if a field of a document can be indexed.
-     *
-     * @param fieldValue the field value
-     * @param field      the field
-     */
-    public static void validateDocumentIndexField(Object fieldValue, String field) {
-        if (fieldValue == null) return;
-
-        if (fieldValue instanceof Document) {
-            throw new InvalidOperationException("compound index on field " + field + " is not supported");
-        }
-
-        if (!(fieldValue instanceof Iterable || fieldValue.getClass().isArray())) {
-            if (!(fieldValue instanceof Comparable)) {
-                throw new IndexingException("cannot index on non comparable field " + field);
-            }
-        }
-    }
-
     public static void validateIterableIndexField(Iterable<?> fieldValue, String field) {
         if (fieldValue != null) {
             for (Object value : fieldValue) {
                 if (value == null) continue;
-                validateArrayItem(value, field);
+                validateArrayIndexItem(value, field);
             }
         }
     }
@@ -142,7 +127,7 @@ public class ValidationUtils {
             Object[] array = convertToObjectArray(arrayValue);
             for (Object value : array) {
                 if (value == null) continue;
-                validateArrayItem(value, field);
+                validateArrayIndexItem(value, field);
             }
         }
     }
@@ -157,7 +142,26 @@ public class ValidationUtils {
         }
     }
 
-    private static void validateArrayItem(Object value, String field) {
+    public static void validateFilterArrayField(Object arrayValue, String field) {
+        if (arrayValue != null) {
+            Object[] array = convertToObjectArray(arrayValue);
+            for (Object value : array) {
+                if (value == null) continue;
+                validateArrayFilterItem(value, field);
+            }
+        }
+    }
+
+    public static void validateFilterIterableField(Iterable<?> fieldValue, String field) {
+        if (fieldValue != null) {
+            for (Object value : fieldValue) {
+                if (value == null) continue;
+                validateArrayFilterItem(value, field);
+            }
+        }
+    }
+
+    private static void validateArrayIndexItem(Object value, String field) {
         if (value instanceof Iterable || value.getClass().isArray()) {
             throw new InvalidOperationException("nested array index on iterable field " + field + " is not supported");
         }
@@ -174,6 +178,16 @@ public class ValidationUtils {
 
         if (!(value instanceof String)) {
             throw new IndexingException("cannot index on an array field containing non string values " + field);
+        }
+    }
+
+    private static void validateArrayFilterItem(Object value, String field) {
+        if (value instanceof Iterable || value.getClass().isArray()) {
+            throw new InvalidOperationException("nested array is not supported");
+        }
+
+        if (!(value instanceof Comparable)) {
+            throw new IndexingException("cannot filter using non comparable values " + field);
         }
     }
 }

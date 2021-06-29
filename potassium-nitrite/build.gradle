@@ -21,15 +21,15 @@ buildscript {
     }
 
     dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.21"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.20"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.20"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.4.32"
     }
 }
 
 
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.4.21"
-    id "org.jetbrains.dokka" version "1.4.20"
+    id "org.jetbrains.kotlin.jvm" version "1.5.20"
+    id "org.jetbrains.dokka" version "1.4.32"
     id 'signing'
     id 'maven-publish'
     id 'com.github.hauner.jarTest'
@@ -58,11 +58,12 @@ dependencies {
     api "com.fasterxml.jackson.module:jackson-module-kotlin"
 
     testApi project(':nitrite-mvstore-adapter')
-    testImplementation "junit:junit:4.13.1"
-    testImplementation "joda-time:joda-time:2.10.8"
-    testImplementation "org.threeten:threetenbp:1.5.0"
-    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.14.0"
-    testAnnotationProcessor "org.apache.logging.log4j:log4j-core:2.14.0"
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "joda-time:joda-time:2.10.10"
+    testImplementation "org.threeten:threetenbp:1.5.1"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.14.1"
+    testImplementation "org.apache.logging.log4j:log4j-core:2.14.1"
+    testImplementation "com.github.javafaker:javafaker:1.0.2"
 }
 
 compileKotlin {
@@ -80,6 +81,13 @@ tasks.named("dokkaJavadoc") {
 test {
     testLogging.showStandardStreams = false
     testLogging.exceptionFormat = 'full'
+    jacoco {
+        destinationFile = file("${buildDir}/jacoco/test.exec")
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.7"
 }
 
 jacocoTestReport {

@@ -17,13 +17,27 @@
 package org.dizitart.no2.filters;
 
 /**
+ * Represents a filter on string values.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
-public abstract class StringFilter extends IndexAwareFilter {
+public abstract class StringFilter extends ComparableFilter {
+    /**
+     * Instantiates a new String filter.
+     *
+     * @param field the field
+     * @param value the value
+     */
     protected StringFilter(String field, String value) {
         super(field, value);
     }
 
+    /**
+     * Gets string value.
+     *
+     * @return the string value
+     */
     public String getStringValue() {
         return (String) getValue();
     }
