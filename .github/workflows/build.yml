@@ -26,6 +26,7 @@ jobs:
       MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
       PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
       GITHUB_TOKEN: ${{ secrets.NITRITE_GH_TOKEN }}
+    name: Build with Java ${{ matrix.Java }}
 
     steps:
       - uses: actions/checkout@v2
@@ -44,6 +45,7 @@ jobs:
         run: ./gradlew clean build
 
   publish:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
