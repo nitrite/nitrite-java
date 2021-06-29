@@ -22,6 +22,7 @@ import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.collection.operation.CollectionOperations;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.common.event.EventBus;
@@ -31,12 +32,14 @@ import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.locks.Lock;
 
@@ -72,6 +75,20 @@ class DefaultNitriteCollection implements NitriteCollection {
         this.lockService = lockService;
 
         initialize();
+    }
+
+    @Override
+    public void addProcessor(Processor processor) {
+        checkOpened();
+        notNull(processor, "a null processor cannot be added");
+        collectionOperations.addProcessor(processor);
+    }
+
+    @Override
+    public void removeProcessor(Processor processor) {
+        checkOpened();
+        notNull(processor, "a null processor cannot be removed");
+        collectionOperations.removeProcessor(processor);
     }
 
     public WriteResult insert(Document[] documents) {
@@ -155,72 +172,61 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public DocumentCursor find() {
+    public DocumentCursor find(Filter filter, FindOptions findOptions) {
         checkOpened();
         try {
             readLock.lock();
-            return collectionOperations.find();
+            return collectionOperations.find(filter, findOptions);
         } finally {
             readLock.unlock();
         }
     }
 
-    public DocumentCursor find(Filter filter) {
+    public void createIndex(IndexOptions indexOptions, String... fields) {
         checkOpened();
+        notNull(fields, "fields cannot be null");
 
-        try {
-            readLock.lock();
-            return collectionOperations.find(filter);
-        } finally {
-            readLock.unlock();
-        }
-    }
-
-    public void createIndex(String field, IndexOptions indexOptions) {
-        checkOpened();
-        notNull(field, "field cannot be null");
-
-        // by default async is false while creating index
+        Fields indexFields = Fields.withNames(fields);
         try {
             writeLock.lock();
             if (indexOptions == null) {
-                collectionOperations.createIndex(field, IndexType.Unique, false);
+                collectionOperations.createIndex(indexFields, IndexType.UNIQUE);
             } else {
-                collectionOperations.createIndex(field, indexOptions.getIndexType(),
-                    indexOptions.isAsync());
+                collectionOperations.createIndex(indexFields, indexOptions.getIndexType());
             }
         } finally {
             writeLock.unlock();
         }
     }
 
-    public void rebuildIndex(String field, boolean isAsync) {
+    public void rebuildIndex(String... fields) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
 
-        IndexEntry indexEntry;
+        IndexDescriptor indexDescriptor;
+        Fields indexFields = Fields.withNames(fields);
         try {
             readLock.lock();
-            indexEntry = collectionOperations.findIndex(field);
+            indexDescriptor = collectionOperations.findIndex(indexFields);
         } finally {
             readLock.unlock();
         }
 
-        if (indexEntry != null) {
-            validateRebuildIndex(indexEntry);
+        if (indexDescriptor != null) {
+            validateRebuildIndex(indexDescriptor);
 
             try {
                 writeLock.lock();
-                collectionOperations.rebuildIndex(indexEntry, isAsync);
+                collectionOperations.rebuildIndex(indexDescriptor);
             } finally {
                 writeLock.unlock();
             }
         } else {
-            throw new IndexingException(field + " is not indexed");
+            throw new IndexingException(Arrays.toString(fields) + " is not indexed");
         }
     }
 
-    public Collection<IndexEntry> listIndices() {
+    public Collection<IndexDescriptor> listIndices() {
         checkOpened();
 
         try {
@@ -231,37 +237,40 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public boolean hasIndex(String field) {
+    public boolean hasIndex(String... fields) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
 
+        Fields indexFields = Fields.withNames(fields);
         try {
             readLock.lock();
-            return collectionOperations.hasIndex(field);
+            return collectionOperations.hasIndex(indexFields);
         } finally {
             readLock.unlock();
         }
     }
 
-    public boolean isIndexing(String field) {
+    public boolean isIndexing(String... fields) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "field cannot be null");
 
+        Fields indexFields = Fields.withNames(fields);
         try {
             readLock.lock();
-            return collectionOperations.isIndexing(field);
+            return collectionOperations.isIndexing(indexFields);
         } finally {
             readLock.unlock();
         }
     }
 
-    public void dropIndex(String field) {
+    public void dropIndex(String... fields) {
         checkOpened();
-        notNull(field, "field cannot be null");
+        notNull(fields, "fields cannot be null");
 
+        Fields indexFields = Fields.withNames(fields);
         try {
             writeLock.lock();
-            collectionOperations.dropIndex(field);
+            collectionOperations.dropIndex(indexFields);
         } finally {
             writeLock.unlock();
         }
@@ -295,25 +304,47 @@ class DefaultNitriteCollection implements NitriteCollection {
 
         try {
             writeLock.lock();
-            collectionOperations.dropCollection();
+
+            if (collectionOperations != null) {
+                // close collection and indexes
+                collectionOperations.close();
+
+                // drop collection and indexes
+                collectionOperations.dropCollection();
+            }
+
+            // set all reference to null
+            this.nitriteMap = null;
+            this.nitriteConfig = null;
+            this.collectionOperations = null;
+            this.nitriteStore = null;
+
+            // close event bus
+            closeEventBus();
         } finally {
             writeLock.unlock();
         }
         isDropped = true;
-        close();
     }
 
     public boolean isOpen() {
         if (nitriteStore == null || nitriteStore.isClosed() || isDropped) {
-            close();
+            try {
+                close();
+            } catch (Exception e) {
+                throw new NitriteIOException("failed to close the database", e);
+            }
             return false;
         } else return true;
     }
 
     public void close() {
         if (collectionOperations != null) {
+            // close collection and indexes
             collectionOperations.close();
         }
+
+        // set all reference to null
         this.nitriteMap = null;
         this.nitriteConfig = null;
         this.collectionOperations = null;
@@ -407,11 +438,12 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    private void validateRebuildIndex(IndexEntry indexEntry) {
-        notNull(indexEntry, "index cannot be null");
+    private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
+        notNull(indexDescriptor, "index cannot be null");
 
-        if (isIndexing(indexEntry.getField())) {
-            throw new IndexingException("indexing on value " + indexEntry.getField() + " is currently running");
+        String[] indexFields = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+        if (isIndexing(indexFields)) {
+            throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }
 

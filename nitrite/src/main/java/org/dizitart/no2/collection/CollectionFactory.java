@@ -18,32 +18,47 @@ package org.dizitart.no2.collection;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.concurrent.LockService;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.StoreCatalog;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
-import static org.dizitart.no2.common.Constants.COLLECTION_CATALOG;
-import static org.dizitart.no2.common.Constants.TAG_COLLECTIONS;
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
+ * A factory class to create {@link NitriteCollection}.
+ * <p>NOTE: Internal API</p>
  * @author Anindya Chatterjee
  */
 public class CollectionFactory {
     private final Map<String, NitriteCollection> collectionMap;
     private final LockService lockService;
 
+    /**
+     * Instantiates a new {@link CollectionFactory}.
+     *
+     * @param lockService the lock service
+     */
     public CollectionFactory(LockService lockService) {
         this.collectionMap = new HashMap<>();
         this.lockService = lockService;
     }
 
+    /**
+     * Gets or creates a collection.
+     *
+     * @param name           the name
+     * @param nitriteConfig  the nitrite config
+     * @param writeCatalogue the write catalogue
+     * @return the collection
+     */
     public NitriteCollection getCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalogue) {
         notNull(nitriteConfig, "configuration is null while creating collection");
         notEmpty(name, "collection name is null or empty");
@@ -74,26 +89,28 @@ public class CollectionFactory {
         if (writeCatalog) {
             // ignore repository request
             if (store.getRepositoryRegistry().contains(name)) {
+                nitriteMap.close();
                 throw new ValidationException("a repository with same name already exists");
             }
 
             for (Set<String> set : store.getKeyedRepositoryRegistry().values()) {
                 if (set.contains(name)) {
+                    nitriteMap.close();
                     throw new ValidationException("a keyed repository with same name already exists");
                 }
             }
 
             collectionMap.put(name, collection);
-            NitriteMap<String, Document> catalogMap = store.openMap(COLLECTION_CATALOG, String.class, Document.class);
-            Document document = catalogMap.get(TAG_COLLECTIONS);
-            if (document == null) document = Document.createDocument();
-            document.put(name, true);
-            catalogMap.put(TAG_COLLECTIONS, document);
+            StoreCatalog storeCatalog = store.getCatalog();
+            storeCatalog.writeCollectionEntry(name);
         }
 
         return collection;
     }
 
+    /**
+     * Clears the internal registry holding collection information.
+     */
     public void clear() {
         Lock lock = lockService.getWriteLock(this.getClass().getName());
         try {
@@ -102,6 +119,8 @@ public class CollectionFactory {
                 collection.close();
             }
             collectionMap.clear();
+        } catch (Exception e) {
+            throw new NitriteIOException("failed to close a collection", e);
         } finally {
             lock.unlock();
         }

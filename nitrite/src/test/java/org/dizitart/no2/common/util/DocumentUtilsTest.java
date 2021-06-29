@@ -17,13 +17,13 @@
 package org.dizitart.no2.common.util;
 
 import org.dizitart.no2.NitriteBuilderTest;
-import org.dizitart.no2.Retry;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.MappableMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.filters.IndexAwareFilter;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.MappableMapper;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.integration.Retry;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -31,10 +31,6 @@ import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.DOC_REVISION;
 import static org.dizitart.no2.common.util.DocumentUtils.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class DocumentUtilsTest {
 
@@ -74,7 +70,7 @@ public class DocumentUtilsTest {
         doc.getId();
         Filter filter = createUniqueFilter(doc);
         assertNotNull(filter);
-        assertTrue(filter instanceof IndexAwareFilter);
+        assertTrue(filter instanceof ComparableFilter);
     }
 
     @Test

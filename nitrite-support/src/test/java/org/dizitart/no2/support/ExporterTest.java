@@ -1,12 +1,6 @@
 package org.dizitart.no2.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.MappingJsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.ContextAttributes;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
@@ -16,8 +10,9 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.databind.jsontype.impl.StdSubtypeResolver;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ExporterTest {
     @Test
@@ -44,7 +39,6 @@ public class ExporterTest {
         assertSame(visibilityChecker, deserializationConfig.getDefaultVisibilityChecker());
         assertTrue(deserializationConfig
                 .getClassIntrospector() instanceof com.fasterxml.jackson.databind.introspect.BasicClassIntrospector);
-        assertTrue(deserializationConfig.getTimeZone() instanceof sun.util.calendar.ZoneInfo);
         assertTrue(deserializationConfig.isAnnotationProcessingEnabled());
         assertNull(deserializationConfig.getPropertyNamingStrategy());
         TypeFactory expectedTypeFactory = actualCreateObjectMapperResult.getTypeFactory();

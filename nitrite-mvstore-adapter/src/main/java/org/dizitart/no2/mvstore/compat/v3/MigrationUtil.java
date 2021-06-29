@@ -19,9 +19,12 @@ package org.dizitart.no2.mvstore.compat.v3;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.DBValue;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 import org.h2.mvstore.MVMap;
@@ -29,7 +32,9 @@ import org.h2.mvstore.MVStore;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import static org.dizitart.no2.common.Constants.INDEX_PREFIX;
 import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 
@@ -76,6 +81,9 @@ public class MigrationUtil {
                 Object newKey = key;
                 if (key instanceof Compat.NitriteId) {
                     newKey = nitriteId((Compat.NitriteId) key);
+                } else if (oldMap.getName().contains(INDEX_PREFIX)) {
+                    // index map, wrap with DBValue
+                    newKey = newKey == null ? DBNull.getInstance() : new DBValue((Comparable<?>) newKey);
                 }
                 Object value = oldMap.get(key);
 
@@ -88,19 +96,26 @@ public class MigrationUtil {
     private static Object migrateValue(Object value) {
         if (value != null) {
             if (value instanceof Compat.UserCredential) {
+                // old user credentials
                 return credential((Compat.UserCredential) value);
             } else if (value instanceof Compat.NitriteId) {
+                // old nitrite id
                 return nitriteId((Compat.NitriteId) value);
             } else if (value instanceof Compat.Index) {
+                // old index entry
                 return indexEntry((Compat.Index) value);
             } else if (value instanceof Compat.IndexMeta) {
+                // old index meta data
                 return indexMeta((Compat.IndexMeta) value);
             } else if (value instanceof Compat.Document) {
+                // old document
                 return document((Compat.Document) value);
             } else if (value instanceof Compat.Attributes) {
+                // old attribute
                 return attributes((Compat.Attributes) value);
             } else if (value instanceof ConcurrentSkipListSet) {
-                return skipList((ConcurrentSkipListSet<?>) value);
+                // old index nitrite id list
+                return arrayList((ConcurrentSkipListSet<?>) value);
             } else if (value instanceof Iterable) {
                 return iterable((Iterable<?>) value);
             } else if (value.getClass().isArray()) {
@@ -137,8 +152,8 @@ public class MigrationUtil {
         return collection;
     }
 
-    private static ConcurrentSkipListSet<?> skipList(ConcurrentSkipListSet<?> value) {
-        ConcurrentSkipListSet<Object> newList = new ConcurrentSkipListSet<>();
+    private static CopyOnWriteArrayList<?> arrayList(ConcurrentSkipListSet<?> value) {
+        CopyOnWriteArrayList<Object> newList = new CopyOnWriteArrayList<>();
         for (Object object : value) {
             Object newValue = migrateValue(object);
             newList.add(newValue);
@@ -175,19 +190,19 @@ public class MigrationUtil {
 
     private static IndexMeta indexMeta(Compat.IndexMeta value) {
         Compat.Index index = value.getIndex();
-        IndexEntry indexEntry = indexEntry(index);
+        IndexDescriptor indexDescriptor = indexEntry(index);
 
         IndexMeta indexMeta = new IndexMeta();
-        indexMeta.setIndexEntry(indexEntry);
+        indexMeta.setIndexDescriptor(indexDescriptor);
         indexMeta.setIndexMap(value.getIndexMap());
         indexMeta.setIsDirty(value.getIsDirty());
 
         return indexMeta;
     }
 
-    private static IndexEntry indexEntry(Compat.Index value) {
+    private static IndexDescriptor indexEntry(Compat.Index value) {
         String indexType = value.getIndexType().name();
-        return new IndexEntry(indexType, value.getField(), value.getCollectionName());
+        return new IndexDescriptor(indexType, Fields.withNames(value.getField()), value.getCollectionName());
     }
 
     private static NitriteId nitriteId(Compat.NitriteId value) {

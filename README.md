@@ -27,7 +27,6 @@ Nitrite is an embedded database ideal for desktop, mobile or small web applicati
 -   Schema migration
 -   Indexing
 -   Full text search
--   Rx-Java support
 -   Both way replication via Nitrite DataGate server
 -   Very fast, lightweight and fluent API 
 -   Android compatibility (API Level 19)
@@ -249,13 +248,13 @@ try (Session session = db.createSession()) {
 
 Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
     @Override
-    public void migrate(Instruction instruction) {
-        instruction.forDatabase()
+    public void migrate(Instruction instructions) {
+        instructions.forDatabase()
             // make a non-secure db to secure db
             .addPassword("test-user", "test-password");
 
-        // create instruction for existing repository
-        instruction.forRepository(OldClass.class, null)
+        // create instructions for existing repository
+        instructions.forRepository(OldClass.class, null)
 
             // rename the repository (in case of entity name changes)
             .renameRepository("migrated", null)
@@ -289,8 +288,8 @@ Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
 
 Migration migration2 = new Migration(2, 3) {
     @Override
-    public void migrate(Instruction instruction) {
-        instruction.forCollection("test")
+    public void migrate(Instruction instructions) {
+        instructions.forCollection("test")
             .addField("fullName", "Dummy Name");
     }
 };

@@ -16,35 +16,32 @@
 
 package org.dizitart.no2.repository;
 
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
-import org.dizitart.no2.common.NullOrder;
 import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.common.SortOrder;
-import org.dizitart.no2.filters.Filter;
-
-import java.text.Collator;
 
 /**
  * A collection of {@link NitriteId}s of the database records,
  * as a result of a find operation.
  *
  * @author Anindya Chatterjee
- * @see ObjectRepository#find(Filter)
- * @see ObjectRepository#find()
  * @since 1.0
  */
 public interface Cursor<T> extends RecordStream<T> {
-    Cursor<T> sort(String field, SortOrder sortOrder, Collator collator, NullOrder nullOrder);
-
-    Cursor<T> skipLimit(long skip, long size);
+    /**
+     * Gets a filter plan for the query.
+     *
+     * @return the filter plan
+     */
+    FindPlan getFindPlan();
 
     /**
      * Projects the result of one type into an {@link Iterable} of other type.
      *
      * @param <P>            the type of the target objects.
      * @param projectionType the projection type.
-     * @return `Iterable` of projected objects.
+     * @return java.lang.Iterable of projected objects.
      */
     <P> RecordStream<P> project(Class<P> projectionType);
 
@@ -52,7 +49,7 @@ public interface Cursor<T> extends RecordStream<T> {
      * Performs a left outer join with a foreign cursor with the specified lookup parameters.
      * <p>
      * It performs an equality match on the localString to the foreignString from the objects of the foreign cursor.
-     * If an input object does not contain the localString, the join treats the field as having a value of `null`
+     * If an input object does not contain the localString, the join treats the field as having a value of <code>null</code>
      * for matching purposes.
      *
      * @param <Foreign>     the type of the foreign object.
@@ -64,28 +61,4 @@ public interface Cursor<T> extends RecordStream<T> {
      * @since 2.1.0
      */
     <Foreign, Joined> RecordStream<Joined> join(Cursor<Foreign> foreignCursor, Lookup lookup, Class<Joined> type);
-
-    default Cursor<T> sort(String field) {
-        return sort(field, SortOrder.Ascending);
-    }
-
-    default Cursor<T> sort(String field, SortOrder sortOrder) {
-        return sort(field, sortOrder, NullOrder.Default);
-    }
-
-    default Cursor<T> sort(String field, SortOrder sortOrder, Collator collator) {
-        return sort(field, sortOrder, collator, NullOrder.Default);
-    }
-
-    default Cursor<T> sort(String field, SortOrder sortOrder, NullOrder nullOrder) {
-        return sort(field, sortOrder, null, nullOrder);
-    }
-
-    default Cursor<T> skip(long skip) {
-        return skipLimit(skip, size());
-    }
-
-    default Cursor<T> limit(long limit) {
-        return skipLimit(0, limit);
-    }
 }

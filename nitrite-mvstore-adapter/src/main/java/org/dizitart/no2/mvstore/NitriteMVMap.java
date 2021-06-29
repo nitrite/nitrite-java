@@ -92,7 +92,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public RecordStream<Key> keySet() {
+    public RecordStream<Key> keys() {
         return RecordStream.fromIterable(mvMap.keySet());
     }
 
@@ -145,6 +145,11 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
+    public RecordStream<Pair<Key, Value>> reversedEntries() {
+        return () -> new ReverseIterator<>(mvMap);
+    }
+
+    @Override
     public Key higherKey(Key key) {
         return mvMap.higherKey(key);
     }
@@ -173,6 +178,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     public void drop() {
         MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
         try {
+            nitriteStore.closeMap(getName());
             nitriteStore.removeMap(getName());
         } finally {
             mvStore.deregisterVersionUsage(txCounter);
@@ -181,6 +187,6 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void close() {
-        // nothing to close
+        nitriteStore.closeMap(getName());
     }
 }

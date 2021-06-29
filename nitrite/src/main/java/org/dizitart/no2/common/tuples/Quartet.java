@@ -10,7 +10,14 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
+ * Represents a quartet.
+ *
+ * @param <A> the type parameter
+ * @param <B> the type parameter
+ * @param <C> the type parameter
+ * @param <D> the type parameter
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 @NoArgsConstructor
@@ -22,6 +29,23 @@ public class Quartet<A, B, C, D> implements Serializable {
     private B second;
     private C third;
     private D fourth;
+
+    /**
+     * Creates a new quartet.
+     *
+     * @param <A> the type parameter
+     * @param <B> the type parameter
+     * @param <C> the type parameter
+     * @param <D> the type parameter
+     * @param a   the a
+     * @param b   the b
+     * @param c   the c
+     * @param d   the d
+     * @return the quartet
+     */
+    public static <A, B, C, D> Quartet<A, B, C, D> quartet(A a, B b, C c, D d) {
+        return new Quartet<>(a, b, c, d);
+    }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeObject(first);

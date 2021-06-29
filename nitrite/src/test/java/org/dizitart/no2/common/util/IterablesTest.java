@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
-import org.dizitart.no2.Retry;
+import org.dizitart.no2.integration.Retry;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -112,7 +112,7 @@ public class IterablesTest {
     @Test
     public void testListOf() {
         assertEquals(1, Iterables.<Object>listOf("items").size());
-        assertEquals(0, Iterables.listOf(  null).size());
+        assertEquals(1, Iterables.listOf((Object) null).size());
     }
 
     @Test

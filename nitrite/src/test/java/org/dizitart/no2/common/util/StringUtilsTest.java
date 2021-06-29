@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
-import org.dizitart.no2.Retry;
+import org.dizitart.no2.integration.Retry;
 import org.junit.Rule;
 import org.junit.Test;
 

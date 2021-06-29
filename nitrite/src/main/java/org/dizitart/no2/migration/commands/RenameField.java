@@ -4,12 +4,18 @@ import lombok.AllArgsConstructor;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.operation.IndexManager;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.IndexEntry;
-import org.dizitart.no2.store.IndexCatalog;
+import org.dizitart.no2.index.IndexDescriptor;
+
+import java.util.Collection;
 
 /**
+ * A command to rename a document field.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @AllArgsConstructor
 public class RenameField extends BaseCommand implements Command {
@@ -21,7 +27,10 @@ public class RenameField extends BaseCommand implements Command {
     public void execute(Nitrite nitrite) {
         initialize(nitrite, collectionName);
 
-        boolean indexExists = indexCatalog.hasIndexEntry(collectionName, oldName);
+        IndexManager indexManager = new IndexManager(oldName, nitrite.getConfig());
+        Fields oldField = Fields.withNames(oldName);
+        Collection<IndexDescriptor> matchingIndexDescriptors = indexManager.findMatchingIndexDescriptors(oldField);
+
         for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
             Document document = entry.getSecond();
             if (document.containsKey(oldName)) {
@@ -33,13 +42,27 @@ public class RenameField extends BaseCommand implements Command {
             }
         }
 
-        if (indexExists) {
-            IndexCatalog indexCatalog = nitrite.getStore().getIndexCatalog();
-            IndexEntry indexEntry = indexCatalog.findIndexEntry(collectionName, oldName);
-            String indexType = indexEntry.getIndexType();
+        if (!matchingIndexDescriptors.isEmpty()) {
+            for (IndexDescriptor matchingIndexDescriptor : matchingIndexDescriptors) {
+                String indexType = matchingIndexDescriptor.getIndexType();
 
-            operations.dropIndex(oldName);
-            operations.createIndex(newName, indexType, false);
+                Fields oldIndexFields = matchingIndexDescriptor.getIndexFields();
+                Fields newIndexFields = getNewIndexFields(oldIndexFields, oldName, newName);
+                operations.dropIndex(matchingIndexDescriptor.getIndexFields());
+                operations.createIndex(newIndexFields, indexType);
+            }
         }
+    }
+
+    private Fields getNewIndexFields(Fields oldIndexFields, String oldName, String newName) {
+        Fields newIndexFields = new Fields();
+        for (String fieldName : oldIndexFields.getFieldNames()) {
+            if (fieldName.equals(oldName)) {
+                newIndexFields.addField(newName);
+            } else {
+                newIndexFields.addField(fieldName);
+            }
+        }
+        return newIndexFields;
     }
 }

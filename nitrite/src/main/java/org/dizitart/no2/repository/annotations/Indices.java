@@ -23,15 +23,8 @@ import java.lang.annotation.Target;
 
 /**
  * Specifies multiple indexed fields for a class.
- * <p>
- * [[app-listing]]
- * [source,java]
- * .Example of Indices annotation
- * --
- *
+
  * @author Anindya Chatterjee.
- *
- *
  * @see Index
  * @since 1.0
  */

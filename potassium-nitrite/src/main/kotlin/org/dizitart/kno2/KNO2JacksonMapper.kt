@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.dizitart.no2.mapper.JacksonMapper
-import org.dizitart.no2.mapper.JacksonExtension
+import org.dizitart.no2.common.mapper.JacksonMapper
+import org.dizitart.no2.common.mapper.JacksonExtension
 import org.dizitart.no2.spatial.mapper.GeometryExtension
 import java.time.ZoneId
 import java.time.chrono.ChronoPeriod

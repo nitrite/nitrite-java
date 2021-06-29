@@ -10,7 +10,15 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
+ * Represents a quintet.
+ *
+ * @param <A> the type parameter
+ * @param <B> the type parameter
+ * @param <C> the type parameter
+ * @param <D> the type parameter
+ * @param <E> the type parameter
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 @NoArgsConstructor
@@ -23,6 +31,25 @@ public class Quintet<A, B, C, D, E> implements Serializable {
     private C third;
     private D fourth;
     private E fifth;
+
+    /**
+     * Creates a new quintet.
+     *
+     * @param <A> the type parameter
+     * @param <B> the type parameter
+     * @param <C> the type parameter
+     * @param <D> the type parameter
+     * @param <E> the type parameter
+     * @param a   the a
+     * @param b   the b
+     * @param c   the c
+     * @param d   the d
+     * @param e   the e
+     * @return the quintet
+     */
+    public static <A, B, C, D, E> Quintet<A, B, C, D, E> quintet(A a, B b, C c, D d, E e) {
+        return new Quintet<>(a, b, c, d, e);
+    }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeObject(first);

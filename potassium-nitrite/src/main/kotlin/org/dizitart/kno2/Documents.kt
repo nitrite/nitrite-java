@@ -48,8 +48,18 @@ fun documentOf(pair: Pair<String, Any>): Document {
     return createDocument(pair.first, pair.second)!!
 }
 
+/**
+ * Checks if a [Document] is empty.
+ *
+ * @return boolean value
+ */
 fun Document.isEmpty() = this.size() == 0
 
+/**
+ * Checks if a [Document] is not empty.
+ *
+ * @return boolean value
+ */
 fun Document.isNotEmpty() = !this.isEmpty()
 
 /**

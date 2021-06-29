@@ -21,7 +21,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.1'
+        classpath 'com.android.tools.build:gradle:4.1.1'
     }
 }
 
@@ -46,17 +46,18 @@ android {
         exclude 'META-INF/LGPL2.1'
     }
 
-    compileSdkVersion 29
+    compileSdkVersion 28
 
     defaultConfig {
         applicationId "org.dizitart.no2.example.android"
         minSdkVersion 19
-        targetSdkVersion 29
+        targetSdkVersion 28
         versionCode 1
         versionName "1.0"
 
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+//        multiDexEnabled true
 
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -71,6 +72,7 @@ android {
     }
 
     compileOptions {
+//        coreLibraryDesugaringEnabled true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
@@ -92,6 +94,7 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.20"
 
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.9.0'
     testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'

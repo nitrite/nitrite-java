@@ -18,7 +18,7 @@ package org.dizitart.no2.spatial.mapper;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.dizitart.no2.mapper.JacksonExtension;
+import org.dizitart.no2.common.mapper.JacksonExtension;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.List;

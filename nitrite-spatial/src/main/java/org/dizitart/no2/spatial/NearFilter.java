@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.util.GeometricShapeFactory;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 class NearFilter extends WithinFilter {
@@ -39,5 +40,10 @@ class NearFilter extends WithinFilter {
         shapeFactory.setCentre(center);
         shapeFactory.setSize(radius * 2);
         return shapeFactory.createCircle();
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " nears " + getValue() + ")";
     }
 }

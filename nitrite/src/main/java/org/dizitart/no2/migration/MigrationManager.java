@@ -3,15 +3,17 @@ package org.dizitart.no2.migration;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.tuples.Quartet;
 import org.dizitart.no2.common.tuples.Triplet;
 import org.dizitart.no2.common.util.SecureString;
 import org.dizitart.no2.exceptions.MigrationException;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.migration.commands.*;
-import org.dizitart.no2.store.DatabaseMetaData;
+import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.store.StoreSecurity;
+import org.dizitart.no2.store.UserAuthenticationService;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -22,31 +24,46 @@ import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
 /**
+ * The database migration manager.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public class MigrationManager {
     private final NitriteConfig nitriteConfig;
-    private final DatabaseMetaData databaseMetadata;
+    private final StoreMetaData storeMetadata;
     private final Nitrite database;
 
+    /**
+     * Instantiates a new {@link MigrationManager}.
+     *
+     * @param nitrite the nitrite database
+     */
     public MigrationManager(Nitrite nitrite) {
         this.database = nitrite;
         this.nitriteConfig = nitrite.getConfig();
-        this.databaseMetadata = nitrite.getDatabaseMetaData();
+        this.storeMetadata = nitrite.getDatabaseMetaData();
     }
 
+    /**
+     * Performs the migration on the database.
+     */
     public void doMigrate() {
         if (isMigrationNeeded()) {
-            Integer existingVersion = databaseMetadata.getSchemaVersion();
+            Integer existingVersion = storeMetadata.getSchemaVersion();
             Integer incomingVersion = nitriteConfig.getSchemaVersion();
 
             Queue<Migration> migrationPath = findMigrationPath(existingVersion, incomingVersion);
             if (migrationPath == null || migrationPath.isEmpty()) {
                 // close the database
-                database.close();
+                try {
+                    database.close();
+                } catch (Exception e) {
+                    throw new NitriteIOException("failed to close the database", e);
+                }
 
                 throw new MigrationException("schema version mismatch, as no migration path found from version "
-                    + databaseMetadata.getSchemaVersion() + " to " + nitriteConfig.getSchemaVersion());
+                    + storeMetadata.getSchemaVersion() + " to " + nitriteConfig.getSchemaVersion());
             }
 
             int length = migrationPath.size();
@@ -61,7 +78,7 @@ public class MigrationManager {
     }
 
     private boolean isMigrationNeeded() {
-        Integer existingVersion = databaseMetadata.getSchemaVersion();
+        Integer existingVersion = storeMetadata.getSchemaVersion();
         Integer incomingVersion = nitriteConfig.getSchemaVersion();
 
         if (existingVersion == null) {
@@ -129,7 +146,7 @@ public class MigrationManager {
             }
         }
 
-        DatabaseMetaData metaData = database.getDatabaseMetaData();
+        StoreMetaData metaData = database.getDatabaseMetaData();
         metaData.setSchemaVersion(nitriteConfig.getSchemaVersion());
 
         NitriteMap<String, Document> storeInfo = database.getStore().openMap(STORE_INFO,
@@ -145,15 +162,20 @@ public class MigrationManager {
                 case AddPassword:
                     Pair<String, SecureString> arg1 =
                         (Pair<String, SecureString>) step.getArguments();
-                    command = nitrite -> StoreSecurity.addOrUpdatePassword(nitrite.getStore(),
-                        false, arg1.getFirst(), null, arg1.getSecond());
+                    command = nitrite -> {
+                        UserAuthenticationService authService = new UserAuthenticationService(nitrite.getStore());
+                        authService.addOrUpdatePassword(false, arg1.getFirst(),
+                            null, arg1.getSecond());
+                    };
                     break;
 
                 case ChangePassword:
                     Triplet<String, SecureString, SecureString> arg2 =
                         (Triplet<String, SecureString, SecureString>) step.getArguments();
-                    command = nitrite -> StoreSecurity.addOrUpdatePassword(nitrite.getStore(),
-                        true, arg2.getFirst(), arg2.getSecond(), arg2.getThird());
+                    command = nitrite -> {
+                        UserAuthenticationService authService = new UserAuthenticationService(nitrite.getStore());
+                        authService.addOrUpdatePassword(true, arg2.getFirst(), arg2.getSecond(), arg2.getThird());
+                    };
                     break;
 
                 case DropCollection:
@@ -192,7 +214,7 @@ public class MigrationManager {
                     break;
 
                 case CollectionDropIndex:
-                    Pair<String, String> arg9 = (Pair<String, String>) step.getArguments();
+                    Pair<String, Fields> arg9 = (Pair<String, Fields>) step.getArguments();
                     command = new DropIndex(arg9.getFirst(), arg9.getSecond());
                     break;
 
@@ -202,7 +224,7 @@ public class MigrationManager {
                     break;
 
                 case CollectionCreateIndex:
-                    Triplet<String, String, String> arg10 = (Triplet<String, String, String>) step.getArguments();
+                    Triplet<String, Fields, String> arg10 = (Triplet<String, Fields, String>) step.getArguments();
                     command = new CreateIndex(arg10.getFirst(), arg10.getSecond(), arg10.getThird());
                     break;
 
@@ -241,14 +263,14 @@ public class MigrationManager {
                     break;
 
                 case RepositoryChangeIdField:
-                    Quartet<String, String, String, String> arg17 =
-                        (Quartet<String, String, String, String>) step.getArguments();
+                    Quartet<String, String, Fields, Fields> arg17 =
+                        (Quartet<String, String, Fields, Fields>) step.getArguments();
                     command = new ChangeIdField(findRepositoryName(arg17.getFirst(), arg17.getSecond()),
                         arg17.getThird(), arg17.getFourth());
                     break;
 
                 case RepositoryDropIndex:
-                    Triplet<String, String, String> arg18 = (Triplet<String, String, String>) step.getArguments();
+                    Triplet<String, String, Fields> arg18 = (Triplet<String, String, Fields>) step.getArguments();
                     command = new DropIndex(findRepositoryName(arg18.getFirst(), arg18.getSecond()), arg18.getThird());
                     break;
 
@@ -258,8 +280,8 @@ public class MigrationManager {
                     break;
 
                 case RepositoryCreateIndex:
-                    Quartet<String, String, String, String> arg20 =
-                        (Quartet<String, String, String, String>) step.getArguments();
+                    Quartet<String, String, Fields, String> arg20 =
+                        (Quartet<String, String, Fields, String>) step.getArguments();
                     command = new CreateIndex(findRepositoryName(arg20.getFirst(), arg20.getSecond()),
                         arg20.getThird(), arg20.getFourth());
                     break;

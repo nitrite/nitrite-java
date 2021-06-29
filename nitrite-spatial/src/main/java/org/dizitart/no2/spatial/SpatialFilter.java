@@ -19,19 +19,24 @@ package org.dizitart.no2.spatial;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.filters.IndexAwareFilter;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.filters.IndexOnlyFilter;
 import org.locationtech.jts.geom.Geometry;
 
-import java.util.Set;
-
 /**
+ * Represents a spatial filter.
+ *
+ * @since 4.0.0
  * @author Anindya Chatterjee
  */
-public abstract class SpatialFilter extends IndexAwareFilter {
+public abstract class SpatialFilter extends IndexOnlyFilter {
     private final Geometry geometry;
 
+    /**
+     * Instantiates a new {@link SpatialFilter}.
+     *
+     * @param field    the field
+     * @param geometry the geometry
+     */
     protected SpatialFilter(String field, Geometry geometry) {
         super(field, geometry);
         this.geometry = geometry;
@@ -43,12 +48,18 @@ public abstract class SpatialFilter extends IndexAwareFilter {
     }
 
     @Override
-    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
-        throw new FilterException("spatial filters cannot be applied on _id field");
+    public boolean apply(Pair<NitriteId, Document> element) {
+        return false;
     }
 
     @Override
-    public boolean apply(Pair<NitriteId, Document> element) {
-        throw new FilterException(getField() + " is not indexed with spatial index");
+    public String supportedIndexType() {
+        return SpatialIndexer.SPATIAL_INDEX;
+    }
+
+    @Override
+    public boolean canBeGrouped(IndexOnlyFilter other) {
+        return other instanceof SpatialFilter
+            && other.getField().equals(getField());
     }
 }

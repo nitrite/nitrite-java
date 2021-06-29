@@ -16,12 +16,17 @@
 
 package org.dizitart.no2.spatial;
 
-import org.dizitart.no2.module.NitriteModule;
-import org.dizitart.no2.module.NitritePlugin;
+import org.dizitart.no2.common.module.NitriteModule;
+import org.dizitart.no2.common.module.NitritePlugin;
 
 import java.util.Set;
 
+import static org.dizitart.no2.common.util.Iterables.setOf;
+
 /**
+ * A nitrite module to enable spatial data indexing.
+ *
+ * @since 4.0.0
  * @author Anindya Chatterjee
  */
 public class SpatialModule implements NitriteModule {

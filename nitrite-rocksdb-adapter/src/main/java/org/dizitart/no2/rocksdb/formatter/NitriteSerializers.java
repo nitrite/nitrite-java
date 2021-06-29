@@ -9,12 +9,15 @@ import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.IndexEntry;
+import org.dizitart.no2.index.DBValue;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -89,39 +92,39 @@ public class NitriteSerializers {
 
         @Override
         public void write(Kryo kryo, Output output, IndexMeta object) {
-            kryo.writeObject(output, object.getIndexEntry());
+            kryo.writeObject(output, object.getIndexDescriptor());
             output.writeString(object.getIndexMap());
             output.writeBoolean(object.getIsDirty().get());
         }
 
         @Override
-        public IndexMeta read(Kryo kryo, Input input, Class<? extends IndexMeta> type) {
-            IndexEntry indexEntry = kryo.readObject(input, IndexEntry.class);
+        public IndexMeta read(Kryo kryo, Input input, Class<IndexMeta> type) {
+            IndexDescriptor indexDescriptor = kryo.readObject(input, IndexDescriptor.class);
             String indexMap = input.readString();
             boolean isDirty = input.readBoolean();
             IndexMeta indexMeta = new IndexMeta();
-            indexMeta.setIndexEntry(indexEntry);
+            indexMeta.setIndexDescriptor(indexDescriptor);
             indexMeta.setIndexMap(indexMap);
             indexMeta.setIsDirty(new AtomicBoolean(isDirty));
             return indexMeta;
         }
     }
 
-    private static class IndexEntrySerializer extends Serializer<IndexEntry> {
+    private static class IndexDescriptorSerializer extends Serializer<IndexDescriptor> {
 
         @Override
-        public void write(Kryo kryo, Output output, IndexEntry object) {
+        public void write(Kryo kryo, Output output, IndexDescriptor object) {
+            kryo.writeObject(output, object.getIndexFields());
             output.writeString(object.getCollectionName());
-            output.writeString(object.getField());
             output.writeString(object.getIndexType());
         }
 
         @Override
-        public IndexEntry read(Kryo kryo, Input input, Class<? extends IndexEntry> type) {
+        public IndexDescriptor read(Kryo kryo, Input input, Class<IndexDescriptor> type) {
+            Fields fields = kryo.readObject(input, Fields.class);
             String collectionName = input.readString();
-            String field = input.readString();
             String indexType = input.readString();
-            return new IndexEntry(indexType, field, collectionName);
+            return new IndexDescriptor(indexType, fields, collectionName);
         }
     }
 
@@ -167,14 +170,30 @@ public class NitriteSerializers {
         }
     }
 
-    public static void registerAll(KryoObjectFormatter kryoObjectFormatter) throws ClassNotFoundException {
+    private static class FieldsSerializer extends Serializer<Fields> {
+        @Override
+        public void write(Kryo kryo, Output output, Fields object) {
+            kryo.writeObject(output, object.getFieldNames());
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Fields read(Kryo kryo, Input input, Class<Fields> type) {
+            List<String> fieldNames = (List<String>) kryo.readObject(input, ArrayList.class);
+            return Fields.withNames(fieldNames.toArray(new String[0]));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
         kryoObjectFormatter.registerSerializer(Document.class, new DocumentSerializer());
         kryoObjectFormatter.registerSerializer(IndexMeta.class, new IndexMetaSerializer());
-        kryoObjectFormatter.registerSerializer(IndexEntry.class, new IndexEntrySerializer());
+        kryoObjectFormatter.registerSerializer(IndexDescriptor.class, new IndexDescriptorSerializer());
         kryoObjectFormatter.registerSerializer(UserCredential.class, new UserCredentialSerializer());
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
-        kryoObjectFormatter.registerSerializer(Class.forName("org.dizitart.no2.collection.NitriteDocument"), new DocumentSerializer());
+        kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
+        kryoObjectFormatter.registerSerializer(DBValue.class, new JavaSerializer());
     }
 }

@@ -2,11 +2,13 @@ package org.dizitart.no2.rocksdb;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.dizitart.no2.module.NitritePlugin;
+import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreModule;
 
 import java.util.Set;
+
+import static org.dizitart.no2.common.util.Iterables.setOf;
 
 public class RocksDBModule implements StoreModule {
 

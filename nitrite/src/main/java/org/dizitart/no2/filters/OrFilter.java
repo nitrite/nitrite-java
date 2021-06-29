@@ -21,29 +21,45 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
+ * Represents an OR filter.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 @Getter
 public class OrFilter extends LogicalFilter {
-    private final Filter rhs;
-    private final Filter lhs;
-
-    OrFilter(Filter lhs, Filter rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
-    }
-
-    @Override
-    public List<Filter> getFilters() {
-        return Arrays.asList(lhs, rhs);
+    /**
+     * Instantiates a new Or filter.
+     *
+     * @param filters the filters
+     */
+    OrFilter(Filter... filters) {
+        super(filters);
     }
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        return lhs.apply(element) || rhs.apply(element);
+        boolean result = false;
+        for (Filter filter : getFilters()) {
+            result = result || filter.apply(element);
+        }
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("(");
+        for (int i = 0; i < getFilters().size(); i++) {
+            Filter filter = getFilters().get(i);
+            if (i == 0) {
+                stringBuilder.append(filter.toString());
+            } else {
+                stringBuilder.append(" || ").append(filter.toString());
+            }
+        }
+        stringBuilder.append(")");
+        return stringBuilder.toString();
     }
 }

@@ -18,10 +18,10 @@ package org.dizitart.no2.common.event;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.Retry;
+import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.repository.ObjectRepository;
-import org.dizitart.no2.repository.data.Employee;
+import org.dizitart.no2.integration.repository.data.Employee;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -145,7 +145,7 @@ public class EventTest {
     }
 
     @Test
-    public void testClose() {
+    public void testClose() throws Exception {
         if (employeeRepository.isOpen()) {
             employeeRepository.close();
         }
@@ -196,7 +196,7 @@ public class EventTest {
     }
 
     @After
-    public void clear() {
+    public void clear() throws Exception {
         if (employeeRepository != null) {
             if (!employeeRepository.isDropped()
                     && employeeRepository.isOpen()) {

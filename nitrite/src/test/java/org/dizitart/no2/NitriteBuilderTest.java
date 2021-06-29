@@ -1,45 +1,53 @@
 /*
- * Copyright (c) 2017-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2;
 
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.exceptions.SecurityException;
-import org.dizitart.no2.index.Indexer;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
-import org.dizitart.no2.module.PluginManager;
-import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.module.NitriteModule;
+import org.dizitart.no2.common.module.NitritePlugin;
+import org.dizitart.no2.common.module.PluginManager;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
+import org.dizitart.no2.index.IndexDescriptor;
+import org.dizitart.no2.index.NitriteIndexer;
+import org.dizitart.no2.integration.Retry;
+import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreConfig;
+import org.dizitart.no2.store.memory.InMemoryConfig;
 import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.dizitart.no2.collection.Document.createDocument;
-import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.module.NitriteModule.module;
-import static org.junit.Assert.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 
-/**
- * @author Anindya Chatterjee.
- */
+import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.common.module.NitriteModule.module;
+import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 public class NitriteBuilderTest {
     private Nitrite db;
 
@@ -53,6 +61,144 @@ public class NitriteBuilderTest {
         if (db != null && !db.isClosed()) {
             db.close();
         }
+    }
+
+    @Test
+    public void testConstructor() {
+        NitriteConfig nitriteConfig = (new NitriteBuilder()).getNitriteConfig();
+        assertTrue(nitriteConfig.getMigrations().isEmpty());
+        assertFalse(nitriteConfig.configured);
+        assertEquals(1, nitriteConfig.getSchemaVersion().intValue());
+        assertNull(nitriteConfig.getNitriteStore());
+        PluginManager pluginManager = nitriteConfig.getPluginManager();
+        assertSame(nitriteConfig, pluginManager.getNitriteConfig());
+        assertTrue(pluginManager.getIndexerMap().isEmpty());
+    }
+
+    @Test
+    public void testFieldSeparator() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        assertSame(builderResult, builderResult.fieldSeparator("Separator"));
+
+        db = Nitrite.builder()
+            .fieldSeparator("::")
+            .openOrCreate();
+
+        Document document = createDocument("firstName", "John")
+            .put("colorCodes", new Document[]{createDocument("color", "Red"), createDocument("color", "Green")})
+            .put("address", createDocument("street", "ABCD Road"));
+
+        String street = document.get("address::street", String.class);
+        assertEquals("ABCD Road", street);
+
+        // use default separator, it should return null
+        street = document.get("address.street", String.class);
+        assertNull(street);
+
+        assertEquals(document.get("colorCodes::1::color"), "Green");
+    }
+
+    @Test
+    public void testLoadModule() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        NitriteModule nitriteModule = mock(NitriteModule.class);
+        when(nitriteModule.plugins()).thenReturn(new HashSet<NitritePlugin>());
+        assertSame(builderResult, builderResult.loadModule(nitriteModule));
+        verify(nitriteModule, times(2)).plugins();
+    }
+
+    @Test
+    public void testAddMigrations() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        assertSame(builderResult, builderResult.addMigrations(null, null, null));
+    }
+
+    @Test
+    public void testAddMigrations2() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        Migration migration = mock(Migration.class);
+        when(migration.getEndVersion()).thenReturn(1);
+        when(migration.getStartVersion()).thenReturn(1);
+        assertSame(builderResult, builderResult.addMigrations(migration, null, null));
+        verify(migration).getEndVersion();
+        verify(migration).getStartVersion();
+    }
+
+    @Test
+    public void testSchemaVersion() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        assertSame(builderResult, builderResult.schemaVersion(1));
+    }
+
+    @Test
+    public void testOpenOrCreate() {
+        Nitrite actualOpenOrCreateResult = Nitrite.builder().openOrCreate("janedoe", "iloveyou");
+        PluginManager pluginManager = actualOpenOrCreateResult.getConfig().getPluginManager();
+        NitriteStore<?> store = actualOpenOrCreateResult.getStore();
+        assertFalse(actualOpenOrCreateResult.isClosed());
+        assertFalse(store.isClosed());
+        assertSame(store, pluginManager.getNitriteStore());
+        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+    }
+
+    @Test
+    public void testOpenOrCreate2() {
+        Nitrite actualOpenOrCreateResult = Nitrite.builder().openOrCreate();
+        assertFalse(actualOpenOrCreateResult.isClosed());
+        NitriteConfig config = actualOpenOrCreateResult.getConfig();
+        assertTrue(config.configured);
+        NitriteStore<?> store = actualOpenOrCreateResult.getStore();
+        assertTrue(store.getRepositoryRegistry().isEmpty());
+        assertFalse(store.isClosed());
+        PluginManager pluginManager = config.getPluginManager();
+        assertEquals(3, pluginManager.getIndexerMap().size());
+        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertTrue(store.getCatalog().getKeyedRepositoryNames().isEmpty());
+        assertSame(store, pluginManager.getNitriteStore());
+        assertTrue(((InMemoryConfig) store.getStoreConfig()).eventListeners().isEmpty());
+    }
+
+    @Test
+    public void testOpenOrCreate3() {
+        Nitrite actualOpenOrCreateResult = Nitrite.builder().openOrCreate("janedoe", "iloveyou");
+        assertFalse(actualOpenOrCreateResult.isClosed());
+        NitriteConfig config = actualOpenOrCreateResult.getConfig();
+        assertTrue(config.configured);
+        NitriteStore<?> store = actualOpenOrCreateResult.getStore();
+        assertTrue(store.getRepositoryRegistry().isEmpty());
+        assertFalse(store.isClosed());
+        PluginManager pluginManager = config.getPluginManager();
+        assertEquals(3, pluginManager.getIndexerMap().size());
+        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertTrue(store.getCatalog().getKeyedRepositoryNames().isEmpty());
+        assertSame(store, pluginManager.getNitriteStore());
+        assertTrue(((InMemoryConfig) store.getStoreConfig()).eventListeners().isEmpty());
+    }
+
+    @Test(expected = NitriteSecurityException.class)
+    public void testOpenOrCreate4() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        builderResult.openOrCreate("", "iloveyou");
+        NitriteConfig nitriteConfig = builderResult.getNitriteConfig();
+        PluginManager pluginManager = nitriteConfig.getPluginManager();
+        assertEquals(3, pluginManager.getIndexerMap().size());
+        NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
+        assertSame(nitriteStore, pluginManager.getNitriteStore());
+        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertFalse(nitriteStore.isClosed());
+        assertTrue(((InMemoryConfig) nitriteStore.getStoreConfig()).eventListeners().isEmpty());
+    }
+
+    @Test(expected = NitriteSecurityException.class)
+    public void testOpenOrCreate5() {
+        NitriteBuilder builderResult = Nitrite.builder();
+        builderResult.openOrCreate("", "iloveyou");
+        NitriteConfig nitriteConfig = builderResult.getNitriteConfig();
+        PluginManager pluginManager = nitriteConfig.getPluginManager();
+        NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
+        assertFalse(nitriteStore.isClosed());
+        assertSame(nitriteStore, pluginManager.getNitriteStore());
+        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
     }
 
     @Test
@@ -108,62 +254,19 @@ public class NitriteBuilderTest {
         assertNotNull(config.nitriteMapper());
     }
 
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreateNullUserId() {
         NitriteBuilder builder = Nitrite.builder();
         builder.openOrCreate(null, "abcd");
     }
 
-    @Test
-    public void testOpenOrCreate() {
-        Nitrite actualOpenOrCreateResult = Nitrite.builder().openOrCreate("janedoe", "iloveyou");
-        PluginManager pluginManager = actualOpenOrCreateResult.getConfig().getPluginManager();
-        NitriteStore<?> store = actualOpenOrCreateResult.getStore();
-        assertFalse(actualOpenOrCreateResult.isClosed());
-        assertFalse(store.isClosed());
-        assertSame(store, pluginManager.getNitriteStore());
-        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.mapper.MappableMapper);
-    }
-
-    @Test(expected = SecurityException.class)
-    public void testOpenOrCreate2() {
-        NitriteBuilder builderResult = Nitrite.builder();
-        builderResult.openOrCreate("", "iloveyou");
-        NitriteConfig nitriteConfig = builderResult.getNitriteConfig();
-        PluginManager pluginManager = nitriteConfig.getPluginManager();
-        NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
-        assertFalse(nitriteStore.isClosed());
-        assertSame(nitriteStore, pluginManager.getNitriteStore());
-        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.mapper.MappableMapper);
-    }
-
-    @Test(expected = SecurityException.class)
+    @Test(expected = NitriteSecurityException.class)
     public void testOpenOrCreateNullPassword() {
         NitriteBuilder builder = Nitrite.builder();
         builder.openOrCreate("abcd", null);
     }
 
-    @Test
-    public void testFieldSeparator() {
-        db = Nitrite.builder()
-            .fieldSeparator("::")
-            .openOrCreate();
-
-        Document document = createDocument("firstName", "John")
-            .put("colorCodes", new Document[]{createDocument("color", "Red"), createDocument("color", "Green")})
-            .put("address", createDocument("street", "ABCD Road"));
-
-        String street = document.get("address::street", String.class);
-        assertEquals("ABCD Road", street);
-
-        // use default separator, it should return null
-        street = document.get("address.street", String.class);
-        assertNull(street);
-
-        assertEquals(document.get("colorCodes::1::color"), "Green");
-    }
-
-    private static class CustomIndexer implements Indexer {
+    private static class CustomIndexer implements NitriteIndexer {
 
         @Override
         public String getIndexType() {
@@ -171,29 +274,30 @@ public class NitriteBuilderTest {
         }
 
         @Override
-        public void writeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
+        public void validateIndex(Fields fields) {
 
         }
 
         @Override
-        public void removeIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object fieldValue) {
+        public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public void updateIndex(NitriteMap<NitriteId, Document> collection, NitriteId nitriteId, String field, Object newValue, Object oldValue) {
+        public void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public void dropIndex(NitriteMap<NitriteId, Document> collection, String field) {
+        public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
 
         }
 
         @Override
-        public Indexer clone() throws CloneNotSupportedException {
+        public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
             return null;
         }
+
 
         @Override
         public void initialize(NitriteConfig nitriteConfig) {
@@ -224,59 +328,5 @@ public class NitriteBuilderTest {
         }
     }
 
-    @Index(value = "longValue")
-    private static class TestObject implements Mappable {
-        private String stringValue;
-        private Long longValue;
-
-        public TestObject() {
-        }
-
-        public TestObject(String stringValue, Long longValue) {
-            this.longValue = longValue;
-            this.stringValue = stringValue;
-        }
-
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument("stringValue", stringValue)
-                .put("longValue", longValue);
-        }
-
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            if (document != null) {
-                this.stringValue = document.get("stringValue", String.class);
-                this.longValue = document.get("longValue", Long.class);
-            }
-        }
-    }
-
-    @Index(value = "longValue")
-    private static class TestObject2 implements Mappable {
-        private String stringValue;
-        private Long longValue;
-
-        public TestObject2() {
-        }
-
-        public TestObject2(String stringValue, Long longValue) {
-            this.longValue = longValue;
-            this.stringValue = stringValue;
-        }
-
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument("stringValue", stringValue)
-                .put("longValue", longValue);
-        }
-
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            if (document != null) {
-                this.stringValue = document.get("stringValue", String.class);
-                this.longValue = document.get("longValue", Long.class);
-            }
-        }
-    }
 }
+

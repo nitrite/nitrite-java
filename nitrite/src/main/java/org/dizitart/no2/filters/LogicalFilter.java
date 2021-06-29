@@ -16,11 +16,28 @@
 
 package org.dizitart.no2.filters;
 
+import lombok.Getter;
+
+import java.util.Arrays;
 import java.util.List;
 
 /**
+ * Represents a filter which does a logical operation (AND, OR)
+ * between a set of filters.
+ *
  * @author Anindya Chatterjee.
+ * @since 1.0
  */
+@Getter
 public abstract class LogicalFilter extends NitriteFilter {
-    public abstract List<Filter> getFilters();
+    private final List<Filter> filters;
+
+    /**
+     * Instantiates a new Logical filter.
+     *
+     * @param filters the filters
+     */
+    public LogicalFilter(Filter... filters) {
+        this.filters = Arrays.asList(filters);
+    }
 }

@@ -23,25 +23,28 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.MigrationManager;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
-import org.dizitart.no2.store.DatabaseMetaData;
+import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.UserAuthenticationService;
 import org.dizitart.no2.transaction.Session;
 
 import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.common.Constants.*;
+import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
+import static org.dizitart.no2.common.Constants.STORE_INFO;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.store.StoreSecurity.authenticate;
 
 /**
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 @Slf4j
 class NitriteDatabase implements Nitrite {
@@ -49,6 +52,7 @@ class NitriteDatabase implements Nitrite {
     private final RepositoryFactory repositoryFactory;
     private final NitriteConfig nitriteConfig;
     private final LockService lockService;
+    private NitriteMap<String, Document> storeInfo;
     private NitriteStore<?> store;
 
     NitriteDatabase(NitriteConfig config) {
@@ -85,6 +89,26 @@ class NitriteDatabase implements Nitrite {
     public <T> ObjectRepository<T> getRepository(Class<T> type, String key) {
         checkOpened();
         return repositoryFactory.getRepository(nitriteConfig, type, key);
+    }
+
+    @Override
+    public void destroyCollection(String name) {
+        checkOpened();
+        store.removeMap(name);
+    }
+
+    @Override
+    public <T> void destroyRepository(Class<T> type) {
+        checkOpened();
+        String mapName = findRepositoryName(type, null);
+        store.removeMap(mapName);
+    }
+
+    @Override
+    public <T> void destroyRepository(Class<T> type, String key) {
+        checkOpened();
+        String mapName = findRepositoryName(type, key);
+        store.removeMap(mapName);
     }
 
     @Override
@@ -138,6 +162,7 @@ class NitriteDatabase implements Nitrite {
 
             repositoryFactory.clear();
             collectionFactory.clear();
+            storeInfo.close();
             store.close();
             log.info("Nitrite database has been closed successfully.");
         } catch (NitriteIOException e) {
@@ -161,16 +186,13 @@ class NitriteDatabase implements Nitrite {
     }
 
     @Override
-    public DatabaseMetaData getDatabaseMetaData() {
-        NitriteMap<String, Document> storeInfo = this.store.openMap(STORE_INFO,
-            String.class, Document.class);
-
+    public StoreMetaData getDatabaseMetaData() {
         Document document = storeInfo.get(STORE_INFO);
         if (document == null) {
             prepareDatabaseMetaData();
             document = storeInfo.get(STORE_INFO);
         }
-        return new DatabaseMetaData(document);
+        return new StoreMetaData(document);
     }
 
     @Override
@@ -180,16 +202,16 @@ class NitriteDatabase implements Nitrite {
 
     private void validateUserCredentials(String username, String password) {
         if (isNullOrEmpty(username)) {
-            throw new SecurityException("username cannot be empty");
+            throw new NitriteSecurityException("username cannot be empty");
         }
         if (isNullOrEmpty(password)) {
-            throw new SecurityException("password cannot be empty");
+            throw new NitriteSecurityException("password cannot be empty");
         }
     }
 
     private void initialize(String username, String password) {
         try {
-            nitriteConfig.initialized();
+            nitriteConfig.initialize();
             store = nitriteConfig.getNitriteStore();
             boolean isExisting = isExisting();
 
@@ -199,34 +221,44 @@ class NitriteDatabase implements Nitrite {
             MigrationManager migrationManager = new MigrationManager(this);
             migrationManager.doMigrate();
 
-            authenticate(store, username, password, isExisting);
+            UserAuthenticationService userAuthenticationService = new UserAuthenticationService(store);
+            userAuthenticationService.authenticate(username, password, isExisting);
         } catch (NitriteException e) {
             log.error("Error while initializing the database", e);
             if (store != null && !store.isClosed()) {
-                store.close();
+                try {
+                    store.close();
+                } catch (Exception ex) {
+                    log.error("Error while closing the database", ex);
+                    throw new NitriteIOException("failed to close database", ex);
+                }
             }
             throw e;
         } catch (Exception e) {
             log.error("Error while initializing the database", e);
             if (store != null && !store.isClosed()) {
-                store.close();
+                try {
+                    store.close();
+                } catch (Exception ex) {
+                    log.error("Error while closing the database");
+                    throw new NitriteIOException("failed to close database", ex);
+                }
             }
             throw new NitriteIOException("failed to initialize database", e);
         }
     }
 
     private void prepareDatabaseMetaData() {
-        NitriteMap<String, Document> storeInfo = this.store.openMap(STORE_INFO,
-            String.class, Document.class);
+        storeInfo = this.store.openMap(STORE_INFO, String.class, Document.class);
 
         if (storeInfo.isEmpty()) {
-            DatabaseMetaData databaseMetadata = new DatabaseMetaData();
-            databaseMetadata.setCreateTime(System.currentTimeMillis());
-            databaseMetadata.setStoreVersion(store.getStoreVersion());
-            databaseMetadata.setNitriteVersion(NITRITE_VERSION);
-            databaseMetadata.setSchemaVersion(INITIAL_SCHEMA_VERSION);
+            StoreMetaData storeMetadata = new StoreMetaData();
+            storeMetadata.setCreateTime(System.currentTimeMillis());
+            storeMetadata.setStoreVersion(store.getStoreVersion());
+            storeMetadata.setNitriteVersion(NITRITE_VERSION);
+            storeMetadata.setSchemaVersion(nitriteConfig.getSchemaVersion());
 
-            storeInfo.put(STORE_INFO, databaseMetadata.getInfo());
+            storeInfo.put(STORE_INFO, storeMetadata.getInfo());
         }
     }
 

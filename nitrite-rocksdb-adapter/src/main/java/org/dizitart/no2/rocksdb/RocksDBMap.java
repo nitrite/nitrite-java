@@ -3,14 +3,13 @@ package org.dizitart.no2.rocksdb;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.rocksdb.ColumnFamilyHandle;
-import org.rocksdb.ComparatorOptions;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
 import org.rocksdb.util.BytewiseComparator;
@@ -136,7 +135,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
-    public RecordStream<K> keySet() {
+    public RecordStream<K> keys() {
         return RecordStream.fromIterable(new KeySet<>(rocksDB, columnFamilyHandle, objectFormatter, getKeyType()));
     }
 
@@ -208,7 +207,13 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @Override
     public RecordStream<Pair<K, V>> entries() {
         return RecordStream.fromIterable(new EntrySet<>(rocksDB, columnFamilyHandle,
-            objectFormatter, getKeyType(), getValueType()));
+            objectFormatter, getKeyType(), getValueType(), false));
+    }
+
+    @Override
+    public RecordStream<Pair<K, V>> reversedEntries() {
+        return RecordStream.fromIterable(new EntrySet<>(rocksDB, columnFamilyHandle,
+            objectFormatter, getKeyType(), getValueType(), true));
     }
 
     @Override
@@ -326,7 +331,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public void drop() {
-        store.removeMap(mapName);
+        store.removeMap(getName());
         close();
     }
 
@@ -335,13 +340,11 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
         this.objectFormatter = store.getStoreConfig().objectFormatter();
         this.columnFamilyHandle = reference.getOrCreateColumnFamily(getName());
         this.rocksDB = reference.getRocksDB();
-        this.bytewiseComparator = new BytewiseComparator(new ComparatorOptions());
-        this.reference.addComparator(bytewiseComparator);
+        this.bytewiseComparator = this.reference.getDbComparator();
     }
 
     @Override
     public void close() {
-        bytewiseComparator.close();
-        columnFamilyHandle.close();
+        store.closeMap(getName());
     }
 }

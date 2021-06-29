@@ -1,11 +1,19 @@
 package org.dizitart.no2.index;
 
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import org.junit.Test;
-
 public class NonUniqueIndexerTest {
+
+    @Test
+    public void testConstructor() {
+        NonUniqueIndexer actualNonUniqueIndexer = new NonUniqueIndexer();
+        assertEquals(IndexType.NON_UNIQUE, actualNonUniqueIndexer.getIndexType());
+        assertFalse(actualNonUniqueIndexer.isUnique());
+    }
+
     @Test
     public void testIsUnique() {
         assertFalse((new NonUniqueIndexer()).isUnique());

@@ -28,8 +28,8 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.data.ChildClass;
-import org.dizitart.no2.repository.data.Employee;
+import org.dizitart.no2.integration.repository.data.ChildClass;
+import org.dizitart.no2.integration.repository.data.Employee;
 import org.junit.Test;
 
 import java.io.Serializable;

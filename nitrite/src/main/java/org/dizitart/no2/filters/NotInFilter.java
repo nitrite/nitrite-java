@@ -20,69 +20,21 @@ import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.exceptions.FilterException;
-import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.index.ComparableIndexer;
-import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.index.IndexMap;
 
 import java.util.*;
-
-import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
  * @author Anindya Chatterjee
  */
-class NotInFilter extends IndexAwareFilter {
+class NotInFilter extends ComparableArrayFilter {
     @Getter
-    private Set<Comparable<?>> comparableSet;
+    private final Set<Comparable<?>> comparableSet;
 
     NotInFilter(String field, Comparable<?>... values) {
         super(field, values);
         this.comparableSet = new HashSet<>();
         Collections.addAll(this.comparableSet, values);
-    }
-
-    @Override
-    protected Set<NitriteId> findIndexedIdSet() {
-        validateNotInFilterValue(getField(), comparableSet);
-        this.comparableSet = convertValues(this.comparableSet);
-
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getIsFieldIndexed()) {
-            if (getIndexer() instanceof ComparableIndexer && comparableSet != null) {
-                ComparableIndexer comparableIndexer = (ComparableIndexer) getIndexer();
-                idSet = comparableIndexer.findNotIn(getCollectionName(), getField(), comparableSet);
-            } else {
-                if (comparableSet != null && !comparableSet.isEmpty()) {
-                    throw new FilterException("notIn filter is not supported on indexed field "
-                        + getField());
-                } else {
-                    throw new FilterException("invalid notIn filter");
-                }
-            }
-        }
-        return idSet;
-    }
-
-    @Override
-    protected Set<NitriteId> findIdSet(NitriteMap<NitriteId, Document> collection) {
-        Set<NitriteId> idSet = new LinkedHashSet<>();
-        if (getOnIdField()) {
-            Set<NitriteId> notInSet = new LinkedHashSet<>();
-            for (Comparable<?> comparable : comparableSet) {
-                if (comparable instanceof String) {
-                    NitriteId nitriteId = NitriteId.createId((String) comparable);
-                    notInSet.add(nitriteId);
-                }
-            }
-
-            for (NitriteId nitriteId : collection.keySet()) {
-                if (!notInSet.contains(nitriteId)) {
-                    idSet.add(nitriteId);
-                }
-            }
-        }
-        return idSet;
     }
 
     @Override
@@ -97,11 +49,28 @@ class NotInFilter extends IndexAwareFilter {
         return true;
     }
 
-    private void validateNotInFilterValue(String field, Collection<Comparable<?>> values) {
-        notNull(field, "field cannot be null");
-        notNull(values, "values cannot be null");
-        if (values.size() == 0) {
-            throw new ValidationException("values cannot be empty");
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
+        List<NitriteId> nitriteIds = new ArrayList<>();
+
+        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
+            if (!comparableSet.contains(entry.getFirst())) {
+                processIndexValue(entry.getSecond(), subMap, nitriteIds);
+            }
         }
+
+        if (!subMap.isEmpty()) {
+            // if sub-map is populated then filtering on compound index, return sub-map
+            return subMap;
+        } else {
+            // else it is filtering on either single field index,
+            // or it is a terminal filter on compound index, return only nitrite-ids
+            return nitriteIds;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "(" + getField() + " not in " + Arrays.toString((Comparable<?>[]) getValue()) + ")";
     }
 }

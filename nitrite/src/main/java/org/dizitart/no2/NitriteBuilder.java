@@ -19,9 +19,9 @@ package org.dizitart.no2;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
-import org.dizitart.no2.exceptions.SecurityException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.Migration;
-import org.dizitart.no2.module.NitriteModule;
+import org.dizitart.no2.common.module.NitriteModule;
 
 /**
  * A builder utility to create a {@link Nitrite} database instance.
@@ -35,6 +35,9 @@ public class NitriteBuilder {
     @Getter
     private final NitriteConfig nitriteConfig;
 
+    /**
+     * Instantiates a new {@link NitriteBuilder}.
+     */
     NitriteBuilder() {
         this.nitriteConfig = new NitriteConfig();
     }
@@ -62,6 +65,12 @@ public class NitriteBuilder {
         return this;
     }
 
+    /**
+     * Adds instructions to perform during schema migration.
+     *
+     * @param migrations the migrations
+     * @return the nitrite builder
+     */
     public NitriteBuilder addMigrations(Migration... migrations) {
         for (Migration migration : migrations) {
             this.nitriteConfig.addMigration(migration);
@@ -69,6 +78,12 @@ public class NitriteBuilder {
         return this;
     }
 
+    /**
+     * Sets the current schema version.
+     *
+     * @param version the version
+     * @return the nitrite builder
+     */
     public NitriteBuilder schemaVersion(Integer version) {
         this.nitriteConfig.schemaVersion(version);
         return this;
@@ -80,9 +95,7 @@ public class NitriteBuilder {
      * exists, then it will create a new file store and open; otherwise it will
      * open the existing file store.
      * <p>
-     *
-     *
-     * <b>NOTE:</b> If the database is corrupted somehow then at the time of opening, it will
+     * NOTE: If the database is corrupted somehow then at the time of opening, it will
      * try to repair it using the last known good version. If still it fails to
      * recover, then it will throw a {@link org.dizitart.no2.exceptions.NitriteIOException}.
      *
@@ -106,15 +119,15 @@ public class NitriteBuilder {
      * While opening an existing database, it will use the specified credentials
      * to open it.
      * </p>
-     *
-     * <b>NOTE:</b> If the database is corrupted somehow then at the time of opening, it will
+     * <p>
+     * NOTE: If the database is corrupted somehow then at the time of opening, it will
      * try to repair it using the last known good version. If still it fails to
      * recover, then it will throw a {@link org.dizitart.no2.exceptions.NitriteIOException}.
      *
      * @param username the username
      * @param password the password
      * @return the nitrite database instance.
-     * @throws SecurityException                              if the user credentials are wrong or one of them is empty string.
+     * @throws NitriteSecurityException                              if the user credentials are wrong or one of them is empty string.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a new in-memory database.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if the database is corrupt and recovery fails.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if the directory does not exist.

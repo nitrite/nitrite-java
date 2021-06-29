@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2017-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2;
@@ -20,16 +21,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
+import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.mapper.Mappable;
-import org.dizitart.no2.mapper.NitriteMapper;
+import org.dizitart.no2.integration.Retry;
+import org.dizitart.no2.integration.TestUtil;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
@@ -49,20 +54,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Locale;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
-import static java.nio.file.Paths.get;
-import static org.dizitart.no2.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.filters.Filter.ALL;
+import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.integration.TestUtil.deleteDb;
+import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
 import static org.junit.Assert.*;
 
 /**
@@ -103,13 +106,13 @@ public class NitriteTest {
         collection = db.getCollection("test");
         collection.remove(ALL);
 
-        collection.createIndex("body", IndexOptions.indexOptions(IndexType.Fulltext));
-        collection.createIndex("firstName", IndexOptions.indexOptions(IndexType.Unique));
+        collection.createIndex(IndexOptions.indexOptions(IndexType.FULL_TEXT), "body");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "firstName");
         collection.insert(doc1, doc2, doc3);
     }
 
     @After
-    public void tearDown() throws IOException {
+    public void tearDown() {
         if (collection.isOpen()) {
             collection.remove(ALL);
             collection.close();
@@ -120,7 +123,7 @@ public class NitriteTest {
             } catch (NitriteIOException ignore) {
             }
         }
-        Files.delete(get(fileName));
+        deleteDb(fileName);
     }
 
     @Test
@@ -356,8 +359,8 @@ public class NitriteTest {
         }).start();
 
         for (int i = 0; i < 1000; ++i) {
-            repository.find(where("status").eq(Receipt.Status.COMPLETED).not())
-                .sort("createdTimestamp", SortOrder.Descending).toList();
+            repository.find(where("status").eq(Receipt.Status.COMPLETED).not(),
+                FindOptions.orderBy("createdTimestamp", SortOrder.Descending)).toList();
             try {
                 Thread.sleep(50);
             } catch (InterruptedException ignored) {
@@ -465,21 +468,21 @@ public class NitriteTest {
         NitriteCollection collection = db.getCollection("test");
 
         // text filter has be the first filter in and clause
-        List<Document> cursor = collection.find(where("second_key").text("fox")
-            .and(where("first_key").eq(1))).toList();
+        List<Document> cursor = collection.find(
+            and(where("second_key").text("fox"), where("first_key").eq(1))).toList();
         assertEquals(cursor.size(), 1);
         assertEquals(cursor.get(0).get("third_key"), 0.5);
 
         ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
         ObjectRepository<Receipt> orangeRepository = db.getRepository(Receipt.class, "orange");
 
-        List<Receipt> list = repository.find(where("synced").eq(true)
-            .and(where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
+        List<Receipt> list = repository.find(
+            and(where("synced").eq(true), where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
         assertEquals(list.size(), 1);
         assertEquals(list.get(0).clientRef, "1");
 
-        list = orangeRepository.find(where("synced").eq(false)
-            .and(where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
+        list = orangeRepository.find(
+            and(where("synced").eq(false), where("status").eq(Receipt.Status.PREPARING.toString()))).toList();
         assertEquals(list.size(), 0);
         assertNotNull(repository.getAttributes());
 
@@ -494,10 +497,10 @@ public class NitriteTest {
         Document doc = createDocument("fifth_key", "fifth_key");
 
         if (!collection.hasIndex("key")) {
-            collection.createIndex("key", IndexOptions.indexOptions(IndexType.NonUnique));
+            collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "key");
         }
         if (!collection.hasIndex("second_key")) {
-            collection.createIndex("second_key", IndexOptions.indexOptions(IndexType.NonUnique));
+            collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "second_key");
         }
 
         collection.insert(doc1, doc2);
@@ -507,6 +510,56 @@ public class NitriteTest {
         for (Document document : collection.find()) {
             System.out.println(document);
         }
+    }
+
+    @Test
+    public void testIssue245() throws Exception {
+        class ThreadRunner implements Runnable {
+            @Override
+            public void run() {
+                try {
+                    long id = Thread.currentThread().getId();
+                    NitriteCollection collection = db.getCollection("testIssue245");
+
+                    for (int i = 0; i < 5; i++) {
+
+                        System.out.println("Thread ID = " + id + " Inserting doc " + i);
+                        Document doc = Document.createDocument(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+
+                        WriteResult result = collection.insert(doc);//db.commit();
+                        System.out.println("Result of insert = " + result.getAffectedCount());
+                        System.out.println("Thread id = " + id + " --> count = " + collection.size());
+
+                        Thread.sleep(10);
+
+                    }//for closing
+
+                    collection.close();
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        Thread t0 = new Thread(new ThreadRunner());
+        Thread t1 = new Thread(new ThreadRunner());
+        Thread t2 = new Thread(new ThreadRunner());
+
+        t0.start();
+        t1.start();
+        t2.start();
+
+        Thread.sleep(10 * 1000);
+
+        t0.join();
+        t1.join();
+        t2.join();
+
+        NitriteCollection collection = db.getCollection("testIssue245");
+        System.out.println("No of Documents = " + collection.size());
+        collection.close();
+        db.close();
     }
 
     @Data
@@ -533,13 +586,13 @@ public class NitriteTest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Indices({
-        @Index(value = "synced", type = IndexType.NonUnique)
+        @Index(value = "synced", type = IndexType.NON_UNIQUE)
     })
     public static class Receipt implements Mappable {
-        private Status status;
         @Id
         private String clientRef;
         private Boolean synced;
+        private Status status;
         private Long createdTimestamp = System.currentTimeMillis();
 
         @Override
@@ -564,6 +617,7 @@ public class NitriteTest {
                 this.createdTimestamp = document.get("createdTimestamp", Long.class);
             }
         }
+
         public enum Status {
             COMPLETED,
             PREPARING,

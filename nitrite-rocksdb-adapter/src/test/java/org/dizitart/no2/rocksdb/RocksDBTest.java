@@ -1,17 +1,18 @@
 /*
- * Copyright (c) 2019-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.rocksdb;
@@ -21,7 +22,12 @@ import com.esotericsoftware.kryo.kryo5.io.ByteBufferOutput;
 import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.github.javafaker.Faker;
 import lombok.Data;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.store.NitriteMap;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.rocksdb.*;
 
@@ -29,14 +35,42 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 
+import static org.dizitart.no2.integration.TestUtil.deleteDb;
+import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Anindya Chatterjee
  */
-public class RocksDBTest extends AbstractTest {
+public class RocksDBTest {
+    private final String fileName = getRandomTempDbFile();
+    private Nitrite db;
+
+    @Rule
+    public Retry retry = new Retry(3);
+
+    @Before
+    public void setUp() throws ParseException {
+        RocksDBModule storeModule = RocksDBModule.withConfig()
+            .filePath(fileName)
+            .build();
+
+        db = Nitrite.builder()
+            .loadModule(storeModule)
+            .fieldSeparator(".")
+            .openOrCreate();
+    }
+
+    @After
+    public void cleanUp() throws IOException {
+        if (db != null && !db.isClosed()) {
+            db.close();
+        }
+        deleteDb(fileName);
+    }
 
     @Test
     public void testRocksDBMap() {

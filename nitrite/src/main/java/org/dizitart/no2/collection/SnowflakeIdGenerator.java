@@ -36,7 +36,7 @@ import java.util.Random;
  *     <li>1 unused sign bit, always set to 0</li>
  * </ul>
  * <p>
- * Original code can be found here - https://github.com/apache/marmotta/blob/master/libraries/kiwi/kiwi-triplestore/src/main/java/org/apache/marmotta/kiwi/generator/SnowflakeIDGenerator.java
+ * This is a derivative work of - https://github.com/apache/marmotta/blob/master/libraries/kiwi/kiwi-triplestore/src/main/java/org/apache/marmotta/kiwi/generator/SnowflakeIDGenerator.java
  * </p>
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)

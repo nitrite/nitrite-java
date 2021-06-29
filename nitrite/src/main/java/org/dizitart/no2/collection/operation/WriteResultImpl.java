@@ -47,8 +47,7 @@ class WriteResultImpl implements WriteResult {
 
     @Override
     public Iterator<NitriteId> iterator() {
-        Iterator<NitriteId> iterator = nitriteIds == null ? Collections.emptyIterator()
+        return nitriteIds == null ? Collections.emptyIterator()
             : nitriteIds.iterator();
-        return iterator;
     }
 }

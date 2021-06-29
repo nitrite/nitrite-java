@@ -20,8 +20,13 @@ import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.NitriteConfig;
 
+import java.util.Objects;
+
 /**
+ * Represents a nitrite filter.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 @Getter
 @Setter
@@ -29,4 +34,41 @@ public abstract class NitriteFilter implements Filter {
     private NitriteConfig nitriteConfig;
     private String collectionName;
     private Boolean objectFilter = false;
+
+    /**
+     * Creates an and filter which performs a logical AND operation on two filters and selects
+     * the documents that satisfy both filters.
+     * <p>
+     *
+     * @param filter other filter
+     * @return the and filter
+     */
+    public Filter and(Filter filter) {
+        return new AndFilter(this, filter);
+    }
+
+    /**
+     * Creates an or filter which performs a logical OR operation on two filters and selects
+     * the documents that satisfy at least one of the filter.
+     * <p>
+     *
+     * @param filter other filter
+     * @return the or filter
+     */
+    public Filter or(Filter filter) {
+        return new OrFilter(this, filter);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof NitriteFilter) {
+            return Objects.equals(this.toString(), String.valueOf(o));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
 }

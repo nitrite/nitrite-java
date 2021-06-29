@@ -22,33 +22,52 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 
-import java.util.Arrays;
-import java.util.List;
-
 /**
+ * Represents an And filter.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 @Getter
 public class AndFilter extends LogicalFilter {
-    private final Filter rhs;
-    private final Filter lhs;
 
-    AndFilter(Filter lhs, Filter rhs) {
-        this.lhs = lhs;
-        this.rhs = rhs;
+    /**
+     * Instantiates a new And filter.
+     *
+     * @param filters the filters
+     */
+    AndFilter(Filter... filters) {
+        super(filters);
 
-        if (rhs instanceof TextFilter) {
-            throw new FilterException("text filter must be the first filter in and operation");
+        for (int i = 1; i < filters.length; i++) {
+            if (filters[i] instanceof TextFilter) {
+                throw new FilterException("text filter must be the first filter in AND operation");
+            }
         }
     }
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        return lhs.apply(element) && rhs.apply(element);
+        boolean result = true;
+        for (Filter filter : getFilters()) {
+            result = result && filter.apply(element);
+        }
+        return result;
     }
 
     @Override
-    public List<Filter> getFilters() {
-        return Arrays.asList(lhs, rhs);
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("(");
+        for (int i = 0; i < getFilters().size(); i++) {
+            Filter filter = getFilters().get(i);
+            if (i == 0) {
+                stringBuilder.append(filter.toString());
+            } else {
+                stringBuilder.append(" && ").append(filter.toString());
+            }
+        }
+        stringBuilder.append(")");
+        return stringBuilder.toString();
     }
 }

@@ -25,8 +25,8 @@ import org.dizitart.no2.sync.net.DataGateSocket;
  */
 @Slf4j
 public class MessageTemplate implements AutoCloseable {
-    private Config config;
-    private ReplicationTemplate replica;
+    private final Config config;
+    private final ReplicationTemplate replica;
     private DataGateSocket dataGateSocket;
     private MessageDispatcher dispatcher;
 

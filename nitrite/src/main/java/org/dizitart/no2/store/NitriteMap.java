@@ -18,8 +18,8 @@ package org.dizitart.no2.store;
 
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.collection.meta.MetadataAware;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.tuples.Pair;
 
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
@@ -44,31 +44,22 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     boolean containsKey(Key key);
 
     /**
-     * Gets the value mapped with the specified key or `null` otherwise.
+     * Gets the value mapped with the specified key or <code>null</code> otherwise.
      *
      * @param key the key
-     * @return the value, or `null` if the key not found.
+     * @return the value, or null if the key not found.
      */
     Value get(Key key);
 
     /**
-     * Gets the parent {@link NitriteStore} where this map is stored.
-     *
-     * @return the store where this map is stored.
-     */
-    NitriteStore<?> getStore();
-
-    /**
-     * Remove all entries in the map.
+     * Removes all entries in the map.
      */
     void clear();
 
     /**
-     * Gets name of this map.
-     *
-     * @return the name of this map.
-     */
-    String getName();
+     * Closes this {@link NitriteMap}.
+     * */
+    void close();
 
     /**
      * Gets a {@link RecordStream} view of the values contained in
@@ -76,7 +67,14 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      *
      * @return the collection view of all values in this map.
      */
-    RecordStream<Value> values();
+    Iterable<Value> values();
+
+    /**
+     * Gets a {@link RecordStream} view of the keys contained in this map.
+     *
+     * @return a set view of the keys contained in this map.
+     */
+    Iterable<Key> keys();
 
     /**
      * Removes the mapping for a key from this map if it is present.
@@ -85,13 +83,6 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      * @return the value that has been removed.
      */
     Value remove(Key key);
-
-    /**
-     * Gets a {@link RecordStream} view of the keys contained in this map.
-     *
-     * @return a set view of the keys contained in this map.
-     */
-    RecordStream<Key> keySet();
 
     /**
      * Associates the specified value with the specified key in this map.
@@ -119,13 +110,6 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      * @return the old value if the key existed, or `null` otherwise.
      */
     Value putIfAbsent(Key key, Value value);
-
-    /**
-     * Gets a {@link RecordStream} view of the mappings contained in this map.
-     *
-     * @return a set view of the mappings contained in this map.
-     */
-    RecordStream<Pair<Key, Value>> entries();
 
     /**
      * Get the smallest key that is larger than the given key, or null if no
@@ -169,12 +153,41 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     boolean isEmpty();
 
     /**
+     * Gets the parent {@link NitriteStore} where this map is stored.
+     *
+     * @return the store where this map is stored.
+     */
+    NitriteStore<?> getStore();
+
+    /**
+     * Gets name of this map.
+     *
+     * @return the name of this map.
+     */
+    String getName();
+
+    /**
+     * Gets a {@link RecordStream} view of the mappings contained in this map.
+     *
+     * @return a set view of the mappings contained in this map.
+     */
+    RecordStream<Pair<Key, Value>> entries();
+
+    /**
+     * Gets a reversed {@link RecordStream} view of the mappings contained in this map.
+     *
+     * @return the record stream
+     */
+    RecordStream<Pair<Key, Value>> reversedEntries();
+
+    /**
      * Deletes the map from the store.
      */
     void drop();
 
-    void close();
-
+    /**
+     * Gets the attributes of this map.
+     * */
     default Attributes getAttributes() {
         NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
         if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
@@ -183,6 +196,9 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
         return null;
     }
 
+    /**
+     * Sets the attributes for this map.
+     * */
     default void setAttributes(Attributes attributes) {
         NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
         if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
@@ -190,6 +206,9 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
         }
     }
 
+    /**
+     * Update last modified time of the map.
+     */
     default void updateLastModifiedTime() {
         if (isNullOrEmpty(getName())
             || META_MAP_NAME.equals(getName())) return;

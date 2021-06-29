@@ -153,4 +153,11 @@ https://docs.yugabyte.com/latest/architecture/docdb/persistence/
 
 https://blog.yugabyte.com/enhancing-rocksdb-for-speed-scale/
 
+## Query Optimization
+ - https://www.javatpoint.com/dbms-transforming-relational-expressions
+ - http://www.cbcb.umd.edu/confcour/Spring2014/CMSC424/query_optimization.pdf
+ - https://www.tutorialcup.com/dbms/query-optimization.htm
+ - https://www.geeksforgeeks.org/query-optimization-in-relational-algebra/
+ 
+ 
 

@@ -321,7 +321,7 @@ class ObjectFilterTest : BaseTest() {
     }
 }
 
-@Indices(Index(value = "text", type = IndexType.Fulltext))
+@Indices(Index(value = ["text"], type = IndexType.FULL_TEXT))
 data class TestData(@Id val id: Int, val text: String, val list: List<ListData> = listOf())
 
 class ListData(val name: String, val score: Int)
@@ -331,7 +331,7 @@ data class SimpleObject(
         val value: Boolean
 )
 
-@Index(value = "geometry", type = SpatialIndexer.SpatialIndex)
+@Index(value = ["geometry"], type = SpatialIndexer.SPATIAL_INDEX)
 data class SpatialData(
         @Id val id: Long,
         val geometry: Geometry

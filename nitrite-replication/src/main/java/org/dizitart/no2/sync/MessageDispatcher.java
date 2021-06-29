@@ -34,8 +34,8 @@ import java.util.concurrent.ExecutorService;
  */
 @Slf4j
 class MessageDispatcher implements DataGateSocketListener, AutoCloseable {
-    private ReplicationTemplate replicationTemplate;
-    private MessageTransformer transformer;
+    private final ReplicationTemplate replicationTemplate;
+    private final MessageTransformer transformer;
     private ExecutorService executorService;
 
     public MessageDispatcher(Config config, ReplicationTemplate replicationTemplate) {

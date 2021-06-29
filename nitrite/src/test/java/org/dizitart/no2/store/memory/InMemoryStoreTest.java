@@ -23,7 +23,7 @@ public class InMemoryStoreTest {
     }
 
     @Test
-    public void testClose() {
+    public void testClose() throws Exception {
         InMemoryStore inMemoryStore = new InMemoryStore();
         inMemoryStore.close();
         assertTrue(inMemoryStore.isClosed());

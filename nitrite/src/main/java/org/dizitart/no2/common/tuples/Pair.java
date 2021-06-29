@@ -28,6 +28,8 @@ import java.io.Serializable;
 /**
  * Represents a pair.
  *
+ * @param <A> the type parameter
+ * @param <B> the type parameter
  * @author Anindya Chatterjee.
  * @since 4.0
  */
@@ -39,6 +41,19 @@ public class Pair<A, B> implements Serializable {
 
     private A first;
     private B second;
+
+    /**
+     * Creates a new pair.
+     *
+     * @param <A>    the type parameter
+     * @param <B>    the type parameter
+     * @param first  the first
+     * @param second the second
+     * @return the pair
+     */
+    public static <A, B> Pair<A, B> pair(A first, B second) {
+        return new Pair<>(first, second);
+    }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeObject(first);

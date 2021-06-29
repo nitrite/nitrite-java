@@ -47,7 +47,7 @@ import static org.dizitart.no2.sync.event.ReplicationEventType.Stopped;
 @Slf4j
 @Getter
 public class ReplicationTemplate implements ReplicationOperation {
-    private Config config;
+    private final Config config;
     private MessageFactory messageFactory;
     private MessageTemplate messageTemplate;
     private LastWriteWinMap crdt;
@@ -76,7 +76,7 @@ public class ReplicationTemplate implements ReplicationOperation {
 
     public ReplicationTemplate(Config config) {
         this.config = config;
-        init();
+        initialize();
     }
 
     public void connect() {
@@ -186,7 +186,7 @@ public class ReplicationTemplate implements ReplicationOperation {
         }
     }
 
-    private void init() {
+    private void initialize() {
         this.messageFactory = new MessageFactory();
         this.connected = new AtomicBoolean(false);
         this.exchangeFlag = new AtomicBoolean(false);
