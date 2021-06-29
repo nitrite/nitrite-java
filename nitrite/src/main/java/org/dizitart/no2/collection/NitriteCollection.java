@@ -42,7 +42,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * A nitrite collection supports indexing. Every nitrite collection is also
  * observable.
  * </p>
- * <h3>Create a collection</h3>
+ * <b>Create a collection</b>
  * <pre>
  * {@code
  * Nitrite db = Nitrite.builder()

@@ -34,7 +34,7 @@ import java.util.Map;
  * Represents an execution plan of a find operation after optimization.
  *
  * @author Anindya Chatterjee
- * @since 4.0
+ * @since 4.0.0
  */
 @Data
 public class FindPlan {
@@ -53,6 +53,9 @@ public class FindPlan {
 
     private List<FindPlan> subPlans;
 
+    /**
+     * Instantiates a new {@link FindPlan}.
+     */
     public FindPlan() {
         this.subPlans = new ArrayList<>();
         this.blockingSortOrder = new ArrayList<>();

@@ -90,19 +90,6 @@ public class ObjectRepositoryTest {
     }
 
     @Test
-    public void testWithFinalField() {
-        ObjectRepository<WithFinalField> repository = db.getRepository(WithFinalField.class);
-        WithFinalField object = new WithFinalField();
-        object.setName("test");
-
-        repository.insert(object);
-        for (WithFinalField instance : repository.find()) {
-            assertEquals(object.getName(), instance.getName());
-            assertEquals(object.getNumber(), instance.getNumber());
-        }
-    }
-
-    @Test
     public void testWithOutGetterSetter() {
         ObjectRepository<WithOutGetterSetter> repository = db.getRepository(WithOutGetterSetter.class);
         WithOutGetterSetter object = new WithOutGetterSetter();

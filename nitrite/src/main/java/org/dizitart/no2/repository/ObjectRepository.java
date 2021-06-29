@@ -47,7 +47,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * <p>
  * An object repository is observable like its underlying {@link NitriteCollection}.
  * </p>
- * <h3>Create a repository</h3>
+ * <b>Create a repository</b>
  * <pre>
  * {@code
  * // create/open a database

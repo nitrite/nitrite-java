@@ -17,6 +17,8 @@
 
 package org.dizitart.no2.integration;
 
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
@@ -38,8 +40,6 @@ import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

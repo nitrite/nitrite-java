@@ -17,13 +17,15 @@
 
 package org.dizitart.no2.integration;
 
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlSchemaType;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.common.mapper.Mappable;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.junit.Rule;
@@ -31,8 +33,6 @@ import org.junit.Test;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import java.util.ArrayList;
 import java.util.List;
 

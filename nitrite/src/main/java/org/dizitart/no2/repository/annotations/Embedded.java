@@ -23,11 +23,25 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * Indicates that an annotated field is used to construct a composite id field.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Embedded {
+    /**
+     * Order of the field in compound index.
+     *
+     * @return the int
+     */
     int order();
+
+    /**
+     * The custom field name in compound index.
+     *
+     * @return the string
+     */
     String fieldName() default "";
 }

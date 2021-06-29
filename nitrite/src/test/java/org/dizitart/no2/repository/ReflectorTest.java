@@ -71,12 +71,6 @@ public class ReflectorTest {
         assertTrue(reflector.getFieldsUpto(startClass, Object.class).isEmpty());
     }
 
-    @Test
-    public void testGetFieldsUpto2() {
-        Reflector reflector = new Reflector();
-        Class<?> startClass = Field.class;
-        assertEquals(Short.SIZE, reflector.getFieldsUpto(startClass, Object.class).size());
-    }
 
     @Test
     public void testGetField() {

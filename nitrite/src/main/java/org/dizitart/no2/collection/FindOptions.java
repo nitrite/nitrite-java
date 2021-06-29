@@ -29,8 +29,8 @@ import java.text.Collator;
 /**
  * The options for find operation.
  *
- * @since 1.0
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 @Data
 @Accessors(fluent = true, chain = true)
@@ -40,13 +40,28 @@ public class FindOptions {
     private Long skip;
     private Long limit;
 
+    /**
+     * Specifies the {@link Collator}.
+     *
+     * @return the collator.
+     */
     @Setter(AccessLevel.PUBLIC)
     private Collator collator;
 
+    /**
+     * Instantiates a new FindOptions.
+     */
     public FindOptions() {
         this.collator = Collator.getInstance();
     }
 
+    /**
+     * Order by find options.
+     *
+     * @param fieldName the field name
+     * @param sortOrder the sort order
+     * @return the find options
+     */
     public static FindOptions orderBy(String fieldName, SortOrder sortOrder) {
         SortableFields fields = new SortableFields();
         fields.addField(fieldName, sortOrder);
@@ -56,38 +71,81 @@ public class FindOptions {
         return findOptions;
     }
 
+    /**
+     * Skip by find options.
+     *
+     * @param skip the skip
+     * @return the find options
+     */
     public static FindOptions skipBy(long skip) {
         FindOptions findOptions = new FindOptions();
         findOptions.skip(skip);
         return findOptions;
     }
 
+    /**
+     * Limit by find options.
+     *
+     * @param limit the limit
+     * @return the find options
+     */
     public static FindOptions limitBy(long limit) {
         FindOptions findOptions = new FindOptions();
         findOptions.limit(limit);
         return findOptions;
     }
 
+    /**
+     * Skip find options.
+     *
+     * @param skip the skip
+     * @return the find options
+     */
     public FindOptions skip(Long skip) {
         this.skip = skip;
         return this;
     }
 
+    /**
+     * Skip find options.
+     *
+     * @param skip the skip
+     * @return the find options
+     */
     public FindOptions skip(Integer skip) {
         this.skip = skip == null ? null : (long) skip;
         return this;
     }
 
+    /**
+     * Limit find options.
+     *
+     * @param limit the limit
+     * @return the find options
+     */
     public FindOptions limit(Long limit) {
         this.limit = limit;
         return this;
     }
 
+    /**
+     * Limit find options.
+     *
+     * @param limit the limit
+     * @return the find options
+     */
     public FindOptions limit(Integer limit) {
         this.limit = limit == null ? null : (long) limit;
         return this;
     }
 
+    /**
+     * Then order by find options.
+     *
+     * @param fieldName the field name
+     * @param sortOrder the sort order
+     * @return the find options
+     */
     public FindOptions thenOrderBy(String fieldName, SortOrder sortOrder) {
         if (orderBy != null) {
             orderBy.addField(fieldName, sortOrder);

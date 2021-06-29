@@ -33,17 +33,32 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
+ * A factory class to create {@link NitriteCollection}.
+ * <p>NOTE: Internal API</p>
  * @author Anindya Chatterjee
  */
 public class CollectionFactory {
     private final Map<String, NitriteCollection> collectionMap;
     private final LockService lockService;
 
+    /**
+     * Instantiates a new {@link CollectionFactory}.
+     *
+     * @param lockService the lock service
+     */
     public CollectionFactory(LockService lockService) {
         this.collectionMap = new HashMap<>();
         this.lockService = lockService;
     }
 
+    /**
+     * Gets or creates a collection.
+     *
+     * @param name           the name
+     * @param nitriteConfig  the nitrite config
+     * @param writeCatalogue the write catalogue
+     * @return the collection
+     */
     public NitriteCollection getCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalogue) {
         notNull(nitriteConfig, "configuration is null while creating collection");
         notEmpty(name, "collection name is null or empty");
@@ -93,6 +108,9 @@ public class CollectionFactory {
         return collection;
     }
 
+    /**
+     * Clears the internal registry holding collection information.
+     */
     public void clear() {
         Lock lock = lockService.getWriteLock(this.getClass().getName());
         try {

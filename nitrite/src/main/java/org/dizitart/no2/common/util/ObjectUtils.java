@@ -202,9 +202,13 @@ public class ObjectUtils {
                             field.setAccessible(true);
 
                             // remove final modifier
-                            Field modifiersField = Field.class.getDeclaredField("modifiers");
-                            modifiersField.setAccessible(true);
-                            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                            try {
+                                Field modifiersField = Field.class.getDeclaredField("modifiers");
+                                modifiersField.setAccessible(true);
+                                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+                            } catch (NoSuchFieldException e) {
+                                // ignore in case of java 12+
+                            }
 
                             if (isSkeletonRequired(type, field.getType())) {
                                 field.set(item, newInstance(field.getType(), true));
