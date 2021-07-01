@@ -336,11 +336,11 @@ class NitriteDataType extends ObjectDataType {
      * @return the byte array
      */
     public static byte[] serialize(Object obj) {
-        try {
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ObjectOutputStream os = new ObjectOutputStream(out);
-            os.writeObject(obj);
-            return out.toByteArray();
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            try (ObjectOutputStream os = new ObjectOutputStream(out)) {
+                os.writeObject(obj);
+                return out.toByteArray();
+            }
         } catch (Throwable e) {
             throw DataUtils.newIllegalArgumentException(
                 "Could not serialize {0}", obj, e);
@@ -354,10 +354,10 @@ class NitriteDataType extends ObjectDataType {
      * @return the object
      */
     public static Object deserialize(byte[] data) {
-        try {
-            ByteArrayInputStream in = new ByteArrayInputStream(data);
-            NitriteObjectInputStream is = new NitriteObjectInputStream(in);
-            return is.readObject();
+        try (ByteArrayInputStream in = new ByteArrayInputStream(data)) {
+            try (NitriteObjectInputStream is = new NitriteObjectInputStream(in)) {
+                return is.readObject();
+            }
         } catch (Throwable e) {
             throw DataUtils.newIllegalArgumentException(
                 "Could not deserialize {0}", Arrays.toString(data), e);

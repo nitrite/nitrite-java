@@ -24,11 +24,16 @@ import org.dizitart.no2.NitriteConfig;
  * @author Anindya Chatterjee.
  * @since 4.0
  */
-public interface NitritePlugin {
+public interface NitritePlugin extends AutoCloseable {
     /**
      * Initializes the plugin instance.
      *
      * @param nitriteConfig the nitrite config
      */
     void initialize(NitriteConfig nitriteConfig);
+
+    default void close() {
+        // this is to make NitritePlugin a functional interface
+        // and make close() not throw checked exception
+    }
 }

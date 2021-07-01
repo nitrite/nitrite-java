@@ -102,7 +102,7 @@ public class ThreadPoolManager {
     /**
      * Shuts down all thread pools.
      */
-    public static void shutdownThreadPools() {
+    public synchronized static void shutdownThreadPools() {
         for (ExecutorService threadPool : threadPools) {
             synchronized (lock) {
                 if (threadPool != null) {

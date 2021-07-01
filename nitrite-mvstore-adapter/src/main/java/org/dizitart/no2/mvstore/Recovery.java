@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.mvstore;
 
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.h2.mvstore.Chunk;
 import org.h2.mvstore.DataUtils;
 import org.h2.mvstore.MVMap;
@@ -90,34 +91,38 @@ public class Recovery {
      */
     private static boolean repair(String fileName, PrintWriter pw) {
         long version = Long.MAX_VALUE;
-        OutputStream ignore = new OutputStream() {
+        boolean repaired = false;
+
+        try(OutputStream ignore = new OutputStream() {
             @Override
             public void write(int b) {
                 // ignore
             }
-        };
-        boolean repaired = false;
-        while (version >= 0) {
-            pw.println(version == Long.MAX_VALUE ? "Trying latest version" : ("Trying version " + version));
-            pw.flush();
-            version = rollback(fileName, version, new PrintWriter(ignore));
-            try {
-                String error = info(fileName + ".temp", new PrintWriter(ignore));
-                if (error == null) {
-                    FilePath.get(fileName).moveTo(FilePath.get(fileName + ".back"), true);
-                    FilePath.get(fileName + ".temp").moveTo(FilePath.get(fileName), true);
-                    pw.println("Success");
-                    repaired = true;
-                    break;
-                }
-                pw.println("    ... failed: " + error);
-            } catch (Exception e) {
-                pw.println("Fail: " + e.getMessage());
+        }) {
+            while (version >= 0) {
+                pw.println(version == Long.MAX_VALUE ? "Trying latest version" : ("Trying version " + version));
                 pw.flush();
+                version = rollback(fileName, version, new PrintWriter(ignore));
+                try {
+                    String error = info(fileName + ".temp", new PrintWriter(ignore));
+                    if (error == null) {
+                        FilePath.get(fileName).moveTo(FilePath.get(fileName + ".back"), true);
+                        FilePath.get(fileName + ".temp").moveTo(FilePath.get(fileName), true);
+                        pw.println("Success");
+                        repaired = true;
+                        break;
+                    }
+                    pw.println("    ... failed: " + error);
+                } catch (Exception e) {
+                    pw.println("Fail: " + e.getMessage());
+                    pw.flush();
+                }
+                version--;
             }
-            version--;
+            pw.flush();
+        } catch (IOException e) {
+            throw new NitriteIOException("Failed to repair database", e);
         }
-        pw.flush();
         return repaired;
     }
 
@@ -130,92 +135,93 @@ public class Recovery {
      */
     private static long rollback(String fileName, long targetVersion, Writer writer) {
         long newestVersion = -1;
-        PrintWriter pw = new PrintWriter(writer, true);
-        if (!FilePath.get(fileName).exists()) {
-            pw.println("File not found: " + fileName);
+        try(PrintWriter pw = new PrintWriter(writer, true)) {
+            if (!FilePath.get(fileName).exists()) {
+                pw.println("File not found: " + fileName);
+                return newestVersion;
+            }
+            FileChannel file = null;
+            FileChannel target = null;
+            int blockSize = BLOCK_SIZE;
+            try {
+                file = FilePath.get(fileName).open("r");
+                FilePath.get(fileName + ".temp").delete();
+                target = FilePath.get(fileName + ".temp").open("rw");
+                long fileSize = file.size();
+                ByteBuffer block = ByteBuffer.allocate(4096);
+                Chunk newestChunk = null;
+                for (long pos = 0; pos < fileSize; ) {
+                    block.rewind();
+                    DataUtils.readFully(file, pos, block);
+                    block.rewind();
+                    int headerType = block.get();
+                    if (headerType == 'H') {
+                        block.rewind();
+                        target.write(block, pos);
+                        pos += blockSize;
+                        continue;
+                    }
+                    if (headerType != 'c') {
+                        pos += blockSize;
+                        continue;
+                    }
+                    Chunk c;
+                    try {
+                        c = readChunkHeader(block, pos);
+                    } catch (IllegalStateException e) {
+                        pos += blockSize;
+                        continue;
+                    }
+                    if (c.len <= 0) {
+                        // not a chunk
+                        pos += blockSize;
+                        continue;
+                    }
+                    int length = c.len * BLOCK_SIZE;
+                    ByteBuffer chunk = ByteBuffer.allocate(length);
+                    DataUtils.readFully(file, pos, chunk);
+                    if (c.version > targetVersion) {
+                        // newer than the requested version
+                        pos += length;
+                        continue;
+                    }
+                    chunk.rewind();
+                    target.write(chunk, pos);
+                    if (newestChunk == null || c.version > newestChunk.version) {
+                        newestChunk = c;
+                        newestVersion = c.version;
+                    }
+                    pos += length;
+                }
+                if (newestChunk != null) {
+                    int length = newestChunk.len * BLOCK_SIZE;
+                    ByteBuffer chunk = ByteBuffer.allocate(length);
+                    DataUtils.readFully(file, newestChunk.block * BLOCK_SIZE, chunk);
+                    chunk.rewind();
+                    target.write(chunk, fileSize);
+                }
+            } catch (IOException e) {
+                pw.println("ERROR: " + e);
+                e.printStackTrace(pw);
+            } finally {
+                if (file != null) {
+                    try {
+                        file.close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
+                if (target != null) {
+                    try {
+                        target.close();
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
+            }
+            pw.flush();
             return newestVersion;
         }
-        FileChannel file = null;
-        FileChannel target = null;
-        int blockSize = BLOCK_SIZE;
-        try {
-            file = FilePath.get(fileName).open("r");
-            FilePath.get(fileName + ".temp").delete();
-            target = FilePath.get(fileName + ".temp").open("rw");
-            long fileSize = file.size();
-            ByteBuffer block = ByteBuffer.allocate(4096);
-            Chunk newestChunk = null;
-            for (long pos = 0; pos < fileSize; ) {
-                block.rewind();
-                DataUtils.readFully(file, pos, block);
-                block.rewind();
-                int headerType = block.get();
-                if (headerType == 'H') {
-                    block.rewind();
-                    target.write(block, pos);
-                    pos += blockSize;
-                    continue;
-                }
-                if (headerType != 'c') {
-                    pos += blockSize;
-                    continue;
-                }
-                Chunk c;
-                try {
-                    c = readChunkHeader(block, pos);
-                } catch (IllegalStateException e) {
-                    pos += blockSize;
-                    continue;
-                }
-                if (c.len <= 0) {
-                    // not a chunk
-                    pos += blockSize;
-                    continue;
-                }
-                int length = c.len * BLOCK_SIZE;
-                ByteBuffer chunk = ByteBuffer.allocate(length);
-                DataUtils.readFully(file, pos, chunk);
-                if (c.version > targetVersion) {
-                    // newer than the requested version
-                    pos += length;
-                    continue;
-                }
-                chunk.rewind();
-                target.write(chunk, pos);
-                if (newestChunk == null || c.version > newestChunk.version) {
-                    newestChunk = c;
-                    newestVersion = c.version;
-                }
-                pos += length;
-            }
-            if (newestChunk != null) {
-                int length = newestChunk.len * BLOCK_SIZE;
-                ByteBuffer chunk = ByteBuffer.allocate(length);
-                DataUtils.readFully(file, newestChunk.block * BLOCK_SIZE, chunk);
-                chunk.rewind();
-                target.write(chunk, fileSize);
-            }
-        } catch (IOException e) {
-            pw.println("ERROR: " + e);
-            e.printStackTrace(pw);
-        } finally {
-            if (file != null) {
-                try {
-                    file.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-            if (target != null) {
-                try {
-                    target.close();
-                } catch (IOException e) {
-                    // ignore
-                }
-            }
-        }
-        pw.flush();
-        return newestVersion;
     }
 
     /**

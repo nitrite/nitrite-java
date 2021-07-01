@@ -288,6 +288,7 @@ public class MigrationManager {
             }
 
             command.execute(database);
+            command.close();
         }
     }
 }

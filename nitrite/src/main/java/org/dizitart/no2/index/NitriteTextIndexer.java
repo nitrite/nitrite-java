@@ -97,6 +97,11 @@ public class NitriteTextIndexer implements NitriteIndexer {
         return textIndex.findNitriteIds(findPlan);
     }
 
+    @Override
+    public void close() {
+        indexRegistry.clear();
+    }
+
     private TextIndex findTextIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
         if (indexRegistry.containsKey(indexDescriptor)) {
             return indexRegistry.get(indexDescriptor);

@@ -12,12 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Anindya Chatterjee
  * @since 4.0
  */
-class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
+class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     private final NitriteStore<T> primaryStore;
     private final Map<String, NitriteMap<?, ?>> mapRegistry;
     private final Map<String, NitriteRTree<?, ?>> rTreeRegistry;
 
-    public TransactionalStore(NitriteStore<T> store) {
+    public TransactionStore(NitriteStore<T> store) {
         this.primaryStore = store;
         this.mapRegistry = new ConcurrentHashMap<>();
         this.rTreeRegistry = new ConcurrentHashMap<>();
@@ -49,7 +49,7 @@ class TransactionalStore<T extends StoreConfig> extends AbstractNitriteStore<T> 
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         for (NitriteMap<?, ?> nitriteMap : mapRegistry.values()) {
             nitriteMap.close();
         }

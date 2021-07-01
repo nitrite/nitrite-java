@@ -29,18 +29,21 @@ public class Rename extends BaseCommand implements Command {
         initialize(nitrite, oldName);
 
         NitriteMap<NitriteId, Document> newMap = nitriteStore.openMap(newName, NitriteId.class, Document.class);
-        CollectionOperations newOperations = new CollectionOperations(newName, newMap, nitrite.getConfig(), null);
+        try(CollectionOperations newOperations
+                = new CollectionOperations(newName, newMap, nitrite.getConfig(), null)) {
 
-        for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
-            newMap.put(entry.getFirst(), entry.getSecond());
-        }
+            for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
+                newMap.put(entry.getFirst(), entry.getSecond());
+            }
 
-        IndexManager indexManager = new IndexManager(oldName, nitrite.getConfig());
-        Collection<IndexDescriptor> indexEntries = indexManager.getIndexDescriptors();
-        for (IndexDescriptor indexDescriptor : indexEntries) {
-            Fields field = indexDescriptor.getIndexFields();
-            String indexType = indexDescriptor.getIndexType();
-            newOperations.createIndex(field, indexType);
+            try (IndexManager indexManager = new IndexManager(oldName, nitrite.getConfig())) {
+                Collection<IndexDescriptor> indexEntries = indexManager.getIndexDescriptors();
+                for (IndexDescriptor indexDescriptor : indexEntries) {
+                    Fields field = indexDescriptor.getIndexFields();
+                    String indexType = indexDescriptor.getIndexType();
+                    newOperations.createIndex(field, indexType);
+                }
+            }
         }
 
         operations.dropCollection();

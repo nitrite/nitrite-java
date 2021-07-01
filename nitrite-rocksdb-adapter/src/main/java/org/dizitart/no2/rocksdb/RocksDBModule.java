@@ -11,6 +11,7 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.Iterables.setOf;
 
 public class RocksDBModule implements StoreModule {
+    private NitriteStore<?> nitriteStore;
 
     @Setter(AccessLevel.PACKAGE)
     private RocksDBConfig storeConfig;
@@ -30,8 +31,11 @@ public class RocksDBModule implements StoreModule {
     }
 
     public NitriteStore<?> getStore() {
-        RocksDBStore store = new RocksDBStore();
-        store.setStoreConfig(storeConfig);
-        return store;
+        if (nitriteStore == null) {
+            RocksDBStore store = new RocksDBStore();
+            store.setStoreConfig(storeConfig);
+            nitriteStore = store;
+        }
+        return nitriteStore;
     }
 }

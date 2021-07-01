@@ -41,11 +41,11 @@ import java.util.Map;
  */
 @Slf4j
 @Getter
-public class PluginManager {
+public class PluginManager implements AutoCloseable {
     private final Map<String, NitriteIndexer> indexerMap;
+    private final NitriteConfig nitriteConfig;
     private NitriteMapper nitriteMapper;
     private NitriteStore<?> nitriteStore;
-    private final NitriteConfig nitriteConfig;
 
     /**
      * Instantiates a new {@link PluginManager}.
@@ -104,6 +104,21 @@ public class PluginManager {
         }
     }
 
+    @Override
+    public void close() {
+        for (NitriteIndexer nitriteIndexer : indexerMap.values()) {
+            nitriteIndexer.close();
+        }
+
+        if (nitriteMapper != null) {
+            nitriteMapper.close();
+        }
+
+        if (nitriteStore != null) {
+            nitriteStore.close();
+        }
+    }
+
     private void loadPlugin(NitritePlugin plugin) {
         populatePlugins(plugin);
     }
@@ -114,60 +129,67 @@ public class PluginManager {
 
     private void populatePlugins(NitritePlugin plugin) {
         if (plugin != null) {
-            loadIfIndexer(plugin);
-            loadIfNitriteMapper(plugin);
-            loadIfNitriteStore(plugin);
+            if (plugin instanceof NitriteIndexer) {
+                loadIndexer((NitriteIndexer) plugin);
+            } else if (plugin instanceof NitriteMapper) {
+                loadNitriteMapper((NitriteMapper) plugin);
+            } else if (plugin instanceof NitriteStore) {
+                loadNitriteStore((NitriteStore<?>) plugin);
+            } else {
+                plugin.close();
+                throw new PluginException("invalid plugin loaded " + plugin);
+            }
         }
     }
 
-    private void loadIfNitriteStore(NitritePlugin plugin) {
-        if (plugin instanceof NitriteStore) {
-            if (nitriteStore != null) {
-                throw new PluginException("multiple NitriteStore found");
-            }
-            this.nitriteStore = (NitriteStore<?>) plugin;
+    private void loadNitriteStore(NitriteStore<?> nitriteStore) {
+        if (this.nitriteStore != null) {
+            nitriteStore.close();
+            throw new PluginException("multiple NitriteStore found");
         }
+        this.nitriteStore = nitriteStore;
     }
 
-    private void loadIfNitriteMapper(NitritePlugin plugin) {
-        if (plugin instanceof NitriteMapper) {
-            if (nitriteMapper != null) {
-                throw new PluginException("multiple NitriteMapper found");
-            }
-            this.nitriteMapper = (NitriteMapper) plugin;
+    private void loadNitriteMapper(NitriteMapper nitriteMapper) {
+        if (this.nitriteMapper != null) {
+            nitriteMapper.close();
+            throw new PluginException("multiple NitriteMapper found");
         }
+        this.nitriteMapper = nitriteMapper;
     }
 
-    private synchronized void loadIfIndexer(NitritePlugin plugin) {
-        if (plugin instanceof NitriteIndexer) {
-            NitriteIndexer nitriteIndexer = (NitriteIndexer) plugin;
-            if (indexerMap.containsKey(nitriteIndexer.getIndexType())) {
-                throw new PluginException("multiple Indexer found for type "
-                    + nitriteIndexer.getIndexType());
-            }
-            this.indexerMap.put(nitriteIndexer.getIndexType(), nitriteIndexer);
+    private synchronized void loadIndexer(NitriteIndexer nitriteIndexer) {
+        if (indexerMap.containsKey(nitriteIndexer.getIndexType())) {
+            nitriteIndexer.close();
+            throw new PluginException("multiple Indexer found for type "
+                + nitriteIndexer.getIndexType());
         }
+        this.indexerMap.put(nitriteIndexer.getIndexType(), nitriteIndexer);
     }
 
     protected void loadInternalPlugins() {
         if (!indexerMap.containsKey(IndexType.UNIQUE)) {
             log.debug("Loading default unique indexer");
-            loadPlugin(new UniqueIndexer());
+            NitritePlugin plugin = new UniqueIndexer();
+            loadPlugin(plugin);
         }
 
         if (!indexerMap.containsKey(IndexType.NON_UNIQUE)) {
             log.debug("Loading default non-unique indexer");
-            loadPlugin(new NonUniqueIndexer());
+            NitritePlugin plugin = new NonUniqueIndexer();
+            loadPlugin(plugin);
         }
 
         if (!indexerMap.containsKey(IndexType.FULL_TEXT)) {
             log.debug("Loading nitrite text indexer");
-            loadPlugin(new NitriteTextIndexer());
+            NitritePlugin plugin = new NitriteTextIndexer();
+            loadPlugin(plugin);
         }
 
         if (nitriteMapper == null) {
             log.debug("Loading mappable mapper");
-            loadPlugin(new MappableMapper());
+            NitritePlugin plugin = new MappableMapper();
+            loadPlugin(plugin);
         }
 
         if (nitriteStore == null) {

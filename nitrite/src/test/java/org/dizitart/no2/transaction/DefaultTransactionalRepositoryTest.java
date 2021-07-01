@@ -243,8 +243,8 @@ public class DefaultTransactionalRepositoryTest {
     public void testGetStore() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        doReturn(new TransactionalStore<>(new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))))).when(defaultTransactionalRepository).getStore();
+        doReturn(new TransactionStore<>(new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(null))))).when(defaultTransactionalRepository).getStore();
         defaultTransactionalRepository.getStore();
         verify(defaultTransactionalRepository).getStore();
     }

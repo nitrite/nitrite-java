@@ -90,12 +90,14 @@ public class CollectionFactory {
             // ignore repository request
             if (store.getRepositoryRegistry().contains(name)) {
                 nitriteMap.close();
+                collection.close();
                 throw new ValidationException("a repository with same name already exists");
             }
 
             for (Set<String> set : store.getKeyedRepositoryRegistry().values()) {
                 if (set.contains(name)) {
                     nitriteMap.close();
+                    collection.close();
                     throw new ValidationException("a keyed repository with same name already exists");
                 }
             }

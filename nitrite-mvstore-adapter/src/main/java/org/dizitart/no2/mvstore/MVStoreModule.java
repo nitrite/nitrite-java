@@ -34,6 +34,7 @@ import static org.dizitart.no2.common.util.Iterables.setOf;
  * @author Anindya Chatterjee
  */
 public class MVStoreModule implements StoreModule {
+    private NitriteStore<?> nitriteStore;
 
     @Setter(AccessLevel.PACKAGE)
     private MVStoreConfig storeConfig;
@@ -45,7 +46,7 @@ public class MVStoreModule implements StoreModule {
 
     @Override
     public Set<NitritePlugin> plugins() {
-        return setOf(getStore());
+        return setOf(nitriteStore);
     }
 
     public static MVStoreModuleBuilder withConfig() {
@@ -53,8 +54,11 @@ public class MVStoreModule implements StoreModule {
     }
 
     public NitriteStore<?> getStore() {
-        NitriteMVStore store = new NitriteMVStore();
-        store.setStoreConfig(storeConfig);
-        return store;
+        if (nitriteStore == null) {
+            NitriteMVStore store = new NitriteMVStore();
+            store.setStoreConfig(storeConfig);
+            nitriteStore = store;
+        }
+        return nitriteStore;
     }
 }

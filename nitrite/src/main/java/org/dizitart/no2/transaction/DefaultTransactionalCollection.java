@@ -1,6 +1,8 @@
 package org.dizitart.no2.transaction;
 
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.*;
@@ -12,12 +14,12 @@ import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.common.event.NitriteEventBus;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
@@ -39,7 +41,7 @@ import static org.dizitart.no2.index.IndexOptions.indexOptions;
  * @author Anindya Chatterjee
  * @since 4.0
  */
-@Data
+@Getter @Setter
 class DefaultTransactionalCollection implements NitriteCollection {
     private final NitriteCollection primary;
     private final TransactionContext transactionContext;
@@ -48,12 +50,21 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private String collectionName;
     private NitriteMap<NitriteId, Document> nitriteMap;
     private NitriteStore<?> nitriteStore;
-    private Lock writeLock;
-    private Lock readLock;
     private CollectionOperations collectionOperations;
-    private EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
     private volatile boolean isDropped;
     private volatile boolean isClosed;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private Lock writeLock;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private Lock readLock;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
 
     public DefaultTransactionalCollection(NitriteCollection primary,
                                           TransactionContext transactionContext,
@@ -67,7 +78,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public WriteResult insert(Document[] documents) {
-        checkOpened();
         notNull(documents, "a null document cannot be inserted");
         containsNull(documents, "a null document cannot be inserted");
 
@@ -79,6 +89,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         WriteResult result;
         try {
             writeLock.lock();
+            checkOpened();
             result = collectionOperations.insert(documents);
         } finally {
             writeLock.unlock();
@@ -99,13 +110,13 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public WriteResult update(Filter filter, Document update, UpdateOptions updateOptions) {
-        checkOpened();
         notNull(update, "a null document cannot be used for update");
         notNull(updateOptions, "updateOptions cannot be null");
 
         WriteResult result;
         try {
             writeLock.lock();
+            checkOpened();
             result = collectionOperations.update(filter, update, updateOptions);
         } finally {
             writeLock.unlock();
@@ -140,8 +151,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public WriteResult update(Document document, boolean insertIfAbsent) {
-        checkOpened();
-
         notNull(document, "a null document cannot be used for update");
 
         if (insertIfAbsent) {
@@ -157,13 +166,13 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public WriteResult remove(Document document) {
-        checkOpened();
         notNull(document, "a null document cannot be removed");
 
         WriteResult result;
         if (document.hasId()) {
             try {
                 writeLock.lock();
+                checkOpened();
                 result = collectionOperations.remove(document);
             } finally {
                 writeLock.unlock();
@@ -192,7 +201,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public WriteResult remove(Filter filter, boolean justOne) {
-        checkOpened();
         if ((filter == null || filter == Filter.ALL) && justOne) {
             throw new InvalidOperationException("remove all cannot be combined with just once");
         }
@@ -200,6 +208,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         WriteResult result;
         try {
             writeLock.lock();
+            checkOpened();
             result = collectionOperations.remove(filter, justOne);
         } finally {
             writeLock.unlock();
@@ -233,10 +242,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public DocumentCursor find(Filter filter, FindOptions findOptions) {
-        checkOpened();
-
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.find(filter, findOptions);
         } finally {
             readLock.unlock();
@@ -245,11 +253,11 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public Document getById(NitriteId nitriteId) {
-        checkOpened();
         notNull(nitriteId, "nitriteId cannot be null");
 
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.getById(nitriteId);
         } finally {
             readLock.unlock();
@@ -263,9 +271,14 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void addProcessor(Processor processor) {
-        checkOpened();
         notNull(processor, "a null processor cannot be added");
-        collectionOperations.addProcessor(processor);
+        try {
+            writeLock.lock();
+            checkOpened();
+            collectionOperations.addProcessor(processor);
+        } finally {
+            writeLock.unlock();
+        }
 
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.AddProcessor);
@@ -276,9 +289,14 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void removeProcessor(Processor processor) {
-        checkOpened();
         notNull(processor, "a null processor cannot be removed");
-        collectionOperations.addProcessor(processor);
+        try {
+            writeLock.lock();
+            checkOpened();
+            collectionOperations.addProcessor(processor);
+        } finally {
+            writeLock.unlock();
+        }
 
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.RemoveProcessor);
@@ -289,13 +307,13 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void createIndex(IndexOptions indexOptions, String... fieldNames) {
-        checkOpened();
         notNull(fieldNames, "fieldNames cannot be null");
 
         // by default async is false while creating index
         try {
             Fields fields = Fields.withNames(fieldNames);
             writeLock.lock();
+            checkOpened();
             if (indexOptions == null) {
                 collectionOperations.createIndex(fields, IndexType.UNIQUE);
             } else {
@@ -314,13 +332,13 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void rebuildIndex(String... fieldNames) {
-        checkOpened();
         notNull(fieldNames, "fieldNames cannot be null");
 
         IndexDescriptor indexDescriptor;
         try {
             Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
+            checkOpened();
             indexDescriptor = collectionOperations.findIndex(fields);
         } finally {
             readLock.unlock();
@@ -331,6 +349,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
             try {
                 writeLock.lock();
+                checkOpened();
                 collectionOperations.rebuildIndex(indexDescriptor);
             } finally {
                 writeLock.unlock();
@@ -348,10 +367,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public Collection<IndexDescriptor> listIndices() {
-        checkOpened();
-
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.listIndexes();
         } finally {
             readLock.unlock();
@@ -360,12 +378,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public boolean hasIndex(String... fieldNames) {
-        checkOpened();
         notNull(fieldNames, "fieldNames cannot be null");
 
         try {
             Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
+            checkOpened();
             return collectionOperations.hasIndex(fields);
         } finally {
             readLock.unlock();
@@ -374,12 +392,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public boolean isIndexing(String... fieldNames) {
-        checkOpened();
         notNull(fieldNames, "fieldNames cannot be null");
 
         try {
             Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
+            checkOpened();
             return collectionOperations.isIndexing(fields);
         } finally {
             readLock.unlock();
@@ -388,12 +406,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void dropIndex(String... fieldNames) {
-        checkOpened();
         notNull(fieldNames, "fieldNames cannot be null");
 
         Fields fields = Fields.withNames(fieldNames);
         try {
             writeLock.lock();
+            checkOpened();
             collectionOperations.dropIndex(fields);
         } finally {
             writeLock.unlock();
@@ -422,10 +440,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void dropAllIndices() {
-        checkOpened();
-
         try {
             writeLock.lock();
+            checkOpened();
             collectionOperations.dropAllIndices();
         } finally {
             writeLock.unlock();
@@ -450,9 +467,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void clear() {
-        checkOpened();
         try {
             writeLock.lock();
+            checkOpened();
             nitriteMap.clear();
         } finally {
             writeLock.unlock();
@@ -476,10 +493,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void drop() {
-        checkOpened();
-
         try {
             writeLock.lock();
+            checkOpened();
             collectionOperations.dropCollection();
         } finally {
             writeLock.unlock();
@@ -529,7 +545,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (collectionOperations != null) {
             collectionOperations.close();
         }
@@ -549,28 +565,35 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void subscribe(CollectionEventListener listener) {
-        checkOpened();
         notNull(listener, "listener cannot be null");
-
-        eventBus.register(listener);
+        try {
+            writeLock.lock();
+            checkOpened();
+            eventBus.register(listener);
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
     public void unsubscribe(CollectionEventListener listener) {
-        checkOpened();
         notNull(listener, "listener cannot be null");
-
-        if (eventBus != null) {
-            eventBus.deregister(listener);
+        try {
+            writeLock.lock();
+            checkOpened();
+            if (eventBus != null) {
+                eventBus.deregister(listener);
+            }
+        } finally {
+            writeLock.unlock();
         }
     }
 
     @Override
     public Attributes getAttributes() {
-        checkOpened();
-
         try {
             readLock.lock();
+            checkOpened();
             return collectionOperations.getAttributes();
         } finally {
             readLock.unlock();
@@ -579,11 +602,11 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void setAttributes(Attributes attributes) {
-        checkOpened();
         notNull(attributes, "attributes cannot be null");
 
         try {
             writeLock.lock();
+            checkOpened();
             collectionOperations.setAttributes(attributes);
         } finally {
             writeLock.unlock();

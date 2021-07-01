@@ -67,7 +67,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         try {
             if (!closed.get()) {
                 // close nitrite maps

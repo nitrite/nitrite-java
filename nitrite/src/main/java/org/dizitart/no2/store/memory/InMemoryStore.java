@@ -59,7 +59,7 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         closed = true;
 
         for (NitriteMap<?, ?> map : nitriteMapRegistry.values()) {

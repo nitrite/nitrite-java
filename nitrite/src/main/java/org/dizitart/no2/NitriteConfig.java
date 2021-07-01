@@ -43,7 +43,7 @@ import java.util.TreeMap;
  */
 @Slf4j
 @ToString
-public class NitriteConfig {
+public class NitriteConfig implements AutoCloseable {
     /**
      * Indicates if this {@link NitriteConfig} is already configured.
      */
@@ -190,6 +190,13 @@ public class NitriteConfig {
      */
     public NitriteStore<?> getNitriteStore() {
         return pluginManager.getNitriteStore();
+    }
+
+    @Override
+    public void close() {
+        if (pluginManager != null) {
+            pluginManager.close();
+        }
     }
 
     /**

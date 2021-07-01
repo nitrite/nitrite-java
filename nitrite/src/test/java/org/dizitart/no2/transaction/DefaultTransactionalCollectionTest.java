@@ -27,37 +27,37 @@ import static org.mockito.Mockito.*;
 public class DefaultTransactionalCollectionTest {
     @Test
     public void testConstructor() {
-        TransactionalConfig transactionalConfig = mock(TransactionalConfig.class);
-        when(transactionalConfig.getNitriteStore()).thenThrow(new NotIdentifiableException("An error occurred"));
+        TransactionConfig transactionConfig = mock(TransactionConfig.class);
+        when(transactionConfig.getNitriteStore()).thenThrow(new NotIdentifiableException("An error occurred"));
 
         TransactionContext transactionContext = new TransactionContext();
-        transactionContext.setConfig(transactionalConfig);
+        transactionContext.setConfig(transactionConfig);
         assertThrows(NotIdentifiableException.class,
             () -> new DefaultTransactionalCollection(null, transactionContext, null));
-        verify(transactionalConfig).getNitriteStore();
+        verify(transactionConfig).getNitriteStore();
     }
 
     @Test
     public void testConstructor2() {
-        TransactionalConfig transactionalConfig = mock(TransactionalConfig.class);
-        TransactionalStore<?> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(new InMemoryStore())));
+        TransactionConfig transactionConfig = mock(TransactionConfig.class);
+        TransactionStore<?> transactionStore = new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(new InMemoryStore())));
 
-        doReturn(transactionalStore).when(transactionalConfig).getNitriteStore();
+        doReturn(transactionStore).when(transactionConfig).getNitriteStore();
         TransactionContext transactionContext = new TransactionContext();
-        transactionContext.setConfig(transactionalConfig);
+        transactionContext.setConfig(transactionConfig);
         DefaultTransactionalCollection actualDefaultTransactionalCollection = new DefaultTransactionalCollection(null,
             transactionContext, null);
         assertNull(actualDefaultTransactionalCollection.getCollectionName());
         assertFalse(actualDefaultTransactionalCollection.isDropped());
         TransactionContext transactionContext1 = actualDefaultTransactionalCollection.getTransactionContext();
         assertSame(transactionContext, transactionContext1);
-        assertSame(transactionalStore, actualDefaultTransactionalCollection.getStore());
+        assertSame(transactionStore, actualDefaultTransactionalCollection.getStore());
         assertNull(actualDefaultTransactionalCollection.getPrimary());
         assertNull(actualDefaultTransactionalCollection.getNitrite());
         assertNull(actualDefaultTransactionalCollection.getNitriteMap());
         assertNull(actualDefaultTransactionalCollection.getCollectionOperations().getAttributes());
-        verify(transactionalConfig, times(2)).getNitriteStore();
+        verify(transactionConfig, times(2)).getNitriteStore();
     }
 }
 

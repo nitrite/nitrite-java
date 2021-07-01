@@ -76,7 +76,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (getStoreConfig().autoCompact()) {
             compact();
         }

@@ -32,7 +32,7 @@ import java.util.Set;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin, AutoCloseable {
+public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin {
 
     /**
      * Opens or creates this nitrite store.

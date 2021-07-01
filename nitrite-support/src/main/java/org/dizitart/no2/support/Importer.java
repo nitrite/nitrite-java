@@ -90,8 +90,10 @@ public class Importer {
      *
      * @param stream the stream
      */
-    public void importFrom(InputStream stream) {
-        importFrom(new InputStreamReader(stream));
+    public void importFrom(InputStream stream) throws IOException {
+        try(InputStreamReader reader = new InputStreamReader(stream)) {
+            importFrom(reader);
+        }
     }
 
     /**

@@ -87,6 +87,7 @@ public interface JournalAware {
 
     default boolean shouldRetry(Receipt receipt) {
         if (receipt == null) return false;
+        if (receipt.getAdded() == null) return false;
         if (receipt.getAdded() == null && receipt.getRemoved() == null) return false;
         return !receipt.getAdded().isEmpty() || !receipt.getRemoved().isEmpty();
     }
