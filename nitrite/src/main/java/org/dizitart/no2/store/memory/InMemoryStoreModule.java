@@ -17,7 +17,6 @@ import static org.dizitart.no2.common.util.Iterables.setOf;
  * @since 4.0
  */
 public class InMemoryStoreModule implements StoreModule {
-    private NitriteStore<?> nitriteStore;
 
     @Setter(AccessLevel.PACKAGE)
     private InMemoryConfig storeConfig;
@@ -40,16 +39,13 @@ public class InMemoryStoreModule implements StoreModule {
 
     @Override
     public NitriteStore<?> getStore() {
-        if (nitriteStore == null) {
-            InMemoryStore store = new InMemoryStore();
-            store.setStoreConfig(storeConfig);
-            nitriteStore = store;
-        }
-        return nitriteStore;
+        InMemoryStore store = new InMemoryStore();
+        store.setStoreConfig(storeConfig);
+        return store;
     }
 
     @Override
     public Set<NitritePlugin> plugins() {
-        return setOf(nitriteStore);
+        return setOf(getStore());
     }
 }

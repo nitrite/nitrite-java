@@ -73,6 +73,7 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
         nitriteMapRegistry.clear();
         nitriteRTreeMapRegistry.clear();
         alert(StoreEvents.Closed);
+        eventBus.close();
     }
 
     @Override

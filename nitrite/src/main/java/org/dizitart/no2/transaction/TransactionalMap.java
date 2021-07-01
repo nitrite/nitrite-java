@@ -8,6 +8,7 @@ import org.dizitart.no2.store.memory.InMemoryMap;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepCopy;
 
@@ -22,6 +23,9 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     private final String mapName;
     private final NitriteStore<?> store;
     private final Set<K> tombstones;
+    private final AtomicBoolean droppedFlag;
+    private final AtomicBoolean closedFlag;
+
     private boolean cleared = false;
 
     public TransactionalMap(String mapName, NitriteMap<K, V> primary, NitriteStore<?> store) {
@@ -30,6 +34,8 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         this.store = store;
         this.backingMap = new InMemoryMap<>(mapName, store);
         this.tombstones = new HashSet<>();
+        this.closedFlag = new AtomicBoolean(false);
+        this.droppedFlag = new AtomicBoolean(false);
     }
 
     @Override
@@ -277,14 +283,23 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public void drop() {
-        cleared = true;
-        close();
+        if (!droppedFlag.get()) {
+            droppedFlag.compareAndSet(false, true);
+            closedFlag.compareAndSet(false, true);
+
+            cleared = true;
+            backingMap.clear();
+            tombstones.clear();
+        }
     }
 
     @Override
     public void close() {
-        backingMap.clear();
-        tombstones.clear();
+        if (!closedFlag.get() && !droppedFlag.get()) {
+            closedFlag.compareAndSet(false, true);
+            backingMap.clear();
+            tombstones.clear();
+        }
     }
 
     private RecordStream<Pair<K, V>> getStream(RecordStream<Pair<K, V>> primaryStream,

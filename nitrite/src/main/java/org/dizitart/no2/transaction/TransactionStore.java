@@ -60,6 +60,7 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
 
         mapRegistry.clear();
         rTreeRegistry.clear();
+        eventBus.close();
     }
 
     @Override

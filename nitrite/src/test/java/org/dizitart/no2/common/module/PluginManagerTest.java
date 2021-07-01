@@ -18,6 +18,7 @@
 package org.dizitart.no2.common.module;
 
 import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.exceptions.PluginException;
 import org.dizitart.no2.store.NitriteStore;
 import org.junit.Test;
 
@@ -42,7 +43,7 @@ public class PluginManagerTest {
         verify(nitriteModule, times(2)).plugins();
     }
 
-    @Test
+    @Test(expected = PluginException.class)
     public void testLoadModule2() {
         PluginManager pluginManager = new PluginManager(new NitriteConfig());
 

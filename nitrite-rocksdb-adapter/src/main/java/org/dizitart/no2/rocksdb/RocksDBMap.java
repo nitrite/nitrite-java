@@ -15,6 +15,7 @@ import org.rocksdb.RocksIterator;
 import org.rocksdb.util.BytewiseComparator;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
@@ -24,7 +25,10 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     private final String mapName;
     private final RocksDBReference reference;
     private final RocksDBStore store;
+
     private AtomicLong size;
+    private AtomicBoolean droppedFlag;
+    private AtomicBoolean closedFlag;
 
     private RocksDB rocksDB;
     private ObjectFormatter objectFormatter;
@@ -331,20 +335,30 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public void drop() {
-        store.removeMap(getName());
-        close();
-    }
+        if (!droppedFlag.get()) {
+            droppedFlag.compareAndSet(false, true);
+            closedFlag.compareAndSet(false, true);
 
-    private void initialize() {
-        this.size = new AtomicLong(0); // just initialized
-        this.objectFormatter = store.getStoreConfig().objectFormatter();
-        this.columnFamilyHandle = reference.getOrCreateColumnFamily(getName());
-        this.rocksDB = reference.getRocksDB();
-        this.bytewiseComparator = this.reference.getDbComparator();
+            store.closeMap(getName());
+            store.removeMap(getName());
+        }
     }
 
     @Override
     public void close() {
-        store.closeMap(getName());
+        if (!closedFlag.get() && !droppedFlag.get()) {
+            closedFlag.compareAndSet(false, true);
+            store.closeMap(getName());
+        }
+    }
+
+    private void initialize() {
+        this.size = new AtomicLong(0); // just initialized
+        this.closedFlag = new AtomicBoolean(false);
+        this.droppedFlag = new AtomicBoolean(false);
+        this.objectFormatter = store.getStoreConfig().objectFormatter();
+        this.columnFamilyHandle = reference.getOrCreateColumnFamily(getName());
+        this.rocksDB = reference.getRocksDB();
+        this.bytewiseComparator = this.reference.getDbComparator();
     }
 }
