@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.mvstore;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.h2.mvstore.Chunk;
 import org.h2.mvstore.DataUtils;
@@ -46,6 +47,7 @@ import static org.h2.mvstore.Chunk.fromString;
  * @author Anindya Chatterjee
  * @since 1.0
  */
+@Slf4j
 public class Recovery {
     /**
      * The block size (physical sector size) of the disk. The store header is
@@ -322,8 +324,7 @@ public class Recovery {
             }
             pw.printf("\n");
         } catch (Exception e) {
-            pw.println("ERROR: " + e);
-            e.printStackTrace(pw);
+            log.error("Error while reading summary information", e);
             return e.getMessage();
         }
         pw.flush();

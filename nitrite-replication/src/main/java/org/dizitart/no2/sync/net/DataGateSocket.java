@@ -221,7 +221,8 @@ public class DataGateSocket {
                     }
                 };
 
-                final SSLContext sslContext = SSLContext.getInstance("SSL");
+                // SSLContext needs to be compatible with TLS 1.2
+                final SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
 
                 final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
