@@ -127,7 +127,7 @@ public class DefaultTransactionalRepositoryTest {
             DefaultTransactionalRepository.class);
         when(defaultTransactionalRepository.update(any(), anyBoolean())).thenReturn(null);
         defaultTransactionalRepository.update("Element", true);
-        verify(defaultTransactionalRepository).update(any(), anyBoolean());
+        verify(defaultTransactionalRepository).update(any(Object.class), anyBoolean());
     }
 
     @Test
