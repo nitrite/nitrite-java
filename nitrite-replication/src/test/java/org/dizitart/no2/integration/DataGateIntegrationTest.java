@@ -62,8 +62,8 @@ public class DataGateIntegrationTest {
             System.out.println("Token - " + jwt);
             Replica replica = Replica.builder()
                 .of(collection)
-                .remote("wss://127.0.0.1:3030/ws/datagate/anidotnet@gmail.com/datagateIntegration")
-                .jwtAuth("anidotnet@gmail.com", jwt)
+                .remote("wss://127.0.0.1:3030/ws/datagate/abcd@gmail.com/datagateIntegration")
+                .jwtAuth("abcd@gmail.com", jwt)
                 .acceptAllCertificates(true)
                 .create();
 
@@ -98,7 +98,7 @@ public class DataGateIntegrationTest {
     private static void createUser() throws Exception {
         OkHttpClient client = getUnsafeOkHttpClient();
         Request request = new Request.Builder()
-            .url("https://127.0.0.1:3030/exists?email=anidotnet@gmail.com")
+            .url("https://127.0.0.1:3030/exists?email=abcd@gmail.com")
             .build();
 
         Call call = client.newCall(request);
@@ -113,7 +113,7 @@ public class DataGateIntegrationTest {
         }
 
         String json = "{" +
-            "\"email\":\"anidotnet@gmail.com\"," +
+            "\"email\":\"abcd@gmail.com\"," +
             "\"password\":\"chang3me\"," +
             "\"firstName\":\"Anindya\"," +
             "\"lastName\":\"Chatterjee\"," +
@@ -137,7 +137,7 @@ public class DataGateIntegrationTest {
     private static String getToken() throws Exception {
         OkHttpClient client = getUnsafeOkHttpClient();
         String json = "{" +
-            "\"email\":\"anidotnet@gmail.com\"," +
+            "\"email\":\"abcd@gmail.com\"," +
             "\"password\":\"chang3me\"}";
         RequestBody body = RequestBody.create(
             MediaType.parse("application/json"), json);

@@ -111,6 +111,7 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
         if (nitriteMapRegistry.containsKey(mapName)) {
             nitriteMapRegistry.get(mapName).clear();
             nitriteMapRegistry.remove(mapName);
+            getCatalog().remove(mapName);
         }
     }
 

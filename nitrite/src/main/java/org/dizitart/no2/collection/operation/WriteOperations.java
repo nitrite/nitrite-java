@@ -17,20 +17,23 @@
 package org.dizitart.no2.collection.operation;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.*;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
+import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.store.NitriteMap;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.dizitart.no2.common.Constants.*;
 
@@ -58,7 +61,7 @@ class WriteOperations {
     }
 
     WriteResult insert(Document... documents) {
-        Set<NitriteId> nitriteIds = new HashSet<>(documents.length);
+        List<NitriteId> nitriteIds = new ArrayList<>(documents.length);
         log.debug("Total {} document(s) to be inserted in {}", documents.length, nitriteMap.getName());
 
         for (Document document : documents) {

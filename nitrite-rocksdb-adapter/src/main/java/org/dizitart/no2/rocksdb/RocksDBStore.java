@@ -126,6 +126,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     @Override
     public void removeMap(String mapName) {
         reference.dropColumnFamily(mapName);
+        getCatalog().remove(mapName);
         nitriteMapRegistry.remove(mapName);
     }
 

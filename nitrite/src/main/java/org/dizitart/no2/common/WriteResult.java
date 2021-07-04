@@ -18,6 +18,7 @@ package org.dizitart.no2.common;
 
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.util.Iterables;
 
 /**
  * An interface to represent the result of a modification operation
@@ -34,6 +35,8 @@ public interface WriteResult extends Iterable<NitriteId> {
      *
      * @return the affected document count.
      */
-    int getAffectedCount();
+    default int getAffectedCount() {
+        return (int) Iterables.size(this);
+    }
 }
 

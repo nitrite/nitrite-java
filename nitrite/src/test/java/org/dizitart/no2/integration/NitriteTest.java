@@ -103,7 +103,7 @@ public class NitriteTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         if (collection.isOpen()) {
             collection.remove(ALL);
             collection.close();
@@ -202,28 +202,28 @@ public class NitriteTest {
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testGetCollectionNullStore() throws Exception {
+    public void testGetCollectionNullStore() {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.getCollection("test");
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testGetRepositoryNullStore() throws Exception {
+    public void testGetRepositoryNullStore() {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class);
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testGetKeyedRepositoryNullStore() throws Exception {
+    public void testGetKeyedRepositoryNullStore() {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.getRepository(NitriteTest.class, "key");
     }
 
     @Test(expected = NitriteIOException.class)
-    public void testCommitNullStore() throws Exception {
+    public void testCommitNullStore() {
         db = Nitrite.builder().openOrCreate();
         db.close();
         db.commit();
@@ -352,7 +352,7 @@ public class NitriteTest {
                     e.printStackTrace();
                 }
             }
-        };
+        }
 
         Thread t0 = new Thread(new ThreadRunner());
         Thread t1 = new Thread(new ThreadRunner());

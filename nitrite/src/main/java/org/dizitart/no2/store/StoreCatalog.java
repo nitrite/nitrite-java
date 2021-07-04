@@ -34,7 +34,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.getKeyedRepositoryType;
  * repositories and keyed-repositories.
  *
  * @author Anindya Chatterjee
- * @since 4.0
+ * @since 4.0.0
  */
 public class StoreCatalog {
     private final NitriteMap<String, Document> catalogMap;

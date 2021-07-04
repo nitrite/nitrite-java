@@ -135,6 +135,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     public void removeMap(String name) {
         MVMap<?, ?> mvMap = mvStore.openMap(name);
         mvStore.removeMap(mvMap);
+        getCatalog().remove(name);
         nitriteMapRegistry.remove(name);
     }
 

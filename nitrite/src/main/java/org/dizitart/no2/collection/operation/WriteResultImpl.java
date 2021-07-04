@@ -27,22 +27,17 @@ import java.util.*;
  */
 @ToString
 class WriteResultImpl implements WriteResult {
-    private Set<NitriteId> nitriteIds;
+    private List<NitriteId> nitriteIds;
 
-    void setNitriteIds(Set<NitriteId> nitriteIds) {
+    void setNitriteIds(List<NitriteId> nitriteIds) {
         this.nitriteIds = nitriteIds;
     }
 
     void addToList(NitriteId nitriteId) {
         if (nitriteIds == null) {
-            nitriteIds = new HashSet<>();
+            nitriteIds = new ArrayList<>();
         }
         nitriteIds.add(nitriteId);
-    }
-
-    public int getAffectedCount() {
-        if (nitriteIds == null) return 0;
-        return nitriteIds.size();
     }
 
     @Override

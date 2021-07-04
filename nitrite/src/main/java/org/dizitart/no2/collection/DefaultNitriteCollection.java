@@ -455,14 +455,7 @@ class DefaultNitriteCollection implements NitriteCollection {
 
     private void checkOpened() {
         if (isOpen()) return;
-
-        if (isDropped) {
-            throw new NitriteIOException("collection has been dropped");
-        }
-
-        if (nitriteStore == null || nitriteStore.isClosed()) {
-            throw new NitriteIOException("store is closed");
-        }
+        throw new NitriteIOException("collection is closed");
     }
 
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {

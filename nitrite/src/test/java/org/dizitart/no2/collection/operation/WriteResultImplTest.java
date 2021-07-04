@@ -3,7 +3,7 @@ package org.dizitart.no2.collection.operation;
 import org.dizitart.no2.collection.NitriteId;
 import org.junit.Test;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
@@ -11,7 +11,7 @@ public class WriteResultImplTest {
     @Test
     public void testSetNitriteIds() {
         WriteResultImpl writeResultImpl = new WriteResultImpl();
-        writeResultImpl.setNitriteIds(new HashSet<>());
+        writeResultImpl.setNitriteIds(new ArrayList<>());
         assertEquals("WriteResultImpl(nitriteIds=[])", writeResultImpl.toString());
     }
 
@@ -25,7 +25,7 @@ public class WriteResultImplTest {
     @Test
     public void testAddToList2() {
         WriteResultImpl writeResultImpl = new WriteResultImpl();
-        writeResultImpl.setNitriteIds(new HashSet<>());
+        writeResultImpl.setNitriteIds(new ArrayList<>());
         writeResultImpl.addToList(NitriteId.newId());
         assertEquals(1, writeResultImpl.getAffectedCount());
     }
