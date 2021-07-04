@@ -77,17 +77,19 @@ public class MigrationUtil {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static void copyData(MVMap oldMap, MVMap newMap) {
         if (oldMap != null) {
-            for (Object key : oldMap.keySet()) {
-                Object newKey = key;
+            Set<Map.Entry> entrySet = oldMap.entrySet();
+            for (Map.Entry entry : entrySet) {
+                Object key = entry.getKey();
+                Object newKey = entry.getKey();
+
                 if (key instanceof Compat.NitriteId) {
                     newKey = nitriteId((Compat.NitriteId) key);
                 } else if (oldMap.getName().contains(INDEX_PREFIX)) {
                     // index map, wrap with DBValue
                     newKey = newKey == null ? DBNull.getInstance() : new DBValue((Comparable<?>) newKey);
                 }
-                Object value = oldMap.get(key);
 
-                Object newValue = migrateValue(value);
+                Object newValue = migrateValue(entry.getValue());
                 newMap.put(newKey, newValue);
             }
         }

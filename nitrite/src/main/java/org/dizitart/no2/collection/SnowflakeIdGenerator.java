@@ -21,9 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.security.SecureRandom;
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
-import java.util.Random;
 
 /**
  * Generate unique IDs using the Twitter Snowflake algorithm (see https://github.com/twitter/snowflake). Snowflake IDs
@@ -44,15 +44,9 @@ import java.util.Random;
  */
 @Slf4j
 public class SnowflakeIdGenerator {
+    private final SecureRandom random;
     private final long nodeIdBits = 10L;
-    private final long maxNodeId = ~(-1L << nodeIdBits);
-    private final long sequenceBits = 12L;
 
-    private final long nodeIdShift = sequenceBits;
-    private final long timestampLeftShift = sequenceBits + nodeIdBits;
-    private final long sequenceMask = ~(-1L << sequenceBits);
-
-    private final long twepoch = 1288834974657L;
     private long nodeId;
 
     private volatile long lastTimestamp = -1L;
@@ -60,18 +54,18 @@ public class SnowflakeIdGenerator {
 
 
     public SnowflakeIdGenerator() {
+        random = new SecureRandom();
+        long maxNodeId = ~(-1L << nodeIdBits);
         try {
             this.nodeId = getNodeId();
         } catch (SocketException | NoSuchElementException | NullPointerException e) {
             log.warn("SNOWFLAKE: could not determine machine address; using random node id");
-            Random rnd = new Random();
-            this.nodeId = rnd.nextInt((int) maxNodeId) + 1;
+            this.nodeId = random.nextInt((int) maxNodeId) + 1;
         }
 
         if (this.nodeId > maxNodeId) {
             log.warn("SNOWFLAKE: nodeId > maxNodeId; using random node id");
-            Random rnd = new Random();
-            this.nodeId = rnd.nextInt((int) maxNodeId) + 1;
+            this.nodeId = random.nextInt((int) maxNodeId) + 1;
         }
         log.debug("SNOWFLAKE: initialised with node id {}", this.nodeId);
     }
@@ -98,8 +92,7 @@ public class SnowflakeIdGenerator {
 
         if (network != null) {
             byte[] mac = network.getHardwareAddress();
-            Random rnd = new Random();
-            byte rndByte = (byte) (rnd.nextInt() & 0x000000FF);
+            byte rndByte = (byte) (random.nextInt() & 0x000000FF);
 
             // take the last byte of the MAC address and a random byte as node id
             return ((0x000000FF & (long) mac[mac.length - 1]) | (0x0000FF00 & (((long) rndByte) << 8))) >> 6;
@@ -123,7 +116,9 @@ public class SnowflakeIdGenerator {
             } catch (InterruptedException ignore) {
             }
         }
+        long sequenceBits = 12L;
         if (lastTimestamp == timestamp) {
+            long sequenceMask = ~(-1L << sequenceBits);
             sequence = (sequence + 1) & sequenceMask;
             if (sequence == 0) {
                 timestamp = tillNextMillis(lastTimestamp);
@@ -132,7 +127,9 @@ public class SnowflakeIdGenerator {
             sequence = 0;
         }
         lastTimestamp = timestamp;
-        long id = ((timestamp - twepoch) << timestampLeftShift) | (nodeId << nodeIdShift) | sequence;
+        long timestampLeftShift = sequenceBits + nodeIdBits;
+        long twepoch = 1288834974657L;
+        long id = ((timestamp - twepoch) << timestampLeftShift) | (nodeId << sequenceBits) | sequence;
 
         if (id < 0) {
             log.warn("Id is smaller than 0: {}", id);

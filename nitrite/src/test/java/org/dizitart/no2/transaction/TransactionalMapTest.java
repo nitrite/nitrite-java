@@ -29,12 +29,12 @@ public class TransactionalMapTest {
     public void testContainsKey() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertFalse(transactionalMap.containsKey("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -43,13 +43,13 @@ public class TransactionalMapTest {
     public void testContainsKey2() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         transactionalMap.put("42", "42");
         assertTrue(transactionalMap.containsKey("42"));
         assertEquals(1, transactionalMap.entries().toList().size());
@@ -59,13 +59,13 @@ public class TransactionalMapTest {
     public void testContainsKey3() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         transactionalMap.put("foo", "42");
         assertFalse(transactionalMap.containsKey("42"));
         assertEquals(1, transactionalMap.entries().toList().size());
@@ -75,12 +75,12 @@ public class TransactionalMapTest {
     public void testGet() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.get("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -89,12 +89,12 @@ public class TransactionalMapTest {
     public void testGet2() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.get(0));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -103,9 +103,9 @@ public class TransactionalMapTest {
     public void testClear() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
             new InMemoryStore());
         transactionalMap.clear();
@@ -118,12 +118,12 @@ public class TransactionalMapTest {
     public void testValues() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertTrue(transactionalMap.values().toList().isEmpty());
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -132,12 +132,12 @@ public class TransactionalMapTest {
     public void testRemove() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.remove("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -145,11 +145,11 @@ public class TransactionalMapTest {
     @Test
     public void testRemove2() {
         InMemoryMap<Object, Object> primary = new InMemoryMap<>("Map Name",
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.remove("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -158,13 +158,13 @@ public class TransactionalMapTest {
     public void testRemove3() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         transactionalMap.put("42", "42");
         assertEquals("42", transactionalMap.remove("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
@@ -175,13 +175,13 @@ public class TransactionalMapTest {
     public void testRemove4() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         transactionalMap.put("", "42");
         assertNull(transactionalMap.remove("42"));
         assertEquals(1, transactionalMap.entries().toList().size());
@@ -191,12 +191,12 @@ public class TransactionalMapTest {
     public void testKeys() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertTrue(transactionalMap.keys().toList().isEmpty());
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -205,9 +205,9 @@ public class TransactionalMapTest {
     public void testPut() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
             new InMemoryStore());
         transactionalMap.put("42", "42");
@@ -220,12 +220,12 @@ public class TransactionalMapTest {
     public void testSize() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertEquals(0L, transactionalMap.size());
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -234,9 +234,9 @@ public class TransactionalMapTest {
     public void testPutIfAbsent() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
             new InMemoryStore());
         assertNull(transactionalMap.putIfAbsent("Key", "Value"));
@@ -249,12 +249,12 @@ public class TransactionalMapTest {
     public void testEntries() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         assertTrue((new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))))).entries()
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))))).entries()
             .toList()
             .isEmpty());
     }
@@ -263,12 +263,12 @@ public class TransactionalMapTest {
     public void testReversedEntries() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertTrue(transactionalMap.reversedEntries().toList().isEmpty());
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -277,12 +277,12 @@ public class TransactionalMapTest {
     public void testHigherKey() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.higherKey("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -291,14 +291,14 @@ public class TransactionalMapTest {
     public void testHigherKey2() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>(null, primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         transactionalMap.putIfAbsent("Key", "Value");
         TransactionalMap<Object, Object> transactionalMap1 = new TransactionalMap<>("Map Name",
-            transactionalMap, new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))));
+            transactionalMap, new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(null))));
         assertEquals("Key", transactionalMap1.higherKey("42"));
         assertEquals(1, transactionalMap1.entries().toList().size());
     }
@@ -307,12 +307,12 @@ public class TransactionalMapTest {
     public void testCeilingKey() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.ceilingKey("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -321,14 +321,14 @@ public class TransactionalMapTest {
     public void testCeilingKey2() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>(null, primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         transactionalMap.put("42", "42");
         TransactionalMap<Object, Object> transactionalMap1 = new TransactionalMap<>("Map Name",
-            transactionalMap, new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))));
+            transactionalMap, new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(null))));
         assertEquals("42", transactionalMap1.ceilingKey("42"));
         assertEquals(1, transactionalMap1.entries().toList().size());
     }
@@ -337,12 +337,12 @@ public class TransactionalMapTest {
     public void testLowerKey() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.lowerKey("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -351,12 +351,12 @@ public class TransactionalMapTest {
     public void testFloorKey() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertNull(transactionalMap.floorKey("42"));
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -365,14 +365,14 @@ public class TransactionalMapTest {
     public void testFloorKey2() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>(null, primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         transactionalMap.put("42", "42");
         TransactionalMap<Object, Object> transactionalMap1 = new TransactionalMap<>("Map Name",
-            transactionalMap, new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))));
+            transactionalMap, new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(null))));
         assertEquals("42", transactionalMap1.floorKey("42"));
         assertEquals(1, transactionalMap1.entries().toList().size());
     }
@@ -381,12 +381,12 @@ public class TransactionalMapTest {
     public void testIsEmpty() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         assertTrue(transactionalMap.isEmpty());
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
@@ -395,13 +395,13 @@ public class TransactionalMapTest {
     public void testIsEmpty2() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         transactionalMap.put("42", "42");
         assertFalse(transactionalMap.isEmpty());
         assertEquals(1, transactionalMap.entries().toList().size());
@@ -411,14 +411,14 @@ public class TransactionalMapTest {
     public void testIsEmpty3() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
 
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         transactionalMap.put("42", "42");
         TransactionalMap<Object, Object> transactionalMap1 = new TransactionalMap<>("Map Name",
-            transactionalMap, new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))));
+            transactionalMap, new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(null))));
         assertFalse(transactionalMap1.isEmpty());
         assertEquals(1, transactionalMap1.entries().toList().size());
     }
@@ -427,9 +427,9 @@ public class TransactionalMapTest {
     public void testDrop() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
             new InMemoryStore());
         transactionalMap.drop();
@@ -442,9 +442,9 @@ public class TransactionalMapTest {
     public void testClose() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
             new InMemoryStore());
         transactionalMap.close();
@@ -457,58 +457,58 @@ public class TransactionalMapTest {
     public void testConstructor() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
+        TransactionStore<StoreConfig> transactionStore = new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            transactionalStore);
-        TransactionalStore<StoreConfig> transactionalStore1 = new TransactionalStore<>(
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+                transactionStore);
+        TransactionStore<StoreConfig> transactionStore1 = new TransactionStore<>(
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         TransactionalMap<Object, Object> actualTransactionalMap = new TransactionalMap<>("Map Name",
-            transactionalMap, transactionalStore1);
+            transactionalMap, transactionStore1);
         assertEquals("Map Name", actualTransactionalMap.getName());
         assertEquals("Map Name", transactionalMap.getName());
-        assertSame(transactionalStore1, actualTransactionalMap.getStore());
-        assertSame(transactionalStore, transactionalMap.getStore());
+        assertSame(transactionStore1, actualTransactionalMap.getStore());
+        assertSame(transactionStore, transactionalMap.getStore());
     }
 
     @Test
     public void testConstructor2() {
         TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
+        TransactionStore<StoreConfig> transactionStore = new TransactionStore<>(
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         TransactionalMap<Object, Object> actualTransactionalMap = new TransactionalMap<>("Map Name",
-            transactionalMap, transactionalStore);
+            transactionalMap, transactionStore);
         assertTrue(actualTransactionalMap.entries().toList().isEmpty());
         assertEquals(0L, actualTransactionalMap.size());
         assertTrue(actualTransactionalMap.isEmpty());
-        assertSame(transactionalStore, actualTransactionalMap.getStore());
+        assertSame(transactionStore, actualTransactionalMap.getStore());
         assertEquals("Map Name", actualTransactionalMap.getName());
         assertTrue(transactionalMap.entries().toList().isEmpty());
     }
 
     @Test
     public void testConstructor3() {
-        TransactionalStore<StoreConfig> transactionalStore = new TransactionalStore<>(
-            new TransactionalStore<>(
-                new TransactionalStore<>(new TransactionalStore<>(null))));
+        TransactionStore<StoreConfig> transactionStore = new TransactionStore<>(
+            new TransactionStore<>(
+                new TransactionStore<>(new TransactionStore<>(null))));
         TransactionalMap<Object, Object> actualTransactionalMap = new TransactionalMap<>("Map Name", null,
-            transactionalStore);
+                transactionStore);
         assertTrue(actualTransactionalMap.entries().toList().isEmpty());
         assertEquals(0L, actualTransactionalMap.size());
         assertTrue(actualTransactionalMap.isEmpty());
-        assertSame(transactionalStore, actualTransactionalMap.getStore());
+        assertSame(transactionStore, actualTransactionalMap.getStore());
         assertEquals("Map Name", actualTransactionalMap.getName());
     }
 }

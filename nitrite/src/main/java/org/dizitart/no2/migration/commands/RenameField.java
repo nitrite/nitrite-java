@@ -27,29 +27,31 @@ public class RenameField extends BaseCommand implements Command {
     public void execute(Nitrite nitrite) {
         initialize(nitrite, collectionName);
 
-        IndexManager indexManager = new IndexManager(oldName, nitrite.getConfig());
-        Fields oldField = Fields.withNames(oldName);
-        Collection<IndexDescriptor> matchingIndexDescriptors = indexManager.findMatchingIndexDescriptors(oldField);
+        try(IndexManager indexManager = new IndexManager(oldName, nitrite.getConfig())) {
+            Fields oldField = Fields.withNames(oldName);
+            Collection<IndexDescriptor> matchingIndexDescriptors
+                = indexManager.findMatchingIndexDescriptors(oldField);
 
-        for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
-            Document document = entry.getSecond();
-            if (document.containsKey(oldName)) {
-                Object value = document.get(oldName);
-                document.put(newName, value);
-                document.remove(oldName);
+            for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
+                Document document = entry.getSecond();
+                if (document.containsKey(oldName)) {
+                    Object value = document.get(oldName);
+                    document.put(newName, value);
+                    document.remove(oldName);
 
-                nitriteMap.put(entry.getFirst(), document);
+                    nitriteMap.put(entry.getFirst(), document);
+                }
             }
-        }
 
-        if (!matchingIndexDescriptors.isEmpty()) {
-            for (IndexDescriptor matchingIndexDescriptor : matchingIndexDescriptors) {
-                String indexType = matchingIndexDescriptor.getIndexType();
+            if (!matchingIndexDescriptors.isEmpty()) {
+                for (IndexDescriptor matchingIndexDescriptor : matchingIndexDescriptors) {
+                    String indexType = matchingIndexDescriptor.getIndexType();
 
-                Fields oldIndexFields = matchingIndexDescriptor.getIndexFields();
-                Fields newIndexFields = getNewIndexFields(oldIndexFields, oldName, newName);
-                operations.dropIndex(matchingIndexDescriptor.getIndexFields());
-                operations.createIndex(newIndexFields, indexType);
+                    Fields oldIndexFields = matchingIndexDescriptor.getIndexFields();
+                    Fields newIndexFields = getNewIndexFields(oldIndexFields, oldName, newName);
+                    operations.dropIndex(matchingIndexDescriptor.getIndexFields());
+                    operations.createIndex(newIndexFields, indexType);
+                }
             }
         }
     }

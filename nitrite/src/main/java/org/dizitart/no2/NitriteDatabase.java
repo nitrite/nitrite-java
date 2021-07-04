@@ -163,7 +163,12 @@ class NitriteDatabase implements Nitrite {
             repositoryFactory.clear();
             collectionFactory.clear();
             storeInfo.close();
-            store.close();
+
+            if (nitriteConfig != null) {
+                // close all plugins
+                nitriteConfig.close();
+            }
+
             log.info("Nitrite database has been closed successfully.");
         } catch (NitriteIOException e) {
             throw e;

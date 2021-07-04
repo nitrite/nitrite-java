@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -25,6 +26,8 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     private final NavigableMap<Key, Value> backingMap;
     private final NitriteStore<?> nitriteStore;
     private final String mapName;
+    private final AtomicBoolean droppedFlag;
+    private final AtomicBoolean closedFlag;
 
     /**
      * Instantiates a new {@link InMemoryMap}.
@@ -35,9 +38,11 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     public InMemoryMap(String mapName, NitriteStore<?> nitriteStore) {
         this.mapName = mapName;
         this.nitriteStore = nitriteStore;
-
         this.backingMap = new ConcurrentSkipListMap<>((o1, o2) ->
             Comparables.compare((Comparable<?>) o1, (Comparable<?>) o2));
+
+        this.closedFlag = new AtomicBoolean(false);
+        this.droppedFlag = new AtomicBoolean(false);
     }
 
     @Override
@@ -156,13 +161,18 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void drop() {
-        clear();
-        getStore().removeMap(mapName);
+        if (!droppedFlag.get()) {
+            droppedFlag.compareAndSet(false, true);
+            clear();
+            getStore().removeMap(mapName);
+        }
     }
 
     @Override
     public void close() {
-        // nothing to close
+        if (!closedFlag.get() && !droppedFlag.get()) {
+            closedFlag.compareAndSet(false, true);
+        }
     }
 
     private RecordStream<Pair<Key, Value>> getStream(NavigableMap<Key, Value> primaryMap) {

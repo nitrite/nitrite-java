@@ -18,6 +18,7 @@ package org.dizitart.no2.mvstore;
 
 
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
@@ -76,7 +77,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (getStoreConfig().autoCompact()) {
             compact();
         }
@@ -95,6 +96,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
         mvStore.close();
         alert(StoreEvents.Closed);
+        eventBus.close();
     }
 
     @Override
@@ -117,18 +119,23 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     public void closeMap(String mapName) {
-        nitriteMapRegistry.remove(mapName);
+        if (!StringUtils.isNullOrEmpty(mapName)) {
+            nitriteMapRegistry.remove(mapName);
+        }
     }
 
     @Override
     public void closeRTree(String rTreeName) {
-        nitriteRTreeMapRegistry.remove(rTreeName);
+        if (!StringUtils.isNullOrEmpty(rTreeName)) {
+            nitriteRTreeMapRegistry.remove(rTreeName);
+        }
     }
 
     @Override
     public void removeMap(String name) {
         MVMap<?, ?> mvMap = mvStore.openMap(name);
         mvStore.removeMap(mvMap);
+        getCatalog().remove(name);
         nitriteMapRegistry.remove(name);
     }
 

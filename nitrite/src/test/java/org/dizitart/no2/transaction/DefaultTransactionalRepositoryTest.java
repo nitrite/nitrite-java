@@ -127,7 +127,7 @@ public class DefaultTransactionalRepositoryTest {
             DefaultTransactionalRepository.class);
         when(defaultTransactionalRepository.update(any(), anyBoolean())).thenReturn(null);
         defaultTransactionalRepository.update("Element", true);
-        verify(defaultTransactionalRepository).update(any(), anyBoolean());
+        verify(defaultTransactionalRepository).update(any(Object.class), anyBoolean());
     }
 
     @Test
@@ -243,8 +243,8 @@ public class DefaultTransactionalRepositoryTest {
     public void testGetStore() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        doReturn(new TransactionalStore<>(new TransactionalStore<>(
-            new TransactionalStore<>(new TransactionalStore<>(null))))).when(defaultTransactionalRepository).getStore();
+        doReturn(new TransactionStore<>(new TransactionStore<>(
+            new TransactionStore<>(new TransactionStore<>(null))))).when(defaultTransactionalRepository).getStore();
         defaultTransactionalRepository.getStore();
         verify(defaultTransactionalRepository).getStore();
     }

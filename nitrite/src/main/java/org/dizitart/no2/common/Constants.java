@@ -38,7 +38,11 @@ public class Constants {
         String v = "unknown";
         try (InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("version")) {
             if (is != null) {
-                v = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8)).readLine();
+                try(InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                    try(BufferedReader bufferedReader = new BufferedReader(reader)) {
+                        v = bufferedReader.readLine();
+                    }
+                }
             }
         } catch (IOException e) {
             throw new NitriteIOException("failed to load version information", e);

@@ -17,7 +17,7 @@ class TransactionContext implements AutoCloseable {
     private String collectionName;
     private Queue<JournalEntry> journal;
     private NitriteMap<NitriteId, Document> nitriteMap;
-    private TransactionalConfig config;
+    private TransactionConfig config;
     private AtomicBoolean active;
 
     public TransactionContext() {

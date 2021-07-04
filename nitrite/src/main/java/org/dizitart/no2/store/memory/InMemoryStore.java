@@ -59,7 +59,7 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         closed = true;
 
         for (NitriteMap<?, ?> map : nitriteMapRegistry.values()) {
@@ -73,6 +73,7 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
         nitriteMapRegistry.clear();
         nitriteRTreeMapRegistry.clear();
         alert(StoreEvents.Closed);
+        eventBus.close();
     }
 
     @Override
@@ -110,6 +111,7 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
         if (nitriteMapRegistry.containsKey(mapName)) {
             nitriteMapRegistry.get(mapName).clear();
             nitriteMapRegistry.remove(mapName);
+            getCatalog().remove(mapName);
         }
     }
 

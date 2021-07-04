@@ -15,6 +15,7 @@ import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
@@ -28,8 +29,8 @@ class NitriteTransaction implements Transaction {
     private final Nitrite nitrite;
     private final LockService lockService;
 
-    private TransactionalStore<?> transactionalStore;
-    private TransactionalConfig transactionalConfig;
+    private TransactionStore<?> transactionStore;
+    private TransactionConfig transactionConfig;
     private Map<String, TransactionContext> contextMap;
     private Map<String, NitriteCollection> collectionRegistry;
     private Map<String, ObjectRepository<?>> repositoryRegistry;
@@ -38,7 +39,6 @@ class NitriteTransaction implements Transaction {
     @Getter
     private String id;
 
-    @Getter
     private State state;
 
     public NitriteTransaction(Nitrite nitrite, LockService lockService) {
@@ -48,7 +48,7 @@ class NitriteTransaction implements Transaction {
     }
 
     @Override
-    public NitriteCollection getCollection(String name) {
+    public synchronized NitriteCollection getCollection(String name) {
         checkState();
 
         if (collectionRegistry.containsKey(name)) {
@@ -62,14 +62,14 @@ class NitriteTransaction implements Transaction {
             throw new TransactionException("collection " + name + " does not exists");
         }
 
-        NitriteMap<NitriteId, Document> txMap = transactionalStore.openMap(name,
+        NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
             NitriteId.class, Document.class);
 
         TransactionContext context = new TransactionContext();
         context.setCollectionName(name);
         context.setNitriteMap(txMap);
         context.setJournal(new LinkedList<>());
-        context.setConfig(transactionalConfig);
+        context.setConfig(transactionConfig);
 
         NitriteCollection txCollection = new DefaultTransactionalCollection(primary, context, nitrite);
         collectionRegistry.put(name, txCollection);
@@ -79,7 +79,7 @@ class NitriteTransaction implements Transaction {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> ObjectRepository<T> getRepository(Class<T> type) {
+    public synchronized <T> ObjectRepository<T> getRepository(Class<T> type) {
         checkState();
 
         String name = findRepositoryName(type, null);
@@ -94,19 +94,19 @@ class NitriteTransaction implements Transaction {
             throw new TransactionException("repository of type " + type.getName() + " does not exists");
         }
 
-        NitriteMap<NitriteId, Document> txMap = transactionalStore.openMap(name,
+        NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
             NitriteId.class, Document.class);
 
         TransactionContext context = new TransactionContext();
         context.setCollectionName(name);
         context.setNitriteMap(txMap);
         context.setJournal(new LinkedList<>());
-        context.setConfig(transactionalConfig);
+        context.setConfig(transactionConfig);
 
         NitriteCollection primaryCollection = primary.getDocumentCollection();
         NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context, nitrite);
         ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(type,
-            primary, backingCollection, transactionalConfig);
+            primary, backingCollection, transactionConfig);
 
         repositoryRegistry.put(name, txRepository);
         contextMap.put(name, context);
@@ -115,7 +115,7 @@ class NitriteTransaction implements Transaction {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> ObjectRepository<T> getRepository(Class<T> type, String key) {
+    public synchronized <T> ObjectRepository<T> getRepository(Class<T> type, String key) {
         checkState();
 
         String name = findRepositoryName(type, key);
@@ -131,26 +131,26 @@ class NitriteTransaction implements Transaction {
                 + " and key " + key + " does not exists");
         }
 
-        NitriteMap<NitriteId, Document> txMap = transactionalStore.openMap(name,
+        NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
             NitriteId.class, Document.class);
 
         TransactionContext context = new TransactionContext();
         context.setCollectionName(name);
         context.setNitriteMap(txMap);
         context.setJournal(new LinkedList<>());
-        context.setConfig(transactionalConfig);
+        context.setConfig(transactionConfig);
 
         NitriteCollection primaryCollection = primary.getDocumentCollection();
         NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context, nitrite);
         ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(type,
-            primary, backingCollection, transactionalConfig);
+            primary, backingCollection, transactionConfig);
         repositoryRegistry.put(name, txRepository);
         contextMap.put(name, context);
         return txRepository;
     }
 
     @Override
-    public void commit() {
+    public synchronized void commit() {
         checkState();
         this.state = State.PartiallyCommitted;
 
@@ -161,6 +161,7 @@ class NitriteTransaction implements Transaction {
             Stack<UndoEntry> undoLog = undoRegistry.containsKey(collectionName)
                 ? undoRegistry.get(collectionName) : new Stack<>();
 
+            // put collection level lock
             Lock lock = lockService.getWriteLock(collectionName);
             try {
                 lock.lock();
@@ -202,13 +203,14 @@ class NitriteTransaction implements Transaction {
     }
 
     @Override
-    public void rollback() {
+    public synchronized void rollback() {
         this.state = State.Aborted;
 
         for (Map.Entry<String, Stack<UndoEntry>> entry : undoRegistry.entrySet()) {
             String collectionName = entry.getKey();
             Stack<UndoEntry> undoLog = entry.getValue();
 
+            // put collection level lock
             Lock writeLock = lockService.getWriteLock(collectionName);
             try {
                 writeLock.lock();
@@ -229,7 +231,7 @@ class NitriteTransaction implements Transaction {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         try {
             state = State.Closed;
             for (TransactionContext context : contextMap.values()) {
@@ -240,28 +242,34 @@ class NitriteTransaction implements Transaction {
             this.collectionRegistry.clear();
             this.repositoryRegistry.clear();
             this.undoRegistry.clear();
-            this.transactionalStore.close();
+            this.transactionStore.close();
+            this.transactionConfig.close();
         } catch (Exception e) {
             throw new TransactionException("transaction failed to close", e);
         }
     }
 
+    @Override
+    public synchronized State getState() {
+        return state;
+    }
+
     private void prepare() {
-        this.contextMap = new HashMap<>();
-        this.collectionRegistry = new HashMap<>();
-        this.repositoryRegistry = new HashMap<>();
-        this.undoRegistry = new HashMap<>();
+        this.contextMap = new ConcurrentHashMap<>();
+        this.collectionRegistry = new ConcurrentHashMap<>();
+        this.repositoryRegistry = new ConcurrentHashMap<>();
+        this.undoRegistry = new ConcurrentHashMap<>();
 
         this.id = UUID.randomUUID().toString();
 
         NitriteStore<?> nitriteStore = nitrite.getStore();
         NitriteConfig nitriteConfig = nitrite.getConfig();
-        this.transactionalConfig = new TransactionalConfig(nitriteConfig);
-        this.transactionalConfig.loadModule(NitriteModule.module(new TransactionalStore<>(nitriteStore)));
+        this.transactionConfig = new TransactionConfig(nitriteConfig);
+        this.transactionConfig.loadModule(NitriteModule.module(new TransactionStore<>(nitriteStore)));
 
-        this.transactionalConfig.autoConfigure();
-        this.transactionalConfig.initialize();
-        this.transactionalStore = (TransactionalStore<?>) this.transactionalConfig.getNitriteStore();
+        this.transactionConfig.autoConfigure();
+        this.transactionConfig.initialize();
+        this.transactionStore = (TransactionStore<?>) this.transactionConfig.getNitriteStore();
         this.state = State.Active;
     }
 

@@ -43,9 +43,9 @@ public class TransactionContextTest {
         TransactionContext transactionContext = new TransactionContext();
         TransactionalMap<NitriteId, Document> primary = new TransactionalMap<>("Map Name", null, null);
         TransactionalMap<NitriteId, Document> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionalStore<>(null));
+            new TransactionStore<>(null));
         TransactionalMap<NitriteId, Document> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionalStore<>(new TransactionalStore<>(null)));
+            new TransactionStore<>(new TransactionStore<>(null)));
         transactionContext
             .setNitriteMap(new TransactionalMap<>("Map Name", primary2, new InMemoryStore()));
         transactionContext.setJournal(journalEntryList);

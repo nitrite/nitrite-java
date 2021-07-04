@@ -2,6 +2,7 @@ package org.dizitart.no2.rocksdb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.UnknownType;
+import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
@@ -67,7 +68,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         try {
             if (!closed.get()) {
                 // close nitrite maps
@@ -80,6 +81,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
             }
 
             alert(StoreEvents.Closed);
+            eventBus.close();
         } catch (Exception e) {
             log.error("Error while closing the database", e);
             throw new NitriteIOException("failed to close database", e);
@@ -116,12 +118,15 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
 
     @Override
     public void closeMap(String mapName) {
-        nitriteMapRegistry.remove(mapName);
+        if (!StringUtils.isNullOrEmpty(mapName)) {
+            nitriteMapRegistry.remove(mapName);
+        }
     }
 
     @Override
     public void removeMap(String mapName) {
         reference.dropColumnFamily(mapName);
+        getCatalog().remove(mapName);
         nitriteMapRegistry.remove(mapName);
     }
 

@@ -34,7 +34,6 @@ import static org.dizitart.no2.common.util.Iterables.setOf;
  * @author Anindya Chatterjee
  */
 public class MVStoreModule implements StoreModule {
-
     @Setter(AccessLevel.PACKAGE)
     private MVStoreConfig storeConfig;
 

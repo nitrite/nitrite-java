@@ -77,7 +77,6 @@ public class Exporter {
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }
 
@@ -121,7 +120,9 @@ public class Exporter {
                     throw new IOException("Failed to create parent directory " + parent.getPath());
                 }
             }
-            exportTo(new FileOutputStream(file));
+            try (FileOutputStream outputStream = new FileOutputStream(file)) {
+                exportTo(outputStream);
+            }
         } catch (IOException ioe) {
             throw new NitriteIOException("I/O error while writing content to file " + file, ioe);
         }
@@ -132,8 +133,10 @@ public class Exporter {
      *
      * @param stream the stream
      */
-    public void exportTo(OutputStream stream) {
-        exportTo(new OutputStreamWriter(stream));
+    public void exportTo(OutputStream stream) throws IOException {
+        try(OutputStreamWriter writer = new OutputStreamWriter(stream)) {
+            exportTo(writer);
+        }
     }
 
     /**

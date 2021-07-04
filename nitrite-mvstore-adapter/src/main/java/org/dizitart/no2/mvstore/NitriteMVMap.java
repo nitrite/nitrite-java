@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.mvstore;
 
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.h2.mvstore.MVMap;
@@ -25,6 +25,7 @@ import org.h2.mvstore.MVStore;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -36,11 +37,15 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     private final MVMap<Key, Value> mvMap;
     private final NitriteStore<?> nitriteStore;
     private final MVStore mvStore;
+    private final AtomicBoolean droppedFlag;
+    private final AtomicBoolean closedFlag;
 
     NitriteMVMap(MVMap<Key, Value> mvMap, NitriteStore<?> nitriteStore) {
         this.mvMap = mvMap;
         this.nitriteStore = nitriteStore;
         this.mvStore = mvMap.getStore();
+        this.closedFlag = new AtomicBoolean(false);
+        this.droppedFlag = new AtomicBoolean(false);
     }
 
     @Override
@@ -176,17 +181,25 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void drop() {
-        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
-        try {
-            nitriteStore.closeMap(getName());
-            nitriteStore.removeMap(getName());
-        } finally {
-            mvStore.deregisterVersionUsage(txCounter);
+        if (!droppedFlag.get()) {
+            droppedFlag.compareAndSet(false, true);
+            closedFlag.compareAndSet(false, true);
+
+            MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+            try {
+                nitriteStore.closeMap(getName());
+                nitriteStore.removeMap(getName());
+            } finally {
+                mvStore.deregisterVersionUsage(txCounter);
+            }
         }
     }
 
     @Override
     public void close() {
-        nitriteStore.closeMap(getName());
+        if (!closedFlag.get() && !droppedFlag.get()) {
+            closedFlag.compareAndSet(false, true);
+            nitriteStore.closeMap(getName());
+        }
     }
 }

@@ -13,10 +13,10 @@ import org.dizitart.no2.store.NitriteStore;
  * @since 4.0
  */
 @Slf4j
-class TransactionalConfig extends NitriteConfig {
+class TransactionConfig extends NitriteConfig {
     private final NitriteConfig config;
 
-    public TransactionalConfig(NitriteConfig config) {
+    public TransactionConfig(NitriteConfig config) {
         super();
         this.config = config;
     }

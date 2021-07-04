@@ -30,6 +30,13 @@ abstract class BaseCommand implements Command {
      */
     protected CollectionOperations operations;
 
+    @Override
+    public void close() {
+        if (operations != null) {
+            operations.close();
+        }
+    }
+
     /**
      * Initializes the database for migration.
      *

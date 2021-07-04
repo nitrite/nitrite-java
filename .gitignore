@@ -452,3 +452,4 @@ test.log
 /build
 !no2-old.db
 .diffblue
+infer-out

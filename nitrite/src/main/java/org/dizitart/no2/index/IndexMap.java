@@ -239,7 +239,7 @@ public class IndexMap {
                 }
             };
         }
-        return null;
+        return Collections.EMPTY_SET;
     }
 
     /**

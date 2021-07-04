@@ -22,14 +22,20 @@ import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventAware;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.collection.meta.MetadataAware;
+import org.dizitart.no2.common.processors.Processor;
+import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.store.NitriteStore;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
+
+import static org.dizitart.no2.common.util.ValidationUtils.containsNull;
+import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
  * The interface Persistent collection.
@@ -201,6 +207,32 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Auto
      * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the {@code element} does not have any id field.
      */
     WriteResult update(T element, boolean insertIfAbsent);
+
+
+    /**
+     * Updates {@code elements} in the collection. Specified {@code elements} must have an id.
+     * If the {@code elements} are not found in the collection, it will be inserted only if {@code insertIfAbsent}
+     * is set to {@code true}.
+     *
+     * @param elements        the elements to update.
+     * @param insertIfAbsent if set to {@code true}, {@code elements} will be inserted if not found.
+     * @return the result of the update operation.
+     * @throws org.dizitart.no2.exceptions.ValidationException      if the {@code elements} is {@code null}.
+     * @throws org.dizitart.no2.exceptions.NotIdentifiableException if the {@code elements} does not have any id field.
+     */
+    default WriteResult update(T[] elements, boolean insertIfAbsent) {
+        notNull(elements, "a null element cannot be updated");
+        containsNull(elements, "a null element cannot be updated");
+
+        List<NitriteId> affectedIds = new ArrayList<>();
+
+        for (T element : elements) {
+            WriteResult writeResult = update(element, insertIfAbsent);
+            affectedIds.addAll(Iterables.toList(writeResult));
+        }
+
+        return affectedIds::iterator;
+    }
 
     /**
      * Deletes the {@code element} from the collection. The {@code element} must have an id.

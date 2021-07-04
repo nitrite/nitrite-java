@@ -11,7 +11,6 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.Iterables.setOf;
 
 public class RocksDBModule implements StoreModule {
-
     @Setter(AccessLevel.PACKAGE)
     private RocksDBConfig storeConfig;
 

@@ -30,8 +30,13 @@ import static org.dizitart.no2.common.util.Iterables.setOf;
  * @author Anindya Chatterjee
  */
 public class SpatialModule implements NitriteModule {
+    private SpatialIndexer spatialIndexer;
+
     @Override
     public Set<NitritePlugin> plugins() {
-        return setOf(new SpatialIndexer());
+        if (spatialIndexer == null) {
+            spatialIndexer = new SpatialIndexer();
+        }
+        return setOf(spatialIndexer);
     }
 }

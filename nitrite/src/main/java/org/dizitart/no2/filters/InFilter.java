@@ -37,7 +37,6 @@ class InFilter extends ComparableArrayFilter {
         Collections.addAll(this.comparableSet, values);
     }
 
-
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
         Document document = element.getSecond();
