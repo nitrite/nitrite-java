@@ -21,7 +21,7 @@ dependencies {
         api project(":nitrite-mvstore-adapter")
         api project(":nitrite-rocksdb-adapter")
 
-        api "org.slf4j:slf4j-api:1.7.31"
+        api "org.slf4j:slf4j-api:1.7.32"
         api "org.objenesis:objenesis:2.6"
         api "org.jasypt:jasypt:1.9.3"
         api "com.fasterxml.jackson.core:jackson-databind:2.12.3"
