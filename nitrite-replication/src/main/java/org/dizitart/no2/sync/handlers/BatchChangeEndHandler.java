@@ -16,32 +16,37 @@
 
 package org.dizitart.no2.sync.handlers;
 
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.WebSocket;
 import org.dizitart.no2.sync.MessageFactory;
-import org.dizitart.no2.sync.MessageTemplate;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import org.dizitart.no2.sync.DataGateClient;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.BatchChangeEnd;
 import org.dizitart.no2.sync.message.BatchEndAck;
 
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class BatchChangeEndHandler implements MessageHandler<BatchChangeEnd> {
-    private final ReplicationTemplate replicationTemplate;
+    private final ReplicatedCollection replicatedCollection;
 
-    public BatchChangeEndHandler(ReplicationTemplate replicationTemplate) {
-        this.replicationTemplate = replicationTemplate;
+    public BatchChangeEndHandler(ReplicatedCollection replicatedCollection) {
+        this.replicatedCollection = replicatedCollection;
     }
 
     @Override
-    public void handleMessage(BatchChangeEnd message) {
-        MessageFactory factory = replicationTemplate.getMessageFactory();
-        BatchEndAck batchEndAck = factory.createBatchEndAck(replicationTemplate.getConfig(),
-            replicationTemplate.getReplicaId(), message.getHeader().getId());
+    public void handleMessage(WebSocket webSocket, BatchChangeEnd message) {
+        MessageFactory factory = new MessageFactory();
+        BatchEndAck batchEndAck = factory.createBatchEndAck(replicatedCollection.getConfig(),
+            replicatedCollection.getReplicaId(), message.getHeader().getId());
 
-        MessageTemplate messageTemplate = replicationTemplate.getMessageTemplate();
-        messageTemplate.sendMessage(batchEndAck);
-        Long time = message.getHeader().getTimestamp();
-        replicationTemplate.saveLastSyncTime(time);
-        replicationTemplate.setAcceptCheckpoint();
+        DataGateClient dataGateClient = replicatedCollection.getDataGateClient();
+        dataGateClient.sendMessage(webSocket, batchEndAck);
+
+        Long time = message.getEndTime();
+
+        log.debug("Saving last sync time - " + time);
+        replicatedCollection.saveLastSyncTime(time);
     }
 }

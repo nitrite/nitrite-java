@@ -1,53 +1,57 @@
 /*
- * Copyright (c) 2017-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package org.dizitart.no2.integration;
+package org.dizitart.no2.mock;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.TestUtils;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.integration.server.Repository;
-import org.dizitart.no2.integration.server.SimpleDataGateServer;
+import org.dizitart.no2.mock.server.MockDataGateServer;
+import org.dizitart.no2.mock.server.MockRepository;
+import org.dizitart.no2.mock.server.ServerLastWriteWinMap;
 import org.dizitart.no2.sync.Replica;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
+import static org.dizitart.no2.TestUtils.createDb;
+import static org.dizitart.no2.TestUtils.randomDocument;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.util.DocumentUtils.isSimilar;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.integration.TestUtils.createDb;
-import static org.dizitart.no2.integration.TestUtils.randomDocument;
 import static org.junit.Assert.*;
 
 /**
@@ -55,12 +59,12 @@ import static org.junit.Assert.*;
  */
 @Slf4j
 public class ReplicaTest {
-    private static SimpleDataGateServer server;
-    @Rule
-    public Retry retry = new Retry(3);
+    private static MockDataGateServer server;
+//    @Rule
+//    public Retry retry = new Retry(3);
     private String dbFile;
     private ExecutorService executorService;
-    private Repository repository;
+    private MockRepository mockRepository;
     private Nitrite db;
 
     public static String getRandomTempDbFile() {
@@ -69,27 +73,29 @@ public class ReplicaTest {
         if (!file.exists()) {
             assertTrue(file.mkdirs());
         }
-        return file.getPath() + File.separator + UUID.randomUUID().toString() + ".db";
+        return file.getPath() + File.separator + UUID.randomUUID() + ".db";
     }
 
     @Before
     public void setUp() throws Exception {
-        server = new SimpleDataGateServer(9090);
+        server = new MockDataGateServer(9090);
         server.start();
         dbFile = getRandomTempDbFile();
         executorService = Executors.newCachedThreadPool();
-        repository = Repository.getInstance();
+        mockRepository = MockRepository.getInstance();
     }
 
     @After
     public void cleanUp() throws Exception {
-        executorService.awaitTermination(2, SECONDS);
-        executorService.shutdown();
+        if(!executorService.awaitTermination(2, SECONDS)) {
+            executorService.shutdown();
+        }
 
         if (db != null && !db.isClosed()) {
             db.close();
         }
 
+        mockRepository.reset();
         if (Files.exists(Paths.get(dbFile))) {
             Files.delete(Paths.get(dbFile));
         }
@@ -98,7 +104,7 @@ public class ReplicaTest {
 
     @Test
     public void testSingleUserSingleReplica() {
-        repository.getUserMap().put("anidotnet", "abcd");
+        mockRepository.getUserMap().put("anidotnet", "abcd");
 
         db = createDb(dbFile);
         NitriteCollection collection = db.getCollection("testSingleUserSingleReplica");
@@ -117,11 +123,11 @@ public class ReplicaTest {
 
         replica.connect();
 
-        await().atMost(5, SECONDS).until(() -> repository.getCollectionReplicaMap().size() == 1);
-        assertEquals(repository.getUserReplicaMap().size(), 1);
-        assertTrue(repository.getUserReplicaMap().containsKey("anidotnet"));
-        assertTrue(repository.getCollectionReplicaMap().containsKey("anidotnet@testSingleUserSingleReplica"));
-        LastWriteWinMap lastWriteWinMap = repository.getReplicaStore().get("anidotnet@testSingleUserSingleReplica");
+        await().atMost(5, SECONDS).until(() -> mockRepository.getCollectionReplicaMap().size() == 1);
+        assertEquals(mockRepository.getUserReplicaMap().size(), 1);
+        assertTrue(mockRepository.getUserReplicaMap().containsKey("anidotnet"));
+        assertTrue(mockRepository.getCollectionReplicaMap().containsKey("anidotnet@testSingleUserSingleReplica"));
+        ServerLastWriteWinMap lastWriteWinMap = mockRepository.getReplicaStore().get("anidotnet@testSingleUserSingleReplica");
 
         await().atMost(5, SECONDS).until(() -> lastWriteWinMap.getCollection().find().size() == 1);
         Document doc = lastWriteWinMap.getCollection().find(where("firstName").eq("Anindya")).firstOrNull();
@@ -149,11 +155,13 @@ public class ReplicaTest {
         await().atMost(5, SECONDS).until(() -> lastWriteWinMap.getCollection().size() == 0);
         doc = lastWriteWinMap.getCollection().find(where("firstName").eq("Anindya")).firstOrNull();
         assertNull(doc);
+
+        replica.disconnectNow();
     }
 
     @Test
     public void testSingleUserMultiReplica() {
-        repository.getUserMap().put("anidotnet", "abcd");
+        mockRepository.getUserMap().put("anidotnet", "abcd");
 
         db = createDb(dbFile);
 
@@ -166,12 +174,14 @@ public class ReplicaTest {
             .of(c1)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testSingleUserMultiReplica")
             .jwtAuth("anidotnet", "abcd")
+            .replicaName("r1")
             .create();
 
         Replica r2 = Replica.builder()
             .of(c2)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testSingleUserMultiReplica")
             .jwtAuth("anidotnet", "abcd")
+            .replicaName("r2")
             .create();
 
         r1.connect();
@@ -200,6 +210,7 @@ public class ReplicaTest {
                     e.printStackTrace();
                 }
             }
+            System.out.println("All r1 data inserted");
         });
 
         executorService.submit(() -> {
@@ -212,9 +223,15 @@ public class ReplicaTest {
                     e.printStackTrace();
                 }
             }
+            System.out.println("All r2 data inserted");
         });
 
-        await().atMost(10, SECONDS).until(() -> c1.size() == 40);
+        await().atMost(10, SECONDS).until(() -> {
+            System.out.println("C1 Size - " + c1.size());
+            System.out.println(c1.find().toList());
+//            FIXME: Always coming as 30, check batch continue logic and scrutinize logs
+            return c1.size() == 40;
+        });
         assertEquals(c2.size(), 40);
 
         r1.disconnect();
@@ -254,13 +271,16 @@ public class ReplicaTest {
         await().atMost(10, SECONDS).until(() -> c2.size() == 0);
         await().atMost(5, SECONDS).until(() -> c1.size() == 0);
         TestUtils.assertEquals(c1, c2);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
     }
 
     @Test
     public void testMultiUserSingleReplica() {
-        repository.getUserMap().put("user1", "abcd");
-        repository.getUserMap().put("user2", "abcd");
-        repository.getUserMap().put("user3", "abcd");
+        mockRepository.getUserMap().put("user1", "abcd");
+        mockRepository.getUserMap().put("user2", "abcd");
+        mockRepository.getUserMap().put("user3", "abcd");
 
         Nitrite db1 = createDb();
         NitriteCollection c1 = db1.getCollection("testMultiUserSingleReplica");
@@ -318,12 +338,16 @@ public class ReplicaTest {
         TestUtils.assertNotEquals(c1, c2);
         TestUtils.assertNotEquals(c1, c3);
         TestUtils.assertNotEquals(c2, c3);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
+        r3.disconnectNow();
     }
 
     @Test
     public void testMultiUserMultiReplica() {
-        repository.getUserMap().put("user1", "abcd");
-        repository.getUserMap().put("user2", "abcd");
+        mockRepository.getUserMap().put("user1", "abcd");
+        mockRepository.getUserMap().put("user2", "abcd");
 
         Nitrite db1 = createDb();
         NitriteCollection c1 = db1.getCollection("testMultiUserSingleReplica1");
@@ -362,11 +386,13 @@ public class ReplicaTest {
         await().atMost(5, SECONDS).until(() -> c1.size() == 10 && c2.size() == 20);
 
         TestUtils.assertNotEquals(c1, c2);
+        r1.disconnectNow();
+        r2.disconnectNow();
     }
 
     @Test
     public void testSecurityInCorrectCredentials() {
-        repository.getUserMap().put("user", "abcd");
+        mockRepository.getUserMap().put("user", "abcd");
 
         Nitrite db1 = createDb();
         NitriteCollection c1 = db1.getCollection("testSecurity");
@@ -385,11 +411,12 @@ public class ReplicaTest {
 
         assertEquals(c1.size(), 10);
         await().atMost(5, SECONDS).until(() -> !r1.isConnected());
+        r1.disconnectNow();
     }
 
     @Test
     public void testCloseDbAndReconnect() {
-        repository.getUserMap().put("anidotnet", "abcd");
+        mockRepository.getUserMap().put("anidotnet", "abcd");
 
         db = createDb(dbFile);
 
@@ -497,11 +524,14 @@ public class ReplicaTest {
         await().atMost(10, SECONDS).until(() -> c2.size() == 0);
         await().atMost(5, SECONDS).until(() -> finalC.size() == 0);
         TestUtils.assertEquals(c1, c2);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
     }
 
     @Test
     public void testDelayedConnect() {
-        repository.getUserMap().put("anidotnet", "abcd");
+        mockRepository.getUserMap().put("anidotnet", "abcd");
 
         Nitrite db1 = createDb(dbFile);
         NitriteCollection c1 = db1.getCollection("testDelayedConnect");
@@ -532,11 +562,14 @@ public class ReplicaTest {
             .create();
         r2.connect();
         await().atMost(5, SECONDS).until(() -> c2.size() == 10);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
     }
 
     @Test
     public void testDelayedConnectRemoveAll() {
-        repository.getUserMap().put("anidotnet", "abcd");
+        mockRepository.getUserMap().put("anidotnet", "abcd");
 
         db = createDb(dbFile);
         NitriteCollection c1 = db.getCollection("testDelayedConnect");
@@ -544,21 +577,25 @@ public class ReplicaTest {
             .of(c1)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
             .jwtAuth("anidotnet", "abcd")
+            .replicaName("r1")
             .create();
 
         r1.connect();
+        System.out.println("r1 connected");
 
         for (int i = 0; i < 10; i++) {
             Document document = randomDocument();
             c1.insert(document);
         }
-        await().atMost(5, SECONDS).until(() -> c1.size() == 10);
+
         c1.remove(Filter.ALL);
+        System.out.println("Removed all");
         assertEquals(c1.size(), 0);
 
         r1.disconnect();
         r1.close();
         db.close();
+        System.out.println("r1 disconnected");
 
         Nitrite db2 = createDb();
         NitriteCollection c2 = db2.getCollection("testDelayedConnect");
@@ -566,8 +603,11 @@ public class ReplicaTest {
             .of(c2)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
             .jwtAuth("anidotnet", "abcd")
+            .replicaName("r2")
             .create();
+
         r2.connect();
+        System.out.println("r2 connected");
 
         for (int i = 0; i < 5; i++) {
             Document document = randomDocument();
@@ -580,18 +620,24 @@ public class ReplicaTest {
             .of(c3)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
             .jwtAuth("anidotnet", "abcd")
+            .replicaName("r1")
             .create();
 
         r1.connect();
-        await().atMost(5, SECONDS).until(() -> c3.size() == 5 && c2.size() == 5);
-        TestUtils.assertEquals(c3, c2);
-        LastWriteWinMap lastWriteWinMap = repository.getReplicaStore().get("anidotnet@testDelayedConnect");
-        assertEquals(lastWriteWinMap.getTombstones().size(), 10);
+        System.out.println("r1 connected again");
+        await().atMost(5, SECONDS).until(() -> {
+            List<Document> l1 = c3.find().toList().stream().map(TestUtils::trimMeta).collect(Collectors.toList());
+            List<Document> l2 = c2.find().toList().stream().map(TestUtils::trimMeta).collect(Collectors.toList());
+            return l1.equals(l2);
+        });
+
+        r1.disconnectNow();
+        r2.disconnectNow();
     }
 
     @Test
-    public void testGarbageCollect() throws InterruptedException {
-        repository.getUserMap().put("anidotnet", "abcd");
+    public void testGarbageCollect() {
+        mockRepository.getUserMap().put("anidotnet", "abcd");
         db = createDb(dbFile);
         NitriteCollection c1 = db.getCollection("testGarbageCollect");
         Replica r1 = Replica.builder()
@@ -614,7 +660,7 @@ public class ReplicaTest {
         r1.close();
         db.close();
 
-        repository.setGcTtl(1L);
+        mockRepository.setGcTtl(1L);
 
         db = createDb(dbFile);
         NitriteCollection c2 = db.getCollection("testGarbageCollect");
@@ -629,14 +675,16 @@ public class ReplicaTest {
         LastWriteWinMap lastWriteWinMap = getCrdt(r1);
 
         await().atMost(5, SECONDS).until(() -> c2.size() == 0
-            && lastWriteWinMap.getTombstones().size() == 0);
+            && lastWriteWinMap.getTombstoneMap().size() == 0);
+
+        r1.disconnectNow();
     }
 
     @SneakyThrows
     private LastWriteWinMap getCrdt(Replica replica) {
-        Field field = Replica.class.getDeclaredField("replicationTemplate");
+        Field field = Replica.class.getDeclaredField("replicatedCollection");
         field.setAccessible(true);
-        ReplicationTemplate replicationTemplate = (ReplicationTemplate) field.get(replica);
-        return replicationTemplate.getCrdt();
+        ReplicatedCollection replicatedCollection = (ReplicatedCollection) field.get(replica);
+        return replicatedCollection.getLastWriteWinMap();
     }
 }

@@ -19,13 +19,10 @@ package org.dizitart.no2.sync.handlers;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.sync.FeedJournal;
-import org.dizitart.no2.sync.MessageFactory;
-import org.dizitart.no2.sync.MessageTemplate;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import org.dizitart.no2.sync.Config;
+import org.dizitart.no2.sync.DataGateClient;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 import org.dizitart.no2.sync.crdt.LastWriteWinState;
-import org.dizitart.no2.sync.message.DataGateFeed;
 import org.dizitart.no2.sync.message.Receipt;
 
 import java.util.HashMap;
@@ -34,49 +31,39 @@ import java.util.HashSet;
 /**
  * @author Anindya Chatterjee
  */
-public interface JournalAware {
-    ReplicationTemplate getReplicationTemplate();
+public interface ReceiptLedgerAware {
+    NitriteCollection getCollection();
 
-    default FeedJournal getJournal() {
-        return getReplicationTemplate().getFeedJournal();
-    }
+    String getReplicaId();
 
-    default void retryFailed(Receipt receipt) {
-        if (shouldRetry(receipt)) {
-            LastWriteWinState state = createState(receipt);
+    LastWriteWinMap getLastWriteWinMap();
 
-            MessageFactory factory = getReplicationTemplate().getMessageFactory();
-            DataGateFeed feedMessage = factory.createFeedMessage(getReplicationTemplate().getConfig(),
-                getReplicationTemplate().getReplicaId(), state);
+    Config getConfig();
 
-            MessageTemplate messageTemplate = getReplicationTemplate().getMessageTemplate();
-            messageTemplate.sendMessage(feedMessage);
-        }
-    }
+    DataGateClient getDataGateClient();
 
     default LastWriteWinState createState(Receipt receipt) {
         LastWriteWinState state = new LastWriteWinState();
-        state.setTombstones(new HashMap<>());
-        state.setChanges(new HashSet<>());
+        state.setTombstoneMap(new HashMap<>());
+        state.setChangeSet(new HashSet<>());
 
-        NitriteCollection collection = getReplicationTemplate().getCollection();
-        LastWriteWinMap crdt = getReplicationTemplate().getCrdt();
+        NitriteCollection collection = getCollection();
 
         if (receipt != null) {
             if (receipt.getAdded() != null) {
                 for (String id : receipt.getAdded()) {
                     Document document = collection.getById(NitriteId.createId(id));
                     if (document != null) {
-                        state.getChanges().add(document);
+                        state.getChangeSet().add(document);
                     }
                 }
             }
 
             if (receipt.getRemoved() != null) {
                 for (String id : receipt.getRemoved()) {
-                    Long timestamp = crdt.getTombstones().get(NitriteId.createId(id));
+                    Long timestamp = getLastWriteWinMap().getTombstoneMap().get(NitriteId.createId(id));
                     if (timestamp != null) {
-                        state.getTombstones().put(id, timestamp);
+                        state.getTombstoneMap().put(id, timestamp);
                     }
                 }
             }

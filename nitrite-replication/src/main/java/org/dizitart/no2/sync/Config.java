@@ -20,12 +20,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import okhttp3.Request;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.sync.event.ReplicationEventListener;
 
 import java.net.Proxy;
-import java.util.concurrent.Callable;
+import java.util.List;
 
 /**
+ * Represents the replication configuration
+ *
  * @author Anindya Chatterjee
+ * @since 4.0.0
  */
 @Data
 public class Config {
@@ -39,5 +43,6 @@ public class Config {
     private Proxy proxy;
     private String authToken;
     private boolean acceptAllCertificates;
-    private Callable<Boolean> networkConnectivityChecker;
+    private List<ReplicationEventListener> eventListeners;
+    private String replicaName;
 }

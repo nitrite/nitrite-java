@@ -32,11 +32,11 @@ import java.util.Set;
 @Data
 public class LastWriteWinState {
     @JsonDeserialize(contentUsing = DocumentDeserializer.class)
-    private Set<Document> changes;
-    private Map<String, Long> tombstones;
+    private Set<Document> changeSet;
+    private Map<String, Long> tombstoneMap;
 
     public LastWriteWinState() {
-        changes = new LinkedHashSet<>();
-        tombstones = new LinkedHashMap<>();
+        changeSet = new LinkedHashSet<>();
+        tombstoneMap = new LinkedHashMap<>();
     }
 }

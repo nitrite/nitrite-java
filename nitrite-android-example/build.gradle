@@ -17,11 +17,11 @@
 buildscript {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.1'
+        classpath 'com.android.tools.build:gradle:4.2.0'
     }
 }
 
@@ -29,7 +29,7 @@ apply plugin: 'com.android.application'
 
 repositories {
     google()
-    jcenter()
+    mavenCentral()
 }
 
 android {
@@ -46,12 +46,12 @@ android {
         exclude 'META-INF/LGPL2.1'
     }
 
-    compileSdkVersion 28
+    compileSdkVersion 30
 
     defaultConfig {
         applicationId "org.dizitart.no2.example.android"
         minSdkVersion 19
-        targetSdkVersion 28
+        targetSdkVersion 30
         versionCode 1
         versionName "1.0"
 

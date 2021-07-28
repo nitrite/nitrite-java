@@ -20,20 +20,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Request;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.sync.event.ReplicationEventListener;
 import org.dizitart.no2.sync.module.DocumentModule;
 
 import java.math.BigInteger;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.Callable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * A builder api for creating a nitrite {@link Replica}.
+ *
  * @author Anindya Chatterjee.
+ * @since 4.0.0
  */
 public class ReplicaBuilder {
     private NitriteCollection collection;
-    private String replicationServer;
+    private String datagateServerUrl;
     private String authToken;
     private TimeSpan timeout;
     private TimeSpan debounce;
@@ -42,77 +47,167 @@ public class ReplicaBuilder {
     private ObjectMapper objectMapper;
     private Proxy proxy;
     private boolean acceptAllCertificates = false;
-    private Callable<Boolean> networkConnectivityChecker = () -> true;
+    private final List<ReplicationEventListener> eventListeners;
+    private String replicaName;
 
+    /**
+     * Instantiates a new {@link ReplicaBuilder}.
+     */
     ReplicaBuilder() {
         chunkSize = 10;
         timeout = new TimeSpan(5, TimeUnit.SECONDS);
         debounce = new TimeSpan(1, TimeUnit.SECONDS);
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new DocumentModule());
+        eventListeners = new ArrayList<>();
     }
 
+    /**
+     * Creates a replica of a {@link NitriteCollection}.
+     *
+     * @param collection the collection
+     * @return the replica builder
+     */
     public ReplicaBuilder of(NitriteCollection collection) {
         this.collection = collection;
         return this;
     }
 
+    /**
+     * Creates a replica of an {@link ObjectRepository}.
+     *
+     * @param repository the repository
+     * @return the replica builder
+     */
     public ReplicaBuilder of(ObjectRepository<?> repository) {
         return of(repository.getDocumentCollection());
     }
 
-    public ReplicaBuilder remote(String replicationServer) {
-        this.replicationServer = replicationServer;
+    /**
+     * Sets the remote datagate server url.
+     *
+     * @param datagateServerUrl the replication server
+     * @return the replica builder
+     */
+    public ReplicaBuilder remote(String datagateServerUrl) {
+        this.datagateServerUrl = datagateServerUrl;
         return this;
     }
 
+    /**
+     * Sets the JWT auth token and user name.
+     *
+     * @param userName  the user name
+     * @param authToken the auth token
+     * @return the replica builder
+     */
     public ReplicaBuilder jwtAuth(String userName, String authToken) {
         this.authToken = authToken;
         this.userName = userName;
         return this;
     }
 
+    /**
+     * Sets the basic auth token.
+     *
+     * @param userName the user name
+     * @param password the password
+     * @return the replica builder
+     */
     public ReplicaBuilder basicAuth(String userName, String password) {
         this.authToken = toHex(userName + ":" + password);
         this.userName = userName;
         return this;
     }
 
+    /**
+     * Sets the connection timeout.
+     *
+     * @param timeSpan the time span
+     * @return the replica builder
+     */
     public ReplicaBuilder timeout(TimeSpan timeSpan) {
         this.timeout = timeSpan;
         return this;
     }
 
+    /**
+     * Sets the chunk size of changes that will be transmitted.
+     *
+     * @param size the size
+     * @return the replica builder
+     */
     public ReplicaBuilder chunkSize(Integer size) {
         this.chunkSize = size;
         return this;
     }
 
+    /**
+     * Sets the debounce value.
+     *
+     * @param timeSpan the time span
+     * @return the replica builder
+     */
     public ReplicaBuilder debounce(TimeSpan timeSpan) {
         this.debounce = timeSpan;
         return this;
     }
 
+    /**
+     * Sets the {@link ObjectMapper} instance.
+     *
+     * @param objectMapper the object mapper
+     * @return the replica builder
+     */
     public ReplicaBuilder objectMapper(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         return this;
     }
 
+    /**
+     * Sets the proxy details.
+     *
+     * @param proxy the proxy
+     * @return the replica builder
+     */
     public ReplicaBuilder proxy(Proxy proxy) {
         this.proxy = proxy;
         return this;
     }
 
+    /**
+     * Sets a flag to accept all certificates.
+     *
+     * @param accept the accept
+     * @return the replica builder
+     */
     public ReplicaBuilder acceptAllCertificates(boolean accept) {
         this.acceptAllCertificates = accept;
         return this;
     }
 
-    public ReplicaBuilder networkConnectivityChecker(Callable<Boolean> callable) {
-        this.networkConnectivityChecker = callable;
+    /**
+     * Add a replication event listener to the replica.
+     *
+     * @param listener the listener
+     * @return the replica builder
+     */
+    public ReplicaBuilder addReplicationEventListener(ReplicationEventListener listener) {
+        this.eventListeners.add(listener);
         return this;
     }
 
+    public ReplicaBuilder replicaName(String name) {
+        this.replicaName = name;
+        return this;
+    }
+
+
+    /**
+     * Creates a {@link Replica}.
+     *
+     * @return the replica
+     */
     public Replica create() {
         if (collection != null) {
             Request.Builder builder = createRequestBuilder();
@@ -128,8 +223,11 @@ public class ReplicaBuilder {
             config.setProxy(proxy);
             config.setAcceptAllCertificates(acceptAllCertificates);
             config.setAuthToken(authToken);
-            config.setNetworkConnectivityChecker(networkConnectivityChecker);
-            return new Replica(config);
+            config.setEventListeners(eventListeners);
+            config.setReplicaName(replicaName);
+
+            ReplicatedCollection replicatedCollection = new ReplicatedCollection(config);
+            return new Replica(config, replicatedCollection);
         } else {
             throw new ReplicationException("no collection or repository has been specified for replication", true);
         }
@@ -137,7 +235,7 @@ public class ReplicaBuilder {
 
     private Request.Builder createRequestBuilder() {
         Request.Builder builder = new Request.Builder();
-        builder.url(replicationServer);
+        builder.url(datagateServerUrl);
         return builder;
     }
 

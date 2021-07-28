@@ -17,31 +17,24 @@
 package org.dizitart.no2.sync.handlers;
 
 import lombok.Getter;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import okhttp3.WebSocket;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.DataGateFeedAck;
 import org.dizitart.no2.sync.message.Receipt;
 
 /**
  * @author Anindya Chatterjee
  */
-@Getter
-public class DataGateFeedAckHandler implements MessageHandler<DataGateFeedAck>, JournalAware {
-    private final ReplicationTemplate replicationTemplate;
+public class DataGateFeedAckHandler implements MessageHandler<DataGateFeedAck> {
+    @Getter private final ReplicatedCollection replicatedCollection;
 
-    public DataGateFeedAckHandler(ReplicationTemplate replicationTemplate) {
-        this.replicationTemplate = replicationTemplate;
+    public DataGateFeedAckHandler(ReplicatedCollection replicatedCollection) {
+        this.replicatedCollection = replicatedCollection;
     }
 
     @Override
-    public void handleMessage(DataGateFeedAck message) {
+    public void handleMessage(WebSocket webSocket, DataGateFeedAck message) {
         Receipt receipt = message.getReceipt();
-
-        Receipt finalReceipt = getJournal().accumulate(receipt);
-        retryFailed(finalReceipt);
-
-        if (replicationTemplate.shouldAcceptCheckpoint()) {
-            Long time = message.getHeader().getTimestamp();
-            replicationTemplate.saveLastSyncTime(time);
-        }
+        replicatedCollection.getFeedLedger().writeOff(receipt);
     }
 }

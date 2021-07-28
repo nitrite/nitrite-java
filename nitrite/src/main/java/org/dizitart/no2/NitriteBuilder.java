@@ -134,7 +134,7 @@ public class NitriteBuilder {
      */
     public Nitrite openOrCreate(String username, String password) {
         this.nitriteConfig.autoConfigure();
-        Runtime.getRuntime().addShutdownHook(new Thread(ThreadPoolManager::shutdownThreadPools));
+        Runtime.getRuntime().addShutdownHook(new Thread(ThreadPoolManager::shutdownAllThreadPools));
         return new NitriteDatabase(username, password, nitriteConfig);
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.integration.server;
+package org.dizitart.no2.mock.server;
 
 
 import org.glassfish.tyrus.server.Server;
@@ -22,24 +22,24 @@ import org.glassfish.tyrus.server.Server;
 /**
  * @author Anindya Chatterjee
  */
-public class SimpleDataGateServer {
+public class MockDataGateServer {
     private final int port;
     private Server server;
-    private final Repository repository;
+    private final MockRepository mockRepository;
 
-    public SimpleDataGateServer(int port) {
+    public MockDataGateServer(int port) {
         this.port = port;
-        this.repository = Repository.getInstance();
+        this.mockRepository = MockRepository.getInstance();
     }
 
     public void start() throws Exception {
-        server = new Server("127.0.0.1", port, "", null, SimpleDataGateEndpoint.class);
+        server = new Server("127.0.0.1", port, "", null, MockDataGateEndpoint.class);
         server.start();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> server.stop()));
     }
 
     public void stop() {
         server.stop();
-        repository.reset();
+        mockRepository.reset();
     }
 }

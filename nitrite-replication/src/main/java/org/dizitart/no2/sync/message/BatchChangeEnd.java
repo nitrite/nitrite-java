@@ -17,14 +17,15 @@
 package org.dizitart.no2.sync.message;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
-public class BatchChangeEnd implements DataGateMessage {
+@EqualsAndHashCode(callSuper = true)
+public class BatchChangeEnd extends TimeBoundMessage implements DataGateMessage {
     private MessageHeader header;
-    private Long lastSynced;
     private Integer batchSize;
     private Integer debounce;
 }

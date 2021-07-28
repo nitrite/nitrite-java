@@ -34,14 +34,14 @@ public interface ReceiptAware extends DataGateMessage {
         Set<String> removed = new HashSet<>();
 
         if (getFeed() != null) {
-            if (getFeed().getChanges() != null) {
-                for (Document change : getFeed().getChanges()) {
+            if (getFeed().getChangeSet() != null) {
+                for (Document change : getFeed().getChangeSet()) {
                     added.add(change.getId().getIdValue());
                 }
             }
 
-            if (getFeed().getTombstones() != null) {
-                for (Map.Entry<String, Long> entry : getFeed().getTombstones().entrySet()) {
+            if (getFeed().getTombstoneMap() != null) {
+                for (Map.Entry<String, Long> entry : getFeed().getTombstoneMap().entrySet()) {
                     removed.add(entry.getKey());
                 }
             }

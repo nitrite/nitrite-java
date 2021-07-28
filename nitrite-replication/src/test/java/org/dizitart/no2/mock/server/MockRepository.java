@@ -14,38 +14,39 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.integration.server;
+package org.dizitart.no2.mock.server;
 
 import jakarta.websocket.Session;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.sync.crdt.LastWriteWinMap;
+import org.dizitart.no2.sync.FeedLedger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.dizitart.no2.integration.TestUtils.createDb;
+import static org.dizitart.no2.TestUtils.createDb;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
-public class Repository {
-    private static Repository instance = new Repository();
+public class MockRepository {
+    private static MockRepository instance = new MockRepository();
     private Map<String, List<String>> collectionReplicaMap;
     private Map<String, List<String>> userReplicaMap;
-    private Map<String, LastWriteWinMap> replicaStore;
+    private Map<String, ServerLastWriteWinMap> replicaStore;
+    private Map<String, FeedLedger> feedLedgerMap;
     private Nitrite db;
     private String serverId;
     private Set<Session> authorizedSessions;
     private Map<String, String> userMap;
     private Long gcTtl;
 
-    private Repository() {
+    private MockRepository() {
         reset();
     }
 
-    public static Repository getInstance() {
+    public static MockRepository getInstance() {
         return instance;
     }
 
@@ -55,6 +56,7 @@ public class Repository {
         replicaStore = new ConcurrentHashMap<>();
         authorizedSessions = new HashSet<>();
         userMap = new ConcurrentHashMap<>();
+        feedLedgerMap = new ConcurrentHashMap<>();
 
         db = createDb();
         serverId = UUID.randomUUID().toString();

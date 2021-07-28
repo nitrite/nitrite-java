@@ -1,79 +1,101 @@
 /*
- * Copyright (c) 2017-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.sync;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.WebSocket;
+import org.dizitart.no2.common.util.StringUtils;
+import org.dizitart.no2.sync.handlers.*;
 import org.dizitart.no2.sync.message.DataGateMessage;
-import org.dizitart.no2.sync.net.DataGateSocket;
 
 /**
  * @author Anindya Chatterjee
  */
 @Slf4j
-public class MessageTemplate implements AutoCloseable {
+public class MessageTemplate {
     private final Config config;
-    private final ReplicationTemplate replica;
-    private DataGateSocket dataGateSocket;
-    private MessageDispatcher dispatcher;
+    private final ReplicatedCollection replicatedCollection;
 
-    public MessageTemplate(Config config, ReplicationTemplate replica) {
+    public MessageTemplate(Config config, ReplicatedCollection replicatedCollection) {
         this.config = config;
-        this.replica = replica;
+        this.replicatedCollection = replicatedCollection;
     }
 
-    public void sendMessage(DataGateMessage message) {
-        if (dataGateSocket != null && dataGateSocket.isConnected()) {
-            if (!dataGateSocket.sendMessage(message)) {
-                throw new ReplicationException("failed to deliver message " + message, true);
-            }
+    public void validateMessage(DataGateMessage message) {
+        if (message == null) {
+            throw new ReplicationException("a null message is received for "
+                + replicatedCollection.getReplicaId(), true);
+        } else if (message.getHeader() == null) {
+            throw new ReplicationException("a message without header is received for "
+                + replicatedCollection.getReplicaId(), true);
+        } else if (StringUtils.isNullOrEmpty(message.getHeader().getCollection())) {
+            throw new ReplicationException("a message without collection info is received for "
+                + replicatedCollection.getReplicaId(), true);
+        } else if (message.getHeader().getMessageType() == null) {
+            throw new ReplicationException("a message without any type is received for "
+                + replicatedCollection.getReplicaId(), true);
         }
     }
 
-    public void openConnection() {
+    public <M extends DataGateMessage> void dispatchMessage(WebSocket webSocket, M message) {
+        MessageHandler<M> handler = findHandler(message);
+        if (handler != null) {
+            handler.handleMessage(webSocket, message);
+        }
+    }
+
+    public <M extends DataGateMessage> void postMessage(WebSocket webSocket, M message) {
         try {
-            dataGateSocket = new DataGateSocket(config);
-            dispatcher = new MessageDispatcher(config, replica);
-
-            dataGateSocket.setListener(dispatcher);
-            dataGateSocket.startConnect();
-        } catch (Exception e) {
-            log.error("Error while establishing connection from {}", getReplicaId(), e);
-            throw new ReplicationException("failed to open connection to server", e, true);
+            String text = config.getObjectMapper().writeValueAsString(message);
+            log.debug("Sending message to datagate server {}", text);
+            webSocket.send(text);
+        } catch (JsonProcessingException e) {
+            throw new ReplicationException("malformed datagate message", e, true);
         }
     }
 
-    public void closeConnection(String reason) {
-        if (dataGateSocket != null) {
-            dataGateSocket.stopConnect(reason);
+    @SuppressWarnings("unchecked")
+    private <M extends DataGateMessage> MessageHandler<M> findHandler(DataGateMessage message) {
+        switch (message.getHeader().getMessageType()) {
+            case Error:
+                return (MessageHandler<M>) new ErrorHandler();
+            case ConnectAck:
+                return (MessageHandler<M>) new ConnectAckHandler(replicatedCollection);
+            case Disconnect:
+                return (MessageHandler<M>) new DisconnectHandler(replicatedCollection);
+            case BatchChangeStart:
+                return (MessageHandler<M>) new BatchChangeStartHandler(replicatedCollection);
+            case BatchChangeContinue:
+                return (MessageHandler<M>) new BatchChangeContinueHandler(replicatedCollection);
+            case BatchChangeEnd:
+                return (MessageHandler<M>) new BatchChangeEndHandler(replicatedCollection);
+            case BatchAck:
+                return (MessageHandler<M>) new BatchAckHandler(replicatedCollection);
+            case BatchEndAck:
+                return (MessageHandler<M>) new BatchEndAckHandler(replicatedCollection);
+            case DataGateFeed:
+                return (MessageHandler<M>) new DataGateFeedHandler(replicatedCollection);
+            case DataGateFeedAck:
+                return (MessageHandler<M>) new DataGateFeedAckHandler(replicatedCollection);
+            default:
+                break;
         }
-    }
-
-    @Override
-    public void close() {
-        if (dataGateSocket != null) {
-            dataGateSocket.stopConnect("normal close");
-        }
-
-        if (dispatcher != null) {
-            dispatcher.close();
-        }
-    }
-
-    private String getReplicaId() {
-        return replica.getReplicaId();
+        return null;
     }
 }

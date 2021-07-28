@@ -16,30 +16,41 @@
 
 package org.dizitart.no2.sync.handlers;
 
-import org.dizitart.no2.sync.MessageTemplate;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import okhttp3.WebSocket;
 import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.DataGateClient;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.DataGateMessage;
 import org.dizitart.no2.sync.message.Receipt;
 import org.dizitart.no2.sync.message.ReceiptAware;
+import org.dizitart.no2.sync.message.TimeBoundMessage;
 
 /**
  * @author Anindya Chatterjee
  */
 public interface ReceiptAckSender<Ack extends DataGateMessage> {
-    ReplicationTemplate getReplicationTemplate();
+    ReplicatedCollection getReplicatedCollection();
 
     Ack createAck(String correlationId, Receipt receipt);
 
-    default void sendAck(ReceiptAware message) {
+    default void sendAck(WebSocket webSocket, ReceiptAware message) {
         if (message != null) {
             LastWriteWinState state = message.getFeed();
-            getReplicationTemplate().getCrdt().merge(state);
+            getReplicatedCollection().getLastWriteWinMap().merge(state);
 
             Receipt receipt = message.calculateReceipt();
-            Ack ack = createAck(message.getHeader().getId(), receipt);
-            MessageTemplate messageTemplate = getReplicationTemplate().getMessageTemplate();
-            messageTemplate.sendMessage(ack);
+            Ack ack = createAck(message.getHeader().getCorrelationId(), receipt);
+
+            if (ack instanceof TimeBoundMessage && message instanceof TimeBoundMessage) {
+                TimeBoundMessage timeBoundMessage = (TimeBoundMessage) message;
+                TimeBoundMessage timeBoundAck = (TimeBoundMessage) ack;
+
+                timeBoundAck.setStartTime(timeBoundMessage.getStartTime());
+                timeBoundAck.setEndTime(timeBoundMessage.getEndTime());
+            }
+
+            DataGateClient dataGateClient = getReplicatedCollection().getDataGateClient();
+            dataGateClient.sendMessage(webSocket, ack);
         }
     }
 }

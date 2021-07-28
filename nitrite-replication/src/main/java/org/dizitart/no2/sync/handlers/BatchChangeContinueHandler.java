@@ -16,9 +16,10 @@
 
 package org.dizitart.no2.sync.handlers;
 
-import lombok.Data;
+import lombok.Getter;
+import okhttp3.WebSocket;
 import org.dizitart.no2.sync.MessageFactory;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.BatchAck;
 import org.dizitart.no2.sync.message.BatchChangeContinue;
 import org.dizitart.no2.sync.message.Receipt;
@@ -26,23 +27,22 @@ import org.dizitart.no2.sync.message.Receipt;
 /**
  * @author Anindya Chatterjee
  */
-@Data
 public class BatchChangeContinueHandler implements MessageHandler<BatchChangeContinue>, ReceiptAckSender<BatchAck> {
-    private ReplicationTemplate replicationTemplate;
+    @Getter private final ReplicatedCollection replicatedCollection;
 
-    public BatchChangeContinueHandler(ReplicationTemplate replicationTemplate) {
-        this.replicationTemplate = replicationTemplate;
+    public BatchChangeContinueHandler(ReplicatedCollection replicatedCollection) {
+        this.replicatedCollection = replicatedCollection;
     }
 
     @Override
-    public void handleMessage(BatchChangeContinue message) {
-        sendAck(message);
+    public void handleMessage(WebSocket webSocket, BatchChangeContinue message) {
+        sendAck(webSocket, message);
     }
 
     @Override
     public BatchAck createAck(String correlationId, Receipt receipt) {
-        MessageFactory factory = replicationTemplate.getMessageFactory();
-        return factory.createBatchAck(replicationTemplate.getConfig(),
-            correlationId, replicationTemplate.getReplicaId(), receipt);
+        MessageFactory factory = new MessageFactory();
+        return factory.createBatchAck(replicatedCollection.getConfig(),
+            correlationId, replicatedCollection.getReplicaId(), receipt);
     }
 }

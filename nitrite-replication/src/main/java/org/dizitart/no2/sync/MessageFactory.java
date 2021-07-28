@@ -25,55 +25,56 @@ import java.util.UUID;
  * @author Anindya Chatterjee
  */
 public class MessageFactory {
-    public Connect createConnect(Config config, String replicaId) {
+    public Connect createConnect(Config config, String replicaId, String correlationId) {
         Connect message = new Connect();
         message.setHeader(createHeader(MessageType.Connect, config.getCollection().getName(),
-            "", replicaId, config.getUserName()));
+            correlationId, replicaId, config.getUserName()));
         message.setAuthToken(config.getAuthToken());
         return message;
     }
 
-    public Disconnect createDisconnect(Config config, String replicaId) {
+    public Disconnect createDisconnect(Config config, String replicaId, String correlationId) {
         Disconnect message = new Disconnect();
         message.setHeader(createHeader(MessageType.Disconnect, config.getCollection().getName(),
-            "", replicaId, config.getUserName()));
+            correlationId, replicaId, config.getUserName()));
         return message;
     }
 
-    public BatchChangeStart createChangeStart(Config config, String replicaId, String uuid) {
+    public BatchChangeStart createChangeStart(Config config, String replicaId, String correlationId) {
         BatchChangeStart message = new BatchChangeStart();
         message.setHeader(createHeader(MessageType.BatchChangeStart, config.getCollection().getName(),
-            uuid, replicaId, config.getUserName()));
+            correlationId, replicaId, config.getUserName()));
         message.setBatchSize(config.getChunkSize());
         message.setDebounce(config.getDebounce());
         return message;
     }
 
     public BatchChangeContinue createChangeContinue(Config config, String replicaId,
-                                                    String uuid, LastWriteWinState state) {
+                                                    String correlationId, LastWriteWinState state) {
         BatchChangeContinue message = new BatchChangeContinue();
         message.setHeader(createHeader(MessageType.BatchChangeContinue, config.getCollection().getName(),
-            uuid, replicaId, config.getUserName()));
+            correlationId, replicaId, config.getUserName()));
         message.setBatchSize(config.getChunkSize());
         message.setDebounce(config.getDebounce());
         message.setFeed(state);
         return message;
     }
 
-    public BatchChangeEnd createChangeEnd(Config config, String replicaId, String uuid, Long lastSyncTime) {
+    public BatchChangeEnd createChangeEnd(Config config, String replicaId,
+                                          String correlationId) {
         BatchChangeEnd message = new BatchChangeEnd();
         message.setHeader(createHeader(MessageType.BatchChangeEnd, config.getCollection().getName(),
-            uuid, replicaId, config.getUserName()));
+            correlationId, replicaId, config.getUserName()));
         message.setBatchSize(config.getChunkSize());
         message.setDebounce(config.getDebounce());
-        message.setLastSynced(lastSyncTime);
         return message;
     }
 
-    public DataGateFeed createFeedMessage(Config config, String replicaId, LastWriteWinState state) {
+    public DataGateFeed createFeedMessage(Config config, String replicaId,
+                                          String correlationId, LastWriteWinState state) {
         DataGateFeed feed = new DataGateFeed();
         feed.setHeader(createHeader(MessageType.DataGateFeed, config.getCollection().getName(),
-            "", replicaId, config.getUserName()));
+            correlationId, replicaId, config.getUserName()));
         feed.setFeed(state);
         return feed;
     }

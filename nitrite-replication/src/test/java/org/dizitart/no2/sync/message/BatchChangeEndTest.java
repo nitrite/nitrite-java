@@ -13,14 +13,14 @@ public class BatchChangeEndTest {
     @Test
     public void testEquals() {
         BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
-        batchChangeEnd.setLastSynced(0L);
+        batchChangeEnd.setEndTime(0L);
         assertFalse((new BatchChangeEnd()).equals(batchChangeEnd));
     }
 
     @Test
     public void testEquals10() {
         BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
-        batchChangeEnd.setLastSynced(0L);
+        batchChangeEnd.setEndTime(0L);
         assertFalse(batchChangeEnd.equals(new BatchChangeEnd()));
     }
 
@@ -104,8 +104,8 @@ public class BatchChangeEndTest {
     @Test
     public void testSetLastSynced() {
         BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
-        batchChangeEnd.setLastSynced(1L);
-        assertEquals(1L, batchChangeEnd.getLastSynced().longValue());
+        batchChangeEnd.setEndTime(1L);
+        assertEquals(1L, batchChangeEnd.getEndTime().longValue());
     }
 
     @Test

@@ -17,24 +17,23 @@
 package org.dizitart.no2.sync.handlers;
 
 import lombok.Getter;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import okhttp3.WebSocket;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.BatchEndAck;
-import org.dizitart.no2.sync.message.Receipt;
 
 /**
  * @author Anindya Chatterjee
  */
 @Getter
-public class BatchEndAckHandler implements MessageHandler<BatchEndAck>, JournalAware {
-    private final ReplicationTemplate replicationTemplate;
+public class BatchEndAckHandler implements MessageHandler<BatchEndAck> {
+    private final ReplicatedCollection replicatedCollection;
 
-    public BatchEndAckHandler(ReplicationTemplate replicationTemplate) {
-        this.replicationTemplate = replicationTemplate;
+    public BatchEndAckHandler(ReplicatedCollection replicatedCollection) {
+        this.replicatedCollection = replicatedCollection;
     }
 
     @Override
-    public void handleMessage(BatchEndAck message) {
-        Receipt finalReceipt = getJournal().getFinalReceipt();
-        retryFailed(finalReceipt);
+    public void handleMessage(WebSocket webSocket, BatchEndAck message) {
+        // nothing to be done here
     }
 }

@@ -16,8 +16,9 @@
 
 package org.dizitart.no2.sync.handlers;
 
-import org.dizitart.no2.sync.FeedJournal;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import okhttp3.WebSocket;
+import org.dizitart.no2.sync.FeedLedger;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.BatchAck;
 import org.dizitart.no2.sync.message.Receipt;
 
@@ -25,16 +26,18 @@ import org.dizitart.no2.sync.message.Receipt;
  * @author Anindya Chatterjee
  */
 public class BatchAckHandler implements MessageHandler<BatchAck> {
-    private final ReplicationTemplate replicationTemplate;
+    private final ReplicatedCollection replicatedCollection;
 
-    public BatchAckHandler(ReplicationTemplate replicationTemplate) {
-        this.replicationTemplate = replicationTemplate;
+    public BatchAckHandler(ReplicatedCollection replicatedCollection) {
+        this.replicatedCollection = replicatedCollection;
     }
 
     @Override
-    public void handleMessage(BatchAck message) {
+    public void handleMessage(WebSocket webSocket, BatchAck message) {
         Receipt receipt = message.getReceipt();
-        FeedJournal journal = replicationTemplate.getFeedJournal();
-        journal.accumulate(receipt);
+        FeedLedger feedLedger = replicatedCollection.getFeedLedger();
+        feedLedger.writeOff(receipt);
+        replicatedCollection.sendAndReceive(webSocket, message.getHeader().getCorrelationId(),
+            message.getHeader().getTimestamp());
     }
 }

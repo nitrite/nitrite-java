@@ -33,7 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.dizitart.no2.collection.Document.createDocument;
-import static org.dizitart.no2.integration.TestUtils.createDb;
+import static org.dizitart.no2.TestUtils.createDb;
 
 /**
  * @author Anindya Chatterjee
@@ -59,7 +59,7 @@ public class DataGateIntegrationTest {
 
             String jwt = getToken();
 
-            System.out.println("Token - " + jwt);
+            log.info("Token - " + jwt);
             Replica replica = Replica.builder()
                 .of(collection)
                 .remote("wss://127.0.0.1:3030/ws/datagate/abcd@gmail.com/datagateIntegration")
@@ -75,15 +75,9 @@ public class DataGateIntegrationTest {
 //            });
 
             replica.connect();
-            System.out.println("Connected");
             Thread.sleep(10000);
-            System.out.println("Completed");
-            System.out.println("Collection Size - " + collection.size());
-            for (Document d : collection.find()) {
-                System.out.println(d);
-            }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Exception during replication", e);
         } finally {
             try {
                 if (dbPath != null) {

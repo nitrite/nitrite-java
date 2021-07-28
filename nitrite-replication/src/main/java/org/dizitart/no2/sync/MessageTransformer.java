@@ -25,7 +25,7 @@ import org.dizitart.no2.sync.message.*;
  * @author Anindya Chatterjee
  */
 public class MessageTransformer {
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public MessageTransformer(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
