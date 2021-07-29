@@ -17,8 +17,6 @@
 
 package org.dizitart.no2.common.streams;
 
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -33,8 +31,8 @@ import java.util.NoSuchElementException;
  * @since 1.0
  * @author Anindya Chatterjee.
  */
-public class BoundedDocumentStream implements RecordStream<Pair<NitriteId, Document>> {
-    private final RecordStream<Pair<NitriteId, Document>> recordStream;
+public class BoundedStream<Key, Value> implements RecordStream<Pair<Key, Value>> {
+    private final RecordStream<Pair<Key, Value>> recordStream;
     private final long skip;
     private final long limit;
 
@@ -45,7 +43,7 @@ public class BoundedDocumentStream implements RecordStream<Pair<NitriteId, Docum
      * @param limit        the limit
      * @param recordStream the record stream
      */
-    public BoundedDocumentStream(Long skip, Long limit, RecordStream<Pair<NitriteId, Document>> recordStream) {
+    public BoundedStream(Long skip, Long limit, RecordStream<Pair<Key, Value>> recordStream) {
         this.skip = skip;
         this.limit = limit;
 
@@ -60,8 +58,8 @@ public class BoundedDocumentStream implements RecordStream<Pair<NitriteId, Docum
     }
 
     @Override
-    public Iterator<Pair<NitriteId, Document>> iterator() {
-        Iterator<Pair<NitriteId, Document>> iterator = recordStream == null ? Collections.emptyIterator()
+    public Iterator<Pair<Key, Value>> iterator() {
+        Iterator<Pair<Key, Value>> iterator = recordStream == null ? Collections.emptyIterator()
             : recordStream.iterator();
         return new BoundedIterator<>(iterator, skip, limit);
     }

@@ -128,7 +128,7 @@ public class BatchChangeSender {
         this.feedLedger = replicatedCollection.getFeedLedger();
         this.messageFactory = new MessageFactory();
         this.hasMore = true;
-        this.offset = config.getChunkSize();
+        this.offset = 0;
         this.currentState = State.ReadyToSend;
         this.lastSyncTime = replicatedCollection.getLastSyncTime();
         this.endTime = null;

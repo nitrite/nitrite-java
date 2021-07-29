@@ -160,9 +160,9 @@ public class ConfigTest {
         Config config = new Config();
         config.setProxy(proxy);
         assertEquals(
-            "Config(collection=null, chunkSize=null, userName=null, debounce=null, objectMapper=null, timeout=null,"
-                + " requestBuilder=null, proxy=HTTP @ 0.0.0.0/0.0.0.0:1, authToken=null, acceptAllCertificates=false,"
-                + " networkConnectivityChecker=null)",
+            "Config(collection=null, chunkSize=null, userName=null, debounce=null, objectMapper=null, " +
+                "timeout=null, requestBuilder=null, proxy=HTTP @ 0.0.0.0/0.0.0.0:1, authToken=null, " +
+                "acceptAllCertificates=false, eventListeners=null, replicaName=null)",
             config.toString());
     }
 
@@ -179,9 +179,9 @@ public class ConfigTest {
         TimeSpan timeout = new TimeSpan(10L, TimeUnit.NANOSECONDS);
         Config config = new Config();
         config.setTimeout(timeout);
-        assertEquals("Config(collection=null, chunkSize=null, userName=null, debounce=null, objectMapper=null, timeout"
-            + "=TimeSpan(time=10, timeUnit=NANOSECONDS), requestBuilder=null, proxy=null, authToken=null, acceptAll"
-            + "Certificates=false, networkConnectivityChecker=null)", config.toString());
+        assertEquals("Config(collection=null, chunkSize=null, userName=null, debounce=null, objectMapper=null, " +
+            "timeout=TimeSpan(time=10, timeUnit=NANOSECONDS), requestBuilder=null, proxy=null, authToken=null, " +
+            "acceptAllCertificates=false, eventListeners=null, replicaName=null)", config.toString());
     }
 
     @Test
@@ -194,9 +194,9 @@ public class ConfigTest {
     @Test
     public void testToString() {
         assertEquals(
-            "Config(collection=null, chunkSize=null, userName=null, debounce=null, objectMapper=null, timeout=null,"
-                + " requestBuilder=null, proxy=null, authToken=null, acceptAllCertificates=false, networkConnectivityChecker"
-                + "=null)",
+            "Config(collection=null, chunkSize=null, userName=null, debounce=null, objectMapper=null, " +
+                "timeout=null, requestBuilder=null, proxy=null, authToken=null, acceptAllCertificates=false, " +
+                "eventListeners=null, replicaName=null)",
             (new Config()).toString());
     }
 }

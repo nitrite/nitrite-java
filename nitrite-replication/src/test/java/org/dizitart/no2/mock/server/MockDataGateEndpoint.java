@@ -193,14 +193,13 @@ public class MockDataGateEndpoint {
     }
 
     protected void handleBatchChangeStart(Session session, BatchChangeStart batchChangeStart) throws IOException {
-        log.debug("BatchChangeStart message received " + batchChangeStart);
         DataGateFeed feed = new DataGateFeed();
 
         String userName = batchChangeStart.getHeader().getUserName();
         String collection = userName + "@" + batchChangeStart.getHeader().getCollection();
         String replicaId = batchChangeStart.getHeader().getOrigin();
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
-        replica.merge(batchChangeStart.getFeed());
+        replica.merge(batchChangeStart.getFeed(), batchChangeStart.getEndTime());
 
         feed.setHeader(createHeader(MessageType.DataGateFeed, batchChangeStart.getHeader().getCollection(),
             userName, replicaId, batchChangeStart.getHeader().getCorrelationId()));
@@ -224,7 +223,7 @@ public class MockDataGateEndpoint {
         String collection = userName + "@" + batchChangeContinue.getHeader().getCollection();
         String replicaId = batchChangeContinue.getHeader().getOrigin();
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
-        replica.merge(batchChangeContinue.getFeed());
+        replica.merge(batchChangeContinue.getFeed(), batchChangeContinue.getEndTime());
 
         feed.setHeader(createHeader(MessageType.DataGateFeed, batchChangeContinue.getHeader().getCollection(),
             userName, replicaId, batchChangeContinue.getHeader().getCorrelationId()));
@@ -298,7 +297,7 @@ public class MockDataGateEndpoint {
         if (hasMore) {
             BatchChangeContinue message = new BatchChangeContinue();
             message.setHeader(createHeader(MessageType.BatchChangeContinue,
-                collection, userName, mockRepository.getServerId(), ""));
+                collection, userName, mockRepository.getServerId(), batchAck.getHeader().getCorrelationId()));
             message.setFeed(changesSince);
             message.setBatchSize(batchSize);
             message.setDebounce(debounce);
@@ -371,10 +370,10 @@ public class MockDataGateEndpoint {
 
 
     private MessageHeader createHeader(MessageType messageType, String collection,
-                                       String userName, String origin, String corrId) {
+                                       String userName, String origin, String correlationId) {
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.setId(UUID.randomUUID().toString());
-        messageHeader.setCorrelationId(corrId);
+        messageHeader.setCorrelationId(correlationId);
         messageHeader.setCollection(collection);
         messageHeader.setMessageType(messageType);
         messageHeader.setOrigin(origin);

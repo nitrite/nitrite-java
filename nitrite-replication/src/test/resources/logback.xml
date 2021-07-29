@@ -27,5 +27,6 @@
     <logger name="org.dizitart" level="INFO" />
     <logger name="org.dizitart.no2.sync" level="DEBUG" />
     <logger name="org.dizitart.no2.mock" level="DEBUG" />
+    <logger name="org.dizitart.no2.mock.server" level="OFF" />
     <logger name="org.dizitart.no2.integration" level="DEBUG" />
 </configuration>

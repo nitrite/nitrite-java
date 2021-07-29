@@ -19,7 +19,7 @@
           xmlns:tools="http://schemas.android.com/tools" package="org.dizitart.no2.example.android">
 
     <application
-        android:name="android.support.multidex.MultiDexApplication"
+        android:name="androidx.multidex.MultiDexApplication"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"

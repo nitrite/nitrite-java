@@ -80,8 +80,8 @@ public class DataGateClient extends WebSocketListener {
     @Override
     public void onMessage(@NotNull WebSocket webSocket, @NotNull String text) {
         try {
+            log.debug("Received message from server {}", text);
             DataGateMessage message = transformer.transform(text);
-            log.debug("Received message from server " + message);
             messageTemplate.validateMessage(message);
             messageTemplate.dispatchMessage(webSocket, message);
         } catch (Exception e) {
@@ -113,7 +113,6 @@ public class DataGateClient extends WebSocketListener {
     public <M extends DataGateMessage> void sendMessage(WebSocket webSocket, M message) {
         try {
             if (replicatedCollection.isConnected()) {
-                log.debug("Sending message to server " + message);
                 messageTemplate.postMessage(webSocket, message);
             } else {
                 throw new IllegalStateException("datagate client is not connected");
@@ -126,7 +125,7 @@ public class DataGateClient extends WebSocketListener {
     }
 
     public void closeConnection(WebSocket webSocket, String reason) {
-        log.debug("Closing connection due to " + reason);
+        log.debug("Closing connection due to {}", reason);
         replicatedCollection.setConnected(false);
         if (webSocket != null) {
             webSocket.close(WebSocketCode.NORMAL_CLOSE, reason);

@@ -96,8 +96,9 @@ public class BatchChangeStartTest {
     public void testSetFeed() {
         BatchChangeStart batchChangeStart = new BatchChangeStart();
         batchChangeStart.setFeed(new LastWriteWinState());
-        assertEquals("BatchChangeStart(header=null, batchSize=null, debounce=null, feed=LastWriteWinState(changes=[],"
-                + " tombstones={}))", batchChangeStart.toString());
+        assertEquals("BatchChangeStart(super=TimeBoundMessage(startTime=null, endTime=null), header=null, " +
+            "batchSize=null, debounce=null, feed=LastWriteWinState(changeSet=[], tombstoneMap={}))",
+            batchChangeStart.toString());
     }
 
     @Test
@@ -105,14 +106,16 @@ public class BatchChangeStartTest {
         BatchChangeStart batchChangeStart = new BatchChangeStart();
         batchChangeStart.setHeader(new MessageHeader());
         assertEquals(
-                "BatchChangeStart(header=MessageHeader(id=null, correlationId=null, collection=null, userName=null,"
-                        + " timestamp=null, messageType=null, origin=null), batchSize=null, debounce=null, feed=null)",
+                "BatchChangeStart(super=TimeBoundMessage(startTime=null, endTime=null), header=MessageHeader" +
+                    "(id=null, correlationId=null, collection=null, userName=null, timestamp=null, messageType=null, " +
+                    "origin=null), batchSize=null, debounce=null, feed=null)",
                 batchChangeStart.toString());
     }
 
     @Test
     public void testToString() {
-        assertEquals("BatchChangeStart(header=null, batchSize=null, debounce=null, feed=null)",
+        assertEquals("BatchChangeStart(super=TimeBoundMessage(startTime=null, endTime=null), header=null, " +
+                "batchSize=null, debounce=null, feed=null)",
                 (new BatchChangeStart()).toString());
     }
 }

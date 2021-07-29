@@ -72,7 +72,7 @@ public class DataGateFeedTest {
     public void testSetFeed() {
         DataGateFeed dataGateFeed = new DataGateFeed();
         dataGateFeed.setFeed(new LastWriteWinState());
-        assertEquals("DataGateFeed(header=null, feed=LastWriteWinState(changes=[], tombstones={}))",
+        assertEquals("DataGateFeed(header=null, feed=LastWriteWinState(changeSet=[], tombstoneMap={}))",
                 dataGateFeed.toString());
     }
 

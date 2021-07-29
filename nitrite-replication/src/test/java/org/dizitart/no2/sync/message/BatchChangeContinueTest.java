@@ -97,8 +97,8 @@ public class BatchChangeContinueTest {
     public void testSetFeed() {
         BatchChangeContinue batchChangeContinue = new BatchChangeContinue();
         batchChangeContinue.setFeed(new LastWriteWinState());
-        assertEquals("BatchChangeContinue(header=null, feed=LastWriteWinState(changes=[], tombstones={}), batchSize=null,"
-            + " debounce=null)", batchChangeContinue.toString());
+        assertEquals("BatchChangeContinue(header=null, feed=LastWriteWinState(changeSet=[], tombstoneMap={}), " +
+            "batchSize=null, debounce=null)", batchChangeContinue.toString());
     }
 
     @Test

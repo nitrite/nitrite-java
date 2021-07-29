@@ -153,7 +153,7 @@ class ReadOperations {
             if (findPlan.getLimit() != null || findPlan.getSkip() != null) {
                 long limit = findPlan.getLimit() == null ? Long.MAX_VALUE : findPlan.getLimit();
                 long skip = findPlan.getSkip() == null ? 0 : findPlan.getSkip();
-                rawStream = new BoundedDocumentStream(skip, limit, rawStream);
+                rawStream = new BoundedStream<>(skip, limit, rawStream);
             }
         }
 

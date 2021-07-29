@@ -96,8 +96,8 @@ public class BatchChangeEndTest {
         BatchChangeEnd batchChangeEnd = new BatchChangeEnd();
         batchChangeEnd.setHeader(new MessageHeader());
         assertEquals(
-            "BatchChangeEnd(header=MessageHeader(id=null, correlationId=null, collection=null, userName=null,"
-                + " timestamp=null, messageType=null, origin=null), lastSynced=null, batchSize=null, debounce=null)",
+            "BatchChangeEnd(header=MessageHeader(id=null, correlationId=null, collection=null, userName=null, " +
+                "timestamp=null, messageType=null, origin=null), batchSize=null, debounce=null)",
             batchChangeEnd.toString());
     }
 
@@ -110,7 +110,7 @@ public class BatchChangeEndTest {
 
     @Test
     public void testToString() {
-        assertEquals("BatchChangeEnd(header=null, lastSynced=null, batchSize=null, debounce=null)",
+        assertEquals("BatchChangeEnd(header=null, batchSize=null, debounce=null)",
             (new BatchChangeEnd()).toString());
     }
 }

@@ -17,13 +17,11 @@
 package org.dizitart.no2.sync.message;
 
 import lombok.Data;
-import lombok.ToString;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
-@ToString(onlyExplicitlyIncluded = true)
 public class MessageHeader {
     private String id;
     private String correlationId;

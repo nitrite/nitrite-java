@@ -43,7 +43,15 @@ public class MockRepository {
     private Long gcTtl;
 
     private MockRepository() {
-        reset();
+        collectionReplicaMap = new ConcurrentHashMap<>();
+        userReplicaMap = new ConcurrentHashMap<>();
+        replicaStore = new ConcurrentHashMap<>();
+        authorizedSessions = new HashSet<>();
+        userMap = new ConcurrentHashMap<>();
+        feedLedgerMap = new ConcurrentHashMap<>();
+        db = createDb();
+        serverId = UUID.randomUUID().toString();
+        gcTtl = 0L;
     }
 
     public static MockRepository getInstance() {
@@ -51,15 +59,6 @@ public class MockRepository {
     }
 
     public void reset() {
-        collectionReplicaMap = new ConcurrentHashMap<>();
-        userReplicaMap = new ConcurrentHashMap<>();
-        replicaStore = new ConcurrentHashMap<>();
-        authorizedSessions = new HashSet<>();
-        userMap = new ConcurrentHashMap<>();
-        feedLedgerMap = new ConcurrentHashMap<>();
-
-        db = createDb();
-        serverId = UUID.randomUUID().toString();
-        gcTtl = 0L;
+        instance = new MockRepository();
     }
 }

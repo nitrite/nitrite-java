@@ -67,13 +67,6 @@ public class DataGateIntegrationTest {
                 .acceptAllCertificates(true)
                 .create();
 
-//            replica.subscribe(event -> {
-//                if (event.getEventType() == ReplicationEventType.Stopped) {
-//                    System.out.println("Reconnecting");
-//                    replica.connect();
-//                }
-//            });
-
             replica.connect();
             Thread.sleep(10000);
         } catch (Exception e) {

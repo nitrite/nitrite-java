@@ -22,6 +22,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.streams.BoundedStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 
@@ -58,33 +59,30 @@ public class LastWriteWinMap {
                 remove(NitriteId.createId(entry.getKey()), entry.getValue());
             }
         }
-
-        log.debug("Collection after merge - " + collection.find().toList());
-        log.debug("Tombstone after merge - " + tombstoneMap.entries().toList());
     }
 
     public LastWriteWinState getChangesSince(Long startTime, Long endTime,
                                              int offset, int size) {
         LastWriteWinState state = new LastWriteWinState();
 
+        BoundedStream<NitriteId, Long> stream
+            = new BoundedStream<>((long) offset, (long) size, tombstoneMap.entries());
+
+        for (Pair<NitriteId, Long> entry : stream) {
+            Long syncTimestamp = entry.getSecond();
+            if (syncTimestamp > startTime && syncTimestamp <= endTime) {
+                state.getTombstoneMap().put(entry.getFirst().getIdValue(),
+                    entry.getSecond());
+            }
+        }
+
         DocumentCursor cursor = collection.find(
             and(
-                where(DOC_MODIFIED).gte(startTime),
+                where(DOC_MODIFIED).gt(startTime),
                 where(DOC_MODIFIED).lte(endTime)
             ), skipBy(offset).limit(size));
 
         state.getChangeSet().addAll(cursor.toSet());
-
-        // send tombstone info in first batch only
-        if (offset == 0) {
-            // don't repeat for other offsets
-            for (Pair<NitriteId, Long> entry : tombstoneMap.entries()) {
-                Long timestamp = entry.getSecond();
-                if (timestamp > startTime && timestamp <= endTime) {
-                    state.getTombstoneMap().put(entry.getFirst().getIdValue(), entry.getSecond());
-                }
-            }
-        }
 
         return state;
     }
@@ -127,9 +125,8 @@ public class LastWriteWinMap {
         Document entry = collection.getById(key);
         if (entry != null) {
             entry.put(DOC_SOURCE, REPLICATOR);
-
-            log.debug("Removing {} from collection for tombstone", key.getIdValue());
             collection.remove(entry);
+
             tombstoneMap.put(key, timestamp);
         }
     }

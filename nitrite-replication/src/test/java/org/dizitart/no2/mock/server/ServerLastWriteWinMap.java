@@ -23,12 +23,15 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.streams.BoundedStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.sync.crdt.LastWriteWinState;
 import org.dizitart.no2.sync.crdt.Tombstone;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.dizitart.no2.collection.FindOptions.skipBy;
 import static org.dizitart.no2.common.Constants.*;
@@ -49,7 +52,7 @@ public class ServerLastWriteWinMap {
         this.tombstoneMap = tombstoneMap;
     }
 
-    public void merge(LastWriteWinState snapshot) {
+    public void merge(LastWriteWinState snapshot, Long syncTime) {
         if (snapshot.getChangeSet() != null) {
             for (Document entry : snapshot.getChangeSet()) {
                 put(entry);
@@ -58,36 +61,37 @@ public class ServerLastWriteWinMap {
 
         if (snapshot.getTombstoneMap() != null) {
             for (Map.Entry<String, Long> entry : snapshot.getTombstoneMap().entrySet()) {
-                remove(NitriteId.createId(entry.getKey()), entry.getValue());
+                remove(NitriteId.createId(entry.getKey()), entry.getValue(), syncTime);
             }
         }
-
-        log.debug("Server Collection after merge - " + collection.find().toList());
-        log.debug("Server Tombstone after merge - " + tombstoneMap.entries().toList());
     }
 
     public LastWriteWinState getChangesSince(Long startTime, Long endTime, int offset, int size) {
         LastWriteWinState state = new LastWriteWinState();
 
+        // send tombstone info
+        BoundedStream<NitriteId, Tombstone> stream
+            = new BoundedStream<>((long) offset, (long) size, tombstoneMap.entries());
+
+        for (Pair<NitriteId, Tombstone> entry : stream) {
+            Long syncTimestamp = entry.getSecond().getSyncTimestamp();
+            if (syncTimestamp > startTime && syncTimestamp <= endTime) {
+                state.getTombstoneMap().put(entry.getFirst().getIdValue(),
+                    entry.getSecond().getDeleteTimestamp());
+            }
+        }
+
         DocumentCursor cursor = collection.find(
             and(
-                where("_synced").gte(startTime),
+                where("_synced").gt(startTime),
                 where("_synced").lte(endTime)
             ), skipBy(offset).limit(size));
 
-        state.getChangeSet().addAll(cursor.toSet());
+        Set<Document> documents = cursor.toSet().stream()
+            .peek(document -> document.remove("_synced"))
+            .collect(Collectors.toSet());
 
-        // send tombstone info in first batch only
-        if (offset == 0) {
-            // don't repeat for other offsets
-            for (Pair<NitriteId, Tombstone> entry : tombstoneMap.entries()) {
-                Long syncTimestamp = entry.getSecond().getSyncTimestamp();
-                if (syncTimestamp > startTime && syncTimestamp <= endTime) {
-                    state.getTombstoneMap().put(entry.getFirst().getIdValue(),
-                        entry.getSecond().getDeleteTimestamp());
-                }
-            }
-        }
+        state.getChangeSet().addAll(documents);
 
         return state;
     }
@@ -127,17 +131,15 @@ public class ServerLastWriteWinMap {
         }
     }
 
-    private void remove(NitriteId key, long timestamp) {
+    private void remove(NitriteId key, long timestamp, long syncTime) {
         Document entry = collection.getById(key);
         if (entry != null) {
             entry.put(DOC_SOURCE, REPLICATOR);
-
-            log.debug("Removing {} from collection for tombstone", key.getIdValue());
             collection.remove(entry);
             Tombstone tombstone = new Tombstone();
             tombstone.setNitriteId(key);
             tombstone.setDeleteTimestamp(timestamp);
-            tombstone.setSyncTimestamp(System.currentTimeMillis());
+            tombstone.setSyncTimestamp(syncTime);
             tombstoneMap.put(key, tombstone);
         } else {
             log.debug("No entry found to remove");

@@ -25,13 +25,13 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.StringUtils;
+import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 import org.dizitart.no2.sync.crdt.LastWriteWinState;
 import org.dizitart.no2.sync.event.CollectionChangeListener;
-import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
-import org.dizitart.no2.sync.net.DataGateSocket;
 import org.dizitart.no2.sync.handlers.ReceiptLedgerAware;
 import org.dizitart.no2.sync.message.Receipt;
+import org.dizitart.no2.sync.net.DataGateSocket;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -62,7 +62,7 @@ public class ReplicatedCollection implements ConflictFreeReplicatedDataType, Rec
     }
 
     public void startReplication() {
-        log.debug("Starting replication for " + getReplicaId());
+        log.debug("Starting replication for {}", getReplicaId());
         DataGateSocket dataGateSocket = new DataGateSocket(config);
         dataGateClient = new DataGateClient(config, this);
         batchChangeSender = new BatchChangeSender(config, this, dataGateClient);
@@ -85,6 +85,7 @@ public class ReplicatedCollection implements ConflictFreeReplicatedDataType, Rec
     public void collectGarbage(Long ttl) {
         if (ttl != null && ttl > 0) {
             long collectTime = System.currentTimeMillis() - ttl;
+
             if (lastWriteWinMap != null && lastWriteWinMap.getTombstoneMap() != null) {
                 Set<NitriteId> removeSet = new HashSet<>();
                 for (Pair<NitriteId, Long> entry : lastWriteWinMap.getTombstoneMap().entries()) {

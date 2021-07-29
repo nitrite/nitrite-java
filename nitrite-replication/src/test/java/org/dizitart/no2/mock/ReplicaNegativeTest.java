@@ -103,9 +103,4 @@ public class ReplicaNegativeTest {
         server.stop();
         await().atMost(5, SECONDS).until(() -> !r1.isConnected());
     }
-
-    /*
-     * 1. Server close and again restarted
-     * 2. Connectivity check with with atomic counter
-     * */
 }

@@ -30,22 +30,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
-public class BoundedDocumentStreamTest {
+public class BoundedStreamTest {
     @Test
     public void testConstructor() {
-        new BoundedDocumentStream(1L, 1L, (RecordStream<Pair<NitriteId, Document>>) mock(RecordStream.class));
+        new BoundedStream<>(1L, 1L, (RecordStream<Pair<NitriteId, Document>>) mock(RecordStream.class));
     }
 
     @Test
     public void testConstructor2() {
         assertThrows(ValidationException.class,
-                () -> new BoundedDocumentStream(-1L, 1L, (RecordStream<Pair<NitriteId, Document>>) mock(RecordStream.class)));
+                () -> new BoundedStream<>(-1L, 1L, (RecordStream<Pair<NitriteId, Document>>) mock(RecordStream.class)));
     }
 
     @Test
     public void testConstructor3() {
         assertThrows(ValidationException.class,
-                () -> new BoundedDocumentStream(1L, -1L, (RecordStream<Pair<NitriteId, Document>>) mock(RecordStream.class)));
+                () -> new BoundedStream<>(1L, -1L, (RecordStream<Pair<NitriteId, Document>>) mock(RecordStream.class)));
     }
 
     @Test
@@ -65,7 +65,8 @@ public class BoundedDocumentStreamTest {
             }
         };
 
-        BoundedDocumentStream stream = new BoundedDocumentStream(2L, 1L, recordStream);
+        BoundedStream<NitriteId, Document> stream
+            = new BoundedStream<>(2L, 1L, recordStream);
 
         for (Pair<NitriteId, Document> pair : stream) {
             assertEquals(3, (int) pair.getSecond().get("value", Integer.class));

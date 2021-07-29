@@ -68,7 +68,8 @@ public class ReplicaTest {
     private Nitrite db;
 
     public static String getRandomTempDbFile() {
-        String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";
+        String dataDir = System.getProperty("java.io.tmpdir") + File.separator
+            + "nitrite" + File.separator + "data";
         File file = new File(dataDir);
         if (!file.exists()) {
             assertTrue(file.mkdirs());
@@ -210,7 +211,6 @@ public class ReplicaTest {
                     e.printStackTrace();
                 }
             }
-            System.out.println("All r1 data inserted");
         });
 
         executorService.submit(() -> {
@@ -223,15 +223,10 @@ public class ReplicaTest {
                     e.printStackTrace();
                 }
             }
-            System.out.println("All r2 data inserted");
         });
 
-        await().atMost(10, SECONDS).until(() -> {
-            System.out.println("C1 Size - " + c1.size());
-            System.out.println(c1.find().toList());
-//            FIXME: Always coming as 30, check batch continue logic and scrutinize logs
-            return c1.size() == 40;
-        });
+
+        await().atMost(10, SECONDS).until(() -> c1.size() == 40);
         assertEquals(c2.size(), 40);
 
         r1.disconnect();
@@ -269,7 +264,8 @@ public class ReplicaTest {
         });
 
         await().atMost(10, SECONDS).until(() -> c2.size() == 0);
-        await().atMost(5, SECONDS).until(() -> c1.size() == 0);
+
+        await().atMost(10, SECONDS).until(() -> c1.size() == 0);
         TestUtils.assertEquals(c1, c2);
 
         r1.disconnectNow();
@@ -581,7 +577,6 @@ public class ReplicaTest {
             .create();
 
         r1.connect();
-        System.out.println("r1 connected");
 
         for (int i = 0; i < 10; i++) {
             Document document = randomDocument();
@@ -589,13 +584,11 @@ public class ReplicaTest {
         }
 
         c1.remove(Filter.ALL);
-        System.out.println("Removed all");
         assertEquals(c1.size(), 0);
 
         r1.disconnect();
         r1.close();
         db.close();
-        System.out.println("r1 disconnected");
 
         Nitrite db2 = createDb();
         NitriteCollection c2 = db2.getCollection("testDelayedConnect");
@@ -607,7 +600,6 @@ public class ReplicaTest {
             .create();
 
         r2.connect();
-        System.out.println("r2 connected");
 
         for (int i = 0; i < 5; i++) {
             Document document = randomDocument();
@@ -624,7 +616,7 @@ public class ReplicaTest {
             .create();
 
         r1.connect();
-        System.out.println("r1 connected again");
+
         await().atMost(5, SECONDS).until(() -> {
             List<Document> l1 = c3.find().toList().stream().map(TestUtils::trimMeta).collect(Collectors.toList());
             List<Document> l2 = c2.find().toList().stream().map(TestUtils::trimMeta).collect(Collectors.toList());
@@ -653,14 +645,19 @@ public class ReplicaTest {
             c1.insert(document);
         }
         await().atMost(5, SECONDS).until(() -> c1.size() == 10);
+
         c1.remove(Filter.ALL);
         assertEquals(c1.size(), 0);
+
+        final LastWriteWinMap lastWriteWinMap = getCrdt(r1);
+        await().atMost(5, SECONDS).until(() -> c1.size() == 0
+            && lastWriteWinMap.getTombstoneMap().size() == 10);
 
         r1.disconnect();
         r1.close();
         db.close();
 
-        mockRepository.setGcTtl(1L);
+        mockRepository.setGcTtl(1000L);
 
         db = createDb(dbFile);
         NitriteCollection c2 = db.getCollection("testGarbageCollect");
@@ -668,14 +665,14 @@ public class ReplicaTest {
             .of(c2)
             .remote("ws://127.0.0.1:9090/datagate/anidotnet/testGarbageCollect")
             .jwtAuth("anidotnet", "abcd")
+            .replicaName("r1")
             .create();
 
         r1.connect();
 
-        LastWriteWinMap lastWriteWinMap = getCrdt(r1);
-
+        final LastWriteWinMap finalLastWriteWinMap = getCrdt(r1);
         await().atMost(5, SECONDS).until(() -> c2.size() == 0
-            && lastWriteWinMap.getTombstoneMap().size() == 0);
+            && finalLastWriteWinMap.getTombstoneMap().size() == 0);
 
         r1.disconnectNow();
     }

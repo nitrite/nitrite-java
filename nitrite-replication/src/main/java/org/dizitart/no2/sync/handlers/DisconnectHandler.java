@@ -35,6 +35,6 @@ public class DisconnectHandler implements MessageHandler<Disconnect> {
     @Override
     public void handleMessage(WebSocket webSocket, Disconnect message) {
         log.debug("Disconnecting from server");
-        replicatedCollection.stopReplication(webSocket, "Server disconnect");
+        replicatedCollection.stopReplication(webSocket, "Server disconnected");
     }
 }
