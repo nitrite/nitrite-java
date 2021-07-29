@@ -20,6 +20,7 @@ package org.dizitart.no2.mock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.Retry;
 import org.dizitart.no2.TestUtils;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
@@ -32,6 +33,7 @@ import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.io.File;
@@ -60,8 +62,10 @@ import static org.junit.Assert.*;
 @Slf4j
 public class ReplicaTest {
     private static MockDataGateServer server;
-//    @Rule
-//    public Retry retry = new Retry(3);
+
+    @Rule
+    public Retry retry = new Retry(3);
+
     private String dbFile;
     private ExecutorService executorService;
     private MockRepository mockRepository;
