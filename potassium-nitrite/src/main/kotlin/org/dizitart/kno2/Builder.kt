@@ -73,7 +73,7 @@ class Builder internal constructor() {
 /**
  * Opens or creates a new database. If it is an in-memory store, then it
  * will create a new one. If it is a file based store, and if the file does not
- * exists, then it will create a new file store and open; otherwise it will
+ * exist, then it will create a new file store and open; otherwise it will
  * open the existing file store.
  *
  * @param [userId] the user id
