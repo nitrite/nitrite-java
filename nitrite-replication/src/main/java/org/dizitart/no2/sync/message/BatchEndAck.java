@@ -24,6 +24,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BatchEndAck extends TimeBoundMessage implements DataGateMessage {
+public class BatchEndAck extends TimeBoundMessage implements BatchMessage {
     private MessageHeader header;
+    private Integer nextOffset;
 }

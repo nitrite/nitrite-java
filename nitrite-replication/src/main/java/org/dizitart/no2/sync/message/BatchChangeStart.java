@@ -27,9 +27,10 @@ import org.dizitart.no2.sync.crdt.LastWriteWinState;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class BatchChangeStart extends TimeBoundMessage implements ReceiptAware {
+public class BatchChangeStart extends TimeBoundMessage implements ReceiptAware, BatchMessage {
     private MessageHeader header;
     private Integer batchSize;
     private Integer debounce;
     private LastWriteWinState feed;
+    private Integer nextOffset;
 }

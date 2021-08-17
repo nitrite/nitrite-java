@@ -108,7 +108,7 @@ public class MessageFactory {
                                       String correlationId, String replicaId, String userName) {
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.setId(UUID.randomUUID().toString());
-        messageHeader.setCorrelationId(correlationId);
+        messageHeader.setTransactionId(correlationId);
         messageHeader.setCollection(collectionName);
         messageHeader.setMessageType(messageType);
         messageHeader.setOrigin(replicaId);

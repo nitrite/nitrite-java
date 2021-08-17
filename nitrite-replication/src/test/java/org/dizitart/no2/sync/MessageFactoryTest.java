@@ -13,7 +13,7 @@ public class MessageFactoryTest {
                 "42", "42", "janedoe");
         assertEquals("42", actualCreateHeaderResult.getOrigin());
         assertEquals("collectionName", actualCreateHeaderResult.getCollection());
-        assertEquals("42", actualCreateHeaderResult.getCorrelationId());
+        assertEquals("42", actualCreateHeaderResult.getTransactionId());
         assertEquals(MessageType.Error, actualCreateHeaderResult.getMessageType());
         assertEquals("janedoe", actualCreateHeaderResult.getUserName());
     }

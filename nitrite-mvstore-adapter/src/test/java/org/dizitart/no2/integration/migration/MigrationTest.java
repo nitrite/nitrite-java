@@ -15,7 +15,7 @@
  *
  */
 
-package org.dizitart.no2.integration.migrate;
+package org.dizitart.no2.integration.migration;
 
 import com.github.javafaker.Faker;
 import org.dizitart.no2.integration.Retry;

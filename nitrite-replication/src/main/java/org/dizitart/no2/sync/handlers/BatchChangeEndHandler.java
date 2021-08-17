@@ -39,7 +39,7 @@ public class BatchChangeEndHandler implements MessageHandler<BatchChangeEnd> {
     public void handleMessage(WebSocket webSocket, BatchChangeEnd message) {
         MessageFactory factory = new MessageFactory();
         BatchEndAck batchEndAck = factory.createBatchEndAck(replicatedCollection.getConfig(),
-            replicatedCollection.getReplicaId(), message.getHeader().getCorrelationId());
+            replicatedCollection.getReplicaId(), message.getHeader().getTransactionId());
         batchEndAck.setStartTime(message.getStartTime());
         batchEndAck.setEndTime(message.getEndTime());
 

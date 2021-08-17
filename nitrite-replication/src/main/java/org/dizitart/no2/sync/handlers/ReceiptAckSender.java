@@ -39,7 +39,7 @@ public interface ReceiptAckSender<Ack extends DataGateMessage> {
             getReplicatedCollection().getLastWriteWinMap().merge(state);
 
             Receipt receipt = message.calculateReceipt();
-            Ack ack = createAck(message.getHeader().getCorrelationId(), receipt);
+            Ack ack = createAck(message.getHeader().getTransactionId(), receipt);
 
             if (ack instanceof TimeBoundMessage && message instanceof TimeBoundMessage) {
                 TimeBoundMessage timeBoundMessage = (TimeBoundMessage) message;

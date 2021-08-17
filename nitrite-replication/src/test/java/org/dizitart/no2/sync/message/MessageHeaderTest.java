@@ -28,14 +28,14 @@ public class MessageHeaderTest {
     @Test
     public void testEquals11() {
         MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setCorrelationId("42");
+        messageHeader.setTransactionId("42");
         assertFalse((new MessageHeader()).equals(messageHeader));
     }
 
     @Test
     public void testEquals12() {
         MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setCorrelationId("42");
+        messageHeader.setTransactionId("42");
         assertFalse(messageHeader.equals(new MessageHeader()));
     }
 
@@ -130,8 +130,8 @@ public class MessageHeaderTest {
     @Test
     public void testSetCorrelationId() {
         MessageHeader messageHeader = new MessageHeader();
-        messageHeader.setCorrelationId("42");
-        assertEquals("42", messageHeader.getCorrelationId());
+        messageHeader.setTransactionId("42");
+        assertEquals("42", messageHeader.getTransactionId());
     }
 
     @Test
