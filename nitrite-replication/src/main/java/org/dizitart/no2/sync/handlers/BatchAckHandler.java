@@ -37,7 +37,6 @@ public class BatchAckHandler implements MessageHandler<BatchAck> {
         Receipt receipt = message.getReceipt();
         FeedLedger feedLedger = replicatedCollection.getFeedLedger();
         feedLedger.writeOff(receipt);
-        replicatedCollection.sendAndReceive(webSocket, message.getHeader().getTransactionId(),
-            message.getHeader().getTimestamp());
+        replicatedCollection.sendAndReceive(webSocket, message);
     }
 }

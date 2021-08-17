@@ -20,10 +20,7 @@ import okhttp3.WebSocket;
 import org.dizitart.no2.sync.crdt.LastWriteWinState;
 import org.dizitart.no2.sync.DataGateClient;
 import org.dizitart.no2.sync.ReplicatedCollection;
-import org.dizitart.no2.sync.message.DataGateMessage;
-import org.dizitart.no2.sync.message.Receipt;
-import org.dizitart.no2.sync.message.ReceiptAware;
-import org.dizitart.no2.sync.message.TimeBoundMessage;
+import org.dizitart.no2.sync.message.*;
 
 /**
  * @author Anindya Chatterjee
@@ -31,7 +28,7 @@ import org.dizitart.no2.sync.message.TimeBoundMessage;
 public interface ReceiptAckSender<Ack extends DataGateMessage> {
     ReplicatedCollection getReplicatedCollection();
 
-    Ack createAck(String correlationId, Receipt receipt);
+    Ack createAck(String transactionId, Receipt receipt);
 
     default void sendAck(WebSocket webSocket, ReceiptAware message) {
         if (message != null) {
@@ -40,7 +37,14 @@ public interface ReceiptAckSender<Ack extends DataGateMessage> {
 
             Receipt receipt = message.calculateReceipt();
             Ack ack = createAck(message.getHeader().getTransactionId(), receipt);
+            ack.getHeader().setCorrelationId(message.getHeader().getId());
 
+            // set offset
+            if (message instanceof OffsetAware && ack instanceof OffsetAware) {
+                ((OffsetAware) ack).setNextOffset(((OffsetAware) message).getNextOffset());
+            }
+
+            // set start time and end time
             if (ack instanceof TimeBoundMessage && message instanceof TimeBoundMessage) {
                 TimeBoundMessage timeBoundMessage = (TimeBoundMessage) message;
                 TimeBoundMessage timeBoundAck = (TimeBoundMessage) ack;

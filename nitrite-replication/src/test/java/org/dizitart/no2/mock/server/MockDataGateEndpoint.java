@@ -178,6 +178,7 @@ public class MockDataGateEndpoint {
                 connect.getHeader().getCollection(), userName,
                 mockRepository.getServerId(), connect.getHeader().getTransactionId()));
             ack.setTombstoneTtl(mockRepository.getGcTtl());
+            ack.setNextOffset(0);
             String message = objectMapper.writeValueAsString(ack);
             session.getBasicRemote().sendText(message);
         } else {
@@ -211,6 +212,7 @@ public class MockDataGateEndpoint {
             userName, mockRepository.getServerId(), batchChangeStart.getHeader().getTransactionId()));
         ack.setStartTime(batchChangeStart.getStartTime());
         ack.setEndTime(batchChangeStart.getEndTime());
+        ack.setNextOffset(batchChangeStart.getNextOffset());
 
         String message = objectMapper.writeValueAsString(ack);
         session.getBasicRemote().sendText(message);
@@ -235,6 +237,7 @@ public class MockDataGateEndpoint {
             userName, mockRepository.getServerId(), batchChangeContinue.getHeader().getTransactionId()));
         ack.setStartTime(batchChangeContinue.getStartTime());
         ack.setEndTime(batchChangeContinue.getEndTime());
+        ack.setNextOffset(batchChangeContinue.getNextOffset());
 
         String message = objectMapper.writeValueAsString(ack);
         session.getBasicRemote().sendText(message);
@@ -259,7 +262,6 @@ public class MockDataGateEndpoint {
         LastWriteWinState changesSince = replica.getChangesSince(batchChangeEnd.getStartTime(),
             batchChangeEnd.getEndTime(), 0, batchSize);
 
-        session.getUserProperties().put("offset", batchSize);
         session.getUserProperties().put("batchSize", batchSize);
         session.getUserProperties().put("debounce", debounce);
 
@@ -271,6 +273,7 @@ public class MockDataGateEndpoint {
         batchChangeStart.setBatchSize(batchSize);
         batchChangeStart.setDebounce(debounce);
         batchChangeStart.setFeed(changesSince);
+        batchChangeStart.setNextOffset(0);
 
         session.getBasicRemote().sendText(objectMapper.writeValueAsString(batchChangeStart));
     }
@@ -278,7 +281,7 @@ public class MockDataGateEndpoint {
     protected void handleBatchAck(Session session, BatchAck batchAck) throws IOException {
         String userName = batchAck.getHeader().getUserName();
         String collection = userName + "@" + batchAck.getHeader().getCollection();
-        Integer offset = (Integer) session.getUserProperties().get("offset");
+        Integer offset = batchAck.getNextOffset();
         Integer batchSize = (Integer) session.getUserProperties().get("batchSize");
         Integer debounce = (Integer) session.getUserProperties().get("debounce");
 
@@ -303,10 +306,9 @@ public class MockDataGateEndpoint {
             message.setDebounce(debounce);
             message.setStartTime(batchAck.getStartTime());
             message.setEndTime(batchAck.getEndTime());
+            message.setNextOffset(batchAck.getNextOffset() + batchSize);
 
             session.getBasicRemote().sendText(objectMapper.writeValueAsString(message));
-
-            session.getUserProperties().put("offset", offset + batchSize);
         } else {
             BatchChangeEnd message = new BatchChangeEnd();
             message.setHeader(createHeader(MessageType.BatchChangeEnd,
@@ -315,9 +317,10 @@ public class MockDataGateEndpoint {
             message.setDebounce(debounce);
             message.setStartTime(batchAck.getStartTime());
             message.setEndTime(batchAck.getEndTime());
+            message.setNextOffset(batchAck.getNextOffset());
+            message.setNextOffset(0);
 
             session.getBasicRemote().sendText(objectMapper.writeValueAsString(message));
-            session.getUserProperties().put("offset", 0);
         }
     }
 

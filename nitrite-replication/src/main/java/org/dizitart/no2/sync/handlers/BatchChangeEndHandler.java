@@ -42,6 +42,7 @@ public class BatchChangeEndHandler implements MessageHandler<BatchChangeEnd> {
             replicatedCollection.getReplicaId(), message.getHeader().getTransactionId());
         batchEndAck.setStartTime(message.getStartTime());
         batchEndAck.setEndTime(message.getEndTime());
+        batchEndAck.getHeader().setCorrelationId(message.getHeader().getId());
 
         DataGateClient dataGateClient = replicatedCollection.getDataGateClient();
         dataGateClient.sendMessage(webSocket, batchEndAck);

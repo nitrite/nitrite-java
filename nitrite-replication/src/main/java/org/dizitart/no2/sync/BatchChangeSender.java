@@ -31,7 +31,6 @@ public class BatchChangeSender {
     private final DataGateClient dataGateClient;
 
     private boolean hasMore;
-    private int offset;
     private State currentState;
     private FeedLedger feedLedger;
     private MessageFactory messageFactory;
@@ -47,43 +46,43 @@ public class BatchChangeSender {
         configure();
     }
 
-    public void sendAndReceive(WebSocket webSocket, String correlationId, Long checkpoint) {
+    public void sendAndReceive(WebSocket webSocket, OffsetAware offsetAware) {
         if (endTime == null) {
-            endTime = checkpoint;
+            endTime = offsetAware.getHeader().getTimestamp();
         }
 
         switch (currentState) {
             case ReadyToSend:
-                sendStartMessage(webSocket, correlationId);
+                sendStartMessage(webSocket, offsetAware);
                 break;
             case StartSent:
-                sendChanges(webSocket, correlationId);
+                sendChanges(webSocket, offsetAware);
                 break;
             case ChangesSent:
                 break;
         }
     }
 
-    private void sendStartMessage(WebSocket webSocket, String correlationId) {
+    private void sendStartMessage(WebSocket webSocket, OffsetAware offsetAware) {
         BatchChangeStart startMessage = messageFactory.createChangeStart(config,
-            replicatedCollection.getReplicaId(), correlationId);
+            replicatedCollection.getReplicaId(), offsetAware.getHeader().getTransactionId());
         startMessage.setStartTime(lastSyncTime);
         startMessage.setEndTime(endTime);
+        startMessage.setNextOffset(offsetAware.getNextOffset() + config.getChunkSize());
 
         LastWriteWinState state = replicatedCollection.getChangesSince(lastSyncTime, endTime,
-            0, config.getChunkSize());
+            offsetAware.getNextOffset(), config.getChunkSize());
 
         startMessage.setFeed(state);
         dataGateClient.sendMessage(webSocket, startMessage);
         feedLedger.writeEntry(startMessage.getFeed());
 
-        offset += config.getChunkSize();
         currentState = State.StartSent;
     }
 
-    private void sendChanges(WebSocket webSocket, String correlationId) {
+    private void sendChanges(WebSocket webSocket, OffsetAware offsetAware) {
         LastWriteWinState state = replicatedCollection.getChangesSince(lastSyncTime, endTime,
-            offset, config.getChunkSize());
+            offsetAware.getNextOffset(), config.getChunkSize());
 
         if (state.getChangeSet().size() == 0 && state.getTombstoneMap().size() == 0) {
             hasMore = false;
@@ -91,26 +90,26 @@ public class BatchChangeSender {
 
         if (hasMore) {
             BatchChangeContinue message = messageFactory.createChangeContinue(config,
-                replicatedCollection.getReplicaId(), correlationId, state);
+                replicatedCollection.getReplicaId(), offsetAware.getHeader().getTransactionId(), state);
             message.setStartTime(lastSyncTime);
             message.setEndTime(endTime);
+            message.setNextOffset(offsetAware.getNextOffset() + config.getChunkSize());
 
             dataGateClient.sendMessage(webSocket, message);
             feedLedger.writeEntry(state);
-            offset += config.getChunkSize();
         } else {
             Receipt finalReceipt = replicatedCollection.getFeedLedger().getFinalReceipt();
             if (replicatedCollection.shouldRetry(finalReceipt)) {
                 state = replicatedCollection.createState(finalReceipt);
                 BatchChangeContinue message = messageFactory.createChangeContinue(config,
-                    replicatedCollection.getReplicaId(), correlationId, state);
+                    replicatedCollection.getReplicaId(), offsetAware.getHeader().getTransactionId(), state);
 
                 message.setStartTime(lastSyncTime);
                 message.setEndTime(endTime);
                 dataGateClient.sendMessage(webSocket, message);
                 feedLedger.writeEntry(state);
             } else {
-                sendEndMessage(webSocket, correlationId);
+                sendEndMessage(webSocket, offsetAware.getHeader().getTransactionId());
                 currentState = State.ChangesSent;
             }
         }
@@ -128,7 +127,6 @@ public class BatchChangeSender {
         this.feedLedger = replicatedCollection.getFeedLedger();
         this.messageFactory = new MessageFactory();
         this.hasMore = true;
-        this.offset = 0;
         this.currentState = State.ReadyToSend;
         this.lastSyncTime = replicatedCollection.getLastSyncTime();
         this.endTime = null;

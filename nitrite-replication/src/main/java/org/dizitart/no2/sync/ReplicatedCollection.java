@@ -30,6 +30,7 @@ import org.dizitart.no2.sync.crdt.LastWriteWinMap;
 import org.dizitart.no2.sync.crdt.LastWriteWinState;
 import org.dizitart.no2.sync.event.CollectionChangeListener;
 import org.dizitart.no2.sync.handlers.ReceiptLedgerAware;
+import org.dizitart.no2.sync.message.OffsetAware;
 import org.dizitart.no2.sync.message.Receipt;
 import org.dizitart.no2.sync.net.DataGateSocket;
 
@@ -78,8 +79,8 @@ public class ReplicatedCollection implements ConflictFreeReplicatedDataType, Rec
         return lastWriteWinMap.getChangesSince(startTime, endTime, start, chunkSize);
     }
 
-    public void sendAndReceive(WebSocket webSocket, String correlationId, Long checkpoint) {
-        batchChangeSender.sendAndReceive(webSocket, correlationId, checkpoint);
+    public void sendAndReceive(WebSocket webSocket, OffsetAware offsetAware) {
+        batchChangeSender.sendAndReceive(webSocket, offsetAware);
     }
 
     public void collectGarbage(Long ttl) {

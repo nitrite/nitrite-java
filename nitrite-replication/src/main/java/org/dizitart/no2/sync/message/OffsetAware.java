@@ -20,6 +20,7 @@ package org.dizitart.no2.sync.message;
 /**
  * @author Anindya Chatterjee
  */
-public interface BatchMessage extends DataGateMessage {
-    int getNextOffset();
+public interface OffsetAware extends DataGateMessage {
+    Integer getNextOffset();
+    void setNextOffset(Integer offset);
 }

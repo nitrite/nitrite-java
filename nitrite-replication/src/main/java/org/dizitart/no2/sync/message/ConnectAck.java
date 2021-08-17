@@ -22,7 +22,8 @@ import lombok.Data;
  * @author Anindya Chatterjee
  */
 @Data
-public class ConnectAck implements DataGateMessage {
+public class ConnectAck implements OffsetAware {
     private MessageHeader header;
     private Long tombstoneTtl;
+    private Integer nextOffset;
 }

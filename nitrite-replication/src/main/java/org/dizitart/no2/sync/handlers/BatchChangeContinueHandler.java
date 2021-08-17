@@ -40,9 +40,9 @@ public class BatchChangeContinueHandler implements MessageHandler<BatchChangeCon
     }
 
     @Override
-    public BatchAck createAck(String correlationId, Receipt receipt) {
+    public BatchAck createAck(String transactionId, Receipt receipt) {
         MessageFactory factory = new MessageFactory();
         return factory.createBatchAck(replicatedCollection.getConfig(),
-            correlationId, replicatedCollection.getReplicaId(), receipt);
+                transactionId, replicatedCollection.getReplicaId(), receipt);
     }
 }
