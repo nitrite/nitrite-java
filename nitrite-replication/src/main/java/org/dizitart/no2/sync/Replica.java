@@ -59,7 +59,7 @@ public class Replica implements AutoCloseable {
                     if (!isConnected()) {
                         replicatedCollection.startReplication();
                     }
-                }, 0, config.getDebounce(), TimeUnit.MILLISECONDS);
+                }, 0, config.getPollingRate(), TimeUnit.MILLISECONDS);
             }
         } else {
             throw new ReplicationException("replica is not configured properly", true);

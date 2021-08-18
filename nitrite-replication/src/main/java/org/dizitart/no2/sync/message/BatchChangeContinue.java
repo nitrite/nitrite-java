@@ -29,6 +29,5 @@ public class BatchChangeContinue extends TimeBoundMessage implements ReceiptAwar
     private MessageHeader header;
     private LastWriteWinState feed;
     private Integer batchSize;
-    private Integer debounce;
     private Integer nextOffset;
 }

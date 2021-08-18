@@ -17,6 +17,7 @@
 package org.dizitart.no2.sync;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -28,7 +29,10 @@ import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
+
+import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
  * A builder api for creating a nitrite {@link Replica}.
@@ -36,13 +40,16 @@ import java.util.concurrent.TimeUnit;
  * @author Anindya Chatterjee.
  * @since 4.0.0
  */
+@Slf4j
 public class ReplicaBuilder {
     private NitriteCollection collection;
-    private String datagateServerUrl;
+    private String remoteHost;
+    private Integer remotePort;
     private String authToken;
     private TimeSpan timeout;
-    private TimeSpan debounce;
+    private TimeSpan pollingRate;
     private Integer chunkSize;
+    private String tenant;
     private String userName;
     private ObjectMapper objectMapper;
     private Proxy proxy;
@@ -55,8 +62,9 @@ public class ReplicaBuilder {
      */
     ReplicaBuilder() {
         chunkSize = 10;
+        remotePort = 46005;                                     // nitrite molar mass
         timeout = new TimeSpan(5, TimeUnit.SECONDS);
-        debounce = new TimeSpan(1, TimeUnit.SECONDS);
+        pollingRate = new TimeSpan(1, TimeUnit.SECONDS);
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new DocumentModule());
         eventListeners = new ArrayList<>();
@@ -84,20 +92,42 @@ public class ReplicaBuilder {
     }
 
     /**
-     * Sets the remote datagate server url.
+     * Sets the remote datagate server host.
      *
-     * @param datagateServerUrl the replication server
+     * @param remoteHost the replication server host
      * @return the replica builder
      */
-    public ReplicaBuilder remote(String datagateServerUrl) {
-        this.datagateServerUrl = datagateServerUrl;
+    public ReplicaBuilder remoteHost(String remoteHost) {
+        this.remoteHost = remoteHost;
         return this;
     }
 
     /**
-     * Sets the JWT auth token and user name.
+     * Sets the remote datagate server port.
      *
-     * @param userName  the user name
+     * @param remotePort the replication server port
+     * @return the replica builder
+     */
+    public ReplicaBuilder remotePort(Integer remotePort) {
+        this.remotePort = remotePort;
+        return this;
+    }
+
+    /**
+     * Sets the remote datagate server tenant id.
+     *
+     * @param tenantId the replication server tenant id
+     * @return the replica builder
+     */
+    public ReplicaBuilder tenant(String tenantId) {
+        this.tenant = tenantId;
+        return this;
+    }
+
+    /**
+     * Sets the JWT auth token and username.
+     *
+     * @param userName  the username
      * @param authToken the auth token
      * @return the replica builder
      */
@@ -110,7 +140,7 @@ public class ReplicaBuilder {
     /**
      * Sets the basic auth token.
      *
-     * @param userName the user name
+     * @param userName the username
      * @param password the password
      * @return the replica builder
      */
@@ -143,13 +173,13 @@ public class ReplicaBuilder {
     }
 
     /**
-     * Sets the debounce value.
+     * Sets the polling rate value.
      *
      * @param timeSpan the time span
      * @return the replica builder
      */
-    public ReplicaBuilder debounce(TimeSpan timeSpan) {
-        this.debounce = timeSpan;
+    public ReplicaBuilder pollingRate(TimeSpan timeSpan) {
+        this.pollingRate = timeSpan;
         return this;
     }
 
@@ -178,7 +208,7 @@ public class ReplicaBuilder {
     /**
      * Sets a flag to accept all certificates.
      *
-     * @param accept the accept
+     * @param accept to accept
      * @return the replica builder
      */
     public ReplicaBuilder acceptAllCertificates(boolean accept) {
@@ -197,11 +227,16 @@ public class ReplicaBuilder {
         return this;
     }
 
+    /**
+     * Sets an optional name for the replica.
+     *
+     * @param name the name of the replica
+     * @return the replica builder
+     */
     public ReplicaBuilder replicaName(String name) {
         this.replicaName = name;
         return this;
     }
-
 
     /**
      * Creates a {@link Replica}.
@@ -216,7 +251,8 @@ public class ReplicaBuilder {
             config.setCollection(collection);
             config.setChunkSize(chunkSize);
             config.setUserName(userName);
-            config.setDebounce(getTimeoutInMillis(debounce));
+            config.setTenant(tenant);
+            config.setPollingRate(getTimeoutInMillis(pollingRate));
             config.setObjectMapper(objectMapper);
             config.setTimeout(timeout);
             config.setRequestBuilder(builder);
@@ -234,8 +270,13 @@ public class ReplicaBuilder {
     }
 
     private Request.Builder createRequestBuilder() {
+        validateBuilder();
+        String remoteUrl = String.format(Locale.getDefault(), "ws://%s:%d/ws/datagate/%s/%s/%s",
+            remoteHost, remotePort, tenant, collection.getName(), userName);
+
+        log.debug("Using remote datagate url " + remoteUrl);
         Request.Builder builder = new Request.Builder();
-        builder.url(datagateServerUrl);
+        builder.url(remoteUrl);
         return builder;
     }
 
@@ -245,5 +286,27 @@ public class ReplicaBuilder {
 
     private int getTimeoutInMillis(TimeSpan connectTimeout) {
         return Math.toIntExact(connectTimeout.getTimeUnit().toMillis(connectTimeout.getTime()));
+    }
+
+    private void validateBuilder() {
+        if (isNullOrEmpty(remoteHost)) {
+            throw new ReplicationException("remote host is a mandatory field");
+        }
+
+        if (remotePort == null) {
+            throw new ReplicationException("remote port is a mandatory field");
+        }
+
+        if (isNullOrEmpty(tenant)) {
+            throw new ReplicationException("tenant id is a mandatory field");
+        }
+
+        if (collection == null || isNullOrEmpty(collection.getName())) {
+            throw new ReplicationException("collection is a mandatory field");
+        }
+
+        if (isNullOrEmpty(userName)) {
+            throw new ReplicationException("username is a mandatory field");
+        }
     }
 }

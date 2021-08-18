@@ -24,6 +24,11 @@ import org.dizitart.no2.exceptions.NitriteException;
 public class ReplicationException extends NitriteException {
     private final boolean fatal;
 
+    public ReplicationException(String errorMessage) {
+        super(errorMessage);
+        this.fatal = false;
+    }
+
     public ReplicationException(String errorMessage, boolean fatal) {
         super(errorMessage);
         this.fatal = fatal;

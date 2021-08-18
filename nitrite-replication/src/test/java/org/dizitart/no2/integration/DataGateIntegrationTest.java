@@ -62,7 +62,9 @@ public class DataGateIntegrationTest {
             log.info("Token - " + jwt);
             Replica replica = Replica.builder()
                 .of(collection)
-                .remote("wss://127.0.0.1:3030/ws/datagate/abcd@gmail.com/datagateIntegration")
+                .remoteHost("127.0.0.1")
+                .remotePort(46005)
+                .tenant("junit-test")
                 .jwtAuth("abcd@gmail.com", jwt)
                 .acceptAllCertificates(true)
                 .create();

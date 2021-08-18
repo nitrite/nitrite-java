@@ -36,7 +36,8 @@ public class Config {
     private NitriteCollection collection;
     private Integer chunkSize;
     private String userName;
-    private Integer debounce;
+    private String tenant;
+    private Integer pollingRate;
     private ObjectMapper objectMapper;
     private TimeSpan timeout;
     private Request.Builder requestBuilder;

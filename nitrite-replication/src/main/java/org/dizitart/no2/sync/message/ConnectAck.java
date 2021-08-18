@@ -26,4 +26,5 @@ public class ConnectAck implements OffsetAware {
     private MessageHeader header;
     private Long tombstoneTtl;
     private Integer nextOffset;
+    private Integer batchSize;
 }

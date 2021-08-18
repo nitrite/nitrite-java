@@ -23,4 +23,6 @@ package org.dizitart.no2.sync.message;
 public interface OffsetAware extends DataGateMessage {
     Integer getNextOffset();
     void setNextOffset(Integer offset);
+    Integer getBatchSize();
+    void setBatchSize(Integer batchSize);
 }

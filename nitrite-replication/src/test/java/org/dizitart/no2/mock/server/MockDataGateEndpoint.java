@@ -43,7 +43,7 @@ import java.util.UUID;
  */
 @Slf4j
 @Data
-@ServerEndpoint(value = "/datagate/{user}/{collection}")
+@ServerEndpoint(value = "/ws/datagate/{tenant}/{collection}/{user}")
 public class MockDataGateEndpoint {
     private ObjectMapper objectMapper;
     private MockRepository mockRepository;
@@ -59,10 +59,12 @@ public class MockDataGateEndpoint {
 
     @OnOpen
     public void onOpen(@PathParam("user") String user,
+                       @PathParam("tenant") String tenant,
                        @PathParam("collection") String collection,
                        Session session) {
         log.info("DataGate server connection established");
         session.getUserProperties().put("user", user);
+        session.getUserProperties().put("tenant", tenant);
         session.getUserProperties().put("collection", user + "@" + collection);
         session.getUserProperties().put("authorized", false);
     }
@@ -123,7 +125,7 @@ public class MockDataGateEndpoint {
 
         try {
             ErrorMessage errorMessage = new ErrorMessage();
-            errorMessage.setHeader(createHeader(MessageType.Error, null, null,
+            errorMessage.setHeader(createHeader(session, MessageType.Error, null, null,
                 mockRepository.getServerId(), ""));
             errorMessage.setError(ex.getMessage());
             String message = objectMapper.writeValueAsString(errorMessage);
@@ -174,18 +176,20 @@ public class MockDataGateEndpoint {
             }
 
             ConnectAck ack = new ConnectAck();
-            ack.setHeader(createHeader(MessageType.ConnectAck,
+            ack.setHeader(createHeader(session, MessageType.ConnectAck,
                 connect.getHeader().getCollection(), userName,
                 mockRepository.getServerId(), connect.getHeader().getTransactionId()));
             ack.setTombstoneTtl(mockRepository.getGcTtl());
             ack.setNextOffset(0);
+            ack.setBatchSize(0);
+
             String message = objectMapper.writeValueAsString(ack);
             session.getBasicRemote().sendText(message);
         } else {
             session.getUserProperties().put("authorized", false);
             ErrorMessage errorMessage = new ErrorMessage();
             errorMessage.setError("Unauthorized");
-            errorMessage.setHeader(createHeader(MessageType.Error,
+            errorMessage.setHeader(createHeader(session, MessageType.Error,
                 connect.getHeader().getCollection(), userName,
                 mockRepository.getServerId(), connect.getHeader().getTransactionId()));
             String message = objectMapper.writeValueAsString(errorMessage);
@@ -202,17 +206,18 @@ public class MockDataGateEndpoint {
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
         replica.merge(batchChangeStart.getFeed(), batchChangeStart.getEndTime());
 
-        feed.setHeader(createHeader(MessageType.DataGateFeed, batchChangeStart.getHeader().getCollection(),
+        feed.setHeader(createHeader(session, MessageType.DataGateFeed, batchChangeStart.getHeader().getCollection(),
             userName, replicaId, batchChangeStart.getHeader().getTransactionId()));
         feed.setFeed(batchChangeStart.getFeed());
 
         BatchAck ack = new BatchAck();
         ack.setReceipt(feed.calculateReceipt());
-        ack.setHeader(createHeader(MessageType.BatchAck, batchChangeStart.getHeader().getCollection(),
+        ack.setHeader(createHeader(session, MessageType.BatchAck, batchChangeStart.getHeader().getCollection(),
             userName, mockRepository.getServerId(), batchChangeStart.getHeader().getTransactionId()));
         ack.setStartTime(batchChangeStart.getStartTime());
         ack.setEndTime(batchChangeStart.getEndTime());
         ack.setNextOffset(batchChangeStart.getNextOffset());
+        ack.setBatchSize(batchChangeStart.getBatchSize());
 
         String message = objectMapper.writeValueAsString(ack);
         session.getBasicRemote().sendText(message);
@@ -227,17 +232,18 @@ public class MockDataGateEndpoint {
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
         replica.merge(batchChangeContinue.getFeed(), batchChangeContinue.getEndTime());
 
-        feed.setHeader(createHeader(MessageType.DataGateFeed, batchChangeContinue.getHeader().getCollection(),
+        feed.setHeader(createHeader(session, MessageType.DataGateFeed, batchChangeContinue.getHeader().getCollection(),
             userName, replicaId, batchChangeContinue.getHeader().getTransactionId()));
         feed.setFeed(batchChangeContinue.getFeed());
 
         BatchAck ack = new BatchAck();
         ack.setReceipt(feed.calculateReceipt());
-        ack.setHeader(createHeader(MessageType.BatchAck, batchChangeContinue.getHeader().getCollection(),
+        ack.setHeader(createHeader(session, MessageType.BatchAck, batchChangeContinue.getHeader().getCollection(),
             userName, mockRepository.getServerId(), batchChangeContinue.getHeader().getTransactionId()));
         ack.setStartTime(batchChangeContinue.getStartTime());
         ack.setEndTime(batchChangeContinue.getEndTime());
         ack.setNextOffset(batchChangeContinue.getNextOffset());
+        ack.setBatchSize(batchChangeContinue.getBatchSize());
 
         String message = objectMapper.writeValueAsString(ack);
         session.getBasicRemote().sendText(message);
@@ -245,12 +251,11 @@ public class MockDataGateEndpoint {
 
     protected void handleBatchChangeEnd(Session session, BatchChangeEnd batchChangeEnd) throws IOException {
         Integer batchSize = batchChangeEnd.getBatchSize();
-        Integer debounce = batchChangeEnd.getDebounce();
         String userName = batchChangeEnd.getHeader().getUserName();
         String collection = userName + "@" + batchChangeEnd.getHeader().getCollection();
 
         BatchEndAck ack = new BatchEndAck();
-        ack.setHeader(createHeader(MessageType.BatchEndAck, batchChangeEnd.getHeader().getCollection(),
+        ack.setHeader(createHeader(session, MessageType.BatchEndAck, batchChangeEnd.getHeader().getCollection(),
             userName, mockRepository.getServerId(), batchChangeEnd.getHeader().getTransactionId()));
         ack.setStartTime(batchChangeEnd.getStartTime());
         ack.setEndTime(batchChangeEnd.getEndTime());
@@ -262,18 +267,15 @@ public class MockDataGateEndpoint {
         LastWriteWinState changesSince = replica.getChangesSince(batchChangeEnd.getStartTime(),
             batchChangeEnd.getEndTime(), 0, batchSize);
 
-        session.getUserProperties().put("batchSize", batchSize);
-        session.getUserProperties().put("debounce", debounce);
 
         BatchChangeStart batchChangeStart = new BatchChangeStart();
-        batchChangeStart.setHeader(createHeader(MessageType.BatchChangeStart,
+        batchChangeStart.setHeader(createHeader(session, MessageType.BatchChangeStart,
             collection, userName, mockRepository.getServerId(), batchChangeEnd.getHeader().getTransactionId()));
         batchChangeStart.setStartTime(batchChangeEnd.getStartTime());
         batchChangeStart.setEndTime(batchChangeEnd.getEndTime());
-        batchChangeStart.setBatchSize(batchSize);
-        batchChangeStart.setDebounce(debounce);
         batchChangeStart.setFeed(changesSince);
-        batchChangeStart.setNextOffset(0);
+        batchChangeStart.setNextOffset(batchSize);
+        batchChangeStart.setBatchSize(batchSize);
 
         session.getBasicRemote().sendText(objectMapper.writeValueAsString(batchChangeStart));
     }
@@ -282,8 +284,6 @@ public class MockDataGateEndpoint {
         String userName = batchAck.getHeader().getUserName();
         String collection = userName + "@" + batchAck.getHeader().getCollection();
         Integer offset = batchAck.getNextOffset();
-        Integer batchSize = (Integer) session.getUserProperties().get("batchSize");
-        Integer debounce = (Integer) session.getUserProperties().get("debounce");
 
         Receipt receipt = batchAck.getReceipt();
         FeedLedger feedLedger = mockRepository.getFeedLedgerMap().get(collection);
@@ -294,31 +294,28 @@ public class MockDataGateEndpoint {
 
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
         LastWriteWinState changesSince = replica.getChangesSince(batchAck.getStartTime(),
-            batchAck.getEndTime(), offset, batchSize);
+            batchAck.getEndTime(), offset, batchAck.getBatchSize());
 
         boolean hasMore = !(changesSince.getChangeSet().size() == 0 && changesSince.getTombstoneMap().size() == 0);
         if (hasMore) {
             BatchChangeContinue message = new BatchChangeContinue();
-            message.setHeader(createHeader(MessageType.BatchChangeContinue,
+            message.setHeader(createHeader(session, MessageType.BatchChangeContinue,
                 collection, userName, mockRepository.getServerId(), batchAck.getHeader().getTransactionId()));
             message.setFeed(changesSince);
-            message.setBatchSize(batchSize);
-            message.setDebounce(debounce);
             message.setStartTime(batchAck.getStartTime());
             message.setEndTime(batchAck.getEndTime());
-            message.setNextOffset(batchAck.getNextOffset() + batchSize);
+            message.setNextOffset(batchAck.getNextOffset() + batchAck.getBatchSize());
+            message.setBatchSize(batchAck.getBatchSize());
 
             session.getBasicRemote().sendText(objectMapper.writeValueAsString(message));
         } else {
             BatchChangeEnd message = new BatchChangeEnd();
-            message.setHeader(createHeader(MessageType.BatchChangeEnd,
+            message.setHeader(createHeader(session, MessageType.BatchChangeEnd,
                 collection, userName, mockRepository.getServerId(), batchAck.getHeader().getTransactionId()));
-            message.setBatchSize(batchSize);
-            message.setDebounce(debounce);
             message.setStartTime(batchAck.getStartTime());
             message.setEndTime(batchAck.getEndTime());
             message.setNextOffset(batchAck.getNextOffset());
-            message.setNextOffset(0);
+            message.setBatchSize(batchAck.getBatchSize());
 
             session.getBasicRemote().sendText(objectMapper.writeValueAsString(message));
         }
@@ -344,8 +341,8 @@ public class MockDataGateEndpoint {
         String user = (String) session.getUserProperties().get("user");
         String collection = (String) session.getUserProperties().get("collection");
 
-        disconnect.setHeader(createHeader(MessageType.Disconnect, collection, user, mockRepository.getServerId(),
-            batchEndAck.getHeader().getTransactionId()));
+        disconnect.setHeader(createHeader(session, MessageType.Disconnect, collection, user,
+            mockRepository.getServerId(), batchEndAck.getHeader().getTransactionId()));
         session.getBasicRemote().sendText(objectMapper.writeValueAsString(disconnect));
 
         mockRepository.getCollectionReplicaMap().get(collection).remove(batchEndAck.getHeader().getOrigin());
@@ -366,13 +363,14 @@ public class MockDataGateEndpoint {
         String user = (String) session.getUserProperties().get("user");
         String collection = (String) session.getUserProperties().get("collection");
 
-        errorMessage.setHeader(createHeader(MessageType.Error, collection, user, mockRepository.getServerId(), ""));
+        errorMessage.setHeader(createHeader(session, MessageType.Error, collection, user,
+            mockRepository.getServerId(), ""));
         errorMessage.setError(error.getMessage());
         session.getBasicRemote().sendText(objectMapper.writeValueAsString(errorMessage));
     }
 
 
-    private MessageHeader createHeader(MessageType messageType, String collection,
+    private MessageHeader createHeader(Session session, MessageType messageType, String collection,
                                        String userName, String origin, String correlationId) {
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.setId(UUID.randomUUID().toString());
@@ -382,6 +380,7 @@ public class MockDataGateEndpoint {
         messageHeader.setOrigin(origin);
         messageHeader.setTimestamp(System.currentTimeMillis());
         messageHeader.setUserName(userName);
+        messageHeader.setTenant((String) session.getUserProperties().get("tenant"));
         return messageHeader;
     }
 

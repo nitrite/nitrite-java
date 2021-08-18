@@ -39,9 +39,10 @@ public interface ReceiptAckSender<Ack extends DataGateMessage> {
             Ack ack = createAck(message.getHeader().getTransactionId(), receipt);
             ack.getHeader().setCorrelationId(message.getHeader().getId());
 
-            // set offset
+            // set offset and batch size
             if (message instanceof OffsetAware && ack instanceof OffsetAware) {
                 ((OffsetAware) ack).setNextOffset(((OffsetAware) message).getNextOffset());
+                ((OffsetAware) ack).setBatchSize(((OffsetAware) message).getBatchSize());
             }
 
             // set start time and end time

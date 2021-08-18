@@ -83,7 +83,7 @@ public class ReplicaTest {
 
     @Before
     public void setUp() throws Exception {
-        server = new MockDataGateServer(9090);
+        server = new MockDataGateServer(46005);
         server.start();
         dbFile = getRandomTempDbFile();
         executorService = Executors.newCachedThreadPool();
@@ -122,7 +122,9 @@ public class ReplicaTest {
 
         Replica replica = Replica.builder()
             .of(collection)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testSingleUserSingleReplica")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .create();
 
@@ -177,14 +179,18 @@ public class ReplicaTest {
 
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testSingleUserMultiReplica")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .replicaName("r1")
             .create();
 
         Replica r2 = Replica.builder()
             .of(c2)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testSingleUserMultiReplica")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .replicaName("r2")
             .create();
@@ -293,21 +299,27 @@ public class ReplicaTest {
 
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/user1/testSingleUserSingleReplica")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("user1", "abcd")
             .create();
         r1.connect();
 
         Replica r2 = Replica.builder()
             .of(c2)
-            .remote("ws://127.0.0.1:9090/datagate/user2/testSingleUserSingleReplica")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("user2", "abcd")
             .create();
         r2.connect();
 
         Replica r3 = Replica.builder()
             .of(c3)
-            .remote("ws://127.0.0.1:9090/datagate/user3/testSingleUserSingleReplica")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("user3", "abcd")
             .create();
         r3.connect();
@@ -357,14 +369,16 @@ public class ReplicaTest {
 
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/user1/testMultiUserSingleReplica1")
+            .remoteHost("127.0.0.1")
+            .tenant("junit-test")
             .jwtAuth("user1", "abcd")
             .create();
         r1.connect();
 
         Replica r2 = Replica.builder()
             .of(c2)
-            .remote("ws://127.0.0.1:9090/datagate/user2/testMultiUserSingleReplica2")
+            .remoteHost("127.0.0.1")
+            .tenant("junit-test")
             .jwtAuth("user2", "abcd")
             .create();
         r2.connect();
@@ -399,7 +413,8 @@ public class ReplicaTest {
 
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/user/testSecurity")
+            .remoteHost("127.0.0.1")
+            .tenant("junit-test")
             .jwtAuth("user", "wrong_token")
             .create();
         r1.connect();
@@ -427,13 +442,17 @@ public class ReplicaTest {
 
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testCloseDbAndReconnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .create();
 
         Replica r2 = Replica.builder()
             .of(c2)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testCloseDbAndReconnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .create();
 
@@ -486,7 +505,9 @@ public class ReplicaTest {
         c1 = db.getCollection("testCloseDbAndReconnect");
         r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testCloseDbAndReconnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .create();
 
@@ -537,7 +558,9 @@ public class ReplicaTest {
         NitriteCollection c1 = db1.getCollection("testDelayedConnect");
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .create();
 
@@ -557,7 +580,9 @@ public class ReplicaTest {
         NitriteCollection c2 = db2.getCollection("testDelayedConnect");
         Replica r2 = Replica.builder()
             .of(c2)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .create();
         r2.connect();
@@ -575,7 +600,9 @@ public class ReplicaTest {
         NitriteCollection c1 = db.getCollection("testDelayedConnect");
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .replicaName("r1")
             .create();
@@ -598,7 +625,9 @@ public class ReplicaTest {
         NitriteCollection c2 = db2.getCollection("testDelayedConnect");
         Replica r2 = Replica.builder()
             .of(c2)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .replicaName("r2")
             .create();
@@ -614,7 +643,9 @@ public class ReplicaTest {
         NitriteCollection c3 = db.getCollection("testDelayedConnect");
         r1 = Replica.builder()
             .of(c3)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testDelayedConnect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .replicaName("r1")
             .create();
@@ -638,7 +669,9 @@ public class ReplicaTest {
         NitriteCollection c1 = db.getCollection("testGarbageCollect");
         Replica r1 = Replica.builder()
             .of(c1)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testGarbageCollect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .create();
 
@@ -667,7 +700,9 @@ public class ReplicaTest {
         NitriteCollection c2 = db.getCollection("testGarbageCollect");
         r1 = Replica.builder()
             .of(c2)
-            .remote("ws://127.0.0.1:9090/datagate/anidotnet/testGarbageCollect")
+            .remoteHost("127.0.0.1")
+            .remotePort(46005)
+            .tenant("junit-test")
             .jwtAuth("anidotnet", "abcd")
             .replicaName("r1")
             .create();

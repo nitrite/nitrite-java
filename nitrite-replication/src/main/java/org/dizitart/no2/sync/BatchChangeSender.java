@@ -69,6 +69,7 @@ public class BatchChangeSender {
         startMessage.setStartTime(lastSyncTime);
         startMessage.setEndTime(endTime);
         startMessage.setNextOffset(offsetAware.getNextOffset() + config.getChunkSize());
+        startMessage.setBatchSize(config.getChunkSize());
 
         LastWriteWinState state = replicatedCollection.getChangesSince(lastSyncTime, endTime,
             offsetAware.getNextOffset(), config.getChunkSize());
@@ -94,6 +95,7 @@ public class BatchChangeSender {
             message.setStartTime(lastSyncTime);
             message.setEndTime(endTime);
             message.setNextOffset(offsetAware.getNextOffset() + config.getChunkSize());
+            message.setBatchSize(config.getChunkSize());
 
             dataGateClient.sendMessage(webSocket, message);
             feedLedger.writeEntry(state);
@@ -120,6 +122,7 @@ public class BatchChangeSender {
             replicatedCollection.getReplicaId(), correlationId);
         endMessage.setStartTime(lastSyncTime);
         endMessage.setEndTime(endTime);
+        endMessage.setBatchSize(config.getChunkSize());
         dataGateClient.sendMessage(webSocket, endMessage);
     }
 

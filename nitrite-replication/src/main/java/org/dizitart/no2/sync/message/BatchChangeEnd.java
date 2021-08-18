@@ -27,6 +27,5 @@ import lombok.EqualsAndHashCode;
 public class BatchChangeEnd extends TimeBoundMessage implements OffsetAware {
     private MessageHeader header;
     private Integer batchSize;
-    private Integer debounce;
     private Integer nextOffset;
 }

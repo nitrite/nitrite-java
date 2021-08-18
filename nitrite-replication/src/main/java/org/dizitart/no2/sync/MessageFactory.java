@@ -28,7 +28,7 @@ public class MessageFactory {
     public Connect createConnect(Config config, String replicaId, String txId) {
         Connect message = new Connect();
         message.setHeader(createHeader(MessageType.Connect, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setAuthToken(config.getAuthToken());
         return message;
     }
@@ -36,16 +36,15 @@ public class MessageFactory {
     public Disconnect createDisconnect(Config config, String replicaId, String txId) {
         Disconnect message = new Disconnect();
         message.setHeader(createHeader(MessageType.Disconnect, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         return message;
     }
 
     public BatchChangeStart createChangeStart(Config config, String replicaId, String txId) {
         BatchChangeStart message = new BatchChangeStart();
         message.setHeader(createHeader(MessageType.BatchChangeStart, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setBatchSize(config.getChunkSize());
-        message.setDebounce(config.getDebounce());
         return message;
     }
 
@@ -53,9 +52,8 @@ public class MessageFactory {
                                                     String txId, LastWriteWinState state) {
         BatchChangeContinue message = new BatchChangeContinue();
         message.setHeader(createHeader(MessageType.BatchChangeContinue, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setBatchSize(config.getChunkSize());
-        message.setDebounce(config.getDebounce());
         message.setFeed(state);
         return message;
     }
@@ -64,9 +62,8 @@ public class MessageFactory {
                                           String txId) {
         BatchChangeEnd message = new BatchChangeEnd();
         message.setHeader(createHeader(MessageType.BatchChangeEnd, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setBatchSize(config.getChunkSize());
-        message.setDebounce(config.getDebounce());
         return message;
     }
 
@@ -74,7 +71,7 @@ public class MessageFactory {
                                           String txId, LastWriteWinState state) {
         DataGateFeed feed = new DataGateFeed();
         feed.setHeader(createHeader(MessageType.DataGateFeed, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         feed.setFeed(state);
         return feed;
     }
@@ -83,7 +80,7 @@ public class MessageFactory {
                                          String txId, Receipt receipt) {
         DataGateFeedAck ack = new DataGateFeedAck();
         ack.setHeader(createHeader(MessageType.DataGateFeedAck, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         ack.setReceipt(receipt);
         return ack;
     }
@@ -92,7 +89,7 @@ public class MessageFactory {
                                    String txId, Receipt receipt) {
         BatchAck ack = new BatchAck();
         ack.setHeader(createHeader(MessageType.BatchAck, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         ack.setReceipt(receipt);
         return ack;
     }
@@ -100,12 +97,13 @@ public class MessageFactory {
     public BatchEndAck createBatchEndAck(Config config, String replicaId, String txId) {
         BatchEndAck ack = new BatchEndAck();
         ack.setHeader(createHeader(MessageType.BatchEndAck, config.getCollection().getName(),
-            txId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         return ack;
     }
 
     public MessageHeader createHeader(MessageType messageType, String collectionName,
-                                      String txId, String replicaId, String userName) {
+                                      String txId, String replicaId,
+                                      String userName, String tenant) {
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.setId(UUID.randomUUID().toString());
         messageHeader.setTransactionId(txId);
@@ -114,6 +112,7 @@ public class MessageFactory {
         messageHeader.setOrigin(replicaId);
         messageHeader.setTimestamp(System.currentTimeMillis());
         messageHeader.setUserName(userName);
+        messageHeader.setTenant(tenant);
         return messageHeader;
     }
 }

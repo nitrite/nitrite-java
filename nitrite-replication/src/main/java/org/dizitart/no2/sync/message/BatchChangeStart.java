@@ -29,8 +29,7 @@ import org.dizitart.no2.sync.crdt.LastWriteWinState;
 @ToString(callSuper = true)
 public class BatchChangeStart extends TimeBoundMessage implements ReceiptAware, OffsetAware {
     private MessageHeader header;
-    private Integer batchSize;
-    private Integer debounce;
     private LastWriteWinState feed;
+    private Integer batchSize;
     private Integer nextOffset;
 }

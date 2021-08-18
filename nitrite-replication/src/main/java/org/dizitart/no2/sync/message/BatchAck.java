@@ -28,4 +28,5 @@ public class BatchAck extends TimeBoundMessage implements OffsetAware {
     private MessageHeader header;
     private Receipt receipt;
     private Integer nextOffset;
+    private Integer batchSize;
 }
