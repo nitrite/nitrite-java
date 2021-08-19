@@ -28,6 +28,8 @@ import org.dizitart.no2.sync.event.ReplicationEventListener;
 import org.dizitart.no2.sync.event.ReplicationEventType;
 import org.dizitart.no2.sync.message.Connect;
 import org.dizitart.no2.sync.message.DataGateMessage;
+import org.dizitart.no2.sync.message.Disconnect;
+import org.dizitart.no2.sync.net.CloseReason;
 import org.dizitart.no2.sync.net.WebSocketCode;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +75,7 @@ public class DataGateClient extends WebSocketListener {
         } catch (Exception e) {
             log.error("Opening websocket failed", e);
             eventBus.post(new ReplicationEvent(ReplicationEventType.Error, e));
-            closeConnection(webSocket, "Error - " + e.getMessage());
+            closeConnection(webSocket, new CloseReason("Client Error - " + e.getMessage()));
         }
     }
 
@@ -90,7 +92,7 @@ public class DataGateClient extends WebSocketListener {
 
             if (e instanceof ReplicationException) {
                 if (((ReplicationException) e).isFatal()) {
-                    closeConnection(webSocket, "Error - " + e.getMessage());
+                    closeConnection(webSocket, new CloseReason("Client Error - " + e.getMessage()));
                 }
             }
         }
@@ -100,7 +102,7 @@ public class DataGateClient extends WebSocketListener {
     public void onFailure(@NotNull WebSocket webSocket, @NotNull Throwable t, @Nullable Response response) {
         log.error("Communication failure", t);
         eventBus.post(new ReplicationEvent(ReplicationEventType.Error, t));
-        closeConnection(webSocket,"Error - " + t.getMessage());
+        closeConnection(webSocket, new CloseReason("Client Error - " + t.getMessage()));
     }
 
     @Override
@@ -120,18 +122,28 @@ public class DataGateClient extends WebSocketListener {
         } catch (Exception e) {
             log.error("Failed to send message", e);
             eventBus.post(new ReplicationEvent(ReplicationEventType.Error, e));
-            closeConnection(webSocket, "Error - " + e.getMessage());
+            closeConnection(webSocket, new CloseReason("Client Error - " + e.getMessage()));
         }
     }
 
-    public void closeConnection(WebSocket webSocket, String reason) {
+    public void closeConnection(WebSocket webSocket, CloseReason reason) {
         log.debug("Closing connection due to {}", reason);
+
+        if (reason == CloseReason.ClientClose) {
+            Disconnect disconnect = messageFactory.createDisconnect(config,
+                replicatedCollection.getReplicaId(), UUID.randomUUID().toString());
+            if (connectedWebsocket != null) {
+                messageTemplate.postMessage(connectedWebsocket, disconnect);
+            }
+        }
+
         replicatedCollection.setConnected(false);
+
         if (webSocket != null) {
-            webSocket.close(WebSocketCode.NORMAL_CLOSE, reason);
+            webSocket.close(WebSocketCode.NORMAL_CLOSE, reason.getReason());
         } else {
             if (connectedWebsocket != null) {
-                connectedWebsocket.close(WebSocketCode.NORMAL_CLOSE, reason);
+                connectedWebsocket.close(WebSocketCode.NORMAL_CLOSE, reason.getReason());
             }
         }
 

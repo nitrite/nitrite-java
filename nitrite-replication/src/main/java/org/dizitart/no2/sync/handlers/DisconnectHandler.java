@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.WebSocket;
 import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.Disconnect;
+import org.dizitart.no2.sync.net.CloseReason;
 
 /**
  * @author Anindya Chatterjee
@@ -35,6 +36,6 @@ public class DisconnectHandler implements MessageHandler<Disconnect> {
     @Override
     public void handleMessage(WebSocket webSocket, Disconnect message) {
         log.debug("Disconnecting from server");
-        replicatedCollection.stopReplication(webSocket, "Server disconnected");
+        replicatedCollection.stopReplication(webSocket, CloseReason.ServerClose);
     }
 }

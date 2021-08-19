@@ -18,6 +18,7 @@
 package org.dizitart.no2.sync;
 
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
+import org.dizitart.no2.sync.net.CloseReason;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -79,7 +80,7 @@ public class Replica implements AutoCloseable {
     }
 
     public void close() {
-        replicatedCollection.stopReplication(null, "User close");
+        replicatedCollection.stopReplication(null, CloseReason.ClientClose);
         ThreadPoolManager.shutdownThreadPool(scheduledExecutorService);
     }
 

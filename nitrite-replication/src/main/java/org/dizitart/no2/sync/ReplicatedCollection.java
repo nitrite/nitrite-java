@@ -32,6 +32,7 @@ import org.dizitart.no2.sync.event.CollectionChangeListener;
 import org.dizitart.no2.sync.handlers.ReceiptLedgerAware;
 import org.dizitart.no2.sync.message.OffsetAware;
 import org.dizitart.no2.sync.message.Receipt;
+import org.dizitart.no2.sync.net.CloseReason;
 import org.dizitart.no2.sync.net.DataGateSocket;
 
 import java.util.HashSet;
@@ -70,7 +71,7 @@ public class ReplicatedCollection implements ConflictFreeReplicatedDataType, Rec
         dataGateSocket.setListener(dataGateClient);
     }
 
-    public void stopReplication(WebSocket webSocket, String reason) {
+    public void stopReplication(WebSocket webSocket, CloseReason reason) {
         dataGateClient.closeConnection(webSocket, reason);
         reset();
     }
