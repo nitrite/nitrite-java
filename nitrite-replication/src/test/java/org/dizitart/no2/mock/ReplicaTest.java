@@ -84,7 +84,7 @@ public class ReplicaTest {
     @Before
     public void setUp() throws Exception {
         server = new MockDataGateServer(46005);
-//        server.start();
+        server.start();
         dbFile = getRandomTempDbFile();
         executorService = Executors.newCachedThreadPool();
         mockRepository = MockRepository.getInstance();
@@ -104,7 +104,7 @@ public class ReplicaTest {
         if (Files.exists(Paths.get(dbFile))) {
             Files.delete(Paths.get(dbFile));
         }
-//        server.stop();
+        server.stop();
     }
 
     @Test
