@@ -68,11 +68,11 @@ public class BatchChangeSender {
             replicatedCollection.getReplicaId(), offsetAware.getHeader().getTransactionId());
         startMessage.setStartTime(lastSyncTime);
         startMessage.setEndTime(endTime);
-        startMessage.setNextOffset(offsetAware.getNextOffset() + config.getChunkSize());
+        startMessage.setNextOffset(config.getChunkSize());
         startMessage.setBatchSize(config.getChunkSize());
 
         LastWriteWinState state = replicatedCollection.getChangesSince(lastSyncTime, endTime,
-            offsetAware.getNextOffset(), config.getChunkSize());
+            0, config.getChunkSize());
 
         startMessage.setFeed(state);
         dataGateClient.sendMessage(webSocket, startMessage);
