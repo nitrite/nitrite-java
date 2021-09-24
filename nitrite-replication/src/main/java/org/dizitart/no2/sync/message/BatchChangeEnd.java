@@ -24,8 +24,6 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BatchChangeEnd extends TimeBoundMessage implements OffsetAware {
+public class BatchChangeEnd extends BatchMessage {
     private MessageHeader header;
-    private Integer batchSize;
-    private Integer nextOffset;
 }

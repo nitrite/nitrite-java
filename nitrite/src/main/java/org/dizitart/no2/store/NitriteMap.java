@@ -95,8 +95,8 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     void put(Key key, Value value);
 
     /**
-     * Get the number of entries, as a integer. Integer.MAX_VALUE is returned if
-     * there are more than this entries.
+     * Get the number of entries, as an integer. Integer.MAX_VALUE is returned if
+     * there are more than these entries.
      *
      * @return the number of entries, as an integer.
      */
@@ -112,7 +112,7 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     Value putIfAbsent(Key key, Value value);
 
     /**
-     * Get the smallest key that is larger than the given key, or null if no
+     * Get the lest key that is greater than the given key, or null if no
      * such key exists.
      *
      * @param key the key
@@ -121,7 +121,7 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     Key higherKey(Key key);
 
     /**
-     * Get the smallest key that is larger or equal to this key.
+     * Get the least key that is greater than or equal to this key.
      *
      * @param key the key
      * @return the result.

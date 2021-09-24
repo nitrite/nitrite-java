@@ -179,7 +179,7 @@ class IndexOperations implements AutoCloseable {
             }
         } finally {
             // remove dirty marker to denote indexing completed successfully
-            // if dirty marker is found in any index, it needs to be rebuild
+            // if dirty marker is found in any index, it needs to be rebuilt
             indexManager.endIndexing(fields);
             getBuildFlag(fields).set(false);
             alert(EventType.IndexEnd, fields);

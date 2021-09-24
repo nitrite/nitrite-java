@@ -29,7 +29,8 @@ import org.dizitart.no2.sync.FeedLedger;
 import org.dizitart.no2.sync.MessageFactory;
 import org.dizitart.no2.sync.MessageTransformer;
 import org.dizitart.no2.sync.ReplicationException;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
+import org.dizitart.no2.sync.crdt.Timestamps;
 import org.dizitart.no2.sync.crdt.Tombstone;
 import org.dizitart.no2.sync.message.*;
 
@@ -204,7 +205,7 @@ public class MockDataGateEndpoint {
         String collection = userName + "@" + batchChangeStart.getHeader().getCollection();
         String replicaId = batchChangeStart.getHeader().getOrigin();
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
-        replica.merge(batchChangeStart.getFeed(), batchChangeStart.getEndTime());
+        replica.merge(batchChangeStart.getFeed(), System.currentTimeMillis());
 
         feed.setHeader(createHeader(session, MessageType.DataGateFeed, batchChangeStart.getHeader().getCollection(),
             userName, replicaId, batchChangeStart.getHeader().getTransactionId()));
@@ -230,7 +231,7 @@ public class MockDataGateEndpoint {
         String collection = userName + "@" + batchChangeContinue.getHeader().getCollection();
         String replicaId = batchChangeContinue.getHeader().getOrigin();
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
-        replica.merge(batchChangeContinue.getFeed(), batchChangeContinue.getEndTime());
+        replica.merge(batchChangeContinue.getFeed(), System.currentTimeMillis());
 
         feed.setHeader(createHeader(session, MessageType.DataGateFeed, batchChangeContinue.getHeader().getCollection(),
             userName, replicaId, batchChangeContinue.getHeader().getTransactionId()));
@@ -264,8 +265,11 @@ public class MockDataGateEndpoint {
         session.getBasicRemote().sendText(message);
 
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
-        LastWriteWinState changesSince = replica.getChangesSince(batchChangeEnd.getStartTime(),
-            batchChangeEnd.getEndTime(), 0, batchSize);
+        Timestamps startTime = batchChangeEnd.getStartTime();
+//        Timestamps endTime = replica.getLastModifiedTime();
+
+        DeltaStates changesSince = replica.getChangesSince(null,
+            null, 0, batchSize);
 
 
         BatchChangeStart batchChangeStart = new BatchChangeStart();
@@ -293,8 +297,8 @@ public class MockDataGateEndpoint {
         }
 
         ServerLastWriteWinMap replica = mockRepository.getReplicaStore().get(collection);
-        LastWriteWinState changesSince = replica.getChangesSince(batchAck.getStartTime(),
-            batchAck.getEndTime(), offset, batchAck.getBatchSize());
+        DeltaStates changesSince = replica.getChangesSince(null,
+            null, offset, batchAck.getBatchSize());
 
         boolean hasMore = !(changesSince.getChangeSet().size() == 0 && changesSince.getTombstoneMap().size() == 0);
         if (hasMore) {

@@ -35,7 +35,7 @@ public class ConnectAckHandler implements MessageHandler<ConnectAck> {
     @Override
     public void handleMessage(WebSocket webSocket, ConnectAck message) {
         replicatedCollection.collectGarbage(message.getTombstoneTtl());
-        replicatedCollection.setConnected(true);
+        replicatedCollection.setStopped(false);
         replicatedCollection.sendAndReceive(webSocket, message);
     }
 }

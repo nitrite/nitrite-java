@@ -17,7 +17,7 @@
 package org.dizitart.no2.sync.message;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.Set;
  * @author Anindya Chatterjee
  */
 public interface ReceiptAware extends DataGateMessage {
-    LastWriteWinState getFeed();
+    DeltaStates getFeed();
 
     default Receipt calculateReceipt() {
         Set<String> added = new HashSet<>();

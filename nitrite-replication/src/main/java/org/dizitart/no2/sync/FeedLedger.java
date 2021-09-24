@@ -21,8 +21,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.collection.meta.MetadataAware;
 import org.dizitart.no2.common.util.StringUtils;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 import org.dizitart.no2.sync.message.Receipt;
 
 import java.util.HashSet;
@@ -37,11 +38,11 @@ public class FeedLedger {
     private static final String JOURNAL = "no2_feed_ledger";
 
     private final Config config;
-    private final ReplicatedCollection replicatedCollection;
+    private final MetadataAware metadataAware;
 
-    public FeedLedger(Config config, ReplicatedCollection replicatedCollection) {
+    public FeedLedger(Config config, MetadataAware metadataAware) {
         this.config = config;
-        this.replicatedCollection = replicatedCollection;
+        this.metadataAware = metadataAware;
     }
 
     public void writeOff(Receipt receipt) {
@@ -58,7 +59,7 @@ public class FeedLedger {
         setCurrent(current);
     }
 
-    public void writeEntry(LastWriteWinState state) {
+    public void writeEntry(DeltaStates state) {
         if (state != null) {
             Receipt receipt = getCurrent();
 
@@ -86,7 +87,7 @@ public class FeedLedger {
 
     private Receipt getCurrent() {
         try {
-            Attributes attributes = replicatedCollection.getAttributes();
+            Attributes attributes = metadataAware.getAttributes();
             String json = attributes.get(JOURNAL);
             if (StringUtils.isNullOrEmpty(json)) {
                 return new Receipt(new HashSet<>(), new HashSet<>());
@@ -104,10 +105,10 @@ public class FeedLedger {
         try {
             ObjectMapper objectMapper = config.getObjectMapper();
             String json = objectMapper.writeValueAsString(receipt);
-            Attributes attributes = replicatedCollection.getAttributes();
+            Attributes attributes = metadataAware.getAttributes();
             attributes.set(JOURNAL, json);
 
-            replicatedCollection.saveAttributes(attributes);
+            metadataAware.setAttributes(attributes);
         } catch (JsonProcessingException e) {
             log.error("Error while writing replica ledger", e);
             throw new ReplicationException("failed to write replica ledger", e, false);

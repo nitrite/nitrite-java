@@ -18,7 +18,9 @@ package org.dizitart.no2.sync;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.WebSocket;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
+import org.dizitart.no2.sync.crdt.DeltaStates;
+import org.dizitart.no2.sync.crdt.Timestamps;
 import org.dizitart.no2.sync.message.*;
 
 /**
@@ -28,62 +30,69 @@ import org.dizitart.no2.sync.message.*;
 public class BatchChangeSender {
     private final Config config;
     private final ReplicatedCollection replicatedCollection;
-    private final DataGateClient dataGateClient;
+    private final String replicaId;
+    private final ConflictFreeReplicatedDataType replicatedDataType;
+    private final DataGateSocketListener dataGateSocketListener;
+    private final FeedLedger feedLedger;
 
     private boolean hasMore;
     private State currentState;
-    private FeedLedger feedLedger;
     private MessageFactory messageFactory;
-    private Long lastSyncTime;
-    private Long endTime;
+    private Timestamps startTime;
+    private Timestamps endTime;
 
     public BatchChangeSender(Config config,
                              ReplicatedCollection replicatedCollection,
-                             DataGateClient dataGateClient) {
+                             DataGateSocketListener dataGateSocketListener) {
         this.config = config;
         this.replicatedCollection = replicatedCollection;
-        this.dataGateClient = dataGateClient;
+        this.replicaId = replicatedCollection.getReplicaId();
+        this.feedLedger = replicatedCollection.getFeedLedger();
+        this.replicatedDataType = replicatedCollection.getReplicatedDataType();
+        this.dataGateSocketListener = dataGateSocketListener;
         configure();
     }
 
-    public void sendAndReceive(WebSocket webSocket, OffsetAware offsetAware) {
+    public void sendAndReceive(WebSocket webSocket, BatchMessage batchMessage) {
+        if (startTime == null) {
+            startTime = replicatedDataType.getLocalSyncedTime();
+        }
+
         if (endTime == null) {
-            endTime = offsetAware.getHeader().getTimestamp();
+            endTime = replicatedDataType.getLastModifiedTime();
         }
 
         switch (currentState) {
             case ReadyToSend:
-                sendStartMessage(webSocket, offsetAware);
+                sendStartMessage(webSocket, batchMessage);
                 break;
             case StartSent:
-                sendChanges(webSocket, offsetAware);
+                sendChanges(webSocket, batchMessage);
                 break;
             case ChangesSent:
                 break;
         }
     }
 
-    private void sendStartMessage(WebSocket webSocket, OffsetAware offsetAware) {
+    private void sendStartMessage(WebSocket webSocket, BatchMessage batchMessage) {
         BatchChangeStart startMessage = messageFactory.createChangeStart(config,
-            replicatedCollection.getReplicaId(), offsetAware.getHeader().getTransactionId());
-        startMessage.setStartTime(lastSyncTime);
-        startMessage.setEndTime(endTime);
+            replicaId, batchMessage.getHeader().getTransactionId());
         startMessage.setNextOffset(config.getChunkSize());
         startMessage.setBatchSize(config.getChunkSize());
 
-        LastWriteWinState state = replicatedCollection.getChangesSince(lastSyncTime, endTime,
+        DeltaStates state = replicatedDataType.delta(startTime, endTime,
             0, config.getChunkSize());
 
         startMessage.setFeed(state);
-        dataGateClient.sendMessage(webSocket, startMessage);
+        dataGateSocketListener.sendMessage(webSocket, startMessage);
         feedLedger.writeEntry(startMessage.getFeed());
 
         currentState = State.StartSent;
     }
 
-    private void sendChanges(WebSocket webSocket, OffsetAware offsetAware) {
-        LastWriteWinState state = replicatedCollection.getChangesSince(lastSyncTime, endTime,
-            offsetAware.getNextOffset(), config.getChunkSize());
+    private void sendChanges(WebSocket webSocket, BatchMessage batchMessage) {
+        DeltaStates state = replicatedDataType.delta(startTime, endTime,
+            batchMessage.getNextOffset(), config.getChunkSize());
 
         if (state.getChangeSet().size() == 0 && state.getTombstoneMap().size() == 0) {
             hasMore = false;
@@ -91,27 +100,23 @@ public class BatchChangeSender {
 
         if (hasMore) {
             BatchChangeContinue message = messageFactory.createChangeContinue(config,
-                replicatedCollection.getReplicaId(), offsetAware.getHeader().getTransactionId(), state);
-            message.setStartTime(lastSyncTime);
-            message.setEndTime(endTime);
-            message.setNextOffset(offsetAware.getNextOffset() + config.getChunkSize());
+                replicaId, batchMessage.getHeader().getTransactionId(), state);
+            message.setNextOffset(batchMessage.getNextOffset() + config.getChunkSize());
             message.setBatchSize(config.getChunkSize());
 
-            dataGateClient.sendMessage(webSocket, message);
+            dataGateSocketListener.sendMessage(webSocket, message);
             feedLedger.writeEntry(state);
         } else {
-            Receipt finalReceipt = replicatedCollection.getFeedLedger().getFinalReceipt();
+            Receipt finalReceipt = feedLedger.getFinalReceipt();
             if (replicatedCollection.shouldRetry(finalReceipt)) {
                 state = replicatedCollection.createState(finalReceipt);
                 BatchChangeContinue message = messageFactory.createChangeContinue(config,
-                    replicatedCollection.getReplicaId(), offsetAware.getHeader().getTransactionId(), state);
+                    replicaId, batchMessage.getHeader().getTransactionId(), state);
 
-                message.setStartTime(lastSyncTime);
-                message.setEndTime(endTime);
-                dataGateClient.sendMessage(webSocket, message);
+                dataGateSocketListener.sendMessage(webSocket, message);
                 feedLedger.writeEntry(state);
             } else {
-                sendEndMessage(webSocket, offsetAware.getHeader().getTransactionId());
+                sendEndMessage(webSocket, batchMessage.getHeader().getTransactionId());
                 currentState = State.ChangesSent;
             }
         }
@@ -120,19 +125,21 @@ public class BatchChangeSender {
     private void sendEndMessage(WebSocket webSocket, String correlationId) {
         BatchChangeEnd endMessage = messageFactory.createChangeEnd(config,
             replicatedCollection.getReplicaId(), correlationId);
-        endMessage.setStartTime(lastSyncTime);
-        endMessage.setEndTime(endTime);
+
+        Timestamps serverStartTime = replicatedDataType.getRemoteSyncedTime();
         endMessage.setBatchSize(config.getChunkSize());
-        dataGateClient.sendMessage(webSocket, endMessage);
+        endMessage.setStartTime(serverStartTime);
+
+        // end time will be passed back in batch end ack message
+        endMessage.setEndTime(endTime);
+
+        dataGateSocketListener.sendMessage(webSocket, endMessage);
     }
 
     private void configure() {
-        this.feedLedger = replicatedCollection.getFeedLedger();
         this.messageFactory = new MessageFactory();
         this.hasMore = true;
         this.currentState = State.ReadyToSend;
-        this.lastSyncTime = replicatedCollection.getLastSyncTime();
-        this.endTime = null;
     }
 
     private enum State {

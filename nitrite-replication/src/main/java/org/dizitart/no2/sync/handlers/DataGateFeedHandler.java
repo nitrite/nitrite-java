@@ -37,9 +37,6 @@ public class DataGateFeedHandler implements MessageHandler<DataGateFeed>, Receip
     @Override
     public void handleMessage(WebSocket webSocket, DataGateFeed message) {
         sendAck(webSocket, message);
-
-        Long time = message.getHeader().getTimestamp();
-        replicatedCollection.saveLastSyncTime(time);
     }
 
     @Override

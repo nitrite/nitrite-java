@@ -15,14 +15,15 @@
  *
  */
 
-package org.dizitart.no2.sync.message;
+package org.dizitart.no2.sync.crdt;
+
+import lombok.Data;
 
 /**
  * @author Anindya Chatterjee
  */
-public interface OffsetAware extends DataGateMessage {
-    Integer getNextOffset();
-    void setNextOffset(Integer offset);
-    Integer getBatchSize();
-    void setBatchSize(Integer batchSize);
+@Data
+public class Timestamps {
+    private Long collectionTime;
+    private Long tombstoneTime;
 }

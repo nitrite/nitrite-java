@@ -19,7 +19,7 @@ package org.dizitart.no2.sync.message;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 
 /**
  * @author Anindya Chatterjee
@@ -27,9 +27,7 @@ import org.dizitart.no2.sync.crdt.LastWriteWinState;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class BatchChangeStart extends TimeBoundMessage implements ReceiptAware, OffsetAware {
+public class BatchChangeStart extends BatchMessage implements ReceiptAware {
     private MessageHeader header;
-    private LastWriteWinState feed;
-    private Integer batchSize;
-    private Integer nextOffset;
+    private DeltaStates feed;
 }

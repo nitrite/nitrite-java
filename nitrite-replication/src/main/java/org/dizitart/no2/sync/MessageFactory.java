@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.sync;
 
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 import org.dizitart.no2.sync.message.*;
 
 import java.util.UUID;
@@ -49,7 +49,7 @@ public class MessageFactory {
     }
 
     public BatchChangeContinue createChangeContinue(Config config, String replicaId,
-                                                    String txId, LastWriteWinState state) {
+                                                    String txId, DeltaStates state) {
         BatchChangeContinue message = new BatchChangeContinue();
         message.setHeader(createHeader(MessageType.BatchChangeContinue, config.getCollection().getName(),
             txId, replicaId, config.getUserName(), config.getTenant()));
@@ -68,7 +68,7 @@ public class MessageFactory {
     }
 
     public DataGateFeed createFeedMessage(Config config, String replicaId,
-                                          String txId, LastWriteWinState state) {
+                                          String txId, DeltaStates state) {
         DataGateFeed feed = new DataGateFeed();
         feed.setHeader(createHeader(MessageType.DataGateFeed, config.getCollection().getName(),
             txId, replicaId, config.getUserName(), config.getTenant()));

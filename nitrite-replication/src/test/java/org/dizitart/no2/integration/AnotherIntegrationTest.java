@@ -1,114 +1,107 @@
 /*
- * Copyright (c) 2017-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.integration;
 
-import com.palantir.docker.compose.DockerComposeRule;
-import com.palantir.docker.compose.configuration.ProjectName;
-import com.palantir.docker.compose.configuration.ShutdownStrategy;
-import com.palantir.docker.compose.connection.DockerPort;
-import com.palantir.docker.compose.connection.waiting.HealthChecks;
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.IntegrationTest;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.TestUtils;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.sync.Replica;
-import org.dizitart.no2.sync.ReplicationException;
 import org.dizitart.no2.sync.event.ReplicationEvent;
 import org.dizitart.no2.sync.event.ReplicationEventType;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.utility.DockerImageName;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
-import static org.dizitart.no2.TestUtils.createDb;
-import static org.dizitart.no2.TestUtils.randomDocument;
+import static org.dizitart.no2.TestUtils.*;
+import static org.dizitart.no2.integration.DataGateIntegrationTest.getRandomTempDbFile;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Anindya Chatterjee
  */
 @Slf4j
-@Category(IntegrationTest.class)
-public class DataGateIntegrationTest {
-    private static final int DATAGATE_PORT = 46005;
-    private static final String MONGODB = "mongo";
-    private static final String DATAGATE = "datagate";
-
+public class AnotherIntegrationTest {
     private String dbFile1, dbFile2;
     private Nitrite db1, db2;
 
-    private DockerPort datagate;
+    private final Network network = Network.newNetwork();
+    private GenericContainer<?> datagate;
+    private MongoDBContainer mongodb;
+    private GenericContainer<?> mongoSeed;
 
     @Rule(order = 0)
-    public Retry retry = new Retry(3);
-
-    @Rule(order = 1)
-    public DockerComposeRule dockerRule = DockerComposeRule.builder()
-        .file("src/test/resources/docker-compose.yml")
-        .projectName(ProjectName.random())
-        .waitingForService(MONGODB, HealthChecks.toHaveAllPortsOpen())
-        .waitingForService(DATAGATE, HealthChecks.toHaveAllPortsOpen())
-        .shutdownStrategy(ShutdownStrategy.GRACEFUL)
-        .build();
-
-    public static String getRandomTempDbFile() {
-        String dataDir = System.getProperty("java.io.tmpdir") + File.separator
-            + "nitrite" + File.separator + "data";
-        File file = new File(dataDir);
-        if (!file.exists()) {
-            assertTrue(file.mkdirs());
-        }
-        return file.getPath() + File.separator + UUID.randomUUID() + ".db";
-    }
+    public Retry retry = new Retry(1);
 
     @Before
-    public void setUpContainer() throws Exception {
-        datagate = dockerRule.containers()
-            .container(DATAGATE)
-            .port(DATAGATE_PORT);
+    public void setUp() throws Exception {
+        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
 
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        mongodb = new MongoDBContainer(
+            DockerImageName.parse("mongo:latest"))
+            .withNetwork(network)
+            .withNetworkAliases("mongo")
+            .withExposedPorts(27017);
 
-        UserClient.createUser(host, port, "abcd@gmail.com");
-        UserClient.createUser(host, port, "abcd2@gmail.com");
-        UserClient.createUser(host, port, "abcd3@gmail.com");
+        mongoSeed = new GenericContainer<>(new ImageFromDockerfile()
+            .withFileFromClasspath("appConfig.json", "mongo-seed/appConfig.json")
+            .withFileFromClasspath("Dockerfile", "mongo-seed/Dockerfile"))
+            .withNetwork(network);
+
+        mongodb.start();
+        mongoSeed.start();
+
+        datagate = new GenericContainer<>(
+            DockerImageName.parse("nitrite/nitrite-datagate:latest"))
+            .withEnv("MONGO_URL", "mongodb://mongo:27017/datagate")
+            .withImagePullPolicy(imageName -> false)
+            .withNetwork(network)
+            .withLogConsumer(logConsumer)
+            .withExposedPorts(46005);
+
+        datagate.start();
+
+        UserClient.createUser(datagate.getHost(), datagate.getFirstMappedPort(), "abcd@gmail.com");
+        UserClient.createUser(datagate.getHost(), datagate.getFirstMappedPort(), "abcd2@gmail.com");
+        UserClient.createUser(datagate.getHost(), datagate.getFirstMappedPort(), "abcd3@gmail.com");
     }
 
     @After
-    public void after() throws IOException, InterruptedException {
-        dockerRule.dockerCompose().down();
-        dockerRule.dockerCompose().kill();
-        dockerRule.dockerCompose().rm();
+    public void cleanUp() {
+        mongodb.stop();
+        mongoSeed.stop();
+        datagate.stop();
 
         if (db1 != null && dbFile1 != null) {
             db1.close();
@@ -123,8 +116,8 @@ public class DataGateIntegrationTest {
 
     @Test
     public void testSingleUserSingleReplica() throws Exception {
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
         String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
 
@@ -163,8 +156,8 @@ public class DataGateIntegrationTest {
         dbFile1 = getRandomTempDbFile();
         dbFile2 = getRandomTempDbFile();
 
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
         db1 = createDb(dbFile1);
         db2 = createDb(dbFile2);
@@ -182,7 +175,6 @@ public class DataGateIntegrationTest {
             .jwtAuth("abcd@gmail.com", jwt)
             .replicaName("r1")
             .acceptAllCertificates(true)
-            .chunkSize(100)
             .create();
 
         Replica r2 = Replica.builder()
@@ -193,7 +185,6 @@ public class DataGateIntegrationTest {
             .jwtAuth("abcd@gmail.com", jwt)
             .replicaName("r2")
             .acceptAllCertificates(true)
-            .chunkSize(100)
             .create();
 
         r1.connect();
@@ -273,8 +264,8 @@ public class DataGateIntegrationTest {
 
     @Test
     public void testMultiUserSingleReplica() throws Exception {
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
         String jwt1 = UserClient.getToken(host, port, "abcd@gmail.com");
         String jwt2 = UserClient.getToken(host, port, "abcd2@gmail.com");
@@ -344,8 +335,8 @@ public class DataGateIntegrationTest {
 
     @Test
     public void testMultiUserMultiReplica() throws Exception {
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
         String jwt1 = UserClient.getToken(host, port, "abcd@gmail.com");
         String jwt2 = UserClient.getToken(host, port, "abcd2@gmail.com");
@@ -393,11 +384,13 @@ public class DataGateIntegrationTest {
 
     @Test
     public void testSecurityInCorrectCredentials() {
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        dbFile1 = getRandomTempDbFile();
 
-        Nitrite db1 = createDb();
-        NitriteCollection c1 = db1.getCollection("testSecurity");
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        Nitrite db1 = createDb(dbFile1);
+        NitriteCollection c1 = db1.getCollection("testSecurityInCorrectCredentials");
 
         AtomicReference<ReplicationEvent> errorEvent = new AtomicReference<>();
 
@@ -421,28 +414,29 @@ public class DataGateIntegrationTest {
         }
 
         assertEquals(c1.size(), 10);
+
         await().atMost(5, SECONDS).until(() -> {
             ReplicationEvent replicationEvent = errorEvent.get();
-            return replicationEvent.getError() instanceof ReplicationException &&
-                replicationEvent.getError().getMessage().contains("failed to validate token");
+            return replicationEvent.getError().getMessage().contains("failed to validate token");
         });
         r1.disconnectNow();
     }
 
     @Test
     public void testCloseDbAndReconnect() throws Exception {
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
         String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
 
         dbFile1 = getRandomTempDbFile();
+        dbFile2 = getRandomTempDbFile();
 
-        Nitrite db = createDb(dbFile1);
+        db1 = createDb(dbFile1);
 
-        Nitrite db2 = createDb();
+        db2 = createDb(dbFile2);
 
-        NitriteCollection c1 = db.getCollection("testCloseDbAndReconnect");
+        NitriteCollection c1 = db1.getCollection("testCloseDbAndReconnect");
         NitriteCollection c2 = db2.getCollection("testCloseDbAndReconnect");
 
         Replica r1 = Replica.builder()
@@ -451,6 +445,7 @@ public class DataGateIntegrationTest {
             .remotePort(port)
             .tenant("junit-test")
             .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
             .create();
 
         Replica r2 = Replica.builder()
@@ -459,6 +454,7 @@ public class DataGateIntegrationTest {
             .remotePort(port)
             .tenant("junit-test")
             .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r2")
             .create();
 
         r1.connect();
@@ -479,11 +475,6 @@ public class DataGateIntegrationTest {
         for (int i = 0; i < 10; i++) {
             Document document = randomDocument();
             c1.insert(document);
-            try {
-                Thread.sleep(random.nextInt(100));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         for (int i = 0; i < 20; i++) {
@@ -502,16 +493,17 @@ public class DataGateIntegrationTest {
 
         r1.disconnect();
         r1.close();
-        db.close();
+        db1.close();
 
-        db = createDb(dbFile1);
-        c1 = db.getCollection("testCloseDbAndReconnect");
+        db1 = createDb(dbFile1);
+        c1 = db1.getCollection("testCloseDbAndReconnect");
         r1 = Replica.builder()
             .of(c1)
             .remoteHost(host)
             .remotePort(port)
             .tenant("junit-test")
             .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
             .create();
 
         for (int i = 0; i < 10; i++) {
@@ -539,20 +531,33 @@ public class DataGateIntegrationTest {
         await().atMost(10, SECONDS).until(() -> finalC.size() == 70 && c2.size() == 70);
         TestUtils.assertEquals(c1, c2);
 
+        log.info("Collection Size - " + finalC.find().size());
+        log.info("Collection Attributes - " + finalC.getAttributes());
+        log.info("Tombstone Size - " + getTombstone(finalC).entries().size());
+        log.info("Tombstone Attributes - " + getTombstone(finalC).getAttributes());
+
         c2.remove(Filter.ALL);
 
-        await().atMost(10, SECONDS).until(() -> c2.size() == 0);
-        await().atMost(5, SECONDS).until(() -> finalC.size() == 0);
-        TestUtils.assertEquals(c1, c2);
-
-        r1.disconnectNow();
-        r2.disconnectNow();
+        try {
+            await().atMost(50, SECONDS).until(() -> finalC.size() == 0);
+            TestUtils.assertEquals(c1, c2);
+        } catch (Exception e) {
+            log.info("Test Failed. Current status as below");
+            log.info("Collection content - " + finalC.find().toList());
+            log.info("Collection Attributes - " + finalC.getAttributes());
+            log.info("Tombstone content - " + getTombstone(finalC).entries().toList());
+            log.info("Tombstone Attributes - " + getTombstone(finalC).getAttributes());
+            throw e;
+        } finally {
+            r1.disconnectNow();
+            r2.disconnectNow();
+        }
     }
 
     @Test
     public void testDelayedConnect() throws Exception {
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
         String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
 
@@ -575,7 +580,9 @@ public class DataGateIntegrationTest {
             Document document = randomDocument();
             c1.insert(document);
         }
-        await().atMost(5, SECONDS).until(() -> c1.size() == 10);
+
+        // allow it to reach the datagate server
+        Thread.sleep(5000);
 
         r1.disconnect();
         r1.close();
@@ -599,8 +606,8 @@ public class DataGateIntegrationTest {
 
     @Test
     public void testDelayedConnectRemoveAll() throws Exception {
-        String host = datagate.getIp();
-        Integer port = datagate.getExternalPort();
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
         String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
 

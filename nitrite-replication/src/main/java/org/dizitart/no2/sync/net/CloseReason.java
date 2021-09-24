@@ -18,6 +18,7 @@
 package org.dizitart.no2.sync.net;
 
 import lombok.Data;
+import org.dizitart.no2.sync.ReplicationException;
 
 /**
  * @author Anindya Chatterjee
@@ -28,8 +29,34 @@ public class CloseReason {
     public static final CloseReason ClientClose = new CloseReason("User Disconnected");
 
     private final String reason;
+    private final Throwable error;
 
     public CloseReason(String reason) {
         this.reason = reason;
+        this.error = null;
+    }
+
+    public CloseReason(String reason, Throwable error) {
+        this.reason = reason;
+        this.error = error;
+    }
+
+    public String getReasonMessage() {
+        Throwable cause = error;
+        while (true) {
+            if (cause == null) {
+                return reason;
+            } else if (cause instanceof ReplicationException) {
+                String message = cause.getMessage();
+                while (true) {
+                    if (message.length() > 123) {
+                        message = message.substring(0, message.lastIndexOf(':'));
+                    } else {
+                        return message;
+                    }
+                }
+            }
+            cause = error.getCause();
+        }
     }
 }

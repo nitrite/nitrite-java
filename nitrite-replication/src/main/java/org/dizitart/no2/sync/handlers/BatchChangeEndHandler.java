@@ -19,7 +19,7 @@ package org.dizitart.no2.sync.handlers;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.WebSocket;
 import org.dizitart.no2.sync.MessageFactory;
-import org.dizitart.no2.sync.DataGateClient;
+import org.dizitart.no2.sync.DataGateSocketListener;
 import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.BatchChangeEnd;
 import org.dizitart.no2.sync.message.BatchEndAck;
@@ -44,12 +44,9 @@ public class BatchChangeEndHandler implements MessageHandler<BatchChangeEnd> {
         batchEndAck.setEndTime(message.getEndTime());
         batchEndAck.getHeader().setCorrelationId(message.getHeader().getId());
 
-        DataGateClient dataGateClient = replicatedCollection.getDataGateClient();
-        dataGateClient.sendMessage(webSocket, batchEndAck);
+        DataGateSocketListener dataGateSocketListener = replicatedCollection.getDataGateSocketListener();
+        dataGateSocketListener.sendMessage(webSocket, batchEndAck);
 
-        Long time = message.getEndTime();
-
-        log.debug("Saving last sync time {}", time);
-        replicatedCollection.saveLastSyncTime(time);
+        replicatedCollection.setRemoteSyncedTime(message.getEndTime());
     }
 }

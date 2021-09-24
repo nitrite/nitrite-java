@@ -103,7 +103,7 @@ public class ReplicaNegativeTest {
 
         await().atMost(5, SECONDS).until(() -> lastWriteWinMap.getCollection().find().size() == 10);
         server.stop();
-        await().atMost(5, SECONDS).until(() -> !r1.isConnected());
+        await().atMost(5, SECONDS).until(() -> r1.isDisconnected());
     }
 
     @Test(expected = ReplicationException.class)

@@ -1,0 +1,38 @@
+version: '3.3'
+
+services:
+  mongo:
+    image: 'mongo'
+    container_name: 'mongo'
+    restart: always
+    ports:
+      - '27017:27017'
+
+  mongo-express:
+    image: 'mongo-express'
+    container_name: 'mongo-express'
+    depends_on:
+      - 'mongo'
+    ports:
+      - '8081:8081'
+    restart: always
+
+  mongo-seed:
+    depends_on:
+      - 'mongo'
+    build: ./mongo-seed
+    container_name: 'mongo-seed'
+
+  datagate:
+    depends_on:
+      - 'mongo-seed'
+    image: 'nitrite/nitrite-datagate:latest'
+    container_name: 'nitrite-datagate'
+    ports:
+      - '46005:46005'
+    restart: always
+    environment:
+      MONGO_URL: mongodb://mongo:27017/datagate
+      GO_ENV: production
+      SERVER_PORT: 46005
+      SERVER_HOST: 0.0.0.0

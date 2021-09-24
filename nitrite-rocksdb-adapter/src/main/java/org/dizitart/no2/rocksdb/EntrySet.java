@@ -59,24 +59,13 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
         @SuppressWarnings("unchecked")
         public Pair<K, V> next() {
             K key = (K) objectFormatter.decodeKey(rawEntryIterator.key(), keyType);
-            try {
-                V value = (V) objectFormatter.decode(rawEntryIterator.value(), valueType);
-                if (reverse) {
-                    rawEntryIterator.prev();
-                } else {
-                    rawEntryIterator.next();
-                }
-                return new Pair<>(key, value);
-            } catch (Exception e) {
-                System.out.println(new String(rawEntryIterator.value()));
-                throw e;
+            V value = (V) objectFormatter.decode(rawEntryIterator.value(), valueType);
+            if (reverse) {
+                rawEntryIterator.prev();
+            } else {
+                rawEntryIterator.next();
             }
-        }
-
-        @Override
-        protected void finalize() throws Throwable {
-            rawEntryIterator.close();
-            super.finalize();
+            return new Pair<>(key, value);
         }
     }
 }

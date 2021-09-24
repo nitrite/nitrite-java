@@ -23,6 +23,7 @@ import org.dizitart.no2.sync.net.CloseReason;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.dizitart.no2.common.Constants.SYNC_THREAD_NAME;
 
@@ -36,6 +37,7 @@ import static org.dizitart.no2.common.Constants.SYNC_THREAD_NAME;
 public class Replica implements AutoCloseable {
     private final Config config;
     private final ReplicatedCollection replicatedCollection;
+    private AtomicBoolean disconnected;
     private ScheduledExecutorService scheduledExecutorService;
     private ScheduledFuture<?> replicationTask;
 
@@ -55,9 +57,11 @@ public class Replica implements AutoCloseable {
                 scheduledExecutorService = getSyncThreadPool();
             }
 
+            disconnected.compareAndSet(true, false);
+
             if (replicationTask == null || replicationTask.isCancelled()) {
                 replicationTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
-                    if (!isConnected()) {
+                    if (replicatedCollection.isStopped() && !disconnected.get()) {
                         replicatedCollection.startReplication();
                     }
                 }, 0, config.getPollingRate(), TimeUnit.MILLISECONDS);
@@ -75,11 +79,12 @@ public class Replica implements AutoCloseable {
         disconnectInternal(true);
     }
 
-    public boolean isConnected() {
-        return replicatedCollection.isConnected();
+    public boolean isDisconnected() {
+        return disconnected.get() || replicatedCollection.isStopped();
     }
 
     public void close() {
+        disconnected.compareAndSet(false, true);
         replicatedCollection.stopReplication(null, CloseReason.ClientClose);
         ThreadPoolManager.shutdownThreadPool(scheduledExecutorService);
     }
@@ -88,7 +93,7 @@ public class Replica implements AutoCloseable {
         if (scheduledExecutorService != null) {
             if (!scheduledExecutorService.isShutdown() && !scheduledExecutorService.isTerminated()) {
                 replicationTask.cancel(mayInterruptIfRunning);
-                ThreadPoolManager.shutdownThreadPool(scheduledExecutorService);
+                disconnected.compareAndSet(false, true);
             }
         } else {
             throw new ReplicationException("replica is not configured properly", true);
@@ -97,6 +102,7 @@ public class Replica implements AutoCloseable {
 
     private void configure() {
         this.scheduledExecutorService = getSyncThreadPool();
+        this.disconnected = new AtomicBoolean(true);
     }
 
     private static ScheduledExecutorService getSyncThreadPool() {

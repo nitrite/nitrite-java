@@ -59,11 +59,26 @@ dependencies {
     testImplementation "ch.qos.logback:logback-core:1.2.4"
     testImplementation "ch.qos.logback:logback-classic:1.2.4"
     testImplementation "junit:junit:4.13.2"
+    testImplementation "org.testcontainers:testcontainers:1.16.0"
+    testImplementation 'org.testcontainers:mongodb:1.16.0'
+    testImplementation 'org.mongodb:mongo-java-driver:3.12.10'
+    testImplementation 'commons-lang:commons-lang:1.0.1'
+    testImplementation 'com.github.javafaker:javafaker:1.0.2'
+    testImplementation "com.palantir.docker.compose:docker-compose-rule-junit4:1.7.0"
 }
 
 test {
     testLogging.showStandardStreams = false
     testLogging.exceptionFormat = 'full'
+    useJUnit {
+        excludeCategories 'org.dizitart.no2.IntegrationTest'
+    }
+}
+
+task integrationTest(type: Test) {
+    useJUnit {
+        includeCategories 'org.dizitart.no2.IntegrationTest'
+    }
 }
 
 jacocoTestReport {

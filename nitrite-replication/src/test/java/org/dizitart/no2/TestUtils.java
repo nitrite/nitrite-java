@@ -17,23 +17,29 @@
 
 package org.dizitart.no2;
 
+import com.github.javafaker.Faker;
+import lombok.SneakyThrows;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.mvstore.MVStoreModule;
+import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.store.NitriteStore;
 import org.junit.Assert;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
  * @author Anindya Chatterjee
  */
 public class TestUtils {
+    private final static Faker faker = new Faker();
     private TestUtils() {}
-
-    private static final Random random = new Random();
 
     public static Nitrite createDb() {
         MVStoreModule storeModule = MVStoreModule.withConfig()
@@ -55,6 +61,11 @@ public class TestUtils {
             .loadModule(storeModule)
             .fieldSeparator(".")
             .openOrCreate();
+    }
+
+    @SneakyThrows
+    public static void deleteDb(String filePath) {
+        Files.delete(Paths.get(filePath));
     }
 
     public static void assertEquals(NitriteCollection c1, NitriteCollection c2) {
@@ -80,20 +91,14 @@ public class TestUtils {
 
     public static Document randomDocument() {
         return Document.createDocument()
-            .put("firstName", randomString())
-            .put("lastName", randomString())
-            .put("age", random.nextInt());
+            .put("firstName", faker.name().firstName())
+            .put("lastName", faker.name().lastName())
+            .put("age", faker.random().nextLong());
     }
 
-    private static String randomString() {
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-
-        return random.ints(leftLimit, rightLimit + 1)
-            .limit(targetStringLength)
-            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString();
+    public static NitriteMap<NitriteId, Long> getTombstone(NitriteCollection collection) {
+        NitriteStore<?> nitriteStore = collection.getStore();
+        String tombStoneName = collection.getAttributes().get(Attributes.TOMBSTONE);
+        return nitriteStore.openMap(tombStoneName, NitriteId.class, Long.class);
     }
-
 }

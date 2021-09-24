@@ -22,7 +22,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.sync.crdt.LastWriteWinMap;
+import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
 
 import static org.dizitart.no2.common.Constants.REPLICATOR;
 
@@ -31,16 +31,17 @@ import static org.dizitart.no2.common.Constants.REPLICATOR;
  */
 @Slf4j
 public class CollectionChangeListener implements CollectionEventListener {
-    private final LastWriteWinMap lastWriteWinMap;
+    private final ConflictFreeReplicatedDataType replicatedDataType;
 
-    public CollectionChangeListener(LastWriteWinMap lastWriteWinMap) {
-        this.lastWriteWinMap = lastWriteWinMap;
+    public CollectionChangeListener(ConflictFreeReplicatedDataType replicatedDataType) {
+        this.replicatedDataType = replicatedDataType;
     }
 
     @Override
     public void onEvent(CollectionEventInfo<?> eventInfo) {
         if (eventInfo != null) {
             if (!REPLICATOR.equals(eventInfo.getOriginator())) {
+                // discard the removes coming from replicator crdt
                 switch (eventInfo.getEventType()) {
                     case Remove:
                         Document document = (Document) eventInfo.getItem();
@@ -60,8 +61,8 @@ public class CollectionChangeListener implements CollectionEventListener {
         NitriteId nitriteId = document.getId();
         Long deleteTime = document.getLastModifiedSinceEpoch();
 
-        if (lastWriteWinMap != null) {
-            lastWriteWinMap.getTombstoneMap().put(nitriteId, deleteTime);
+        if (replicatedDataType != null) {
+            replicatedDataType.createTombstone(nitriteId, deleteTime);
         }
     }
 }

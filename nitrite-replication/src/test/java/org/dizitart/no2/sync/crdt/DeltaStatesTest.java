@@ -4,10 +4,10 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class LastWriteWinStateTest {
+public class DeltaStatesTest {
     @Test
     public void testConstructor() {
-        assertEquals("LastWriteWinState(changeSet=[], tombstoneMap={})", (new LastWriteWinState()).toString());
+        assertEquals("LastWriteWinState(changeSet=[], tombstoneMap={})", (new DeltaStates()).toString());
     }
 }
 

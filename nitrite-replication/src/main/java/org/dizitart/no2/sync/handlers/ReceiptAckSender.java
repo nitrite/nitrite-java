@@ -17,8 +17,8 @@
 package org.dizitart.no2.sync.handlers;
 
 import okhttp3.WebSocket;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
-import org.dizitart.no2.sync.DataGateClient;
+import org.dizitart.no2.sync.crdt.DeltaStates;
+import org.dizitart.no2.sync.DataGateSocketListener;
 import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.*;
 
@@ -32,30 +32,27 @@ public interface ReceiptAckSender<Ack extends DataGateMessage> {
 
     default void sendAck(WebSocket webSocket, ReceiptAware message) {
         if (message != null) {
-            LastWriteWinState state = message.getFeed();
-            getReplicatedCollection().getLastWriteWinMap().merge(state);
+            DeltaStates state = message.getFeed();
+            getReplicatedCollection().getReplicatedDataType().merge(state);
 
             Receipt receipt = message.calculateReceipt();
             Ack ack = createAck(message.getHeader().getTransactionId(), receipt);
             ack.getHeader().setCorrelationId(message.getHeader().getId());
 
+            BatchMessage batchMessage = (BatchMessage) message;
+            BatchMessage batchAck = (BatchMessage) ack;
+
             // set offset and batch size
-            if (message instanceof OffsetAware && ack instanceof OffsetAware) {
-                ((OffsetAware) ack).setNextOffset(((OffsetAware) message).getNextOffset());
-                ((OffsetAware) ack).setBatchSize(((OffsetAware) message).getBatchSize());
-            }
+            batchAck.setNextOffset(batchMessage.getNextOffset());
+            batchAck.setBatchSize(batchMessage.getBatchSize());
 
             // set start time and end time
-            if (ack instanceof TimeBoundMessage && message instanceof TimeBoundMessage) {
-                TimeBoundMessage timeBoundMessage = (TimeBoundMessage) message;
-                TimeBoundMessage timeBoundAck = (TimeBoundMessage) ack;
+            batchAck.setStartTime(batchMessage.getStartTime());
+            batchAck.setEndTime(batchMessage.getEndTime());
 
-                timeBoundAck.setStartTime(timeBoundMessage.getStartTime());
-                timeBoundAck.setEndTime(timeBoundMessage.getEndTime());
-            }
-
-            DataGateClient dataGateClient = getReplicatedCollection().getDataGateClient();
-            dataGateClient.sendMessage(webSocket, ack);
+            DataGateSocketListener dataGateSocketListener
+                = getReplicatedCollection().getDataGateSocketListener();
+            dataGateSocketListener.sendMessage(webSocket, ack);
         }
     }
 }

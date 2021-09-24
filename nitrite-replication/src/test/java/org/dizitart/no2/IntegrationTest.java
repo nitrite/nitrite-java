@@ -15,15 +15,10 @@
  *
  */
 
-package org.dizitart.no2.sync.message;
-
-import lombok.Data;
+package org.dizitart.no2;
 
 /**
  * @author Anindya Chatterjee
  */
-@Data
-public abstract class TimeBoundMessage {
-    private Long startTime;
-    private Long endTime;
+public interface IntegrationTest {
 }

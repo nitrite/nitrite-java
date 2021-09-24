@@ -16,9 +16,7 @@
 
 package org.dizitart.no2.collection.meta;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,47 +31,70 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-@EqualsAndHashCode
+@Data
 public class Attributes implements Serializable {
+    private static final long serialVersionUID = 1481284930L;
+
     /**
      * The constant CREATED_TIME.
      */
-    public static final String CREATED_TIME = "createdTime";
+    public static final String CREATED_TIME = "created_at";
+
     /**
      * The constant LAST_MODIFIED_TIME.
      */
-    public static final String LAST_MODIFIED_TIME = "lastModifiedTime";
+    public static final String LAST_MODIFIED_TIME = "last_modified_at";
+
     /**
      * The constant OWNER.
      */
     public static final String OWNER = "owner";
+
     /**
      * The constant UNIQUE_ID.
      */
     public static final String UNIQUE_ID = "uuid";
-    /**
-     * The constant LAST_SYNCED.
-     */
-    public static final String LAST_SYNCED = "lastSynced";
+
     /**
      * The constant SYNC_LOCK.
      */
-    public static final String SYNC_LOCK = "syncLock";
+    public static final String SYNC_LOCK = "sync_lock";
+
     /**
      * The constant EXPIRY_WAIT.
      */
-    public static final String EXPIRY_WAIT = "expiryWait";
+    public static final String EXPIRY_WAIT = "expiry_wait";
+
     /**
      * The constant TOMBSTONE.
      */
     public static final String TOMBSTONE = "tombstone";
+
+    /**
+     * The constant LAST_SYNCED.
+     */
+    public static final String LOCAL_COLLECTION_SYNCED_TIME = "local_collection_synced_at";
+
+    /**
+     * The constant REMOTE_COLLECTION_SYNCED_TIME.
+     */
+    public static final String REMOTE_COLLECTION_SYNCED_TIME = "remote_collection_synced_at";
+
+    /**
+     * The constant TOMBSTONE_SYNC_TIME.
+     */
+    public static final String LOCAL_TOMBSTONE_SYNCED_TIME = "local_tombstone_synced_at";
+
+    /**
+     * The constant REMOTE_TOMBSTONE_SYNC_TIME.
+     */
+    public static final String REMOTE_TOMBSTONE_SYNCED_TIME = "remote_tombstone_synced_at";
+
     /**
      * The constant REPLICA.
      */
     public static final String REPLICA = "replica";
-    private static final long serialVersionUID = 1481284930L;
 
-    @Getter @Setter
     private Map<String, String> attributes;
 
     /**

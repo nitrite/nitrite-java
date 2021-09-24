@@ -176,8 +176,18 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     @Override
     public boolean containsKey(String key) {
-//        return getFields().contains(key);
         return super.containsKey(key);
+    }
+
+    @Override
+    public boolean containsField(String field) {
+        if (containsKey(field)) {
+            // search top level
+            return true;
+        } else {
+            // search deep level
+            return getFields().contains(field);
+        }
     }
 
     @Override

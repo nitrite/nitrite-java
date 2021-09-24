@@ -56,7 +56,7 @@ public class CollectionFactory {
      *
      * @param name           the name
      * @param nitriteConfig  the nitrite config
-     * @param writeCatalogue the write catalogue
+     * @param writeCatalogue to write catalogue
      * @return the collection
      */
     public NitriteCollection getCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalogue) {

@@ -17,12 +17,9 @@
 package org.dizitart.no2.sync.handlers;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.sync.Config;
-import org.dizitart.no2.sync.DataGateClient;
-import org.dizitart.no2.sync.crdt.LastWriteWinMap;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 import org.dizitart.no2.sync.message.Receipt;
 
 import java.util.HashMap;
@@ -32,27 +29,18 @@ import java.util.HashSet;
  * @author Anindya Chatterjee
  */
 public interface ReceiptLedgerAware {
-    NitriteCollection getCollection();
 
-    String getReplicaId();
+    ConflictFreeReplicatedDataType getReplicatedDataType();
 
-    LastWriteWinMap getLastWriteWinMap();
-
-    Config getConfig();
-
-    DataGateClient getDataGateClient();
-
-    default LastWriteWinState createState(Receipt receipt) {
-        LastWriteWinState state = new LastWriteWinState();
+    default DeltaStates createState(Receipt receipt) {
+        DeltaStates state = new DeltaStates();
         state.setTombstoneMap(new HashMap<>());
         state.setChangeSet(new HashSet<>());
-
-        NitriteCollection collection = getCollection();
 
         if (receipt != null) {
             if (receipt.getAdded() != null) {
                 for (String id : receipt.getAdded()) {
-                    Document document = collection.getById(NitriteId.createId(id));
+                    Document document = getReplicatedDataType().getDocument(NitriteId.createId(id));
                     if (document != null) {
                         state.getChangeSet().add(document);
                     }
@@ -61,7 +49,7 @@ public interface ReceiptLedgerAware {
 
             if (receipt.getRemoved() != null) {
                 for (String id : receipt.getRemoved()) {
-                    Long timestamp = getLastWriteWinMap().getTombstoneMap().get(NitriteId.createId(id));
+                    Long timestamp = getReplicatedDataType().getTombstoneTime(NitriteId.createId(id));
                     if (timestamp != null) {
                         state.getTombstoneMap().put(id, timestamp);
                     }

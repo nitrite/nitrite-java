@@ -26,7 +26,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.streams.BoundedStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 import org.dizitart.no2.sync.crdt.Tombstone;
 
 import java.util.Map;
@@ -52,7 +52,7 @@ public class ServerLastWriteWinMap {
         this.tombstoneMap = tombstoneMap;
     }
 
-    public void merge(LastWriteWinState snapshot, Long syncTime) {
+    public void merge(DeltaStates snapshot, Long syncTime) {
         if (snapshot.getChangeSet() != null) {
             for (Document entry : snapshot.getChangeSet()) {
                 put(entry);
@@ -66,8 +66,8 @@ public class ServerLastWriteWinMap {
         }
     }
 
-    public LastWriteWinState getChangesSince(Long startTime, Long endTime, int offset, int size) {
-        LastWriteWinState state = new LastWriteWinState();
+    public DeltaStates getChangesSince(Long startTime, Long endTime, int offset, int size) {
+        DeltaStates state = new DeltaStates();
 
         // send tombstone info
         BoundedStream<NitriteId, Tombstone> stream

@@ -34,13 +34,13 @@ import java.util.concurrent.TimeUnit;
  * @author Anindya Chatterjee
  */
 @Slf4j
-public class DataGateSocket {
+public class DataGateClient {
     private final Config config;
 
     private OkHttpClient httpClient;
     private Request request;
 
-    public DataGateSocket(Config config) {
+    public DataGateClient(Config config) {
         this.config = config;
         configure(config);
     }

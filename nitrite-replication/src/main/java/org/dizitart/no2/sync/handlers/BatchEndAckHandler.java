@@ -34,6 +34,6 @@ public class BatchEndAckHandler implements MessageHandler<BatchEndAck> {
 
     @Override
     public void handleMessage(WebSocket webSocket, BatchEndAck message) {
-        // nothing to be done here
+        replicatedCollection.setLocalSyncedTime(message.getEndTime());
     }
 }

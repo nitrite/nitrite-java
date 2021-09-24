@@ -30,12 +30,12 @@ import java.util.Set;
  * @author Anindya Chatterjee
  */
 @Data
-public class LastWriteWinState {
+public class DeltaStates {
     @JsonDeserialize(contentUsing = DocumentDeserializer.class)
     private Set<Document> changeSet;
     private Map<String, Long> tombstoneMap;
 
-    public LastWriteWinState() {
+    public DeltaStates() {
         changeSet = new LinkedHashSet<>();
         tombstoneMap = new LinkedHashMap<>();
     }

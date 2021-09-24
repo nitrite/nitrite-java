@@ -21,22 +21,18 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.WebSocket;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.Timestamps;
 import org.dizitart.no2.sync.event.CollectionChangeListener;
 import org.dizitart.no2.sync.handlers.ReceiptLedgerAware;
-import org.dizitart.no2.sync.message.OffsetAware;
+import org.dizitart.no2.sync.message.BatchMessage;
 import org.dizitart.no2.sync.message.Receipt;
 import org.dizitart.no2.sync.net.CloseReason;
-import org.dizitart.no2.sync.net.DataGateSocket;
+import org.dizitart.no2.sync.net.DataGateClient;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -46,78 +42,69 @@ import static org.dizitart.no2.collection.meta.Attributes.REPLICA;
  * @author Anindya Chatterjee
  */
 @Slf4j
-public class ReplicatedCollection implements ConflictFreeReplicatedDataType, ReceiptLedgerAware {
+public class ReplicatedCollection implements ReceiptLedgerAware {
     private String replicaId;
-    private AtomicBoolean connectedIndicator;
-    private CollectionChangeListener changeListener;
+    private AtomicBoolean stopped;
 
     @Getter private final Config config;
+    @Getter private final NitriteCollection collection;
     @Getter private FeedLedger feedLedger;
-    @Getter private NitriteCollection collection;
-    @Getter private DataGateClient dataGateClient;
-    @Getter private LastWriteWinMap lastWriteWinMap;
+    @Getter private DataGateSocketListener dataGateSocketListener;
+    @Getter private ConflictFreeReplicatedDataType replicatedDataType;
     @Getter private BatchChangeSender batchChangeSender;
 
     public ReplicatedCollection(Config config) {
         this.config = config;
-        configure();
+        this.collection = config.getCollection();
+        initialize();
     }
 
     public void startReplication() {
         log.debug("Starting replication for {}", getReplicaId());
-        DataGateSocket dataGateSocket = new DataGateSocket(config);
-        dataGateClient = new DataGateClient(config, this);
-        batchChangeSender = new BatchChangeSender(config, this, dataGateClient);
-        dataGateSocket.setListener(dataGateClient);
+        DataGateClient dataGateClient = new DataGateClient(config);
+        dataGateSocketListener = new DataGateSocketListener(config, this);
+        batchChangeSender = new BatchChangeSender(config, this, dataGateSocketListener);
+        dataGateClient.setListener(dataGateSocketListener);
     }
 
     public void stopReplication(WebSocket webSocket, CloseReason reason) {
-        dataGateClient.closeConnection(webSocket, reason);
-        reset();
+        dataGateSocketListener.closeConnection(webSocket, reason);
+        setStopped(true);
     }
 
-    public LastWriteWinState getChangesSince(Long startTime, Long endTime, int start, Integer chunkSize) {
-        return lastWriteWinMap.getChangesSince(startTime, endTime, start, chunkSize);
+    public void sendAndReceive(WebSocket webSocket, BatchMessage batchMessage) {
+        batchChangeSender.sendAndReceive(webSocket, batchMessage);
     }
 
-    public void sendAndReceive(WebSocket webSocket, OffsetAware offsetAware) {
-        batchChangeSender.sendAndReceive(webSocket, offsetAware);
-    }
+    public void collectGarbage(Long dtl) {
+        if (dtl != null && dtl > 0) {
+            long collectTime = System.currentTimeMillis() - dtl * 24 * 60 * 60 * 1000;
 
-    public void collectGarbage(Long ttl) {
-        if (ttl != null && ttl > 0) {
-            long collectTime = System.currentTimeMillis() - ttl;
-
-            if (lastWriteWinMap != null && lastWriteWinMap.getTombstoneMap() != null) {
-                Set<NitriteId> removeSet = new HashSet<>();
-                for (Pair<NitriteId, Long> entry : lastWriteWinMap.getTombstoneMap().entries()) {
-                    if (entry.getSecond() < collectTime) {
-                        removeSet.add(entry.getFirst());
-                    }
-                }
-
-                Receipt garbage = new Receipt();
-                for (NitriteId nitriteId : removeSet) {
-                    lastWriteWinMap.getTombstoneMap().remove(nitriteId);
-                    garbage.getRemoved().add(nitriteId.getIdValue());
-                }
-
-                feedLedger.writeOff(garbage);
-            }
+            Receipt garbage = replicatedDataType.collectGarbage(collectTime);
+            feedLedger.writeOff(garbage);
         }
     }
 
-    public void setConnected(boolean connected) {
-        this.connectedIndicator.set(connected);
+    public void setStopped(boolean stopped) {
+        if (this.stopped == null) {
+            this.stopped = new AtomicBoolean();
+        }
+        this.stopped.set(stopped);
     }
 
-    public boolean isConnected() {
-        return connectedIndicator.get();
+    public boolean isStopped() {
+        return stopped != null && stopped.get();
     }
 
     public String getReplicaId() {
         if (StringUtils.isNullOrEmpty(replicaId)) {
-            Attributes attributes = getAttributes();
+            Attributes attributes = collection.getAttributes();
+
+            if (attributes == null) {
+                attributes = new Attributes();
+                collection.setAttributes(attributes);
+            }
+
             if (!attributes.hasKey(Attributes.REPLICA)) {
                 String name = StringUtils.isNullOrEmpty(config.getReplicaName())
                     ? UUID.randomUUID().toString()
@@ -129,23 +116,19 @@ public class ReplicatedCollection implements ConflictFreeReplicatedDataType, Rec
         return replicaId;
     }
 
-    private void configure() {
-        connectedIndicator = new AtomicBoolean(false);
-        collection = config.getCollection();
-        lastWriteWinMap = createConflictFreeReplicatedDataType();
-        feedLedger = new FeedLedger(config, this);
-        changeListener = new CollectionChangeListener(lastWriteWinMap);
-        getCollection().subscribe(changeListener);
+    public void setLocalSyncedTime(Timestamps syncedTime) {
+        replicatedDataType.setLocalSyncedTime(syncedTime);
     }
 
-    private void reset() {
-        connectedIndicator = new AtomicBoolean(false);
-        collection = config.getCollection();
-        lastWriteWinMap = createConflictFreeReplicatedDataType();
-        feedLedger = new FeedLedger(config, this);
+    public void setRemoteSyncedTime(Timestamps syncedTime) {
+        replicatedDataType.setRemoteSyncedTime(syncedTime);
+    }
 
-        getCollection().unsubscribe(changeListener);
-        changeListener = new CollectionChangeListener(lastWriteWinMap);
+    private void initialize() {
+        stopped = new AtomicBoolean(true);
+        replicatedDataType = new LastWriteWinMap(collection);
+        feedLedger = new FeedLedger(config, collection);
+        CollectionChangeListener changeListener = new CollectionChangeListener(replicatedDataType);
         getCollection().subscribe(changeListener);
     }
 }
