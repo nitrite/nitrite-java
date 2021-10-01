@@ -61,7 +61,7 @@ dependencies {
     testImplementation "org.awaitility:awaitility:4.1.0"
     testImplementation "joda-time:joda-time:2.10.10"
     testImplementation "org.meanbean:meanbean:2.0.3"
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.12.4"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.12.5"
     testImplementation "commons-io:commons-io:2.11.0"
     testImplementation "jakarta.xml.bind:jakarta.xml.bind-api:3.0.1"
     testImplementation "com.sun.xml.bind:jaxb-impl:3.0.2"
