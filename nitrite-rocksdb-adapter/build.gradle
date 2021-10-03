@@ -43,7 +43,7 @@ dependencies {
     testImplementation "org.mockito:mockito-core:3.12.4"
     testImplementation "org.apache.lucene:lucene-core:8.9.0"
     testImplementation "org.apache.lucene:lucene-analyzers-common:8.10.0"
-    testImplementation "org.apache.lucene:lucene-queryparser:8.9.0"
+    testImplementation "org.apache.lucene:lucene-queryparser:8.10.0"
     testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.14.1"
     testImplementation "org.apache.logging.log4j:log4j-core:2.14.1"
     testImplementation "org.awaitility:awaitility:4.1.0"
