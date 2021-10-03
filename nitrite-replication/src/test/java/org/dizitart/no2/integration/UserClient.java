@@ -19,18 +19,14 @@ package org.dizitart.no2.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class UserClient {
-
-//    @Test
-    public void test() throws Exception {
-        createUser("127.0.0.1", 46005, "abcd@gmail.com");
-    }
-
     public static void createUser(String host, Integer port, String user) throws Exception {
         OkHttpClient client = getUnsafeOkHttpClient();
         Request request = new Request.Builder()
@@ -50,8 +46,7 @@ public class UserClient {
                 }
             }
         } catch (Exception e) {
-            System.out.println("Error checking user " + user);
-            e.printStackTrace();
+            log.error("Error checking user " + user, e);
             return;
         }
 
@@ -108,41 +103,12 @@ public class UserClient {
             }
         }
 
-        System.err.println(response.body().string());
         throw new Exception("failed to login");
     }
 
     private static OkHttpClient getUnsafeOkHttpClient() {
         try {
-//            final TrustManager[] trustAllCerts = new TrustManager[]{
-//                new X509TrustManager() {
-//
-//                    @Override
-//                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
-//                                                   String authType) {
-//                    }
-//
-//                    @Override
-//                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
-//                                                   String authType) {
-//                    }
-//
-//                    @Override
-//                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-//                        return new java.security.cert.X509Certificate[]{};
-//                    }
-//                }
-//            };
-//
-//            final SSLContext sslContext = SSLContext.getInstance("SSL");
-//            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-//
-//            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
-//            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-
-//            builder.hostnameVerifier((hostname, session) -> true);
             builder.retryOnConnectionFailure(true);
 
             return builder.build();

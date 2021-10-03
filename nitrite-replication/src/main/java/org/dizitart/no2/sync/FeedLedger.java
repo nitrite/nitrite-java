@@ -16,12 +16,11 @@
 
 package org.dizitart.no2.sync;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.collection.meta.MetadataAware;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.sync.crdt.DeltaStates;
 import org.dizitart.no2.sync.message.Receipt;
@@ -30,24 +29,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static org.dizitart.no2.collection.meta.Attributes.FEED_LEDGER;
+
 /**
  * @author Anindya Chatterjee
  */
 @Slf4j
 public class FeedLedger {
-    private static final String JOURNAL = "no2_feed_ledger";
 
     private final Config config;
-    private final MetadataAware metadataAware;
+    private NitriteCollection journal;
 
-    public FeedLedger(Config config, MetadataAware metadataAware) {
+    public FeedLedger(Config config) {
         this.config = config;
-        this.metadataAware = metadataAware;
+        initializeLedger();
     }
 
     public void writeOff(Receipt receipt) {
         Receipt current = getCurrent();
-        if (receipt != null && current != null) {
+        if (receipt != null) {
             for (String id : receipt.getAdded()) {
                 current.getAdded().remove(id);
             }
@@ -85,33 +85,46 @@ public class FeedLedger {
         return getCurrent();
     }
 
-    private Receipt getCurrent() {
-        try {
-            Attributes attributes = metadataAware.getAttributes();
-            String json = attributes.get(JOURNAL);
-            if (StringUtils.isNullOrEmpty(json)) {
-                return new Receipt(new HashSet<>(), new HashSet<>());
-            }
+    private void initializeLedger() {
+        NitriteCollection collection = config.getCollection();
+        String feedLedgerName = getFeedLedgerName(collection);
 
-            ObjectMapper objectMapper = config.getObjectMapper();
-            return objectMapper.readValue(json, Receipt.class);
-        } catch (JsonProcessingException e) {
-            log.error("Error while opening replica ledger", e);
-            throw new ReplicationException("failed to open replica ledger", e, false);
+        Nitrite db = config.getDb();
+        this.journal = db.getCollection(feedLedgerName);
+    }
+
+    private String getFeedLedgerName(NitriteCollection collection) {
+        Attributes attributes = collection.getAttributes();
+        String feedLedgerName = attributes.get(FEED_LEDGER);
+        if (StringUtils.isNullOrEmpty(feedLedgerName)) {
+            feedLedgerName = collection.getName() + "_" + FEED_LEDGER;
+            attributes.set(FEED_LEDGER, feedLedgerName);
+            collection.setAttributes(attributes);
+        }
+        return feedLedgerName;
+    }
+
+    private Receipt getCurrent() {
+        Document document = journal.find().firstOrNull();
+        if (document == null) {
+            Receipt receipt = new Receipt(new HashSet<>(), new HashSet<>());
+            document = receipt.toDocument();
+            journal.insert(document);
+            return receipt;
+        } else {
+            return Receipt.fromDocument(document);
         }
     }
 
     private void setCurrent(Receipt receipt) {
-        try {
-            ObjectMapper objectMapper = config.getObjectMapper();
-            String json = objectMapper.writeValueAsString(receipt);
-            Attributes attributes = metadataAware.getAttributes();
-            attributes.set(JOURNAL, json);
-
-            metadataAware.setAttributes(attributes);
-        } catch (JsonProcessingException e) {
-            log.error("Error while writing replica ledger", e);
-            throw new ReplicationException("failed to write replica ledger", e, false);
+        Document document = journal.find().firstOrNull();
+        if (document == null) {
+            document = receipt.toDocument();
+            journal.insert(document);
+        } else {
+            document.put("added", receipt.getAdded());
+            document.put("removed", receipt.getRemoved());
+            journal.update(document);
         }
     }
 }

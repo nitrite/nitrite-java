@@ -70,15 +70,6 @@ dependencies {
 test {
     testLogging.showStandardStreams = false
     testLogging.exceptionFormat = 'full'
-    useJUnit {
-        excludeCategories 'org.dizitart.no2.IntegrationTest'
-    }
-}
-
-task integrationTest(type: Test) {
-    useJUnit {
-        includeCategories 'org.dizitart.no2.IntegrationTest'
-    }
 }
 
 jacocoTestReport {

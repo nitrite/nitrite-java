@@ -17,75 +17,94 @@
 
 package org.dizitart.no2.sync.crdt;
 
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.SortOrder;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.StringUtils;
-import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.sync.Config;
 import org.dizitart.no2.sync.message.Receipt;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.dizitart.no2.collection.FindOptions.orderBy;
 import static org.dizitart.no2.collection.meta.Attributes.*;
 import static org.dizitart.no2.common.Constants.DOC_MODIFIED;
-import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
+import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.index.IndexOptions.indexOptions;
 
 /**
  * @author Anindya Chatterjee
  */
 public abstract class ConflictFreeReplicatedDataType implements AutoCloseable {
-    protected final NitriteCollection collection;
-    protected NitriteMap<NitriteId, Long> tombstoneMap;
+    protected static final String TOMBSTONE_COUNTER = "tombstone_counter";
+    protected static final String DELETED_TIME = "deleted_time";
+    protected static final String TOMBSTONE_SOURCE = "tombstone_source";
+
+    protected final Config config;
+    protected NitriteCollection collection;
+    protected NitriteCollection tombstones;
+    protected AtomicInteger counter;
 
     public abstract void createTombstone(NitriteId nitriteId, Long deleteTime);
     public abstract void merge(DeltaStates deltaStates);
-    public abstract DeltaStates delta(Timestamps startMarker, Timestamps endMarker,
+    public abstract DeltaStates delta(Markers startMarker, Markers endMarker,
                                       int offset, int size);
 
-    protected ConflictFreeReplicatedDataType(NitriteCollection collection) {
-        this.collection = collection;
-        createTombstones();
+    protected ConflictFreeReplicatedDataType(Config config) {
+        this.config = config;
+        initializeDataType();
+    }
+
+    public void resetCounter() {
+        this.counter = new AtomicInteger(0);
     }
 
     public Long getTombstoneTime(NitriteId id) {
-        return tombstoneMap.get(id);
+        Document tombstone = tombstones.getById(id);
+        if (tombstone == null) return 0L;
+        return tombstone.get(DELETED_TIME, Long.class);
     }
 
     public Document getDocument(NitriteId id) {
         return collection.getById(id);
     }
 
-    public Timestamps getLastModifiedTime() {
-        Timestamps lastModifiedTime = new Timestamps();
+    public Markers getLocalEndMarkers() {
+        Markers markers = new Markers();
 
         // get last updated document from DOC_MODIFIED index and get its modified time
-        Document latest = collection.find(FindOptions.orderBy(DOC_MODIFIED, SortOrder.Descending)).firstOrNull();
-        lastModifiedTime.setCollectionTime(latest == null ? 0 : latest.getLastModifiedSinceEpoch());
+        Document latest = collection.find(orderBy(DOC_MODIFIED, SortOrder.Descending)).firstOrNull();
+        markers.setCollectionMarker(latest == null ? 0 : latest.getLastModifiedSinceEpoch());
 
-        Attributes attributes = getTombstoneAttributes();
-        lastModifiedTime.setTombstoneTime(Long.parseLong(attributes.get(LAST_MODIFIED_TIME)));
+        // get the highest tombstone counter for the current collection
+        Document latestTombstone = tombstones.find(
+            where(TOMBSTONE_SOURCE).eq(collection.getName()),
+            orderBy(TOMBSTONE_COUNTER, SortOrder.Descending)).firstOrNull();
 
-        return lastModifiedTime;
+        markers.setTombstoneMarker(latestTombstone == null ? 0L : latestTombstone.get(TOMBSTONE_COUNTER, Long.class));
+
+        return markers;
     }
 
     public Receipt collectGarbage(long collectTime) {
         Set<NitriteId> removeSet = new HashSet<>();
-        for (Pair<NitriteId, Long> entry : tombstoneMap.entries()) {
-            if (entry.getSecond() < collectTime) {
-                removeSet.add(entry.getFirst());
+        for (Document entry : tombstones.find()) {
+            if (entry.get(TOMBSTONE_COUNTER, Long.class) < collectTime) {
+                removeSet.add(entry.getId());
             }
         }
 
         Receipt garbage = new Receipt();
         for (NitriteId nitriteId : removeSet) {
-            tombstoneMap.remove(nitriteId);
+            tombstones.remove(Filter.byId(nitriteId));
             garbage.getRemoved().add(nitriteId.getIdValue());
         }
 
@@ -96,37 +115,25 @@ public abstract class ConflictFreeReplicatedDataType implements AutoCloseable {
     public void close() {
         // collection should not be closed as it may be used outside of replication
         // but as tombstone is only used in replication, so close tombstone.
-        if (tombstoneMap != null) {
-            tombstoneMap.close();
+        if (tombstones != null) {
+            tombstones.close();
         }
     }
 
-    public Timestamps getLocalSyncedTime() {
-        return getSyncedTime(LOCAL_COLLECTION_SYNCED_TIME, LOCAL_TOMBSTONE_SYNCED_TIME);
+    public Markers getLocalStartMarkers() {
+        return getMarkers(LOCAL_COLLECTION_MARKER, LOCAL_TOMBSTONE_MARKER);
     }
 
-    public Timestamps getRemoteSyncedTime() {
-        return getSyncedTime(REMOTE_COLLECTION_SYNCED_TIME, REMOTE_TOMBSTONE_SYNCED_TIME);
+    public void setLocalNextMarkers(Markers markers) {
+        setMarkers(LOCAL_COLLECTION_MARKER, LOCAL_TOMBSTONE_MARKER, markers);
     }
 
-    public void setLocalSyncedTime(Timestamps timestamps) {
-        Attributes collectionAttributes = getCollectionAttributes();
-        collectionAttributes.set(LOCAL_COLLECTION_SYNCED_TIME, Objects.toString(timestamps.getCollectionTime()));
-        collection.setAttributes(collectionAttributes);
-
-        Attributes tombstoneAttributes = getTombstoneAttributes();
-        tombstoneAttributes.set(LOCAL_TOMBSTONE_SYNCED_TIME, Objects.toString(timestamps.getTombstoneTime()));
-        tombstoneMap.setAttributes(tombstoneAttributes);
+    public Markers getRemoteStartMarkers() {
+        return getMarkers(REMOTE_COLLECTION_MARKER, REMOTE_TOMBSTONE_MARKER);
     }
 
-    public void setRemoteSyncedTime(Timestamps timestamps) {
-        Attributes collectionAttributes = getCollectionAttributes();
-        collectionAttributes.set(REMOTE_COLLECTION_SYNCED_TIME, Objects.toString(timestamps.getCollectionTime()));
-        collection.setAttributes(collectionAttributes);
-
-        Attributes tombstoneAttributes = getTombstoneAttributes();
-        tombstoneAttributes.set(REMOTE_TOMBSTONE_SYNCED_TIME, Objects.toString(timestamps.getTombstoneTime()));
-        tombstoneMap.setAttributes(tombstoneAttributes);
+    public void setRemoteNextMarkers(Markers markers) {
+        setMarkers(REMOTE_COLLECTION_MARKER, REMOTE_TOMBSTONE_MARKER, markers);
     }
 
     public Attributes getCollectionAttributes() {
@@ -140,49 +147,73 @@ public abstract class ConflictFreeReplicatedDataType implements AutoCloseable {
     }
 
     public Attributes getTombstoneAttributes() {
-        Attributes attributes = tombstoneMap.getAttributes();
+        Attributes attributes = tombstones.getAttributes();
 
         if (attributes == null) {
             attributes = new Attributes();
-            tombstoneMap.setAttributes(attributes);
+            tombstones.setAttributes(attributes);
         }
         return attributes;
     }
 
-    private void createTombstones() {
-        NitriteStore<?> store = collection.getStore();
+    private void initializeDataType() {
+        this.collection = config.getCollection();
+        this.counter = new AtomicInteger(0);
+
+        Nitrite db = config.getDb();
         Attributes collectionAttributes = getCollectionAttributes();
         String tombstoneName = getTombstoneName(collectionAttributes);
-        this.tombstoneMap = store.openMap(tombstoneName, NitriteId.class, Long.class);
-        collection.setAttributes(collectionAttributes);
+
+        this.tombstones = db.getCollection(tombstoneName);
+        ensureIndices();
     }
 
     private String getTombstoneName(Attributes attributes) {
         String tombstoneName = attributes.get(TOMBSTONE);
         if (StringUtils.isNullOrEmpty(tombstoneName)) {
-            tombstoneName = collection.getName() + INTERNAL_NAME_SEPARATOR + TOMBSTONE;
+            tombstoneName = collection.getName() + "_" + TOMBSTONE;
             attributes.set(TOMBSTONE, tombstoneName);
         }
         return tombstoneName;
     }
 
-    private Timestamps getSyncedTime(String collectionKey, String tombstoneKey) {
-        Timestamps remoteSyncedTime = new Timestamps();
+    private Markers getMarkers(String collectionKey, String tombstoneKey) {
+        Markers markers = new Markers();
 
-        String remoteCollectionSyncedTime = getCollectionAttributes().get(collectionKey);
-        if (StringUtils.isNullOrEmpty(remoteCollectionSyncedTime)) {
-            remoteSyncedTime.setCollectionTime(0L);
+        String collectionMarker = getCollectionAttributes().get(collectionKey);
+        if (StringUtils.isNullOrEmpty(collectionMarker)) {
+            markers.setCollectionMarker(0L);
         } else {
-            remoteSyncedTime.setCollectionTime(Long.parseLong(remoteCollectionSyncedTime));
+            markers.setCollectionMarker(Long.parseLong(collectionMarker));
         }
 
-        String remoteTombstoneSyncedTime = getTombstoneAttributes().get(tombstoneKey);
-        if (StringUtils.isNullOrEmpty(remoteTombstoneSyncedTime)) {
-            remoteSyncedTime.setTombstoneTime(0L);
+        String tombstoneMarker = getTombstoneAttributes().get(tombstoneKey);
+        if (StringUtils.isNullOrEmpty(tombstoneMarker)) {
+            markers.setTombstoneMarker(0L);
         } else {
-            remoteSyncedTime.setTombstoneTime(Long.parseLong(remoteTombstoneSyncedTime));
+            markers.setTombstoneMarker(Long.parseLong(tombstoneMarker));
         }
 
-        return remoteSyncedTime;
+        return markers;
+    }
+
+    private void setMarkers(String collectionKey, String tombstoneKey, Markers markers) {
+        Attributes collectionAttributes = getCollectionAttributes();
+        collectionAttributes.set(collectionKey, Objects.toString(markers.getCollectionMarker()));
+        collection.setAttributes(collectionAttributes);
+
+        Attributes tombstoneAttributes = getTombstoneAttributes();
+        tombstoneAttributes.set(tombstoneKey, Objects.toString(markers.getTombstoneMarker()));
+        tombstones.setAttributes(tombstoneAttributes);
+    }
+
+    private void ensureIndices() {
+        if (!collection.hasIndex(DOC_MODIFIED)) {
+            collection.createIndex(indexOptions(IndexType.NON_UNIQUE), DOC_MODIFIED);
+        }
+
+        if (!tombstones.hasIndex(TOMBSTONE_COUNTER)) {
+            tombstones.createIndex(indexOptions(IndexType.NON_UNIQUE), TOMBSTONE_COUNTER);
+        }
     }
 }

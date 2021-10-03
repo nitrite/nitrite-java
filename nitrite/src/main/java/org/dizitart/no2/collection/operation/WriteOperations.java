@@ -266,13 +266,13 @@ class WriteOperations {
         NitriteId nitriteId = document.getId();
         document = nitriteMap.remove(nitriteId);
         if (document != null) {
-            long time = System.currentTimeMillis();
+            long removedAt = System.currentTimeMillis();
             documentIndexWriter.removeIndexEntry(document);
             writeResult.addToList(nitriteId);
 
             int rev = document.getRevision();
             document.put(DOC_REVISION, rev + 1);
-            document.put(DOC_MODIFIED, time);
+            document.put(DOC_MODIFIED, removedAt);
 
             log.debug("Document removed {} from {}", document, nitriteMap.getName());
 
@@ -280,7 +280,7 @@ class WriteOperations {
             Document eventDoc = document.clone();
             eventInfo.setItem(eventDoc);
             eventInfo.setEventType(EventType.Remove);
-            eventInfo.setTimestamp(time);
+            eventInfo.setTimestamp(removedAt);
             return eventInfo;
         }
         return null;

@@ -23,7 +23,7 @@ import lombok.Data;
  * @author Anindya Chatterjee
  */
 @Data
-public class Timestamps {
-    private Long collectionTime;
-    private Long tombstoneTime;
+public class Markers {
+    private Long collectionMarker;
+    private Long tombstoneMarker;
 }

@@ -25,7 +25,7 @@ import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
-import org.dizitart.no2.sync.crdt.Timestamps;
+import org.dizitart.no2.sync.crdt.Markers;
 import org.dizitart.no2.sync.event.CollectionChangeListener;
 import org.dizitart.no2.sync.handlers.ReceiptLedgerAware;
 import org.dizitart.no2.sync.message.BatchMessage;
@@ -64,6 +64,7 @@ public class ReplicatedCollection implements ReceiptLedgerAware {
         DataGateClient dataGateClient = new DataGateClient(config);
         dataGateSocketListener = new DataGateSocketListener(config, this);
         batchChangeSender = new BatchChangeSender(config, this, dataGateSocketListener);
+        replicatedDataType.resetCounter();
         dataGateClient.setListener(dataGateSocketListener);
     }
 
@@ -116,18 +117,18 @@ public class ReplicatedCollection implements ReceiptLedgerAware {
         return replicaId;
     }
 
-    public void setLocalSyncedTime(Timestamps syncedTime) {
-        replicatedDataType.setLocalSyncedTime(syncedTime);
+    public void setLocalNextMarkers(Markers markers) {
+        replicatedDataType.setLocalNextMarkers(markers);
     }
 
-    public void setRemoteSyncedTime(Timestamps syncedTime) {
-        replicatedDataType.setRemoteSyncedTime(syncedTime);
+    public void setRemoteNextMarkers(Markers markers) {
+        replicatedDataType.setRemoteNextMarkers(markers);
     }
 
     private void initialize() {
         stopped = new AtomicBoolean(true);
-        replicatedDataType = new LastWriteWinMap(collection);
-        feedLedger = new FeedLedger(config, collection);
+        replicatedDataType = new LastWriteWinMap(config);
+        feedLedger = new FeedLedger(config);
         CollectionChangeListener changeListener = new CollectionChangeListener(replicatedDataType);
         getCollection().subscribe(changeListener);
     }

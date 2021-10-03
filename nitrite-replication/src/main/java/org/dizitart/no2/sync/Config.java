@@ -19,6 +19,7 @@ package org.dizitart.no2.sync;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import okhttp3.Request;
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.sync.event.ReplicationEventListener;
 
@@ -33,6 +34,7 @@ import java.util.List;
  */
 @Data
 public class Config {
+    private Nitrite db;
     private NitriteCollection collection;
     private Integer chunkSize;
     private String userName;

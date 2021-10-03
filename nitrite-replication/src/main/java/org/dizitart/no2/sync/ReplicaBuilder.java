@@ -19,6 +19,7 @@ package org.dizitart.no2.sync;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.sync.event.ReplicationEventListener;
@@ -42,6 +43,7 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  */
 @Slf4j
 public class ReplicaBuilder {
+    private Nitrite db;
     private NitriteCollection collection;
     private String remoteHost;
     private Integer remotePort;
@@ -68,6 +70,17 @@ public class ReplicaBuilder {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new DocumentModule());
         eventListeners = new ArrayList<>();
+    }
+
+    /**
+     * Creates a replica from a {@link Nitrite} database.
+     *
+     * @param db the db
+     * @return the replica builder
+     */
+    public ReplicaBuilder database(Nitrite db) {
+        this.db = db;
+        return this;
     }
 
     /**
@@ -244,33 +257,30 @@ public class ReplicaBuilder {
      * @return the replica
      */
     public Replica create() {
-        if (collection != null) {
-            Request.Builder builder = createRequestBuilder();
+        validateBuilder();
+        Request.Builder builder = createRequestBuilder();
 
-            Config config = new Config();
-            config.setCollection(collection);
-            config.setChunkSize(chunkSize);
-            config.setUserName(userName);
-            config.setTenant(tenant);
-            config.setPollingRate(getTimeoutInMillis(pollingRate));
-            config.setObjectMapper(objectMapper);
-            config.setTimeout(timeout);
-            config.setRequestBuilder(builder);
-            config.setProxy(proxy);
-            config.setAcceptAllCertificates(acceptAllCertificates);
-            config.setAuthToken(authToken);
-            config.setEventListeners(eventListeners);
-            config.setReplicaName(replicaName);
+        Config config = new Config();
+        config.setDb(db);
+        config.setCollection(collection);
+        config.setChunkSize(chunkSize);
+        config.setUserName(userName);
+        config.setTenant(tenant);
+        config.setPollingRate(getTimeoutInMillis(pollingRate));
+        config.setObjectMapper(objectMapper);
+        config.setTimeout(timeout);
+        config.setRequestBuilder(builder);
+        config.setProxy(proxy);
+        config.setAcceptAllCertificates(acceptAllCertificates);
+        config.setAuthToken(authToken);
+        config.setEventListeners(eventListeners);
+        config.setReplicaName(replicaName);
 
-            ReplicatedCollection replicatedCollection = new ReplicatedCollection(config);
-            return new Replica(config, replicatedCollection);
-        } else {
-            throw new ReplicationException("no collection or repository has been specified for replication", true);
-        }
+        ReplicatedCollection replicatedCollection = new ReplicatedCollection(config);
+        return new Replica(config, replicatedCollection);
     }
 
     private Request.Builder createRequestBuilder() {
-        validateBuilder();
         String remoteUrl = String.format(Locale.getDefault(), "ws://%s:%d/ws/datagate/%s/%s/%s",
             remoteHost, remotePort, tenant, collection.getName(), userName);
 
@@ -301,8 +311,12 @@ public class ReplicaBuilder {
             throw new ReplicationException("tenant id is a mandatory field");
         }
 
+        if (db == null) {
+            throw new ReplicationException("database is a mandatory field");
+        }
+
         if (collection == null || isNullOrEmpty(collection.getName())) {
-            throw new ReplicationException("collection is a mandatory field");
+            throw new ReplicationException("collection or repository is a mandatory field");
         }
 
         if (isNullOrEmpty(userName)) {

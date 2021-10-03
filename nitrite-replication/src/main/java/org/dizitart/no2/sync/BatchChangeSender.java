@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.WebSocket;
 import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
 import org.dizitart.no2.sync.crdt.DeltaStates;
-import org.dizitart.no2.sync.crdt.Timestamps;
+import org.dizitart.no2.sync.crdt.Markers;
 import org.dizitart.no2.sync.message.*;
 
 /**
@@ -38,8 +38,8 @@ public class BatchChangeSender {
     private boolean hasMore;
     private State currentState;
     private MessageFactory messageFactory;
-    private Timestamps startTime;
-    private Timestamps endTime;
+    private Markers startMarkers;
+    private Markers endMarkers;
 
     public BatchChangeSender(Config config,
                              ReplicatedCollection replicatedCollection,
@@ -54,12 +54,12 @@ public class BatchChangeSender {
     }
 
     public void sendAndReceive(WebSocket webSocket, BatchMessage batchMessage) {
-        if (startTime == null) {
-            startTime = replicatedDataType.getLocalSyncedTime();
+        if (startMarkers == null) {
+            startMarkers = replicatedDataType.getLocalStartMarkers();
         }
 
-        if (endTime == null) {
-            endTime = replicatedDataType.getLastModifiedTime();
+        if (endMarkers == null) {
+            endMarkers = replicatedDataType.getLocalEndMarkers();
         }
 
         switch (currentState) {
@@ -80,7 +80,7 @@ public class BatchChangeSender {
         startMessage.setNextOffset(config.getChunkSize());
         startMessage.setBatchSize(config.getChunkSize());
 
-        DeltaStates state = replicatedDataType.delta(startTime, endTime,
+        DeltaStates state = replicatedDataType.delta(startMarkers, endMarkers,
             0, config.getChunkSize());
 
         startMessage.setFeed(state);
@@ -91,7 +91,7 @@ public class BatchChangeSender {
     }
 
     private void sendChanges(WebSocket webSocket, BatchMessage batchMessage) {
-        DeltaStates state = replicatedDataType.delta(startTime, endTime,
+        DeltaStates state = replicatedDataType.delta(startMarkers, endMarkers,
             batchMessage.getNextOffset(), config.getChunkSize());
 
         if (state.getChangeSet().size() == 0 && state.getTombstoneMap().size() == 0) {
@@ -126,12 +126,12 @@ public class BatchChangeSender {
         BatchChangeEnd endMessage = messageFactory.createChangeEnd(config,
             replicatedCollection.getReplicaId(), correlationId);
 
-        Timestamps serverStartTime = replicatedDataType.getRemoteSyncedTime();
+        Markers serverStartMarkers = replicatedDataType.getRemoteStartMarkers();
         endMessage.setBatchSize(config.getChunkSize());
-        endMessage.setStartTime(serverStartTime);
+        endMessage.setStartMarkers(serverStartMarkers);
 
-        // end time will be passed back in batch end ack message
-        endMessage.setEndTime(endTime);
+        // end markers will be passed back in batch end ack message
+        endMessage.setEndMarkers(endMarkers);
 
         dataGateSocketListener.sendMessage(webSocket, endMessage);
     }

@@ -47,8 +47,8 @@ public interface ReceiptAckSender<Ack extends DataGateMessage> {
             batchAck.setBatchSize(batchMessage.getBatchSize());
 
             // set start time and end time
-            batchAck.setStartTime(batchMessage.getStartTime());
-            batchAck.setEndTime(batchMessage.getEndTime());
+            batchAck.setStartMarkers(batchMessage.getStartMarkers());
+            batchAck.setEndMarkers(batchMessage.getEndMarkers());
 
             DataGateSocketListener dataGateSocketListener
                 = getReplicatedCollection().getDataGateSocketListener();

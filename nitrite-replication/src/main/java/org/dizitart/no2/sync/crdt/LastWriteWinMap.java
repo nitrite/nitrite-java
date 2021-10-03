@@ -19,45 +19,32 @@ package org.dizitart.no2.sync.crdt;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.common.streams.BoundedStream;
-import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.common.util.Iterables;
-import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.sync.Config;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static org.dizitart.no2.collection.FindOptions.skipBy;
-import static org.dizitart.no2.collection.meta.Attributes.LAST_MODIFIED_TIME;
 import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
 
 /**
  * @author Anindya Chatterjee.
  */
 @Slf4j
 public class LastWriteWinMap extends ConflictFreeReplicatedDataType {
-
-    public LastWriteWinMap(NitriteCollection collection) {
-        super(collection);
-        ensureIndices();
+    public LastWriteWinMap(Config config) {
+        super(config);
     }
 
     @Override
     public void createTombstone(NitriteId nitriteId, Long deleteTime) {
-        if (tombstoneMap != null) {
-            if (tombstoneMap.containsKey(nitriteId)) {
-                Long time = tombstoneMap.get(nitriteId);
-                if (deleteTime > time) {
-                    writeTombstoneEntry(nitriteId, deleteTime);
-                }
-            } else {
-                writeTombstoneEntry(nitriteId, deleteTime);
-            }
+        if (tombstones != null) {
+            writeTombstoneEntry(nitriteId, deleteTime, collection.getName());
         }
     }
 
@@ -77,11 +64,11 @@ public class LastWriteWinMap extends ConflictFreeReplicatedDataType {
     }
 
     @Override
-    public DeltaStates delta(Timestamps startMarker, Timestamps endMarker, int offset, int size) {
+    public DeltaStates delta(Markers startMarker, Markers endMarker, int offset, int size) {
         DeltaStates deltaStates = new DeltaStates();
-        deltaStates.setChangeSet(getDocumentChanges(startMarker.getCollectionTime(), endMarker.getCollectionTime(),
+        deltaStates.setChangeSet(getDocumentChanges(startMarker.getCollectionMarker(), endMarker.getCollectionMarker(),
             offset, size));
-        deltaStates.setTombstoneMap(getTombstoneChanges(startMarker.getTombstoneTime(), endMarker.getTombstoneTime(),
+        deltaStates.setTombstoneMap(getTombstoneChanges(startMarker.getTombstoneMarker(), endMarker.getTombstoneMarker(),
             offset, size));
 
         return deltaStates;
@@ -100,16 +87,17 @@ public class LastWriteWinMap extends ConflictFreeReplicatedDataType {
 
     private Map<String, Long> getTombstoneChanges(Long startTime, Long endTime,
                                                   int offset, int size) {
-        BoundedStream<NitriteId, Long> stream
-            = new BoundedStream<>((long) offset, (long) size, tombstoneMap.entries());
+        DocumentCursor cursor = tombstones.find(
+            and(
+                where(TOMBSTONE_COUNTER).gt(startTime),
+                where(TOMBSTONE_COUNTER).lte(endTime),
+                where(TOMBSTONE_SOURCE).eq(collection.getName())
+            ), skipBy(offset).limit(size));
 
         Map<String, Long> tombstoneMap = new HashMap<>();
-        for (Pair<NitriteId, Long> entry : stream) {
-            Long syncTimestamp = entry.getSecond();
-            if (syncTimestamp > startTime && syncTimestamp <= endTime) {
-                tombstoneMap.put(entry.getFirst().getIdValue(),
-                    entry.getSecond());
-            }
+        for (Document entry : cursor) {
+            Long deletedTime = entry.get(DELETED_TIME, Long.class);
+            tombstoneMap.put(entry.getId().getIdValue(), deletedTime);
         }
         return tombstoneMap;
     }
@@ -120,8 +108,9 @@ public class LastWriteWinMap extends ConflictFreeReplicatedDataType {
 
             Document entry = collection.getById(key);
             if (entry == null) {
-                if (tombstoneMap.containsKey(key)) {
-                    Long tombstoneTime = tombstoneMap.get(key);
+                Document tombstone = tombstones.getById(key);
+                if (tombstone != null) {
+                    Long tombstoneTime = tombstone.get(TOMBSTONE_COUNTER, Long.class);
                     Long docModifiedTime = value.getLastModifiedSinceEpoch();
 
                     if (docModifiedTime >= tombstoneTime) {
@@ -169,42 +158,24 @@ public class LastWriteWinMap extends ConflictFreeReplicatedDataType {
             entry.put(DOC_SOURCE, REPLICATOR);
             collection.remove(entry);
 
-            createTombstone(key, timestamp);
+            writeTombstoneEntry(key, timestamp, REPLICATOR);
         }
     }
 
-    private void writeTombstoneEntry(NitriteId nitriteId, Long deleteTime) {
-        // if current deleted time is greater than previous deleted time,
-        // update the deleted time
-        tombstoneMap.put(nitriteId, deleteTime);
+    private void writeTombstoneEntry(NitriteId nitriteId, Long deleteTime, String source) {
+        // to make the counter unique for each item for bulk delete
+        long tombstoneCounter = REPLICATOR.equalsIgnoreCase(source)
+            ? 0 : System.currentTimeMillis() + counter.incrementAndGet();
+        Document tombstone = Document
+            .createDocument(DOC_ID, nitriteId.getIdValue())
+            .put(DELETED_TIME, deleteTime)
+            .put(TOMBSTONE_COUNTER, tombstoneCounter)
+            .put(TOMBSTONE_SOURCE, source);
 
-        // update last modified date in tombstone attributes
-        Attributes attributes = getTombstoneAttributes();
-        long lastModifiedTime = Long.parseLong(attributes.get(LAST_MODIFIED_TIME));
-        if (deleteTime > lastModifiedTime) {
-            // if deleted date is higher than the already saved last modified time
-            // then only update it, otherwise ignore
-            attributes.set(LAST_MODIFIED_TIME, Long.toString(deleteTime));
-            tombstoneMap.setAttributes(attributes);
-        }
+        tombstones.insert(tombstone);
     }
 
     private void destroyTombstone(NitriteId nitriteId) {
-        tombstoneMap.remove(nitriteId);
-
-        // update last modified date in tombstone attributes
-        Attributes attributes = getTombstoneAttributes();
-        List<Long> deleteTimes = Iterables.toList(tombstoneMap.values());
-        Collections.sort(deleteTimes, Collections.reverseOrder());
-
-        long lastModifiedTime = deleteTimes.get(0);
-        attributes.set(LAST_MODIFIED_TIME, Long.toString(lastModifiedTime));
-        tombstoneMap.setAttributes(attributes);
-    }
-
-    private void ensureIndices() {
-        if (!collection.hasIndex(DOC_MODIFIED)) {
-            collection.createIndex(indexOptions(IndexType.NON_UNIQUE), DOC_MODIFIED);
-        }
+        tombstones.remove(Filter.byId(nitriteId));
     }
 }

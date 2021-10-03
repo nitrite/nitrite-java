@@ -7,7 +7,7 @@ import static org.junit.Assert.assertEquals;
 public class DeltaStatesTest {
     @Test
     public void testConstructor() {
-        assertEquals("LastWriteWinState(changeSet=[], tombstoneMap={})", (new DeltaStates()).toString());
+        assertEquals("DeltaStates(changeSet=[], tombstoneMap={})", (new DeltaStates()).toString());
     }
 }
 

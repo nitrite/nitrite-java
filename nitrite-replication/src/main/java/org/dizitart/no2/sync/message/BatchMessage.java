@@ -19,7 +19,7 @@ package org.dizitart.no2.sync.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
-import org.dizitart.no2.sync.crdt.Timestamps;
+import org.dizitart.no2.sync.crdt.Markers;
 
 /**
  * @author Anindya Chatterjee
@@ -29,6 +29,6 @@ import org.dizitart.no2.sync.crdt.Timestamps;
 public abstract class BatchMessage implements DataGateMessage {
     private Integer nextOffset;
     private Integer batchSize;
-    private Timestamps startTime;
-    private Timestamps endTime;
+    private Markers startMarkers;
+    private Markers endMarkers;
 }

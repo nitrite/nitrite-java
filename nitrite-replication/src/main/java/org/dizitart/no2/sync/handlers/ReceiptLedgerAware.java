@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 /**
+ * TODO: documentation
  * @author Anindya Chatterjee
  */
 public interface ReceiptLedgerAware {

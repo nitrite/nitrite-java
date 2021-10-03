@@ -40,13 +40,11 @@ public class BatchChangeEndHandler implements MessageHandler<BatchChangeEnd> {
         MessageFactory factory = new MessageFactory();
         BatchEndAck batchEndAck = factory.createBatchEndAck(replicatedCollection.getConfig(),
             replicatedCollection.getReplicaId(), message.getHeader().getTransactionId());
-        batchEndAck.setStartTime(message.getStartTime());
-        batchEndAck.setEndTime(message.getEndTime());
         batchEndAck.getHeader().setCorrelationId(message.getHeader().getId());
 
         DataGateSocketListener dataGateSocketListener = replicatedCollection.getDataGateSocketListener();
         dataGateSocketListener.sendMessage(webSocket, batchEndAck);
 
-        replicatedCollection.setRemoteSyncedTime(message.getEndTime());
+        replicatedCollection.setRemoteNextMarkers(message.getEndMarkers());
     }
 }

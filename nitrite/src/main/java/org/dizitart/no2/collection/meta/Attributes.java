@@ -71,24 +71,29 @@ public class Attributes implements Serializable {
     public static final String TOMBSTONE = "tombstone";
 
     /**
-     * The constant LAST_SYNCED.
+     * The constant FEED_LEDGER.
      */
-    public static final String LOCAL_COLLECTION_SYNCED_TIME = "local_collection_synced_at";
+    public static final String FEED_LEDGER = "feed_ledger";
 
     /**
-     * The constant REMOTE_COLLECTION_SYNCED_TIME.
+     * The constant LOCAL_COLLECTION_MARKER.
      */
-    public static final String REMOTE_COLLECTION_SYNCED_TIME = "remote_collection_synced_at";
+    public static final String LOCAL_COLLECTION_MARKER = "local_collection_marker";
 
     /**
-     * The constant TOMBSTONE_SYNC_TIME.
+     * The constant REMOTE_COLLECTION_MARKER.
      */
-    public static final String LOCAL_TOMBSTONE_SYNCED_TIME = "local_tombstone_synced_at";
+    public static final String REMOTE_COLLECTION_MARKER = "remote_collection_marker";
 
     /**
-     * The constant REMOTE_TOMBSTONE_SYNC_TIME.
+     * The constant LOCAL_TOMBSTONE_MARKER.
      */
-    public static final String REMOTE_TOMBSTONE_SYNCED_TIME = "remote_tombstone_synced_at";
+    public static final String LOCAL_TOMBSTONE_MARKER = "local_tombstone_marker";
+
+    /**
+     * The constant REMOTE_TOMBSTONE_MARKER.
+     */
+    public static final String REMOTE_TOMBSTONE_MARKER = "remote_tombstone_marker";
 
     /**
      * The constant REPLICA.
