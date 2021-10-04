@@ -79,6 +79,7 @@ public class DataGateIntegrationTest {
 
         mongoSeed = new GenericContainer<>(new ImageFromDockerfile()
             .withFileFromClasspath("appConfig.json", "mongo-seed/appConfig.json")
+            .withFileFromClasspath("serverConfig.json", "mongo-seed/serverConfig.json")
             .withFileFromClasspath("Dockerfile", "mongo-seed/Dockerfile"))
             .withNetwork(network);
 
