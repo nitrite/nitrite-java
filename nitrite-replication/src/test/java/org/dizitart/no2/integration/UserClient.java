@@ -55,7 +55,7 @@ public class UserClient {
             "\"password\":\"chang3me\"," +
             "\"firstName\":\"Anindya\"," +
             "\"lastName\":\"Chatterjee\"," +
-            "\"roles\": [\"admin\"]" +
+            "\"roles\": [\"1\"]" +
             "}";
 
         RequestBody body = RequestBody.create(
