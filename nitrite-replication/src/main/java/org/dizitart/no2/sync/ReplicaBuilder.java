@@ -25,9 +25,7 @@ import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.sync.event.ReplicationEventListener;
 import org.dizitart.no2.sync.module.DocumentModule;
 
-import java.math.BigInteger;
 import java.net.Proxy;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -146,19 +144,6 @@ public class ReplicaBuilder {
      */
     public ReplicaBuilder jwtAuth(String userName, String authToken) {
         this.authToken = authToken;
-        this.userName = userName;
-        return this;
-    }
-
-    /**
-     * Sets the basic auth token.
-     *
-     * @param userName the username
-     * @param password the password
-     * @return the replica builder
-     */
-    public ReplicaBuilder basicAuth(String userName, String password) {
-        this.authToken = toHex(userName + ":" + password);
         this.userName = userName;
         return this;
     }
@@ -288,10 +273,6 @@ public class ReplicaBuilder {
         Request.Builder builder = new Request.Builder();
         builder.url(remoteUrl);
         return builder;
-    }
-
-    private String toHex(String arg) {
-        return String.format("%040x", new BigInteger(1, arg.getBytes(StandardCharsets.UTF_8)));
     }
 
     private int getTimeoutInMillis(TimeSpan connectTimeout) {

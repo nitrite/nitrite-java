@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -39,11 +39,10 @@ public class UserClient {
             response = call.execute();
             ObjectMapper mapper = new ObjectMapper();
             assert response.body() != null;
-            JsonNode jsonNode = mapper.readValue(response.body().string(), JsonNode.class);
-            if (jsonNode.has("exists")) {
-                if (jsonNode.get("exists").asBoolean()) {
-                    return;
-                }
+            DataGateResponse<BooleanResponse> dataGateResponse = mapper.readValue(response.body().string(),
+                new TypeReference<DataGateResponse<BooleanResponse>>() {});
+            if (dataGateResponse.getData().getResult()) {
+                return;
             }
         } catch (Exception e) {
             log.error("Error checking user " + user, e);
@@ -96,11 +95,10 @@ public class UserClient {
             assert response.body() != null;
             json = response.body().string();
             ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readValue(json, JsonNode.class);
+            DataGateResponse<Token> dataGateResponse = mapper.readValue(json,
+                new TypeReference<DataGateResponse<Token>>() {});
 
-            if (jsonNode.has("token")) {
-                return jsonNode.get("token").asText();
-            }
+            return dataGateResponse.getData().getToken();
         }
 
         throw new Exception("failed to login");
