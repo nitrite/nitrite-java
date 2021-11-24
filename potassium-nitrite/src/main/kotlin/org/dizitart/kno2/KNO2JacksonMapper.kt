@@ -54,7 +54,7 @@ open class KNO2JacksonMapper(vararg extensions: JacksonExtension) : JacksonMappe
         addValueType(OptionalDouble::class.java)
 
         val objectMapper = super.createObjectMapper()
-        objectMapper.registerModule(KotlinModule())
+        objectMapper.registerModule(KotlinModule.Builder().build())
         objectMapper.registerModule(Jdk8Module())
         objectMapper.registerModule(JavaTimeModule())
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
