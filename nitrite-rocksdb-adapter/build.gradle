@@ -49,7 +49,7 @@ dependencies {
     testImplementation "org.awaitility:awaitility:4.1.0"
     testImplementation "joda-time:joda-time:2.10.12"
     testImplementation "org.meanbean:meanbean:2.0.3"
-    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.12.5"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:2.13.0"
     testImplementation "commons-io:commons-io:2.11.0"
     testImplementation "com.google.guava:guava:31.0.1-jre"
     testImplementation "jakarta.xml.bind:jakarta.xml.bind-api:3.0.1"
