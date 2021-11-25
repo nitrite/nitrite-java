@@ -34,7 +34,7 @@ dependencies {
         exclude group: "org.objenesis"
     }
 
-    annotationProcessor "org.projectlombok:lombok:1.18.20"
+    annotationProcessor "org.projectlombok:lombok:1.18.22"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
     testImplementation "uk.co.jemos.podam:podam:7.2.7.RELEASE"
