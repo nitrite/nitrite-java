@@ -32,7 +32,7 @@ dependencies {
         api "com.h2database:h2-mvstore:1.4.200"
         api "com.squareup.okhttp3:okhttp:4.9.3"
         api "org.rocksdb:rocksdbjni:6.26.1"
-        api "com.esotericsoftware.kryo:kryo5:5.2.0"
+        api "com.esotericsoftware.kryo:kryo5:5.2.1"
         api "org.locationtech.jts:jts-core:1.18.2"
         api "commons-codec:commons-codec:1.15"
         api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.0"
