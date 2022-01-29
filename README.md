@@ -431,6 +431,6 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 </a>
    
 <a href="https://www.macstadium.com/" style="padding-right:20px">
-    <img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" alt="MacStadium"/>
+    <img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" height="32" alt="MacStadium"/>
 </a>
 </div>
