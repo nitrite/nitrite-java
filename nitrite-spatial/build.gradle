@@ -48,7 +48,7 @@ dependencies {
     api "org.slf4j:slf4j-api"
     api "org.locationtech.jts:jts-core"
 
-    annotationProcessor "org.projectlombok:lombok:1.18.20"
+    annotationProcessor "org.projectlombok:lombok:1.18.22"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')

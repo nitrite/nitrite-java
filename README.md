@@ -422,11 +422,15 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 ## Special Thanks
 
 <div>
-<a href="https://www.ej-technologies.com/products/jprofiler/overview.html" style="padding-right:20px">
+<a href="https://www.ej-technologies.com/products/jprofiler/overview.html" style="margin-right: 20px;">
     <img src="https://www.ej-technologies.com/images/product_banners/jprofiler_medium.png" alt="JProfiler"/>
 </a>
 
-<a href="https://www.yourkit.com/" style="padding-right:20px">
+<a href="https://www.yourkit.com/" style="margin-right: 20px;">
     <img src="https://www.yourkit.com/images/yklogo.png" alt="YourKit"/>
+</a>
+   
+<a href="https://www.macstadium.com/" style="margin-right: 30px;">
+    <img src="https://uploads-ssl.webflow.com/5ac3c046c82724970fc60918/5c019d917bba312af7553b49_MacStadium-developerlogo.png" height="32" alt="MacStadium"/>
 </a>
 </div>
