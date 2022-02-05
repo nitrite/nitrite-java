@@ -32,6 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.containers.Network;
@@ -56,6 +57,7 @@ import static org.junit.Assert.*;
  * @author Anindya Chatterjee
  */
 @Slf4j
+@Ignore
 public class DataGateIntegrationTest {
     private final Network network = Network.newNetwork();
     private String dbFile1, dbFile2;
