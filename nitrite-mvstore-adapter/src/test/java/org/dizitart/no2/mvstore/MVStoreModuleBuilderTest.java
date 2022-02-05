@@ -78,11 +78,12 @@ public class MVStoreModuleBuilderTest {
 
     @Test
     public void testFilePath() {
+        String tempPath = System.getProperty("java.io.tmpdir");
         MVStoreModuleBuilder withConfigResult = MVStoreModule.withConfig();
         MVStoreModuleBuilder actualFilePathResult = withConfigResult
-                .filePath(Paths.get(System.getProperty("java.io.tmpdir"), "test.txt").toFile());
+                .filePath(Paths.get(tempPath, "test.txt").toFile());
         assertSame(withConfigResult, actualFilePathResult);
-        assertEquals("/tmp/test.txt", actualFilePathResult.filePath());
+        assertEquals(tempPath + "test.txt", actualFilePathResult.filePath());
     }
 
     @Test
