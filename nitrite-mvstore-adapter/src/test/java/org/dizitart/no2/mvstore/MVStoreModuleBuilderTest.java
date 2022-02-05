@@ -83,7 +83,7 @@ public class MVStoreModuleBuilderTest {
         MVStoreModuleBuilder actualFilePathResult = withConfigResult
                 .filePath(Paths.get(tempPath, "test.txt").toFile());
         assertSame(withConfigResult, actualFilePathResult);
-        assertEquals(tempPath + "test.txt", actualFilePathResult.filePath());
+        assertEquals(Paths.get(tempPath, "test.txt").toString(), actualFilePathResult.filePath());
     }
 
     @Test
