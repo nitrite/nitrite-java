@@ -29,7 +29,7 @@ jobs:
     name: Build with Java ${{ matrix.Java }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up JDK ${{ matrix.Java }}
         uses: actions/setup-java@v2.5.0
         with:
@@ -48,7 +48,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Java
         uses: actions/setup-java@v2.5.0
         with:
