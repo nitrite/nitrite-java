@@ -188,7 +188,7 @@ public class SyncHandleTest extends BaseSyncTest {
 
         await().atMost(5, TimeUnit.SECONDS).until(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 return secondary.find().size() == 3 && primary.find().size() == 3;
             }
         });

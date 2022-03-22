@@ -20,7 +20,6 @@ import io.franzbecker.gradle.lombok.task.DelombokTask
 
 buildscript {
     repositories {
-        jcenter()
         mavenCentral()
         mavenLocal()
         maven {
