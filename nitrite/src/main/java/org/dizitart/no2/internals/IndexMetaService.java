@@ -155,6 +155,7 @@ class IndexMetaService {
     @EqualsAndHashCode
     @ToString
     private static class IndexMeta implements Serializable {
+        private static final long serialVersionUID = 1647971212L;
         private Index index;
         private String indexMap;
         private AtomicBoolean isDirty;

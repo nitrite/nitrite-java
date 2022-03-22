@@ -40,6 +40,7 @@ import static org.dizitart.no2.util.ValidationUtils.notNull;
 @EqualsAndHashCode
 @ToString
 public class Index implements Comparable<Index>, Serializable {
+    private static final long serialVersionUID = 6727331412761083161L;
 
     /**
      * Specifies the type of the index.
