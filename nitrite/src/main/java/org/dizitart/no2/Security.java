@@ -166,6 +166,7 @@ class Security {
 
     @Data
     private static class UserCredential implements Serializable {
+        private static final long serialVersionUID = 1647971266L;
         private byte[] passwordHash;
         private byte[] passwordSalt;
     }
