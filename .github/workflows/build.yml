@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '11', '17' ]
+        java: [ '11' ]
     env:
       PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
       MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
