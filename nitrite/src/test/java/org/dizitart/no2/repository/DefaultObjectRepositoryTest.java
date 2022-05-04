@@ -56,18 +56,6 @@ public class DefaultObjectRepositoryTest {
     }
 
     @Test
-    public void testRemoveProcessor() {
-        NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        doNothing().when(nitriteCollection).removeProcessor(any());
-        Class<Object> type = Object.class;
-        DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
-            nitriteCollection, new NitriteConfig());
-        defaultObjectRepository.removeProcessor(new ProcessorChain());
-        verify(nitriteCollection).removeProcessor(any());
-        assertNull(defaultObjectRepository.getAttributes());
-    }
-
-    @Test
     public void testCreateIndex() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
         doNothing().when(nitriteCollection).createIndex(any(), any());

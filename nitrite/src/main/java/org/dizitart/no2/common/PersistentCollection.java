@@ -56,13 +56,6 @@ public interface PersistentCollection<T> extends EventAware, MetadataAware, Auto
     void addProcessor(Processor processor);
 
     /**
-     * Removes a data processor from this collection.
-     *
-     * @param processor the processor
-     */
-    void removeProcessor(Processor processor);
-
-    /**
      * Creates an unique index on the {@code fields}, if not already exists.
      *
      * @param fields       the fields to be indexed.

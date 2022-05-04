@@ -51,11 +51,6 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void removeProcessor(Processor processor) {
-        backingCollection.removeProcessor(processor);
-    }
-
-    @Override
     public void createIndex(IndexOptions indexOptions, String... fieldNames) {
         backingCollection.createIndex(indexOptions, fieldNames);
     }

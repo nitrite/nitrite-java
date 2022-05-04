@@ -90,19 +90,6 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    @Override
-    public void removeProcessor(Processor processor) {
-        notNull(processor, "a null processor cannot be removed");
-
-        try {
-            writeLock.lock();
-            checkOpened();
-            collectionOperations.removeProcessor(processor);
-        } finally {
-            writeLock.unlock();
-        }
-    }
-
     public WriteResult insert(Document[] documents) {
         notNull(documents, "a null document cannot be inserted");
         containsNull(documents, "a null document cannot be inserted");

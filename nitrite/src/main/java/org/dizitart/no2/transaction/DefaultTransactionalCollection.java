@@ -46,7 +46,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private final NitriteCollection primary;
     private final TransactionContext transactionContext;
     private final Nitrite nitrite;
-
     private String collectionName;
     private NitriteMap<NitriteId, Document> nitriteMap;
     private NitriteStore<?> nitriteStore;
@@ -283,25 +282,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.AddProcessor);
         journalEntry.setCommit(() -> primary.addProcessor(processor));
-        journalEntry.setRollback(() -> primary.removeProcessor(processor));
-        transactionContext.getJournal().add(journalEntry);
-    }
-
-    @Override
-    public void removeProcessor(Processor processor) {
-        notNull(processor, "a null processor cannot be removed");
-        try {
-            writeLock.lock();
-            checkOpened();
-            collectionOperations.addProcessor(processor);
-        } finally {
-            writeLock.unlock();
-        }
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.RemoveProcessor);
-        journalEntry.setCommit(() -> primary.removeProcessor(processor));
-        journalEntry.setRollback(() -> primary.addProcessor(processor));
         transactionContext.getJournal().add(journalEntry);
     }
 

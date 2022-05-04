@@ -61,12 +61,6 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void removeProcessor(Processor processor) {
-        notNull(processor, "a null processor cannot be removed");
-        collection.removeProcessor(processor);
-    }
-
-    @Override
     public void createIndex(IndexOptions indexOptions, String... fields) {
         collection.createIndex(indexOptions, fields);
     }

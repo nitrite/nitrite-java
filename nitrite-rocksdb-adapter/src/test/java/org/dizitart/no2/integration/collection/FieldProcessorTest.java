@@ -88,6 +88,7 @@ public class FieldProcessorTest extends BaseCollectionTest {
             .put("expiryDate", new Date());
         collection.insert(document);
 
+        cvvProcessor.process(collection);
         collection.addProcessor(cvvProcessor);
     }
 
@@ -197,16 +198,5 @@ public class FieldProcessorTest extends BaseCollectionTest {
         collection.createIndex("cvv");
         Document document = collection.find(where("cvv").eq("008")).firstOrNull();
         assertNull(document);
-    }
-
-    @Test
-    public void testRemoveProcessor() {
-        Document document = collection.find(where("cvv").eq("008")).firstOrNull();
-        assertNull(document);
-
-        collection.removeProcessor(cvvProcessor);
-
-        document = collection.find(where("cvv").eq("008")).firstOrNull();
-        assertNotNull(document);
     }
 }

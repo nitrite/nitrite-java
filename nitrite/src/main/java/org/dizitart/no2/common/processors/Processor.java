@@ -18,6 +18,13 @@
 package org.dizitart.no2.common.processors;
 
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.PersistentCollection;
+import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.repository.ObjectRepository;
+
+import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
+import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
 
 /**
  * Represents a document processor.
@@ -26,6 +33,7 @@ import org.dizitart.no2.collection.Document;
  * @since 4.0
  */
 public interface Processor {
+
     /**
      * Processes a document before writing it into database.
      *
@@ -41,4 +49,27 @@ public interface Processor {
      * @return the document
      */
     Document processAfterRead(Document document);
+
+    /**
+     * Processes all documents of a {@link PersistentCollection}.
+     *
+     * @param collection the collection to process
+     */
+    default void process(PersistentCollection<?> collection) {
+        NitriteCollection nitriteCollection = null;
+        if (collection instanceof NitriteCollection) {
+            nitriteCollection = (NitriteCollection) collection;
+        } else if (collection instanceof ObjectRepository<?>) {
+            ObjectRepository<?> repository = (ObjectRepository<?>) collection;
+            nitriteCollection = repository.getDocumentCollection();
+        }
+
+        if (nitriteCollection != null) {
+            for (Document document : nitriteCollection.find(Filter.ALL, null)) {
+                Document processed = processBeforeWrite(document);
+                nitriteCollection.update(createUniqueFilter(document), processed, updateOptions(false));
+            }
+        }
+    }
 }
+

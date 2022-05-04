@@ -63,6 +63,10 @@ public class FieldProcessorTest extends BaseObjectRepositoryTest {
 
         persons.insert(person);
 
+        // process existing data
+        fieldProcessor.process(persons);
+
+        // add for further changes
         persons.addProcessor(fieldProcessor);
 
         person = new EncryptedPerson();
@@ -186,22 +190,5 @@ public class FieldProcessorTest extends BaseObjectRepositoryTest {
         persons.createIndex("cvv");
         EncryptedPerson person = persons.find(where("cvv").eq("008")).firstOrNull();
         assertNull(person);
-    }
-
-    @Test
-    public void testRemoveProcessor() {
-        EncryptedPerson person = persons.find(where("cvv").eq("008")).firstOrNull();
-        assertNull(person);
-
-        person = persons.find(where("creditCardNumber").eq("5548960345687452")).firstOrNull();
-        assertNull(person);
-
-        persons.removeProcessor(fieldProcessor);
-
-        person = persons.find(where("cvv").eq("008")).firstOrNull();
-        assertNotNull(person);
-
-        person = persons.find(where("creditCardNumber").eq("5548960345687452")).firstOrNull();
-        assertNotNull(person);
     }
 }

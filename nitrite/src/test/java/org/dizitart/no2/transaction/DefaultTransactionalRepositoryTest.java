@@ -40,16 +40,6 @@ public class DefaultTransactionalRepositoryTest {
     }
 
     @Test
-    public void testRemoveProcessor() {
-        DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
-            DefaultTransactionalRepository.class);
-        doNothing().when(defaultTransactionalRepository)
-            .removeProcessor(any());
-        defaultTransactionalRepository.removeProcessor(new ProcessorChain());
-        verify(defaultTransactionalRepository).removeProcessor(any());
-    }
-
-    @Test
     public void testCreateIndex() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);

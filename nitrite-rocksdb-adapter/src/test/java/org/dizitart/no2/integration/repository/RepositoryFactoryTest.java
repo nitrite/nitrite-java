@@ -137,11 +137,6 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public void removeProcessor(Processor processor) {
-
-        }
-
-        @Override
         public void createIndex(IndexOptions indexOptions, String... fields) {
 
         }
