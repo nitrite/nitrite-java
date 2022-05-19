@@ -124,7 +124,7 @@ class NitriteDatabase implements Nitrite {
     }
 
     @Override
-    public Map<String, Set<String>> listKeyedRepository() {
+    public Map<String, Set<String>> listKeyedRepositories() {
         checkOpened();
         return store.getKeyedRepositoryRegistry();
     }

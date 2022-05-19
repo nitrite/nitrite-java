@@ -277,7 +277,7 @@ public class ObjectRepositoryTest {
         assertTrue(db.hasRepository(Employee.class, "developers"));
 
         assertEquals(db.listRepositories().size(), 1);
-        assertEquals(db.listKeyedRepository().size(), 2);
+        assertEquals(db.listKeyedRepositories().size(), 2);
 
         assertEquals(employeeRepo.find(where("address").text("abcd")).size(), 1);
         assertEquals(employeeRepo.find(where("address").text("xyz")).size(), 1);
@@ -306,7 +306,7 @@ public class ObjectRepositoryTest {
         assertTrue(errored);
 
         assertTrue(db.listRepositories().contains("entity.employee"));
-        assertEquals(db.listKeyedRepository().size(), 2);
+        assertEquals(db.listKeyedRepositories().size(), 2);
         assertEquals(db.listCollectionNames().size(), 0);
 
         assertTrue(managerRepo.hasIndex("firstName"));
@@ -315,7 +315,7 @@ public class ObjectRepositoryTest {
         assertTrue(employeeRepo.hasIndex("lastName"));
 
         managerRepo.drop();
-        assertEquals(db.listKeyedRepository().size(), 1);
+        assertEquals(db.listKeyedRepositories().size(), 1);
     }
 
     @Test

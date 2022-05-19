@@ -15,22 +15,22 @@ public abstract class Migration {
     private final Queue<MigrationStep> migrationSteps;
 
     @Getter
-    private final Integer startVersion;
+    private final Integer fromVersion;
 
     @Getter
-    private final Integer endVersion;
+    private final Integer toVersion;
 
     private boolean executed = false;
 
     /**
      * Instantiates a new {@link Migration}.
      *
-     * @param startVersion the start version
-     * @param endVersion   the end version
+     * @param fromVersion the start version
+     * @param toVersion   the end version
      */
-    public Migration(Integer startVersion, Integer endVersion) {
-        this.startVersion = startVersion;
-        this.endVersion = endVersion;
+    public Migration(Integer fromVersion, Integer toVersion) {
+        this.fromVersion = fromVersion;
+        this.toVersion = toVersion;
         this.migrationSteps = new LinkedList<>();
     }
 

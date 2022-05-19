@@ -115,8 +115,8 @@ public class NitriteConfig implements AutoCloseable {
         }
 
         if (migration != null) {
-            final int start = migration.getStartVersion();
-            final int end = migration.getEndVersion();
+            final int start = migration.getFromVersion();
+            final int end = migration.getToVersion();
             TreeMap<Integer, Migration> targetMap = migrations.get(start);
             if (targetMap == null) {
                 targetMap = new TreeMap<>();
@@ -137,7 +137,7 @@ public class NitriteConfig implements AutoCloseable {
      * @param version the version
      * @return the nitrite config
      */
-    public NitriteConfig schemaVersion(Integer version) {
+    public NitriteConfig currentSchemaVersion(Integer version) {
         if (configured) {
             throw new InvalidOperationException("cannot add schema version info after database" +
                 " initialization");
@@ -147,7 +147,7 @@ public class NitriteConfig implements AutoCloseable {
     }
 
     /**
-     * Auto configures nitrite database with default configuration values and
+     * Autoconfigures nitrite database with default configuration values and
      * default built-in plugins.
      */
     public void autoConfigure() {
@@ -159,7 +159,7 @@ public class NitriteConfig implements AutoCloseable {
     }
 
     /**
-     * Finds an {@link NitriteIndexer} by indexType.
+     * Finds a {@link NitriteIndexer} by indexType.
      *
      * @param indexType the type of {@link NitriteIndexer} to find.
      * @return the {@link NitriteIndexer}

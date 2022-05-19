@@ -117,11 +117,11 @@ public class NitriteBuilderTest {
     public void testAddMigrations2() {
         NitriteBuilder builderResult = Nitrite.builder();
         Migration migration = mock(Migration.class);
-        when(migration.getEndVersion()).thenReturn(1);
-        when(migration.getStartVersion()).thenReturn(1);
+        when(migration.getToVersion()).thenReturn(1);
+        when(migration.getFromVersion()).thenReturn(1);
         assertSame(builderResult, builderResult.addMigrations(migration, null, null));
-        verify(migration).getEndVersion();
-        verify(migration).getStartVersion();
+        verify(migration).getToVersion();
+        verify(migration).getFromVersion();
     }
 
     @Test

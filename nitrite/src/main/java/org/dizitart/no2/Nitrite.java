@@ -157,7 +157,7 @@ public interface Nitrite extends AutoCloseable {
      *
      * @return the set of all registered classes' names.
      */
-    Map<String, Set<String>> listKeyedRepository();
+    Map<String, Set<String>> listKeyedRepositories();
 
     /**
      * Checks whether the store has any unsaved changes.
@@ -239,8 +239,8 @@ public interface Nitrite extends AutoCloseable {
      */
     default <T> boolean hasRepository(Class<T> type, String key) {
         checkOpened();
-        return listKeyedRepository().containsKey(key)
-            && listKeyedRepository().get(key).contains(type.getName());
+        return listKeyedRepositories().containsKey(key)
+            && listKeyedRepositories().get(key).contains(type.getName());
     }
 
     /**

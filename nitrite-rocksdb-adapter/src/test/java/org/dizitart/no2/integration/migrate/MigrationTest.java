@@ -123,7 +123,7 @@ public class MigrationTest {
         ObjectRepository<NewClass> newRepo = db.getRepository(NewClass.class);
         assertEquals(newRepo.size(), 10);
         assertTrue(db.listCollectionNames().isEmpty());
-        assertTrue(db.listKeyedRepository().isEmpty());
+        assertTrue(db.listKeyedRepositories().isEmpty());
 
         assertEquals((int) db.getDatabaseMetaData().getSchemaVersion(), 2);
     }
