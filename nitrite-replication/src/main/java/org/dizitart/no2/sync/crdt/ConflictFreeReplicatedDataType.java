@@ -21,7 +21,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.filters.Filter;
@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.dizitart.no2.collection.FindOptions.orderBy;
-import static org.dizitart.no2.collection.meta.Attributes.*;
+import static org.dizitart.no2.common.meta.Attributes.*;
 import static org.dizitart.no2.common.Constants.DOC_MODIFIED;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.index.IndexOptions.indexOptions;

@@ -22,7 +22,7 @@ import org.dizitart.no2.integration.repository.BaseObjectRepositoryTest;
 import org.dizitart.no2.integration.repository.data.SubEmployee;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.index.IndexType;

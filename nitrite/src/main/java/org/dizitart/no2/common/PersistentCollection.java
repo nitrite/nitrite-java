@@ -21,7 +21,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventAware;
 import org.dizitart.no2.collection.events.EventType;
-import org.dizitart.no2.collection.meta.MetadataAware;
+import org.dizitart.no2.common.meta.AttributesAware;
 import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.index.IndexDescriptor;
@@ -46,7 +46,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @see ObjectRepository
  * @since 1.0
  */
-public interface PersistentCollection<T> extends EventAware, MetadataAware, AutoCloseable {
+public interface PersistentCollection<T> extends EventAware, AttributesAware, AutoCloseable {
 
     /**
      * Adds a data processor to this collection.

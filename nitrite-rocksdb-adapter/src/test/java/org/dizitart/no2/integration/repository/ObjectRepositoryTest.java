@@ -22,7 +22,7 @@ import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.mapper.Mappable;
 import org.dizitart.no2.common.mapper.MappableMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;

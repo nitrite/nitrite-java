@@ -1,5 +1,6 @@
 package org.dizitart.no2.collection.meta;
 
+import org.dizitart.no2.common.meta.Attributes;
 import org.junit.Test;
 
 import java.util.Map;

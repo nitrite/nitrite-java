@@ -1,14 +1,16 @@
 package org.dizitart.no2.collection.meta;
 
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.meta.AttributesAware;
 import org.junit.Assert;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNull;
 
-public class MetadataAwareTest {
+public class AttributesAwareTest {
     @Test
     public void testGetAttributes() {
-        MetadataAware metadataAware = new MetadataAware() {
+        AttributesAware attributesAware = new AttributesAware() {
             @Override
             public Attributes getAttributes() {
                 return new Attributes();
@@ -19,12 +21,12 @@ public class MetadataAwareTest {
 
             }
         };
-        Assert.assertNotNull("This is a boilerplate assert on the result.", metadataAware.getAttributes());
+        Assert.assertNotNull("This is a boilerplate assert on the result.", attributesAware.getAttributes());
     }
 
     @Test
     public void testSetAttributes() {
-        MetadataAware metadataAware = new MetadataAware() {
+        AttributesAware attributesAware = new AttributesAware() {
             @Override
             public Attributes getAttributes() {
                 return null;
@@ -35,7 +37,7 @@ public class MetadataAwareTest {
                 assertNull(attributes);
             }
         };
-        metadataAware.setAttributes(null);
+        attributesAware.setAttributes(null);
     }
 }
 

@@ -8,7 +8,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.collection.operation.CollectionOperations;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;

@@ -60,16 +60,6 @@ class NitriteDatabase implements Nitrite {
         this.lockService = new LockService();
         this.collectionFactory = new CollectionFactory(lockService);
         this.repositoryFactory = new RepositoryFactory(collectionFactory);
-        this.initialize(null, null);
-    }
-
-    NitriteDatabase(String username, String password, NitriteConfig config) {
-        validateUserCredentials(username, password);
-        this.nitriteConfig = config;
-        this.lockService = new LockService();
-        this.collectionFactory = new CollectionFactory(lockService);
-        this.repositoryFactory = new RepositoryFactory(collectionFactory);
-        this.initialize(username, password);
     }
 
     @Override
@@ -206,6 +196,10 @@ class NitriteDatabase implements Nitrite {
     }
 
     private void validateUserCredentials(String username, String password) {
+        if (isNullOrEmpty(username) && isNullOrEmpty(password)) {
+            return;
+        }
+
         if (isNullOrEmpty(username)) {
             throw new NitriteSecurityException("username cannot be empty");
         }
@@ -214,7 +208,8 @@ class NitriteDatabase implements Nitrite {
         }
     }
 
-    private void initialize(String username, String password) {
+    public void initialize(String username, String password) {
+        validateUserCredentials(username, password);
         try {
             nitriteConfig.initialize();
             store = nitriteConfig.getNitriteStore();

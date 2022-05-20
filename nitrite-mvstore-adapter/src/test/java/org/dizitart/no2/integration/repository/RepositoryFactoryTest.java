@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.common.processors.Processor;

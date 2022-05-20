@@ -21,7 +21,7 @@ import com.github.javafaker.Faker;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;

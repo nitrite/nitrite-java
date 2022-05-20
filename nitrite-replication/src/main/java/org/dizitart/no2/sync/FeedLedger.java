@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.sync.crdt.DeltaStates;
 import org.dizitart.no2.sync.message.Receipt;
@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.dizitart.no2.collection.meta.Attributes.FEED_LEDGER;
+import static org.dizitart.no2.common.meta.Attributes.FEED_LEDGER;
 
 /**
  * @author Anindya Chatterjee

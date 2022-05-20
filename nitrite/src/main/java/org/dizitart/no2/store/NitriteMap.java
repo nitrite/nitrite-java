@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.collection.meta.MetadataAware;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.meta.AttributesAware;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 
@@ -33,7 +33,7 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  * @author Anindya Chatterjee.
  * @since 1.0
  */
-public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
+public interface NitriteMap<Key, Value> extends AttributesAware, AutoCloseable {
     /**
      * Determines if the map contains a mapping for the
      * specified key.

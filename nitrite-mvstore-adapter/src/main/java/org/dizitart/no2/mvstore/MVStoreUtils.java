@@ -17,7 +17,7 @@
 package org.dizitart.no2.mvstore;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.mvstore.compat.v3.MigrationUtil;

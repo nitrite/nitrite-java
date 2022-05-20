@@ -21,7 +21,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.WebSocket;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.sync.crdt.ConflictFreeReplicatedDataType;
 import org.dizitart.no2.sync.crdt.LastWriteWinMap;
@@ -36,7 +36,7 @@ import org.dizitart.no2.sync.net.DataGateClient;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.dizitart.no2.collection.meta.Attributes.REPLICA;
+import static org.dizitart.no2.common.meta.Attributes.REPLICA;
 
 /**
  * @author Anindya Chatterjee

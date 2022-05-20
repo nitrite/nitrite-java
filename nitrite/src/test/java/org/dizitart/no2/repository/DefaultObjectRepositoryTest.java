@@ -23,7 +23,7 @@ import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.processors.ProcessorChain;

@@ -18,7 +18,7 @@ package org.dizitart.no2.mvstore.compat.v3;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.NitriteIOException;

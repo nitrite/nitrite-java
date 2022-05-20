@@ -9,7 +9,7 @@ import com.esotericsoftware.kryo.kryo5.serializers.JavaSerializer;
 import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.DBValue;

@@ -22,7 +22,7 @@ import lombok.SneakyThrows;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.store.NitriteMap;

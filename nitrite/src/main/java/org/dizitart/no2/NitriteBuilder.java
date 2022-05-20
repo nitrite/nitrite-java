@@ -103,7 +103,9 @@ public class NitriteBuilder {
     public Nitrite openOrCreate() {
         this.nitriteConfig.autoConfigure();
         Runtime.getRuntime().addShutdownHook(new Thread(ThreadPoolManager::shutdownAllThreadPools));
-        return new NitriteDatabase(nitriteConfig);
+        NitriteDatabase db = new NitriteDatabase(nitriteConfig);
+        db.initialize(null, null);
+        return db;
     }
 
     /**
@@ -128,6 +130,8 @@ public class NitriteBuilder {
     public Nitrite openOrCreate(String username, String password) {
         this.nitriteConfig.autoConfigure();
         Runtime.getRuntime().addShutdownHook(new Thread(ThreadPoolManager::shutdownAllThreadPools));
-        return new NitriteDatabase(username, password, nitriteConfig);
+        NitriteDatabase db = new NitriteDatabase(nitriteConfig);
+        db.initialize(username, password);
+        return db;
     }
 }

@@ -19,7 +19,7 @@ package org.dizitart.no2.transaction;
 
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
