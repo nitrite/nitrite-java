@@ -170,6 +170,8 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
     public Document merge(Document document) {
         if (document instanceof NitriteDocument) {
             super.putAll((NitriteDocument) document);
+        } else {
+            throw new InvalidOperationException("Document merge only supports NitriteDocument");
         }
         return this;
     }
@@ -220,6 +222,11 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 
     @Override
