@@ -128,11 +128,11 @@ public class SnowflakeIdGenerator {
         }
         lastTimestamp = timestamp;
         long timestampLeftShift = sequenceBits + nodeIdBits;
-        long twepoch = 1288834974657L;
-        long id = ((timestamp - twepoch) << timestampLeftShift) | (nodeId << sequenceBits) | sequence;
+        long no2epoch = 1288834974657L;
+        long id = ((timestamp - no2epoch) << timestampLeftShift) | (nodeId << sequenceBits) | sequence;
 
         if (id < 0) {
-            log.warn("Id is smaller than 0: {}", id);
+            log.warn("Generated id is negative: {}", id);
         }
         return id;
     }

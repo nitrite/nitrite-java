@@ -138,7 +138,7 @@ public class Constants {
     /**
      * The constant TAG_COLLECTION_METADATA.
      */
-    public static final String TAG_MAP_METADATA =  "mapNames";
+    public static final String TAG_MAP_METADATA = "mapNames";
 
     /**
      * The constant TAG_TYPE.

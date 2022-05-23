@@ -59,10 +59,10 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
     public Document put(String field, Object value) {
         // field name cannot be empty or null
         if (isNullOrEmpty(field)) {
-            throw new InvalidOperationException("document does not support empty or null key");
+            throw new InvalidOperationException("Document does not support empty or null key");
         }
 
-        // _id field can not be set manually
+        // field name cannot be empty or null
         if (DOC_ID.contentEquals(field) && !validId(value)) {
             throw new InvalidOperationException("_id is an auto generated value and cannot be set");
         }

@@ -48,7 +48,7 @@ public class StoreCatalogTest {
     @Test
     public void testWriteKeyedRepositoryEntries() {
         StoreCatalog storeCatalog = new StoreCatalog(new InMemoryStore());
-        storeCatalog.writeKeyedRepositoryEntries("Name");
+        storeCatalog.writeKeyedRepositoryEntry("Name");
         assertTrue(storeCatalog.getCollectionNames().isEmpty());
     }
 

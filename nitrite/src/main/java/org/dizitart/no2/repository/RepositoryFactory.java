@@ -148,7 +148,7 @@ public class RepositoryFactory {
         if (StringUtils.isNullOrEmpty(key)) {
             storeCatalog.writeRepositoryEntry(name);
         } else {
-            storeCatalog.writeKeyedRepositoryEntries(name);
+            storeCatalog.writeKeyedRepositoryEntry(name);
         }
     }
 }
