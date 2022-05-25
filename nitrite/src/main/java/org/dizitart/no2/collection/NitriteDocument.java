@@ -279,7 +279,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     private void deepPut(String[] splits, Object value) {
         if (splits.length == 0) {
-            throw new ValidationException("invalid key provided");
+            throw new ValidationException("Invalid key provided");
         }
         String key = splits[0];
         if (splits.length == 1) {
@@ -309,7 +309,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     private void deepRemove(String[] splits) {
         if (splits.length == 0) {
-            throw new ValidationException("invalid key provided");
+            throw new ValidationException("Invalid key provided");
         }
         String key = splits[0];
         if (splits.length == 1) {
@@ -331,8 +331,42 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                     // remove the current level document also
                     super.remove(key);
                 }
-            } else if (val == null) {
-                // if current level value is null, remove the key
+            } else if (val instanceof List && isInteger(splits[1])) {
+                // if the current level value is an iterable,
+                // remove the element at the next level
+                List<?> list = (List<?>) val;
+                int index = Integer.parseInt(splits[1]);
+                Object item = list.get(index);
+                if (splits.length > 2 && item instanceof NitriteDocument) {
+                    // if there are more splits, then this is an embedded document
+                    // so remove the element at the next level
+                    ((NitriteDocument) item).deepRemove(Arrays.copyOfRange(splits, 2, splits.length));
+                } else {
+                    // if there are no more splits, then this is a primitive value
+                    // so remove the element at the next level
+                    list.remove(index);
+                    this.put(key, list);
+                }
+            } else if (val != null && val.getClass().isArray()) {
+                // if the current level value is an array,
+                // remove the element at the next level
+                Object[] array = convertToObjectArray(val);
+                int index = Integer.parseInt(splits[1]);
+                Object item = array[index];
+                if (splits.length > 2 && item instanceof NitriteDocument) {
+                    // if there are more splits, then this is an embedded document
+                    // so remove the element at the next level
+                    ((NitriteDocument) item).deepRemove(Arrays.copyOfRange(splits, 2, splits.length));
+                } else {
+                    // if there are no more splits, then this is a primitive value
+                    // so remove the element at the next level
+                    List<?> list = Arrays.asList(array);
+                    list.remove(index);
+                    this.put(key, list.toArray());
+                }
+            } else {
+                // if current level value is not an iterable,
+                // remove the key
                 super.remove(key);
             }
         }
@@ -382,15 +416,9 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                 // convert the key as an integer index
                 int index = asInteger(accessor);
 
-                // check index lower bound
-                if (index < 0) {
-                    throw new ValidationException("invalid array index " + index + " to access item inside a document");
-                }
-
-                // check index upper bound
-                if (index >= array.length) {
-                    throw new ValidationException("index " + index +
-                        " is not less than the size of the array " + array.length);
+                // check index bound
+                if (index < 0 || index >= array.length) {
+                    throw new ValidationException("Invalid index " + index + " to access item inside a document");
                 }
 
                 // get the value at the index from the array
@@ -423,15 +451,9 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                 // convert the key as an integer index
                 int index = asInteger(accessor);
 
-                // check index lower bound
-                if (index < 0) {
-                    throw new ValidationException("invalid collection index " + index + " to access item inside a document");
-                }
-
-                // check index upper bound
-                if (index >= collection.size()) {
-                    throw new ValidationException("index " + accessor +
-                        " is not less than the size of the list " + collection.size());
+                // check index bound
+                if (index < 0 || index >= collection.size()) {
+                    throw new ValidationException("Invalid index " + index + " to access item inside a document");
                 }
 
                 // get the value at the index from the list

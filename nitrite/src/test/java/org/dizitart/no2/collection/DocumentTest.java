@@ -18,7 +18,6 @@
 package org.dizitart.no2.collection;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.After;
@@ -26,12 +25,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import static org.dizitart.no2.integration.TestUtil.parse;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.Iterables.listOf;
+import static org.dizitart.no2.integration.TestUtil.parse;
 import static org.junit.Assert.*;
 
 public class DocumentTest {
@@ -171,13 +173,33 @@ public class DocumentTest {
 
     @Test
     public void testRemove() {
-        Iterator<Pair<String, Object>> iterator = doc.iterator();
         assertEquals(doc.size(), 4);
-        if (iterator.hasNext()) {
-            iterator.next();
-            iterator.remove();
-        }
+        doc.remove("score");
         assertEquals(doc.size(), 3);
+    }
+
+    @Test
+    public void testRemoveWithCustomFieldSeparator() {
+        NitriteConfig config = new NitriteConfig();
+        config.fieldSeparator(":");
+        assertEquals(((Document)doc.get("location:address")).size(), 3);
+        doc.remove("location:address:line1");
+        assertEquals(((Document)doc.get("location:address")).size(), 2);
+        config.fieldSeparator(".");
+    }
+    @Test
+    public void testRemoveFromArray() {
+        NitriteConfig config = new NitriteConfig();
+        config.fieldSeparator(":");
+
+        assertEquals(((List<?>)doc.get("location:address:house")).size(), 3);
+        doc.remove("location:address:house:0");
+        assertEquals(((List<?>)doc.get("location:address:house")).size(), 2);
+
+        assertEquals(((List<?>) doc.get("objArray")).size(), 2);
+        doc.remove("objArray:0:value");
+        assertEquals(((List<?>) doc.get("objArray")).size(), 2);
+        assertEquals(((Document) doc.get("objArray:0")).size(), 0);
     }
 
     @Test
@@ -193,7 +215,7 @@ public class DocumentTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void getEmbeddedArrayFields() {
+    public void testGetEmbeddedArrayFields() {
         Document document = createDocument("first", "value")
             .put("seconds", new String[]{"1", "2"})
             .put("third", null)
