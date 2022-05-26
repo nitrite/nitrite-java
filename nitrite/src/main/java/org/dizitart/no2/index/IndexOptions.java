@@ -40,8 +40,8 @@ public class IndexOptions {
     private String indexType;
 
     /**
-     * Creates an {@link IndexOptions} with the specified `indexType`. Index creation
-     * will be synchronous with this option.
+     * Creates an {@link IndexOptions} with the specified <code>indexType</code>.
+     * Index creation will be synchronous with this option.
      *
      * @param indexType the type of index to be created.
      * @return a new synchronous index creation option.

@@ -91,7 +91,7 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
     void createIndex(IndexOptions indexOptions, String... fields);
 
     /**
-     * Rebuilds index on the {@code field} if it exists.
+     * Rebuilds index on the {@code fields} if it exists.
      *
      * @param fields the fields to be indexed.
      * @throws org.dizitart.no2.exceptions.IndexingException if the {@code field} is not indexed.

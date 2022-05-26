@@ -20,7 +20,6 @@ package org.dizitart.no2.common.processors;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.PersistentCollection;
-import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.repository.ObjectRepository;
 
 import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
@@ -65,7 +64,7 @@ public interface Processor {
         }
 
         if (nitriteCollection != null) {
-            for (Document document : nitriteCollection.find(Filter.ALL, null)) {
+            for (Document document : nitriteCollection.find()) {
                 Document processed = processBeforeWrite(document);
                 nitriteCollection.update(createUniqueFilter(document), processed, updateOptions(false));
             }

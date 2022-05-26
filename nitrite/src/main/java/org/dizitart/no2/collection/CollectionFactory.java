@@ -60,8 +60,8 @@ public class CollectionFactory {
      * @return the collection
      */
     public NitriteCollection getCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalogue) {
-        notNull(nitriteConfig, "configuration is null while creating collection");
-        notEmpty(name, "collection name is null or empty");
+        notNull(nitriteConfig, "Configuration is null while creating collection");
+        notEmpty(name, "Collection name is null or empty");
 
         Lock lock = lockService.getWriteLock(this.getClass().getName());
         try {
@@ -91,14 +91,14 @@ public class CollectionFactory {
             if (store.getRepositoryRegistry().contains(name)) {
                 nitriteMap.close();
                 collection.close();
-                throw new ValidationException("a repository with same name already exists");
+                throw new ValidationException("A repository with same name already exists");
             }
 
             for (Set<String> set : store.getKeyedRepositoryRegistry().values()) {
                 if (set.contains(name)) {
                     nitriteMap.close();
                     collection.close();
-                    throw new ValidationException("a keyed repository with same name already exists");
+                    throw new ValidationException("A keyed repository with same name already exists");
                 }
             }
 
@@ -122,7 +122,7 @@ public class CollectionFactory {
             }
             collectionMap.clear();
         } catch (Exception e) {
-            throw new NitriteIOException("failed to close a collection", e);
+            throw new NitriteIOException("Failed to close a collection", e);
         } finally {
             lock.unlock();
         }
