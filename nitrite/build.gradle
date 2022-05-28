@@ -63,7 +63,7 @@ dependencies {
     testImplementation "org.meanbean:meanbean:2.0.3"
     testImplementation "com.fasterxml.jackson.core:jackson-databind:2.13.0"
     testImplementation "commons-io:commons-io:2.11.0"
-    testImplementation "jakarta.xml.bind:jakarta.xml.bind-api:3.0.1"
+    testImplementation "jakarta.xml.bind:jakarta.xml.bind-api:4.0.0"
     testImplementation "com.sun.xml.bind:jaxb-impl:3.0.2"
 }
 
