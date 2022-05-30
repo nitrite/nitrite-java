@@ -61,7 +61,7 @@ class GreaterThanFilter extends ComparableFilter {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<?> applyOnIndex(IndexMap indexMap) {
         Comparable comparable = getComparable();
-        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
+        List<NavigableMap<Comparable<?>, Object>> subMaps = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
         Comparable ceilingKey = indexMap.higherKey(comparable);
@@ -69,14 +69,14 @@ class GreaterThanFilter extends ComparableFilter {
             // get the starting value, it can be a navigable-map (compound index)
             // or list (single field index)
             Object value = indexMap.get(ceilingKey);
-            processIndexValue(value, subMap, nitriteIds);
+            processIndexValue(value, subMaps, nitriteIds);
 
             ceilingKey = indexMap.higherKey(ceilingKey);
         }
 
-        if (!subMap.isEmpty()) {
+        if (!subMaps.isEmpty()) {
             // if sub-map is populated then filtering on compound index, return sub-map
-            return subMap;
+            return subMaps;
         } else {
             // else it is filtering on either single field index,
             // or it is a terminal filter on compound index, return only nitrite-ids

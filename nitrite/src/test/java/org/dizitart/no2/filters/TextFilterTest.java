@@ -52,7 +52,7 @@ public class TextFilterTest {
     public void testApplyOnIndex() {
         TextFilter textFilter = new TextFilter("Field", "42");
         textFilter.setTextTokenizer(new EnglishTextTokenizer());
-        assertTrue(textFilter.applyOnIndex(new InMemoryMap<>("Map Name", null)).isEmpty());
+        assertTrue(textFilter.applyOnTextIndex(new InMemoryMap<>("Map Name", null)).isEmpty());
         assertEquals("42", textFilter.getStringValue());
     }
 
@@ -61,7 +61,7 @@ public class TextFilterTest {
         TextFilter textFilter = new TextFilter("Field", "*");
         textFilter.setTextTokenizer(new EnglishTextTokenizer());
         assertThrows(FilterException.class,
-                () -> textFilter.applyOnIndex(new InMemoryMap<>("Map Name", null)));
+                () -> textFilter.applyOnTextIndex(new InMemoryMap<>("Map Name", null)));
     }
 }
 

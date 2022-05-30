@@ -47,11 +47,11 @@ class ElementMatchFilter extends NitriteFilter {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public boolean apply(Pair<NitriteId, Document> element) {
         if (elementFilter instanceof ElementMatchFilter) {
-            throw new FilterException("nested elemMatch filter is not supported");
+            throw new FilterException("Nested elemMatch filter is not supported");
         }
 
         if (elementFilter instanceof TextFilter) {
-            throw new FilterException("text filter is not supported in elemMatch filter");
+            throw new FilterException("Text filter is not supported in elemMatch filter");
         }
 
         Document document = element.getSecond();

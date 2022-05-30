@@ -163,11 +163,11 @@ public class ValidationUtils {
 
     private static void validateArrayIndexItem(Object value, String field) {
         if (value instanceof Iterable || value.getClass().isArray()) {
-            throw new InvalidOperationException("nested array index on iterable field " + field + " is not supported");
+            throw new InvalidOperationException("Nested iterables are not supported");
         }
 
         if (!(value instanceof Comparable)) {
-            throw new IndexingException("cannot index on an array field containing non comparable values " + field);
+            throw new IndexingException("Each value for the iterable field " + field + " must implement Comparable");
         }
     }
 

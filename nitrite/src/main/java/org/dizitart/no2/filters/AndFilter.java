@@ -41,18 +41,19 @@ public class AndFilter extends LogicalFilter {
 
         for (int i = 1; i < filters.length; i++) {
             if (filters[i] instanceof TextFilter) {
-                throw new FilterException("text filter must be the first filter in AND operation");
+                throw new FilterException("Text filter must be the first filter in AND operation");
             }
         }
     }
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        boolean result = true;
         for (Filter filter : getFilters()) {
-            result = result && filter.apply(element);
+            if (!filter.apply(element)) {
+                return false;
+            }
         }
-        return result;
+        return true;
     }
 
     @Override
@@ -61,11 +62,10 @@ public class AndFilter extends LogicalFilter {
         stringBuilder.append("(");
         for (int i = 0; i < getFilters().size(); i++) {
             Filter filter = getFilters().get(i);
-            if (i == 0) {
-                stringBuilder.append(filter.toString());
-            } else {
-                stringBuilder.append(" && ").append(filter.toString());
+            if (i > 0) {
+                stringBuilder.append(" && ");
             }
+            stringBuilder.append(filter.toString());
         }
         stringBuilder.append(")");
         return stringBuilder.toString();

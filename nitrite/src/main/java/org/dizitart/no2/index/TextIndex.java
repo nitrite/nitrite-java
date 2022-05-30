@@ -150,7 +150,7 @@ public class TextIndex implements NitriteIndex {
         if (filters.size() == 1 && filters.get(0) instanceof TextFilter) {
             TextFilter textFilter = (TextFilter) filters.get(0);
             textFilter.setTextTokenizer(textTokenizer);
-            return textFilter.applyOnIndex(indexMap);
+            return textFilter.applyOnTextIndex(indexMap);
         }
         throw new FilterException("invalid filter found for full-text index");
     }

@@ -236,6 +236,8 @@ public class UniversalTextTokenizer extends BaseTextTokenizer {
                 case Zulu:
                     registerLanguage(new Zulu());
                     break;
+                default:
+                    break;
             }
         }
     }

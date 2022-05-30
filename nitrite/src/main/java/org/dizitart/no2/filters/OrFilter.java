@@ -40,11 +40,12 @@ public class OrFilter extends LogicalFilter {
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        boolean result = false;
         for (Filter filter : getFilters()) {
-            result = result || filter.apply(element);
+            if (filter.apply(element)) {
+                return true;
+            }
         }
-        return result;
+        return false;
     }
 
     @Override
@@ -53,11 +54,10 @@ public class OrFilter extends LogicalFilter {
         stringBuilder.append("(");
         for (int i = 0; i < getFilters().size(); i++) {
             Filter filter = getFilters().get(i);
-            if (i == 0) {
-                stringBuilder.append(filter.toString());
-            } else {
-                stringBuilder.append(" || ").append(filter.toString());
+            if (i > 0) {
+                stringBuilder.append(" || ");
             }
+            stringBuilder.append(filter.toString());
         }
         stringBuilder.append(")");
         return stringBuilder.toString();

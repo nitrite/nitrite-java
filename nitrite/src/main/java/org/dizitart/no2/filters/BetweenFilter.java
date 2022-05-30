@@ -17,7 +17,7 @@
 package org.dizitart.no2.filters;
 
 import lombok.Data;
-import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.exceptions.FilterException;
 
 /**
  * @author Anindya Chatterjee
@@ -50,11 +50,11 @@ class BetweenFilter<T> extends AndFilter {
 
     private static <T> void validateBound(Bound<T> bound) {
         if (bound == null) {
-            throw new ValidationException("bound cannot be null");
+            throw new FilterException("Bound cannot be null");
         }
 
         if (!(bound.upperBound instanceof Comparable) || !(bound.lowerBound instanceof Comparable)) {
-            throw new ValidationException("upper bound or lower bound value must be comparable");
+            throw new FilterException("Upper bound or lower bound value must be comparable");
         }
     }
 

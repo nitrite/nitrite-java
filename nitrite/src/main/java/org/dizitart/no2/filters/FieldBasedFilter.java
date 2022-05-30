@@ -20,8 +20,8 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.exceptions.FilterException;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
@@ -82,7 +82,7 @@ public abstract class FieldBasedFilter extends NitriteFilter {
 
         if (value != null) {
             if (!nitriteMapper.isValue(value) && !(value instanceof Comparable)) {
-                throw new ValidationException("search term is not comparable " + value);
+                throw new FilterException("The value for field '" + field + "' is not a valid search term");
             }
         }
     }
