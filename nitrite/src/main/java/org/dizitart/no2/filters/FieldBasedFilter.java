@@ -55,7 +55,7 @@ public abstract class FieldBasedFilter extends NitriteFilter {
     }
 
     /**
-     * Gets the value fo the filter.
+     * Gets the value of the filter.
      *
      * @return the value
      */

@@ -113,7 +113,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     }
 
     /**
-     * Is compound index boolean.
+     * Indicates if this descriptor is for a compound index.
      *
      * @return the boolean
      */

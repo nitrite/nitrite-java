@@ -54,7 +54,7 @@ public abstract class ComparableFilter extends FieldBasedFilter {
     }
 
     /**
-     * Apply this filter on an nitrite index.
+     * Apply this filter on a nitrite index.
      *
      * @param indexMap the index scanner
      * @return the object

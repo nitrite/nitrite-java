@@ -97,7 +97,7 @@ public interface Filter {
 
     /**
      * Creates a not filter which performs a logical NOT operation on a filter and selects
-     * the documents that *_do not_* satisfy the criteria. This also includes documents
+     * the documents that <strong>do not</strong> satisfy the criteria. This also includes documents
      * that do not contain the value.
      * <p>
      *

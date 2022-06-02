@@ -251,7 +251,7 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
      * Drops the collection and all of its indices.
      * <p>
      * Any further access to a dropped collection would result into
-     * a {@link IllegalStateException}.
+     * an exception.
      * </p>
      */
     void drop();

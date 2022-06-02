@@ -35,6 +35,11 @@ public abstract class IndexOnlyFilter extends ComparableFilter {
         super(field, value);
     }
 
+    /**
+     * Gets the supported index type for this filter.
+     *
+     * @return the supported index type
+     */
     public abstract String supportedIndexType();
 
     /**
