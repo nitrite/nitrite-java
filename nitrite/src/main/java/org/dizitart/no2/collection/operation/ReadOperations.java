@@ -21,10 +21,7 @@ import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.streams.*;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.filters.EqualsFilter;
-import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.filters.LogicalFilter;
-import org.dizitart.no2.filters.NitriteFilter;
+import org.dizitart.no2.filters.*;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.common.processors.ProcessorChain;
@@ -122,7 +119,7 @@ class ReadOperations {
         } else {
             // and or single filter
             if (findPlan.getByIdFilter() != null) {
-                EqualsFilter byIdFilter = findPlan.getByIdFilter();
+                FieldBasedFilter byIdFilter = findPlan.getByIdFilter();
                 NitriteId nitriteId = NitriteId.createId((String) byIdFilter.getValue());
                 rawStream = RecordStream.single(pair(nitriteId, nitriteMap.get(nitriteId)));
             } else {

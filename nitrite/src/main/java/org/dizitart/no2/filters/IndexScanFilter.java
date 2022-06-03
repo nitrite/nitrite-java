@@ -50,6 +50,6 @@ public class IndexScanFilter implements Filter {
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
-        throw new InvalidOperationException("index scan filter cannot be applied on collection");
+        throw new InvalidOperationException("Index scan filter cannot be applied on collection");
     }
 }

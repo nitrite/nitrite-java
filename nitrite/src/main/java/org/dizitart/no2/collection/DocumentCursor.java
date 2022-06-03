@@ -20,13 +20,10 @@ import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 
 /**
- * An interface to iterate over database {@code find()} results. It provides a
+ * An interface to iterate over {@link NitriteCollection#find()} results. It provides a
  * mechanism to iterate over all {@link NitriteId}s of the result.
  * <pre>
  * {@code
- * // create/open a database
- * Nitrite db = Nitrite.builder()
- *      .openOrCreate("user", "password");
  *
  * // create/open a database
  * Nitrite db = Nitrite.builder()
@@ -68,7 +65,7 @@ public interface DocumentCursor extends RecordStream<Document> {
      * Performs a left outer join with a foreign cursor with the specified lookup parameters.
      * <p>
      * It performs an equality match on the localString to the foreignString from the documents of the foreign cursor.
-     * If an input document does not contain the localString, the join treats the field as having a value of `null`
+     * If an input document does not contain the localString, the join treats the field as having a value of <code>null</code>
      * for matching purposes.
      *
      * @param foreignCursor the foreign cursor for the join.
