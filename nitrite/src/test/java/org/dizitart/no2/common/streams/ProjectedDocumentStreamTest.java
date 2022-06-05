@@ -18,11 +18,12 @@
 package org.dizitart.no2.common.streams;
 
 import com.fasterxml.jackson.databind.util.ArrayIterator;
+import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.processors.ProcessorChain;
+import org.dizitart.no2.common.tuples.Pair;
 import org.junit.Test;
 
 import static org.junit.Assert.assertNull;
@@ -64,6 +65,26 @@ public class ProjectedDocumentStreamTest {
         projectedDocumentStream.iterator();
         verify(recordStream).iterator();
         assertTrue(projectedDocumentStream.toList().isEmpty());
+    }
+    @Test
+    public void test() {
+        try(Nitrite db = Nitrite.builder().openOrCreate()) {
+            Document document = Document.createDocument("name", "John")
+                .put("address", Document.createDocument("street", "Main Street")
+                    .put("city", "New York")
+                    .put("state", "NY")
+                    .put("zip", "10001"));
+            db.getCollection("users").insert(document);
+
+            Document projection = Document.createDocument("name", null)
+                .put("address.city", null)
+                .put("address.state", null);
+
+            db.getCollection("users")
+                .find()
+                .project(projection)
+                .forEach(System.out::println);
+        }
     }
 }
 

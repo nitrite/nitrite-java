@@ -70,7 +70,11 @@ class ReadOperations {
     }
 
     Document getById(NitriteId nitriteId) {
-        return nitriteMap.get(nitriteId);
+        Document document = nitriteMap.get(nitriteId);
+        if (processorChain != null) {
+            document = processorChain.processAfterRead(document);
+        }
+        return document;
     }
 
     private void prepareFilter(Filter filter) {

@@ -39,7 +39,7 @@ public interface Processor {
      * @param document the document
      * @return the document
      */
-    Document processBeforeWrite(Document document);
+    default Document processBeforeWrite(Document document) { return document; }
 
     /**
      * Processes a document after reading from the database.
@@ -47,7 +47,7 @@ public interface Processor {
      * @param document the document
      * @return the document
      */
-    Document processAfterRead(Document document);
+    default Document processAfterRead(Document document) { return document; }
 
     /**
      * Processes all documents of a {@link PersistentCollection}.

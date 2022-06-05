@@ -21,7 +21,9 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.common.processors.StringFieldEncryptionProcessor;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -356,6 +358,41 @@ public class CollectionFindTest extends BaseCollectionTest {
             iteration++;
         }
         assertEquals(iteration, 3);
+    }
+    @Test
+    public void testProjection() {
+        Document doc1 = Document.createDocument("name", "John")
+            .put("address", Document.createDocument("street", "Main Street")
+                .put("city", "New York")
+                .put("state", "NY")
+                .put("zip", "10001"));
+
+        Document doc2 = Document.createDocument("name", "Jane")
+            .put("address", Document.createDocument("street", "Other Street")
+                .put("city", "New Jersey")
+                .put("state", "NJ")
+                .put("zip", "70001"));
+
+        NitriteCollection collection = db.getCollection("person");
+        collection.insert(doc1, doc2);
+
+        StringFieldEncryptionProcessor processor = new StringFieldEncryptionProcessor("pass");
+        processor.addFields("name");
+        processor.process(collection);
+        collection.addProcessor(processor);
+
+        Document projection = Document.createDocument("name", null)
+            .put("address.city", null)
+            .put("address.state", null);
+
+        RecordStream<Document> recordStream = collection.find().project(projection);
+        assertEquals(recordStream.size(), 2);
+        assertEquals(recordStream.firstOrNull(), Document.createDocument("name", "John")
+            .put("address", Document.createDocument("city", "New York").put("state", "NY")));
+        assertEquals(recordStream.toList().stream().skip(1).findFirst().orElse(null),
+            Document.createDocument("name", "Jane").put("address", Document.createDocument("city", "New Jersey")
+                .put("state", "NJ")));
+        System.out.println(recordStream.firstOrNull());
     }
 
     @Test
