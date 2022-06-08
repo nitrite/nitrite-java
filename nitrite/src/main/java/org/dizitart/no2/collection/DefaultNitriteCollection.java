@@ -142,13 +142,13 @@ class DefaultNitriteCollection implements NitriteCollection {
                 writeLock.unlock();
             }
         } else {
-            throw new NotIdentifiableException("remove operation failed as no id value found for the document");
+            throw new NotIdentifiableException("Document has no id, cannot remove by document");
         }
     }
 
     public WriteResult remove(Filter filter, boolean justOne) {
         if ((filter == null || filter == Filter.ALL) && justOne) {
-            throw new InvalidOperationException("remove all cannot be combined with just once");
+            throw new InvalidOperationException("Cannot remove all documents with justOne set to true");
         }
 
         try {
@@ -450,7 +450,7 @@ class DefaultNitriteCollection implements NitriteCollection {
 
         String[] indexFields = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(indexFields)) {
-            throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
+            throw new IndexingException("Cannot rebuild index, index is currently being built");
         }
     }
 

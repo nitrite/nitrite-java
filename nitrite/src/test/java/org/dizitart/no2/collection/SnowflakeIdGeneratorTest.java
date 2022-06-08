@@ -19,6 +19,10 @@ package org.dizitart.no2.collection;
 
 import org.junit.Test;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class SnowflakeIdGeneratorTest {
@@ -31,6 +35,17 @@ public class SnowflakeIdGeneratorTest {
     @Test
     public void testGetId() {
         assertTrue((new SnowflakeIdGenerator()).getId() != 0);
+    }
+
+    @Test
+    public void testUniqueness() {
+        SnowflakeIdGenerator generator = new SnowflakeIdGenerator();
+        Set<Long> ids = new HashSet<>();
+        for (int j = 0; j < 100; j++) {
+            ids.add(generator.getId());
+        }
+
+        assertEquals(100, ids.size());
     }
 }
 
