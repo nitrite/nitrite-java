@@ -49,6 +49,7 @@ class FindOptimizer {
 
         if (findOptions != null) {
             findPlan.setCollator(findOptions.collator());
+            findPlan.setDistinct(findOptions.distinct());
         }
         return findPlan;
     }
@@ -178,7 +179,7 @@ class FindOptimizer {
                     // if filter is compatible with already identified index only filter then add
                     indexOnlyFilters.add(indexScanFilter);
                 } else {
-                    throw new FilterException("a query can not have multiple index only filters");
+                    throw new FilterException("A query can not have multiple index only filters");
                 }
             }
         }
@@ -283,7 +284,7 @@ class FindOptimizer {
     private void validateCollectionScanFilters(Collection<Filter> filters) {
         for (Filter filter : filters) {
             if (filter instanceof IndexOnlyFilter) {
-                throw new FilterException("collection scan is not supported for the filter " + filter);
+                throw new FilterException("Collection scan is not supported for the filter " + filter);
             } else if (filter instanceof TextFilter) {
                 throw new FilterException(((TextFilter) filter).getField() + " is not full-text indexed");
             }

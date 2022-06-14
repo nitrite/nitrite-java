@@ -112,7 +112,7 @@ class DefaultNitriteCollection implements NitriteCollection {
             if (document.hasId()) {
                 return update(createUniqueFilter(document), document, updateOptions(false));
             } else {
-                throw new NotIdentifiableException("update operation failed as no id value found for the document");
+                throw new NotIdentifiableException("Update operation failed as the document does not have id");
             }
         }
     }

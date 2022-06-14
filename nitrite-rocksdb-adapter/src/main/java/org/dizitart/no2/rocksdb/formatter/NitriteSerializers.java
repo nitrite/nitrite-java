@@ -12,7 +12,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.index.DBValue;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;

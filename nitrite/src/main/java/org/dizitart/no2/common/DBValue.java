@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Nitrite author or authors.
+ * Copyright (c) 2017-2022 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  *
  */
 
-package org.dizitart.no2.index;
+package org.dizitart.no2.common;
 
 import lombok.AccessLevel;
 import lombok.Data;

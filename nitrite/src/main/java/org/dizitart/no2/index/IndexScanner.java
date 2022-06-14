@@ -18,6 +18,7 @@
 package org.dizitart.no2.index;
 
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.ComparableFilter;
 

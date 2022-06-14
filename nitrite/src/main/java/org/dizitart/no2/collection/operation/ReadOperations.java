@@ -105,6 +105,13 @@ class ReadOperations {
         }
     }
 
+    private DocumentCursor createCursor(FindPlan findPlan) {
+        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(findPlan);
+        DocumentStream cursor = new DocumentStream(recordStream, processorChain);
+        cursor.setFindPlan(findPlan);
+        return cursor;
+    }
+
     private RecordStream<Pair<NitriteId, Document>> findSuitableStream(FindPlan findPlan) {
         RecordStream<Pair<NitriteId, Document>> rawStream;
 
@@ -115,17 +122,20 @@ class ReadOperations {
                 RecordStream<Pair<NitriteId, Document>> suitableStream = findSuitableStream(subPlan);
                 subStreams.add(suitableStream);
             }
-            // union of all suitable stream of all sub plans
-            rawStream = new UnionStream(subStreams);
 
-            // return only distinct items
-            rawStream = new DistinctStream(rawStream);
+            // concat all suitable stream of all sub plans
+            rawStream = new ConcatStream(subStreams);
+
+            if (findPlan.isDistinct()) {
+                // return only distinct items
+                rawStream = new DistinctStream(rawStream);
+            }
         } else {
             // and or single filter
             if (findPlan.getByIdFilter() != null) {
                 FieldBasedFilter byIdFilter = findPlan.getByIdFilter();
                 NitriteId nitriteId = NitriteId.createId((String) byIdFilter.getValue());
-                rawStream = RecordStream.single(pair(nitriteId, nitriteMap.get(nitriteId)));
+                rawStream = RecordStream.single(pair(nitriteId, getById(nitriteId)));
             } else {
                 IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
                 if (indexDescriptor != null) {
@@ -159,12 +169,5 @@ class ReadOperations {
         }
 
         return rawStream;
-    }
-
-    private DocumentCursor createCursor(FindPlan findPlan) {
-        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(findPlan);
-        DocumentStream cursor = new DocumentStream(recordStream, processorChain);
-        cursor.setFindPlan(findPlan);
-        return cursor;
     }
 }

@@ -48,6 +48,7 @@ public class FindPlan {
 
     private Long skip;
     private Long limit;
+    private boolean distinct;
 
     private Collator collator;
 

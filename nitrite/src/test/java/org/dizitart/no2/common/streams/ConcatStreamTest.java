@@ -23,17 +23,17 @@ import java.util.ArrayList;
 
 import static org.junit.Assert.assertTrue;
 
-public class UnionStreamTest {
+public class ConcatStreamTest {
     @Test
     public void testConstructor() {
-        assertTrue((new UnionStream(new ArrayList<>())).toList().isEmpty());
+        assertTrue((new ConcatStream(new ArrayList<>())).toList().isEmpty());
     }
 
     @Test
     public void testIterator() {
-        UnionStream unionStream = new UnionStream(new ArrayList<>());
-        unionStream.iterator();
-        assertTrue(unionStream.toList().isEmpty());
+        ConcatStream concatStream = new ConcatStream(new ArrayList<>());
+        concatStream.iterator();
+        assertTrue(concatStream.toList().isEmpty());
     }
 }
 

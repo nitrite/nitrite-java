@@ -75,9 +75,9 @@ public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
                 } else {
 
                     // validate comparable
-                    if (value1.getClass().isArray() || value1 instanceof Iterable
-                        || value2.getClass().isArray() || value2 instanceof Iterable) {
-                        throw new ValidationException("cannot sort on an array or collection object");
+                    if (!(value1 instanceof Comparable) || !(value2 instanceof Comparable)) {
+                        throw new ValidationException("Cannot compare " + value1.getClass()
+                            + " and " + value2.getClass());
                     }
 
                     // compare values
@@ -95,6 +95,7 @@ public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
                     result *= -1;
                 }
 
+                // if both values are equal, continue to next sort order
                 if (result != 0) {
                     return result;
                 }

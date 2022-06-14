@@ -23,7 +23,7 @@ import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.index.DBValue;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
