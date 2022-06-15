@@ -29,7 +29,7 @@ dependencies {
         api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.3"
         api "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0"
         api "org.mapdb:mapdb:3.0.8"
-        api "com.h2database:h2-mvstore:1.4.200"
+        api "com.h2database:h2-mvstore:2.1.214"
         api "com.squareup.okhttp3:okhttp:4.9.3"
         api "org.rocksdb:rocksdbjni:7.2.2"
         api "com.esotericsoftware.kryo:kryo5:5.2.1"
