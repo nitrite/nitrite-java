@@ -19,7 +19,7 @@ package org.dizitart.no2.common.mapper;
 import org.dizitart.no2.collection.Document;
 
 /**
- * An object that serializes itself to a {@link Document}
+ * An object that maps itself to a {@link Document}
  * and vice versa.
  *
  * @author Anindya Chatterjee
@@ -35,7 +35,7 @@ public interface Mappable {
     Document write(NitriteMapper mapper);
 
     /**
-     * Reads the `document` and populate all fields of this instance.
+     * Reads the <code>document</code> and populate all fields of this instance.
      *
      * @param mapper   the {@link NitriteMapper} instance used.
      * @param document the document.
