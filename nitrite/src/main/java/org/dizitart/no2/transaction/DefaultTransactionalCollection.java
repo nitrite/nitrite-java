@@ -158,14 +158,14 @@ class DefaultTransactionalCollection implements NitriteCollection {
             if (document.hasId()) {
                 return update(createUniqueFilter(document), document, updateOptions(false));
             } else {
-                throw new NotIdentifiableException("update operation failed as no id value found for the document");
+                throw new NotIdentifiableException("Update operation failed as no id value found for the document");
             }
         }
     }
 
     @Override
     public WriteResult remove(Document document) {
-        notNull(document, "a null document cannot be removed");
+        notNull(document, "A null document cannot be removed");
 
         WriteResult result;
         if (document.hasId()) {
@@ -177,7 +177,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
                 writeLock.unlock();
             }
         } else {
-            throw new NotIdentifiableException("remove operation failed as no id value found for the document");
+            throw new NotIdentifiableException("Remove operation failed as no id value found for the document");
         }
 
         AtomicReference<Document> toRemove = new AtomicReference<>();
@@ -201,7 +201,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
     @Override
     public WriteResult remove(Filter filter, boolean justOne) {
         if ((filter == null || filter == Filter.ALL) && justOne) {
-            throw new InvalidOperationException("remove all cannot be combined with just once");
+            throw new InvalidOperationException("Remove all cannot be combined with just once");
         }
 
         WriteResult result;
@@ -518,7 +518,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
             try {
                 close();
             } catch (Exception e) {
-                throw new NitriteIOException("failed to close the database", e);
+                throw new NitriteIOException("Failed to close the database", e);
             }
             return false;
         } else return true;
@@ -634,19 +634,19 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     private void checkOpened() {
         if (isClosed) {
-            throw new TransactionException("collection is closed");
+            throw new TransactionException("Collection is closed");
         }
 
         if (!primary.isOpen()) {
-            throw new NitriteIOException("store is closed");
+            throw new NitriteIOException("Store is closed");
         }
 
         if (isDropped()) {
-            throw new NitriteIOException("collection has been dropped");
+            throw new NitriteIOException("Collection has been dropped");
         }
 
         if (!transactionContext.getActive().get()) {
-            throw new TransactionException("transaction is closed");
+            throw new TransactionException("Transaction is closed");
         }
     }
 
@@ -658,11 +658,11 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
-        notNull(indexDescriptor, "indexEntry cannot be null");
+        notNull(indexDescriptor, "indexDescriptor cannot be null");
 
         String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(fieldNames)) {
-            throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
+            throw new IndexingException("Indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }
 }

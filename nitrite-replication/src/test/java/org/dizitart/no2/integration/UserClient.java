@@ -69,7 +69,7 @@ public class UserClient {
         response = call.execute();
 
         if (response.code() != 201) {
-            throw new Exception("user creation failed");
+            throw new Exception("User creation failed");
         }
     }
 
@@ -101,7 +101,7 @@ public class UserClient {
             return dataGateResponse.getData().getToken();
         }
 
-        throw new Exception("failed to login");
+        throw new Exception("Failed to login");
     }
 
     private static OkHttpClient getUnsafeOkHttpClient() {

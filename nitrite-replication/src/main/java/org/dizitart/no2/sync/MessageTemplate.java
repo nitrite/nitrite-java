@@ -39,16 +39,16 @@ public class MessageTemplate {
 
     public void validateMessage(DataGateMessage message) {
         if (message == null) {
-            throw new ReplicationException("a null message is received for "
+            throw new ReplicationException("A null message is received for "
                 + replicatedCollection.getReplicaId(), true);
         } else if (message.getHeader() == null) {
-            throw new ReplicationException("a message without header is received for "
+            throw new ReplicationException("A message without header is received for "
                 + replicatedCollection.getReplicaId(), true);
         } else if (StringUtils.isNullOrEmpty(message.getHeader().getCollection())) {
-            throw new ReplicationException("a message without collection info is received for "
+            throw new ReplicationException("A message without collection info is received for "
                 + replicatedCollection.getReplicaId(), true);
         } else if (message.getHeader().getMessageType() == null) {
-            throw new ReplicationException("a message without any type is received for "
+            throw new ReplicationException("A message without any type is received for "
                 + replicatedCollection.getReplicaId(), true);
         }
     }
@@ -66,7 +66,7 @@ public class MessageTemplate {
             log.debug("Sending message to datagate server {}", text);
             webSocket.send(text);
         } catch (JsonProcessingException e) {
-            throw new ReplicationException("malformed datagate message", e, true);
+            throw new ReplicationException("Malformed datagate message", e, true);
         }
     }
 

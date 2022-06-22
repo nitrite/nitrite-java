@@ -67,7 +67,7 @@ public class Replica implements AutoCloseable {
                 }, 0, config.getPollingRate(), TimeUnit.MILLISECONDS);
             }
         } else {
-            throw new ReplicationException("replica is not configured properly", true);
+            throw new ReplicationException("Replica is not configured properly", true);
         }
     }
 
@@ -96,7 +96,7 @@ public class Replica implements AutoCloseable {
                 disconnected.compareAndSet(false, true);
             }
         } else {
-            throw new ReplicationException("replica is not configured properly", true);
+            throw new ReplicationException("Replica is not configured properly", true);
         }
     }
 

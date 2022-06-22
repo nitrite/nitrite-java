@@ -69,7 +69,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
         // value must be serializable
         if (value != null && !Serializable.class.isAssignableFrom(value.getClass())) {
-            throw new ValidationException("type " + value.getClass().getName()
+            throw new ValidationException("Type " + value.getClass().getName()
                 + " does not implement java.io.Serializable");
         }
 
@@ -118,7 +118,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             // create a nitrite id instance from the string value
             return createId(id);
         } catch (ClassCastException cce) {
-            throw new InvalidIdException("invalid _id found " + get(DOC_ID));
+            throw new InvalidIdException("Invalid _id found " + get(DOC_ID));
         }
     }
 

@@ -67,7 +67,7 @@ public class MigrationUtil {
             oldStore.commit();
             newStore.commit();
         } catch (Throwable t) {
-            throw new NitriteIOException("migration of old data has failed", t);
+            throw new NitriteIOException("Migration of old data has failed", t);
         } finally {
             oldStore.close();
             newStore.close();
@@ -220,7 +220,7 @@ public class MigrationUtil {
 
     private static void validateOldStore(MVStore store) {
         if (store.hasMap(STORE_INFO)) {
-            throw new ValidationException("database file is corrupted");
+            throw new ValidationException("Database file is corrupted");
         }
     }
 }

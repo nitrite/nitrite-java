@@ -85,7 +85,7 @@ public class TestUtil {
             return loadDocument(node);
         } catch (IOException e) {
             log.error("Error while parsing json", e);
-            throw new ObjectMappingException("failed to parse json " + json);
+            throw new ObjectMappingException("Failed to parse json " + json);
         }
     }
 

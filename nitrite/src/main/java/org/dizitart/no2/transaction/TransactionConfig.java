@@ -28,7 +28,7 @@ class TransactionConfig extends NitriteConfig {
             nitriteIndexer.initialize(this);
             return nitriteIndexer;
         } else {
-            throw new IndexingException("no indexer found for index type " + indexType);
+            throw new IndexingException("No indexer found for index type " + indexType);
         }
     }
 

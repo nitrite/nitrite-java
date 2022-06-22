@@ -20,6 +20,7 @@ package org.dizitart.no2.common.mapper;
 /**
  * Represents a factory for creating instances of a type.
  *
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public interface MappableFactory<T> {

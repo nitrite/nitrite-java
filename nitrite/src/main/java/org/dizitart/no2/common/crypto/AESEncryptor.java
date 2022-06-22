@@ -117,7 +117,7 @@ public class AESEncryptor implements Encryptor {
             // string representation, base64, send this string to other for decryption.
             return Base64.encodeToString(cipherTextWithIvSalt, Base64.URL_SAFE);
         } catch (Exception e) {
-            throw new NitriteSecurityException("failed to encrypt data", e);
+            throw new NitriteSecurityException("Failed to encrypt data", e);
         }
     }
 
@@ -153,7 +153,7 @@ public class AESEncryptor implements Encryptor {
             byte[] plainText = cipher.doFinal(cipherText);
             return new String(plainText, UTF_8);
         } catch (Exception e) {
-            throw new NitriteSecurityException("failed to decrypt data", e);
+            throw new NitriteSecurityException("Failed to decrypt data", e);
         }
     }
 }

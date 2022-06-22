@@ -90,7 +90,7 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
     @Override
     public int compareTo(NitriteId other) {
         if (other.idValue == null) {
-            throw new InvalidIdException("cannot compare with null id");
+            throw new InvalidIdException("Cannot compare with null id");
         }
 
         return Long.compare(Long.parseLong(idValue), Long.parseLong(other.idValue));

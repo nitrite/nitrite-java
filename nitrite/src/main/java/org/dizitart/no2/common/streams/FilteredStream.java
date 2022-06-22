@@ -98,7 +98,7 @@ public class FilteredStream implements RecordStream<Pair<NitriteId, Document>> {
         @Override
         public void remove() {
             if (nextPairSet) {
-                throw new InvalidOperationException("remove operation cannot be called here");
+                throw new InvalidOperationException("Remove operation cannot be called here");
             }
             iterator.remove();
         }

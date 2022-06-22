@@ -31,7 +31,8 @@ public class FindPlanTest {
         assertTrue(actualFindPlan.getBlockingSortOrder().isEmpty());
         assertEquals(
             "FindPlan(byIdFilter=null, indexScanFilter=null, collectionScanFilter=null, indexDescriptor=null,"
-                + " indexScanOrder=null, blockingSortOrder=[], skip=null, limit=null, collator=null, subPlans=[])",
+                + " indexScanOrder=null, blockingSortOrder=[], skip=null, limit=null, distinct=false, " +
+                "collator=null, subPlans=[])",
             actualFindPlan.toString());
         assertTrue(actualFindPlan.getSubPlans().isEmpty());
         assertNull(actualFindPlan.getSkip());

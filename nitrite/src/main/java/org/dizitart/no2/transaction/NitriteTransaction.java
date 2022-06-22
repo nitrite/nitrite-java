@@ -59,7 +59,7 @@ class NitriteTransaction implements Transaction {
         if (nitrite.hasCollection(name)) {
             primary = nitrite.getCollection(name);
         } else {
-            throw new TransactionException("collection " + name + " does not exists");
+            throw new TransactionException("Collection " + name + " does not exists");
         }
 
         NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
@@ -91,7 +91,7 @@ class NitriteTransaction implements Transaction {
         if (nitrite.hasRepository(type)) {
             primary = nitrite.getRepository(type);
         } else {
-            throw new TransactionException("repository of type " + type.getName() + " does not exists");
+            throw new TransactionException("Repository of type " + type.getName() + " does not exists");
         }
 
         NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
@@ -127,7 +127,7 @@ class NitriteTransaction implements Transaction {
         if (nitrite.hasRepository(type, key)) {
             primary = nitrite.getRepository(type, key);
         } else {
-            throw new TransactionException("repository of type " + type.getName()
+            throw new TransactionException("Repository of type " + type.getName()
                 + " and key " + key + " does not exists");
         }
 
@@ -190,7 +190,7 @@ class NitriteTransaction implements Transaction {
             } catch (Exception e) {
                 state = State.Failed;
                 log.error("Error while committing transaction", e);
-                throw new TransactionException("failed to commit transaction", e);
+                throw new TransactionException("Failed to commit transaction", e);
             } finally {
                 undoRegistry.put(collectionName, undoLog);
                 transactionContext.getActive().set(false);
@@ -245,7 +245,7 @@ class NitriteTransaction implements Transaction {
             this.transactionStore.close();
             this.transactionConfig.close();
         } catch (Exception e) {
-            throw new TransactionException("transaction failed to close", e);
+            throw new TransactionException("Transaction failed to close", e);
         }
     }
 
@@ -275,7 +275,7 @@ class NitriteTransaction implements Transaction {
 
     private void checkState() {
         if (state != State.Active) {
-            throw new TransactionException("transaction is not active");
+            throw new TransactionException("Transaction is not active");
         }
     }
 }

@@ -329,7 +329,7 @@ class DefaultNitriteCollection implements NitriteCollection {
             readLock.lock();
             return nitriteStore != null && !nitriteStore.isClosed() && !isDropped;
         } catch (Exception e) {
-            throw new NitriteIOException("failed to close the database", e);
+            throw new NitriteIOException("Failed to close the database", e);
         } finally {
             readLock.unlock();
         }
@@ -442,7 +442,7 @@ class DefaultNitriteCollection implements NitriteCollection {
 
     private void checkOpened() {
         if (isOpen()) return;
-        throw new NitriteIOException("collection is closed");
+        throw new NitriteIOException("Collection is closed");
     }
 
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {

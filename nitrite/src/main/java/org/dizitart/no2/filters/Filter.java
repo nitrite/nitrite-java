@@ -66,7 +66,7 @@ public interface Filter {
     static Filter and(Filter... filters) {
         notEmpty(filters, "At least two filters must be specified");
         if (filters.length < 2) {
-            throw new FilterException("at least two filters must be specified");
+            throw new FilterException("At least two filters must be specified");
         }
 
         return new AndFilter(filters);
@@ -79,9 +79,9 @@ public interface Filter {
      * @return the filter
      */
     static Filter or(Filter... filters) {
-        notEmpty(filters, "at least two filters must be specified");
+        notEmpty(filters, "At least two filters must be specified");
         if (filters.length < 2) {
-            throw new FilterException("at least two filters must be specified");
+            throw new FilterException("At least two filters must be specified");
         }
 
         return new OrFilter(filters);

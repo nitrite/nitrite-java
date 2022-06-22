@@ -100,7 +100,7 @@ class StoreFactory {
             }
         } catch (RocksDBException e) {
             log.error("Error while listing column families", e);
-            throw new NitriteIOException("failed to open database", e);
+            throw new NitriteIOException("Failed to open database", e);
         }
         reference.setColumnFamilyDescriptors(cfDescriptors);
     }
@@ -120,7 +120,7 @@ class StoreFactory {
             reference.setColumnFamilyHandleRegistry(handleMap);
         } catch (RocksDBException e) {
             log.error("Error while opening rocks database", e);
-            throw new NitriteIOException("failed to open database", e);
+            throw new NitriteIOException("Failed to open database", e);
         }
     }
 }

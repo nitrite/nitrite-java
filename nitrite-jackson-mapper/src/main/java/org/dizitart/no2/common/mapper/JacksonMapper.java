@@ -106,7 +106,7 @@ public class JacksonMapper extends MappableMapper {
             }
         }
 
-        throw new ObjectMappingException("failed to convert using jackson");
+        throw new ObjectMappingException("Failed to convert using jackson");
     }
 
     @Override
@@ -124,7 +124,7 @@ public class JacksonMapper extends MappableMapper {
             JsonNode node = objectMapper.convertValue(object, JsonNode.class);
             return node != null && node.isValueNode();
         } catch (Exception ex) {
-            throw new ObjectMappingException("error while checking for value type", ex);
+            throw new ObjectMappingException("Error while checking for value type", ex);
         }
     }
 

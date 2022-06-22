@@ -128,7 +128,7 @@ class ElementMatchFilter extends NitriteFilter {
         } else if (filter instanceof RegexFilter) {
             return matchRegex(item, filter);
         } else {
-            throw new FilterException("filter " + filter.getClass().getSimpleName() +
+            throw new FilterException("Filter " + filter.getClass().getSimpleName() +
                 " is not a supported in elemMatch");
         }
     }

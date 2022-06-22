@@ -80,7 +80,7 @@ public class NitriteConfig implements AutoCloseable {
      */
     public void fieldSeparator(String separator) {
         if (configured) {
-            throw new InvalidOperationException("cannot change the separator after database" +
+            throw new InvalidOperationException("Cannot change the separator after database" +
                 " initialization");
         }
         NitriteConfig.fieldSeparator = separator;
@@ -94,7 +94,7 @@ public class NitriteConfig implements AutoCloseable {
      */
     public NitriteConfig loadModule(NitriteModule module) {
         if (configured) {
-            throw new InvalidOperationException("cannot load module after database" +
+            throw new InvalidOperationException("Cannot load module after database" +
                 " initialization");
         }
         pluginManager.loadModule(module);
@@ -110,7 +110,7 @@ public class NitriteConfig implements AutoCloseable {
     @SuppressWarnings("Java8MapApi")
     public NitriteConfig addMigration(Migration migration) {
         if (configured) {
-            throw new InvalidOperationException("cannot add migration steps after database" +
+            throw new InvalidOperationException("Cannot add migration steps after database" +
                 " initialization");
         }
 
@@ -139,7 +139,7 @@ public class NitriteConfig implements AutoCloseable {
      */
     public NitriteConfig currentSchemaVersion(Integer version) {
         if (configured) {
-            throw new InvalidOperationException("cannot add schema version info after database" +
+            throw new InvalidOperationException("Cannot add schema version info after database" +
                 " initialization");
         }
         this.schemaVersion = version;
@@ -152,7 +152,7 @@ public class NitriteConfig implements AutoCloseable {
      */
     public void autoConfigure() {
         if (configured) {
-            throw new InvalidOperationException("cannot execute autoconfigure after database" +
+            throw new InvalidOperationException("Cannot execute autoconfigure after database" +
                 " initialization");
         }
         pluginManager.findAndLoadPlugins();
@@ -170,7 +170,7 @@ public class NitriteConfig implements AutoCloseable {
             nitriteIndexer.initialize(this);
             return nitriteIndexer;
         } else {
-            throw new IndexingException("no indexer found for index type " + indexType);
+            throw new IndexingException("No indexer found for index type " + indexType);
         }
     }
 

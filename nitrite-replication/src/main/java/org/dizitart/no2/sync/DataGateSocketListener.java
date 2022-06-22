@@ -117,7 +117,7 @@ public class DataGateSocketListener extends WebSocketListener {
             if (!replicatedCollection.isStopped()) {
                 messageTemplate.postMessage(webSocket, message);
             } else {
-                throw new IllegalStateException("datagate client is not connected");
+                throw new IllegalStateException("Datagate client is not connected");
             }
         } catch (Exception e) {
             log.error("Failed to send message", e);

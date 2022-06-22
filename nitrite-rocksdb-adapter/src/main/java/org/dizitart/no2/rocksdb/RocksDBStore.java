@@ -43,7 +43,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
             throw e;
         } catch (Exception e) {
             log.error("Error while opening database", e);
-            throw new NitriteIOException("failed to open database", e);
+            throw new NitriteIOException("Failed to open database", e);
         }
     }
 
@@ -84,7 +84,7 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
             eventBus.close();
         } catch (Exception e) {
             log.error("Error while closing the database", e);
-            throw new NitriteIOException("failed to close database", e);
+            throw new NitriteIOException("Failed to close database", e);
         }
     }
 
@@ -134,17 +134,17 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
                                                                                Class<?> keyType,
                                                                                Class<?> valueType) {
-        throw new InvalidOperationException("rtree not supported on rocksdb store");
+        throw new InvalidOperationException("Rtree not supported on rocksdb store");
     }
 
     @Override
     public void closeRTree(String rTreeName) {
-        throw new InvalidOperationException("rtree not supported on rocksdb store");
+        throw new InvalidOperationException("Rtree not supported on rocksdb store");
     }
 
     @Override
     public void removeRTree(String mapName) {
-        throw new InvalidOperationException("rtree not supported on rocksdb store");
+        throw new InvalidOperationException("Rtree not supported on rocksdb store");
     }
 
     @Override

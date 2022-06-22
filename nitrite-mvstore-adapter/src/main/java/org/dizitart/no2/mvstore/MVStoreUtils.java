@@ -48,7 +48,7 @@ class MVStoreUtils {
             testForMigration(store);
         } catch (IllegalStateException ise) {
             if (ise.getMessage().contains("file is locked")) {
-                throw new NitriteIOException("database is already opened in other process");
+                throw new NitriteIOException("Database is already opened in other process");
             }
 
             if (dbFile != null) {
@@ -71,24 +71,24 @@ class MVStoreUtils {
                         }
                     } else {
                         if (storeConfig.isReadOnly()) {
-                            throw new NitriteIOException("cannot create readonly database", ise);
+                            throw new NitriteIOException("Cannot create readonly database", ise);
                         }
                     }
                 } catch (InvalidOperationException | NitriteIOException ex) {
                     throw ex;
                 } catch (Exception e) {
-                    throw new NitriteIOException("database file is corrupted", e);
+                    throw new NitriteIOException("Database file is corrupted", e);
                 }
             } else {
-                throw new NitriteIOException("unable to create in-memory database", ise);
+                throw new NitriteIOException("Unable to create in-memory database", ise);
             }
         } catch (IllegalArgumentException iae) {
             if (dbFile != null) {
                 if (!dbFile.getParentFile().exists()) {
-                    throw new NitriteIOException("directory " + dbFile.getParent() + " does not exists", iae);
+                    throw new NitriteIOException("Directory " + dbFile.getParent() + " does not exists", iae);
                 }
             }
-            throw new NitriteIOException("unable to create database file", iae);
+            throw new NitriteIOException("Unable to create database file", iae);
         } finally {
             if (store != null) {
                 store.setRetentionTime(0);
@@ -130,7 +130,7 @@ class MVStoreUtils {
 
         if (mvStoreConfig.isReadOnly()) {
             if (isNullOrEmpty(mvStoreConfig.filePath())) {
-                throw new InvalidOperationException("unable create readonly in-memory database");
+                throw new InvalidOperationException("Unable create readonly in-memory database");
             }
             builder = builder.readOnly();
         }
@@ -192,14 +192,14 @@ class MVStoreUtils {
         File backupFile = new File(orgFile.getPath() + "_old");
         if (orgFile.renameTo(backupFile)) {
             if (!newFile.renameTo(orgFile)) {
-                throw new NitriteIOException("could not rename new data file");
+                throw new NitriteIOException("Could not rename new data file");
             }
 
             if (!backupFile.delete()) {
-                throw new NitriteIOException("could not delete backup data file");
+                throw new NitriteIOException("Could not delete backup data file");
             }
         } else {
-            throw new NitriteIOException("could not create backup copy of old data file");
+            throw new NitriteIOException("Could not create backup copy of old data file");
         }
     }
 

@@ -73,7 +73,7 @@ class MutatedObjectStream<T> implements RecordStream<T> {
 
         @Override
         public void remove() {
-            throw new InvalidOperationException("remove on a cursor is not supported");
+            throw new InvalidOperationException("Remove on a cursor is not supported");
         }
     }
 }

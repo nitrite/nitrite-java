@@ -79,13 +79,13 @@ public class BoundedStream<Key, Value> implements RecordStream<Pair<Key, Value>>
          */
         public BoundedIterator(final Iterator<? extends T> iterator, final long skip, final long limit) {
             if (iterator == null) {
-                throw new ValidationException("iterator must not be null");
+                throw new ValidationException("Iterator must not be null");
             }
             if (skip < 0) {
-                throw new ValidationException("skip parameter must not be negative.");
+                throw new ValidationException("skip parameter must not be negative");
             }
             if (limit < 0) {
-                throw new ValidationException("limit parameter must not be negative.");
+                throw new ValidationException("limit parameter must not be negative");
             }
 
             this.iterator = iterator;

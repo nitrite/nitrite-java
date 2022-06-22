@@ -61,7 +61,7 @@ class IndexOperations implements AutoCloseable {
             indexDescriptor = indexManager.createIndexDescriptor(fields, indexType);
         } else {
             // if index already there throw
-            throw new IndexingException("index already exists on fields: " + fields);
+            throw new IndexingException("Index already exists on fields: " + fields);
         }
 
         buildIndex(indexDescriptor, false);
@@ -113,7 +113,7 @@ class IndexOperations implements AutoCloseable {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new IndexingException("failed to drop all indices", e);
+                throw new IndexingException("Failed to drop all indices", e);
             }
         }
 

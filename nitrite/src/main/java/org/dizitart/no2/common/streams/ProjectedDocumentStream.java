@@ -115,7 +115,7 @@ public class ProjectedDocumentStream implements RecordStream<Document> {
 
         @Override
         public void remove() {
-            throw new InvalidOperationException("remove on a cursor is not supported");
+            throw new InvalidOperationException("Remove on a cursor is not supported");
         }
 
         private Document project(Document original) {

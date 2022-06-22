@@ -45,7 +45,7 @@ public class Constants {
                 }
             }
         } catch (IOException e) {
-            throw new NitriteIOException("failed to load version information", e);
+            throw new NitriteIOException("Failed to load version information", e);
         }
         NITRITE_VERSION = v;
     }

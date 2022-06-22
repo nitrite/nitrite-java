@@ -220,7 +220,7 @@ class NitriteJsonExporter {
                 return Hex.encodeHexString(data);
             }
         } catch (IOException e) {
-            throw new NitriteIOException("failed to write object", e);
+            throw new NitriteIOException("Failed to write object", e);
         }
     }
 }

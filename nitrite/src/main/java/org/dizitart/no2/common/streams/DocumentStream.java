@@ -85,7 +85,7 @@ public class DocumentStream implements DocumentCursor {
     private void validateKeyValuePair(Pair<String, Object> kvp) {
         if (kvp.getSecond() != null) {
             if (!(kvp.getSecond() instanceof Document)) {
-                throw new ValidationException("projection contains non-null values");
+                throw new ValidationException("Projection contains non-null values");
             } else {
                 validateProjection((Document) kvp.getSecond());
             }
@@ -127,7 +127,7 @@ public class DocumentStream implements DocumentCursor {
 
         @Override
         public void remove() {
-            throw new InvalidOperationException("remove on cursor is not supported");
+            throw new InvalidOperationException("Remove on cursor is not supported");
         }
     }
 }

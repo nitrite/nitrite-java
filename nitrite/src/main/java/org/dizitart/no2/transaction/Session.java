@@ -72,7 +72,7 @@ public class Session implements AutoCloseable {
      */
     public void checkState() {
         if (!active.get()) {
-            throw new TransactionException("this session is not active");
+            throw new TransactionException("This session is not active");
         }
     }
 }

@@ -97,7 +97,7 @@ public class TextIndex implements NitriteIndex {
                 addIndexElement(indexMap, fieldValues, (String) item);
             }
         } else {
-            throw new IndexingException("string data is expected");
+            throw new IndexingException("String data is expected");
         }
     }
 
@@ -129,7 +129,7 @@ public class TextIndex implements NitriteIndex {
                 removeIndexElement(indexMap, fieldValues, (String) item);
             }
         } else {
-            throw new IndexingException("string data is expected");
+            throw new IndexingException("String data is expected");
         }
     }
 
@@ -152,7 +152,7 @@ public class TextIndex implements NitriteIndex {
             textFilter.setTextTokenizer(textTokenizer);
             return textFilter.applyOnTextIndex(indexMap);
         }
-        throw new FilterException("invalid filter found for full-text index");
+        throw new FilterException("Invalid filter found for full-text index");
     }
 
     private NitriteMap<String, List<?>> findIndexMap() {

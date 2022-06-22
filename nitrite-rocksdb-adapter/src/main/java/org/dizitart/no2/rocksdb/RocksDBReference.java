@@ -75,7 +75,7 @@ public class RocksDBReference implements AutoCloseable {
                 return handle;
             } catch (RocksDBException e) {
                 log.error("Error while retrieving column family handle", e);
-                throw new NitriteIOException("failed to obtain column family handle", e);
+                throw new NitriteIOException("Failed to obtain column family handle", e);
             }
         }
     }
@@ -89,7 +89,7 @@ public class RocksDBReference implements AutoCloseable {
                 columnFamilyHandleRegistry.remove(mapName);
             } catch (RocksDBException e) {
                 log.error("Error while dropping column family " + mapName, e);
-                throw new NitriteIOException("failed to drop column family", e);
+                throw new NitriteIOException("Failed to drop column family", e);
             }
         }
     }

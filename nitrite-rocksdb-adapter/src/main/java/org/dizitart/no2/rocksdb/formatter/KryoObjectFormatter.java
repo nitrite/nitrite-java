@@ -59,7 +59,7 @@ public class KryoObjectFormatter implements ObjectFormatter {
             }
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            throw new NitriteIOException("failed to close output stream", e);
+            throw new NitriteIOException("Failed to close output stream", e);
         }
     }
 
@@ -80,7 +80,7 @@ public class KryoObjectFormatter implements ObjectFormatter {
             }
             return byteArrayOutputStream.toByteArray();
         } catch (IOException e) {
-            throw new NitriteIOException("failed to close output stream", e);
+            throw new NitriteIOException("Failed to close output stream", e);
         }
     }
 
@@ -110,7 +110,7 @@ public class KryoObjectFormatter implements ObjectFormatter {
                 return serializer.readKey(kryo, input, type);
             }
         } catch (IOException e) {
-            throw new NitriteIOException("failed to close output stream", e);
+            throw new NitriteIOException("Failed to close output stream", e);
         }
     }
 
@@ -133,7 +133,7 @@ public class KryoObjectFormatter implements ObjectFormatter {
             DefaultTimeKeySerializers.registerAll(this);
         } catch (Exception e) {
             log.error("Error while registering default serializers", e);
-            throw new NitriteIOException("failed to register default serializers", e);
+            throw new NitriteIOException("Failed to register default serializers", e);
         }
     }
 }

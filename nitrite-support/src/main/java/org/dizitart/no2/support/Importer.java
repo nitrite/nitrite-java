@@ -116,7 +116,7 @@ public class Importer {
             try {
                 jsonImporter.importData();
             } catch (IOException | ClassNotFoundException e) {
-                throw new NitriteIOException("error while importing data", e);
+                throw new NitriteIOException("Error while importing data", e);
             }
         }
     }

@@ -129,19 +129,19 @@ public class RepositoryOperations {
                         idField.set(object, id);
                         document.put(objectIdField.getIdFieldName(), nitriteMapper.convert(id, Comparable.class));
                     } else if (!update) {
-                        throw new InvalidIdException("auto generated id should not be set manually");
+                        throw new InvalidIdException("Auto generated id should not be set manually");
                     }
                 } catch (IllegalAccessException iae) {
-                    throw new InvalidIdException("auto generated id value cannot be accessed");
+                    throw new InvalidIdException("Auto generated id value cannot be accessed");
                 }
             }
 
             Object idValue = document.get(objectIdField.getIdFieldName());
             if (idValue == null) {
-                throw new InvalidIdException("id cannot be null");
+                throw new InvalidIdException("Id cannot be null");
             }
             if (idValue instanceof String && isNullOrEmpty((String) idValue)) {
-                throw new InvalidIdException("id value cannot be empty string");
+                throw new InvalidIdException("Id value cannot be empty string");
             }
         }
         return document;
@@ -155,7 +155,7 @@ public class RepositoryOperations {
      */
     public Filter createUniqueFilter(Object object) {
         if (objectIdField == null) {
-            throw new NotIdentifiableException("update operation failed as no id value found for the object");
+            throw new NotIdentifiableException("Update operation failed as no id value found for the object");
         }
 
         Field idField = objectIdField.getField();
@@ -163,11 +163,11 @@ public class RepositoryOperations {
         try {
             Object value = idField.get(object);
             if (value == null) {
-                throw new InvalidIdException("id value cannot be null");
+                throw new InvalidIdException("Id value cannot be null");
             }
             return objectIdField.createUniqueFilter(value, nitriteMapper);
         } catch (IllegalAccessException iae) {
-            throw new InvalidIdException("id field is not accessible");
+            throw new InvalidIdException("Id field is not accessible");
         }
     }
 
@@ -197,10 +197,10 @@ public class RepositoryOperations {
     public <I> Filter createIdFilter(I id) {
         if (objectIdField != null) {
             if (id == null) {
-                throw new InvalidIdException("a null id is not a valid id");
+                throw new InvalidIdException("A null id is not a valid id");
             }
             if (!isCompatibleTypes(id.getClass(), objectIdField.getField().getType())) {
-                throw new InvalidIdException("a value of invalid type is provided as id");
+                throw new InvalidIdException("A value of invalid type is provided as id");
             }
 
             return objectIdField.createUniqueFilter(id, nitriteMapper);
@@ -240,7 +240,7 @@ public class RepositoryOperations {
 
     private void validateCollection() {
         if (collection == null) {
-            throw new ValidationException("repository has not been initialized properly");
+            throw new ValidationException("Repository has not been initialized properly");
         }
     }
 }

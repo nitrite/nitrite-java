@@ -50,7 +50,7 @@ public class DataGateClient {
             createWebSocket(listener);
         } catch (Exception e) {
             log.error("Failed to connect to remote datagate server", e);
-            throw new ReplicationException("remote datagate connection failed", e, true);
+            throw new ReplicationException("Remote datagate connection failed", e, true);
         }
     }
 
@@ -108,7 +108,7 @@ public class DataGateClient {
 
                 builder.hostnameVerifier((hostname, session) -> true);
             } catch (Exception e) {
-                throw new ReplicationException("error while configuring SSLSocketFactory", e, true);
+                throw new ReplicationException("Error while configuring SSLSocketFactory", e, true);
             }
         }
 

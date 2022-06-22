@@ -79,15 +79,15 @@ public class UserAuthenticationService {
                     byte[] expectedHash = userCredential.getPasswordHash();
 
                     if (notExpectedPassword(password.toCharArray(), salt, expectedHash)) {
-                        throw new NitriteSecurityException("username or password is invalid");
+                        throw new NitriteSecurityException("Username or password is invalid");
                     }
                 } else {
-                    throw new NitriteSecurityException("username or password is invalid");
+                    throw new NitriteSecurityException("Username or password is invalid");
                 }
             }
         } else if (existing) {
             if (store.hasMap(USER_MAP)) {
-                throw new NitriteSecurityException("username or password is invalid");
+                throw new NitriteSecurityException("Username or password is invalid");
             }
         }
     }
@@ -113,12 +113,12 @@ public class UserAuthenticationService {
                 byte[] expectedHash = credential.getPasswordHash();
 
                 if (notExpectedPassword(oldPassword.asString().toCharArray(), salt, expectedHash)) {
-                    throw new NitriteSecurityException("username or password is invalid");
+                    throw new NitriteSecurityException("Username or password is invalid");
                 }
             }
         } else {
             if (store.hasMap(USER_MAP)) {
-                throw new NitriteSecurityException("cannot add new credentials");
+                throw new NitriteSecurityException("Cannot add new credentials");
             }
         }
 
@@ -150,7 +150,7 @@ public class UserAuthenticationService {
             return skf.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Error while hashing password", e);
-            throw new NitriteSecurityException("error while hashing a password: "
+            throw new NitriteSecurityException("Error while hashing a password: "
                 + e.getMessage());
         } finally {
             spec.clearPassword();

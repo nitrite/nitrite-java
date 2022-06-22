@@ -98,10 +98,10 @@ public class IndexScanner {
                 }
             } else {
                 // filter is not comparable filter, so index scanning can not continue
-                throw new FilterException("index scan is not supported for " + comparableFilter.getClass().getName());
+                throw new FilterException("Index scan is not supported for non comparable filter");
             }
         } else {
-            // if no more filter is left, get all terminal nitrite ids from
+            // if no more filter left, get all terminal nitrite ids from
             // index map and return them in the order.
             List<NitriteId> terminalResult = indexMap.getTerminalNitriteIds();
             nitriteIds.addAll(terminalResult);

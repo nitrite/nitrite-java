@@ -163,7 +163,7 @@ class NitriteDatabase implements Nitrite {
         } catch (NitriteIOException e) {
             throw e;
         } catch (Throwable error) {
-            throw new NitriteIOException("error while shutting down nitrite", error);
+            throw new NitriteIOException("Error while shutting down nitrite", error);
         }
     }
 
@@ -174,7 +174,7 @@ class NitriteDatabase implements Nitrite {
             try {
                 store.commit();
             } catch (Exception e) {
-                throw new NitriteIOException("failed to commit changes", e);
+                throw new NitriteIOException("Failed to commit changes", e);
             }
             log.debug("Unsaved changes committed successfully.");
         }
@@ -230,7 +230,7 @@ class NitriteDatabase implements Nitrite {
                     store.close();
                 } catch (Exception ex) {
                     log.error("Error while closing the database", ex);
-                    throw new NitriteIOException("failed to close database", ex);
+                    throw new NitriteIOException("Failed to close database", ex);
                 }
             }
             throw e;
@@ -241,10 +241,10 @@ class NitriteDatabase implements Nitrite {
                     store.close();
                 } catch (Exception ex) {
                     log.error("Error while closing the database");
-                    throw new NitriteIOException("failed to close database", ex);
+                    throw new NitriteIOException("Failed to close database", ex);
                 }
             }
-            throw new NitriteIOException("failed to initialize database", e);
+            throw new NitriteIOException("Failed to initialize database", e);
         }
     }
 

@@ -281,27 +281,27 @@ public class ReplicaBuilder {
 
     private void validateBuilder() {
         if (isNullOrEmpty(remoteHost)) {
-            throw new ReplicationException("remote host is a mandatory field");
+            throw new ReplicationException("Remote host is a mandatory field");
         }
 
         if (remotePort == null) {
-            throw new ReplicationException("remote port is a mandatory field");
+            throw new ReplicationException("Remote port is a mandatory field");
         }
 
         if (isNullOrEmpty(tenant)) {
-            throw new ReplicationException("tenant id is a mandatory field");
+            throw new ReplicationException("Tenant id is a mandatory field");
         }
 
         if (db == null) {
-            throw new ReplicationException("database is a mandatory field");
+            throw new ReplicationException("Database is a mandatory field");
         }
 
         if (collection == null || isNullOrEmpty(collection.getName())) {
-            throw new ReplicationException("collection or repository is a mandatory field");
+            throw new ReplicationException("Collection or repository is a mandatory field");
         }
 
         if (isNullOrEmpty(userName)) {
-            throw new ReplicationException("username is a mandatory field");
+            throw new ReplicationException("Username is a mandatory field");
         }
     }
 }

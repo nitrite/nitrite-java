@@ -45,7 +45,7 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
 
     @Override
     public void commit() {
-        throw new InvalidOperationException("call commit on transaction");
+        throw new InvalidOperationException("Call commit on transaction");
     }
 
     @Override

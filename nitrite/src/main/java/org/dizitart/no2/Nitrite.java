@@ -254,7 +254,7 @@ public interface Nitrite extends AutoCloseable {
 
         for (String reservedName : RESERVED_NAMES) {
             if (name.contains(reservedName)) {
-                throw new ValidationException("name cannot contain " + reservedName);
+                throw new ValidationException("Name cannot contain " + reservedName);
             }
         }
     }
@@ -264,7 +264,7 @@ public interface Nitrite extends AutoCloseable {
      */
     default void checkOpened() {
         if (getStore() == null || getStore().isClosed()) {
-            throw new NitriteIOException("store is closed");
+            throw new NitriteIOException("Store is closed");
         }
     }
 }
