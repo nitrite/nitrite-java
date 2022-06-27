@@ -44,7 +44,7 @@ public class StoreMetaData implements MetaData {
     }
 
     /**
-     * Gets the database info ina document.
+     * Gets the database info in a document.
      *
      * @return the info
      */

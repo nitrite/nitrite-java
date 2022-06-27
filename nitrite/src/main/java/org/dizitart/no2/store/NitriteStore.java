@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Represents a storage for Nitrite database.
+ * Represents a storage interface for Nitrite database.
  *
  * @param <Config> the type parameter
  * @author Anindya Chatterjee
@@ -40,7 +40,7 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin 
     void openOrCreate();
 
     /**
-     * Checks whether this store is closed for further modification.
+     * Checks whether this store is closed.
      *
      * @return <code>true</code> if closed; <code>false</code> otherwise.
      */

@@ -173,11 +173,11 @@ public class ValidationUtils {
 
     private static void validateStringArrayItem(Object value, String field) {
         if (!(value instanceof String) && (value instanceof Iterable || value.getClass().isArray())) {
-            throw new InvalidOperationException("Nested array index on iterable field " + field + " is not supported");
+            throw new InvalidOperationException("Nested iterables are not supported");
         }
 
         if (!(value instanceof String)) {
-            throw new IndexingException("Cannot index on an array field containing non string values " + field);
+            throw new IndexingException("Each value in the iterable field " + field + " must be a string");
         }
     }
 

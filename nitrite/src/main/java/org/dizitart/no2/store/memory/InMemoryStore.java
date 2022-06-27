@@ -138,7 +138,7 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     private void initEventBus() {
         if (getStoreConfig().eventListeners() != null) {
             for (StoreEventListener eventListener : getStoreConfig().eventListeners()) {
-                eventBus.register(eventListener);
+                subscribe(eventListener);
             }
         }
     }

@@ -2,6 +2,7 @@ package org.dizitart.no2.store.memory;
 
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.NitriteRTree;
 
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The in-memory {@link NitriteRTree}.
@@ -21,16 +23,21 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {
     private final Map<SpatialKey, Key> backingMap;
+    private final AtomicBoolean droppedFlag;
+    private final AtomicBoolean closedFlag;
 
     /**
      * Instantiates a new {@link InMemoryRTree}.
      */
     public InMemoryRTree() {
         this.backingMap = new ConcurrentHashMap<>();
+        this.closedFlag = new AtomicBoolean(false);
+        this.droppedFlag = new AtomicBoolean(false);
     }
 
     @Override
     public void add(Key key, NitriteId nitriteId) {
+        checkOpened();
         if (nitriteId != null && nitriteId.getIdValue() != null) {
             SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
             backingMap.put(spatialKey, key);
@@ -39,6 +46,7 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
 
     @Override
     public void remove(Key key, NitriteId nitriteId) {
+        checkOpened();
         if (nitriteId != null && nitriteId.getIdValue() != null) {
             SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
             backingMap.remove(spatialKey);
@@ -47,6 +55,7 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
 
     @Override
     public RecordStream<NitriteId> findIntersectingKeys(Key key) {
+        checkOpened();
         SpatialKey spatialKey = getKey(key, 0L);
         Set<NitriteId> set = new HashSet<>();
 
@@ -61,6 +70,7 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
 
     @Override
     public RecordStream<NitriteId> findContainedKeys(Key key) {
+        checkOpened();
         SpatialKey spatialKey = getKey(key, 0L);
         Set<NitriteId> set = new HashSet<>();
 
@@ -71,6 +81,35 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
         }
 
         return RecordStream.fromIterable(set);
+    }
+
+    @Override
+    public long size() {
+        checkOpened();
+        return backingMap.size();
+    }
+
+    @Override
+    public void close() {
+        closedFlag.compareAndSet(false, true);
+    }
+
+    @Override
+    public void clear() {
+        checkOpened();
+        backingMap.clear();
+    }
+
+    @Override
+    public void drop() {
+        checkOpened();
+        droppedFlag.compareAndSet(false, true);
+        backingMap.clear();
+    }
+
+    private SpatialKey getKey(Key key, long id) {
+        return new SpatialKey(id, key.getMinX(),
+            key.getMaxX(), key.getMinY(), key.getMaxY());
     }
 
     private boolean isOverlap(SpatialKey a, SpatialKey b) {
@@ -97,29 +136,14 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
         return true;
     }
 
-    @Override
-    public long size() {
-        return backingMap.size();
-    }
+    private void checkOpened() {
+        if (closedFlag.get()) {
+            throw new InvalidOperationException("RTreeMap is closed");
+        }
 
-    private SpatialKey getKey(Key key, long id) {
-        return new SpatialKey(id, key.getMinX(),
-            key.getMaxX(), key.getMinY(), key.getMaxY());
-    }
-
-    @Override
-    public void close() {
-
-    }
-
-    @Override
-    public void clear() {
-        backingMap.clear();
-    }
-
-    @Override
-    public void drop() {
-        backingMap.clear();
+        if (droppedFlag.get()) {
+            throw new InvalidOperationException("RTreeMap is dropped");
+        }
     }
 
     /**

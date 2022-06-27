@@ -47,7 +47,7 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
     }
 
     /**
-     * Alerts about an {@link StoreEvents} to all subscribed {@link StoreEventListener}s.
+     * Alerts about a {@link StoreEvents} to all subscribed {@link StoreEventListener}s.
      *
      * @param eventType the event type
      */
