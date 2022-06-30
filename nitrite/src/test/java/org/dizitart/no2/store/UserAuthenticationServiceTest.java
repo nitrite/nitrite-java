@@ -17,71 +17,33 @@
 
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
-
-import static org.junit.Assert.assertThrows;
 
 public class UserAuthenticationServiceTest {
     @Test
     public void testConstructor() {
-        // TODO: This test is incomplete.
-        //   Reason: Nothing to assert: the constructed class does not have observers (e.g. getters or public fields).
-        //   Add observers (e.g. getters or public fields) to the class.
-        //   See https://diff.blue/R002
-
         new UserAuthenticationService(null);
     }
 
     @Test
-    public void testAuthenticate() {
-        assertThrows(NitriteSecurityException.class,
-            () -> (new UserAuthenticationService(new InMemoryStore())).authenticate("janedoe", "iloveyou", true));
-    }
-
-    @Test
     public void testAuthenticate2() {
-        // TODO: This test is incomplete.
-        //   Reason: No meaningful assertions found.
-        //   To help Diffblue Cover to find assertions, please add getters to the
-        //   class under test that return fields written by the method under test.
-        //   See https://diff.blue/R004
-
-        (new UserAuthenticationService(new InMemoryStore())).authenticate("", "iloveyou", true);
+        (new UserAuthenticationService(new InMemoryStore())).authenticate("", "iloveyou");
     }
 
     @Test
     public void testAuthenticate3() {
-        // TODO: This test is incomplete.
-        //   Reason: No meaningful assertions found.
-        //   To help Diffblue Cover to find assertions, please add getters to the
-        //   class under test that return fields written by the method under test.
-        //   See https://diff.blue/R004
-
-        (new UserAuthenticationService(new InMemoryStore())).authenticate("janedoe", "", true);
+        (new UserAuthenticationService(new InMemoryStore())).authenticate("janedoe", "");
     }
 
     @Test
     public void testAuthenticate4() {
-        // TODO: This test is incomplete.
-        //   Reason: No meaningful assertions found.
-        //   To help Diffblue Cover to find assertions, please add getters to the
-        //   class under test that return fields written by the method under test.
-        //   See https://diff.blue/R004
-
-        (new UserAuthenticationService(new InMemoryStore())).authenticate("janedoe", "iloveyou", false);
+        (new UserAuthenticationService(new InMemoryStore())).authenticate("janedoe", "iloveyou");
     }
 
     @Test
     public void testAuthenticate5() {
-        // TODO: This test is incomplete.
-        //   Reason: No meaningful assertions found.
-        //   To help Diffblue Cover to find assertions, please add getters to the
-        //   class under test that return fields written by the method under test.
-        //   See https://diff.blue/R004
-
-        (new UserAuthenticationService(new InMemoryStore())).authenticate("", "iloveyou", false);
+        (new UserAuthenticationService(new InMemoryStore())).authenticate("", "iloveyou");
     }
 }
 

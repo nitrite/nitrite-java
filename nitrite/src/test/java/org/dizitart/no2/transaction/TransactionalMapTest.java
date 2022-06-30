@@ -435,7 +435,7 @@ public class TransactionalMapTest {
         transactionalMap.drop();
         assertTrue(transactionalMap.entries().toList().isEmpty());
         assertEquals(0L, transactionalMap.size());
-        assertEquals(4, transactionalMap.getAttributes().getAttributes().size());
+        assertNull(transactionalMap.getAttributes());
     }
 
     @Test

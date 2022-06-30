@@ -119,6 +119,7 @@ class IndexOperations implements AutoCloseable {
 
         indexManager.dropIndexMeta();
         indexBuildTracker.clear();
+        indexManager.close();
 
         // recreate index manager to discard old native resources
         // special measure for RocksDB adapter

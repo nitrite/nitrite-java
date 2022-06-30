@@ -345,11 +345,21 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
+    public boolean isDropped() {
+        return droppedFlag.get();
+    }
+
+    @Override
     public void close() {
         if (!closedFlag.get() && !droppedFlag.get()) {
             closedFlag.compareAndSet(false, true);
             store.closeMap(getName());
         }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closedFlag.get();
     }
 
     private void initialize() {

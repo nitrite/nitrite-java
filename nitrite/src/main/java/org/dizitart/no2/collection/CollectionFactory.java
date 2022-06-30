@@ -83,25 +83,24 @@ public class CollectionFactory {
 
     private NitriteCollection createCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalog) {
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
-        NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name, NitriteId.class, Document.class);
-        NitriteCollection collection = new DefaultNitriteCollection(name, nitriteMap, nitriteConfig, lockService);
 
         if (writeCatalog) {
             // ignore repository request
             if (store.getRepositoryRegistry().contains(name)) {
-                nitriteMap.close();
-                collection.close();
                 throw new ValidationException("A repository with same name already exists");
             }
 
             for (Set<String> set : store.getKeyedRepositoryRegistry().values()) {
                 if (set.contains(name)) {
-                    nitriteMap.close();
-                    collection.close();
                     throw new ValidationException("A keyed repository with same name already exists");
                 }
             }
+        }
 
+        NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name, NitriteId.class, Document.class);
+        NitriteCollection collection = new DefaultNitriteCollection(name, nitriteMap, nitriteConfig, lockService);
+
+        if (writeCatalog) {
             collectionMap.put(name, collection);
             StoreCatalog storeCatalog = store.getCatalog();
             storeCatalog.writeCollectionEntry(name);

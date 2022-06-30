@@ -55,7 +55,7 @@ public class NitriteSecurityNegativeTest {
         assertEquals(dbCollection.find().size(), 1);
     }
 
-    @Test(expected = NitriteException.class)
+    @Test
     public void testOpenUnsecuredWithCredential() {
         db = createDb(fileName);
         NitriteCollection dbCollection = db.getCollection("test");

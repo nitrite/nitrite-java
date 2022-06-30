@@ -64,13 +64,6 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public void clear() {
-        checkOpened();
-        backingMap.clear();
-        updateLastModifiedTime();
-    }
-
-    @Override
     public String getName() {
         return mapName;
     }
@@ -178,15 +171,34 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void drop() {
-        checkOpened();
-        droppedFlag.compareAndSet(false, true);
-        clear();
-        getStore().removeMap(mapName);
+        if (!droppedFlag.get()) {
+            backingMap.clear();
+            getStore().removeMap(mapName);
+            droppedFlag.compareAndSet(false, true);
+            closedFlag.compareAndSet(false, true);
+        }
+    }
+
+    @Override
+    public boolean isDropped() {
+        return droppedFlag.get();
     }
 
     @Override
     public void close() {
         closedFlag.compareAndSet(false, true);
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closedFlag.get();
+    }
+
+    @Override
+    public void clear() {
+        checkOpened();
+        backingMap.clear();
+        updateLastModifiedTime();
     }
 
     private RecordStream<Pair<Key, Value>> getStream(NavigableMap<Key, Value> primaryMap) {

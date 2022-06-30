@@ -85,7 +85,12 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     @SuppressWarnings("unchecked")
     public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
         if (nitriteMapRegistry.containsKey(mapName)) {
-            return (InMemoryMap<Key, Value>) nitriteMapRegistry.get(mapName);
+            NitriteMap<Key, Value> nitriteMap = (NitriteMap<Key, Value>) nitriteMapRegistry.get(mapName);
+            if (nitriteMap.isClosed()) {
+                nitriteMapRegistry.remove(mapName);
+            } else {
+                return nitriteMap;
+            }
         }
 
         NitriteMap<Key, Value> nitriteMap = new InMemoryMap<>(mapName, this);
@@ -97,19 +102,23 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     @Override
     public void closeMap(String mapName) {
         // nothing to close as it is volatile map, moreover,
-        // removing it form registry means loosing the map
+        // removing it from registry means losing the map
     }
 
     @Override
     public void closeRTree(String rTreeName) {
         // nothing to close as it is volatile map, moreover,
-        // removing it form registry means loosing the map
+        // removing it from registry means losing the map
     }
 
     @Override
     public void removeMap(String mapName) {
         if (nitriteMapRegistry.containsKey(mapName)) {
-            nitriteMapRegistry.get(mapName).clear();
+            NitriteMap<?, ?> nitriteMap = nitriteMapRegistry.get(mapName);
+            if (!nitriteMap.isClosed() && !nitriteMap.isDropped()) {
+                nitriteMap.clear();
+                nitriteMap.close();
+            }
             nitriteMapRegistry.remove(mapName);
             getCatalog().remove(mapName);
         }

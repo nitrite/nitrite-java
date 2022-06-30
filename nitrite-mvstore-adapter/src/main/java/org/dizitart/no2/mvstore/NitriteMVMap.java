@@ -196,10 +196,20 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
+    public boolean isDropped() {
+        return droppedFlag.get();
+    }
+
+    @Override
     public void close() {
         if (!closedFlag.get() && !droppedFlag.get()) {
             closedFlag.compareAndSet(false, true);
             nitriteStore.closeMap(getName());
         }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closedFlag.get();
     }
 }

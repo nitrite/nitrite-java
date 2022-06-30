@@ -1,5 +1,6 @@
 package org.dizitart.no2.store.memory;
 
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.Test;
 
@@ -333,7 +334,7 @@ public class InMemoryMapTest {
         assertFalse(inMemoryMap.isEmpty());
     }
 
-    @Test
+    @Test(expected = InvalidOperationException.class)
     public void testDrop() {
         InMemoryMap<Object, Object> inMemoryMap = new InMemoryMap<>("Map Name", new InMemoryStore());
         inMemoryMap.put("Key", "Value");
@@ -342,7 +343,7 @@ public class InMemoryMapTest {
         assertEquals(4, inMemoryMap.getAttributes().getAttributes().size());
     }
 
-    @Test
+    @Test(expected = InvalidOperationException.class)
     public void testDrop2() {
         InMemoryMap<Object, Object> inMemoryMap = new InMemoryMap<>("42", new InMemoryStore());
         inMemoryMap.put("Key", "Value");
@@ -351,7 +352,7 @@ public class InMemoryMapTest {
         assertEquals(4, inMemoryMap.getAttributes().getAttributes().size());
     }
 
-    @Test
+    @Test(expected = InvalidOperationException.class)
     public void testDrop3() {
         InMemoryMap<Object, Object> inMemoryMap = new InMemoryMap<>("Map Name", new InMemoryStore());
         inMemoryMap.drop();
@@ -361,12 +362,6 @@ public class InMemoryMapTest {
 
     @Test
     public void testClose() {
-        // TODO: This test is incomplete.
-        //   Reason: No meaningful assertions found.
-        //   To help Diffblue Cover to find assertions, please add getters to the
-        //   class under test that return fields written by the method under test.
-        //   See https://diff.blue/R004
-
         (new InMemoryMap<>("Map Name", null)).close();
     }
 

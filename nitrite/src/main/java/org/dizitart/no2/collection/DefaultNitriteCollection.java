@@ -303,11 +303,11 @@ class DefaultNitriteCollection implements NitriteCollection {
             checkOpened();
 
             if (collectionOperations != null) {
-                // close collection and indexes
-                collectionOperations.close();
-
                 // drop collection and indexes
                 collectionOperations.dropCollection();
+
+                // close collection and indexes
+//                collectionOperations.close();
             }
 
             // set all reference to null
@@ -324,12 +324,22 @@ class DefaultNitriteCollection implements NitriteCollection {
         isDropped = true;
     }
 
+    public boolean isDropped() {
+        try {
+            readLock.lock();
+            return isDropped || nitriteMap == null || nitriteMap.isDropped();
+        } finally {
+            readLock.unlock();
+        }
+    }
+
     public boolean isOpen() {
         try {
             readLock.lock();
-            return nitriteStore != null && !nitriteStore.isClosed() && !isDropped;
+            return nitriteStore != null && !nitriteStore.isClosed()
+                && !isDropped && !nitriteMap.isClosed() && !nitriteMap.isDropped();
         } catch (Exception e) {
-            throw new NitriteIOException("Failed to close the database", e);
+            throw new NitriteIOException("Failed to check the collection state", e);
         } finally {
             readLock.unlock();
         }

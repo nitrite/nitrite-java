@@ -57,9 +57,9 @@ public class UserAuthenticationService {
      *
      * @param username the username
      * @param password the password
-     * @param existing indicates if authentication data is already existing
      */
-    public void authenticate(String username, String password, boolean existing) {
+    public void authenticate(String username, String password) {
+        boolean existing = store.hasMap(USER_MAP);
         if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
             if (!existing) {
                 byte[] salt = getNextSalt();
@@ -86,9 +86,7 @@ public class UserAuthenticationService {
                 }
             }
         } else if (existing) {
-            if (store.hasMap(USER_MAP)) {
-                throw new NitriteSecurityException("Username or password is invalid");
-            }
+            throw new NitriteSecurityException("Username or password is invalid");
         }
     }
 
@@ -100,8 +98,7 @@ public class UserAuthenticationService {
      * @param oldPassword the old password
      * @param newPassword the new password
      */
-    public void addOrUpdatePassword(boolean update, String username,
-                                           SecureString oldPassword, SecureString newPassword) {
+    public void addOrUpdatePassword(boolean update, String username, SecureString oldPassword, SecureString newPassword) {
         NitriteMap<String, UserCredential> userMap = null;
 
         if (update) {
@@ -150,8 +147,7 @@ public class UserAuthenticationService {
             return skf.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Error while hashing password", e);
-            throw new NitriteSecurityException("Error while hashing a password: "
-                + e.getMessage());
+            throw new NitriteSecurityException("Error while hashing a password: " + e.getMessage());
         } finally {
             spec.clearPassword();
         }

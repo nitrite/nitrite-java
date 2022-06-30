@@ -79,7 +79,12 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     @SuppressWarnings("unchecked")
     public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
         if (mapRegistry.containsKey(mapName)) {
-            return (NitriteMap<Key, Value>) mapRegistry.get(mapName);
+            NitriteMap<Key, Value> nitriteMap = (NitriteMap<Key, Value>) mapRegistry.get(mapName);
+            if (nitriteMap.isClosed()) {
+                mapRegistry.remove(mapName);
+            } else {
+                return (NitriteMap<Key, Value>) mapRegistry.get(mapName);
+            }
         }
 
         NitriteMap<Key, Value> primaryMap = null;
