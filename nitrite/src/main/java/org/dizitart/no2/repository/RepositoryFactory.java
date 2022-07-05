@@ -116,7 +116,7 @@ public class RepositoryFactory {
             }
             repositoryMap.clear();
         } catch (Exception e) {
-            throw new NitriteIOException("Failed to close an object repository", e);
+            throw new NitriteIOException("Failed to clear an object repository", e);
         } finally {
             lock.unlock();
         }
@@ -127,7 +127,7 @@ public class RepositoryFactory {
         NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
         if (nitriteMapper.isValueType(type)) {
-            throw new ValidationException("A value type cannot be used to create repository");
+            throw new ValidationException("Cannot create a repository for a value type");
         }
 
         if (store.getCollectionNames().contains(collectionName)) {

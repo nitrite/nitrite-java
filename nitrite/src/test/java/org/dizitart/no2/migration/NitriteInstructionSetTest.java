@@ -23,11 +23,11 @@ import java.util.LinkedList;
 
 import static org.junit.Assert.assertSame;
 
-public class NitriteInstructionsTest {
+public class NitriteInstructionSetTest {
     @Test
     public void testConstructor() {
         LinkedList<MigrationStep> migrationStepList = new LinkedList<>();
-        assertSame(migrationStepList, (new NitriteInstructions(migrationStepList)).getMigrationSteps());
+        assertSame(migrationStepList, (new NitriteInstructionSet(migrationStepList)).getMigrationSteps());
     }
 }
 

@@ -6,16 +6,16 @@ import lombok.Getter;
 import java.util.Queue;
 
 /**
- * Default implementation of {@link Instructions}.
+ * Default implementation of {@link InstructionSet}.
  *
  * @author Anindya Chatterjee
  * @since 4.0
  */
-class NitriteInstructions implements Instructions {
+class NitriteInstructionSet implements InstructionSet {
     @Getter(AccessLevel.PACKAGE)
     private final Queue<MigrationStep> migrationSteps;
 
-    NitriteInstructions(Queue<MigrationStep> migrationSteps) {
+    NitriteInstructionSet(Queue<MigrationStep> migrationSteps) {
         this.migrationSteps = migrationSteps;
     }
 

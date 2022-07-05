@@ -26,7 +26,7 @@ import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.migration.Instructions;
+import org.dizitart.no2.migration.InstructionSet;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.migration.TypeConverter;
 import org.dizitart.no2.mvstore.MVStoreModule;
@@ -96,7 +96,7 @@ public class MigrationTest {
 
         Migration migration = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
                 instruction.forDatabase()
                     .addPassword("test-user", "test-password");
 
@@ -153,7 +153,7 @@ public class MigrationTest {
 
         Migration migration = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
                 instruction.forDatabase()
                     .addPassword("test-user", "test-password");
 
@@ -184,11 +184,11 @@ public class MigrationTest {
 
         migration = new Migration(2, 3) {
             @Override
-            public void migrate(Instructions instructions) {
-                instructions.forDatabase()
+            public void migrate(InstructionSet instructionSet) {
+                instructionSet.forDatabase()
                     .changePassword("test-user", "test-password", "password");
 
-                instructions.forCollection("testCollectionMigrate")
+                instructionSet.forCollection("testCollectionMigrate")
                     .dropIndex("firstName")
                     .deleteField("bloodGroup")
                     .addField("name", document -> faker.name().fullName())
@@ -235,7 +235,7 @@ public class MigrationTest {
 
         Migration migration = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
 
                 instruction.forCollection("test")
                     .rename("testOpenWithoutSchemaVersion")
@@ -287,7 +287,7 @@ public class MigrationTest {
 
         Migration migration = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
 
                 instruction.forCollection("test")
                     .rename("testDescendingSchema")
@@ -313,9 +313,9 @@ public class MigrationTest {
 
         migration = new Migration(2, Constants.INITIAL_SCHEMA_VERSION) {
             @Override
-            public void migrate(Instructions instructions) {
+            public void migrate(InstructionSet instructionSet) {
 
-                instructions.forCollection("testDescendingSchema")
+                instructionSet.forCollection("testDescendingSchema")
                     .rename("test");
             }
         };
@@ -351,7 +351,7 @@ public class MigrationTest {
 
         Migration migration = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
 
                 instruction.forCollection("test")
                     .rename("testMigrationWithoutVersion")
@@ -392,7 +392,7 @@ public class MigrationTest {
 
         Migration migration = new Migration(1, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
 
                 instruction.forCollection("testWrongSchemaVersionNoMigration")
                     .rename("test")
@@ -421,8 +421,8 @@ public class MigrationTest {
 
         migration = new Migration(2, 3) {
             @Override
-            public void migrate(Instructions instructions) {
-                instructions.forCollection("test")
+            public void migrate(InstructionSet instructionSet) {
+                instructionSet.forCollection("test")
                     .rename("testWrongSchemaVersionNoMigration");
             }
         };
@@ -461,7 +461,7 @@ public class MigrationTest {
 
         Migration migration = new Migration(1, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
 
                 instruction.forCollection("testReOpenAfterMigration")
                     .rename("test")
@@ -529,7 +529,7 @@ public class MigrationTest {
 
         Migration migration1 = new Migration(1, 2) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
 
                 instruction.forCollection("testMultipleMigrations")
                     .rename("test");
@@ -538,7 +538,7 @@ public class MigrationTest {
 
         Migration migration2 = new Migration(2, 3) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
                 instruction.forCollection("test")
                     .addField("fullName", "Dummy Name");
             }
@@ -563,7 +563,7 @@ public class MigrationTest {
 
         Migration migration3 = new Migration(3, 4) {
             @Override
-            public void migrate(Instructions instruction) {
+            public void migrate(InstructionSet instruction) {
                 instruction.forCollection("test")
                     .addField("age", 10);
             }

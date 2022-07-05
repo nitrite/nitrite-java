@@ -62,7 +62,7 @@ public class MigrationManager {
                     throw new NitriteIOException("Failed to close the database", e);
                 }
 
-                throw new MigrationException("Schema version mismatch, as no migration path found from version "
+                throw new MigrationException("Schema version mismatch, no migration path found from version "
                     + storeMetadata.getSchemaVersion() + " to " + nitriteConfig.getSchemaVersion());
             }
 
@@ -88,6 +88,7 @@ public class MigrationManager {
         if (incomingVersion == null) {
             throw new MigrationException("Invalid version provided");
         }
+
         return !existingVersion.equals(incomingVersion);
     }
 

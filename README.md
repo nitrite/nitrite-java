@@ -248,7 +248,7 @@ try (Session session = db.createSession()) {
 
 Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
     @Override
-    public void migrate(Instruction instructions) {
+    public void migrate(InstructionSet instructions) {
         instructions.forDatabase()
             // make a non-secure db to secure db
             .addPassword("test-user", "test-password");
@@ -288,7 +288,7 @@ Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
 
 Migration migration2 = new Migration(2, 3) {
     @Override
-    public void migrate(Instruction instructions) {
+    public void migrate(InstructionSet instructions) {
         instructions.forCollection("test")
             .addField("fullName", "Dummy Name");
     }

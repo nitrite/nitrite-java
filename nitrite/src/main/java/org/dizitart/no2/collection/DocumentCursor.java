@@ -64,8 +64,8 @@ public interface DocumentCursor extends RecordStream<Document> {
     /**
      * Performs a left outer join with a foreign cursor with the specified lookup parameters.
      * <p>
-     * It performs an equality match on the localString to the foreignString from the documents of the foreign cursor.
-     * If an input document does not contain the localString, the join treats the field as having a value of <code>null</code>
+     * It performs an equality match on the localField to the foreignField from the documents of the foreign cursor.
+     * If an input document does not contain the localField, the join treats the field as having a value of <code>null</code>
      * for matching purposes.
      *
      * @param foreignCursor the foreign cursor for the join.

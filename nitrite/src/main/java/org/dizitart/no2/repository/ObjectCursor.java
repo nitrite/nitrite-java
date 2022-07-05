@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.streams.MutatedObjectStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.common.mapper.NitriteMapper;

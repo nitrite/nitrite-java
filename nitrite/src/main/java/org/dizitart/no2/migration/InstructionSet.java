@@ -8,7 +8,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
  * @author Anindya Chatterjee
  * @since 4.0
  */
-public interface Instructions {
+public interface InstructionSet {
     /**
      * Creates a {@link DatabaseInstruction}.
      *

@@ -37,9 +37,9 @@ public abstract class Migration {
     /**
      * Migrates the database using the <code>instructions</code>.
      *
-     * @param instructions the instructions
+     * @param instructionSet the instructions
      */
-    public abstract void migrate(Instructions instructions);
+    public abstract void migrate(InstructionSet instructionSet);
 
     /**
      * Returns the {@link MigrationStep}s as a queue for execution.
@@ -54,7 +54,7 @@ public abstract class Migration {
     }
 
     private void execute() {
-        NitriteInstructions instruction = new NitriteInstructions(migrationSteps);
+        NitriteInstructionSet instruction = new NitriteInstructionSet(migrationSteps);
         migrate(instruction);
         this.executed = true;
     }

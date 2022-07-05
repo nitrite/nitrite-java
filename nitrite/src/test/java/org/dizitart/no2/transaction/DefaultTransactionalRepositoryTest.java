@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.mockito.Mockito.*;
 
 public class DefaultTransactionalRepositoryTest {
@@ -124,9 +125,9 @@ public class DefaultTransactionalRepositoryTest {
     public void testUpdate2() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        when(defaultTransactionalRepository.update(any(), (Object) any(), anyBoolean())).thenReturn(null);
-        defaultTransactionalRepository.update(mock(Filter.class), "Update", true);
-        verify(defaultTransactionalRepository).update(any(), (Object) any(), anyBoolean());
+        when(defaultTransactionalRepository.update(any(), (Object) any(), any())).thenReturn(null);
+        defaultTransactionalRepository.update(mock(Filter.class), "Update", updateOptions(true));
+        verify(defaultTransactionalRepository).update(any(), (Object) any(), any());
     }
 
     @Test

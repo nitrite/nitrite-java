@@ -4,6 +4,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
@@ -97,19 +98,19 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     public WriteResult update(T element, boolean insertIfAbsent) {
         notNull(element, "a null object cannot be used for update");
 
-        return update(operations.createUniqueFilter(element), element, insertIfAbsent);
+        return update(operations.createUniqueFilter(element), element, updateOptions(insertIfAbsent, true));
     }
 
     @Override
-    public WriteResult update(Filter filter, T update, boolean insertIfAbsent) {
+    public WriteResult update(Filter filter, T update, UpdateOptions updateOptions) {
         notNull(update, "a null object cannot be used for update");
 
         Document updateDocument = operations.toDocument(update, true);
-        if (!insertIfAbsent) {
+        if (updateOptions == null || !updateOptions.isInsertIfAbsent()) {
             operations.removeNitriteId(updateDocument);
         }
         return backingCollection.update(operations.asObjectFilter(filter), updateDocument,
-            updateOptions(insertIfAbsent, true));
+            updateOptions);
     }
 
     @Override
@@ -118,7 +119,8 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
         operations.removeNitriteId(update);
         operations.serializeFields(update);
 
-        return backingCollection.update(operations.asObjectFilter(filter), update, updateOptions(false, justOnce));
+        return backingCollection.update(operations.asObjectFilter(filter), update,
+            updateOptions(false, justOnce));
     }
 
     @Override

@@ -27,8 +27,10 @@ public interface RepositoryInstruction extends Instruction {
         migrationStep.setInstructionType(InstructionType.RenameRepository);
         migrationStep.setArguments(new Quartet<>(entityName(), key(), entityName, key));
         addStep(migrationStep);
+
         final RepositoryInstruction parent = this;
 
+        // new instruction set for new repository
         return new RepositoryInstruction() {
             @Override
             public String entityName() {

@@ -17,13 +17,11 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.collection.FindPlan;
-import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 
 /**
- * A collection of {@link NitriteId}s of the database records,
- * as a result of a find operation.
+ * An interface to iterate over {@link ObjectRepository#find()} results.
  *
  * @author Anindya Chatterjee
  * @since 1.0
@@ -37,7 +35,7 @@ public interface Cursor<T> extends RecordStream<T> {
     FindPlan getFindPlan();
 
     /**
-     * Projects the result of one type into an {@link Iterable} of other type.
+     * Projects the result of one type into an {@link Iterable} of another type.
      *
      * @param <P>            the type of the target objects.
      * @param projectionType the projection type.
@@ -48,8 +46,8 @@ public interface Cursor<T> extends RecordStream<T> {
     /**
      * Performs a left outer join with a foreign cursor with the specified lookup parameters.
      * <p>
-     * It performs an equality match on the localString to the foreignString from the objects of the foreign cursor.
-     * If an input object does not contain the localString, the join treats the field as having a value of <code>null</code>
+     * It performs an equality match on the localField to the foreignField from the objects of the foreign cursor.
+     * If an input object does not contain the localField, the join treats the field as having a value of <code>null</code>
      * for matching purposes.
      *
      * @param <Foreign>     the type of the foreign object.

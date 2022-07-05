@@ -16,10 +16,7 @@
 
 package org.dizitart.no2.repository;
 
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.FindOptions;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.events.EventAware;
 import org.dizitart.no2.collection.events.EventType;
@@ -37,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.util.ValidationUtils.containsNull;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -78,9 +76,7 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
     /**
      * Inserts object into this repository. If the object contains a value marked with
      * {@link Id}, then the value will be used as a unique key to identify the object
-     * in the repository. If the object does not contain any value marked with {@link Id},
-     * then nitrite will generate a new {@link NitriteId} and will add it to the document
-     * generated from the object.
+     * in the repository.
      * <p>
      * If any of the value is already indexed in the repository, then after insertion the
      * index will also be updated.
@@ -112,7 +108,7 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
         List<T> itemList = new ArrayList<>();
         itemList.add(object);
 
-        if (others != null && itemList.size() > 0) {
+        if (others != null) {
             Collections.addAll(itemList, others);
         }
 
@@ -141,7 +137,7 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      * @throws ValidationException if the {@code update} object is {@code null}.
      */
     default WriteResult update(Filter filter, T update) {
-        return update(filter, update, false);
+        return update(filter, update, updateOptions(false));
     }
 
     /**
@@ -163,12 +159,12 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
      *
      * @param filter         the filter to apply to select objects from the collection.
      * @param update         the modifications to apply.
-     * @param insertIfAbsent if set to {@code true}, {@code update} object will be inserted if not found.
+     * @param updateOptions  various options for update operation.
      * @return the result of the update operation.
      * @throws ValidationException if the {@code update} object is {@code null}.
      * @throws ValidationException if {@code updateOptions} is {@code null}.
      */
-    WriteResult update(Filter filter, T update, boolean insertIfAbsent);
+    WriteResult update(Filter filter, T update, UpdateOptions updateOptions);
 
     /**
      * Updates object in the repository by setting the field specified in {@code document}.
@@ -328,7 +324,7 @@ public interface ObjectRepository<T> extends PersistentCollection<T> {
     Class<T> getType();
 
     /**
-     * Returns the underlying document collection.
+     * Returns the underlying {@link NitriteCollection} instance.
      *
      * @return the underlying document collection.
      */

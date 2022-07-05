@@ -139,7 +139,7 @@ class Reflector {
         return fields;
     }
 
-    public void filterSynthetics(List<Field> fields) {
+    private void filterSynthetics(List<Field> fields) {
         if (fields == null || fields.isEmpty()) return;
         Iterator<Field> iterator = fields.iterator();
         if (iterator.hasNext()) {
