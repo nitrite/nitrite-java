@@ -125,7 +125,11 @@ public class MappableMapper implements NitriteMapper {
             return (Target) source;
         } else {
             if (Document.class.isAssignableFrom(type)) {
-                return (Target) convertToDocument(source);
+                if (source instanceof Document) {
+                    return (Target) source;
+                } else {
+                    return (Target) convertToDocument(source);
+                }
             } else if (source instanceof Document) {
                 return convertFromDocument((Document) source, type);
             }

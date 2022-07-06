@@ -21,6 +21,7 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
+import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.filters.NitriteFilter;
@@ -102,7 +103,7 @@ public class RepositoryOperations {
         if (others == null || others.length == 0) return null;
         Document[] documents = new Document[others.length];
         for (int i = 0; i < others.length; i++) {
-            documents[i] = toDocument(others[i], false);
+            documents[i] = toDocument(others[i], false); // this method is for insert only
         }
         return documents;
     }
@@ -117,6 +118,9 @@ public class RepositoryOperations {
      */
     public <T> Document toDocument(T object, boolean update) {
         Document document = nitriteMapper.convert(object, Document.class);
+        if (document == null) {
+            throw new ObjectMappingException("Failed to map object to document");
+        }
 
         if (objectIdField != null) {
             Field idField = objectIdField.getField();
@@ -129,6 +133,7 @@ public class RepositoryOperations {
                         idField.set(object, id);
                         document.put(objectIdField.getIdFieldName(), nitriteMapper.convert(id, Comparable.class));
                     } else if (!update) {
+                        // if it is an insert, then we should not allow to insert the document with user provided id
                         throw new InvalidIdException("Auto generated id should not be set manually");
                     }
                 } catch (IllegalAccessException iae) {

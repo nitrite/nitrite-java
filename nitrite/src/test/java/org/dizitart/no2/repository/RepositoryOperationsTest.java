@@ -27,6 +27,7 @@ import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.common.streams.DocumentStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
+import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.filters.Filter;
 import org.junit.Test;
@@ -42,7 +43,7 @@ public class RepositoryOperationsTest {
             () -> new RepositoryOperations(type, new NitriteBuilderTest.CustomNitriteMapper(), null));
     }
 
-    @Test
+    @Test(expected = ObjectMappingException.class)
     public void testToDocuments() {
         Class<?> type = Object.class;
         assertEquals(3,
@@ -61,7 +62,7 @@ public class RepositoryOperationsTest {
             .toDocuments(new Object[]{}));
     }
 
-    @Test
+    @Test(expected = ObjectMappingException.class)
     public void testToDocument() {
         Class<?> type = Object.class;
         assertNull(
