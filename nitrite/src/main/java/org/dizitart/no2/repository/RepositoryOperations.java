@@ -160,7 +160,7 @@ public class RepositoryOperations {
      */
     public Filter createUniqueFilter(Object object) {
         if (objectIdField == null) {
-            throw new NotIdentifiableException("Update operation failed as no id value found for the object");
+            throw new NotIdentifiableException("No id value found for the object");
         }
 
         Field idField = objectIdField.getField();
@@ -202,7 +202,7 @@ public class RepositoryOperations {
     public <I> Filter createIdFilter(I id) {
         if (objectIdField != null) {
             if (id == null) {
-                throw new InvalidIdException("A null id is not a valid id");
+                throw new InvalidIdException("Id cannot be null");
             }
             if (!isCompatibleTypes(id.getClass(), objectIdField.getField().getType())) {
                 throw new InvalidIdException("A value of invalid type is provided as id");
