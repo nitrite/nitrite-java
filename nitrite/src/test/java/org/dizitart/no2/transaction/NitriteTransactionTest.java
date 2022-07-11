@@ -32,7 +32,7 @@ public class NitriteTransactionTest {
         Nitrite nitrite = mock(Nitrite.class);
         when(nitrite.getConfig()).thenReturn(new NitriteConfig());
         doReturn(new TransactionStore<>(new InMemoryStore())).when(nitrite).getStore();
-        assertEquals(State.Active, (new NitriteTransaction(nitrite, new LockService())).getState());
+        assertEquals(TransactionState.Active, (new NitriteTransaction(nitrite, new LockService())).getState());
         verify(nitrite).getConfig();
         verify(nitrite).getStore();
     }

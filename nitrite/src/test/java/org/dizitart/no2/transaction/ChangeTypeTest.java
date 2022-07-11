@@ -24,13 +24,8 @@ import static org.junit.Assert.assertEquals;
 public class ChangeTypeTest {
 
     @Test
-    public void testValueOf3() {
-        assertEquals(ChangeType.AddProcessor, ChangeType.valueOf("AddProcessor"));
-    }
-
-    @Test
     public void testValues() {
-        assertEquals(12, ChangeType.values().length);
+        assertEquals(10, ChangeType.values().length);
     }
 }
 

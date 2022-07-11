@@ -83,7 +83,7 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
             if (nitriteMap.isClosed()) {
                 mapRegistry.remove(mapName);
             } else {
-                return (NitriteMap<Key, Value>) mapRegistry.get(mapName);
+                return nitriteMap;
             }
         }
 
@@ -100,13 +100,13 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     @Override
     public void closeMap(String mapName) {
         // nothing to close as it is volatile map, moreover,
-        // removing it form registry means loosing the map
+        // removing it from registry means losing the map
     }
 
     @Override
     public void closeRTree(String rTreeName) {
         // nothing to close as it is volatile map, moreover,
-        // removing it form registry means loosing the map
+        // removing it from registry means losing the map
     }
 
     @Override

@@ -50,7 +50,7 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
     void addProcessor(Processor processor);
 
     /**
-     * Creates an unique index on the {@code fields}, if not already exists.
+     * Creates a unique index on the {@code fields}, if not already exists.
      *
      * @param fields       the fields to be indexed.
      * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on the field.

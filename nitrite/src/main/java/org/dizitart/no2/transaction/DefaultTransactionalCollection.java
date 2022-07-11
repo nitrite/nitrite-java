@@ -278,11 +278,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
         } finally {
             writeLock.unlock();
         }
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.AddProcessor);
-        journalEntry.setCommit(() -> primary.addProcessor(processor));
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
@@ -431,7 +426,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         List<IndexDescriptor> indexEntries = new ArrayList<>();
 
         JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.DropAllIndices);
+        journalEntry.setChangeType(ChangeType.DropAllIndexes);
         journalEntry.setCommit(() -> {
             indexEntries.addAll(primary.listIndices());
             primary.dropAllIndices();
@@ -595,7 +590,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         AtomicReference<Attributes> original = new AtomicReference<>();
 
         JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.SetAttribute);
+        journalEntry.setChangeType(ChangeType.SetAttributes);
         journalEntry.setCommit(() -> {
             original.set(primary.getAttributes());
             primary.setAttributes(attributes);

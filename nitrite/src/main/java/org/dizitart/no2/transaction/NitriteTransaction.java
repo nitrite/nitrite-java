@@ -39,7 +39,7 @@ class NitriteTransaction implements Transaction {
     @Getter
     private String id;
 
-    private State state;
+    private TransactionState state;
 
     public NitriteTransaction(Nitrite nitrite, LockService lockService) {
         this.nitrite = nitrite;
@@ -152,7 +152,7 @@ class NitriteTransaction implements Transaction {
     @Override
     public synchronized void commit() {
         checkState();
-        this.state = State.PartiallyCommitted;
+        this.state = TransactionState.PartiallyCommitted;
 
         for (Map.Entry<String, TransactionContext> contextEntry : contextMap.entrySet()) {
             String collectionName = contextEntry.getKey();
@@ -184,13 +184,13 @@ class NitriteTransaction implements Transaction {
                     }
                 }
             } catch (TransactionException te) {
-                state = State.Failed;
+                state = TransactionState.Failed;
                 log.error("Error while committing transaction", te);
                 throw te;
             } catch (Exception e) {
-                state = State.Failed;
+                state = TransactionState.Failed;
                 log.error("Error while committing transaction", e);
-                throw new TransactionException("Failed to commit transaction", e);
+                throw new TransactionException("Error committing transaction", e);
             } finally {
                 undoRegistry.put(collectionName, undoLog);
                 transactionContext.getActive().set(false);
@@ -198,13 +198,13 @@ class NitriteTransaction implements Transaction {
             }
         }
 
-        state = State.Committed;
+        state = TransactionState.Committed;
         close();
     }
 
     @Override
     public synchronized void rollback() {
-        this.state = State.Aborted;
+        this.state = TransactionState.Aborted;
 
         for (Map.Entry<String, Stack<UndoEntry>> entry : undoRegistry.entrySet()) {
             String collectionName = entry.getKey();
@@ -233,7 +233,7 @@ class NitriteTransaction implements Transaction {
     @Override
     public synchronized void close() {
         try {
-            state = State.Closed;
+            state = TransactionState.Closed;
             for (TransactionContext context : contextMap.values()) {
                 context.getActive().set(false);
             }
@@ -245,12 +245,11 @@ class NitriteTransaction implements Transaction {
             this.transactionStore.close();
             this.transactionConfig.close();
         } catch (Exception e) {
-            throw new TransactionException("Transaction failed to close", e);
+            throw new TransactionException("Error closing transaction", e);
         }
     }
 
-    @Override
-    public synchronized State getState() {
+    public synchronized TransactionState getState() {
         return state;
     }
 
@@ -270,11 +269,11 @@ class NitriteTransaction implements Transaction {
         this.transactionConfig.autoConfigure();
         this.transactionConfig.initialize();
         this.transactionStore = (TransactionStore<?>) this.transactionConfig.getNitriteStore();
-        this.state = State.Active;
+        this.state = TransactionState.Active;
     }
 
     private void checkState() {
-        if (state != State.Active) {
+        if (state != TransactionState.Active) {
             throw new TransactionException("Transaction is not active");
         }
     }

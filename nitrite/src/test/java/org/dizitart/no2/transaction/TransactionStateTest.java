@@ -21,22 +21,22 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class StateTest {
+public class TransactionStateTest {
     @Test
     public void testValueOf2() {
-        assertEquals(State.Aborted, State.valueOf("Aborted"));
+        assertEquals(TransactionState.Aborted, TransactionState.valueOf("Aborted"));
     }
 
     @Test
     public void testValues() {
-        State[] actualValuesResult = State.values();
+        TransactionState[] actualValuesResult = TransactionState.values();
         assertEquals(6, actualValuesResult.length);
-        assertEquals(State.Active, actualValuesResult[0]);
-        assertEquals(State.PartiallyCommitted, actualValuesResult[1]);
-        assertEquals(State.Committed, actualValuesResult[2]);
-        assertEquals(State.Closed, actualValuesResult[3]);
-        assertEquals(State.Failed, actualValuesResult[4]);
-        assertEquals(State.Aborted, actualValuesResult[5]);
+        assertEquals(TransactionState.Active, actualValuesResult[0]);
+        assertEquals(TransactionState.PartiallyCommitted, actualValuesResult[1]);
+        assertEquals(TransactionState.Committed, actualValuesResult[2]);
+        assertEquals(TransactionState.Closed, actualValuesResult[3]);
+        assertEquals(TransactionState.Failed, actualValuesResult[4]);
+        assertEquals(TransactionState.Aborted, actualValuesResult[5]);
     }
 }
 

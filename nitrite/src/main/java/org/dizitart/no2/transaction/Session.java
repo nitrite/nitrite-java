@@ -57,7 +57,7 @@ public class Session implements AutoCloseable {
     public void close() {
         this.active.compareAndSet(true, false);
         for (Transaction transaction : transactionMap.values()) {
-            if (transaction.getState() != State.Closed) {
+            if (transaction.getState() != TransactionState.Closed) {
                 transaction.rollback();
             }
         }
@@ -72,7 +72,7 @@ public class Session implements AutoCloseable {
      */
     public void checkState() {
         if (!active.get()) {
-            throw new TransactionException("This session is not active");
+            throw new TransactionException("Session is closed");
         }
     }
 }

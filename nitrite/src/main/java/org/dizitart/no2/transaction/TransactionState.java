@@ -6,34 +6,34 @@ package org.dizitart.no2.transaction;
  * @author Anindya Chatterjee
  * @since 4.0
  */
-public enum State {
+public enum TransactionState {
     /**
      * Transaction is active.
      */
     Active,
 
     /**
-     * Transaction is partially committed.
+     * Transaction partially committed.
      */
     PartiallyCommitted,
 
     /**
-     * Transaction is fully committed.
+     * Transaction fully committed.
      */
     Committed,
 
     /**
-     * Transaction is closed.
+     * Transaction closed.
      */
     Closed,
 
     /**
-     * Transaction is failed.
+     * Transaction failed.
      */
     Failed,
 
     /**
-     * Transaction is aborted.
+     * Transaction aborted.
      */
     Aborted,
 }

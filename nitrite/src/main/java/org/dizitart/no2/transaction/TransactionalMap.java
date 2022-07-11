@@ -64,7 +64,7 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         if (result == null) {
             result = primary.get(k);
             if (result instanceof CopyOnWriteArrayList) {
-                // create a deep copy of the list so that it does not effect the original one
+                // create a deep copy of the list so that it does not affect the original one
                 List<?> list = deepCopy((CopyOnWriteArrayList<?>) result);
                 backingMap.put(k, (V) list);
                 result = (V) list;

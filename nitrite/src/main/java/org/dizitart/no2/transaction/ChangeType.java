@@ -45,7 +45,7 @@ enum ChangeType {
     /**
      * Drop all indices.
      */
-    DropAllIndices,
+    DropAllIndexes,
 
     /**
      * Drop collection.
@@ -55,15 +55,5 @@ enum ChangeType {
     /**
      * Set attribute.
      */
-    SetAttribute,
-
-    /**
-     * Add processor
-     * */
-    AddProcessor,
-
-    /**
-     * Remove processor
-     * */
-    RemoveProcessor,
+    SetAttributes,
 }
