@@ -513,7 +513,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
             try {
                 close();
             } catch (Exception e) {
-                throw new NitriteIOException("Failed to close the database", e);
+                throw new NitriteIOException("Failed to close the collection", e);
             }
             return false;
         } else return true;
@@ -633,15 +633,15 @@ class DefaultTransactionalCollection implements NitriteCollection {
         }
 
         if (!primary.isOpen()) {
-            throw new NitriteIOException("Store is closed");
+            throw new TransactionException("Store is closed");
         }
 
         if (isDropped()) {
-            throw new NitriteIOException("Collection has been dropped");
+            throw new TransactionException("Collection is dropped");
         }
 
         if (!transactionContext.getActive().get()) {
-            throw new TransactionException("Transaction is closed");
+            throw new TransactionException("Transaction is not active");
         }
     }
 
@@ -657,7 +657,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
         String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(fieldNames)) {
-            throw new IndexingException("Indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
+            throw new IndexingException("Indexing on fields " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }
 }
