@@ -431,7 +431,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 boolean expectedException = false;
                 try {
                     assertEquals(0, txCol.size());
-                } catch (NitriteIOException e) {
+                } catch (TransactionException e) {
                     expectedException = true;
                 }
                 assertTrue(expectedException);

@@ -2,8 +2,8 @@ package org.dizitart.no2.rocksdb;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.UnknownType;
+import org.dizitart.no2.common.util.SpatialKey;
 import org.dizitart.no2.common.util.StringUtils;
-import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.BoundingBox;
@@ -22,11 +22,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     private final AtomicBoolean closed;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
+
+    private final Map<String, NitriteRTree<?, ?>> nitriteRTreeMapRegistry;
     private RocksDBReference reference;
 
     public RocksDBStore() {
         super();
         nitriteMapRegistry = new ConcurrentHashMap<>();
+        nitriteRTreeMapRegistry = new ConcurrentHashMap<>();
         closed = new AtomicBoolean(true);
     }
 
@@ -131,20 +134,34 @@ public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
                                                                                Class<?> keyType,
                                                                                Class<?> valueType) {
-        throw new InvalidOperationException("Rtree not supported on rocksdb store");
+
+        if (nitriteRTreeMapRegistry.containsKey(rTreeName)) {
+            return (RocksDBRTree<Key, Value>) nitriteRTreeMapRegistry.get(rTreeName);
+        } else {
+            RocksDBMap<SpatialKey, Key> nitriteMap = new RocksDBMap<>(rTreeName, this, this.reference,
+                SpatialKey.class, keyType);
+            RocksDBRTree<Key, Value> nitriteRTree = new RocksDBRTree<>(nitriteMap);
+            nitriteRTreeMapRegistry.put(rTreeName, nitriteRTree);
+            return nitriteRTree;
+        }
     }
 
     @Override
     public void closeRTree(String rTreeName) {
-        throw new InvalidOperationException("Rtree not supported on rocksdb store");
+        if (!StringUtils.isNullOrEmpty(rTreeName)) {
+            nitriteRTreeMapRegistry.remove(rTreeName);
+        }
     }
 
     @Override
     public void removeRTree(String mapName) {
-        throw new InvalidOperationException("Rtree not supported on rocksdb store");
+        reference.dropColumnFamily(mapName);
+        getCatalog().remove(mapName);
+        nitriteRTreeMapRegistry.remove(mapName);
     }
 
     @Override

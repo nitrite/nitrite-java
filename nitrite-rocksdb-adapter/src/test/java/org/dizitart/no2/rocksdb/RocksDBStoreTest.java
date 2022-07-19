@@ -17,11 +17,11 @@
 
 package org.dizitart.no2.rocksdb;
 
-import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteException;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class RocksDBStoreTest {
@@ -46,16 +46,20 @@ public class RocksDBStoreTest {
         RocksDBStore rocksDBStore = new RocksDBStore();
         rocksDBStore.setStoreConfig(rocksDBConfig);
         Class<?> keyType = Object.class;
-        rocksDBStore.openMap("Map Name", keyType, Object.class);
+        rocksDBStore.openMap("MapName", keyType, Object.class);
         verify(rocksDBConfig).objectFormatter();
     }
 
-    @Test
+    @Test(expected = NitriteException.class)
     public void testOpenRTree() {
+        RocksDBConfig rocksDBConfig = mock(RocksDBConfig.class);
+        when(rocksDBConfig.objectFormatter()).thenThrow(new NitriteException("An error occurred"));
+
         RocksDBStore rocksDBStore = new RocksDBStore();
+        rocksDBStore.setStoreConfig(rocksDBConfig);
         Class<?> keyType = Object.class;
-        assertThrows(InvalidOperationException.class,
-                () -> rocksDBStore.openRTree("R Tree Name", keyType, Object.class));
+        rocksDBStore.openRTree("Rtree", keyType, Object.class);
+        verify(rocksDBConfig).objectFormatter();
     }
 }
 

@@ -450,19 +450,10 @@ class DefaultTransactionalCollection implements NitriteCollection {
             writeLock.unlock();
         }
 
-        List<Document> documentList = new ArrayList<>();
-
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.Clear);
-        journalEntry.setCommit(() -> {
-            documentList.addAll(primary.find().toList());
-            primary.clear();
-        });
-        journalEntry.setRollback(() -> {
-            for (Document document : documentList) {
-                primary.insert(document);
-            }
-        });
+        journalEntry.setCommit(primary::clear);
+        journalEntry.setRollback(() -> {}); // can't be rolled back
         transactionContext.getJournal().add(journalEntry);
     }
 
@@ -477,28 +468,10 @@ class DefaultTransactionalCollection implements NitriteCollection {
         }
         isDropped = true;
 
-        List<Document> documentList = new ArrayList<>();
-        List<IndexDescriptor> indexEntries = new ArrayList<>();
-
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.DropCollection);
-        journalEntry.setCommit(() -> {
-            documentList.addAll(primary.find().toList());
-            indexEntries.addAll(primary.listIndices());
-            primary.drop();
-        });
-        journalEntry.setRollback(() -> {
-            NitriteCollection collection = nitrite.getCollection(collectionName);
-
-            for (IndexDescriptor indexDescriptor : indexEntries) {
-                String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
-                collection.createIndex(indexOptions(indexDescriptor.getIndexType()), fieldNames);
-            }
-
-            for (Document document : documentList) {
-                collection.insert(document);
-            }
-        });
+        journalEntry.setCommit(primary::drop);
+        journalEntry.setRollback(() -> {}); // can't be rolled back
         transactionContext.getJournal().add(journalEntry);
     }
 
