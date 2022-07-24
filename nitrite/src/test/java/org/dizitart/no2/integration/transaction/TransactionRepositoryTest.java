@@ -324,7 +324,6 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 repository.insert(txData2);
 
                 transaction.commit();
-                fail();
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();

@@ -118,6 +118,20 @@ public class IndexManager implements AutoCloseable {
         }
     }
 
+    public void clearAll() {
+        // close all index maps
+        if (!indexMetaMap.isClosed() && !indexMetaMap.isDropped()) {
+            Iterable<IndexMeta> indexMetas = indexMetaMap.values();
+            for (IndexMeta indexMeta : indexMetas) {
+                if (indexMeta != null && indexMeta.getIndexDescriptor() != null) {
+                    String indexMapName = indexMeta.getIndexMap();
+                    NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
+                    indexMap.clear();
+                }
+            }
+        }
+    }
+
     /**
      * Is dirty index boolean.
      *

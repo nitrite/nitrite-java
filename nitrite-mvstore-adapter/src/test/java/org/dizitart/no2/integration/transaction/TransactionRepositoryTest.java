@@ -324,11 +324,10 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 repository.insert(txData2);
 
                 transaction.commit();
-                fail();
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(2, repository.size());
+                assertEquals(0, repository.size());
             }
         }
     }
@@ -454,7 +453,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 boolean expectedException = false;
                 try {
                     assertEquals(0, txRepo.size());
-                } catch (NitriteIOException e) {
+                } catch (TransactionException e) {
                     expectedException = true;
                 }
                 assertTrue(expectedException);

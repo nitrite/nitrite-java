@@ -126,6 +126,17 @@ class IndexOperations implements AutoCloseable {
         this.indexManager = new IndexManager(collectionName, nitriteConfig);
     }
 
+    void clear() {
+        for (Map.Entry<Fields, AtomicBoolean> entry : indexBuildTracker.entrySet()) {
+            if (entry.getValue() != null && entry.getValue().get()) {
+                throw new IndexingException("Index build already in progress on fields: " + entry.getKey());
+            }
+        }
+
+        indexManager.clearAll();
+        indexBuildTracker.clear();
+    }
+
     boolean isIndexing(Fields field) {
         // has an index will only return true, if there is an index on
         // the value and indexing is not running on it

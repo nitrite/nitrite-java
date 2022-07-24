@@ -3,17 +3,16 @@ package org.dizitart.no2.transaction;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.collection.operation.CollectionOperations;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.common.event.NitriteEventBus;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
@@ -45,7 +44,6 @@ import static org.dizitart.no2.index.IndexOptions.indexOptions;
 class DefaultTransactionalCollection implements NitriteCollection {
     private final NitriteCollection primary;
     private final TransactionContext transactionContext;
-    private final Nitrite nitrite;
     private String collectionName;
     private NitriteMap<NitriteId, Document> nitriteMap;
     private NitriteStore<?> nitriteStore;
@@ -66,11 +64,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
 
     public DefaultTransactionalCollection(NitriteCollection primary,
-                                          TransactionContext transactionContext,
-                                          Nitrite nitrite) {
+                                          TransactionContext transactionContext) {
         this.primary = primary;
         this.transactionContext = transactionContext;
-        this.nitrite = nitrite;
 
         initialize();
     }
@@ -445,7 +441,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         try {
             writeLock.lock();
             checkOpened();
-            nitriteMap.clear();
+            collectionOperations.clear();
         } finally {
             writeLock.unlock();
         }

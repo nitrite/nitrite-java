@@ -257,6 +257,11 @@ public class CollectionOperations implements AutoCloseable {
         nitriteMap.close();
     }
 
+    public void clear() {
+        nitriteMap.clear();
+        indexOperations.clear();
+    }
+
     private void initialize() {
         this.processorChain = new ProcessorChain();
         this.indexOperations = new IndexOperations(collectionName, nitriteConfig, nitriteMap, eventBus);

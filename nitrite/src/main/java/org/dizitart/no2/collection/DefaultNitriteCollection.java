@@ -164,7 +164,7 @@ class DefaultNitriteCollection implements NitriteCollection {
         try {
             writeLock.lock();
             checkOpened();
-            nitriteMap.clear();
+            collectionOperations.clear();
         } finally {
             writeLock.unlock();
         }

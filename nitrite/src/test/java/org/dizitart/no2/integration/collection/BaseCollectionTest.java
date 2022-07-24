@@ -78,7 +78,7 @@ public abstract class BaseCollectionTest {
                     .put("lastName", "ln2")
                     .put("birthDay", simpleDateFormat.parse("2010-06-12T16:02:48.440Z"))
                     .put("data", new byte[]{3, 4, 3})
-                    .put("list", Arrays.asList("three", "four", "three"))
+                    .put("list", Arrays.asList("three", "four", "five"))
                     .put("body", "quick hello world from nitrite");
             doc3 = createDocument("firstName", "fn3")
                     .put("lastName", "ln2")

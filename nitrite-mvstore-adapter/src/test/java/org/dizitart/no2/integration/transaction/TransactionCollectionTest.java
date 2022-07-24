@@ -299,11 +299,11 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.insert(document2);
                 collection.insert(document2);
 
-                throw new TransactionException("failed");
+                transaction.commit();
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(2, collection.size());
+                assertEquals(0, collection.size());
             }
         }
     }
@@ -431,7 +431,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 boolean expectedException = false;
                 try {
                     assertEquals(0, txCol.size());
-                } catch (NitriteIOException e) {
+                } catch (TransactionException e) {
                     expectedException = true;
                 }
                 assertTrue(expectedException);

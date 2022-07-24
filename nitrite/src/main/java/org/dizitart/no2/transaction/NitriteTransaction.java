@@ -71,7 +71,7 @@ class NitriteTransaction implements Transaction {
         context.setJournal(new LinkedList<>());
         context.setConfig(transactionConfig);
 
-        NitriteCollection txCollection = new DefaultTransactionalCollection(primary, context, nitrite);
+        NitriteCollection txCollection = new DefaultTransactionalCollection(primary, context);
         collectionRegistry.put(name, txCollection);
         contextMap.put(name, context);
         return txCollection;
@@ -104,7 +104,7 @@ class NitriteTransaction implements Transaction {
         context.setConfig(transactionConfig);
 
         NitriteCollection primaryCollection = primary.getDocumentCollection();
-        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context, nitrite);
+        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context);
         ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(type,
             primary, backingCollection, transactionConfig);
 
@@ -141,7 +141,7 @@ class NitriteTransaction implements Transaction {
         context.setConfig(transactionConfig);
 
         NitriteCollection primaryCollection = primary.getDocumentCollection();
-        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context, nitrite);
+        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context);
         ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(type,
             primary, backingCollection, transactionConfig);
         repositoryRegistry.put(name, txRepository);

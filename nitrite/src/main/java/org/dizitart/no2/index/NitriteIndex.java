@@ -109,8 +109,7 @@ public interface NitriteIndex {
             nitriteIds = new CopyOnWriteArrayList<>();
         }
 
-        if (isUnique() && nitriteIds.size() == 1
-            && !nitriteIds.contains(fieldValues.getNitriteId())) {
+        if (isUnique() && nitriteIds.size() == 1) {
             // if key is already exists for unique type, throw error
             throw new UniqueConstraintException("Unique key constraint violation for " + fieldValues.getFields());
         }

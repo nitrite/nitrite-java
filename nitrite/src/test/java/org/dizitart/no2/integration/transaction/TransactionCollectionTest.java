@@ -299,11 +299,11 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.insert(document2);
                 collection.insert(document2);
 
-                throw new TransactionException("failed");
+                transaction.commit();
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(2, collection.size());
+                assertEquals(0, collection.size());
             }
         }
     }
