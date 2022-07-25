@@ -21,15 +21,13 @@ import junit.framework.JUnit4TestAdapterCache;
 import lombok.Data;
 import org.apache.commons.lang3.mutable.MutableByte;
 import org.apache.commons.lang3.mutable.MutableDouble;
-import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.StopFilter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.repository.annotations.Entity;
-import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.integration.repository.data.ChildClass;
 import org.dizitart.no2.integration.repository.data.Employee;
+import org.dizitart.no2.repository.annotations.Entity;
+import org.dizitart.no2.repository.annotations.Index;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -68,13 +66,6 @@ public class ObjectUtilsTest implements Serializable {
     }
 
     @Test
-    public void testDeepEquals2() {
-        CharArraySet makeStopSetResult = StopFilter.makeStopSet(new String[]{"foo", "foo", "foo"}, true);
-        makeStopSetResult.add((Object) "foo");
-        assertFalse(ObjectUtils.deepEquals(makeStopSetResult, new AnnotatedMethodMap()));
-    }
-
-    @Test
     public void testDeepEquals3() {
         MutableByte o1 = new MutableByte();
         assertFalse(ObjectUtils.deepEquals(o1, new MutableDouble()));
@@ -90,15 +81,6 @@ public class ObjectUtilsTest implements Serializable {
     public void testDeepEquals5() {
         MutableByte o1 = new MutableByte();
         assertTrue(ObjectUtils.deepEquals(o1, new MutableByte()));
-    }
-
-    @Test
-    public void testDeepEquals6() {
-        CharArraySet makeStopSetResult = StopFilter.makeStopSet(new String[]{"foo", "foo", "foo"}, true);
-        makeStopSetResult.add((Object) "foo");
-        CharArraySet makeStopSetResult1 = StopFilter.makeStopSet(new String[]{"foo", "foo", "foo"}, true);
-        makeStopSetResult1.add((Object) "foo");
-        assertTrue(ObjectUtils.deepEquals(makeStopSetResult, makeStopSetResult1));
     }
 
     @Test

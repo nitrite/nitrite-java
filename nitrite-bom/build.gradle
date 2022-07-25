@@ -24,10 +24,10 @@ dependencies {
         api "org.slf4j:slf4j-api:1.7.32"
         api "org.objenesis:objenesis:2.6"
         api "org.jasypt:jasypt:1.9.3"
-        api "com.fasterxml.jackson.core:jackson-databind:2.13.0"
-        api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.1"
+        api "com.fasterxml.jackson.core:jackson-databind:2.13.3"
+        api "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3"
         api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.3"
-        api "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0"
+        api "com.fasterxml.jackson.module:jackson-module-kotlin:2.13.3"
         api "org.mapdb:mapdb:3.0.8"
         api "com.h2database:h2-mvstore:1.4.200"
         api "com.squareup.okhttp3:okhttp:4.9.3"
@@ -35,7 +35,7 @@ dependencies {
         api "com.esotericsoftware.kryo:kryo5:5.2.1"
         api "org.locationtech.jts:jts-core:1.18.2"
         api "commons-codec:commons-codec:1.15"
-        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.0"
+        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21"
         api "org.jetbrains.kotlin:kotlin-reflect:1.6.21"
     }
 }

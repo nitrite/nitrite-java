@@ -47,18 +47,21 @@ dependencies {
     api "org.slf4j:slf4j-api"
     api "com.fasterxml.jackson.core:jackson-databind"
 
-    annotationProcessor "org.projectlombok:lombok:1.18.22"
+    annotationProcessor "org.projectlombok:lombok:1.18.24"
 
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
-    testAnnotationProcessor "org.projectlombok:lombok:1.18.20"
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.24"
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.locationtech.jts:jts-core:1.18.2"
-    testImplementation "org.awaitility:awaitility:4.1.1"
-    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.14.1"
-    testImplementation "org.apache.logging.log4j:log4j-core:2.15.0"
-    testImplementation "com.github.javafaker:javafaker:1.0.2"
+    testImplementation "org.awaitility:awaitility:4.2.0"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.17.2"
+    testImplementation "org.apache.logging.log4j:log4j-core:2.17.2"
+    testImplementation ("com.github.javafaker:javafaker:1.0.2") {
+        exclude module: 'snakeyaml'
+    }
     testImplementation platform("com.fasterxml.jackson:jackson-bom:2.13.0")
     testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
+    testImplementation 'org.yaml:snakeyaml:1.30'
 }
 
 test {
