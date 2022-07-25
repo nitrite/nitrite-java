@@ -212,6 +212,8 @@ class MVStoreUtils {
             MVStore.TxCounter txCounter = store.registerVersionUsage();
             MVMap<String, Attributes> metaMap = store.openMap(META_MAP_NAME);
             try {
+                // fire one operation to trigger compatibility issue
+                // if no exception thrown, then the database is compatible
                 metaMap.remove("MigrationTest");
             } catch (IllegalStateException e) {
                 store.close();

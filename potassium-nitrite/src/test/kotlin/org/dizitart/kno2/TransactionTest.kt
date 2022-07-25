@@ -485,7 +485,7 @@ class TransactionTest: BaseTest() {
                 var expectedException = false
                 try {
                     Assert.assertEquals(0, txCol.size())
-                } catch (e: NitriteIOException) {
+                } catch (e: TransactionException) {
                     expectedException = true
                 }
                 Assert.assertTrue(expectedException)
