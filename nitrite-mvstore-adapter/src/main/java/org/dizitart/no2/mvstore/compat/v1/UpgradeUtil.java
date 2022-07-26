@@ -1,34 +1,38 @@
 /*
- * Copyright (c) 2019-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2022 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package org.dizitart.no2.mvstore.compat.v3;
+package org.dizitart.no2.mvstore.compat.v1;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
+import org.dizitart.no2.mvstore.MVStoreConfig;
+import org.dizitart.no2.mvstore.compat.v1.mvstore.MVMap;
+import org.dizitart.no2.mvstore.compat.v1.mvstore.MVStore;
 import org.dizitart.no2.store.UserCredential;
-import org.h2.mvstore.MVMap;
-import org.h2.mvstore.MVStore;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -37,45 +41,47 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import static org.dizitart.no2.common.Constants.INDEX_PREFIX;
 import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
+import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
- * An utility class to migrate the.
- *
- * @since 4.0.0
  * @author Anindya Chatterjee
  */
-public class MigrationUtil {
+@Slf4j
+public class UpgradeUtil {
+    private UpgradeUtil() {
+    }
 
-    /**
-     * Migrate an old 3.x compatible store to new 4.x compatible store.
-     *
-     * @param newStore the new store
-     * @param oldStore the old store
-     */
-    @SuppressWarnings({"rawtypes"})
-    public static void migrate(MVStore newStore, MVStore oldStore) {
+    public static void tryUpgrade(org.h2.mvstore.MVStore.Builder newBuilder, MVStoreConfig oldStoreConfig) {
+        log.info("Upgrading old database format to new database format");
+
+        MVStore.Builder oldBuilder = createBuilder(oldStoreConfig);
+        try (MVStore oldStore = oldBuilder.open()) {
+            try (org.h2.mvstore.MVStore newStore = newBuilder.open()) {
+                upgrade(newStore, oldStore);
+            }
+        }
+    }
+
+    private static void upgrade(org.h2.mvstore.MVStore newStore, MVStore oldStore) {
         try {
             validateOldStore(oldStore);
 
             Set<String> mapNames = oldStore.getMapNames();
             for (String mapName : mapNames) {
-                MVMap oldMap = oldStore.openMap(mapName, new MVMapBuilder<>());
-                MVMap newMap = newStore.openMap(mapName);
+                MVMap<?, ?> oldMap = oldStore.openMap(mapName, new MVMapBuilder<>());
+                org.h2.mvstore.MVMap<?, ?> newMap = newStore.openMap(mapName);
                 copyData(oldMap, newMap);
             }
 
             oldStore.commit();
             newStore.commit();
         } catch (Throwable t) {
-            throw new NitriteIOException("Migration of old data has failed", t);
-        } finally {
-            oldStore.close();
-            newStore.close();
+            throw new NitriteIOException("Upgrade of old database has failed", t);
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void copyData(MVMap oldMap, MVMap newMap) {
+    private static void copyData(MVMap oldMap, org.h2.mvstore.MVMap newMap) {
         if (oldMap != null) {
             Set<Map.Entry> entrySet = oldMap.entrySet();
             for (Map.Entry entry : entrySet) {
@@ -222,5 +228,37 @@ public class MigrationUtil {
         if (store.hasMap(STORE_INFO)) {
             throw new ValidationException("Database file is corrupted");
         }
+    }
+
+    private static MVStore.Builder createBuilder(MVStoreConfig mvStoreConfig) {
+        MVStore.Builder builder = new MVStore.Builder();
+
+        // auto compact disabled github issue #41
+        builder.autoCompactFillRate(0);
+
+        if (!isNullOrEmpty(mvStoreConfig.filePath())) {
+            builder = builder.fileName(mvStoreConfig.filePath());
+        }
+
+        if (!mvStoreConfig.autoCommit()) {
+            builder = builder.autoCommitDisabled();
+        }
+
+        if (mvStoreConfig.autoCommitBufferSize() > 0) {
+            builder = builder.autoCommitBufferSize(mvStoreConfig.autoCommitBufferSize());
+        }
+
+        if (mvStoreConfig.isReadOnly()) {
+            if (isNullOrEmpty(mvStoreConfig.filePath())) {
+                throw new InvalidOperationException("Unable create readonly in-memory database");
+            }
+            builder = builder.readOnly();
+        }
+
+        if (mvStoreConfig.compress()) {
+            builder = builder.compress();
+        }
+
+        return builder;
     }
 }

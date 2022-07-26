@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.mvstore.compat.v3;
+package org.dizitart.no2.mvstore.compat.v1;
 
-import org.h2.mvstore.MVMap;
+
+import org.dizitart.no2.mvstore.compat.v1.mvstore.MVMap;
 
 /**
  * The type Mv map builder.
@@ -32,7 +33,7 @@ class MVMapBuilder<K, V> extends MVMap.Builder<K, V> {
      * Instantiates a new Mv map builder.
      */
     public MVMapBuilder() {
-        setKeyType(new org.dizitart.no2.mvstore.compat.v3.NitriteDataType());
-        setValueType(new org.dizitart.no2.mvstore.compat.v3.NitriteDataType());
+        setKeyType(new NitriteDataType());
+        setValueType(new NitriteDataType());
     }
 }

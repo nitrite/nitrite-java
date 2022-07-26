@@ -1,30 +1,17 @@
 /*
- * Copyright (c) 2019-2020. Nitrite author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Copyright 2004-2019 H2 Group. Multiple-Licensed under the MPL 2.0,
+ * and the EPL 1.0 (https://h2database.com/html/license.html).
+ * Initial Developer: H2 Group
  */
+package org.dizitart.no2.mvstore.compat.v1.mvstore.type;
 
-package org.dizitart.no2.mvstore.compat.v3;
-
-import org.h2.mvstore.DataUtils;
-import org.h2.mvstore.WriteBuffer;
-import org.h2.mvstore.type.DataType;
-import org.h2.mvstore.type.ObjectDataType;
-import org.h2.mvstore.type.StringDataType;
+import org.dizitart.no2.mvstore.compat.v1.mvstore.DataUtils;
+import org.dizitart.no2.mvstore.compat.v1.mvstore.WriteBuffer;
 import org.h2.util.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
@@ -36,77 +23,29 @@ import java.util.HashMap;
 import java.util.UUID;
 
 /**
- * The type Nitrite data type.
- *
- * <b>NOTE:</b> This code is a modification of h2 mvstore's {@link ObjectDataType}
- * @since 4.0.0
- * @author H2 Group
- * @author Anindya Chatterjee
+ * A data type implementation for the most common data types, including
+ * serializable objects.
  */
-class NitriteDataType extends ObjectDataType {
+public class ObjectDataType implements DataType {
+
     /**
      * The type constants are also used as tag values.
      */
     static final int TYPE_NULL = 0;
-    /**
-     * The Type boolean.
-     */
     static final int TYPE_BOOLEAN = 1;
-    /**
-     * The Type byte.
-     */
     static final int TYPE_BYTE = 2;
-    /**
-     * The Type short.
-     */
     static final int TYPE_SHORT = 3;
-    /**
-     * The Type int.
-     */
     static final int TYPE_INT = 4;
-    /**
-     * The Type long.
-     */
     static final int TYPE_LONG = 5;
-    /**
-     * The Type big integer.
-     */
     static final int TYPE_BIG_INTEGER = 6;
-    /**
-     * The Type float.
-     */
     static final int TYPE_FLOAT = 7;
-    /**
-     * The Type double.
-     */
     static final int TYPE_DOUBLE = 8;
-    /**
-     * The Type big decimal.
-     */
     static final int TYPE_BIG_DECIMAL = 9;
-    /**
-     * The Type char.
-     */
     static final int TYPE_CHAR = 10;
-    /**
-     * The Type string.
-     */
     static final int TYPE_STRING = 11;
-    /**
-     * The Type uuid.
-     */
     static final int TYPE_UUID = 12;
-    /**
-     * The Type date.
-     */
     static final int TYPE_DATE = 13;
-    /**
-     * The Type array.
-     */
     static final int TYPE_ARRAY = 14;
-    /**
-     * The Type serialized object.
-     */
     static final int TYPE_SERIALIZED_OBJECT = 19;
 
     /**
@@ -114,73 +53,22 @@ class NitriteDataType extends ObjectDataType {
      * in the tag. e.g. TAG_BOOLEAN_TRUE and TAG_FLOAT_0.
      */
     static final int TAG_BOOLEAN_TRUE = 32;
-    /**
-     * The Tag integer negative.
-     */
     static final int TAG_INTEGER_NEGATIVE = 33;
-    /**
-     * The Tag integer fixed.
-     */
     static final int TAG_INTEGER_FIXED = 34;
-    /**
-     * The Tag long negative.
-     */
     static final int TAG_LONG_NEGATIVE = 35;
-    /**
-     * The Tag long fixed.
-     */
     static final int TAG_LONG_FIXED = 36;
-    /**
-     * The Tag big integer 0.
-     */
     static final int TAG_BIG_INTEGER_0 = 37;
-    /**
-     * The Tag big integer 1.
-     */
     static final int TAG_BIG_INTEGER_1 = 38;
-    /**
-     * The Tag big integer small.
-     */
     static final int TAG_BIG_INTEGER_SMALL = 39;
-    /**
-     * The Tag float 0.
-     */
     static final int TAG_FLOAT_0 = 40;
-    /**
-     * The Tag float 1.
-     */
     static final int TAG_FLOAT_1 = 41;
-    /**
-     * The Tag float fixed.
-     */
     static final int TAG_FLOAT_FIXED = 42;
-    /**
-     * The Tag double 0.
-     */
     static final int TAG_DOUBLE_0 = 43;
-    /**
-     * The Tag double 1.
-     */
     static final int TAG_DOUBLE_1 = 44;
-    /**
-     * The Tag double fixed.
-     */
     static final int TAG_DOUBLE_FIXED = 45;
-    /**
-     * The Tag big decimal 0.
-     */
     static final int TAG_BIG_DECIMAL_0 = 46;
-    /**
-     * The Tag big decimal 1.
-     */
     static final int TAG_BIG_DECIMAL_1 = 47;
-    /**
-     * The Tag big decimal small.
-     */
     static final int TAG_BIG_DECIMAL_SMALL = 48;
-    /**
-     * The Tag big decimal small scaled.
-     */
     static final int TAG_BIG_DECIMAL_SMALL_SCALED = 49;
 
     /**
@@ -188,208 +76,28 @@ class NitriteDataType extends ObjectDataType {
      * tag.
      */
     static final int TAG_INTEGER_0_15 = 64;
-    /**
-     * The Tag long 0 7.
-     */
     static final int TAG_LONG_0_7 = 80;
-    /**
-     * The Tag string 0 15.
-     */
     static final int TAG_STRING_0_15 = 88;
-    /**
-     * The Tag byte array 0 15.
-     */
     static final int TAG_BYTE_ARRAY_0_15 = 104;
 
     /**
      * Constants for floating point synchronization.
      */
     static final int FLOAT_ZERO_BITS = Float.floatToIntBits(0.0f);
-    /**
-     * The Float one bits.
-     */
     static final int FLOAT_ONE_BITS = Float.floatToIntBits(1.0f);
-    /**
-     * The Double zero bits.
-     */
     static final long DOUBLE_ZERO_BITS = Double.doubleToLongBits(0.0d);
-    /**
-     * The Double one bits.
-     */
     static final long DOUBLE_ONE_BITS = Double.doubleToLongBits(1.0d);
 
-    /**
-     * The Common classes.
-     */
-    static final Class<?>[] COMMON_CLASSES = {boolean.class, byte.class,
+    static final Class<?>[] COMMON_CLASSES = { boolean.class, byte.class,
         short.class, char.class, int.class, long.class, float.class,
         double.class, Object.class, Boolean.class, Byte.class, Short.class,
         Character.class, Integer.class, Long.class, BigInteger.class,
         Float.class, Double.class, BigDecimal.class, String.class,
-        UUID.class, Date.class};
+        UUID.class, Date.class };
 
     private static final HashMap<Class<?>, Integer> COMMON_CLASSES_MAP = new HashMap<>(32);
 
     private AutoDetectDataType last = new StringType(this);
-
-    private static int getTypeId(Object obj) {
-        if (obj instanceof Integer) {
-            return TYPE_INT;
-        } else if (obj instanceof String) {
-            return TYPE_STRING;
-        } else if (obj instanceof Long) {
-            return TYPE_LONG;
-        } else if (obj instanceof Double) {
-            return TYPE_DOUBLE;
-        } else if (obj instanceof Float) {
-            return TYPE_FLOAT;
-        } else if (obj instanceof Boolean) {
-            return TYPE_BOOLEAN;
-        } else if (obj instanceof UUID) {
-            return TYPE_UUID;
-        } else if (obj instanceof Byte) {
-            return TYPE_BYTE;
-        } else if (obj instanceof Short) {
-            return TYPE_SHORT;
-        } else if (obj instanceof Character) {
-            return TYPE_CHAR;
-        } else if (obj == null) {
-            return TYPE_NULL;
-        } else if (isDate(obj)) {
-            return TYPE_DATE;
-        } else if (isBigInteger(obj)) {
-            return TYPE_BIG_INTEGER;
-        } else if (isBigDecimal(obj)) {
-            return TYPE_BIG_DECIMAL;
-        } else if (obj.getClass().isArray()) {
-            return TYPE_ARRAY;
-        }
-        return TYPE_SERIALIZED_OBJECT;
-    }
-
-    /**
-     * Check whether this object is a BigInteger.
-     *
-     * @param obj the object
-     * @return true if yes
-     */
-    static boolean isBigInteger(Object obj) {
-        return obj != null && obj.getClass() == BigInteger.class;
-    }
-
-    /**
-     * Check whether this object is a BigDecimal.
-     *
-     * @param obj the object
-     * @return true if yes
-     */
-    static boolean isBigDecimal(Object obj) {
-        return obj != null && obj.getClass() == BigDecimal.class;
-    }
-
-    /**
-     * Check whether this object is a date.
-     *
-     * @param obj the object
-     * @return true if yes
-     */
-    static boolean isDate(Object obj) {
-        return obj != null && obj.getClass() == Date.class;
-    }
-
-    /**
-     * Check whether this object is an array.
-     *
-     * @param obj the object
-     * @return true if yes
-     */
-    static boolean isArray(Object obj) {
-        return obj != null && obj.getClass().isArray();
-    }
-
-    /**
-     * Get the class id, or null if not found.
-     *
-     * @param clazz the class
-     * @return the class id or null
-     */
-    static Integer getCommonClassId(Class<?> clazz) {
-        HashMap<Class<?>, Integer> map = COMMON_CLASSES_MAP;
-        if (map.size() == 0) {
-            // lazy initialization
-            // synchronized, because the COMMON_CLASSES_MAP is not
-            synchronized (map) {
-                if (map.size() == 0) {
-                    for (int i = 0, size = COMMON_CLASSES.length; i < size; i++) {
-                        map.put(COMMON_CLASSES[i], i);
-                    }
-                }
-            }
-        }
-        return map.get(clazz);
-    }
-
-    /**
-     * Serialize the object to a byte array.
-     *
-     * @param obj the object to serialize
-     * @return the byte array
-     */
-    public static byte[] serialize(Object obj) {
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            try (ObjectOutputStream os = new ObjectOutputStream(out)) {
-                os.writeObject(obj);
-                return out.toByteArray();
-            }
-        } catch (Throwable e) {
-            throw DataUtils.newIllegalArgumentException(
-                "Could not serialize {0}", obj, e);
-        }
-    }
-
-    /**
-     * De-serialize the byte array to an object.
-     *
-     * @param data the byte array
-     * @return the object
-     */
-    public static Object deserialize(byte[] data) {
-        try (ByteArrayInputStream in = new ByteArrayInputStream(data)) {
-            try (NitriteObjectInputStream is = new NitriteObjectInputStream(in)) {
-                return is.readObject();
-            }
-        } catch (Throwable e) {
-            throw DataUtils.newIllegalArgumentException(
-                "Could not deserialize {0}", Arrays.toString(data), e);
-        }
-    }
-
-    /**
-     * Compare the contents of two byte arrays. If the content or length of the
-     * first array is smaller than the second array, -1 is returned. If the
-     * content or length of the second array is smaller than the first array, 1
-     * is returned. If the contents and lengths are the same, 0 is returned.
-     * <p>
-     * This method interprets bytes as unsigned.
-     *
-     * @param data1 the first byte array (must not be null)
-     * @param data2 the second byte array (must not be null)
-     * @return the result of the comparison (-1, 1 or 0)
-     */
-    public static int compareNotNull(byte[] data1, byte[] data2) {
-        if (data1 == data2) {
-            return 0;
-        }
-        int len = Math.min(data1.length, data2.length);
-        for (int i = 0; i < len; i++) {
-            int b = data1[i] & 255;
-            int b2 = data2[i] & 255;
-            if (b != b2) {
-                return b > b2 ? 1 : -1;
-            }
-        }
-        return Integer.signum(data1.length - data2.length);
-    }
 
     @Override
     public int compare(Object a, Object b) {
@@ -524,6 +232,41 @@ class NitriteDataType extends ObjectDataType {
         return t.read(buff, tag);
     }
 
+    private static int getTypeId(Object obj) {
+        if (obj instanceof Integer) {
+            return TYPE_INT;
+        } else if (obj instanceof String) {
+            return TYPE_STRING;
+        } else if (obj instanceof Long) {
+            return TYPE_LONG;
+        } else if (obj instanceof Double) {
+            return TYPE_DOUBLE;
+        } else if (obj instanceof Float) {
+            return TYPE_FLOAT;
+        } else if (obj instanceof Boolean) {
+            return TYPE_BOOLEAN;
+        } else if (obj instanceof UUID) {
+            return TYPE_UUID;
+        } else if (obj instanceof Byte) {
+            return TYPE_BYTE;
+        } else if (obj instanceof Short) {
+            return TYPE_SHORT;
+        } else if (obj instanceof Character) {
+            return TYPE_CHAR;
+        } else if (obj == null) {
+            return TYPE_NULL;
+        } else if (isDate(obj)) {
+            return TYPE_DATE;
+        } else if (isBigInteger(obj)) {
+            return TYPE_BIG_INTEGER;
+        } else if (isBigDecimal(obj)) {
+            return TYPE_BIG_DECIMAL;
+        } else if (obj.getClass().isArray()) {
+            return TYPE_ARRAY;
+        }
+        return TYPE_SERIALIZED_OBJECT;
+    }
+
     /**
      * Switch the last remembered type to match the type of the given object.
      *
@@ -540,26 +283,138 @@ class NitriteDataType extends ObjectDataType {
     }
 
     /**
+     * Check whether this object is a BigInteger.
+     *
+     * @param obj the object
+     * @return true if yes
+     */
+    static boolean isBigInteger(Object obj) {
+        return obj != null && obj.getClass() == BigInteger.class;
+    }
+
+    /**
+     * Check whether this object is a BigDecimal.
+     *
+     * @param obj the object
+     * @return true if yes
+     */
+    static boolean isBigDecimal(Object obj) {
+        return obj != null && obj.getClass() == BigDecimal.class;
+    }
+
+    /**
+     * Check whether this object is a date.
+     *
+     * @param obj the object
+     * @return true if yes
+     */
+    static boolean isDate(Object obj) {
+        return obj != null && obj.getClass() == Date.class;
+    }
+
+    /**
+     * Check whether this object is an array.
+     *
+     * @param obj the object
+     * @return true if yes
+     */
+    static boolean isArray(Object obj) {
+        return obj != null && obj.getClass().isArray();
+    }
+
+    /**
+     * Get the class id, or null if not found.
+     *
+     * @param clazz the class
+     * @return the class id or null
+     */
+    static Integer getCommonClassId(Class<?> clazz) {
+        HashMap<Class<?>, Integer> map = COMMON_CLASSES_MAP;
+        if (map.size() == 0) {
+            // lazy initialization
+            // synchronized, because the COMMON_CLASSES_MAP is not
+            synchronized (map) {
+                if (map.size() == 0) {
+                    for (int i = 0, size = COMMON_CLASSES.length; i < size; i++) {
+                        map.put(COMMON_CLASSES[i], i);
+                    }
+                }
+            }
+        }
+        return map.get(clazz);
+    }
+
+    /**
+     * Serialize the object to a byte array.
+     *
+     * @param obj the object to serialize
+     * @return the byte array
+     */
+    public static byte[] serialize(Object obj) {
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ObjectOutputStream os = new ObjectOutputStream(out);
+            os.writeObject(obj);
+            return out.toByteArray();
+        } catch (Throwable e) {
+            throw DataUtils.newIllegalArgumentException(
+                "Could not serialize {0}", obj, e);
+        }
+    }
+
+    /**
+     * De-serialize the byte array to an object.
+     *
+     * @param data the byte array
+     * @return the object
+     */
+    public static Object deserialize(byte[] data) {
+        try {
+            ByteArrayInputStream in = new ByteArrayInputStream(data);
+            ObjectInputStream is = new ObjectInputStream(in);
+            return is.readObject();
+        } catch (Throwable e) {
+            throw DataUtils.newIllegalArgumentException(
+                "Could not deserialize {0}", Arrays.toString(data), e);
+        }
+    }
+
+    /**
+     * Compare the contents of two byte arrays. If the content or length of the
+     * first array is smaller than the second array, -1 is returned. If the
+     * content or length of the second array is smaller than the first array, 1
+     * is returned. If the contents and lengths are the same, 0 is returned.
+     * <p>
+     * This method interprets bytes as unsigned.
+     *
+     * @param data1 the first byte array (must not be null)
+     * @param data2 the second byte array (must not be null)
+     * @return the result of the comparison (-1, 1 or 0)
+     */
+    public static int compareNotNull(byte[] data1, byte[] data2) {
+        if (data1 == data2) {
+            return 0;
+        }
+        int len = Math.min(data1.length, data2.length);
+        for (int i = 0; i < len; i++) {
+            int b = data1[i] & 255;
+            int b2 = data2[i] & 255;
+            if (b != b2) {
+                return b > b2 ? 1 : -1;
+            }
+        }
+        return Integer.signum(data1.length - data2.length);
+    }
+
+    /**
      * The base class for auto-detect data types.
      */
     abstract static class AutoDetectDataType implements DataType {
 
-        /**
-         * The Base.
-         */
-        protected final NitriteDataType base;
-        /**
-         * The Type id.
-         */
+        protected final ObjectDataType base;
         protected final int typeId;
 
-        /**
-         * Instantiates a new Auto detect data type.
-         *
-         * @param base   the base
-         * @param typeId the type id
-         */
-        AutoDetectDataType(NitriteDataType base, int typeId) {
+        AutoDetectDataType(ObjectDataType base, int typeId) {
             this.base = base;
             this.typeId = typeId;
         }
@@ -621,7 +476,7 @@ class NitriteDataType extends ObjectDataType {
          * Read an object from the buffer.
          *
          * @param buff the buffer
-         * @param tag  the first byte of the object (usually the type)
+         * @param tag the first byte of the object (usually the type)
          * @return the read object
          */
         abstract Object read(ByteBuffer buff, int tag);
@@ -633,12 +488,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class NullType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Null type.
-         *
-         * @param base the base
-         */
-        NullType(NitriteDataType base) {
+        NullType(ObjectDataType base) {
             super(base, TYPE_NULL);
         }
 
@@ -680,12 +530,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class BooleanType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Boolean type.
-         *
-         * @param base the base
-         */
-        BooleanType(NitriteDataType base) {
+        BooleanType(ObjectDataType base) {
             super(base, TYPE_BOOLEAN);
         }
 
@@ -726,12 +571,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class ByteType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Byte type.
-         *
-         * @param base the base
-         */
-        ByteType(NitriteDataType base) {
+        ByteType(ObjectDataType base) {
             super(base, TYPE_BYTE);
         }
 
@@ -772,12 +612,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class CharacterType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Character type.
-         *
-         * @param base the base
-         */
-        CharacterType(NitriteDataType base) {
+        CharacterType(ObjectDataType base) {
             super(base, TYPE_CHAR);
         }
 
@@ -818,12 +653,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class ShortType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Short type.
-         *
-         * @param base the base
-         */
-        ShortType(NitriteDataType base) {
+        ShortType(ObjectDataType base) {
             super(base, TYPE_SHORT);
         }
 
@@ -864,12 +694,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class IntegerType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Integer type.
-         *
-         * @param base the base
-         */
-        IntegerType(NitriteDataType base) {
+        IntegerType(ObjectDataType base) {
             super(base, TYPE_INT);
         }
 
@@ -931,12 +756,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class LongType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Long type.
-         *
-         * @param base the base
-         */
-        LongType(NitriteDataType base) {
+        LongType(ObjectDataType base) {
             super(base, TYPE_LONG);
         }
 
@@ -1002,12 +822,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class FloatType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Float type.
-         *
-         * @param base the base
-         */
-        FloatType(NitriteDataType base) {
+        FloatType(ObjectDataType base) {
             super(base, TYPE_FLOAT);
         }
 
@@ -1034,9 +849,9 @@ class NitriteDataType extends ObjectDataType {
             }
             float x = (Float) obj;
             int f = Float.floatToIntBits(x);
-            if (f == NitriteDataType.FLOAT_ZERO_BITS) {
+            if (f == ObjectDataType.FLOAT_ZERO_BITS) {
                 buff.put((byte) TAG_FLOAT_0);
-            } else if (f == NitriteDataType.FLOAT_ONE_BITS) {
+            } else if (f == ObjectDataType.FLOAT_ONE_BITS) {
                 buff.put((byte) TAG_FLOAT_1);
             } else {
                 int value = Integer.reverse(f);
@@ -1069,12 +884,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class DoubleType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Double type.
-         *
-         * @param base the base
-         */
-        DoubleType(NitriteDataType base) {
+        DoubleType(ObjectDataType base) {
             super(base, TYPE_DOUBLE);
         }
 
@@ -1101,9 +911,9 @@ class NitriteDataType extends ObjectDataType {
             }
             double x = (Double) obj;
             long d = Double.doubleToLongBits(x);
-            if (d == NitriteDataType.DOUBLE_ZERO_BITS) {
+            if (d == ObjectDataType.DOUBLE_ZERO_BITS) {
                 buff.put((byte) TAG_DOUBLE_0);
-            } else if (d == NitriteDataType.DOUBLE_ONE_BITS) {
+            } else if (d == ObjectDataType.DOUBLE_ONE_BITS) {
                 buff.put((byte) TAG_DOUBLE_1);
             } else {
                 long value = Long.reverse(d);
@@ -1138,12 +948,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class BigIntegerType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Big integer type.
-         *
-         * @param base the base
-         */
-        BigIntegerType(NitriteDataType base) {
+        BigIntegerType(ObjectDataType base) {
             super(base, TYPE_BIG_INTEGER);
         }
 
@@ -1209,12 +1014,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class BigDecimalType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Big decimal type.
-         *
-         * @param base the base
-         */
-        BigDecimalType(NitriteDataType base) {
+        BigDecimalType(ObjectDataType base) {
             super(base, TYPE_BIG_DECIMAL);
         }
 
@@ -1292,12 +1092,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class StringType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new String type.
-         *
-         * @param base the base
-         */
-        StringType(NitriteDataType base) {
+        StringType(ObjectDataType base) {
             super(base, TYPE_STRING);
         }
 
@@ -1351,12 +1146,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class UUIDType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Uuid type.
-         *
-         * @param base the base
-         */
-        UUIDType(NitriteDataType base) {
+        UUIDType(ObjectDataType base) {
             super(base, TYPE_UUID);
         }
 
@@ -1400,12 +1190,7 @@ class NitriteDataType extends ObjectDataType {
      */
     static class DateType extends AutoDetectDataType {
 
-        /**
-         * Instantiates a new Date type.
-         *
-         * @param base the base
-         */
-        DateType(NitriteDataType base) {
+        DateType(ObjectDataType base) {
             super(base, TYPE_DATE);
         }
 
@@ -1448,14 +1233,9 @@ class NitriteDataType extends ObjectDataType {
      */
     static class ObjectArrayType extends AutoDetectDataType {
 
-        private final NitriteDataType elementType = new NitriteDataType();
+        private final ObjectDataType elementType = new ObjectDataType();
 
-        /**
-         * Instantiates a new Object array type.
-         *
-         * @param base the base
-         */
-        ObjectArrayType(NitriteDataType base) {
+        ObjectArrayType(ObjectDataType base) {
             super(base, TYPE_ARRAY);
         }
 
@@ -1694,12 +1474,7 @@ class NitriteDataType extends ObjectDataType {
 
         private int averageSize = 10_000;
 
-        /**
-         * Instantiates a new Serialized object type.
-         *
-         * @param base the base
-         */
-        SerializedObjectType(NitriteDataType base) {
+        SerializedObjectType(ObjectDataType base) {
             super(base, TYPE_SERIALIZED_OBJECT);
         }
 
@@ -1771,23 +1546,7 @@ class NitriteDataType extends ObjectDataType {
             averageSize = (size + 15 * averageSize) / 16;
             buff.get(data);
             return deserialize(data);
-//            try {
-//
-//            } catch (IllegalArgumentException iae) {
-//                return handleCompatibilityIssue(iae);
-//            }
         }
-
-//        private Object handleCompatibilityIssue(IllegalArgumentException iae) {
-//            if (iae.getCause() != null && iae.getCause() instanceof ClassCastException) {
-//                ClassCastException cce = (ClassCastException) iae.getCause();
-//                if (cce.getMessage().contains("org.dizitart.no2.store.compat.v3.Compat$IndexType")) {
-//                    return null;
-//                }
-//            } else if (iae.getCause() != null && iae.getCause() instanceof StreamCorruptedException) {
-//                return null;
-//            }
-//            throw iae;
-//        }
     }
+
 }

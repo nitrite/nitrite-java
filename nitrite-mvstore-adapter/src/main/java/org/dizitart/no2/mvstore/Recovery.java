@@ -248,11 +248,11 @@ public class Recovery {
             }
         } catch (Exception e) {
             // there could be various reasons
-            throw DataUtils.newIllegalStateException(
+            throw DataUtils.newMVStoreException(
                 DataUtils.ERROR_FILE_CORRUPT,
                 "File corrupt reading chunk at position {0}", start, e);
         }
-        throw DataUtils.newIllegalStateException(
+        throw DataUtils.newMVStoreException(
             DataUtils.ERROR_FILE_CORRUPT,
             "File corrupt reading chunk at position {0}", start);
     }

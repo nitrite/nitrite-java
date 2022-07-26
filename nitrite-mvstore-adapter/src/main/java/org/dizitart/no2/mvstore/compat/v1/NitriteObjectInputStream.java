@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.mvstore.compat.v3;
+package org.dizitart.no2.mvstore.compat.v1;
 
 import lombok.extern.slf4j.Slf4j;
 
