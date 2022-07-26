@@ -59,7 +59,7 @@ dependencies {
     testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.2'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.17.2'
     testImplementation "junit:junit:4.13.2"
-    testImplementation "org.testcontainers:testcontainers:1.17.2"
+    testImplementation "org.testcontainers:testcontainers:1.17.3"
     testImplementation 'org.testcontainers:mongodb:1.17.2'
     testImplementation 'org.mongodb:mongo-java-driver:3.12.11'
     testImplementation 'commons-lang:commons-lang:2.6'
