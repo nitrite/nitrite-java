@@ -24,6 +24,7 @@ public interface CollectionInstruction extends Instruction {
         addStep(migrationStep);
         final CollectionInstruction parent = this;
 
+        // new instruction set for new collection
         return new CollectionInstruction() {
             @Override
             public String collectionName() {

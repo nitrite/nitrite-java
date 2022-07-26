@@ -17,7 +17,8 @@
 package org.dizitart.no2.sync.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import okhttp3.WebSocket;
+import org.dizitart.no2.sync.ReplicationException;
 import org.dizitart.no2.sync.message.ErrorMessage;
 
 /**
@@ -25,15 +26,10 @@ import org.dizitart.no2.sync.message.ErrorMessage;
  */
 @Slf4j
 public class ErrorHandler implements MessageHandler<ErrorMessage> {
-    private final ReplicationTemplate replica;
-
-    public ErrorHandler(ReplicationTemplate replica) {
-        this.replica = replica;
-    }
 
     @Override
-    public void handleMessage(ErrorMessage message) {
+    public void handleMessage(WebSocket webSocket, ErrorMessage message) {
         log.error("Received error message from server - {}", message.getError());
-        replica.stopReplication(message.getError());
+        throw new ReplicationException(message.getError(), true);
     }
 }

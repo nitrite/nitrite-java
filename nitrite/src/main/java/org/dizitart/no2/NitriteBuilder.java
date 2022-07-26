@@ -85,19 +85,15 @@ public class NitriteBuilder {
      * @return the nitrite builder
      */
     public NitriteBuilder schemaVersion(Integer version) {
-        this.nitriteConfig.schemaVersion(version);
+        this.nitriteConfig.currentSchemaVersion(version);
         return this;
     }
 
     /**
-     * Opens or creates a new nitrite database backed by mvstore. If it is an in-memory store,
+     * Opens or creates a new nitrite database. If it is an in-memory store,
      * then it will create a new one. If it is a file based store, and if the file does not
-     * exists, then it will create a new file store and open; otherwise it will
+     * exist, then it will create a new file store and open; otherwise it will
      * open the existing file store.
-     * <p>
-     * NOTE: If the database is corrupted somehow then at the time of opening, it will
-     * try to repair it using the last known good version. If still it fails to
-     * recover, then it will throw a {@link org.dizitart.no2.exceptions.NitriteIOException}.
      *
      * @return the nitrite database instance.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a new in-memory database.
@@ -106,35 +102,36 @@ public class NitriteBuilder {
      */
     public Nitrite openOrCreate() {
         this.nitriteConfig.autoConfigure();
-        return new NitriteDatabase(nitriteConfig);
+        Runtime.getRuntime().addShutdownHook(new Thread(ThreadPoolManager::shutdownAllThreadPools));
+        NitriteDatabase db = new NitriteDatabase(nitriteConfig);
+        db.initialize(null, null);
+        return db;
     }
 
     /**
-     * Opens or creates a new nitrite database backed by mvstore. If it is an in-memory store,
+     * Opens or creates a new nitrite database. If it is an in-memory store,
      * then it will create a new one. If it is a file based store, and if the file does not
-     * exists, then it will create a new file store and open; otherwise it will
+     * exist, then it will create a new file store and open; otherwise it will
      * open the existing file store.
      * <p>
      * While creating a new database, it will use the specified user credentials.
      * While opening an existing database, it will use the specified credentials
      * to open it.
      * </p>
-     * <p>
-     * NOTE: If the database is corrupted somehow then at the time of opening, it will
-     * try to repair it using the last known good version. If still it fails to
-     * recover, then it will throw a {@link org.dizitart.no2.exceptions.NitriteIOException}.
      *
      * @param username the username
      * @param password the password
      * @return the nitrite database instance.
-     * @throws NitriteSecurityException                              if the user credentials are wrong or one of them is empty string.
+     * @throws NitriteSecurityException                       if the user credentials are wrong or one of them is empty string.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a new in-memory database.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if the database is corrupt and recovery fails.
      * @throws org.dizitart.no2.exceptions.NitriteIOException if the directory does not exist.
      */
     public Nitrite openOrCreate(String username, String password) {
         this.nitriteConfig.autoConfigure();
-        Runtime.getRuntime().addShutdownHook(new Thread(ThreadPoolManager::shutdownThreadPools));
-        return new NitriteDatabase(username, password, nitriteConfig);
+        Runtime.getRuntime().addShutdownHook(new Thread(ThreadPoolManager::shutdownAllThreadPools));
+        NitriteDatabase db = new NitriteDatabase(nitriteConfig);
+        db.initialize(username, password);
+        return db;
     }
 }

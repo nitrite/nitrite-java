@@ -97,7 +97,8 @@ public class TextIndex implements NitriteIndex {
                 addIndexElement(indexMap, fieldValues, (String) item);
             }
         } else {
-            throw new IndexingException("string data is expected");
+            throw new IndexingException("Index field " + firstField
+                + " must be a String, String[] or Iterable<String>");
         }
     }
 
@@ -129,7 +130,8 @@ public class TextIndex implements NitriteIndex {
                 removeIndexElement(indexMap, fieldValues, (String) item);
             }
         } else {
-            throw new IndexingException("string data is expected");
+            throw new IndexingException("Index field " + firstField
+                + " must be a String, String[] or Iterable<String>");
         }
     }
 
@@ -150,9 +152,9 @@ public class TextIndex implements NitriteIndex {
         if (filters.size() == 1 && filters.get(0) instanceof TextFilter) {
             TextFilter textFilter = (TextFilter) filters.get(0);
             textFilter.setTextTokenizer(textTokenizer);
-            return textFilter.applyOnIndex(indexMap);
+            return textFilter.applyOnTextIndex(indexMap);
         }
-        throw new FilterException("invalid filter found for full-text index");
+        throw new FilterException("Text index only supports a single TextFilter");
     }
 
     private NitriteMap<String, List<?>> findIndexMap() {
@@ -192,29 +194,8 @@ public class TextIndex implements NitriteIndex {
         }
     }
 
-    private Set<String> decompose(Object fieldValue) {
-        Set<String> result = new HashSet<>();
-        if (fieldValue == null) {
-            result.add(null);
-        } else if (fieldValue instanceof String) {
-            result.add((String) fieldValue);
-        } else if (fieldValue instanceof Iterable) {
-            Iterable<?> iterable = (Iterable<?>) fieldValue;
-            for (Object item : iterable) {
-                result.addAll(decompose(item));
-            }
-        } else if (fieldValue.getClass().isArray()) {
-            Object[] array = convertToObjectArray(fieldValue);
-            for (Object item : array) {
-                result.addAll(decompose(item));
-            }
-        }
-
-        Set<String> words = new HashSet<>();
-        for (String item : result) {
-            words.addAll(textTokenizer.tokenize(item));
-        }
-
-        return words;
+    private Set<String> decompose(String fieldValue) {
+        if (fieldValue == null) return new HashSet<>();
+        return textTokenizer.tokenize(fieldValue);
     }
 }

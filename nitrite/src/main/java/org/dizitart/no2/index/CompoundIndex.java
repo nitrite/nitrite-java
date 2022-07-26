@@ -21,6 +21,7 @@ import lombok.Getter;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
@@ -169,26 +170,26 @@ public class CompoundIndex implements NitriteIndex {
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void populateSubMap(NavigableMap subMap, FieldValues fieldValues, int startIndex) {
-        if (startIndex >= fieldValues.getValues().size()) return;
+    private void populateSubMap(NavigableMap subMap, FieldValues fieldValues, int depth) {
+        if (depth >= fieldValues.getValues().size()) return;
 
-        Pair<String, Object> pair = fieldValues.getValues().get(startIndex);
+        Pair<String, Object> pair = fieldValues.getValues().get(depth);
         Object value = pair.getSecond();
         DBValue dbValue;
         if (value == null) {
             dbValue = DBNull.getInstance();
         } else {
             if (Iterable.class.isAssignableFrom(value.getClass()) || value.getClass().isArray()) {
-                throw new IndexingException("compound multikey index is supported on the first field of the index only");
+                throw new IndexingException("Compound multikey index is supported on the first field of the index only");
             }
 
             if (!(value instanceof Comparable)) {
-                throw new IndexingException(value + " is not comparable");
+                throw new IndexingException(value + " is not a comparable type");
             }
             dbValue = new DBValue((Comparable<?>) value);
         }
 
-        if (startIndex == fieldValues.getValues().size() - 1) {
+        if (depth == fieldValues.getValues().size() - 1) {
             // terminal field
             List<NitriteId> nitriteIds = (List<NitriteId>) subMap.get(dbValue);
             nitriteIds = addNitriteIds(nitriteIds, fieldValues);
@@ -202,13 +203,13 @@ public class CompoundIndex implements NitriteIndex {
             }
 
             subMap.put(dbValue, subMap2);
-            populateSubMap(subMap2, fieldValues, startIndex + 1);
+            populateSubMap(subMap2, fieldValues, depth + 1);
         }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private void deleteFromSubMap(NavigableMap subMap, FieldValues fieldValues, int startIndex) {
-        Pair<String, Object> pair = fieldValues.getValues().get(startIndex);
+    private void deleteFromSubMap(NavigableMap subMap, FieldValues fieldValues, int depth) {
+        Pair<String, Object> pair = fieldValues.getValues().get(depth);
         Object value = pair.getSecond();
         DBValue dbValue;
         if (value == null) {
@@ -220,7 +221,7 @@ public class CompoundIndex implements NitriteIndex {
             dbValue = new DBValue((Comparable<?>) value);
         }
 
-        if (startIndex == fieldValues.getValues().size() - 1) {
+        if (depth == fieldValues.getValues().size() - 1) {
             // terminal field
             List<NitriteId> nitriteIds = (List<NitriteId>) subMap.get(dbValue);
             nitriteIds = removeNitriteIds(nitriteIds, fieldValues);
@@ -236,7 +237,7 @@ public class CompoundIndex implements NitriteIndex {
                 return;
             }
 
-            deleteFromSubMap(subMap2, fieldValues, startIndex + 1);
+            deleteFromSubMap(subMap2, fieldValues, depth + 1);
             subMap.put(dbValue, subMap2);
         }
     }

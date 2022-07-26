@@ -1,7 +1,5 @@
 package org.dizitart.no2.common;
 
-import org.dizitart.no2.index.DBValue;
-
 import java.io.Serializable;
 
 /**

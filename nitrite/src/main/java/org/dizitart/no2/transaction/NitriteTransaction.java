@@ -39,7 +39,7 @@ class NitriteTransaction implements Transaction {
     @Getter
     private String id;
 
-    private State state;
+    private TransactionState state;
 
     public NitriteTransaction(Nitrite nitrite, LockService lockService) {
         this.nitrite = nitrite;
@@ -59,7 +59,7 @@ class NitriteTransaction implements Transaction {
         if (nitrite.hasCollection(name)) {
             primary = nitrite.getCollection(name);
         } else {
-            throw new TransactionException("collection " + name + " does not exists");
+            throw new TransactionException("Collection " + name + " does not exists");
         }
 
         NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
@@ -71,7 +71,7 @@ class NitriteTransaction implements Transaction {
         context.setJournal(new LinkedList<>());
         context.setConfig(transactionConfig);
 
-        NitriteCollection txCollection = new DefaultTransactionalCollection(primary, context, nitrite);
+        NitriteCollection txCollection = new DefaultTransactionalCollection(primary, context);
         collectionRegistry.put(name, txCollection);
         contextMap.put(name, context);
         return txCollection;
@@ -91,7 +91,7 @@ class NitriteTransaction implements Transaction {
         if (nitrite.hasRepository(type)) {
             primary = nitrite.getRepository(type);
         } else {
-            throw new TransactionException("repository of type " + type.getName() + " does not exists");
+            throw new TransactionException("Repository of type " + type.getName() + " does not exists");
         }
 
         NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
@@ -104,7 +104,7 @@ class NitriteTransaction implements Transaction {
         context.setConfig(transactionConfig);
 
         NitriteCollection primaryCollection = primary.getDocumentCollection();
-        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context, nitrite);
+        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context);
         ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(type,
             primary, backingCollection, transactionConfig);
 
@@ -127,7 +127,7 @@ class NitriteTransaction implements Transaction {
         if (nitrite.hasRepository(type, key)) {
             primary = nitrite.getRepository(type, key);
         } else {
-            throw new TransactionException("repository of type " + type.getName()
+            throw new TransactionException("Repository of type " + type.getName()
                 + " and key " + key + " does not exists");
         }
 
@@ -141,7 +141,7 @@ class NitriteTransaction implements Transaction {
         context.setConfig(transactionConfig);
 
         NitriteCollection primaryCollection = primary.getDocumentCollection();
-        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context, nitrite);
+        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context);
         ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(type,
             primary, backingCollection, transactionConfig);
         repositoryRegistry.put(name, txRepository);
@@ -152,7 +152,7 @@ class NitriteTransaction implements Transaction {
     @Override
     public synchronized void commit() {
         checkState();
-        this.state = State.PartiallyCommitted;
+        this.state = TransactionState.PartiallyCommitted;
 
         for (Map.Entry<String, TransactionContext> contextEntry : contextMap.entrySet()) {
             String collectionName = contextEntry.getKey();
@@ -184,13 +184,13 @@ class NitriteTransaction implements Transaction {
                     }
                 }
             } catch (TransactionException te) {
-                state = State.Failed;
+                state = TransactionState.Failed;
                 log.error("Error while committing transaction", te);
                 throw te;
             } catch (Exception e) {
-                state = State.Failed;
+                state = TransactionState.Failed;
                 log.error("Error while committing transaction", e);
-                throw new TransactionException("failed to commit transaction", e);
+                throw new TransactionException("Error committing transaction", e);
             } finally {
                 undoRegistry.put(collectionName, undoLog);
                 transactionContext.getActive().set(false);
@@ -198,13 +198,13 @@ class NitriteTransaction implements Transaction {
             }
         }
 
-        state = State.Committed;
+        state = TransactionState.Committed;
         close();
     }
 
     @Override
     public synchronized void rollback() {
-        this.state = State.Aborted;
+        this.state = TransactionState.Aborted;
 
         for (Map.Entry<String, Stack<UndoEntry>> entry : undoRegistry.entrySet()) {
             String collectionName = entry.getKey();
@@ -233,7 +233,7 @@ class NitriteTransaction implements Transaction {
     @Override
     public synchronized void close() {
         try {
-            state = State.Closed;
+            state = TransactionState.Closed;
             for (TransactionContext context : contextMap.values()) {
                 context.getActive().set(false);
             }
@@ -245,12 +245,11 @@ class NitriteTransaction implements Transaction {
             this.transactionStore.close();
             this.transactionConfig.close();
         } catch (Exception e) {
-            throw new TransactionException("transaction failed to close", e);
+            throw new TransactionException("Error closing transaction", e);
         }
     }
 
-    @Override
-    public synchronized State getState() {
+    public synchronized TransactionState getState() {
         return state;
     }
 
@@ -270,12 +269,12 @@ class NitriteTransaction implements Transaction {
         this.transactionConfig.autoConfigure();
         this.transactionConfig.initialize();
         this.transactionStore = (TransactionStore<?>) this.transactionConfig.getNitriteStore();
-        this.state = State.Active;
+        this.state = TransactionState.Active;
     }
 
     private void checkState() {
-        if (state != State.Active) {
-            throw new TransactionException("transaction is not active");
+        if (state != TransactionState.Active) {
+            throw new TransactionException("Transaction is not active");
         }
     }
 }

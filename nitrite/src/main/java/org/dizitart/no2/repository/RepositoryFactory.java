@@ -116,7 +116,7 @@ public class RepositoryFactory {
             }
             repositoryMap.clear();
         } catch (Exception e) {
-            throw new NitriteIOException("failed to close an object repository", e);
+            throw new NitriteIOException("Failed to clear an object repository", e);
         } finally {
             lock.unlock();
         }
@@ -127,11 +127,11 @@ public class RepositoryFactory {
         NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
         if (nitriteMapper.isValueType(type)) {
-            throw new ValidationException("a value type cannot be used to create repository");
+            throw new ValidationException("Cannot create a repository for a value type");
         }
 
         if (store.getCollectionNames().contains(collectionName)) {
-            throw new ValidationException("a collection with same entity name already exists");
+            throw new ValidationException("A collection with same entity name already exists");
         }
 
         NitriteCollection nitriteCollection = collectionFactory.getCollection(collectionName,
@@ -148,7 +148,7 @@ public class RepositoryFactory {
         if (StringUtils.isNullOrEmpty(key)) {
             storeCatalog.writeRepositoryEntry(name);
         } else {
-            storeCatalog.writeKeyedRepositoryEntries(name);
+            storeCatalog.writeKeyedRepositoryEntry(name);
         }
     }
 }

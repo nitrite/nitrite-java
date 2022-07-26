@@ -18,12 +18,9 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.FindOptions;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.processors.ProcessorChain;
@@ -52,18 +49,6 @@ public class DefaultObjectRepositoryTest {
             nitriteCollection, new NitriteConfig());
         defaultObjectRepository.addProcessor(new ProcessorChain());
         verify(nitriteCollection).addProcessor(any());
-        assertNull(defaultObjectRepository.getAttributes());
-    }
-
-    @Test
-    public void testRemoveProcessor() {
-        NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        doNothing().when(nitriteCollection).removeProcessor(any());
-        Class<Object> type = Object.class;
-        DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
-            nitriteCollection, new NitriteConfig());
-        defaultObjectRepository.removeProcessor(new ProcessorChain());
-        verify(nitriteCollection).removeProcessor(any());
         assertNull(defaultObjectRepository.getAttributes());
     }
 
@@ -170,9 +155,9 @@ public class DefaultObjectRepositoryTest {
     public void testUpdate2() {
         DefaultObjectRepository<Object> defaultObjectRepository = (DefaultObjectRepository<Object>) mock(
             DefaultObjectRepository.class);
-        when(defaultObjectRepository.update(any(), (Object) any(), anyBoolean())).thenReturn(null);
-        defaultObjectRepository.update(mock(Filter.class), "Update", true);
-        verify(defaultObjectRepository).update(any(), (Object) any(), anyBoolean());
+        when(defaultObjectRepository.update(any(), (Object) any(), any())).thenReturn(null);
+        defaultObjectRepository.update(mock(Filter.class), "Update", UpdateOptions.updateOptions(true));
+        verify(defaultObjectRepository).update(any(), (Object) any(), any());
     }
 
     @Test

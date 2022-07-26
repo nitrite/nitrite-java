@@ -23,7 +23,6 @@ import org.dizitart.no2.store.NitriteRTree;
 import org.dizitart.no2.store.NitriteStore;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.rtree.MVRTreeMap;
-import org.h2.mvstore.rtree.SpatialKey;
 
 import java.util.Iterator;
 
@@ -45,7 +44,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
     @Override
     public void add(Key key, NitriteId nitriteId) {
         if (nitriteId != null && nitriteId.getIdValue() != null) {
-            SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+            MVSpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
             MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
                 mvMap.add(spatialKey, key);
@@ -58,7 +57,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
     @Override
     public void remove(Key key, NitriteId nitriteId) {
         if (nitriteId != null && nitriteId.getIdValue() != null) {
-            SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+            MVSpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
             MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
                 mvMap.remove(spatialKey);
@@ -70,15 +69,15 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
 
     @Override
     public RecordStream<NitriteId> findIntersectingKeys(Key key) {
-        SpatialKey spatialKey = getKey(key, 0L);
-        MVRTreeMap.RTreeCursor treeCursor = mvMap.findIntersectingKeys(spatialKey);
+        MVSpatialKey spatialKey = getKey(key, 0L);
+        MVRTreeMap.RTreeCursor<Key> treeCursor = mvMap.findIntersectingKeys(spatialKey);
         return getRecordStream(treeCursor);
     }
 
     @Override
     public RecordStream<NitriteId> findContainedKeys(Key key) {
-        SpatialKey spatialKey = getKey(key, 0L);
-        MVRTreeMap.RTreeCursor treeCursor = mvMap.findContainedKeys(spatialKey);
+        MVSpatialKey spatialKey = getKey(key, 0L);
+        MVRTreeMap.RTreeCursor<Key> treeCursor = mvMap.findContainedKeys(spatialKey);
         return getRecordStream(treeCursor);
     }
 
@@ -87,16 +86,16 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
         return mvMap.sizeAsLong();
     }
 
-    private SpatialKey getKey(Key key, long id) {
+    private MVSpatialKey getKey(Key key, long id) {
         if (key == null) {
-            return new SpatialKey(id);
+            return new MVSpatialKey(id);
         } else {
-            return new SpatialKey(id, key.getMinX(),
+            return new MVSpatialKey(id, key.getMinX(),
                 key.getMaxX(), key.getMinY(), key.getMaxY());
         }
     }
 
-    private RecordStream<NitriteId> getRecordStream(MVRTreeMap.RTreeCursor treeCursor) {
+    private RecordStream<NitriteId> getRecordStream(MVRTreeMap.RTreeCursor<Key> treeCursor) {
         return RecordStream.fromIterable(() -> new Iterator<NitriteId>() {
             @Override
             public boolean hasNext() {
@@ -105,7 +104,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
 
             @Override
             public NitriteId next() {
-                SpatialKey next = treeCursor.next();
+                MVSpatialKey next = (MVSpatialKey) treeCursor.next();
                 return NitriteId.createId(Long.toString(next.getId()));
             }
         });

@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.collection.meta.Attributes;
-import org.dizitart.no2.collection.meta.MetadataAware;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.meta.AttributesAware;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 
@@ -33,7 +33,7 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  * @author Anindya Chatterjee.
  * @since 1.0
  */
-public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
+public interface NitriteMap<Key, Value> extends AttributesAware, AutoCloseable {
     /**
      * Determines if the map contains a mapping for the
      * specified key.
@@ -55,6 +55,13 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      * Removes all entries in the map.
      */
     void clear();
+
+    /**
+     * Indicates if the map already is closed.
+     *
+     * @return the boolean
+     */
+    boolean isClosed();
 
     /**
      * Closes this {@link NitriteMap}.
@@ -95,8 +102,8 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     void put(Key key, Value value);
 
     /**
-     * Get the number of entries, as a integer. Integer.MAX_VALUE is returned if
-     * there are more than this entries.
+     * Get the number of entries, as an integer. Integer.MAX_VALUE is returned if
+     * there are more than these entries.
      *
      * @return the number of entries, as an integer.
      */
@@ -112,7 +119,7 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     Value putIfAbsent(Key key, Value value);
 
     /**
-     * Get the smallest key that is larger than the given key, or null if no
+     * Get the lest key that is greater than the given key, or null if no
      * such key exists.
      *
      * @param key the key
@@ -121,7 +128,7 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     Key higherKey(Key key);
 
     /**
-     * Get the smallest key that is larger or equal to this key.
+     * Get the least key that is greater than or equal to this key.
      *
      * @param key the key
      * @return the result.
@@ -186,12 +193,21 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
     void drop();
 
     /**
+     * Indicates if this map is dropped already.
+     *
+     * @return the boolean result
+     */
+    boolean isDropped();
+
+    /**
      * Gets the attributes of this map.
      * */
     default Attributes getAttributes() {
-        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
-        if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
-            return metaMap.get(getName());
+        if (!isDropped()) {
+            NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
+            if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
+                return metaMap.get(getName());
+            }
         }
         return null;
     }
@@ -200,9 +216,11 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      * Sets the attributes for this map.
      * */
     default void setAttributes(Attributes attributes) {
-        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
-        if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
-            metaMap.put(getName(), attributes);
+        if (!isDropped()) {
+            NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
+            if (metaMap != null && !getName().contentEquals(META_MAP_NAME)) {
+                metaMap.put(getName(), attributes);
+            }
         }
     }
 
@@ -210,17 +228,19 @@ public interface NitriteMap<Key, Value> extends MetadataAware, AutoCloseable {
      * Update last modified time of the map.
      */
     default void updateLastModifiedTime() {
-        if (isNullOrEmpty(getName())
-            || META_MAP_NAME.equals(getName())) return;
+        if (!isDropped()) {
+            if (isNullOrEmpty(getName())
+                || META_MAP_NAME.equals(getName())) return;
 
-        NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
-        if (metaMap != null) {
-            Attributes attributes = metaMap.get(getName());
-            if (attributes == null) {
-                attributes = new Attributes(getName());
-                metaMap.put(getName(), attributes);
+            NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
+            if (metaMap != null) {
+                Attributes attributes = metaMap.get(getName());
+                if (attributes == null) {
+                    attributes = new Attributes(getName());
+                    metaMap.put(getName(), attributes);
+                }
+                attributes.set(Attributes.LAST_MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
             }
-            attributes.set(Attributes.LAST_MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
         }
     }
 }

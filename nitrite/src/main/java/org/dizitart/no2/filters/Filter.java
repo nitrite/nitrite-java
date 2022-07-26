@@ -64,9 +64,9 @@ public interface Filter {
      * @return the filter
      */
     static Filter and(Filter... filters) {
-        notEmpty(filters, "at least two filters must be specified");
+        notEmpty(filters, "At least two filters must be specified");
         if (filters.length < 2) {
-            throw new FilterException("at least two filters must be specified");
+            throw new FilterException("At least two filters must be specified");
         }
 
         return new AndFilter(filters);
@@ -79,9 +79,9 @@ public interface Filter {
      * @return the filter
      */
     static Filter or(Filter... filters) {
-        notEmpty(filters, "at least two filters must be specified");
+        notEmpty(filters, "At least two filters must be specified");
         if (filters.length < 2) {
-            throw new FilterException("at least two filters must be specified");
+            throw new FilterException("At least two filters must be specified");
         }
 
         return new OrFilter(filters);
@@ -97,7 +97,7 @@ public interface Filter {
 
     /**
      * Creates a not filter which performs a logical NOT operation on a filter and selects
-     * the documents that *_do not_* satisfy the criteria. This also includes documents
+     * the documents that <strong>do not</strong> satisfy the criteria. This also includes documents
      * that do not contain the value.
      * <p>
      *

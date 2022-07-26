@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.filters;
 
-import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.exceptions.FilterException;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -84,19 +84,19 @@ public class BetweenFilterTest {
 
     @Test
     public void testConstructor2() {
-        assertThrows(ValidationException.class,
+        assertThrows(FilterException.class,
                 () -> new BetweenFilter<>("Field", new BetweenFilter.Bound<>(null, "Upper Bound")));
     }
 
     @Test
     public void testConstructor3() {
-        assertThrows(ValidationException.class,
+        assertThrows(FilterException.class,
                 () -> new BetweenFilter<>("Field", new BetweenFilter.Bound<>("Lower Bound", null)));
     }
 
     @Test
     public void testConstructor4() {
-        assertThrows(ValidationException.class, () -> new BetweenFilter<>("Field", null));
+        assertThrows(FilterException.class, () -> new BetweenFilter<>("Field", null));
     }
 }
 

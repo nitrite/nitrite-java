@@ -3,6 +3,7 @@ package org.dizitart.no2.store.memory;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Comparables;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
@@ -47,11 +48,13 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public boolean containsKey(Key key) {
+        checkOpened();
         return backingMap.containsKey(key);
     }
 
     @Override
     public Value get(Key key) {
+        checkOpened();
         return backingMap.get(key);
     }
 
@@ -61,23 +64,19 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public void clear() {
-        backingMap.clear();
-        updateLastModifiedTime();
-    }
-
-    @Override
     public String getName() {
         return mapName;
     }
 
     @Override
     public RecordStream<Value> values() {
+        checkOpened();
         return RecordStream.fromIterable(backingMap.values());
     }
 
     @Override
     public Value remove(Key key) {
+        checkOpened();
         Value value = backingMap.remove(key);
         updateLastModifiedTime();
         return value;
@@ -85,11 +84,13 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Key> keys() {
+        checkOpened();
         return RecordStream.fromIterable(backingMap.keySet());
     }
 
     @Override
     public void put(Key key, Value value) {
+        checkOpened();
         notNull(value, "value cannot be null");
         backingMap.put(key, value);
         updateLastModifiedTime();
@@ -97,33 +98,38 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public long size() {
+        checkOpened();
         return backingMap.size();
     }
 
     @Override
     public Value putIfAbsent(Key key, Value value) {
+        checkOpened();
         notNull(value, "value cannot be null");
 
         Value v = get(key);
         if (v == null) {
             put(key, value);
+            updateLastModifiedTime();
         }
-        updateLastModifiedTime();
         return v;
     }
 
     @Override
     public RecordStream<Pair<Key, Value>> entries() {
+        checkOpened();
         return getStream(backingMap);
     }
 
     @Override
     public RecordStream<Pair<Key, Value>> reversedEntries() {
+        checkOpened();
         return getStream(backingMap.descendingMap());
     }
 
     @Override
     public Key higherKey(Key key) {
+        checkOpened();
         if (key == null) {
             return null;
         }
@@ -132,6 +138,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public Key ceilingKey(Key key) {
+        checkOpened();
         if (key == null) {
             return null;
         }
@@ -140,6 +147,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public Key lowerKey(Key key) {
+        checkOpened();
         if (key == null) {
             return null;
         }
@@ -148,6 +156,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public Key floorKey(Key key) {
+        checkOpened();
         if (key == null) {
             return null;
         }
@@ -156,23 +165,40 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public boolean isEmpty() {
+        checkOpened();
         return backingMap.isEmpty();
     }
 
     @Override
     public void drop() {
         if (!droppedFlag.get()) {
-            droppedFlag.compareAndSet(false, true);
-            clear();
+            backingMap.clear();
             getStore().removeMap(mapName);
+            droppedFlag.compareAndSet(false, true);
+            closedFlag.compareAndSet(false, true);
         }
     }
 
     @Override
+    public boolean isDropped() {
+        return droppedFlag.get();
+    }
+
+    @Override
     public void close() {
-        if (!closedFlag.get() && !droppedFlag.get()) {
-            closedFlag.compareAndSet(false, true);
-        }
+        closedFlag.compareAndSet(false, true);
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closedFlag.get();
+    }
+
+    @Override
+    public void clear() {
+        checkOpened();
+        backingMap.clear();
+        updateLastModifiedTime();
     }
 
     private RecordStream<Pair<Key, Value>> getStream(NavigableMap<Key, Value> primaryMap) {
@@ -190,5 +216,15 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
                 return new Pair<>(entry.getKey(), entry.getValue());
             }
         });
+    }
+
+    private void checkOpened() {
+        if (closedFlag.get()) {
+            throw new InvalidOperationException("Map " + mapName + " is closed");
+        }
+
+        if (droppedFlag.get()) {
+            throw new InvalidOperationException("Map " + mapName + " is dropped");
+        }
     }
 }

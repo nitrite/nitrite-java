@@ -33,7 +33,7 @@ public class DefaultTransactionalCollectionTest {
         TransactionContext transactionContext = new TransactionContext();
         transactionContext.setConfig(transactionConfig);
         assertThrows(NotIdentifiableException.class,
-            () -> new DefaultTransactionalCollection(null, transactionContext, null));
+            () -> new DefaultTransactionalCollection(null, transactionContext));
         verify(transactionConfig).getNitriteStore();
     }
 
@@ -47,14 +47,13 @@ public class DefaultTransactionalCollectionTest {
         TransactionContext transactionContext = new TransactionContext();
         transactionContext.setConfig(transactionConfig);
         DefaultTransactionalCollection actualDefaultTransactionalCollection = new DefaultTransactionalCollection(null,
-            transactionContext, null);
+            transactionContext);
         assertNull(actualDefaultTransactionalCollection.getCollectionName());
         assertFalse(actualDefaultTransactionalCollection.isDropped());
         TransactionContext transactionContext1 = actualDefaultTransactionalCollection.getTransactionContext();
         assertSame(transactionContext, transactionContext1);
         assertSame(transactionStore, actualDefaultTransactionalCollection.getStore());
         assertNull(actualDefaultTransactionalCollection.getPrimary());
-        assertNull(actualDefaultTransactionalCollection.getNitrite());
         assertNull(actualDefaultTransactionalCollection.getNitriteMap());
         assertNull(actualDefaultTransactionalCollection.getCollectionOperations().getAttributes());
         verify(transactionConfig, times(2)).getNitriteStore();

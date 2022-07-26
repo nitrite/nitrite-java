@@ -56,12 +56,12 @@ public class CollectionFactory {
      *
      * @param name           the name
      * @param nitriteConfig  the nitrite config
-     * @param writeCatalogue the write catalogue
+     * @param writeCatalogue to write catalogue
      * @return the collection
      */
     public NitriteCollection getCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalogue) {
-        notNull(nitriteConfig, "configuration is null while creating collection");
-        notEmpty(name, "collection name is null or empty");
+        notNull(nitriteConfig, "Configuration is null while creating collection");
+        notEmpty(name, "Collection name is null or empty");
 
         Lock lock = lockService.getWriteLock(this.getClass().getName());
         try {
@@ -83,25 +83,24 @@ public class CollectionFactory {
 
     private NitriteCollection createCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalog) {
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
-        NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name, NitriteId.class, Document.class);
-        NitriteCollection collection = new DefaultNitriteCollection(name, nitriteMap, nitriteConfig, lockService);
 
         if (writeCatalog) {
             // ignore repository request
             if (store.getRepositoryRegistry().contains(name)) {
-                nitriteMap.close();
-                collection.close();
-                throw new ValidationException("a repository with same name already exists");
+                throw new ValidationException("A repository with same name already exists");
             }
 
             for (Set<String> set : store.getKeyedRepositoryRegistry().values()) {
                 if (set.contains(name)) {
-                    nitriteMap.close();
-                    collection.close();
-                    throw new ValidationException("a keyed repository with same name already exists");
+                    throw new ValidationException("A keyed repository with same name already exists");
                 }
             }
+        }
 
+        NitriteMap<NitriteId, Document> nitriteMap = store.openMap(name, NitriteId.class, Document.class);
+        NitriteCollection collection = new DefaultNitriteCollection(name, nitriteMap, nitriteConfig, lockService);
+
+        if (writeCatalog) {
             collectionMap.put(name, collection);
             StoreCatalog storeCatalog = store.getCatalog();
             storeCatalog.writeCollectionEntry(name);
@@ -122,7 +121,7 @@ public class CollectionFactory {
             }
             collectionMap.clear();
         } catch (Exception e) {
-            throw new NitriteIOException("failed to close a collection", e);
+            throw new NitriteIOException("Failed to close a collection", e);
         } finally {
             lock.unlock();
         }

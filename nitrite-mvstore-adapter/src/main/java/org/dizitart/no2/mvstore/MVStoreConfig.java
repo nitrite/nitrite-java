@@ -86,4 +86,23 @@ public class MVStoreConfig implements StoreConfig {
     public void addStoreEventListener(StoreEventListener listener) {
         eventListeners.add(listener);
     }
+
+    public MVStoreConfig clone() {
+        MVStoreConfig config = new MVStoreConfig();
+        config.eventListeners(new HashSet<>(eventListeners));
+        config.filePath(filePath);
+        config.autoCommitBufferSize(autoCommitBufferSize);
+        config.encryptionKey(encryptionKey);
+        config.isReadOnly(isReadOnly);
+        config.compress(compress);
+        config.compressHigh(compressHigh);
+        config.autoCommit(autoCommit);
+        config.autoCompact(autoCompact);
+        config.recoveryMode(recoveryMode);
+        config.cacheSize(cacheSize);
+        config.cacheConcurrency(cacheConcurrency);
+        config.pageSplitSize(pageSplitSize);
+        config.fileStore(fileStore);
+        return config;
+    }
 }

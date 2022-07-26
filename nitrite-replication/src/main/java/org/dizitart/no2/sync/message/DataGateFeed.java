@@ -17,7 +17,7 @@
 package org.dizitart.no2.sync.message;
 
 import lombok.Data;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 
 /**
  * @author Anindya Chatterjee.
@@ -25,5 +25,5 @@ import org.dizitart.no2.sync.crdt.LastWriteWinState;
 @Data
 public class DataGateFeed implements ReceiptAware {
     private MessageHeader header;
-    private LastWriteWinState feed;
+    private DeltaStates feed;
 }

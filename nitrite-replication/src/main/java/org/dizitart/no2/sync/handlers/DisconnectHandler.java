@@ -16,21 +16,26 @@
 
 package org.dizitart.no2.sync.handlers;
 
-import org.dizitart.no2.sync.ReplicationTemplate;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.WebSocket;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.Disconnect;
+import org.dizitart.no2.sync.net.CloseReason;
 
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class DisconnectHandler implements MessageHandler<Disconnect> {
-    private final ReplicationTemplate replicationTemplate;
+    private final ReplicatedCollection replicatedCollection;
 
-    public DisconnectHandler(ReplicationTemplate replicationTemplate) {
-        this.replicationTemplate = replicationTemplate;
+    public DisconnectHandler(ReplicatedCollection replicatedCollection) {
+        this.replicatedCollection = replicatedCollection;
     }
 
     @Override
-    public void handleMessage(Disconnect message) {
-        replicationTemplate.stopReplication("Server disconnect");
+    public void handleMessage(WebSocket webSocket, Disconnect message) {
+        log.debug("Disconnecting from server");
+        replicatedCollection.stopReplication(webSocket, CloseReason.ServerClose);
     }
 }

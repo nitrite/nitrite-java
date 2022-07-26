@@ -23,7 +23,8 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.ValidationUtils.validateArrayIndexField;
@@ -91,10 +92,8 @@ public interface NitriteIndex {
             validateIterableIndexField((Iterable<?>) value, field);
         } else if (value.getClass().isArray()) {
             validateArrayIndexField(value, field);
-        } else {
-            if (!(value instanceof Comparable)) {
-                throw new ValidationException(value + " is not comparable");
-            }
+        } else if (!(value instanceof Comparable)) {
+            throw new ValidationException("Index field " + field + " must be a comparable type");
         }
     }
 
@@ -110,10 +109,9 @@ public interface NitriteIndex {
             nitriteIds = new CopyOnWriteArrayList<>();
         }
 
-        if (isUnique() && nitriteIds.size() == 1
-            && !nitriteIds.contains(fieldValues.getNitriteId())) {
+        if (isUnique() && nitriteIds.size() == 1) {
             // if key is already exists for unique type, throw error
-            throw new UniqueConstraintException("unique key constraint violation for " + fieldValues.getFields());
+            throw new UniqueConstraintException("Unique key constraint violation for " + fieldValues.getFields());
         }
 
         // index always are in ascending format

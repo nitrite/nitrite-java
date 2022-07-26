@@ -50,18 +50,18 @@ public abstract class BaseTextTokenizer implements TextTokenizer {
     }
 
     /**
-     * Converts a `word` into all lower case and checks if it
-     * is a known stop word. If it is, then the `word` will be
+     * Converts a <code>word</code> into all lower case and checks if it
+     * is a known stop word. If it is, then the <code>word</code> will be
      * discarded and will not be considered as a valid token.
      *
      * @param word the word
      * @return the tokenized word in all upper case.
      */
     protected String convertWord(String word) {
-        word = word.toLowerCase();
-        if (stopWords().contains(word)) {
+        String convertedWord = word.toLowerCase();
+        if (stopWords().contains(convertedWord)) {
             return null;
         }
-        return word;
+        return convertedWord;
     }
 }

@@ -4,6 +4,8 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.tuples.Triplet;
 import org.dizitart.no2.common.util.SecureString;
 
+import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
+
 /**
  * Represents a migration instruction set for the nitrite database.
  *
@@ -64,7 +66,7 @@ public interface DatabaseInstruction extends Instruction {
      * @return the database instruction
      */
     default DatabaseInstruction dropRepository(Class<?> type) {
-        return dropRepository(type.getName());
+        return dropRepository(getEntityName(type));
     }
 
     /**
@@ -85,7 +87,7 @@ public interface DatabaseInstruction extends Instruction {
      * @return the database instruction
      */
     default DatabaseInstruction dropRepository(Class<?> type, String key) {
-        return dropRepository(type.getName(), key);
+        return dropRepository(getEntityName(type), key);
     }
 
     /**

@@ -18,12 +18,8 @@ package org.dizitart.no2.common.concurrent;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 import static org.dizitart.no2.common.Constants.DAEMON_THREAD_NAME;
 
@@ -40,7 +36,7 @@ public class ThreadPoolManager {
     private final static Object lock;
 
     static {
-        threadPools = new ArrayList<>();
+        threadPools = new CopyOnWriteArrayList<>();
         commonPool = workerPool();
         threadPools.add(commonPool);
         lock = new Object();
@@ -66,6 +62,20 @@ public class ThreadPoolManager {
      */
     public static ExecutorService getThreadPool(int size, String threadName) {
         ExecutorService threadPool = Executors.newFixedThreadPool(size, threadFactory(threadName));
+        threadPools.add(threadPool);
+        return threadPool;
+    }
+
+    /**
+     * Creates an {@link ScheduledExecutorService} with provided size where
+     * all {@link Thread}s are daemon threads and uncaught error aware.
+     *
+     * @param size       the size
+     * @param threadName the thread name
+     * @return the {@link ScheduledExecutorService}
+     */
+    public static ScheduledExecutorService getScheduledThreadPool(int size, String threadName) {
+        ScheduledExecutorService threadPool = Executors.newScheduledThreadPool(size, threadFactory(threadName));
         threadPools.add(threadPool);
         return threadPool;
     }
@@ -102,29 +112,39 @@ public class ThreadPoolManager {
     /**
      * Shuts down all thread pools.
      */
-    public synchronized static void shutdownThreadPools() {
+    public synchronized static void shutdownAllThreadPools() {
         for (ExecutorService threadPool : threadPools) {
-            synchronized (lock) {
-                if (threadPool != null) {
-                    threadPool.shutdown();
-                }
-            }
-            try {
-                if (threadPool != null && !threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
-                    synchronized (lock) {
-                        threadPool.shutdownNow();
-                    }
+            shutdownThreadPool(threadPool);
+        }
+    }
 
-                    if (!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
-                        log.error("Thread pool did not terminate");
-                    }
-                }
-            } catch (InterruptedException e) {
+    /**
+     * Shuts down a thread pool.
+     *
+     * @param threadPool the thread pool
+     */
+    public synchronized static void shutdownThreadPool(ExecutorService threadPool) {
+        synchronized (lock) {
+            if (threadPool != null) {
+                threadPool.shutdown();
+            }
+        }
+        try {
+            if (threadPool != null && !threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
                 synchronized (lock) {
                     threadPool.shutdownNow();
                 }
-                Thread.currentThread().interrupt();
+
+                if (!threadPool.awaitTermination(10, TimeUnit.SECONDS)) {
+                    log.error("Thread pool did not terminate");
+                }
             }
+        } catch (InterruptedException e) {
+            synchronized (lock) {
+                threadPool.shutdownNow();
+            }
+            Thread.currentThread().interrupt();
         }
+        threadPools.remove(threadPool);
     }
 }

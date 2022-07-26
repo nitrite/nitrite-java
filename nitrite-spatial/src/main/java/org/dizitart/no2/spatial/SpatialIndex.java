@@ -113,14 +113,14 @@ public class SpatialIndex implements NitriteIndex {
         if (indexScanFilter == null
             || indexScanFilter.getFilters() == null
             || indexScanFilter.getFilters().isEmpty()) {
-            throw new FilterException("no spatial filter found");
+            throw new FilterException("No spatial filter found");
         }
 
         List<ComparableFilter> filters = indexScanFilter.getFilters();
         ComparableFilter filter = filters.get(0);
 
         if (!(filter instanceof SpatialFilter)) {
-            throw new FilterException("spatial filter must be the first filter for index scan");
+            throw new FilterException("Spatial filter must be the first filter for index scan");
         }
 
         RecordStream<NitriteId> keys = null;
@@ -158,6 +158,6 @@ public class SpatialIndex implements NitriteIndex {
         } else if (fieldValue instanceof Geometry) {
             return (Geometry) fieldValue;
         }
-        throw new IndexingException("field " + field + " does not contain Geometry data");
+        throw new IndexingException("Field " + field + " does not contain Geometry data");
     }
 }

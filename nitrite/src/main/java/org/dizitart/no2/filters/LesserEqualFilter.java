@@ -63,14 +63,14 @@ class LesserEqualFilter extends ComparableFilter {
         List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        Comparable ceilingKey = indexMap.floorKey(comparable);
-        while (ceilingKey != null) {
+        Comparable floorKey = indexMap.floorKey(comparable);
+        while (floorKey != null) {
             // get the starting value, it can be a navigable-map (compound index)
             // or list (single field index)
-            Object value = indexMap.get(ceilingKey);
+            Object value = indexMap.get(floorKey);
             processIndexValue(value, subMap, nitriteIds);
 
-            ceilingKey = indexMap.lowerKey(ceilingKey);
+            floorKey = indexMap.lowerKey(floorKey);
         }
 
         if (!subMap.isEmpty()) {

@@ -17,7 +17,7 @@
 package org.dizitart.no2.filters;
 
 /**
- * A fluent api for the {@link Filter}.
+ * A fluent api for the {@link NitriteFilter}.
  *
  * @author Anindya Chatterjee.
  * @since 4.0
@@ -34,7 +34,7 @@ public final class FluentFilter {
     }
 
     /**
-     * Where clause for fluent filter.
+     * Where clause for fluent filter api.
      *
      * @param field the field
      * @return the fluent filter

@@ -24,7 +24,9 @@ import lombok.Data;
 @Data
 public class MessageHeader {
     private String id;
+    private String transactionId;
     private String correlationId;
+    private String tenant;
     private String collection;
     private String userName;
     private Long timestamp;

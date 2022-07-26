@@ -16,30 +16,43 @@
 
 package org.dizitart.no2.sync.handlers;
 
-import org.dizitart.no2.sync.MessageTemplate;
-import org.dizitart.no2.sync.ReplicationTemplate;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
-import org.dizitart.no2.sync.message.DataGateMessage;
-import org.dizitart.no2.sync.message.Receipt;
-import org.dizitart.no2.sync.message.ReceiptAware;
+import okhttp3.WebSocket;
+import org.dizitart.no2.sync.crdt.DeltaStates;
+import org.dizitart.no2.sync.DataGateSocketListener;
+import org.dizitart.no2.sync.ReplicatedCollection;
+import org.dizitart.no2.sync.message.*;
 
 /**
  * @author Anindya Chatterjee
  */
 public interface ReceiptAckSender<Ack extends DataGateMessage> {
-    ReplicationTemplate getReplicationTemplate();
+    ReplicatedCollection getReplicatedCollection();
 
-    Ack createAck(String correlationId, Receipt receipt);
+    Ack createAck(String transactionId, Receipt receipt);
 
-    default void sendAck(ReceiptAware message) {
+    default void sendAck(WebSocket webSocket, ReceiptAware message) {
         if (message != null) {
-            LastWriteWinState state = message.getFeed();
-            getReplicationTemplate().getCrdt().merge(state);
+            DeltaStates state = message.getFeed();
+            getReplicatedCollection().getReplicatedDataType().merge(state);
 
             Receipt receipt = message.calculateReceipt();
-            Ack ack = createAck(message.getHeader().getId(), receipt);
-            MessageTemplate messageTemplate = getReplicationTemplate().getMessageTemplate();
-            messageTemplate.sendMessage(ack);
+            Ack ack = createAck(message.getHeader().getTransactionId(), receipt);
+            ack.getHeader().setCorrelationId(message.getHeader().getId());
+
+            BatchMessage batchMessage = (BatchMessage) message;
+            BatchMessage batchAck = (BatchMessage) ack;
+
+            // set offset and batch size
+            batchAck.setNextOffset(batchMessage.getNextOffset());
+            batchAck.setBatchSize(batchMessage.getBatchSize());
+
+            // set start time and end time
+            batchAck.setStartMarkers(batchMessage.getStartMarkers());
+            batchAck.setEndMarkers(batchMessage.getEndMarkers());
+
+            DataGateSocketListener dataGateSocketListener
+                = getReplicatedCollection().getDataGateSocketListener();
+            dataGateSocketListener.sendMessage(webSocket, ack);
         }
     }
 }

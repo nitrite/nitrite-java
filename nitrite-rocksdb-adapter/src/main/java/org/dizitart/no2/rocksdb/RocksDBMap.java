@@ -64,7 +64,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             return rocksDB.get(columnFamilyHandle, key) != null;
         } catch (Exception e) {
             log.error("Error while querying key", e);
-            throw new NitriteIOException("failed to check key", e);
+            throw new NitriteIOException("Failed to check key", e);
         }
     }
 
@@ -81,7 +81,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             return (V) objectFormatter.decode(value, getValueType());
         } catch (Exception e) {
             log.error("Error while querying by key", e);
-            throw new NitriteIOException("failed to query by key", e);
+            throw new NitriteIOException("Failed to query by key", e);
         }
     }
 
@@ -134,7 +134,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             return (V) objectFormatter.decode(value, getValueType());
         } catch (Exception e) {
             log.error("Error while removing key", e);
-            throw new NitriteIOException("failed to remove key", e);
+            throw new NitriteIOException("Failed to remove key", e);
         }
     }
 
@@ -162,7 +162,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             updateLastModifiedTime();
         } catch (Exception e) {
             log.error("Error while writing key and value for " + mapName, e);
-            throw new NitriteIOException("failed to write key and value", e);
+            throw new NitriteIOException("Failed to write key and value", e);
         }
     }
 
@@ -204,7 +204,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             return (V) objectFormatter.decode(oldValue, getValueType());
         } catch (Exception e) {
             log.error("Error while writing key and value", e);
-            throw new NitriteIOException("failed to write key and value", e);
+            throw new NitriteIOException("Failed to write key and value", e);
         }
     }
 
@@ -345,11 +345,21 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
+    public boolean isDropped() {
+        return droppedFlag.get();
+    }
+
+    @Override
     public void close() {
         if (!closedFlag.get() && !droppedFlag.get()) {
             closedFlag.compareAndSet(false, true);
             store.closeMap(getName());
         }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closedFlag.get();
     }
 
     private void initialize() {

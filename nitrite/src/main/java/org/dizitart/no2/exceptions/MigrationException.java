@@ -15,4 +15,14 @@ public class MigrationException extends NitriteException {
     public MigrationException(String errorMessage) {
         super(errorMessage);
     }
+
+    /**
+     * Instantiates a new Migration exception.
+     *
+     * @param errorMessage the error message
+     * @param cause the cause
+     */
+    public MigrationException(String errorMessage, Throwable cause) {
+        super(errorMessage, cause);
+    }
 }

@@ -20,21 +20,18 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
-import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.common.processors.ProcessorChain;
+import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.StoreCatalog;
 
 import java.util.Collection;
-
-import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
-import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
 
 /**
  * The collection operations.
@@ -77,18 +74,7 @@ public class CollectionOperations implements AutoCloseable {
      * @param processor the processor
      */
     public void addProcessor(Processor processor) {
-        doProcess(processor);
         processorChain.add(processor);
-    }
-
-    /**
-     * Removes a document processor.
-     *
-     * @param processor the processor
-     */
-    public void removeProcessor(Processor processor) {
-        processorChain.remove(processor);
-        undoProcess(processor);
     }
 
     /**
@@ -271,6 +257,11 @@ public class CollectionOperations implements AutoCloseable {
         nitriteMap.close();
     }
 
+    public void clear() {
+        nitriteMap.clear();
+        indexOperations.clear();
+    }
+
     private void initialize() {
         this.processorChain = new ProcessorChain();
         this.indexOperations = new IndexOperations(collectionName, nitriteConfig, nitriteMap, eventBus);
@@ -289,19 +280,5 @@ public class CollectionOperations implements AutoCloseable {
 
         // drop the map
         nitriteMap.drop();
-    }
-
-    private void doProcess(Processor processor) {
-        for (Document document : find(Filter.ALL, null)) {
-            Document processed = processor.processBeforeWrite(document);
-            update(createUniqueFilter(document), processed, updateOptions(false));
-        }
-    }
-
-    private void undoProcess(Processor processor) {
-        for (Document document : find(Filter.ALL, null)) {
-            Document processed = processor.processAfterRead(document);
-            update(createUniqueFilter(document), processed, updateOptions(false));
-        }
     }
 }

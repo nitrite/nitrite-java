@@ -17,48 +17,18 @@
 
 package org.dizitart.no2;
 
-import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.store.memory.InMemoryStoreModule;
 import org.junit.Test;
 
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class NitriteDatabaseTest {
     @Test
     public void testConstructor() {
         NitriteConfig nitriteConfig = new NitriteConfig();
         nitriteConfig.loadModule(new InMemoryStoreModule());
-        new NitriteDatabase("janedoe", "iloveyou", nitriteConfig);
-        assertTrue(nitriteConfig.configured);
-    }
-
-    @Test
-    public void testConstructor2() {
-        assertThrows(NitriteSecurityException.class, () -> new NitriteDatabase("", "iloveyou", new NitriteConfig()));
-    }
-
-    @Test
-    public void testConstructor3() {
-        assertThrows(NitriteSecurityException.class, () -> new NitriteDatabase("janedoe", "", new NitriteConfig()));
-    }
-
-    @Test
-    public void testConstructor4() {
-        assertThrows(NitriteIOException.class, () -> new NitriteDatabase("janedoe", "iloveyou", null));
-    }
-
-    @Test(expected = NitriteIOException.class)
-    public void testConstructor5() {
-        NitriteConfig nitriteConfig = new NitriteConfig();
         new NitriteDatabase(nitriteConfig);
-        assertTrue(nitriteConfig.configured);
-    }
-
-    @Test
-    public void testConstructor6() {
-        assertThrows(NitriteIOException.class, () -> new NitriteDatabase(null));
+        assertFalse(nitriteConfig.configured);
     }
 }
 

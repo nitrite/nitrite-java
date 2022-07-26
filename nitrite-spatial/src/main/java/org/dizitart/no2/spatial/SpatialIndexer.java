@@ -57,7 +57,7 @@ public class SpatialIndexer implements NitriteIndexer {
     @Override
     public void validateIndex(Fields fields) {
         if (fields.getFieldNames().size() > 1) {
-            throw new IndexingException("spatial index can only be created on a single field");
+            throw new IndexingException("Spatial index can only be created on a single field");
         }
     }
 

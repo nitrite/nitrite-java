@@ -67,14 +67,14 @@ class Reflector {
         String remaining = split.length == 2 ? split[1] : "";
 
         if (isNullOrEmpty(key)) {
-            throw new ValidationException("invalid embedded field provided");
+            throw new ValidationException("Invalid embedded field provided");
         }
 
         Field field;
         try {
             field = startingClass.getDeclaredField(key);
         } catch (NoSuchFieldException e) {
-            throw new ValidationException("no such field '" + key + "' for type " + startingClass.getName(), e);
+            throw new ValidationException("No such field '" + key + "' for type " + startingClass.getName(), e);
         }
 
         if (!isNullOrEmpty(remaining) || remaining.contains(NitriteConfig.getFieldSeparator())) {
@@ -123,7 +123,7 @@ class Reflector {
                 }
             }
             if (field == null) {
-                throw new ValidationException("no such field '" + name + "' for type " + type.getName());
+                throw new ValidationException("No such field '" + name + "' for type " + type.getName());
             }
             return field;
         }
@@ -139,7 +139,7 @@ class Reflector {
         return fields;
     }
 
-    public void filterSynthetics(List<Field> fields) {
+    private void filterSynthetics(List<Field> fields) {
         if (fields == null || fields.isEmpty()) return;
         Iterator<Field> iterator = fields.iterator();
         if (iterator.hasNext()) {

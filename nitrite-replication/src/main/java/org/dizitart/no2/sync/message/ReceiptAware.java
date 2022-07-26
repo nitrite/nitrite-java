@@ -17,7 +17,7 @@
 package org.dizitart.no2.sync.message;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -27,21 +27,21 @@ import java.util.Set;
  * @author Anindya Chatterjee
  */
 public interface ReceiptAware extends DataGateMessage {
-    LastWriteWinState getFeed();
+    DeltaStates getFeed();
 
     default Receipt calculateReceipt() {
         Set<String> added = new HashSet<>();
         Set<String> removed = new HashSet<>();
 
         if (getFeed() != null) {
-            if (getFeed().getChanges() != null) {
-                for (Document change : getFeed().getChanges()) {
+            if (getFeed().getChangeSet() != null) {
+                for (Document change : getFeed().getChangeSet()) {
                     added.add(change.getId().getIdValue());
                 }
             }
 
-            if (getFeed().getTombstones() != null) {
-                for (Map.Entry<String, Long> entry : getFeed().getTombstones().entrySet()) {
+            if (getFeed().getTombstoneMap() != null) {
+                for (Map.Entry<String, Long> entry : getFeed().getTombstoneMap().entrySet()) {
                     removed.add(entry.getKey());
                 }
             }

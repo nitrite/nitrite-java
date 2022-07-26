@@ -58,7 +58,7 @@ public class TextFilter extends StringFilter {
         Object docValue = element.getSecond().get(getField());
 
         if (!(docValue instanceof String)) {
-            throw new FilterException("text filter can not be applied on non string field " + getField());
+            throw new FilterException("Text filter can not be applied on non string field " + getField());
         }
 
         String docString = (String) docValue;
@@ -76,12 +76,12 @@ public class TextFilter extends StringFilter {
     }
 
     /**
-     * Apply on index linked hash set.
+     * Apply this filter on text index.
      *
      * @param indexMap the index map
      * @return the linked hash set
      */
-    public LinkedHashSet<NitriteId> applyOnIndex(NitriteMap<String, List<?>> indexMap) {
+    public LinkedHashSet<NitriteId> applyOnTextIndex(NitriteMap<String, List<?>> indexMap) {
         notNull(getField(), "field cannot be null");
         notNull(getStringValue(), "search term cannot be null");
         String searchString = getStringValue();
@@ -117,12 +117,13 @@ public class TextFilter extends StringFilter {
 
     private LinkedHashSet<NitriteId> searchByWildCard(NitriteMap<String, List<?>> indexMap, String searchString) {
         if (searchString.contentEquals("*")) {
-            throw new FilterException("* is not a valid search string");
+            throw new FilterException("* is not a valid search term");
         }
 
         StringTokenizer stringTokenizer = stringTokenizer(searchString);
         if (stringTokenizer.countTokens() > 1) {
-            throw new FilterException("multiple words with wildcard is not supported");
+            throw new FilterException("Wild card search can not be applied on " +
+                "multiple words");
         }
 
         if (searchString.startsWith("*") && !searchString.endsWith("*")) {
@@ -138,7 +139,7 @@ public class TextFilter extends StringFilter {
     @SuppressWarnings("unchecked")
     private LinkedHashSet<NitriteId> searchByLeadingWildCard(NitriteMap<String, List<?>> indexMap, String searchString) {
         if (searchString.equalsIgnoreCase("*")) {
-            throw new FilterException("invalid search term '*'");
+            throw new FilterException("* is not a valid search term");
         }
 
         LinkedHashSet<NitriteId> idSet = new LinkedHashSet<>();
@@ -156,7 +157,7 @@ public class TextFilter extends StringFilter {
     @SuppressWarnings("unchecked")
     private LinkedHashSet<NitriteId> searchByTrailingWildCard(NitriteMap<String, List<?>> indexMap, String searchString) {
         if (searchString.equalsIgnoreCase("*")) {
-            throw new FilterException("invalid search term '*'");
+            throw new FilterException("* is not a valid search term");
         }
 
         LinkedHashSet<NitriteId> idSet = new LinkedHashSet<>();

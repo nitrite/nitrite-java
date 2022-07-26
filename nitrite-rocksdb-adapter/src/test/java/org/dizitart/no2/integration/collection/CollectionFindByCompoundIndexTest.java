@@ -19,6 +19,7 @@ package org.dizitart.no2.integration.collection;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
@@ -82,7 +83,7 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
                     where("firstName").eq("fn3"),
                     where("lastName").eq("ln2")
                 )
-            )
+            ), FindOptions.withDistinct()
         );
 
         assertEquals(2, cursor.size());
@@ -198,6 +199,22 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
         );
 
         FindPlan findPlan = cursor.getFindPlan();
+        assertEquals(3, findPlan.getSubPlans().size());
+        assertEquals(5, cursor.size());
+
+        // distinct
+        cursor = collection.find(
+            or(
+                or(
+                    where("lastName").eq("ln2"),
+                    where("firstName").notEq("fn1")
+                ),
+                where("birthDay").eq(simpleDateFormat.parse("2012-07-01T16:02:48.440Z")),
+                where("firstName").notEq("fn1")
+            ), FindOptions.withDistinct()
+        );
+
+        findPlan = cursor.getFindPlan();
         assertEquals(3, findPlan.getSubPlans().size());
         assertEquals(3, cursor.size());
     }

@@ -64,6 +64,9 @@ public class Fields implements Comparable<Fields>, Serializable {
      * @return the fields
      */
     public Fields addField(String field) {
+        notNull(field, "field cannot be null");
+        notEmpty(field, "field cannot be empty");
+
         fieldNames.add(field);
         return this;
     }
@@ -78,28 +81,27 @@ public class Fields implements Comparable<Fields>, Serializable {
     }
 
     /**
-     * Starts with boolean.
+     * Check if a {@link Fields} is a subset of the current {@link Fields}.
      *
      * @param other the other
      * @return the boolean
      */
     public boolean startsWith(Fields other) {
-        if (other != null) {
-            int length = Math.min(fieldNames.size(), other.fieldNames.size());
+        notNull(other, "other cannot be null");
 
-            // if other is greater then it is not a prefix of this field
-            if (other.fieldNames.size() > length) return false;
+        int length = Math.min(fieldNames.size(), other.fieldNames.size());
 
-            for (int i = 0; i < length; i++) {
-                String thisField = fieldNames.get(i);
-                String otherField = other.fieldNames.get(i);
-                if (!thisField.equals(otherField)) {
-                    return false;
-                }
+        // if other is greater then it is not a prefix of this field
+        if (other.fieldNames.size() > length) return false;
+
+        for (int i = 0; i < length; i++) {
+            String thisField = fieldNames.get(i);
+            String otherField = other.fieldNames.get(i);
+            if (!thisField.equals(otherField)) {
+                return false;
             }
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**

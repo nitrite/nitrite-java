@@ -61,7 +61,7 @@ class IndexOperations implements AutoCloseable {
             indexDescriptor = indexManager.createIndexDescriptor(fields, indexType);
         } else {
             // if index already there throw
-            throw new IndexingException("index already exists on " + fields);
+            throw new IndexingException("Index already exists on fields: " + fields);
         }
 
         buildIndex(indexDescriptor, false);
@@ -75,12 +75,12 @@ class IndexOperations implements AutoCloseable {
             buildIndexInternal(indexDescriptor, rebuild);
             return;
         }
-        throw new IndexingException("indexing is already running on " + indexDescriptor.getIndexFields());
+        throw new IndexingException("Index build already in progress on fields: " + indexDescriptor.getIndexFields());
     }
 
     void dropIndex(Fields fields) {
         if (getBuildFlag(fields).get()) {
-            throw new IndexingException("cannot drop index as indexing is running on " + fields);
+            throw new IndexingException("Index build already in progress on fields: " + fields);
         }
 
         IndexDescriptor indexDescriptor = findIndexDescriptor(fields);
@@ -92,14 +92,14 @@ class IndexOperations implements AutoCloseable {
             indexManager.dropIndexDescriptor(fields);
             indexBuildTracker.remove(fields);
         } else {
-            throw new IndexingException(fields + " is not indexed");
+            throw new IndexingException("Index does not exist on fields: " + fields);
         }
     }
 
     void dropAllIndices() {
         for (Map.Entry<Fields, AtomicBoolean> entry : indexBuildTracker.entrySet()) {
             if (entry.getValue() != null && entry.getValue().get()) {
-                throw new IndexingException("cannot drop index as indexing is running on " + entry.getKey());
+                throw new IndexingException("Index build already in progress on fields: " + entry.getKey());
             }
         }
 
@@ -113,16 +113,28 @@ class IndexOperations implements AutoCloseable {
             try {
                 future.get();
             } catch (InterruptedException | ExecutionException e) {
-                throw new IndexingException("failed to drop all indices", e);
+                throw new IndexingException("Failed to drop all indices", e);
             }
         }
 
         indexManager.dropIndexMeta();
         indexBuildTracker.clear();
+        indexManager.close();
 
         // recreate index manager to discard old native resources
         // special measure for RocksDB adapter
         this.indexManager = new IndexManager(collectionName, nitriteConfig);
+    }
+
+    void clear() {
+        for (Map.Entry<Fields, AtomicBoolean> entry : indexBuildTracker.entrySet()) {
+            if (entry.getValue() != null && entry.getValue().get()) {
+                throw new IndexingException("Index build already in progress on fields: " + entry.getKey());
+            }
+        }
+
+        indexManager.clearAll();
+        indexBuildTracker.clear();
     }
 
     boolean isIndexing(Fields field) {
@@ -144,17 +156,17 @@ class IndexOperations implements AutoCloseable {
         return indexManager.findExactIndexDescriptor(field);
     }
 
-    AtomicBoolean getBuildFlag(Fields field) {
+    boolean shouldRebuildIndex(Fields fields) {
+        return indexManager.isDirtyIndex(fields) && !getBuildFlag(fields).get();
+    }
+
+    private AtomicBoolean getBuildFlag(Fields field) {
         AtomicBoolean flag = indexBuildTracker.get(field);
         if (flag != null) return flag;
 
         flag = new AtomicBoolean(false);
         indexBuildTracker.put(field, flag);
         return flag;
-    }
-
-    boolean shouldRebuildIndex(Fields fields) {
-        return indexManager.isDirtyIndex(fields) && !getBuildFlag(fields).get();
     }
 
     private void buildIndexInternal(IndexDescriptor indexDescriptor, boolean rebuild) {
@@ -179,7 +191,7 @@ class IndexOperations implements AutoCloseable {
             }
         } finally {
             // remove dirty marker to denote indexing completed successfully
-            // if dirty marker is found in any index, it needs to be rebuild
+            // if dirty marker is found in any index, it needs to be rebuilt
             indexManager.endIndexing(fields);
             getBuildFlag(fields).set(false);
             alert(EventType.IndexEnd, fields);

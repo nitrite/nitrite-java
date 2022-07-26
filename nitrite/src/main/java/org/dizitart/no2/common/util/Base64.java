@@ -92,7 +92,7 @@ public class Base64 {
         // (It could contain less if it contains whitespace, etc.)
         Decoder decoder = new Decoder(flags, new byte[len*3/4]);
         if (!decoder.process(input, offset, len)) {
-            throw new IllegalArgumentException("bad base-64");
+            throw new IllegalArgumentException("Bad base-64 input");
         }
         // Maybe we got lucky and allocated exactly enough output space.
         if (decoder.op == decoder.output.length) {

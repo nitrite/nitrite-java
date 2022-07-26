@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.streams.MutatedObjectStream;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.common.mapper.NitriteMapper;
@@ -75,20 +76,20 @@ class ObjectCursor<T> implements Cursor<T> {
 
     private <D> Document emptyDocument(NitriteMapper nitriteMapper, Class<D> type) {
         if (type.isPrimitive()) {
-            throw new ValidationException("cannot project to primitive type");
+            throw new ValidationException("Cannot project to primitive type");
         } else if (type.isInterface()) {
-            throw new ValidationException("cannot project to interface");
+            throw new ValidationException("Cannot project to interface");
         } else if (type.isArray()) {
-            throw new ValidationException("cannot project to array");
+            throw new ValidationException("Cannot project to array");
         } else if (Modifier.isAbstract(type.getModifiers())) {
-            throw new ValidationException("cannot project to abstract type");
+            throw new ValidationException("Cannot project to abstract type");
         } else if (nitriteMapper.isValueType(type)) {
-            throw new ValidationException("cannot to project to nitrite mapper's value type");
+            throw new ValidationException("Cannot to project to nitrite mapper's value type");
         }
 
         Document dummyDoc = skeletonDocument(nitriteMapper, type);
         if (dummyDoc == null) {
-            throw new ValidationException("cannot project to empty type");
+            throw new ValidationException("Cannot project to empty type");
         } else {
             return dummyDoc;
         }
@@ -114,7 +115,7 @@ class ObjectCursor<T> implements Cursor<T> {
 
         @Override
         public void remove() {
-            throw new InvalidOperationException("remove on a cursor is not supported");
+            throw new InvalidOperationException("Remove on a cursor is not supported");
         }
     }
 }

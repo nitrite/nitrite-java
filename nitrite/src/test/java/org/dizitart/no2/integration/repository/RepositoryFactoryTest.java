@@ -22,7 +22,7 @@ import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.TestUtil;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -126,11 +126,6 @@ public class RepositoryFactoryTest {
 
         @Override
         public void addProcessor(Processor processor) {
-
-        }
-
-        @Override
-        public void removeProcessor(Processor processor) {
 
         }
 

@@ -151,12 +151,20 @@ public interface Document extends Iterable<Pair<String, Object>>, Cloneable, Ser
     Document merge(Document update);
 
     /**
-     * Checks if a key exists in the document.
+     * Checks if a top level key exists in the document.
      *
      * @param key the key
      * @return the boolean
      */
     boolean containsKey(String key);
+
+    /**
+     * Checks if a top level field or embedded field exists in the document.
+     *
+     * @param field the field
+     * @return the boolean
+     */
+    boolean containsField(String field);
 
     /**
      * Gets the document revision number.

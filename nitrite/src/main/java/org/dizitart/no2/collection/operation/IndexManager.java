@@ -103,17 +103,33 @@ public class IndexManager implements AutoCloseable {
     @Override
     public void close() {
         // close all index maps
-        Iterable<IndexMeta> indexMetas = indexMetaMap.values();
-        for (IndexMeta indexMeta : indexMetas) {
-            if (indexMeta != null && indexMeta.getIndexDescriptor() != null) {
-                String indexMapName = indexMeta.getIndexMap();
-                NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
-                indexMap.close();
+        if (!indexMetaMap.isClosed() && !indexMetaMap.isDropped()) {
+            Iterable<IndexMeta> indexMetas = indexMetaMap.values();
+            for (IndexMeta indexMeta : indexMetas) {
+                if (indexMeta != null && indexMeta.getIndexDescriptor() != null) {
+                    String indexMapName = indexMeta.getIndexMap();
+                    NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
+                    indexMap.close();
+                }
+            }
+
+            // close index meta
+            indexMetaMap.close();
+        }
+    }
+
+    public void clearAll() {
+        // close all index maps
+        if (!indexMetaMap.isClosed() && !indexMetaMap.isDropped()) {
+            Iterable<IndexMeta> indexMetas = indexMetaMap.values();
+            for (IndexMeta indexMeta : indexMetas) {
+                if (indexMeta != null && indexMeta.getIndexDescriptor() != null) {
+                    String indexMapName = indexMeta.getIndexMap();
+                    NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
+                    indexMap.clear();
+                }
             }
         }
-
-        // close index meta
-        indexMetaMap.close();
     }
 
     /**
@@ -181,7 +197,6 @@ public class IndexManager implements AutoCloseable {
     }
 
     void dropIndexMeta() {
-        indexMetaMap.clear();
         indexMetaMap.drop();
     }
 

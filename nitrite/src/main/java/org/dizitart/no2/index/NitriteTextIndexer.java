@@ -69,7 +69,7 @@ public class NitriteTextIndexer implements NitriteIndexer {
     @Override
     public void validateIndex(Fields fields) {
         if (fields.getFieldNames().size() > 1) {
-            throw new IndexingException("text index can only be created on a single field");
+            throw new IndexingException("Text index can only be created on a single field");
         }
     }
 

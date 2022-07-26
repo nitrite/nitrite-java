@@ -17,12 +17,14 @@
 package org.dizitart.no2.sync.message;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
-public class ConnectAck implements DataGateMessage {
+@EqualsAndHashCode(callSuper = true)
+public class ConnectAck extends BatchMessage {
     private MessageHeader header;
     private Long tombstoneTtl;
 }

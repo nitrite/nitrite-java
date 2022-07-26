@@ -22,7 +22,7 @@ import org.dizitart.no2.integration.repository.BaseObjectRepositoryTest;
 import org.dizitart.no2.integration.repository.data.SubEmployee;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.index.IndexType;
@@ -324,11 +324,10 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 repository.insert(txData2);
 
                 transaction.commit();
-                fail();
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(2, repository.size());
+                assertEquals(0, repository.size());
             }
         }
     }
@@ -454,7 +453,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 boolean expectedException = false;
                 try {
                     assertEquals(0, txRepo.size());
-                } catch (NitriteIOException e) {
+                } catch (TransactionException e) {
                     expectedException = true;
                 }
                 assertTrue(expectedException);

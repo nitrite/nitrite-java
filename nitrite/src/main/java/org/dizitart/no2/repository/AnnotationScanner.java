@@ -139,7 +139,7 @@ class AnnotationScanner {
                 String fieldName = StringUtils.isNullOrEmpty(id.fieldName()) ? field.getName() : id.fieldName();
                 indexValidator.validate(field.getType(), fieldName, nitriteMapper);
                 if (alreadyIdFound) {
-                    throw new NotIdentifiableException("multiple id fields found for the type");
+                    throw new NotIdentifiableException("Multiple id fields found for the type");
                 } else {
                     alreadyIdFound = true;
                     objectIdField = new ObjectIdField();

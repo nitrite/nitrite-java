@@ -27,13 +27,12 @@ import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.MigrationManager;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
-import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.store.UserAuthenticationService;
 import org.dizitart.no2.transaction.Session;
 
-import java.io.File;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,16 +59,6 @@ class NitriteDatabase implements Nitrite {
         this.lockService = new LockService();
         this.collectionFactory = new CollectionFactory(lockService);
         this.repositoryFactory = new RepositoryFactory(collectionFactory);
-        this.initialize(null, null);
-    }
-
-    NitriteDatabase(String username, String password, NitriteConfig config) {
-        validateUserCredentials(username, password);
-        this.nitriteConfig = config;
-        this.lockService = new LockService();
-        this.collectionFactory = new CollectionFactory(lockService);
-        this.repositoryFactory = new RepositoryFactory(collectionFactory);
-        this.initialize(username, password);
     }
 
     @Override
@@ -124,7 +113,7 @@ class NitriteDatabase implements Nitrite {
     }
 
     @Override
-    public Map<String, Set<String>> listKeyedRepository() {
+    public Map<String, Set<String>> listKeyedRepositories() {
         checkOpened();
         return store.getKeyedRepositoryRegistry();
     }
@@ -165,7 +154,7 @@ class NitriteDatabase implements Nitrite {
             storeInfo.close();
 
             if (nitriteConfig != null) {
-                // close all plugins
+                // close all plugins and store
                 nitriteConfig.close();
             }
 
@@ -173,7 +162,7 @@ class NitriteDatabase implements Nitrite {
         } catch (NitriteIOException e) {
             throw e;
         } catch (Throwable error) {
-            throw new NitriteIOException("error while shutting down nitrite", error);
+            throw new NitriteIOException("Error occurred while closing the database", error);
         }
     }
 
@@ -184,9 +173,9 @@ class NitriteDatabase implements Nitrite {
             try {
                 store.commit();
             } catch (Exception e) {
-                throw new NitriteIOException("failed to commit changes", e);
+                throw new NitriteIOException("Error occurred while committing the database", e);
             }
-            log.debug("Unsaved changes committed successfully.");
+            log.debug("Unsaved changes has been committed successfully.");
         }
     }
 
@@ -205,20 +194,11 @@ class NitriteDatabase implements Nitrite {
         return new Session(this, lockService);
     }
 
-    private void validateUserCredentials(String username, String password) {
-        if (isNullOrEmpty(username)) {
-            throw new NitriteSecurityException("username cannot be empty");
-        }
-        if (isNullOrEmpty(password)) {
-            throw new NitriteSecurityException("password cannot be empty");
-        }
-    }
-
-    private void initialize(String username, String password) {
+    public void initialize(String username, String password) {
+        validateUserCredentials(username, password);
         try {
             nitriteConfig.initialize();
             store = nitriteConfig.getNitriteStore();
-            boolean isExisting = isExisting();
 
             store.openOrCreate();
             prepareDatabaseMetaData();
@@ -227,29 +207,35 @@ class NitriteDatabase implements Nitrite {
             migrationManager.doMigrate();
 
             UserAuthenticationService userAuthenticationService = new UserAuthenticationService(store);
-            userAuthenticationService.authenticate(username, password, isExisting);
-        } catch (NitriteException e) {
-            log.error("Error while initializing the database", e);
-            if (store != null && !store.isClosed()) {
-                try {
-                    store.close();
-                } catch (Exception ex) {
-                    log.error("Error while closing the database", ex);
-                    throw new NitriteIOException("failed to close database", ex);
-                }
-            }
-            throw e;
+            userAuthenticationService.authenticate(username, password);
         } catch (Exception e) {
-            log.error("Error while initializing the database", e);
+            log.error("Error occurred while initializing the database", e);
             if (store != null && !store.isClosed()) {
                 try {
                     store.close();
                 } catch (Exception ex) {
-                    log.error("Error while closing the database");
-                    throw new NitriteIOException("failed to close database", ex);
+                    log.error("Error occurred while closing the database");
+                    throw new NitriteIOException("Failed to close database", ex);
                 }
             }
-            throw new NitriteIOException("failed to initialize database", e);
+            if (e instanceof NitriteException) {
+                throw e;
+            } else {
+                throw new NitriteIOException("Failed to initialize database", e);
+            }
+        }
+    }
+
+    private void validateUserCredentials(String username, String password) {
+        if (isNullOrEmpty(username) && isNullOrEmpty(password)) {
+            return;
+        }
+
+        if (isNullOrEmpty(username)) {
+            throw new NitriteSecurityException("Username is required");
+        }
+        if (isNullOrEmpty(password)) {
+            throw new NitriteSecurityException("Password is required");
         }
     }
 
@@ -265,14 +251,5 @@ class NitriteDatabase implements Nitrite {
 
             storeInfo.put(STORE_INFO, storeMetadata.getInfo());
         }
-    }
-
-    private boolean isExisting() {
-        String filePath = store.getStoreConfig().filePath();
-        if (!isNullOrEmpty(filePath)) {
-            File dbFile = new File(filePath);
-            return dbFile.exists();
-        }
-        return false;
     }
 }

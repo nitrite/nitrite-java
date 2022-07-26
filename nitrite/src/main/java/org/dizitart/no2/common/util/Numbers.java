@@ -65,7 +65,7 @@ public class Numbers {
                 return number.longValue();
             }
         }
-        throw new ValidationException("cannot cast number of type " + value.getClass().getName()
+        throw new ValidationException("Cannot cast number of type " + value.getClass().getName()
             + " to " + type.getName());
     }
 
@@ -91,7 +91,7 @@ public class Numbers {
         try {
             return new BigDecimal(number.toString());
         } catch (NumberFormatException e) {
-            throw new ValidationException("the given number (\"" + number + "\" of class "
+            throw new ValidationException("The given number (\"" + number + "\" of class "
                 + number.getClass().getName() + ") does not have a parsable string representation", e);
         }
     }

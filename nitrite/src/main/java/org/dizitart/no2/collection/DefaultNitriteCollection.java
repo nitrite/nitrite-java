@@ -20,7 +20,7 @@ import lombok.Getter;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.collection.operation.CollectionOperations;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
@@ -90,19 +90,6 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    @Override
-    public void removeProcessor(Processor processor) {
-        notNull(processor, "a null processor cannot be removed");
-
-        try {
-            writeLock.lock();
-            checkOpened();
-            collectionOperations.removeProcessor(processor);
-        } finally {
-            writeLock.unlock();
-        }
-    }
-
     public WriteResult insert(Document[] documents) {
         notNull(documents, "a null document cannot be inserted");
         containsNull(documents, "a null document cannot be inserted");
@@ -125,7 +112,7 @@ class DefaultNitriteCollection implements NitriteCollection {
             if (document.hasId()) {
                 return update(createUniqueFilter(document), document, updateOptions(false));
             } else {
-                throw new NotIdentifiableException("update operation failed as no id value found for the document");
+                throw new NotIdentifiableException("Update operation failed as the document does not have id");
             }
         }
     }
@@ -155,13 +142,13 @@ class DefaultNitriteCollection implements NitriteCollection {
                 writeLock.unlock();
             }
         } else {
-            throw new NotIdentifiableException("remove operation failed as no id value found for the document");
+            throw new NotIdentifiableException("Document has no id, cannot remove by document");
         }
     }
 
     public WriteResult remove(Filter filter, boolean justOne) {
         if ((filter == null || filter == Filter.ALL) && justOne) {
-            throw new InvalidOperationException("remove all cannot be combined with just once");
+            throw new InvalidOperationException("Cannot remove all documents with justOne set to true");
         }
 
         try {
@@ -177,7 +164,7 @@ class DefaultNitriteCollection implements NitriteCollection {
         try {
             writeLock.lock();
             checkOpened();
-            nitriteMap.clear();
+            collectionOperations.clear();
         } finally {
             writeLock.unlock();
         }
@@ -316,11 +303,11 @@ class DefaultNitriteCollection implements NitriteCollection {
             checkOpened();
 
             if (collectionOperations != null) {
-                // close collection and indexes
-                collectionOperations.close();
-
                 // drop collection and indexes
                 collectionOperations.dropCollection();
+
+                // close collection and indexes
+//                collectionOperations.close();
             }
 
             // set all reference to null
@@ -337,12 +324,22 @@ class DefaultNitriteCollection implements NitriteCollection {
         isDropped = true;
     }
 
+    public boolean isDropped() {
+        try {
+            readLock.lock();
+            return isDropped || nitriteMap == null || nitriteMap.isDropped();
+        } finally {
+            readLock.unlock();
+        }
+    }
+
     public boolean isOpen() {
         try {
             readLock.lock();
-            return nitriteStore != null && !nitriteStore.isClosed() && !isDropped;
+            return nitriteStore != null && !nitriteStore.isClosed()
+                && !isDropped && !nitriteMap.isClosed() && !nitriteMap.isDropped();
         } catch (Exception e) {
-            throw new NitriteIOException("failed to close the database", e);
+            throw new NitriteIOException("Failed to check the collection state", e);
         } finally {
             readLock.unlock();
         }
@@ -455,7 +452,7 @@ class DefaultNitriteCollection implements NitriteCollection {
 
     private void checkOpened() {
         if (isOpen()) return;
-        throw new NitriteIOException("collection is closed");
+        throw new NitriteIOException("Collection is closed");
     }
 
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
@@ -463,7 +460,7 @@ class DefaultNitriteCollection implements NitriteCollection {
 
         String[] indexFields = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(indexFields)) {
-            throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
+            throw new IndexingException("Cannot rebuild index, index is currently being built");
         }
     }
 

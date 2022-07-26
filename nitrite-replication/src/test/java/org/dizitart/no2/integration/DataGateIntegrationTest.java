@@ -1,204 +1,825 @@
 /*
- * Copyright (c) 2017-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.integration;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.Retry;
+import org.dizitart.no2.TestUtils;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.sync.Replica;
+import org.dizitart.no2.sync.event.ReplicationEvent;
+import org.dizitart.no2.sync.event.ReplicationEventType;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.Ignore;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.Network;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
+import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.shaded.org.bouncycastle.util.Objects;
+import org.testcontainers.utility.DockerImageName;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
-import static org.dizitart.no2.collection.Document.createDocument;
-import static org.dizitart.no2.integration.TestUtils.createDb;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
+import static org.dizitart.no2.TestUtils.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee
  */
 @Slf4j
+@Ignore
 public class DataGateIntegrationTest {
-    // TODO: Use https://www.testcontainers.org/ and use datagate-container for integration test
+    private final Network network = Network.newNetwork();
+    private String dbFile1, dbFile2;
+    private Nitrite db1, db2;
+    private GenericContainer<?> datagate;
+    private MongoDBContainer mongodb;
+    private GenericContainer<?> mongoSeed;
 
-    public static void main(String[] args) {
-        Path dbPath = null;
-        try {
-            createUser();
-            dbPath = Files.createTempFile("no2-datagate-it", "db");
+    @Rule(order = 0)
+    public Retry retry = new Retry(3);
 
-            Nitrite db = createDb(dbPath.toFile().getPath());
+    @Before
+    public void setUp() throws Exception {
+        Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
 
-            NitriteCollection collection = db.getCollection("datagateIntegration");
-            Document document = createDocument().put("firstName", "Anindya")
-                .put("lastName", "Chatterjee")
-                .put("address", createDocument("street", "1234 Abcd Street")
-                    .put("pin", 123456));
-            collection.insert(document);
+        mongodb = new MongoDBContainer(
+            DockerImageName.parse("mongo:latest"))
+            .withNetwork(network)
+            .withNetworkAliases("mongo")
+            .withExposedPorts(27017);
 
-            String jwt = getToken();
+        mongoSeed = new GenericContainer<>(new ImageFromDockerfile()
+            .withFileFromClasspath("appConfig.json", "mongo-seed/appConfig.json")
+            .withFileFromClasspath("serverConfig.json", "mongo-seed/serverConfig.json")
+            .withFileFromClasspath("Dockerfile", "mongo-seed/Dockerfile"))
+            .withNetwork(network);
 
-            System.out.println("Token - " + jwt);
-            Replica replica = Replica.builder()
-                .of(collection)
-                .remote("wss://127.0.0.1:3030/ws/datagate/abcd@gmail.com/datagateIntegration")
-                .jwtAuth("abcd@gmail.com", jwt)
-                .acceptAllCertificates(true)
-                .create();
+        mongodb.start();
+        mongoSeed.start();
 
-//            replica.subscribe(event -> {
-//                if (event.getEventType() == ReplicationEventType.Stopped) {
-//                    System.out.println("Reconnecting");
-//                    replica.connect();
-//                }
-//            });
+        datagate = new GenericContainer<>(
+            DockerImageName.parse("nitrite/nitrite-datagate:latest"))
+            .withEnv("MONGO_URL", "mongodb://mongo:27017/datagate")
+            .withImagePullPolicy(imageName -> false)
+            .withNetwork(network)
+            .withLogConsumer(logConsumer)
+            .withExposedPorts(46005);
 
-            replica.connect();
-            System.out.println("Connected");
-            Thread.sleep(10000);
-            System.out.println("Completed");
-            System.out.println("Collection Size - " + collection.size());
-            for (Document d : collection.find()) {
-                System.out.println(d);
+        datagate.start();
+
+        UserClient.createUser(datagate.getHost(), datagate.getFirstMappedPort(), "abcd@gmail.com");
+        UserClient.createUser(datagate.getHost(), datagate.getFirstMappedPort(), "abcd2@gmail.com");
+        UserClient.createUser(datagate.getHost(), datagate.getFirstMappedPort(), "abcd3@gmail.com");
+    }
+
+    @After
+    public void cleanUp() {
+        mongodb.stop();
+        mongoSeed.stop();
+        datagate.stop();
+
+        if (db1 != null && dbFile1 != null) {
+            if (!db1.isClosed()) {
+                db1.close();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+            TestUtils.deleteDb(dbFile1);
+        }
+
+        if (db2 != null && dbFile2 != null) {
+            if (!db2.isClosed()) {
+                db2.close();
+            }
+            TestUtils.deleteDb(dbFile2);
+        }
+    }
+
+    @Test
+    public void testSingleUserSingleReplica() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
+
+        db1 = createDb(dbFile1);
+        NitriteCollection c1 = db1.getCollection("testSingleUserSingleReplica");
+
+        Replica replica = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("integration-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .create();
+
+        replica.connect();
+
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
             try {
-                if (dbPath != null) {
-                    Files.delete(dbPath);
-                }
-            } catch (Exception e) {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+
+        await().atMost(5, SECONDS).until(() -> c1.size() == 10);
+        c1.remove(Filter.ALL);
+        await().atMost(5, SECONDS).until(() -> c1.size() == 0);
+        replica.disconnectNow();
     }
 
-    private static void createUser() throws Exception {
-        OkHttpClient client = getUnsafeOkHttpClient();
-        Request request = new Request.Builder()
-            .url("https://127.0.0.1:3030/exists?email=abcd@gmail.com")
-            .build();
+    @Test
+    public void testSingleUserMultiReplica() throws Exception {
+        dbFile1 = getRandomTempDbFile();
+        dbFile2 = getRandomTempDbFile();
 
-        Call call = client.newCall(request);
-        Response response = call.execute();
-        ObjectMapper mapper = new ObjectMapper();
-        assert response.body() != null;
-        JsonNode jsonNode = mapper.readValue(response.body().string(), JsonNode.class);
-        if (jsonNode.has("exists")) {
-            if (jsonNode.get("exists").asBoolean()) {
-                return;
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        db1 = createDb(dbFile1);
+        db2 = createDb(dbFile2);
+
+        NitriteCollection c1 = db1.getCollection("testSingleUserMultiReplica");
+        NitriteCollection c2 = db2.getCollection("testSingleUserMultiReplica");
+
+        String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
+
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("integration-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
+            .acceptAllCertificates(true)
+            .create();
+
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("integration-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r2")
+            .acceptAllCertificates(true)
+            .create();
+
+        r1.connect();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+        }
+
+        await().atMost(5, SECONDS).until(() -> c1.size() == 10);
+        assertEquals(c2.size(), 0);
+
+        r2.connect();
+        await().atMost(15, SECONDS).until(() -> c2.size() == 10);
+
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
-        String json = "{" +
-            "\"email\":\"abcd@gmail.com\"," +
-            "\"password\":\"chang3me\"," +
-            "\"firstName\":\"Anindya\"," +
-            "\"lastName\":\"Chatterjee\"," +
-            "\"roles\": [\"admin\"]}";
-        RequestBody body = RequestBody.create(
-            MediaType.parse("application/json"), json);
-
-        request = new Request.Builder()
-            .url("https://127.0.0.1:3030/register")
-            .post(body)
-            .build();
-
-        call = client.newCall(request);
-        response = call.execute();
-
-        if (response.code() != 201) {
-            throw new Exception("user creation failed");
-        }
-    }
-
-    private static String getToken() throws Exception {
-        OkHttpClient client = getUnsafeOkHttpClient();
-        String json = "{" +
-            "\"email\":\"abcd@gmail.com\"," +
-            "\"password\":\"chang3me\"}";
-        RequestBody body = RequestBody.create(
-            MediaType.parse("application/json"), json);
-
-        Request request = new Request.Builder()
-            .url("https://127.0.0.1:3030/login")
-            .post(body)
-            .build();
-
-        Call call = client.newCall(request);
-        Response response = call.execute();
-
-        if (response.code() == 200) {
-            assert response.body() != null;
-            json = response.body().string();
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode jsonNode = mapper.readValue(json, JsonNode.class);
-
-            if (jsonNode.has("token")) {
-                return jsonNode.get("token").asText();
+        for (int i = 0; i < 20; i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
 
-        throw new Exception("failed to login");
+
+        await().atMost(10, SECONDS).until(() -> c1.size() == 40);
+        assertEquals(c2.size(), 40);
+
+        r1.disconnect();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (int i = 0; i < 20; i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        r1.connect();
+        await().atMost(10, SECONDS).until(() -> c1.size() == 70 && c2.size() == 70);
+        TestUtils.assertEquals(c1, c2);
+
+        c2.remove(Filter.ALL);
+
+        await().atMost(10, SECONDS).until(() -> c2.size() == 0);
+
+        await().atMost(30, SECONDS).until(() -> c1.size() == 0);
+        TestUtils.assertEquals(c1, c2);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
     }
 
-    private static OkHttpClient getUnsafeOkHttpClient() {
-        try {
-            final TrustManager[] trustAllCerts = new TrustManager[]{
-                new X509TrustManager() {
+    @Test
+    public void testMultiUserSingleReplica() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
 
-                    @Override
-                    public void checkClientTrusted(java.security.cert.X509Certificate[] chain,
-                                                   String authType) {
-                    }
+        String jwt1 = UserClient.getToken(host, port, "abcd@gmail.com");
+        String jwt2 = UserClient.getToken(host, port, "abcd2@gmail.com");
+        String jwt3 = UserClient.getToken(host, port, "abcd3@gmail.com");
 
-                    @Override
-                    public void checkServerTrusted(java.security.cert.X509Certificate[] chain,
-                                                   String authType) {
-                    }
+        Nitrite db1 = createDb();
+        NitriteCollection c1 = db1.getCollection("testMultiUserSingleReplica");
 
-                    @Override
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new java.security.cert.X509Certificate[]{};
-                    }
+        Nitrite db2 = createDb();
+        NitriteCollection c2 = db2.getCollection("testMultiUserSingleReplica");
+
+        Nitrite db3 = createDb();
+        NitriteCollection c3 = db3.getCollection("testMultiUserSingleReplica");
+
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt1)
+            .create();
+        r1.connect();
+
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd2@gmail.com", jwt2)
+            .create();
+        r2.connect();
+
+        Replica r3 = Replica.builder()
+            .database(db3)
+            .of(c3)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd3@gmail.com", jwt3)
+            .create();
+        r3.connect();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+        }
+
+        for (int i = 0; i < 20; i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+        }
+
+        for (int i = 0; i < 30; i++) {
+            Document document = randomDocument();
+            c3.insert(document);
+        }
+
+        await().atMost(5, SECONDS).until(() -> c1.size() == 10 && c2.size() == 20 && c3.size() == 30);
+
+        TestUtils.assertNotEquals(c1, c2);
+        TestUtils.assertNotEquals(c1, c3);
+        TestUtils.assertNotEquals(c2, c3);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
+        r3.disconnectNow();
+    }
+
+    @Test
+    public void testMultiUserMultiReplica() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        String jwt1 = UserClient.getToken(host, port, "abcd@gmail.com");
+        String jwt2 = UserClient.getToken(host, port, "abcd2@gmail.com");
+
+        Nitrite db1 = createDb();
+        NitriteCollection c1 = db1.getCollection("testMultiUserSingleReplica1");
+
+        Nitrite db2 = createDb();
+        NitriteCollection c2 = db2.getCollection("testMultiUserSingleReplica2");
+
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt1)
+            .create();
+        r1.connect();
+
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd2@gmail.com", jwt2)
+            .create();
+        r2.connect();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+        }
+
+        for (int i = 0; i < 20; i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+        }
+
+        await().atMost(5, SECONDS).until(() -> c1.size() == 10 && c2.size() == 20);
+
+        TestUtils.assertNotEquals(c1, c2);
+        r1.disconnectNow();
+        r2.disconnectNow();
+    }
+
+    @Test
+    public void testSecurityInCorrectCredentials() {
+        dbFile1 = getRandomTempDbFile();
+
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        db1 = createDb(dbFile1);
+        NitriteCollection c1 = db1.getCollection("testSecurityInCorrectCredentials");
+
+        AtomicReference<ReplicationEvent> errorEvent = new AtomicReference<>();
+
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", "wrong_token")
+            .addReplicationEventListener(event -> {
+                if (event.getEventType() == ReplicationEventType.Error && errorEvent.get() == null) {
+                    errorEvent.set(event);
                 }
-            };
+            })
+            .create();
+        r1.connect();
 
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
-
-            builder.hostnameVerifier((hostname, session) -> true);
-
-            return builder.build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
         }
+
+        assertEquals(c1.size(), 10);
+
+        await().atMost(5, SECONDS).until(() -> {
+            ReplicationEvent replicationEvent = errorEvent.get();
+            return replicationEvent.getError().getMessage().contains("failed to validate token");
+        });
+        r1.disconnectNow();
+    }
+
+    @Test
+    public void testCloseDbAndReconnect() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
+
+        dbFile1 = getRandomTempDbFile();
+        dbFile2 = getRandomTempDbFile();
+
+        db1 = createDb(dbFile1);
+        db2 = createDb(dbFile2);
+
+        NitriteCollection c1 = db1.getCollection("testCloseDbAndReconnect");
+        NitriteCollection c2 = db2.getCollection("testCloseDbAndReconnect");
+
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
+            .create();
+
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r2")
+            .create();
+
+        r1.connect();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+        }
+
+        NitriteCollection finalC1 = c1;
+        await().atMost(5, SECONDS).until(() -> finalC1.size() == 10);
+        assertEquals(c2.size(), 0);
+
+        r2.connect();
+        await().atMost(5, SECONDS).until(() -> c2.size() == 10);
+
+        Random random = new Random();
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+        }
+
+        for (int i = 0; i < 20; i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        NitriteCollection finalC2 = c1;
+        await().atMost(10, SECONDS).until(() -> finalC2.size() == 40);
+        assertEquals(c2.size(), 40);
+
+        r1.disconnect();
+        r1.close();
+        db1.close();
+
+        db1 = createDb(dbFile1);
+        c1 = db1.getCollection("testCloseDbAndReconnect");
+        r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
+            .create();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        for (int i = 0; i < 20; i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+            try {
+                Thread.sleep(random.nextInt(100));
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        r1.connect();
+        NitriteCollection finalC = c1;
+        await().atMost(10, SECONDS).until(() -> finalC.size() == 70 && c2.size() == 70);
+        TestUtils.assertEquals(c1, c2);
+
+        c2.remove(Filter.ALL);
+
+        await().atMost(10, SECONDS).until(() -> finalC.size() == 0);
+        TestUtils.assertEquals(c1, c2);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
+    }
+
+    @Test
+    public void testDelayedConnect() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
+
+        dbFile1 = getRandomTempDbFile();
+
+        db1 = createDb(dbFile1);
+
+        NitriteCollection c1 = db1.getCollection("testDelayedConnect");
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .create();
+
+        r1.connect();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+        }
+
+        // allow it to reach the datagate server
+        Thread.sleep(5000);
+
+        r1.disconnect();
+        r1.close();
+        db1.close();
+
+        Nitrite db2 = createDb();
+        NitriteCollection c2 = db2.getCollection("testDelayedConnect");
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .create();
+        r2.connect();
+        await().atMost(5, SECONDS).until(() -> c2.size() == 10);
+
+        r1.disconnectNow();
+        r2.disconnectNow();
+    }
+
+    @Test
+    public void testDelayedConnectRemoveAll() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
+
+        dbFile1 = getRandomTempDbFile();
+
+        db1 = createDb(dbFile1);
+        NitriteCollection c1 = db1.getCollection("testDelayedConnect");
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
+            .create();
+
+        r1.connect();
+
+        for (int i = 0; i < 10; i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+        }
+
+        c1.remove(Filter.ALL);
+        assertEquals(c1.size(), 0);
+
+        r1.disconnect();
+        r1.close();
+        db1.close();
+
+        Nitrite db2 = createDb();
+        NitriteCollection c2 = db2.getCollection("testDelayedConnect");
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r2")
+            .create();
+
+        r2.connect();
+
+        for (int i = 0; i < 5; i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+        }
+
+        db1 = createDb(dbFile1);
+        NitriteCollection c3 = db1.getCollection("testDelayedConnect");
+        r1 = Replica.builder()
+            .database(db1)
+            .of(c3)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
+            .create();
+
+        r1.connect();
+
+        await().atMost(5, SECONDS).until(() -> {
+            List<Document> l1 = c3.find().toList().stream().map(TestUtils::trimMeta).collect(Collectors.toList());
+            List<Document> l2 = c2.find().toList().stream().map(TestUtils::trimMeta).collect(Collectors.toList());
+            return l1.equals(l2);
+        });
+
+        r1.disconnectNow();
+        r2.disconnectNow();
+    }
+
+    @Test
+    public void testHighestRevisionWin() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
+
+        dbFile1 = getRandomTempDbFile();
+        dbFile2 = getRandomTempDbFile();
+
+        db1 = createDb(dbFile1);
+        db2 = createDb(dbFile2);
+
+        NitriteCollection c1 = db1.getCollection("testHighestRevisionWin");
+        NitriteCollection c2 = db2.getCollection("testHighestRevisionWin");
+
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
+            .create();
+
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r2")
+            .create();
+
+        r1.connect();
+        r2.connect();
+
+        Document document = randomDocument();
+        c1.insert(document);
+
+        await().atMost(5, SECONDS).until(() -> c2.size() == 1);
+
+        Document d2 = c2.find().firstOrNull();
+        d2.put("age", 38);
+
+        assertTrue(Objects.areEqual(c1.find().firstOrNull().getRevision(), 1));
+        assertNotEquals(c1.find().firstOrNull().get("age"), d2.get("age"));
+
+        c2.update(d2);
+
+        await().atMost(5, SECONDS).until(() -> {
+            Document d1 = c1.find().firstOrNull();
+            return Objects.areEqual(d1.get("age"), 38) && Objects.areEqual(d1.getRevision(), 2);
+        });
+    }
+
+    @Test
+    public void testRandomInsertDelete() throws Exception {
+        String host = datagate.getHost();
+        Integer port = datagate.getMappedPort(46005);
+
+        String jwt = UserClient.getToken(host, port, "abcd@gmail.com");
+
+        dbFile1 = getRandomTempDbFile();
+        dbFile2 = getRandomTempDbFile();
+
+        db1 = createDb(dbFile1);
+        db2 = createDb(dbFile2);
+
+        NitriteCollection c1 = db1.getCollection("testRandomInsertDelete");
+        NitriteCollection c2 = db2.getCollection("testRandomInsertDelete");
+
+        Replica r1 = Replica.builder()
+            .database(db1)
+            .of(c1)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r1")
+            .create();
+
+        Replica r2 = Replica.builder()
+            .database(db2)
+            .of(c2)
+            .remoteHost(host)
+            .remotePort(port)
+            .tenant("junit-test")
+            .jwtAuth("abcd@gmail.com", jwt)
+            .replicaName("r2")
+            .create();
+
+        r1.connect();
+        r2.connect();
+
+        Random random = new Random();
+
+        // insert
+        for (int i = 0; i < random.nextInt(50); i++) {
+            Document document = randomDocument();
+            c1.insert(document);
+            Thread.sleep(random.nextInt(100));
+        }
+
+        // insert
+        for (int i = 0; i < random.nextInt(30); i++) {
+            Document document = randomDocument();
+            c2.insert(document);
+            Thread.sleep(random.nextInt(100));
+        }
+
+        // update
+        DocumentCursor cursor = c1.find();
+        for (Document document : cursor) {
+            document.put("age", random.nextInt());
+            c1.update(document);
+        }
+
+        // delete
+        for (int i = 0; i < random.nextInt(30); i++) {
+            Document document = c1.find().firstOrNull();
+            c1.remove(document);
+            Thread.sleep(random.nextInt(100));
+        }
+
+        await().atMost(20, SECONDS).until(() -> c1.size() > 0 && c1.size() == c2.size());
+        System.out.println("C1 Size = " + c1.size());
+        TestUtils.assertEquals(c1, c2);
     }
 }

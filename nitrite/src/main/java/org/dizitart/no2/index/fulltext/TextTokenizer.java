@@ -35,7 +35,7 @@ public interface TextTokenizer {
     Languages getLanguage();
 
     /**
-     * Tokenize a `text` and discards all stop-words from it.
+     * Tokenize a <code>text</code> and discards all stop-words from it.
      *
      * @param text the text to tokenize
      * @return the set of tokens.

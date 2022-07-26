@@ -20,7 +20,7 @@ package org.dizitart.kno2
 import com.github.javafaker.Faker
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.collection.UpdateOptions
-import org.dizitart.no2.collection.meta.Attributes
+import org.dizitart.no2.common.meta.Attributes
 import org.dizitart.no2.exceptions.NitriteIOException
 import org.dizitart.no2.exceptions.TransactionException
 import org.dizitart.no2.filters.FluentFilter
@@ -485,7 +485,7 @@ class TransactionTest: BaseTest() {
                 var expectedException = false
                 try {
                     Assert.assertEquals(0, txCol.size())
-                } catch (e: NitriteIOException) {
+                } catch (e: TransactionException) {
                     expectedException = true
                 }
                 Assert.assertTrue(expectedException)

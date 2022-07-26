@@ -163,31 +163,31 @@ public class ValidationUtils {
 
     private static void validateArrayIndexItem(Object value, String field) {
         if (value instanceof Iterable || value.getClass().isArray()) {
-            throw new InvalidOperationException("nested array index on iterable field " + field + " is not supported");
+            throw new InvalidOperationException("Nested iterables are not supported");
         }
 
         if (!(value instanceof Comparable)) {
-            throw new IndexingException("cannot index on an array field containing non comparable values " + field);
+            throw new IndexingException("Each value in the iterable field " + field + " must implement Comparable");
         }
     }
 
     private static void validateStringArrayItem(Object value, String field) {
         if (!(value instanceof String) && (value instanceof Iterable || value.getClass().isArray())) {
-            throw new InvalidOperationException("nested array index on iterable field " + field + " is not supported");
+            throw new InvalidOperationException("Nested iterables are not supported");
         }
 
         if (!(value instanceof String)) {
-            throw new IndexingException("cannot index on an array field containing non string values " + field);
+            throw new IndexingException("Each value in the iterable field " + field + " must be a string");
         }
     }
 
     private static void validateArrayFilterItem(Object value, String field) {
         if (value instanceof Iterable || value.getClass().isArray()) {
-            throw new InvalidOperationException("nested array is not supported");
+            throw new InvalidOperationException("Nested array is not supported");
         }
 
         if (!(value instanceof Comparable)) {
-            throw new IndexingException("cannot filter using non comparable values " + field);
+            throw new IndexingException("Cannot filter using non comparable values " + field);
         }
     }
 }

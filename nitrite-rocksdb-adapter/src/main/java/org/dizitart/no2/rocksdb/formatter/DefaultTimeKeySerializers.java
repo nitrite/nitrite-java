@@ -30,7 +30,7 @@ class DefaultTimeKeySerializers {
             try {
                 return format.parse(value);
             } catch (Exception e) {
-                throw new NitriteIOException("failed to read java.util.Date", e);
+                throw new NitriteIOException("Failed to read java.util.Date", e);
             }
         }
     }
@@ -47,7 +47,7 @@ class DefaultTimeKeySerializers {
             try {
                 return new Timestamp(format.parse(value).getTime());
             } catch (Exception e) {
-                throw new NitriteIOException("failed to read java.sql.Timestamp", e);
+                throw new NitriteIOException("Failed to read java.sql.Timestamp", e);
             }
         }
     }
@@ -64,7 +64,7 @@ class DefaultTimeKeySerializers {
             try {
                 return new java.sql.Date(format.parse(value).getTime());
             } catch (Exception e) {
-                throw new NitriteIOException("failed to read java.sql.Date", e);
+                throw new NitriteIOException("Failed to read java.sql.Date", e);
             }
         }
     }
@@ -81,7 +81,7 @@ class DefaultTimeKeySerializers {
             try {
                 return new Time(format.parse(value).getTime());
             } catch (Exception e) {
-                throw new NitriteIOException("failed to read java.sql.Time", e);
+                throw new NitriteIOException("Failed to read java.sql.Time", e);
             }
         }
     }
@@ -100,7 +100,7 @@ class DefaultTimeKeySerializers {
                 cal.setTime(format.parse(input));
                 return cal;
             } catch (Exception e) {
-                throw new NitriteIOException("failed to read java.util.Date", e);
+                throw new NitriteIOException("Failed to read java.util.Date", e);
             }
         }
     }

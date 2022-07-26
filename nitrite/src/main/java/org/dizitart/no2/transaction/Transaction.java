@@ -22,7 +22,7 @@ public interface Transaction extends AutoCloseable {
      *
      * @return the state
      */
-    State getState();
+    TransactionState getState();
 
     /**
      * Gets a {@link NitriteCollection} to perform ACID operations on it.

@@ -25,7 +25,7 @@ import org.dizitart.no2.sync.message.*;
  * @author Anindya Chatterjee
  */
 public class MessageTransformer {
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public MessageTransformer(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -58,7 +58,7 @@ public class MessageTransformer {
                 return objectMapper.treeToValue(jsonNode, DataGateFeedAck.class);
             }
         } catch (JsonProcessingException e) {
-            throw new ReplicationException("failed to transform message from server", e, true);
+            throw new ReplicationException("Failed to transform message from server", e, true);
         }
         return null;
     }

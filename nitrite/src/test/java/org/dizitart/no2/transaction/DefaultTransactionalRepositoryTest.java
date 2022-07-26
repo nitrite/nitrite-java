@@ -19,7 +19,7 @@ package org.dizitart.no2.transaction;
 
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
+import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.mockito.Mockito.*;
 
 public class DefaultTransactionalRepositoryTest {
@@ -37,16 +38,6 @@ public class DefaultTransactionalRepositoryTest {
         doNothing().when(defaultTransactionalRepository).addProcessor(any());
         defaultTransactionalRepository.addProcessor(new ProcessorChain());
         verify(defaultTransactionalRepository).addProcessor(any());
-    }
-
-    @Test
-    public void testRemoveProcessor() {
-        DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
-            DefaultTransactionalRepository.class);
-        doNothing().when(defaultTransactionalRepository)
-            .removeProcessor(any());
-        defaultTransactionalRepository.removeProcessor(new ProcessorChain());
-        verify(defaultTransactionalRepository).removeProcessor(any());
     }
 
     @Test
@@ -134,9 +125,9 @@ public class DefaultTransactionalRepositoryTest {
     public void testUpdate2() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        when(defaultTransactionalRepository.update(any(), (Object) any(), anyBoolean())).thenReturn(null);
-        defaultTransactionalRepository.update(mock(Filter.class), "Update", true);
-        verify(defaultTransactionalRepository).update(any(), (Object) any(), anyBoolean());
+        when(defaultTransactionalRepository.update(any(), (Object) any(), any())).thenReturn(null);
+        defaultTransactionalRepository.update(mock(Filter.class), "Update", updateOptions(true));
+        verify(defaultTransactionalRepository).update(any(), (Object) any(), any());
     }
 
     @Test

@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.common;
 
+import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.Test;
 
 import java.util.List;
@@ -55,7 +56,7 @@ public class FieldsTest {
         assertTrue(fields.startsWith(new Fields()));
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testStartsWith2() {
         assertFalse((new Fields()).startsWith(null));
     }

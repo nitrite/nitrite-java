@@ -15,7 +15,7 @@ class RocksDBStoreUtils {
         if (!isNullOrEmpty(storeConfig.filePath())) {
             db = StoreFactory.createDBReference(storeConfig);
         } else {
-            throw new InvalidOperationException("nitrite rocksdb store does not support in-memory database");
+            throw new InvalidOperationException("Nitrite rocksdb store does not support in-memory database");
         }
         return db;
     }

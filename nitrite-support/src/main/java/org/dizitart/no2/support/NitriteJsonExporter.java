@@ -60,7 +60,7 @@ class NitriteJsonExporter {
         if (collections.isEmpty()) {
             collectionNames = db.listCollectionNames();
             repositoryNames = db.listRepositories();
-            keyedRepositoryNames = db.listKeyedRepository();
+            keyedRepositoryNames = db.listKeyedRepositories();
         } else {
             collectionNames = new HashSet<>();
             repositoryNames = new HashSet<>();
@@ -220,7 +220,7 @@ class NitriteJsonExporter {
                 return Hex.encodeHexString(data);
             }
         } catch (IOException e) {
-            throw new NitriteIOException("failed to write object", e);
+            throw new NitriteIOException("Failed to write object", e);
         }
     }
 }

@@ -47,12 +47,6 @@ public class NitriteConfigTest {
 
     @Test
     public void testFieldSeparator() {
-        // TODO: This test is incomplete.
-        //   Reason: No meaningful assertions found.
-        //   To help Diffblue Cover to find assertions, please add getters to the
-        //   class under test that return fields written by the method under test.
-        //   See https://diff.blue/R004
-
         (new NitriteConfig()).fieldSeparator("Separator");
     }
 
@@ -75,39 +69,39 @@ public class NitriteConfigTest {
     public void testAddMigration2() {
         NitriteConfig nitriteConfig = new NitriteConfig();
         Migration migration = mock(Migration.class);
-        when(migration.getEndVersion()).thenReturn(1);
-        when(migration.getStartVersion()).thenReturn(1);
+        when(migration.getToVersion()).thenReturn(1);
+        when(migration.getFromVersion()).thenReturn(1);
         assertSame(nitriteConfig, nitriteConfig.addMigration(migration));
-        verify(migration).getEndVersion();
-        verify(migration).getStartVersion();
+        verify(migration).getToVersion();
+        verify(migration).getFromVersion();
     }
 
     @Test
     public void testAddMigration3() {
         NitriteConfig nitriteConfig = new NitriteConfig();
         Migration migration = mock(Migration.class);
-        when(migration.getEndVersion()).thenReturn(4);
-        when(migration.getStartVersion()).thenReturn(1);
+        when(migration.getToVersion()).thenReturn(4);
+        when(migration.getFromVersion()).thenReturn(1);
         assertSame(nitriteConfig, nitriteConfig.addMigration(migration));
-        verify(migration).getEndVersion();
-        verify(migration).getStartVersion();
+        verify(migration).getToVersion();
+        verify(migration).getFromVersion();
     }
 
     @Test
     public void testAddMigration4() {
         NitriteConfig nitriteConfig = new NitriteConfig();
         Migration migration = mock(Migration.class);
-        when(migration.getEndVersion()).thenReturn(1);
-        when(migration.getStartVersion()).thenReturn(4);
+        when(migration.getToVersion()).thenReturn(1);
+        when(migration.getFromVersion()).thenReturn(4);
         assertSame(nitriteConfig, nitriteConfig.addMigration(migration));
-        verify(migration).getEndVersion();
-        verify(migration).getStartVersion();
+        verify(migration).getToVersion();
+        verify(migration).getFromVersion();
     }
 
     @Test
     public void testSchemaVersion() {
         NitriteConfig nitriteConfig = new NitriteConfig();
-        NitriteConfig actualSchemaVersionResult = nitriteConfig.schemaVersion(1);
+        NitriteConfig actualSchemaVersionResult = nitriteConfig.currentSchemaVersion(1);
         assertSame(nitriteConfig, actualSchemaVersionResult);
         assertEquals(1, actualSchemaVersionResult.getSchemaVersion().intValue());
     }

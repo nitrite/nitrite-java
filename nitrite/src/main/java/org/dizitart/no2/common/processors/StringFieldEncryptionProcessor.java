@@ -88,7 +88,7 @@ public class StringFieldEncryptionProcessor implements Processor {
             return copy;
         } catch (Exception e) {
             log.error("Error while processing document before write", e);
-            throw new NitriteIOException("failed to process document before write", e);
+            throw new NitriteIOException("Failed to process document before write", e);
         }
     }
 
@@ -111,7 +111,7 @@ public class StringFieldEncryptionProcessor implements Processor {
             return copy;
         } catch (Exception e) {
             log.error("Error while processing document after read", e);
-            throw new NitriteIOException("failed to process document after read", e);
+            throw new NitriteIOException("Failed to process document after read", e);
         }
     }
 }

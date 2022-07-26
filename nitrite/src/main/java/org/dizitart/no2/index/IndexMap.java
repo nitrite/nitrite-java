@@ -21,6 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 

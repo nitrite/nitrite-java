@@ -115,22 +115,23 @@ public class ProjectedDocumentStream implements RecordStream<Document> {
 
         @Override
         public void remove() {
-            throw new InvalidOperationException("remove on a cursor is not supported");
+            throw new InvalidOperationException("Remove on a cursor is not supported");
         }
 
         private Document project(Document original) {
             if (projection == null) return original;
-            Document result = original.clone();
+            Document newDoc = Document.createDocument();
 
-            for (Pair<String, Object> pair : original) {
-                if (!projection.containsKey(pair.getFirst())) {
-                    result.remove(pair.getFirst());
+            for (String field : projection.getFields()) {
+                if (original.containsField(field)) {
+                    Object value = original.get(field);
+                    newDoc.put(field, value);
                 }
             }
 
             // process the result
-            result = processorChain.processAfterRead(result);
-            return result;
+            newDoc = processorChain.processAfterRead(newDoc);
+            return newDoc;
         }
     }
 }

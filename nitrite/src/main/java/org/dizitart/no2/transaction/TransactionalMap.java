@@ -64,7 +64,7 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         if (result == null) {
             result = primary.get(k);
             if (result instanceof CopyOnWriteArrayList) {
-                // create a deep copy of the list so that it does not effect the original one
+                // create a deep copy of the list so that it does not affect the original one
                 List<?> list = deepCopy((CopyOnWriteArrayList<?>) result);
                 backingMap.put(k, (V) list);
                 result = (V) list;
@@ -284,22 +284,29 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     @Override
     public void drop() {
         if (!droppedFlag.get()) {
-            droppedFlag.compareAndSet(false, true);
-            closedFlag.compareAndSet(false, true);
-
-            cleared = true;
             backingMap.clear();
             tombstones.clear();
+            cleared = true;
+            droppedFlag.compareAndSet(false, true);
         }
     }
 
     @Override
+    public boolean isDropped() {
+        return droppedFlag.get();
+    }
+
+    @Override
     public void close() {
-        if (!closedFlag.get() && !droppedFlag.get()) {
-            closedFlag.compareAndSet(false, true);
-            backingMap.clear();
-            tombstones.clear();
-        }
+        backingMap.clear();
+        tombstones.clear();
+        cleared = true;
+        closedFlag.compareAndSet(false, true);
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closedFlag.get();
     }
 
     private RecordStream<Pair<K, V>> getStream(RecordStream<Pair<K, V>> primaryStream,

@@ -16,8 +16,6 @@
 
 package org.dizitart.no2.common.util;
 
-import org.dizitart.no2.common.UnknownType;
-
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -136,15 +134,6 @@ public class Iterables {
             count++;
         }
         return count;
-    }
-
-    public static Class<?> getElementType(Iterable<?> iterable) {
-        if (iterable == null) return UnknownType.class;
-        Iterator<?> iterator = iterable.iterator();
-        if (iterator.hasNext()) {
-            return iterator.next().getClass();
-        }
-        return UnknownType.class;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

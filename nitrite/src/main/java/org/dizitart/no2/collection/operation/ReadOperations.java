@@ -21,10 +21,7 @@ import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.streams.*;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.filters.EqualsFilter;
-import org.dizitart.no2.filters.Filter;
-import org.dizitart.no2.filters.LogicalFilter;
-import org.dizitart.no2.filters.NitriteFilter;
+import org.dizitart.no2.filters.*;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.common.processors.ProcessorChain;
@@ -73,7 +70,11 @@ class ReadOperations {
     }
 
     Document getById(NitriteId nitriteId) {
-        return nitriteMap.get(nitriteId);
+        Document document = nitriteMap.get(nitriteId);
+        if (processorChain != null) {
+            document = processorChain.processAfterRead(document);
+        }
+        return document;
     }
 
     private void prepareFilter(Filter filter) {
@@ -104,6 +105,13 @@ class ReadOperations {
         }
     }
 
+    private DocumentCursor createCursor(FindPlan findPlan) {
+        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(findPlan);
+        DocumentStream cursor = new DocumentStream(recordStream, processorChain);
+        cursor.setFindPlan(findPlan);
+        return cursor;
+    }
+
     private RecordStream<Pair<NitriteId, Document>> findSuitableStream(FindPlan findPlan) {
         RecordStream<Pair<NitriteId, Document>> rawStream;
 
@@ -114,17 +122,21 @@ class ReadOperations {
                 RecordStream<Pair<NitriteId, Document>> suitableStream = findSuitableStream(subPlan);
                 subStreams.add(suitableStream);
             }
-            // union of all suitable stream of all sub plans
-            rawStream = new UnionStream(subStreams);
 
-            // return only distinct items
-            rawStream = new DistinctStream(rawStream);
+            // concat all suitable stream of all sub plans
+            rawStream = new ConcatStream(subStreams);
+
+            if (findPlan.isDistinct()) {
+                // return only distinct items
+                rawStream = new DistinctStream(rawStream);
+            }
         } else {
             // and or single filter
             if (findPlan.getByIdFilter() != null) {
-                EqualsFilter byIdFilter = findPlan.getByIdFilter();
+                FieldBasedFilter byIdFilter = findPlan.getByIdFilter();
                 NitriteId nitriteId = NitriteId.createId((String) byIdFilter.getValue());
-                rawStream = RecordStream.single(pair(nitriteId, nitriteMap.get(nitriteId)));
+                Document document = nitriteMap.get(nitriteId);
+                rawStream = RecordStream.single(pair(nitriteId, document));
             } else {
                 IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
                 if (indexDescriptor != null) {
@@ -153,17 +165,10 @@ class ReadOperations {
             if (findPlan.getLimit() != null || findPlan.getSkip() != null) {
                 long limit = findPlan.getLimit() == null ? Long.MAX_VALUE : findPlan.getLimit();
                 long skip = findPlan.getSkip() == null ? 0 : findPlan.getSkip();
-                rawStream = new BoundedDocumentStream(skip, limit, rawStream);
+                rawStream = new BoundedStream<>(skip, limit, rawStream);
             }
         }
 
         return rawStream;
-    }
-
-    private DocumentCursor createCursor(FindPlan findPlan) {
-        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(findPlan);
-        DocumentStream cursor = new DocumentStream(recordStream, processorChain);
-        cursor.setFindPlan(findPlan);
-        return cursor;
     }
 }

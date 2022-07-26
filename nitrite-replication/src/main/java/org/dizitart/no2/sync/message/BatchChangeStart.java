@@ -17,15 +17,17 @@
 package org.dizitart.no2.sync.message;
 
 import lombok.Data;
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
-public class BatchChangeStart implements ReceiptAware {
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class BatchChangeStart extends BatchMessage implements ReceiptAware {
     private MessageHeader header;
-    private Integer batchSize;
-    private Integer debounce;
-    private LastWriteWinState feed;
+    private DeltaStates feed;
 }

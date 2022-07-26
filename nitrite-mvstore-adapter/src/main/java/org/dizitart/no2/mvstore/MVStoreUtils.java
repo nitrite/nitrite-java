@@ -17,12 +17,13 @@
 package org.dizitart.no2.mvstore;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.mvstore.compat.v3.MigrationUtil;
+import org.dizitart.no2.mvstore.compat.v1.UpgradeUtil;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
+import org.h2.mvstore.MVStoreException;
 
 import java.io.File;
 
@@ -31,12 +32,13 @@ import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
- * @since 4.0.0
  * @author Anindya Chatterjee.
+ * @since 4.0.0
  */
 @Slf4j
 class MVStoreUtils {
-    private MVStoreUtils() { }
+    private MVStoreUtils() {
+    }
 
     static MVStore openOrCreate(MVStoreConfig storeConfig) {
         MVStore.Builder builder = createBuilder(storeConfig);
@@ -46,49 +48,50 @@ class MVStoreUtils {
         try {
             store = builder.open();
             testForMigration(store);
-        } catch (IllegalStateException ise) {
-            if (ise.getMessage().contains("file is locked")) {
-                throw new NitriteIOException("database is already opened in other process");
+        } catch (MVStoreException me) {
+            if (me.getMessage().contains("file is locked")) {
+                throw new NitriteIOException("Database is already opened in other process");
             }
 
             if (dbFile != null) {
                 try {
                     if (dbFile.isDirectory()) {
-                        throw new NitriteIOException(storeConfig.filePath()
-                            + " is a directory, must be a file");
+                        throw new NitriteIOException(storeConfig.filePath() + " is a directory, must be a file");
                     }
 
                     if (dbFile.exists() && dbFile.isFile()) {
-                        if (isCompatibilityError(ise)) {
+                        if (isCompatibilityError(me)) {
                             if (store != null) {
                                 store.closeImmediately();
                             }
-                            store = tryMigrate(dbFile, builder, storeConfig);
+
+                            // try upgrading the database
+                            store = tryUpgrade(dbFile, storeConfig);
                         } else {
-                            log.error("Database corruption detected. Trying to repair", ise);
+                            log.error("Database corruption detected. Trying to repair", me);
                             Recovery.recover(storeConfig.filePath());
                             store = builder.open();
                         }
                     } else {
                         if (storeConfig.isReadOnly()) {
-                            throw new NitriteIOException("cannot create readonly database", ise);
+                            throw new NitriteIOException("Cannot create readonly database", me);
                         }
                     }
                 } catch (InvalidOperationException | NitriteIOException ex) {
                     throw ex;
                 } catch (Exception e) {
-                    throw new NitriteIOException("database file is corrupted", e);
+                    throw new NitriteIOException("Database file is corrupted", e);
                 }
             } else {
-                throw new NitriteIOException("unable to create in-memory database", ise);
+                throw new NitriteIOException("Unable to create in-memory database", me);
             }
         } catch (IllegalArgumentException iae) {
             if (dbFile != null) {
                 if (!dbFile.getParentFile().exists()) {
-                    throw new NitriteIOException("directory " + dbFile.getParent() + " does not exists", iae);
+                    throw new NitriteIOException("Directory " + dbFile.getParent() + " does not exists", iae);
                 }
             }
-            throw new NitriteIOException("unable to create database file", iae);
+            throw new NitriteIOException("Unable to create database file", iae);
         } finally {
             if (store != null) {
                 store.setRetentionTime(0);
@@ -100,10 +103,8 @@ class MVStoreUtils {
         return store;
     }
 
-    private static boolean isCompatibilityError(IllegalStateException ise) {
-        return ise.getCause() != null
-            && ise.getCause().getCause() instanceof ClassNotFoundException
-            && ise.getCause().getCause().getMessage().contains("org.dizitart.no2");
+    private static boolean isCompatibilityError(Exception e) {
+        return e.getMessage().contains("The write format 1 is smaller than the supported format");
     }
 
     private static MVStore.Builder createBuilder(MVStoreConfig mvStoreConfig) {
@@ -130,7 +131,7 @@ class MVStoreUtils {
 
         if (mvStoreConfig.isReadOnly()) {
             if (isNullOrEmpty(mvStoreConfig.filePath())) {
-                throw new InvalidOperationException("unable create readonly in-memory database");
+                throw new InvalidOperationException("Unable create readonly in-memory database");
             }
             builder = builder.readOnly();
         }
@@ -167,24 +168,17 @@ class MVStoreUtils {
         return builder;
     }
 
-    private static MVStore tryMigrate(File orgFile, MVStore.Builder builder, MVStoreConfig storeConfig) {
-        log.info("Migrating old database format to new database format");
-
-        // open old store with builder
-        MVStore oldMvStore = builder.open();
-
+    private static MVStore tryUpgrade(File orgFile, MVStoreConfig storeConfig) {
         // create new store with builder
         File newFile = new File(orgFile.getPath() + "_new");
-        storeConfig.filePath(newFile.getPath());
-        MVStore.Builder newBuilder = createBuilder(storeConfig);
-        MVStore newMvStore = newBuilder.open();
+        MVStoreConfig newStoreConfig = storeConfig.clone();
+        newStoreConfig.filePath(newFile.getPath());
+        MVStore.Builder newBuilder = createBuilder(newStoreConfig);
 
-        // migrate 2 stores maps
-        MigrationUtil.migrate(newMvStore, oldMvStore);
+        UpgradeUtil.tryUpgrade(newBuilder, storeConfig);
+
+        // switch the file
         switchFiles(newFile, orgFile);
-
-        // open new store calling openOrCreate and return
-        storeConfig.filePath(orgFile.getPath());
         return openOrCreate(storeConfig);
     }
 
@@ -192,14 +186,14 @@ class MVStoreUtils {
         File backupFile = new File(orgFile.getPath() + "_old");
         if (orgFile.renameTo(backupFile)) {
             if (!newFile.renameTo(orgFile)) {
-                throw new NitriteIOException("could not rename new data file");
+                throw new NitriteIOException("Could not rename new data file");
             }
 
             if (!backupFile.delete()) {
-                throw new NitriteIOException("could not delete backup data file");
+                throw new NitriteIOException("Could not delete backup data file");
             }
         } else {
-            throw new NitriteIOException("could not create backup copy of old data file");
+            throw new NitriteIOException("Could not create backup copy of old data file");
         }
     }
 
@@ -212,6 +206,8 @@ class MVStoreUtils {
             MVStore.TxCounter txCounter = store.registerVersionUsage();
             MVMap<String, Attributes> metaMap = store.openMap(META_MAP_NAME);
             try {
+                // fire one operation to trigger compatibility issue
+                // if no exception thrown, then the database is compatible
                 metaMap.remove("MigrationTest");
             } catch (IllegalStateException e) {
                 store.close();

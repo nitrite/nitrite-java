@@ -3,17 +3,16 @@ package org.dizitart.no2.transaction;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
 import org.dizitart.no2.collection.operation.CollectionOperations;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.common.event.NitriteEventBus;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
@@ -45,8 +44,6 @@ import static org.dizitart.no2.index.IndexOptions.indexOptions;
 class DefaultTransactionalCollection implements NitriteCollection {
     private final NitriteCollection primary;
     private final TransactionContext transactionContext;
-    private final Nitrite nitrite;
-
     private String collectionName;
     private NitriteMap<NitriteId, Document> nitriteMap;
     private NitriteStore<?> nitriteStore;
@@ -67,11 +64,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
 
     public DefaultTransactionalCollection(NitriteCollection primary,
-                                          TransactionContext transactionContext,
-                                          Nitrite nitrite) {
+                                          TransactionContext transactionContext) {
         this.primary = primary;
         this.transactionContext = transactionContext;
-        this.nitrite = nitrite;
 
         initialize();
     }
@@ -159,14 +154,14 @@ class DefaultTransactionalCollection implements NitriteCollection {
             if (document.hasId()) {
                 return update(createUniqueFilter(document), document, updateOptions(false));
             } else {
-                throw new NotIdentifiableException("update operation failed as no id value found for the document");
+                throw new NotIdentifiableException("Update operation failed as no id value found for the document");
             }
         }
     }
 
     @Override
     public WriteResult remove(Document document) {
-        notNull(document, "a null document cannot be removed");
+        notNull(document, "A null document cannot be removed");
 
         WriteResult result;
         if (document.hasId()) {
@@ -178,7 +173,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
                 writeLock.unlock();
             }
         } else {
-            throw new NotIdentifiableException("remove operation failed as no id value found for the document");
+            throw new NotIdentifiableException("Remove operation failed as no id value found for the document");
         }
 
         AtomicReference<Document> toRemove = new AtomicReference<>();
@@ -202,7 +197,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
     @Override
     public WriteResult remove(Filter filter, boolean justOne) {
         if ((filter == null || filter == Filter.ALL) && justOne) {
-            throw new InvalidOperationException("remove all cannot be combined with just once");
+            throw new InvalidOperationException("Remove all cannot be combined with just once");
         }
 
         WriteResult result;
@@ -279,30 +274,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
         } finally {
             writeLock.unlock();
         }
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.AddProcessor);
-        journalEntry.setCommit(() -> primary.addProcessor(processor));
-        journalEntry.setRollback(() -> primary.removeProcessor(processor));
-        transactionContext.getJournal().add(journalEntry);
-    }
-
-    @Override
-    public void removeProcessor(Processor processor) {
-        notNull(processor, "a null processor cannot be removed");
-        try {
-            writeLock.lock();
-            checkOpened();
-            collectionOperations.addProcessor(processor);
-        } finally {
-            writeLock.unlock();
-        }
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.RemoveProcessor);
-        journalEntry.setCommit(() -> primary.removeProcessor(processor));
-        journalEntry.setRollback(() -> primary.addProcessor(processor));
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
@@ -451,7 +422,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         List<IndexDescriptor> indexEntries = new ArrayList<>();
 
         JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.DropAllIndices);
+        journalEntry.setChangeType(ChangeType.DropAllIndexes);
         journalEntry.setCommit(() -> {
             indexEntries.addAll(primary.listIndices());
             primary.dropAllIndices();
@@ -470,24 +441,15 @@ class DefaultTransactionalCollection implements NitriteCollection {
         try {
             writeLock.lock();
             checkOpened();
-            nitriteMap.clear();
+            collectionOperations.clear();
         } finally {
             writeLock.unlock();
         }
 
-        List<Document> documentList = new ArrayList<>();
-
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.Clear);
-        journalEntry.setCommit(() -> {
-            documentList.addAll(primary.find().toList());
-            primary.clear();
-        });
-        journalEntry.setRollback(() -> {
-            for (Document document : documentList) {
-                primary.insert(document);
-            }
-        });
+        journalEntry.setCommit(primary::clear);
+        journalEntry.setRollback(() -> {}); // can't be rolled back
         transactionContext.getJournal().add(journalEntry);
     }
 
@@ -502,28 +464,10 @@ class DefaultTransactionalCollection implements NitriteCollection {
         }
         isDropped = true;
 
-        List<Document> documentList = new ArrayList<>();
-        List<IndexDescriptor> indexEntries = new ArrayList<>();
-
         JournalEntry journalEntry = new JournalEntry();
         journalEntry.setChangeType(ChangeType.DropCollection);
-        journalEntry.setCommit(() -> {
-            documentList.addAll(primary.find().toList());
-            indexEntries.addAll(primary.listIndices());
-            primary.drop();
-        });
-        journalEntry.setRollback(() -> {
-            NitriteCollection collection = nitrite.getCollection(collectionName);
-
-            for (IndexDescriptor indexDescriptor : indexEntries) {
-                String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
-                collection.createIndex(indexOptions(indexDescriptor.getIndexType()), fieldNames);
-            }
-
-            for (Document document : documentList) {
-                collection.insert(document);
-            }
-        });
+        journalEntry.setCommit(primary::drop);
+        journalEntry.setRollback(() -> {}); // can't be rolled back
         transactionContext.getJournal().add(journalEntry);
     }
 
@@ -538,7 +482,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
             try {
                 close();
             } catch (Exception e) {
-                throw new NitriteIOException("failed to close the database", e);
+                throw new NitriteIOException("Failed to close the collection", e);
             }
             return false;
         } else return true;
@@ -615,7 +559,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         AtomicReference<Attributes> original = new AtomicReference<>();
 
         JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.SetAttribute);
+        journalEntry.setChangeType(ChangeType.SetAttributes);
         journalEntry.setCommit(() -> {
             original.set(primary.getAttributes());
             primary.setAttributes(attributes);
@@ -654,19 +598,19 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     private void checkOpened() {
         if (isClosed) {
-            throw new TransactionException("collection is closed");
+            throw new TransactionException("Collection is closed");
         }
 
         if (!primary.isOpen()) {
-            throw new NitriteIOException("store is closed");
+            throw new TransactionException("Store is closed");
         }
 
         if (isDropped()) {
-            throw new NitriteIOException("collection has been dropped");
+            throw new TransactionException("Collection is dropped");
         }
 
         if (!transactionContext.getActive().get()) {
-            throw new TransactionException("transaction is closed");
+            throw new TransactionException("Transaction is not active");
         }
     }
 
@@ -678,11 +622,11 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
-        notNull(indexDescriptor, "indexEntry cannot be null");
+        notNull(indexDescriptor, "indexDescriptor cannot be null");
 
         String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(fieldNames)) {
-            throw new IndexingException("indexing on value " + indexDescriptor.getIndexFields() + " is currently running");
+            throw new IndexingException("Indexing on fields " + indexDescriptor.getIndexFields() + " is currently running");
         }
     }
 }

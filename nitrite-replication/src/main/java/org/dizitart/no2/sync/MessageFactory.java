@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.sync;
 
-import org.dizitart.no2.sync.crdt.LastWriteWinState;
+import org.dizitart.no2.sync.crdt.DeltaStates;
 import org.dizitart.no2.sync.message.*;
 
 import java.util.UUID;
@@ -25,94 +25,94 @@ import java.util.UUID;
  * @author Anindya Chatterjee
  */
 public class MessageFactory {
-    public Connect createConnect(Config config, String replicaId) {
+    public Connect createConnect(Config config, String replicaId, String txId) {
         Connect message = new Connect();
         message.setHeader(createHeader(MessageType.Connect, config.getCollection().getName(),
-            "", replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setAuthToken(config.getAuthToken());
         return message;
     }
 
-    public Disconnect createDisconnect(Config config, String replicaId) {
+    public Disconnect createDisconnect(Config config, String replicaId, String txId) {
         Disconnect message = new Disconnect();
         message.setHeader(createHeader(MessageType.Disconnect, config.getCollection().getName(),
-            "", replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         return message;
     }
 
-    public BatchChangeStart createChangeStart(Config config, String replicaId, String uuid) {
+    public BatchChangeStart createChangeStart(Config config, String replicaId, String txId) {
         BatchChangeStart message = new BatchChangeStart();
         message.setHeader(createHeader(MessageType.BatchChangeStart, config.getCollection().getName(),
-            uuid, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setBatchSize(config.getChunkSize());
-        message.setDebounce(config.getDebounce());
         return message;
     }
 
     public BatchChangeContinue createChangeContinue(Config config, String replicaId,
-                                                    String uuid, LastWriteWinState state) {
+                                                    String txId, DeltaStates state) {
         BatchChangeContinue message = new BatchChangeContinue();
         message.setHeader(createHeader(MessageType.BatchChangeContinue, config.getCollection().getName(),
-            uuid, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setBatchSize(config.getChunkSize());
-        message.setDebounce(config.getDebounce());
         message.setFeed(state);
         return message;
     }
 
-    public BatchChangeEnd createChangeEnd(Config config, String replicaId, String uuid, Long lastSyncTime) {
+    public BatchChangeEnd createChangeEnd(Config config, String replicaId,
+                                          String txId) {
         BatchChangeEnd message = new BatchChangeEnd();
         message.setHeader(createHeader(MessageType.BatchChangeEnd, config.getCollection().getName(),
-            uuid, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         message.setBatchSize(config.getChunkSize());
-        message.setDebounce(config.getDebounce());
-        message.setLastSynced(lastSyncTime);
         return message;
     }
 
-    public DataGateFeed createFeedMessage(Config config, String replicaId, LastWriteWinState state) {
+    public DataGateFeed createFeedMessage(Config config, String replicaId,
+                                          String txId, DeltaStates state) {
         DataGateFeed feed = new DataGateFeed();
         feed.setHeader(createHeader(MessageType.DataGateFeed, config.getCollection().getName(),
-            "", replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         feed.setFeed(state);
         return feed;
     }
 
     public DataGateFeedAck createFeedAck(Config config, String replicaId,
-                                         String correlationId, Receipt receipt) {
+                                         String txId, Receipt receipt) {
         DataGateFeedAck ack = new DataGateFeedAck();
         ack.setHeader(createHeader(MessageType.DataGateFeedAck, config.getCollection().getName(),
-            correlationId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         ack.setReceipt(receipt);
         return ack;
     }
 
     public BatchAck createBatchAck(Config config, String replicaId,
-                                   String correlationId, Receipt receipt) {
+                                   String txId, Receipt receipt) {
         BatchAck ack = new BatchAck();
         ack.setHeader(createHeader(MessageType.BatchAck, config.getCollection().getName(),
-            correlationId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         ack.setReceipt(receipt);
         return ack;
     }
 
-    public BatchEndAck createBatchEndAck(Config config, String replicaId, String correlationId) {
+    public BatchEndAck createBatchEndAck(Config config, String replicaId, String txId) {
         BatchEndAck ack = new BatchEndAck();
         ack.setHeader(createHeader(MessageType.BatchEndAck, config.getCollection().getName(),
-            correlationId, replicaId, config.getUserName()));
+            txId, replicaId, config.getUserName(), config.getTenant()));
         return ack;
     }
 
     public MessageHeader createHeader(MessageType messageType, String collectionName,
-                                      String correlationId, String replicaId, String userName) {
+                                      String txId, String replicaId,
+                                      String userName, String tenant) {
         MessageHeader messageHeader = new MessageHeader();
         messageHeader.setId(UUID.randomUUID().toString());
-        messageHeader.setCorrelationId(correlationId);
+        messageHeader.setTransactionId(txId);
         messageHeader.setCollection(collectionName);
         messageHeader.setMessageType(messageType);
         messageHeader.setOrigin(replicaId);
         messageHeader.setTimestamp(System.currentTimeMillis());
         messageHeader.setUserName(userName);
+        messageHeader.setTenant(tenant);
         return messageHeader;
     }
 }

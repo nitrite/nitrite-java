@@ -21,7 +21,7 @@ import com.github.javafaker.Faker;
 import org.dizitart.no2.integration.collection.BaseCollectionTest;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.index.IndexType;
@@ -299,11 +299,11 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.insert(document2);
                 collection.insert(document2);
 
-                throw new TransactionException("failed");
+                transaction.commit();
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(2, collection.size());
+                assertEquals(0, collection.size());
             }
         }
     }
@@ -431,7 +431,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 boolean expectedException = false;
                 try {
                     assertEquals(0, txCol.size());
-                } catch (NitriteIOException e) {
+                } catch (TransactionException e) {
                     expectedException = true;
                 }
                 assertTrue(expectedException);

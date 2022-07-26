@@ -17,12 +17,14 @@
 package org.dizitart.no2.sync.message;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
-public class BatchAck implements DataGateMessage {
+@EqualsAndHashCode(callSuper = true)
+public class BatchAck extends BatchMessage {
     private MessageHeader header;
     private Receipt receipt;
 }

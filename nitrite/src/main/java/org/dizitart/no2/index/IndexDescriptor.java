@@ -91,7 +91,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     public int compareTo(IndexDescriptor other) {
         if (other == null) return 1;
 
-        // compound index have highest cardinality
+        // compound index have the highest cardinality
         if (this.isCompoundIndex() && !other.isCompoundIndex()) return 1;
 
         // unique index has the next highest cardinality
@@ -113,7 +113,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     }
 
     /**
-     * Is compound index boolean.
+     * Indicates if this descriptor is for a compound index.
      *
      * @return the boolean
      */

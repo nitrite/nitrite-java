@@ -19,6 +19,7 @@ package org.dizitart.no2.sync.message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.dizitart.no2.collection.Document;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,4 +33,17 @@ import java.util.Set;
 public class Receipt {
     private Set<String> added = new HashSet<>();
     private Set<String> removed = new HashSet<>();
+
+    @SuppressWarnings("unchecked")
+    public static Receipt fromDocument(Document document) {
+        return new Receipt(
+            (Set<String>) document.get("added", Set.class),
+            (Set<String>) document.get("removed", Set.class)
+        );
+    }
+
+    public Document toDocument() {
+        return Document.createDocument("added", added)
+            .put("removed", removed);
+    }
 }

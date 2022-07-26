@@ -54,7 +54,7 @@ public abstract class ComparableFilter extends FieldBasedFilter {
     }
 
     /**
-     * Apply this filter on an nitrite index.
+     * Apply this filter on a nitrite index.
      *
      * @param indexMap the index scanner
      * @return the object
@@ -73,7 +73,7 @@ public abstract class ComparableFilter extends FieldBasedFilter {
                                      List<NavigableMap<Comparable<?>, Object>> subMap,
                                      List<NitriteId> nitriteIds) {
         if (value instanceof List) {
-            // if its is list then add it directly to nitrite ids
+            // if it is list then add it directly to nitrite ids
             List<NitriteId> result = (List<NitriteId>) value;
             nitriteIds.addAll(result);
         }

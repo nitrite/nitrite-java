@@ -34,6 +34,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
  */
 public class MappableMapper implements NitriteMapper {
     private final Set<Class<?>> valueTypes;
+    private final Map<Class<?>, MappableFactory<?>> mappableFactories;
 
     /**
      * Instantiates a new {@link MappableMapper}.
@@ -42,6 +43,7 @@ public class MappableMapper implements NitriteMapper {
      */
     public MappableMapper(Class<?>... valueTypes) {
         this.valueTypes = new HashSet<>();
+        this.mappableFactories = new HashMap<>();
         init(listOf(valueTypes));
     }
 
@@ -53,20 +55,27 @@ public class MappableMapper implements NitriteMapper {
      * @param type     the type
      * @return the target
      */
+    @SuppressWarnings("unchecked")
     protected <Target> Target convertFromDocument(Document source, Class<Target> type) {
         if (source == null) {
             return null;
         }
 
         if (Mappable.class.isAssignableFrom(type)) {
-            Target item = newInstance(type, false);
-            if (item == null) return null;
+            Target item;
+            if (mappableFactories.containsKey(type)) {
+                MappableFactory<?> factory = mappableFactories.get(type);
+                item = (Target) factory.create();
+            } else {
+                item = newInstance(type, false);
+            }
 
+            if (item == null) return null;
             ((Mappable) item).read(this, source);
             return item;
         }
 
-        throw new ObjectMappingException("object must implements Mappable");
+        throw new ObjectMappingException(type.getName() + " is not a Mappable");
     }
 
     /**
@@ -82,7 +91,7 @@ public class MappableMapper implements NitriteMapper {
             return mappable.write(this);
         }
 
-        throw new ObjectMappingException("object must implements Mappable");
+        throw new ObjectMappingException("Object of type " + source.getClass().getName() + " is not Mappable");
     }
 
     /**
@@ -92,6 +101,17 @@ public class MappableMapper implements NitriteMapper {
      */
     protected void addValueType(Class<?> valueType) {
         this.valueTypes.add(valueType);
+    }
+
+    /**
+     * Register a {@link Mappable} factory to be used when converting a document to an object.
+     *
+     * @param <T>     the type parameter
+     * @param factory the factory
+     * @param type    the type
+     */
+    public <T> void registerMappable(MappableFactory<T> factory, Class<T> type) {
+        mappableFactories.put(type, factory);
     }
 
     @Override
@@ -105,13 +125,17 @@ public class MappableMapper implements NitriteMapper {
             return (Target) source;
         } else {
             if (Document.class.isAssignableFrom(type)) {
-                return (Target) convertToDocument(source);
+                if (source instanceof Document) {
+                    return (Target) source;
+                } else {
+                    return (Target) convertToDocument(source);
+                }
             } else if (source instanceof Document) {
                 return convertFromDocument((Document) source, type);
             }
         }
 
-        throw new ObjectMappingException("object must implements Mappable");
+        throw new ObjectMappingException("Can't convert object of type " + source.getClass() + " to type " + type);
     }
 
     @Override

@@ -1,0 +1,29 @@
+[
+  {
+    "_id": "serverConfig",
+    "alert_config": {
+      "log_format": "text",
+      "response_time_threshold": 20,
+      "sentry_dsn": "",
+      "enable_syslog": false,
+      "syslog_address": "",
+      "slack_channel": "",
+      "email_address": "",
+      "air_brake_id": -1,
+      "air_brake_key": "",
+      "hide_sensitive_data": true
+    },
+    "email_config": {
+      "smtp_host": "smtp.gmail.com",
+      "smtp_port": "587",
+      "auth_required": true,
+      "sender": "",
+      "password": ""
+    },
+    "tls_config": {
+      "enable_ssl": false,
+      "server_key": "",
+      "server_cert": ""
+    }
+  }
+]

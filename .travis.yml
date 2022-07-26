@@ -28,5 +28,5 @@ after_success:
 
 env:
   global:
-    - NITRITE_VERSION=4.0.1-SNAPSHOT
+    - NITRITE_VERSION=4.1.0-SNAPSHOT
     - PGP_KEY_FILE=~/secring.gpg

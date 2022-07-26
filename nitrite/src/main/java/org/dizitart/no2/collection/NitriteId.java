@@ -28,10 +28,10 @@ import static org.dizitart.no2.common.Constants.ID_PREFIX;
 import static org.dizitart.no2.common.Constants.ID_SUFFIX;
 
 /**
- * An unique identifier across the Nitrite database. Each document in
+ * A unique identifier across the Nitrite database. Each document in
  * a nitrite collection is associated with a {@link NitriteId}.
  * <p>
- * During insertion if an unique object is supplied in the '_id' field
+ * During insertion if a unique object is supplied in the '_id' field
  * of the document, then the value of the '_id' field will be used to
  * create a new {@link NitriteId}. If that is not supplied, then nitrite
  * will auto generate one and supply it in the '_id' field of the document.
@@ -43,7 +43,7 @@ import static org.dizitart.no2.common.Constants.ID_SUFFIX;
 @EqualsAndHashCode
 public final class NitriteId implements Comparable<NitriteId>, Serializable {
     private static final long serialVersionUID = 1477462375L;
-    private transient static final SnowflakeIdGenerator generator = new SnowflakeIdGenerator();
+    private static final SnowflakeIdGenerator generator = new SnowflakeIdGenerator();
 
     private String idValue;
 
@@ -83,14 +83,14 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
             Long.parseLong(value.toString());
             return true;
         } catch (Exception e) {
-            throw new InvalidIdException("id must be a string representation of 64bit decimal number");
+            throw new InvalidIdException("id must be a string representation of 64bit integer number " + value);
         }
     }
 
     @Override
     public int compareTo(NitriteId other) {
         if (other.idValue == null) {
-            throw new InvalidIdException("cannot compare with null id");
+            throw new InvalidIdException("Cannot compare with null id");
         }
 
         return Long.compare(Long.parseLong(idValue), Long.parseLong(other.idValue));

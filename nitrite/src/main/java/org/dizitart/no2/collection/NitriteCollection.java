@@ -46,7 +46,6 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * <pre>
  * {@code
  * Nitrite db = Nitrite.builder()
- *    .loadModule(MVStoreModule("/tmp/tmp.db"))
  *    .openOrCreate("user", "password");
  *    
  * NitriteCollection collection = db.getCollection("products");

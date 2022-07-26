@@ -179,8 +179,6 @@ public class ObjectUtils {
             // generic check
             return o1.equals(o2);
         }
-
-        // none of the type check passes so they are not of compatible type
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -222,7 +220,7 @@ public class ObjectUtils {
 
             return item;
         } catch (Throwable e) {
-            throw new ObjectMappingException("failed to instantiate type " + type.getName(), e);
+            throw new ObjectMappingException("Failed to instantiate type " + type.getName(), e);
         }
     }
 
@@ -285,7 +283,7 @@ public class ObjectUtils {
                 return (T) ois.readObject();
             }
         } catch (IOException | ClassNotFoundException e) {
-            throw new NitriteIOException("error while deep copying object", e);
+            throw new NitriteIOException("Error while deep copying object", e);
         }
     }
 

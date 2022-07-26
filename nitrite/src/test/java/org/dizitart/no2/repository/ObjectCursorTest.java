@@ -26,6 +26,7 @@ import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.mapper.MappableMapper;
 import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.common.streams.DocumentStream;
+import org.dizitart.no2.common.streams.MutatedObjectStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.Test;

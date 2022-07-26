@@ -73,17 +73,17 @@ public class IndexValidator {
                 }
 
                 if (!embeddedFieldFound) {
-                    throw new IndexingException("no embedded field found for object id");
+                    throw new IndexingException("No embedded field found for object id");
                 }
             } else {
                 if (!Comparable.class.isAssignableFrom(fieldType)) {
-                    throw new IndexingException("cannot index on non comparable field " + field);
+                    throw new IndexingException("Cannot index on non comparable field " + field);
                 }
             }
         } catch (IndexingException ie) {
             throw ie;
         } catch (Throwable e) {
-            throw new IndexingException("invalid type specified " + fieldType.getName() + " for indexing", e);
+            throw new IndexingException("Invalid type specified " + fieldType.getName() + " for indexing", e);
         }
     }
 }

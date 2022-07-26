@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.exceptions.IndexingException;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -85,6 +86,10 @@ public abstract class ComparableIndexer implements NitriteIndexer {
     }
 
     private NitriteIndex findNitriteIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+        if (indexDescriptor == null) {
+            throw new IndexingException("Index descriptor cannot be null");
+        }
+
         if (indexRegistry.containsKey(indexDescriptor)) {
             return indexRegistry.get(indexDescriptor);
         }

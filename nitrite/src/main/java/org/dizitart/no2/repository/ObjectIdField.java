@@ -90,7 +90,7 @@ class ObjectIdField {
         }
 
         if (!embeddedFieldFound) {
-            throw new IndexingException("no embedded field found for " + field.getName());
+            throw new IndexingException("No embedded field found for " + field.getName());
         }
 
         embeddedFieldNames = orderedFieldName.values().toArray(new String[0]);

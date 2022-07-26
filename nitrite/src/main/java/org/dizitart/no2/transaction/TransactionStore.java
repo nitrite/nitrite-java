@@ -45,7 +45,7 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
 
     @Override
     public void commit() {
-        throw new InvalidOperationException("call commit on transaction");
+        throw new InvalidOperationException("Call commit on transaction");
     }
 
     @Override
@@ -79,7 +79,12 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     @SuppressWarnings("unchecked")
     public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
         if (mapRegistry.containsKey(mapName)) {
-            return (NitriteMap<Key, Value>) mapRegistry.get(mapName);
+            NitriteMap<Key, Value> nitriteMap = (NitriteMap<Key, Value>) mapRegistry.get(mapName);
+            if (nitriteMap.isClosed()) {
+                mapRegistry.remove(mapName);
+            } else {
+                return nitriteMap;
+            }
         }
 
         NitriteMap<Key, Value> primaryMap = null;
@@ -95,13 +100,13 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     @Override
     public void closeMap(String mapName) {
         // nothing to close as it is volatile map, moreover,
-        // removing it form registry means loosing the map
+        // removing it from registry means losing the map
     }
 
     @Override
     public void closeRTree(String rTreeName) {
         // nothing to close as it is volatile map, moreover,
-        // removing it form registry means loosing the map
+        // removing it from registry means losing the map
     }
 
     @Override

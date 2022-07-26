@@ -18,6 +18,7 @@ package org.dizitart.no2.common.event;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -115,7 +116,7 @@ public class EventTest {
         e.setEmpId(1L);
         e.setAddress("abcd");
 
-        employeeRepository.update(where("empId").eq(1), e, true);
+        employeeRepository.update(where("empId").eq(1), e, UpdateOptions.updateOptions(true));
         await().atMost(1, TimeUnit.SECONDS).until(listenerPrepared(EventType.Insert));
         assertEquals(listener.getAction(), EventType.Insert);
         assertNotNull(listener.getItem());

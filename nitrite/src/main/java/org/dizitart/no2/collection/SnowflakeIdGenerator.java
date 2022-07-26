@@ -19,11 +19,9 @@ package org.dizitart.no2.collection;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.NetworkInterface;
-import java.net.SocketException;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import java.util.Enumeration;
-import java.util.NoSuchElementException;
+import java.util.UUID;
 
 /**
  * Generate unique IDs using the Twitter Snowflake algorithm (see https://github.com/twitter/snowflake). Snowflake IDs
@@ -51,23 +49,19 @@ public class SnowflakeIdGenerator {
 
     private volatile long lastTimestamp = -1L;
     private volatile long sequence = 0L;
+    private static final long no2epoch = 1288834974657L;
 
 
     public SnowflakeIdGenerator() {
         random = new SecureRandom();
         long maxNodeId = ~(-1L << nodeIdBits);
-        try {
-            this.nodeId = getNodeId();
-        } catch (SocketException | NoSuchElementException | NullPointerException e) {
-            log.warn("SNOWFLAKE: could not determine machine address; using random node id");
-            this.nodeId = random.nextInt((int) maxNodeId) + 1;
-        }
+        this.nodeId = getNodeId();
 
         if (this.nodeId > maxNodeId) {
-            log.warn("SNOWFLAKE: nodeId > maxNodeId; using random node id");
+            log.warn("nodeId > maxNodeId; using random node id");
             this.nodeId = random.nextInt((int) maxNodeId) + 1;
         }
-        log.debug("SNOWFLAKE: initialised with node id {}", this.nodeId);
+        log.debug("initialised with node id {}", this.nodeId);
     }
 
     protected long tillNextMillis(long lastTimestamp) {
@@ -78,27 +72,11 @@ public class SnowflakeIdGenerator {
         return timestamp;
     }
 
-    protected long getNodeId() throws SocketException {
-        NetworkInterface network = null;
+    protected long getNodeId() {
+        byte[] uuid = asBytes(UUID.randomUUID());
+        byte rndByte = (byte) (random.nextInt() & 0x000000FF);
 
-        Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
-        while (en.hasMoreElements()) {
-            NetworkInterface nint = en.nextElement();
-            if (!nint.isLoopback() && nint.getHardwareAddress() != null) {
-                network = nint;
-                break;
-            }
-        }
-
-        if (network != null) {
-            byte[] mac = network.getHardwareAddress();
-            byte rndByte = (byte) (random.nextInt() & 0x000000FF);
-
-            // take the last byte of the MAC address and a random byte as node id
-            return ((0x000000FF & (long) mac[mac.length - 1]) | (0x0000FF00 & (((long) rndByte) << 8))) >> 6;
-        } else {
-            throw new NoSuchElementException("no network interface found");
-        }
+        return ((0x000000FF & (long) uuid[uuid.length - 1]) | (0x0000FF00 & (((long) rndByte) << 8))) >> 6;
     }
 
 
@@ -128,12 +106,18 @@ public class SnowflakeIdGenerator {
         }
         lastTimestamp = timestamp;
         long timestampLeftShift = sequenceBits + nodeIdBits;
-        long twepoch = 1288834974657L;
-        long id = ((timestamp - twepoch) << timestampLeftShift) | (nodeId << sequenceBits) | sequence;
+        long id = ((timestamp - no2epoch) << timestampLeftShift) | (nodeId << sequenceBits) | sequence;
 
         if (id < 0) {
-            log.warn("Id is smaller than 0: {}", id);
+            log.warn("Generated id is negative: {}", id);
         }
         return id;
+    }
+
+    private byte[] asBytes(UUID uuid) {
+        ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+        bb.putLong(uuid.getMostSignificantBits());
+        bb.putLong(uuid.getLeastSignificantBits());
+        return bb.array();
     }
 }

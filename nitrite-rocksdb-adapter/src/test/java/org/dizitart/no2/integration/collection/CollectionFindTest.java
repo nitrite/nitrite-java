@@ -420,7 +420,7 @@ public class CollectionFindTest extends BaseCollectionTest {
             new ArrayList<String>() {{
                 add("three");
                 add("four");
-                add("three");
+                add("five");
             }}));
         assertNotNull(ids);
         assertEquals(ids.size(), 1);

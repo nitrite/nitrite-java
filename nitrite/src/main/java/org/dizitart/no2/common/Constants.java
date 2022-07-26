@@ -45,7 +45,7 @@ public class Constants {
                 }
             }
         } catch (IOException e) {
-            throw new NitriteIOException("failed to load version information", e);
+            throw new NitriteIOException("Failed to load version information", e);
         }
         NITRITE_VERSION = v;
     }
@@ -138,7 +138,7 @@ public class Constants {
     /**
      * The constant TAG_COLLECTION_METADATA.
      */
-    public static final String TAG_MAP_METADATA =  "mapNames";
+    public static final String TAG_MAP_METADATA = "mapNames";
 
     /**
      * The constant TAG_TYPE.

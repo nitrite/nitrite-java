@@ -160,7 +160,7 @@ public class Exporter {
         try {
             jsonExporter.exportData();
         } catch (IOException | ClassNotFoundException e) {
-            throw new NitriteIOException("error while exporting data", e);
+            throw new NitriteIOException("Error while exporting data", e);
         }
     }
 }

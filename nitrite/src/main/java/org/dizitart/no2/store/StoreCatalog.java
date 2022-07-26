@@ -91,7 +91,7 @@ public class StoreCatalog {
      *
      * @param name the name
      */
-    public void writeKeyedRepositoryEntries(String name) {
+    public void writeKeyedRepositoryEntry(String name) {
         Document document = catalogMap.get(TAG_KEYED_REPOSITORIES);
         if (document == null) {
             document = Document.createDocument();

@@ -1,35 +1,50 @@
 /*
- * Copyright (c) 2017-2020. Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
 package org.dizitart.no2.sync;
 
-import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.sync.event.ReplicationEvent;
-import org.dizitart.no2.sync.event.ReplicationEventListener;
-import org.dizitart.no2.sync.event.ReplicationEventType;
+import org.dizitart.no2.common.concurrent.ThreadPoolManager;
+import org.dizitart.no2.sync.net.CloseReason;
+
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static org.dizitart.no2.common.Constants.SYNC_THREAD_NAME;
 
 /**
+ * Represents a remote replica of the local {@link org.dizitart.no2.collection.NitriteCollection}
+ * or {@link org.dizitart.no2.repository.ObjectRepository}.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0.0
  */
-@Slf4j
-public final class Replica implements AutoCloseable {
-    private final ReplicationTemplate replicationTemplate;
+public class Replica implements AutoCloseable {
+    private final Config config;
+    private final ReplicatedCollection replicatedCollection;
+    private AtomicBoolean disconnected;
+    private ScheduledExecutorService scheduledExecutorService;
+    private ScheduledFuture<?> replicationTask;
 
-    Replica(Config config) {
-        this.replicationTemplate = new ReplicationTemplate(config);
+    Replica(Config config, ReplicatedCollection replicatedCollection) {
+        this.config = config;
+        this.replicatedCollection = replicatedCollection;
+        configure();
     }
 
     public static ReplicaBuilder builder() {
@@ -37,50 +52,60 @@ public final class Replica implements AutoCloseable {
     }
 
     public void connect() {
-        try {
-            replicationTemplate.connect();
-        } catch (Exception e) {
-            log.error("Error while connecting the replica {}", getReplicaId(), e);
-            replicationTemplate.postEvent(new ReplicationEvent(ReplicationEventType.Error, e));
-            if (e instanceof ReplicationException) {
-                throw e;
+        if (scheduledExecutorService != null) {
+            if (scheduledExecutorService.isShutdown() || scheduledExecutorService.isTerminated()) {
+                scheduledExecutorService = getSyncThreadPool();
             }
-            throw new ReplicationException("failed to open connection", e, true);
+
+            disconnected.compareAndSet(true, false);
+
+            if (replicationTask == null || replicationTask.isCancelled()) {
+                replicationTask = scheduledExecutorService.scheduleAtFixedRate(() -> {
+                    if (replicatedCollection.isStopped() && !disconnected.get()) {
+                        replicatedCollection.startReplication();
+                    }
+                }, 0, config.getPollingRate(), TimeUnit.MILLISECONDS);
+            }
+        } else {
+            throw new ReplicationException("Replica is not configured properly", true);
         }
     }
 
     public void disconnect() {
-        try {
-            replicationTemplate.disconnect();
-        } catch (Exception e) {
-            replicationTemplate.postEvent(new ReplicationEvent(ReplicationEventType.Error, e));
-            log.error("Error while disconnecting the replica {}", getReplicaId(), e);
-            if (e instanceof ReplicationException) {
-                throw e;
+        disconnectInternal(false);
+    }
+
+    public void disconnectNow() {
+        disconnectInternal(true);
+    }
+
+    public boolean isDisconnected() {
+        return disconnected.get() || replicatedCollection.isStopped();
+    }
+
+    public void close() {
+        disconnected.compareAndSet(false, true);
+        replicatedCollection.stopReplication(null, CloseReason.ClientClose);
+        ThreadPoolManager.shutdownThreadPool(scheduledExecutorService);
+    }
+
+    private void disconnectInternal(boolean mayInterruptIfRunning) {
+        if (scheduledExecutorService != null) {
+            if (!scheduledExecutorService.isShutdown() && !scheduledExecutorService.isTerminated()) {
+                replicationTask.cancel(mayInterruptIfRunning);
+                disconnected.compareAndSet(false, true);
             }
-            throw new ReplicationException("failed to disconnect the replica", e, true);
+        } else {
+            throw new ReplicationException("Replica is not configured properly", true);
         }
     }
 
-    public void subscribe(ReplicationEventListener listener) {
-        replicationTemplate.subscribe(listener);
+    private void configure() {
+        this.scheduledExecutorService = getSyncThreadPool();
+        this.disconnected = new AtomicBoolean(true);
     }
 
-    public void unsubscribe(ReplicationEventListener listener) {
-        replicationTemplate.unsubscribe(listener);
-    }
-
-    private String getReplicaId() {
-        return replicationTemplate.getReplicaId();
-    }
-
-    public boolean isConnected() {
-        return replicationTemplate.isConnected();
-    }
-
-    @Override
-    public void close() {
-        replicationTemplate.stopReplication("Normal shutdown");
-        replicationTemplate.close();
+    private static ScheduledExecutorService getSyncThreadPool() {
+        return ThreadPoolManager.getScheduledThreadPool(1, SYNC_THREAD_NAME);
     }
 }

@@ -16,9 +16,10 @@
 
 package org.dizitart.no2.sync.handlers;
 
-import lombok.Data;
+import lombok.Getter;
+import okhttp3.WebSocket;
 import org.dizitart.no2.sync.MessageFactory;
-import org.dizitart.no2.sync.ReplicationTemplate;
+import org.dizitart.no2.sync.ReplicatedCollection;
 import org.dizitart.no2.sync.message.DataGateFeed;
 import org.dizitart.no2.sync.message.DataGateFeedAck;
 import org.dizitart.no2.sync.message.Receipt;
@@ -26,27 +27,22 @@ import org.dizitart.no2.sync.message.Receipt;
 /**
  * @author Anindya Chatterjee
  */
-@Data
 public class DataGateFeedHandler implements MessageHandler<DataGateFeed>, ReceiptAckSender<DataGateFeedAck> {
-    private ReplicationTemplate replicationTemplate;
+    @Getter private final ReplicatedCollection replicatedCollection;
 
-    public DataGateFeedHandler(ReplicationTemplate replicationTemplate) {
-        this.replicationTemplate = replicationTemplate;
+    public DataGateFeedHandler(ReplicatedCollection replicatedCollection) {
+        this.replicatedCollection = replicatedCollection;
     }
 
     @Override
-    public void handleMessage(DataGateFeed message) {
-        sendAck(message);
-        if (replicationTemplate.shouldAcceptCheckpoint()) {
-            Long time = message.getHeader().getTimestamp();
-            replicationTemplate.saveLastSyncTime(time);
-        }
+    public void handleMessage(WebSocket webSocket, DataGateFeed message) {
+        sendAck(webSocket, message);
     }
 
     @Override
-    public DataGateFeedAck createAck(String correlationId, Receipt receipt) {
-        MessageFactory factory = replicationTemplate.getMessageFactory();
-        return factory.createFeedAck(replicationTemplate.getConfig(),
-            replicationTemplate.getReplicaId(), correlationId, receipt);
+    public DataGateFeedAck createAck(String transactionId, Receipt receipt) {
+        MessageFactory factory = new MessageFactory();
+        return factory.createFeedAck(replicatedCollection.getConfig(),
+            replicatedCollection.getReplicaId(), transactionId, receipt);
     }
 }

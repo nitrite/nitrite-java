@@ -20,8 +20,9 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.collection.meta.Attributes;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
@@ -58,12 +59,6 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     public void addProcessor(Processor processor) {
         notNull(processor, "a null processor cannot be added");
         collection.addProcessor(processor);
-    }
-
-    @Override
-    public void removeProcessor(Processor processor) {
-        notNull(processor, "a null processor cannot be removed");
-        collection.removeProcessor(processor);
     }
 
     @Override
@@ -111,17 +106,19 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     @Override
     public WriteResult update(T element, boolean insertIfAbsent) {
         notNull(element, "a null object cannot be used for update");
-        return update(operations.createUniqueFilter(element), element, insertIfAbsent);
+        return update(operations.createUniqueFilter(element), element, updateOptions(insertIfAbsent, true));
     }
 
     @Override
-    public WriteResult update(Filter filter, T update, boolean insertIfAbsent) {
+    public WriteResult update(Filter filter, T update, UpdateOptions updateOptions) {
         notNull(update, "a null object cannot be used for update");
         Document updateDocument = operations.toDocument(update, true);
-        if (!insertIfAbsent) {
+        if (updateOptions == null || !updateOptions.isInsertIfAbsent()) {
             operations.removeNitriteId(updateDocument);
         }
-        return collection.update(operations.asObjectFilter(filter), updateDocument, updateOptions(insertIfAbsent, true));
+
+        return collection.update(operations.asObjectFilter(filter), updateDocument,
+            updateOptions);
     }
 
     @Override

@@ -78,7 +78,7 @@ public class PluginManager implements AutoCloseable {
             loadInternalPlugins();
         } catch (Exception e) {
             log.error("Error while loading internal plugins", e);
-            throw new PluginException("error while loading internal plugins", e);
+            throw new PluginException("Error while loading internal plugins", e);
         }
     }
 
@@ -90,7 +90,7 @@ public class PluginManager implements AutoCloseable {
             initializePlugin(nitriteStore);
         } else {
             log.error("No storage engine found. Please ensure that a storage module has been loaded properly");
-            throw new NitriteIOException("no storage engine found");
+            throw new NitriteIOException("No nitrite storage engine found");
         }
 
         if (nitriteMapper != null) {
@@ -137,7 +137,7 @@ public class PluginManager implements AutoCloseable {
                 loadNitriteStore((NitriteStore<?>) plugin);
             } else {
                 plugin.close();
-                throw new PluginException("invalid plugin loaded " + plugin);
+                throw new PluginException("Unknown plugin type: " + plugin.getClass().getName());
             }
         }
     }
@@ -145,7 +145,7 @@ public class PluginManager implements AutoCloseable {
     private void loadNitriteStore(NitriteStore<?> nitriteStore) {
         if (this.nitriteStore != null) {
             nitriteStore.close();
-            throw new PluginException("multiple NitriteStore found");
+            throw new PluginException("Multiple nitrite store plugins found");
         }
         this.nitriteStore = nitriteStore;
     }
@@ -153,7 +153,7 @@ public class PluginManager implements AutoCloseable {
     private void loadNitriteMapper(NitriteMapper nitriteMapper) {
         if (this.nitriteMapper != null) {
             nitriteMapper.close();
-            throw new PluginException("multiple NitriteMapper found");
+            throw new PluginException("Multiple nitrite mapper plugins found");
         }
         this.nitriteMapper = nitriteMapper;
     }
@@ -161,7 +161,7 @@ public class PluginManager implements AutoCloseable {
     private synchronized void loadIndexer(NitriteIndexer nitriteIndexer) {
         if (indexerMap.containsKey(nitriteIndexer.getIndexType())) {
             nitriteIndexer.close();
-            throw new PluginException("multiple Indexer found for type "
+            throw new PluginException("Multiple indexer plugins found for type: "
                 + nitriteIndexer.getIndexType());
         }
         this.indexerMap.put(nitriteIndexer.getIndexType(), nitriteIndexer);

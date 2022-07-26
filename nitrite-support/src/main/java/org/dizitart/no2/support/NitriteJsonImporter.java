@@ -227,7 +227,7 @@ class NitriteJsonImporter {
                 }
             }
         } catch (Exception e) {
-            throw new NitriteIOException("error while reading data", e);
+            throw new NitriteIOException("Error while reading data", e);
         }
     }
 }
