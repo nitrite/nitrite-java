@@ -26,7 +26,7 @@ buildscript {
         classpath "io.freefair.gradle:lombok-plugin:6.3.0"
         classpath "net.ltgt.gradle:gradle-errorprone-plugin:2.0.2"
         classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.30.0"
-        classpath "com.adarshr:gradle-test-logger-plugin:3.1.0"
+        classpath "com.adarshr:gradle-test-logger-plugin:3.2.0"
         classpath "gradle.plugin.gradle-plugins:jartest:1.0.1"
     }
 }
