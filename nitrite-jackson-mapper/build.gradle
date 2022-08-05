@@ -54,12 +54,12 @@ dependencies {
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.locationtech.jts:jts-core:1.19.0"
     testImplementation "org.awaitility:awaitility:4.2.0"
-    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.17.2"
+    testImplementation "org.apache.logging.log4j:log4j-slf4j-impl:2.18.0"
     testImplementation "org.apache.logging.log4j:log4j-core:2.17.2"
     testImplementation ("com.github.javafaker:javafaker:1.0.2") {
         exclude module: 'snakeyaml'
     }
-    testImplementation platform("com.fasterxml.jackson:jackson-bom:2.13.0")
+    testImplementation platform("com.fasterxml.jackson:jackson-bom:2.13.3")
     testImplementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310"
     testImplementation 'org.yaml:snakeyaml:1.30'
 }
