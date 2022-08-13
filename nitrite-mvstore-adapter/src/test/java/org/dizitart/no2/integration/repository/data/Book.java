@@ -40,7 +40,7 @@ import static org.dizitart.no2.collection.Document.createDocument;
     @Index(value = { "price", "publisher" })
 })
 public class Book implements Mappable {
-    @Id(fieldName = "book_id")
+    @Id(fieldName = "book_id", embeddedFields = { "isbn", "book_name" })
     private BookId bookId;
 
     private String publisher;

@@ -69,7 +69,7 @@ public class RepositoryOperations {
      * Create indices.
      */
     public void createIndices() {
-        annotationScanner.scanIndices();
+        annotationScanner.performScan();
         annotationScanner.createIndices();
         annotationScanner.createIdIndex();
         objectIdField = annotationScanner.getObjectIdField();

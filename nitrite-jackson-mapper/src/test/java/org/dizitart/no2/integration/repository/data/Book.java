@@ -37,7 +37,7 @@ import java.util.List;
 })
 public class Book {
     @JsonProperty("book_id")
-    @Id(fieldName = "book_id")
+    @Id(fieldName = "book_id", embeddedFields = { "isbn", "book_name" })
     private BookId bookId;
 
     private String publisher;

@@ -91,7 +91,7 @@ public class Fields implements Comparable<Fields>, Serializable {
 
         int length = Math.min(fieldNames.size(), other.fieldNames.size());
 
-        // if other is greater then it is not a prefix of this field
+        // if other is greater than it is not a prefix of this field
         if (other.fieldNames.size() > length) return false;
 
         for (int i = 0; i < length; i++) {

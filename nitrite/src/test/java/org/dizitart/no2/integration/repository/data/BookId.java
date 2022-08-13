@@ -21,7 +21,6 @@ import lombok.Data;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.Mappable;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.repository.annotations.Embedded;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 
@@ -30,10 +29,8 @@ import static org.dizitart.no2.collection.Document.createDocument;
  */
 @Data
 public class BookId implements Mappable {
-    @Embedded(order = 0)
     private String isbn;
 
-    @Embedded(order = 1, fieldName = "book_name")
     private String name;
 
     private String author;

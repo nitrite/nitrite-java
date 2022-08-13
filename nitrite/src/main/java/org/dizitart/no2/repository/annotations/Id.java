@@ -36,4 +36,11 @@ public @interface Id {
      * @return the string
      */
     String fieldName() default "";
+
+    /**
+     * The name of the embedded fields.
+     *
+     * @return the string
+     */
+    String[] embeddedFields() default {};
 }

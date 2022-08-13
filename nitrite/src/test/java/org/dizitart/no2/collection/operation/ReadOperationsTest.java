@@ -27,6 +27,7 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.store.memory.InMemoryMap;
 import org.junit.Test;
+import org.mockito.internal.verification.NoInteractions;
 
 import java.util.ArrayList;
 
@@ -68,12 +69,16 @@ public class ReadOperationsTest {
 
     @Test
     public void testGetById() {
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        when(indexOperations.listIndexes()).thenReturn(new ArrayList<>());
+
         NitriteConfig nitriteConfig = new NitriteConfig();
         InMemoryMap<NitriteId, Document> nitriteMap = new InMemoryMap<>("Map Name", null);
 
-        ReadOperations readOperations = new ReadOperations("Collection Name", null, nitriteConfig, nitriteMap,
+        ReadOperations readOperations = new ReadOperations("Collection Name", indexOperations, nitriteConfig, nitriteMap,
                 new ProcessorChain());
         assertNull(readOperations.getById(NitriteId.newId()));
+        verify(indexOperations, new NoInteractions()).listIndexes();
     }
 }
 

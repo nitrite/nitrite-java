@@ -56,7 +56,7 @@ public class AnnotationScannerTest {
         Class<?> type = Object.class;
         AnnotationScanner annotationScanner = new AnnotationScanner(type, null,
                 new NitriteBuilderTest.CustomNitriteMapper());
-        annotationScanner.scanIndices();
+        annotationScanner.performScan();
         assertNull(annotationScanner.getObjectIdField());
     }
 
@@ -65,7 +65,7 @@ public class AnnotationScannerTest {
         Class<?> type = Field.class;
         AnnotationScanner annotationScanner = new AnnotationScanner(type, null,
                 new NitriteBuilderTest.CustomNitriteMapper());
-        annotationScanner.scanIndices();
+        annotationScanner.performScan();
         assertNull(annotationScanner.getObjectIdField());
     }
 
@@ -75,7 +75,7 @@ public class AnnotationScannerTest {
         NitriteCollection collection = mock(NitriteCollection.class);
         AnnotationScanner annotationScanner = new AnnotationScanner(type, collection,
                 new NitriteBuilderTest.CustomNitriteMapper());
-        annotationScanner.scanIndices();
+        annotationScanner.performScan();
         assertNull(annotationScanner.getObjectIdField());
     }
 }

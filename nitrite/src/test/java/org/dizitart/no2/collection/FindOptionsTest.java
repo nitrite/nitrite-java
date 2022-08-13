@@ -121,5 +121,13 @@ public class FindOptionsTest {
         FindOptions orderByResult = FindOptions.orderBy("Field Name", SortOrder.Ascending);
         assertSame(orderByResult, orderByResult.thenOrderBy("Field Name", SortOrder.Ascending));
     }
+
+    @Test
+    public void testDistinct() {
+        FindOptions findOptions = new FindOptions();
+        FindOptions actualDistinctResult = findOptions.withDistinct(true);
+        assertSame(findOptions, actualDistinctResult);
+        assertTrue(actualDistinctResult.distinct());
+    }
 }
 

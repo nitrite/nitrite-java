@@ -19,17 +19,14 @@ package org.dizitart.no2.integration.repository.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
-import org.dizitart.no2.repository.annotations.Embedded;
 
 /**
  * @author Anindya Chatterjee
  */
 @Data
 public class BookId {
-    @Embedded(order = 0)
     private String isbn;
 
-    @Embedded(order = 1, fieldName = "book_name")
     @JsonProperty("book_name")
     private String name;
 
