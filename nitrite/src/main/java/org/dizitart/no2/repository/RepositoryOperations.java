@@ -106,9 +106,6 @@ public class RepositoryOperations {
   
 		    createObjectIdFieldWithField(idField);
 	
-			//this.collection.getAttributes().set(RepositoryAttributes.ID_FIELD_NAME, objectIdField.getIdFieldName());
-			//this.collection.getAttributes().set(RepositoryAttributes.ID_RECOGNITION_STRATEGY,
-				//	IdRecognitionStrategy.BY_CLIENT.toString());
 
 		}
 
@@ -140,9 +137,6 @@ public class RepositoryOperations {
 
 		 getFieldWithName("id").ifPresent((idField)->{
 			createObjectIdFieldWithField(idField);
-		//	this.collection.getAttributes().set(RepositoryAttributes.ID_FIELD_NAME, objectIdField.getIdFieldName());
-			//this.collection.getAttributes().set(RepositoryAttributes.ID_RECOGNITION_STRATEGY,
-				//	IdRecognitionStrategy.BY_CONVENIENT.toString());
 
 		});
 		
