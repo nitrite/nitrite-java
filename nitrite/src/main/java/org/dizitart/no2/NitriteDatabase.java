@@ -25,6 +25,8 @@ import org.dizitart.no2.exceptions.NitriteException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.MigrationManager;
+import org.dizitart.no2.repository.DefaultRepositoryFinder;
+import org.dizitart.no2.repository.IRepositoryFinder;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
 import org.dizitart.no2.store.NitriteMap;
@@ -79,6 +81,12 @@ class NitriteDatabase implements Nitrite {
         checkOpened();
         return repositoryFactory.getRepository(nitriteConfig, type, key);
     }
+    
+    @Override
+	public <T> IRepositoryFinder<T> repository(Class<T> type) {
+    	checkOpened(); 
+    	return new DefaultRepositoryFinder<>(nitriteConfig  , type, this.repositoryFactory ) ; 
+	}
 
     @Override
     public void destroyCollection(String name) {
@@ -252,4 +260,6 @@ class NitriteDatabase implements Nitrite {
             storeInfo.put(STORE_INFO, storeMetadata.getInfo());
         }
     }
+
+	
 }

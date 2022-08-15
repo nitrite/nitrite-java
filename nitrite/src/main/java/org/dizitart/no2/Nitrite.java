@@ -20,6 +20,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.repository.IRepositoryFinder;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.store.NitriteStore;
@@ -111,7 +112,11 @@ public interface Nitrite extends AutoCloseable {
      * @see ObjectRepository
      */
     <T> ObjectRepository<T> getRepository(Class<T> type, String key);
-
+ 
+    
+    
+    <T> IRepositoryFinder<T> repository(Class<T> type) ; 
+    
     /**
      * Destroys a {@link NitriteCollection} without opening it first.
      *

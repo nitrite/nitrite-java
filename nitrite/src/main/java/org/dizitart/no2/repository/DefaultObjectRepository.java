@@ -41,186 +41,191 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @author Anindya Chatterjee
  */
 class DefaultObjectRepository<T> implements ObjectRepository<T> {
-    private final NitriteCollection collection;
-    private final NitriteConfig nitriteConfig;
-    private final Class<T> type;
-    private RepositoryOperations operations;
+	private final NitriteCollection collection;
+	private final NitriteConfig nitriteConfig;
+	private final Class<T> type;
+	private RepositoryOperations operations;
 
-    DefaultObjectRepository(Class<T> type,
-                            NitriteCollection collection,
-                            NitriteConfig nitriteConfig) {
-        this.type = type;
-        this.collection = collection;
-        this.nitriteConfig = nitriteConfig;
-        initialize();
-    }
+	DefaultObjectRepository(Class<T> type, NitriteCollection collection, NitriteConfig nitriteConfig) {
+		this.type = type;
+		this.collection = collection;
+		this.nitriteConfig = nitriteConfig;
+		initialize();
+	}
 
-    @Override
-    public void addProcessor(Processor processor) {
-        notNull(processor, "a null processor cannot be added");
-        collection.addProcessor(processor);
-    }
+	@Override
+	public void addProcessor(Processor processor) {
+		notNull(processor, "a null processor cannot be added");
+		collection.addProcessor(processor);
+	}
 
-    @Override
-    public void createIndex(IndexOptions indexOptions, String... fields) {
-        collection.createIndex(indexOptions, fields);
-    }
+	@Override
+	public void createIndex(IndexOptions indexOptions, String... fields) {
+		collection.createIndex(indexOptions, fields);
+	}
 
-    @Override
-    public void rebuildIndex(String... fields) {
-        collection.rebuildIndex(fields);
-    }
+	@Override
+	public void rebuildIndex(String... fields) {
+		collection.rebuildIndex(fields);
+	}
 
-    @Override
-    public Collection<IndexDescriptor> listIndices() {
-        return collection.listIndices();
-    }
+	@Override
+	public Collection<IndexDescriptor> listIndices() {
+		return collection.listIndices();
+	}
 
-    @Override
-    public boolean hasIndex(String... fields) {
-        return collection.hasIndex(fields);
-    }
+	@Override
+	public boolean hasIndex(String... fields) {
+		return collection.hasIndex(fields);
+	}
 
-    @Override
-    public boolean isIndexing(String... fields) {
-        return collection.isIndexing(fields);
-    }
+	@Override
+	public boolean isIndexing(String... fields) {
+		return collection.isIndexing(fields);
+	}
 
-    @Override
-    public void dropIndex(String... fields) {
-        collection.dropIndex(fields);
-    }
+	@Override
+	public void dropIndex(String... fields) {
+		collection.dropIndex(fields);
+	}
 
-    @Override
-    public void dropAllIndices() {
-        collection.dropAllIndices();
-    }
+	@Override
+	public void dropAllIndices() {
+		collection.dropAllIndices();
+	}
 
-    @Override
-    public WriteResult insert(T[] elements) {
-        notNull(elements, "a null object cannot be inserted");
-        containsNull(elements, "a null object cannot be inserted");
-        return collection.insert(operations.toDocuments(elements));
-    }
+	@Override
+	public WriteResult insert(T[] elements) {
+		notNull(elements, "a null object cannot be inserted");
+		containsNull(elements, "a null object cannot be inserted");
+		return collection.insert(operations.toDocuments(elements));
+	}
 
-    @Override
-    public WriteResult update(T element, boolean insertIfAbsent) {
-        notNull(element, "a null object cannot be used for update");
-        return update(operations.createUniqueFilter(element), element, updateOptions(insertIfAbsent, true));
-    }
+	@Override
+	public WriteResult update(T element, boolean insertIfAbsent) {
+		notNull(element, "a null object cannot be used for update");
+		return update(operations.createUniqueFilter(element), element, updateOptions(insertIfAbsent, true));
+	}
 
-    @Override
-    public WriteResult update(Filter filter, T update, UpdateOptions updateOptions) {
-        notNull(update, "a null object cannot be used for update");
-        Document updateDocument = operations.toDocument(update, true);
-        if (updateOptions == null || !updateOptions.isInsertIfAbsent()) {
-            operations.removeNitriteId(updateDocument);
-        }
+	@Override
+	public WriteResult update(Filter filter, T update, UpdateOptions updateOptions) {
+		notNull(update, "a null object cannot be used for update");
+		Document updateDocument = operations.toDocument(update, true);
+		if (updateOptions == null || !updateOptions.isInsertIfAbsent()) {
+			operations.removeNitriteId(updateDocument);
+		}
 
-        return collection.update(operations.asObjectFilter(filter), updateDocument,
-            updateOptions);
-    }
+		return collection.update(operations.asObjectFilter(filter), updateDocument, updateOptions);
+	}
 
-    @Override
-    public WriteResult update(Filter filter, Document update, boolean justOnce) {
-        notNull(update, "a null document cannot be used for update");
-        operations.removeNitriteId(update);
-        operations.serializeFields(update);
-        return collection.update(operations.asObjectFilter(filter), update, updateOptions(false, justOnce));
-    }
+	@Override
+	public WriteResult update(Filter filter, Document update, boolean justOnce) {
+		notNull(update, "a null document cannot be used for update");
+		operations.removeNitriteId(update);
+		operations.serializeFields(update);
+		return collection.update(operations.asObjectFilter(filter), update, updateOptions(false, justOnce));
+	}
 
-    @Override
-    public WriteResult remove(T element) {
-        notNull(element, "a null object cannot be removed");
-        return remove(operations.createUniqueFilter(element));
-    }
+	@Override
+	public WriteResult remove(T element) {
+		notNull(element, "a null object cannot be removed");
+		return remove(operations.createUniqueFilter(element));
+	}
 
-    @Override
-    public WriteResult remove(Filter filter, boolean justOne) {
-        return collection.remove(operations.asObjectFilter(filter), justOne);
-    }
+	@Override
+	public WriteResult remove(Filter filter, boolean justOne) {
+		return collection.remove(operations.asObjectFilter(filter), justOne);
+	}
 
-    @Override
-    public void clear() {
-        collection.clear();
-    }
+	@Override
+	public void clear() {
+		collection.clear();
+	}
 
+	@Override
+	public Cursor<T> find(Filter filter, FindOptions findOptions) {
+		return operations.find(filter, findOptions, type);
+	}
 
-    @Override
-    public Cursor<T> find(Filter filter, FindOptions findOptions) {
-        return operations.find(filter, findOptions, type);
-    }
+	@Override
+	public <I> T getById(I id) {
+		Filter idFilter = operations.createIdFilter(id);
+		return find(idFilter).firstOrNull();
+	}
 
-    @Override
-    public <I> T getById(I id) {
-        Filter idFilter = operations.createIdFilter(id);
-        return find(idFilter).firstOrNull();
-    }
+	@Override
+	public void drop() {
+		collection.drop();
+	}
 
-    @Override
-    public void drop() {
-        collection.drop();
-    }
+	@Override
+	public boolean isDropped() {
+		return collection.isDropped();
+	}
 
-    @Override
-    public boolean isDropped() {
-        return collection.isDropped();
-    }
+	@Override
+	public boolean isOpen() {
+		return collection.isOpen();
+	}
 
-    @Override
-    public boolean isOpen() {
-        return collection.isOpen();
-    }
+	@Override
+	public void close() {
+		collection.close();
+	}
 
-    @Override
-    public void close() {
-        collection.close();
-    }
+	@Override
+	public long size() {
+		return collection.size();
+	}
 
-    @Override
-    public long size() {
-        return collection.size();
-    }
+	@Override
+	public NitriteStore<?> getStore() {
+		return collection.getStore();
+	}
 
-    @Override
-    public NitriteStore<?> getStore() {
-        return collection.getStore();
-    }
+	@Override
+	public void subscribe(CollectionEventListener listener) {
+		collection.subscribe(listener);
+	}
 
-    @Override
-    public void subscribe(CollectionEventListener listener) {
-        collection.subscribe(listener);
-    }
+	@Override
+	public void unsubscribe(CollectionEventListener listener) {
+		collection.unsubscribe(listener);
+	}
 
-    @Override
-    public void unsubscribe(CollectionEventListener listener) {
-        collection.unsubscribe(listener);
-    }
+	@Override
+	public Attributes getAttributes() {
+		return collection.getAttributes();
+	}
 
-    @Override
-    public Attributes getAttributes() {
-        return collection.getAttributes();
-    }
+	@Override
+	public void setAttributes(Attributes attributes) {
+		collection.setAttributes(attributes);
+	}
 
-    @Override
-    public void setAttributes(Attributes attributes) {
-        collection.setAttributes(attributes);
-    }
+	@Override
+	public Class<T> getType() {
+		return type;
+	}
 
-    @Override
-    public Class<T> getType() {
-        return type;
-    }
+	@Override
+	public NitriteCollection getDocumentCollection() {
+		return collection;
+	}
 
-    @Override
-    public NitriteCollection getDocumentCollection() {
-        return collection;
-    }
+	private void initialize() {
+		NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
+		operations = new RepositoryOperations(type, nitriteMapper, collection);
+		
+		
+		String idFieldName = null ; 
+		Attributes attrs = getAttributes() ; 
+		
+		if(attrs != null ) { 
+			 idFieldName = attrs.get(RepositoryAttributes.ID_FIELD_NAME);
+		}
 
-    private void initialize() {
-        NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
-        operations = new RepositoryOperations(type, nitriteMapper, collection);
-        operations.createIndices();
-    }
+	  operations.createIndices(idFieldName);
+	}
 
 }
