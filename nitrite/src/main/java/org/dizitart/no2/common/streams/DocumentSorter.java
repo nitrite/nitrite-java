@@ -22,7 +22,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 
 import java.text.Collator;
 import java.util.Comparator;
@@ -76,7 +76,7 @@ public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
 
                     // validate comparable
                     if (!(value1 instanceof Comparable) || !(value2 instanceof Comparable)) {
-                        throw new ValidationException("Cannot compare " + value1.getClass()
+                        throw new InvalidOperationException("Cannot compare " + value1.getClass()
                             + " and " + value2.getClass());
                     }
 
