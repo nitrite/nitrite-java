@@ -24,8 +24,9 @@ import lombok.ToString;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.Company;
@@ -69,6 +70,11 @@ public class CustomFieldSeparatorTest {
             .loadModule(storeModule)
             .fieldSeparator(":")
             .openOrCreate();
+
+        SimpleDocumentMapper mapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        mapper.registerEntityConverter(new Company.CompanyConverter());
+        mapper.registerEntityConverter(new EmployeeForCustomSeparator.EmployeeForCustomSeparatorConverter());
+        mapper.registerEntityConverter(new Note.NoteConverter());
 
         repository = db.getRepository(EmployeeForCustomSeparator.class);
     }
@@ -121,7 +127,7 @@ public class CustomFieldSeparatorTest {
         @Index(value = "address", type = IndexType.FULL_TEXT),
         @Index(value = "employeeNote:text", type = IndexType.FULL_TEXT)
     })
-    public static class EmployeeForCustomSeparator implements Serializable, Mappable {
+    public static class EmployeeForCustomSeparator implements Serializable {
         @Id
         @Getter
         @Setter
@@ -159,28 +165,39 @@ public class CustomFieldSeparatorTest {
             employeeNote = copy.employeeNote;
         }
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument().put("empId", empId)
-                .put("joinDate", joinDate)
-                .put("address", address)
-                .put("blob", blob)
-                .put("company", company.write(mapper))
-                .put("employeeNote", employeeNote.write(mapper));
-        }
+        public static class EmployeeForCustomSeparatorConverter implements EntityConverter<EmployeeForCustomSeparator> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            empId = document.get("empId", Long.class);
-            joinDate = document.get("joinDate", Date.class);
-            address = document.get("address", String.class);
-            blob = document.get("blob", byte[].class);
-            employeeNote = new Note();
-            Document doc = document.get("employeeNote", Document.class);
-            employeeNote.read(mapper, doc);
-            company = new Company();
-            doc = document.get("company", Document.class);
-            company.read(mapper, doc);
+            @Override
+            public Class<EmployeeForCustomSeparator> getEntityType() {
+                return EmployeeForCustomSeparator.class;
+            }
+
+            @Override
+            public Document toDocument(EmployeeForCustomSeparator entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument().put("empId", entity.empId)
+                    .put("joinDate", entity.joinDate)
+                    .put("address", entity.address)
+                    .put("blob", entity.blob)
+                    .put("company", nitriteMapper.convert(entity.company, Document.class))
+                    .put("employeeNote", nitriteMapper.convert(entity.employeeNote, Document.class));
+            }
+
+            @Override
+            public EmployeeForCustomSeparator fromDocument(Document document, NitriteMapper nitriteMapper) {
+                EmployeeForCustomSeparator entity = new EmployeeForCustomSeparator();
+
+                entity.empId = document.get("empId", Long.class);
+                entity.joinDate = document.get("joinDate", Date.class);
+                entity.address = document.get("address", String.class);
+                entity.blob = document.get("blob", byte[].class);
+
+                Document doc = document.get("employeeNote", Document.class);
+                entity.employeeNote = nitriteMapper.convert(doc, Note.class);
+
+                doc = document.get("company", Document.class);
+                entity.company = nitriteMapper.convert(doc, Company.class);
+                return entity;
+            }
         }
     }
 

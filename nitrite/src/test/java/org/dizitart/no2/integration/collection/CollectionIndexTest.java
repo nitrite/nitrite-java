@@ -130,7 +130,7 @@ public class CollectionIndexTest extends BaseCollectionTest {
         insert();
         Collection<IndexDescriptor> indices = collection.listIndices();
         for (IndexDescriptor idx : indices) {
-            collection.rebuildIndex(idx.getIndexFields().getFieldNames().toArray(new String[0]));
+            collection.rebuildIndex(idx.getFields().getFieldNames().toArray(new String[0]));
         }
     }
 

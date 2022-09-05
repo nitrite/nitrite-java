@@ -17,21 +17,25 @@
 package org.dizitart.no2.common.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.repository.EntityDecorator;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Entity;
-import org.objenesis.Objenesis;
-import org.objenesis.ObjenesisSerializer;
-import org.objenesis.ObjenesisStd;
-import org.objenesis.instantiator.ObjectInstantiator;
 
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.dizitart.no2.common.Constants.KEY_OBJ_SEPARATOR;
 import static org.dizitart.no2.common.util.Iterables.toArray;
@@ -46,8 +50,6 @@ import static org.dizitart.no2.common.util.Iterables.toArray;
 @Slf4j
 public class ObjectUtils {
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER_TYPE;
-    private static final Objenesis stdObjenesis = new ObjenesisStd(true);
-    private static final Objenesis serializerObjenesis = new ObjenesisSerializer(true);
 
     static {
         Map<Class<?>, Class<?>> primToWrap = new LinkedHashMap<>();
@@ -90,6 +92,14 @@ public class ObjectUtils {
         } else {
             return entityName + KEY_OBJ_SEPARATOR + key;
         }
+    }
+
+    public static <T> String findRepositoryNameByDecorator(EntityDecorator<T> entityDecorator, String key) {
+        String entityName = entityDecorator.getEntityName();
+        if (entityName.contains(KEY_OBJ_SEPARATOR)) {
+            throw new ValidationException(entityName + " is not a valid entity name");
+        }
+        return findRepositoryName(entityName, key);
     }
 
     /**
@@ -181,15 +191,13 @@ public class ObjectUtils {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static <T> T newInstance(Class<T> type, boolean createSkeleton) {
+    public static <T> T newInstance(Class<T> type, boolean createSkeleton, NitriteMapper nitriteMapper) {
         try {
             if (type.isPrimitive() || type.isArray() || type == String.class) {
                 return defaultValue(type);
             }
 
-            ObjectInstantiator instantiator = getInstantiatorOf(type);
-            T item = (T) instantiator.newInstance();
+            T item = nitriteMapper.convert(Document.createDocument(), type);
 
             if (createSkeleton) {
                 Field[] fields = type.getDeclaredFields();
@@ -199,17 +207,8 @@ public class ObjectUtils {
                         if (!Modifier.isStatic(field.getModifiers())) {
                             field.setAccessible(true);
 
-                            // remove final modifier
-                            try {
-                                Field modifiersField = Field.class.getDeclaredField("modifiers");
-                                modifiersField.setAccessible(true);
-                                modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-                            } catch (NoSuchFieldException e) {
-                                // ignore in case of java 12+
-                            }
-
                             if (isSkeletonRequired(type, field.getType())) {
-                                field.set(item, newInstance(field.getType(), true));
+                                field.set(item, newInstance(field.getType(), true, nitriteMapper));
                             } else {
                                 field.set(item, defaultValue(field.getType()));
                             }
@@ -224,14 +223,65 @@ public class ObjectUtils {
         }
     }
 
-    public static boolean isValueType(Class<?> retType) {
+    public static boolean isValue(Object value, NitriteMapper nitriteMapper) {
+        try {
+            if (value == null) return true; // special case
+
+            nitriteMapper.convert(value, Comparable.class);
+            return true;
+        } catch (Exception e) {
+            return isBuiltInValueType(value.getClass());
+        }
+    }
+
+    public static boolean isValueType(Class<?> type, NitriteMapper nitriteMapper) {
+        try {
+            Object value = newInstance(type, false, nitriteMapper);
+            if (value != null) {
+                return isValue(value, nitriteMapper);
+            } else {
+                return isBuiltInValueType(type);
+            }
+        } catch (Exception e) {
+            return isBuiltInValueType(type);
+        }
+    }
+
+    public static boolean isBuiltInValueType(Class<?> retType) {
         if (retType.isPrimitive() && retType != void.class) return true;
         if (Number.class.isAssignableFrom(retType)) return true;
-        if (Boolean.class == retType) return true;
-        if (Character.class == retType) return true;
-        if (String.class == retType) return true;
         if (byte[].class.isAssignableFrom(retType)) return true;
-        return Enum.class.isAssignableFrom(retType);
+        if (Enum.class.isAssignableFrom(retType)) return true;
+        return builtInTypes().contains(retType);
+    }
+
+    public static List<Class<?>> builtInTypes() {
+        return Iterables.listOf(
+            byte[].class,
+            Number.class,
+            Byte.class,
+            Short.class,
+            Integer.class,
+            Long.class,
+            Float.class,
+            Double.class,
+            BigDecimal.class,
+            BigInteger.class,
+            Boolean.class,
+            Character.class,
+            String.class,
+            Date.class,
+            URL.class,
+            URI.class,
+            Currency.class,
+            Calendar.class,
+            StringBuffer.class,
+            StringBuilder.class,
+            Locale.class,
+            Void.class,
+            UUID.class,
+            Pattern.class
+        );
     }
 
     public static boolean isCompatibleTypes(Class<?> type1, Class<?> type2) {
@@ -292,14 +342,6 @@ public class ObjectUtils {
         return (wrapped == null) ? type : wrapped;
     }
 
-    private static <T> ObjectInstantiator<T> getInstantiatorOf(Class<T> type) {
-        if (Serializable.class.isAssignableFrom(type)) {
-            return serializerObjenesis.getInstantiatorOf(type);
-        } else {
-            return stdObjenesis.getInstantiatorOf(type);
-        }
-    }
-
     private static <P, F> boolean isSkeletonRequired(Class<P> enclosingType, Class<F> fieldType) {
         String fieldTypePackage = getPackageName(fieldType);
         String enclosingTypePackage = getPackageName(enclosingType);
@@ -349,7 +391,7 @@ public class ObjectUtils {
         }
 
         if (type == String.class) {
-            return (T) "";
+            return (T) null;
         }
 
         return null;

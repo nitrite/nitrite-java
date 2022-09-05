@@ -18,27 +18,37 @@
 package org.dizitart.no2.integration.repository.data;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
 /**
  * @author Anindya Chatterjee.
  */
-public class WithPublicField implements Mappable {
+public class WithPublicField {
     @Id
     public String name;
     public long number;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("name", name)
-            .put("number", number);
-    }
+    public static class Converter implements EntityConverter<WithPublicField> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        number = document.get("number", Long.class);
+        @Override
+        public Class<WithPublicField> getEntityType() {
+            return WithPublicField.class;
+        }
+
+        @Override
+        public Document toDocument(WithPublicField entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("name", entity.name)
+                .put("number", entity.number);
+        }
+
+        @Override
+        public WithPublicField fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithPublicField entity = new WithPublicField();
+            entity.name = document.get("name", String.class);
+            entity.number = document.get("number", Long.class);
+            return entity;
+        }
     }
 }

@@ -20,16 +20,17 @@ package org.dizitart.no2.integration.repository;
 import com.github.javafaker.Faker;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.meta.Attributes;
-import org.dizitart.no2.common.mapper.Mappable;
-import org.dizitart.no2.common.mapper.MappableMapper;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.*;
+import org.dizitart.no2.integration.repository.decorator.*;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Entity;
@@ -61,7 +62,24 @@ public class ObjectRepositoryTest {
 
     @Before
     public void setUp() {
-        NitriteMapper mapper = new MappableMapper();
+        SimpleDocumentMapper mapper = new SimpleDocumentMapper();
+        mapper.registerEntityConverter(new InternalClass.Converter());
+        mapper.registerEntityConverter(new EmployeeEntity.Converter());
+        mapper.registerEntityConverter(new StressRecord.Converter());
+        mapper.registerEntityConverter(new WithClassField.Converter());
+        mapper.registerEntityConverter(new WithDateId.Converter());
+        mapper.registerEntityConverter(new WithTransientField.Converter());
+        mapper.registerEntityConverter(new WithOutId.Converter());
+        mapper.registerEntityConverter(new ChildClass.Converter());
+        mapper.registerEntityConverter(new WithOutGetterSetter.Converter());
+        mapper.registerEntityConverter(new WithPrivateConstructor.Converter());
+        mapper.registerEntityConverter(new WithPublicField.Converter());
+        mapper.registerEntityConverter(new Employee.EmployeeConverter());
+        mapper.registerEntityConverter(new Company.CompanyConverter());
+        mapper.registerEntityConverter(new ProductConverter());
+        mapper.registerEntityConverter(new ProductIdConverter());
+        mapper.registerEntityConverter(new ManufacturerConverter());
+        mapper.registerEntityConverter(new MiniProduct.Converter());
 
         db = Nitrite.builder()
             .loadModule(module(mapper))
@@ -334,12 +352,152 @@ public class ObjectRepositoryTest {
         await().atMost(5, TimeUnit.SECONDS).until(() -> counter.get() == 1);
     }
 
+    @Test
+    public void testRepositoryName() {
+        ObjectRepository<Product> productRepository = db.getRepository(new ProductDecorator());
+        ObjectRepository<Product> upcomingProductRepository = db.getRepository(new ProductDecorator(), "upcoming");
+        ObjectRepository<Manufacturer> manufacturerRepository = db.getRepository(new ManufacturerDecorator());
+        ObjectRepository<Manufacturer> exManufacturerRepository = db.getRepository(new ManufacturerDecorator(), "ex");
+        ObjectRepository<Employee> employeeRepository = db.getRepository(Employee.class);
+        ObjectRepository<Employee> managerRepository = db.getRepository(Employee.class, "manager");
+
+        assertEquals(productRepository.getDocumentCollection().getName(), "product");
+        assertEquals(upcomingProductRepository.getDocumentCollection().getName(),
+            "product+upcoming");
+        assertEquals(manufacturerRepository.getDocumentCollection().getName(), Manufacturer.class.getName());
+        assertEquals(exManufacturerRepository.getDocumentCollection().getName(), Manufacturer.class.getName() + "+ex");
+        assertEquals(employeeRepository.getDocumentCollection().getName(), Employee.class.getName());
+        assertEquals(managerRepository.getDocumentCollection().getName(), Employee.class.getName() + "+manager");
+    }
+
+    @Test
+    public void testRepositoryType() {
+        ObjectRepository<Product> productRepository = db.getRepository(new ProductDecorator());
+        ObjectRepository<Product> upcomingProductRepository = db.getRepository(new ProductDecorator(), "upcoming");
+        ObjectRepository<Manufacturer> manufacturerRepository = db.getRepository(new ManufacturerDecorator());
+        ObjectRepository<Manufacturer> exManufacturerRepository = db.getRepository(new ManufacturerDecorator(), "ex");
+        ObjectRepository<Employee> employeeRepository = db.getRepository(Employee.class);
+        ObjectRepository<Employee> managerRepository = db.getRepository(Employee.class, "manager");
+
+        assertEquals(productRepository.getType(), Product.class);
+        assertEquals(upcomingProductRepository.getType(), Product.class);
+        assertEquals(manufacturerRepository.getType(), Manufacturer.class);
+        assertEquals(exManufacturerRepository.getType(), Manufacturer.class);
+        assertEquals(employeeRepository.getType(), Employee.class);
+        assertEquals(managerRepository.getType(), Employee.class);
+    }
+
+    @Test
+    public void testDestroyRepository() {
+        ObjectRepository<Product> productRepository = db.getRepository(new ProductDecorator());
+        ObjectRepository<Product> upcomingProductRepository = db.getRepository(new ProductDecorator(), "upcoming");
+        ObjectRepository<Manufacturer> manufacturerRepository = db.getRepository(new ManufacturerDecorator());
+        ObjectRepository<Manufacturer> exManufacturerRepository = db.getRepository(new ManufacturerDecorator(), "ex");
+        ObjectRepository<Employee> employeeRepository = db.getRepository(Employee.class);
+        ObjectRepository<Employee> managerRepository = db.getRepository(Employee.class, "manager");
+
+        assertNotNull(productRepository);
+        assertNotNull(upcomingProductRepository);
+        assertNotNull(manufacturerRepository);
+        assertNotNull(exManufacturerRepository);
+        assertNotNull(employeeRepository);
+        assertNotNull(managerRepository);
+
+        assertTrue(db.hasRepository(new ProductDecorator()));
+        assertTrue(db.hasRepository(new ProductDecorator(), "upcoming"));
+        assertTrue(db.hasRepository(new ManufacturerDecorator()));
+        assertTrue(db.hasRepository(new ManufacturerDecorator(), "ex"));
+        assertTrue(db.hasRepository(Employee.class));
+        assertTrue(db.hasRepository(Employee.class, "manager"));
+
+        db.destroyRepository(new ProductDecorator());
+        assertFalse(db.hasRepository(new ProductDecorator()));
+        assertTrue(db.hasRepository(new ProductDecorator(), "upcoming"));
+
+        db.destroyRepository(new ProductDecorator(), "upcoming");
+        assertFalse(db.hasRepository(new ProductDecorator()));
+        assertFalse(db.hasRepository(new ProductDecorator(), "upcoming"));
+
+        db.destroyRepository(new ManufacturerDecorator());
+        db.destroyRepository(new ManufacturerDecorator(), "ex");
+        assertFalse(db.hasRepository(new ManufacturerDecorator()));
+        assertFalse(db.hasRepository(new ManufacturerDecorator(), "ex"));
+
+        db.destroyRepository(Employee.class);
+        assertFalse(db.hasRepository(Employee.class));
+        assertTrue(db.hasRepository(Employee.class, "manager"));
+
+        db.destroyRepository(Employee.class, "manager");
+        assertFalse(db.hasRepository(Employee.class));
+        assertFalse(db.hasRepository(Employee.class, "manager"));
+    }
+
+    @Test
+    public void testDestroyRepositoryWrongDecorator() {
+        ObjectRepository<Product> productRepository = db.getRepository(new ProductDecorator());
+        assertNotNull(productRepository);
+        assertTrue(db.hasRepository(new ProductDecorator()));
+        assertFalse(db.hasRepository(new ManufacturerDecorator()));
+
+        db.destroyRepository(new ManufacturerDecorator());
+        assertTrue(db.hasRepository(new ProductDecorator()));
+        assertFalse(db.hasRepository(new ManufacturerDecorator()));
+    }
+
+    @Test
+    public void testDestroyRepositoryWrongDecoratorWithKey() {
+        ObjectRepository<Product> productRepository = db.getRepository(new ProductDecorator(), "upcoming");
+        assertNotNull(productRepository);
+        assertTrue(db.hasRepository(new ProductDecorator(), "upcoming"));
+        assertFalse(db.hasRepository(new ManufacturerDecorator()));
+
+        db.destroyRepository(new ManufacturerDecorator(), "upcoming");
+        assertTrue(db.hasRepository(new ProductDecorator(), "upcoming"));
+        assertFalse(db.hasRepository(new ManufacturerDecorator()));
+    }
+
+    @Test
+    public void testDestroyRepositoryWrongClassName() {
+        ObjectRepository<Product> productRepository = db.getRepository(new ProductDecorator());
+        assertNotNull(productRepository);
+        assertFalse(db.hasRepository(Product.class));
+
+        db.destroyRepository(Product.class);
+        assertTrue(db.hasRepository(new ProductDecorator()));
+        assertFalse(db.hasRepository(Product.class));
+    }
+
+    @Test
+    public void testDestroyRepositoryWrongClassNameAndKey() {
+        ObjectRepository<Employee> employeeRepository = db.getRepository(Employee.class);
+        assertNotNull(employeeRepository);
+        assertTrue(db.hasRepository(Employee.class));
+
+        db.destroyRepository(Employee.class, "manager");
+        assertTrue(db.hasRepository(Employee.class));
+        assertFalse(db.hasRepository(Employee.class, "manager"));
+    }
+
+    @Test
+    public void testHasRepository() {
+        ObjectRepository<Employee> employeeRepository = db.getRepository(Employee.class);
+        ObjectRepository<Product> productRepository = db.getRepository(new ProductDecorator());
+
+        assertNotNull(employeeRepository);
+        assertNotNull(productRepository);
+
+        assertTrue(db.hasRepository(Employee.class));
+        assertFalse(db.hasRepository(Employee.class, "manager"));
+        assertTrue(db.hasRepository(new ProductDecorator()));
+        assertFalse(db.hasRepository(new ProductDecorator(), "ex"));
+    }
+
     @Data
     @Entity(value = "entity.employee", indices = {
         @Index(value = "firstName", type = IndexType.NON_UNIQUE),
         @Index(value = "lastName", type = IndexType.NON_UNIQUE),
     })
-    private static class EmployeeEntity implements Mappable {
+    private static class EmployeeEntity {
         private static final Faker faker = new Faker();
 
         @Id
@@ -353,18 +511,28 @@ public class ObjectRepositoryTest {
             lastName = faker.name().lastName();
         }
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument("id", id)
-                .put("firstName", firstName)
-                .put("lastName", lastName);
-        }
+        public static class Converter implements EntityConverter<EmployeeEntity> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            id = document.get("id", Long.class);
-            firstName = document.get("firstName", String.class);
-            lastName = document.get("lastName", String.class);
+            @Override
+            public Class<EmployeeEntity> getEntityType() {
+                return EmployeeEntity.class;
+            }
+
+            @Override
+            public Document toDocument(EmployeeEntity entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("id", entity.id)
+                    .put("firstName", entity.firstName)
+                    .put("lastName", entity.lastName);
+            }
+
+            @Override
+            public EmployeeEntity fromDocument(Document document, NitriteMapper nitriteMapper) {
+                EmployeeEntity entity = new EmployeeEntity();
+                entity.id = document.get("id", Long.class);
+                entity.firstName = document.get("firstName", String.class);
+                entity.lastName = document.get("lastName", String.class);
+                return entity;
+            }
         }
     }
 }

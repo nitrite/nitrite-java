@@ -21,7 +21,7 @@ import lombok.SneakyThrows;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
-import org.dizitart.no2.spatial.mapper.GeometryExtension;
+import org.dizitart.no2.spatial.mapper.GeometryModule;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -50,7 +50,7 @@ public class TestUtil {
 
         return Nitrite.builder()
             .loadModule(module)
-            .loadModule(new JacksonMapperModule(new GeometryExtension()))
+            .loadModule(new JacksonMapperModule(new GeometryModule()))
             .loadModule(new SpatialModule())
             .fieldSeparator(".")
             .openOrCreate();

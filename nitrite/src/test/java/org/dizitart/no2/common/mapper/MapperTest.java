@@ -31,14 +31,15 @@ import static org.junit.Assert.assertTrue;
  * @author Anindya Chatterjee
  */
 public class MapperTest {
-    private MappableMapper mappableMapper;
+    private SimpleDocumentMapper simpleDocumentMapper;
 
     @Rule
     public Retry retry = new Retry(3);
 
     @Test
     public void testWithConverter() {
-        mappableMapper = new MappableMapper();
+        simpleDocumentMapper = new SimpleDocumentMapper();
+        simpleDocumentMapper.registerEntityConverter(new Employee.Converter());
 
         Employee boss = new Employee();
         boss.setEmpId("1");
@@ -52,12 +53,12 @@ public class MapperTest {
         emp1.setBoss(boss);
 
         long start = System.currentTimeMillis();
-        Document document = mappableMapper.convert(emp1, Document.class);
+        Document document = simpleDocumentMapper.convert(emp1, Document.class);
         long diff = System.currentTimeMillis() - start;
         System.out.println(diff);
 
         start = System.currentTimeMillis();
-        Employee employee = mappableMapper.convert(document, Employee.class);
+        Employee employee = simpleDocumentMapper.convert(document, Employee.class);
         diff = System.currentTimeMillis() - start;
         System.out.println(diff);
         assertEquals(emp1, employee);
@@ -65,7 +66,10 @@ public class MapperTest {
 
     @Test
     public void testWithMappable() {
-        mappableMapper = new MappableMapper();
+        simpleDocumentMapper = new SimpleDocumentMapper();
+        simpleDocumentMapper.registerEntityConverter(new Department.DepartmentConverter());
+        simpleDocumentMapper.registerEntityConverter(new MappableEmployee.MappableEmployeeConverter());
+        simpleDocumentMapper.registerEntityConverter(new MappableDepartment.Converter());
 
         MappableEmployee boss = new MappableEmployee();
         boss.setEmpId("1");
@@ -79,12 +83,12 @@ public class MapperTest {
         emp1.setBoss(boss);
 
         long start = System.currentTimeMillis();
-        Document document = mappableMapper.convert(emp1, Document.class);
+        Document document = simpleDocumentMapper.convert(emp1, Document.class);
         long diff = System.currentTimeMillis() - start;
         System.out.println(diff);
 
         start = System.currentTimeMillis();
-        MappableEmployee employee = mappableMapper.convert(document, MappableEmployee.class);
+        MappableEmployee employee = simpleDocumentMapper.convert(document, MappableEmployee.class);
         diff = System.currentTimeMillis() - start;
         System.out.println(diff);
         assertEquals(emp1, employee);
@@ -92,7 +96,10 @@ public class MapperTest {
 
     @Test
     public void testWithConverterAndMappableMix() {
-        mappableMapper = new MappableMapper();
+        simpleDocumentMapper = new SimpleDocumentMapper();
+        simpleDocumentMapper.registerEntityConverter(new Department.DepartmentConverter());
+        simpleDocumentMapper.registerEntityConverter(new MappableEmployee.MappableEmployeeConverter());
+        simpleDocumentMapper.registerEntityConverter(new MappableDepartment.Converter());
 
         final MappableEmployee boss = new MappableEmployee();
         boss.setEmpId("1");
@@ -113,12 +120,12 @@ public class MapperTest {
         }});
 
         long start = System.currentTimeMillis();
-        Document document = mappableMapper.convert(department, Document.class);
+        Document document = simpleDocumentMapper.convert(department, Document.class);
         long diff = System.currentTimeMillis() - start;
         System.out.println(diff);
 
         start = System.currentTimeMillis();
-        Department dept = mappableMapper.convert(document, Department.class);
+        Department dept = simpleDocumentMapper.convert(document, Department.class);
         diff = System.currentTimeMillis() - start;
         System.out.println(diff);
         assertEquals(department, dept);
@@ -126,7 +133,10 @@ public class MapperTest {
 
     @Test
     public void testNested() {
-        mappableMapper = new MappableMapper();
+        simpleDocumentMapper = new SimpleDocumentMapper();
+        simpleDocumentMapper.registerEntityConverter(new Department.DepartmentConverter());
+        simpleDocumentMapper.registerEntityConverter(new MappableEmployee.MappableEmployeeConverter());
+        simpleDocumentMapper.registerEntityConverter(new MappableDepartment.Converter());
 
         final MappableEmployee boss = new MappableEmployee();
         boss.setEmpId("1");
@@ -147,12 +157,12 @@ public class MapperTest {
         }});
 
         long start = System.currentTimeMillis();
-        Document document = mappableMapper.convert(department, Document.class);
+        Document document = simpleDocumentMapper.convert(department, Document.class);
         long diff = System.currentTimeMillis() - start;
         System.out.println(diff);
 
         start = System.currentTimeMillis();
-        MappableDepartment dept = mappableMapper.convert(document, MappableDepartment.class);
+        MappableDepartment dept = simpleDocumentMapper.convert(document, MappableDepartment.class);
         diff = System.currentTimeMillis() - start;
         System.out.println(diff);
         assertEquals(department, dept);
@@ -160,13 +170,16 @@ public class MapperTest {
 
     @Test
     public void testWithValueType() {
-        mappableMapper = new MappableMapper();
+        simpleDocumentMapper = new SimpleDocumentMapper();
+        simpleDocumentMapper.registerEntityConverter(new Company.CompanyConverter());
+        simpleDocumentMapper.registerEntityConverter(new Company.CompanyId.CompanyIdConverter());
+
         Company company = new Company();
         company.setName("test");
         company.setId(1L);
         company.setCompanyId(new Company.CompanyId(1L));
 
-        Document document = mappableMapper.convert(company, Document.class);
+        Document document = simpleDocumentMapper.convert(company, Document.class);
         Object companyId = document.get("companyId");
         assertTrue(companyId instanceof Document);
     }

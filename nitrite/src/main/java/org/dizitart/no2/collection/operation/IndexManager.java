@@ -84,7 +84,7 @@ public class IndexManager implements AutoCloseable {
         List<IndexDescriptor> indexDescriptors = new ArrayList<>();
 
         for (IndexDescriptor indexDescriptor : getIndexDescriptors()) {
-            if (indexDescriptor.getIndexFields().startsWith(fields)) {
+            if (indexDescriptor.getFields().startsWith(fields)) {
                 indexDescriptors.add(indexDescriptor);
             }
         }

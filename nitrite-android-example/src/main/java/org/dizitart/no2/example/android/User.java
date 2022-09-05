@@ -17,13 +17,13 @@
 package org.dizitart.no2.example.android;
 
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 /**
  * @author Anindya Chatterjee.
  */
-public class User implements Mappable {
+public class User {
     private String id;
     private String username;
     private String email;
@@ -62,19 +62,29 @@ public class User implements Mappable {
         this.email = email;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        Document document = Document.createDocument();
-        document.put("id", id);
-        document.put("username", username);
-        document.put("email", email);
-        return document;
-    }
+    public static class Converter implements EntityConverter<User> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        id = (String) document.get("id");
-        username = (String) document.get("username");
-        email = (String) document.get("email");
+        @Override
+        public Class<User> getEntityType() {
+            return User.class;
+        }
+
+        @Override
+        public Document toDocument(User entity, NitriteMapper nitriteMapper) {
+            Document document = Document.createDocument();
+            document.put("id", entity.id);
+            document.put("username", entity.username);
+            document.put("email", entity.email);
+            return document;
+        }
+
+        @Override
+        public User fromDocument(Document document, NitriteMapper nitriteMapper) {
+            User entity = new User();
+            entity.id = (String) document.get("id");
+            entity.username = (String) document.get("username");
+            entity.email = (String) document.get("email");
+            return entity;
+        }
     }
 }

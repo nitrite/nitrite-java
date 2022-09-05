@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2022 Nitrite author or authors.
+ * Copyright (c) 2017-2021 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,19 @@
  *
  */
 
-package org.dizitart.no2.common.mapper;
+package org.dizitart.no2.common.mapper.modules;
 
-/**
- * Represents a factory for creating instances of a type.
- *
- * @since 4.0
- * @author Anindya Chatterjee
- */
-public interface MappableFactory<T> {
-    T create();
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+
+public class NitriteIdSerializerTest {
+    @Test
+    public void testConstructor() {
+        NitriteIdSerializer actualNitriteIdSerializer = new NitriteIdSerializer();
+        assertNull(actualNitriteIdSerializer.getDelegatee());
+        assertFalse(actualNitriteIdSerializer.isUnwrappingSerializer());
+    }
 }
+

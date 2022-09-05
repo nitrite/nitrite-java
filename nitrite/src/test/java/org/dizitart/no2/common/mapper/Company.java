@@ -25,27 +25,13 @@ import java.io.Serializable;
  * @author Anindya Chatterjee.
  */
 @Data
-public class Company implements Mappable {
+public class Company {
     private String name;
     private Long id;
     private CompanyId companyId;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("id", id)
-            .put("name", name)
-            .put("companyId", mapper.convert(companyId, Document.class));
-    }
-
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        id = document.get("id", Long.class);
-        companyId = document.get("companyId", CompanyId.class);
-    }
-
     @Data
-    public static class CompanyId implements Comparable<CompanyId>, Serializable, Mappable {
+    public static class CompanyId implements Comparable<CompanyId>, Serializable {
         private Long idValue;
 
         public CompanyId(long value) {
@@ -57,14 +43,47 @@ public class Company implements Mappable {
             return idValue.compareTo(other.idValue);
         }
 
+        public static class CompanyIdConverter implements EntityConverter<CompanyId> {
+
+            @Override
+            public Class<CompanyId> getEntityType() {
+                return CompanyId.class;
+            }
+
+            @Override
+            public Document toDocument(CompanyId entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument().put("idValue", entity.idValue);
+            }
+
+            @Override
+            public CompanyId fromDocument(Document document, NitriteMapper nitriteMapper) {
+                CompanyId entity = new CompanyId(0L);
+                entity.idValue = document.get("idValue", Long.class);
+                return entity;
+            }
+        }
+    }
+
+    public static class CompanyConverter implements EntityConverter<Company> {
         @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument().put("idValue", idValue);
+        public Class<Company> getEntityType() {
+            return Company.class;
         }
 
         @Override
-        public void read(NitriteMapper mapper, Document document) {
-            idValue = document.get("idValue", Long.class);
+        public Document toDocument(Company entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("id", entity.id)
+                .put("name", entity.name)
+                .put("companyId", nitriteMapper.convert(entity.companyId, Document.class));
+        }
+
+        @Override
+        public Company fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Company entity = new Company();
+            entity.name = document.get("name", String.class);
+            entity.id = document.get("id", Long.class);
+            entity.companyId = nitriteMapper.convert(document.get("companyId", Document.class), CompanyId.class);
+            return entity;
         }
     }
 }

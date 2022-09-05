@@ -234,5 +234,4 @@ public class Constants {
      * The constant INITIAL_REVISION.
      */
     public static final Integer INITIAL_SCHEMA_VERSION = 1;
-
 }

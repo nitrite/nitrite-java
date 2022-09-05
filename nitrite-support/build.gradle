@@ -52,6 +52,7 @@ dependencies {
     testAnnotationProcessor "org.projectlombok:lombok:1.18.24"
     testImplementation project(path: ':nitrite-mvstore-adapter', configuration: 'default')
     testImplementation "junit:junit:4.13.2"
+    testImplementation "com.github.javafaker:javafaker:1.0.2"
 }
 
 test {

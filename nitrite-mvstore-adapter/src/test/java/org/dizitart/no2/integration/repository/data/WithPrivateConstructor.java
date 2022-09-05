@@ -19,14 +19,14 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.EqualsAndHashCode;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 /**
  * @author Anindya Chatterjee.
  */
 @EqualsAndHashCode
-public class WithPrivateConstructor implements Mappable {
+public class WithPrivateConstructor {
     private String name;
     private long number;
 
@@ -42,15 +42,24 @@ public class WithPrivateConstructor implements Mappable {
         return obj;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("name", name)
-            .put("number", number);
-    }
+    public static class Converter implements EntityConverter<WithPrivateConstructor> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        number = document.get("number", Long.class);
+        @Override
+        public Class<WithPrivateConstructor> getEntityType() {
+            return WithPrivateConstructor.class;
+        }
+
+        @Override
+        public Document toDocument(WithPrivateConstructor entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("name", entity.name)
+                .put("number", entity.number);
+        }
+
+        @Override
+        public WithPrivateConstructor fromDocument(Document document, NitriteMapper nitriteMapper) {
+            String name = document.get("name", String.class);
+            Long number = document.get("number", Long.class);
+            return WithPrivateConstructor.create(name, number);
+        }
     }
 }

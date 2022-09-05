@@ -1,12 +1,6 @@
 ##TODO:
 
-1. fix codacy issues
-2. nitrite explorer
-4. add p2p replications via jgroups
-5. add lucene indexer
-6. nitrite cluster via jgroups
-7. spring data rest / graphql api over nitrite cluster
-8. data views (like rdbms view)
+
 
 
 ## Other Articles
@@ -158,6 +152,42 @@ https://blog.yugabyte.com/enhancing-rocksdb-for-speed-scale/
  - http://www.cbcb.umd.edu/confcour/Spring2014/CMSC424/query_optimization.pdf
  - https://www.tutorialcup.com/dbms/query-optimization.htm
  - https://www.geeksforgeeks.org/query-optimization-in-relational-algebra/
+
+
+## TODO Test
+
+```
+
+DatabaseInstruction dropRepository(Class<?> type, String key)
+DatabaseInstruction dropRepository(EntityDecorator<?> decorator)
+DatabaseInstruction dropRepository(EntityDecorator<?> decorator, String key)
+DatabaseInstruction dropRepository(String typeName)
+
+
+RepositoryInstruction forRepository(Class<?> type)
+RepositoryInstruction forRepository(Class<?> type, String key)
+RepositoryInstruction forRepository(EntityDecorator<?> decorator)
+RepositoryInstruction forRepository(EntityDecorator<?> decorator, String key)
+RepositoryInstruction forRepository(String typeName)
+
+
+EntityId
+
+IndexValidator
+
+ObjectCursor
+
+RepositoryFactory
+
+
+Transaction :: ObjectRepository<T> getRepository(EntityDecorator<T> decorator);
+Transaction :: ObjectRepository<T> getRepository(EntityDecorator<T> decorator, String key);
+
+
+KNO2JacksonMapper
+```
+
+
  
  
 

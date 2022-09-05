@@ -11,6 +11,7 @@ import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.repository.EntityDecorator;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryNameByDecorator;
 
 /**
  * @author Anindya Chatterjee
@@ -143,6 +145,78 @@ class NitriteTransaction implements Transaction {
         NitriteCollection primaryCollection = primary.getDocumentCollection();
         NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context);
         ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(type,
+            primary, backingCollection, transactionConfig);
+        repositoryRegistry.put(name, txRepository);
+        contextMap.put(name, context);
+        return txRepository;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public synchronized <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator) {
+        checkState();
+
+        String name = findRepositoryNameByDecorator(entityDecorator, null);
+        if (repositoryRegistry.containsKey(name)) {
+            return (ObjectRepository<T>) repositoryRegistry.get(name);
+        }
+
+        ObjectRepository<T> primary;
+        if (nitrite.hasRepository(entityDecorator)) {
+            primary = nitrite.getRepository(entityDecorator);
+        } else {
+            throw new TransactionException("Repository of type " + entityDecorator.getEntityName() + " does not exists");
+        }
+
+        NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
+            NitriteId.class, Document.class);
+
+        TransactionContext context = new TransactionContext();
+        context.setCollectionName(name);
+        context.setNitriteMap(txMap);
+        context.setJournal(new LinkedList<>());
+        context.setConfig(transactionConfig);
+
+        NitriteCollection primaryCollection = primary.getDocumentCollection();
+        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context);
+        ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(entityDecorator,
+            primary, backingCollection, transactionConfig);
+
+        repositoryRegistry.put(name, txRepository);
+        contextMap.put(name, context);
+        return txRepository;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public synchronized <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator, String key) {
+        checkState();
+
+        String name = findRepositoryNameByDecorator(entityDecorator, key);
+        if (repositoryRegistry.containsKey(name)) {
+            return (ObjectRepository<T>) repositoryRegistry.get(name);
+        }
+
+        ObjectRepository<T> primary;
+        if (nitrite.hasRepository(entityDecorator, key)) {
+            primary = nitrite.getRepository(entityDecorator, key);
+        } else {
+            throw new TransactionException("Repository of type " + entityDecorator.getEntityName()
+                + " and key " + key + " does not exists");
+        }
+
+        NitriteMap<NitriteId, Document> txMap = transactionStore.openMap(name,
+            NitriteId.class, Document.class);
+
+        TransactionContext context = new TransactionContext();
+        context.setCollectionName(name);
+        context.setNitriteMap(txMap);
+        context.setJournal(new LinkedList<>());
+        context.setConfig(transactionConfig);
+
+        NitriteCollection primaryCollection = primary.getDocumentCollection();
+        NitriteCollection backingCollection = new DefaultTransactionalCollection(primaryCollection, context);
+        ObjectRepository<T> txRepository = new DefaultTransactionalRepository<>(entityDecorator,
             primary, backingCollection, transactionConfig);
         repositoryRegistry.put(name, txRepository);
         contextMap.put(name, context);

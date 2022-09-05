@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
@@ -28,21 +28,31 @@ import org.dizitart.no2.repository.annotations.Id;
  * @author Anindya Chatterjee
  */
 @Data
-public class WithNitriteId implements Mappable {
+public class WithNitriteId {
     @Id
     public NitriteId idField;
     public String name;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("idField", idField)
-            .put("name", name);
-    }
+    public static class WithNitriteIdConverter implements EntityConverter<WithNitriteId> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        idField = document.get("idField", NitriteId.class);
-        name = document.get("name", String.class);
+        @Override
+        public Class<WithNitriteId> getEntityType() {
+            return WithNitriteId.class;
+        }
+
+        @Override
+        public Document toDocument(WithNitriteId entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("idField", entity.idField)
+                .put("name", entity.name);
+        }
+
+        @Override
+        public WithNitriteId fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithNitriteId entity = new WithNitriteId();
+            entity.idField = document.get("idField", NitriteId.class);
+            entity.name = document.get("name", String.class);
+            return entity;
+        }
     }
 }

@@ -26,8 +26,9 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NitriteSecurityException;
@@ -192,6 +193,10 @@ public class NitriteBuilderTest {
             .fieldSeparator(".")
             .loadModule(module)
             .openOrCreate();
+
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new TestObject.Converter());
+        documentMapper.registerEntityConverter(new TestObject2.Converter());
 
         NitriteCollection collection = db.getCollection("test");
         collection.insert(createDocument("id1", "value"));
@@ -369,23 +374,13 @@ public class NitriteBuilderTest {
         }
 
         @Override
-        public boolean isValueType(Class<?> type) {
-            return false;
-        }
-
-        @Override
-        public boolean isValue(Object object) {
-            return false;
-        }
-
-        @Override
         public void initialize(NitriteConfig nitriteConfig) {
 
         }
     }
 
     @Index(value = "longValue")
-    private static class TestObject implements Mappable {
+    private static class TestObject {
         private String stringValue;
         private Long longValue;
 
@@ -397,23 +392,29 @@ public class NitriteBuilderTest {
             this.stringValue = stringValue;
         }
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument("stringValue", stringValue)
-                .put("longValue", longValue);
-        }
+        public static class Converter implements EntityConverter<TestObject> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            if (document != null) {
-                this.stringValue = document.get("stringValue", String.class);
-                this.longValue = document.get("longValue", Long.class);
+            @Override
+            public Class<TestObject> getEntityType() {
+                return TestObject.class;
+            }
+
+            @Override
+            public Document toDocument(TestObject entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument()
+                    .put("stringValue", entity.stringValue)
+                    .put("longValue", entity.longValue);
+            }
+
+            @Override
+            public TestObject fromDocument(Document document, NitriteMapper nitriteMapper) {
+                return null;
             }
         }
     }
 
     @Index(value = "longValue")
-    private static class TestObject2 implements Mappable {
+    private static class TestObject2 {
         private String stringValue;
         private Long longValue;
 
@@ -425,17 +426,27 @@ public class NitriteBuilderTest {
             this.stringValue = stringValue;
         }
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument("stringValue", stringValue)
-                .put("longValue", longValue);
-        }
+        public static class Converter implements EntityConverter<TestObject2> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            if (document != null) {
-                this.stringValue = document.get("stringValue", String.class);
-                this.longValue = document.get("longValue", Long.class);
+            @Override
+            public Class<TestObject2> getEntityType() {
+                return TestObject2.class;
+            }
+
+            @Override
+            public Document toDocument(TestObject2 entity, NitriteMapper nitriteMapper) {
+                return createDocument("stringValue", entity.stringValue)
+                    .put("longValue", entity.longValue);
+            }
+
+            @Override
+            public TestObject2 fromDocument(Document document, NitriteMapper nitriteMapper) {
+                TestObject2 entity = new TestObject2();
+                if (document != null) {
+                    entity.stringValue = document.get("stringValue", String.class);
+                    entity.longValue = document.get("longValue", Long.class);
+                }
+                return entity;
             }
         }
     }

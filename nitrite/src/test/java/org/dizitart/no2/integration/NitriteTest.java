@@ -28,12 +28,13 @@ import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
+import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.mapper.Mappable;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
@@ -54,12 +55,12 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
-import static org.dizitart.no2.integration.TestUtil.createDb;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.integration.TestUtil.createDb;
 import static org.junit.Assert.*;
 
 /**
@@ -74,6 +75,9 @@ public class NitriteTest {
     @Before
     public void setUp() throws ParseException {
         db = createDb("test-user", "test-password");
+        SimpleDocumentMapper nitriteMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        nitriteMapper.registerEntityConverter(new Receipt.ReceiptConverter());
+        nitriteMapper.registerEntityConverter(new CompatChild.CompatChildConverter());
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
@@ -198,7 +202,7 @@ public class NitriteTest {
 
     @Test(expected = ValidationException.class)
     public void testGetRepositoryInvalid() {
-        db.getRepository(null);
+        db.getRepository((Class<Object>) null);
     }
 
     @Test(expected = NitriteIOException.class)
@@ -377,20 +381,30 @@ public class NitriteTest {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class CompatChild implements Mappable {
+    public static class CompatChild {
         private Long childId;
         private String lastName;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument("childId", childId)
-                .put("lastName", lastName);
-        }
+        public static class CompatChildConverter implements EntityConverter<CompatChild> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            childId = document.get("childId", Long.class);
-            lastName = document.get("lastName", String.class);
+            @Override
+            public Class<CompatChild> getEntityType() {
+                return CompatChild.class;
+            }
+
+            @Override
+            public Document toDocument(CompatChild entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("childId", entity.getChildId())
+                    .put("lastName", entity.getLastName());
+            }
+
+            @Override
+            public CompatChild fromDocument(Document document, NitriteMapper nitriteMapper) {
+                CompatChild compatChild = new CompatChild();
+                compatChild.setChildId(document.get("childId", Long.class));
+                compatChild.setLastName(document.get("lastName", String.class));
+                return compatChild;
+            }
         }
     }
 
@@ -400,39 +414,50 @@ public class NitriteTest {
     @Indices({
         @Index(value = "synced", type = IndexType.NON_UNIQUE)
     })
-    public static class Receipt implements Mappable {
+    public static class Receipt {
         @Id
         private String clientRef;
         private Boolean synced;
         private Long createdTimestamp = System.currentTimeMillis();
         private Status status;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument("status", status)
-                .put("clientRef", clientRef)
-                .put("synced", synced)
-                .put("createdTimestamp", createdTimestamp);
-        }
-
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            if (document != null) {
-                Object status = document.get("status");
-                if (status instanceof Status) {
-                    this.status = (Status) status;
-                } else {
-                    this.status = Status.valueOf(status.toString());
-                }
-                this.clientRef = document.get("clientRef", String.class);
-                this.synced = document.get("synced", Boolean.class);
-                this.createdTimestamp = document.get("createdTimestamp", Long.class);
-            }
-        }
-
         public enum Status {
             COMPLETED,
             PREPARING,
+        }
+
+        public static class ReceiptConverter implements EntityConverter<Receipt> {
+
+            @Override
+            public Class<Receipt> getEntityType() {
+                return Receipt.class;
+            }
+
+            @Override
+            public Document toDocument(Receipt entity, NitriteMapper nitriteMapper) {
+                return createDocument("status", entity.getStatus())
+                    .put("clientRef", entity.getClientRef())
+                    .put("synced", entity.getSynced())
+                    .put("createdTimestamp", entity.getCreatedTimestamp());
+            }
+
+            @Override
+            public Receipt fromDocument(Document document, NitriteMapper nitriteMapper) {
+                Receipt receipt = new Receipt();
+
+                if (document != null) {
+                    Object status = document.get("status");
+                    if (status instanceof Receipt.Status) {
+                        receipt.status = (Receipt.Status) status;
+                    } else {
+                        receipt.status = Receipt.Status.valueOf(status.toString());
+                    }
+                    receipt.clientRef = document.get("clientRef", String.class);
+                    receipt.synced = document.get("synced", Boolean.class);
+                    receipt.createdTimestamp = document.get("createdTimestamp", Long.class);
+                }
+                return receipt;
+            }
         }
     }
 }

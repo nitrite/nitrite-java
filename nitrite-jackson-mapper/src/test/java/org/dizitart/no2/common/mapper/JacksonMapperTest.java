@@ -18,8 +18,6 @@
 package org.dizitart.no2.common.mapper;
 
 import com.fasterxml.jackson.databind.DeserializationConfig;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.cfg.ContextAttributes;
 import com.fasterxml.jackson.databind.introspect.VisibilityChecker;
@@ -29,8 +27,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BinaryNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.extensions.NitriteIdExtension;
+import org.dizitart.no2.common.mapper.modules.NitriteIdModule;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.junit.Test;
 
@@ -80,10 +77,13 @@ public class JacksonMapperTest {
 
     @Test
     public void testConstructor2() {
-        NitriteIdExtension nitriteIdExtension = new NitriteIdExtension();
-        NitriteIdExtension nitriteIdExtension1 = new NitriteIdExtension();
-        ObjectMapper objectMapper = (new JacksonMapper(nitriteIdExtension, nitriteIdExtension1, new NitriteIdExtension()))
-            .getObjectMapper();
+        NitriteIdModule nitriteIdModule = new NitriteIdModule();
+        NitriteIdModule nitriteIdModule1 = new NitriteIdModule();
+        JacksonMapper jacksonMapper = new JacksonMapper();
+        jacksonMapper.registerJacksonModule(nitriteIdModule);
+        jacksonMapper.registerJacksonModule(nitriteIdModule1);
+        jacksonMapper.registerJacksonModule(new NitriteIdModule());
+        ObjectMapper objectMapper = jacksonMapper.getObjectMapper();
         PolymorphicTypeValidator polymorphicTypeValidator = objectMapper.getPolymorphicTypeValidator();
         assertTrue(polymorphicTypeValidator instanceof LaissezFaireSubTypeValidator);
         VisibilityChecker<?> visibilityChecker = objectMapper.getVisibilityChecker();
@@ -120,7 +120,9 @@ public class JacksonMapperTest {
 
     @Test
     public void testConstructor3() {
-        ObjectMapper objectMapper = (new JacksonMapper(new NitriteIdExtension())).getObjectMapper();
+        JacksonMapper jacksonMapper = new JacksonMapper();
+        jacksonMapper.registerJacksonModule(new NitriteIdModule());
+        ObjectMapper objectMapper = jacksonMapper.getObjectMapper();
         PolymorphicTypeValidator polymorphicTypeValidator = objectMapper.getPolymorphicTypeValidator();
         assertTrue(polymorphicTypeValidator instanceof LaissezFaireSubTypeValidator);
         VisibilityChecker<?> visibilityChecker = objectMapper.getVisibilityChecker();
@@ -156,8 +158,8 @@ public class JacksonMapperTest {
     }
 
     @Test
-    public void testCreateObjectMapper() {
-        ObjectMapper actualCreateObjectMapperResult = (new JacksonMapper()).createObjectMapper();
+    public void testGetObjectMapper() {
+        ObjectMapper actualCreateObjectMapperResult = (new JacksonMapper()).getObjectMapper();
         PolymorphicTypeValidator polymorphicTypeValidator = actualCreateObjectMapperResult.getPolymorphicTypeValidator();
         assertTrue(polymorphicTypeValidator instanceof LaissezFaireSubTypeValidator);
         VisibilityChecker<?> visibilityChecker = actualCreateObjectMapperResult.getVisibilityChecker();
@@ -203,15 +205,6 @@ public class JacksonMapperTest {
     }
 
     @Test
-    public void testConvert2() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        jacksonMapper.addValueType(Object.class);
-        assertEquals("Source", jacksonMapper.<Object, Object>convert("Source", Object.class));
-        assertTrue(jacksonMapper.getObjectMapper()
-            .getSerializerProviderInstance() instanceof com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.Impl);
-    }
-
-    @Test
     public void testConvert3() {
         JacksonMapper jacksonMapper = new JacksonMapper();
         assertNull(jacksonMapper.convert(null, Object.class));
@@ -237,53 +230,6 @@ public class JacksonMapperTest {
         JacksonMapper jacksonMapper = new JacksonMapper();
         BinaryNode source = new BinaryNode("AAAAAAAAAAAAAAAAAAAAAAAA".getBytes(StandardCharsets.UTF_8));
         assertNull(jacksonMapper.<Object, Object>convert(source, Object.class));
-    }
-
-    @Test
-    public void testIsValueType() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        assertThrows(ObjectMappingException.class, () -> jacksonMapper.isValueType(Object.class));
-    }
-
-    @Test
-    public void testIsValueType2() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        jacksonMapper.addValueType(Object.class);
-        assertTrue(jacksonMapper.isValueType(Object.class));
-    }
-
-    @Test
-    public void testIsValueType3() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        assertFalse(jacksonMapper.isValueType(JsonMappingException.class));
-        assertTrue(jacksonMapper.getObjectMapper()
-            .getSerializerProviderInstance() instanceof com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.Impl);
-    }
-
-    @Test
-    public void testIsValueType4() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        assertFalse(jacksonMapper.isValueType(JsonNode.class));
-    }
-
-    @Test
-    public void testIsValueType5() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        assertFalse(jacksonMapper.isValueType(Document.class));
-    }
-
-    @Test
-    public void testIsValue() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        assertTrue(jacksonMapper.isValue("Object"));
-        assertTrue(jacksonMapper.getObjectMapper()
-            .getSerializerProviderInstance() instanceof com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.Impl);
-    }
-
-    @Test
-    public void testIsValue2() {
-        JacksonMapper jacksonMapper = new JacksonMapper();
-        assertFalse(jacksonMapper.isValue(new ArrayNode(new JsonNodeFactory(true))));
     }
 
     @Test

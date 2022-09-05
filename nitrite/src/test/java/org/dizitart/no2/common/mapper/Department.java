@@ -28,32 +28,42 @@ import java.util.List;
  */
 @Data
 @ToString
-public class Department implements Mappable {
+public class Department {
     private String name;
     private List<MappableEmployee> employeeList;
 
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        List<Document> docList = new ArrayList<>();
-        if (employeeList != null && !employeeList.isEmpty()) {
-            employeeList.stream().map(employee -> mapper.convert(employee, Document.class))
-                .forEach(docList::add);
+    public static class DepartmentConverter implements EntityConverter<Department> {
+
+        @Override
+        public Class<Department> getEntityType() {
+            return Department.class;
         }
 
-        return Document.createDocument().put("name", name)
-            .put("employeeList", docList);
-    }
+        @Override
+        public Document toDocument(Department entity, NitriteMapper nitriteMapper) {
+            List<Document> docList = new ArrayList<>();
+            if (entity.employeeList != null && !entity.employeeList.isEmpty()) {
+                entity.employeeList.stream().map(employee -> nitriteMapper.convert(employee, Document.class))
+                    .forEach(docList::add);
+            }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void read(NitriteMapper mapper, Document document) {
-        employeeList = new ArrayList<>();
-        List<Document> documentList = (List<Document>) document.get("employeeList", ArrayList.class);
-        if (documentList != null && !documentList.isEmpty()) {
-            documentList.stream().map(doc -> mapper.convert(doc, MappableEmployee.class))
-                .forEach(employeeList::add);
+            return Document.createDocument().put("name", entity.name)
+                .put("employeeList", docList);
         }
-        name = document.get("name", String.class);
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Department fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Department entity = new Department();
+            entity.employeeList = new ArrayList<>();
+            List<Document> documentList = (List<Document>) document.get("employeeList", ArrayList.class);
+            if (documentList != null && !documentList.isEmpty()) {
+                documentList.stream().map(doc -> nitriteMapper.convert(doc, MappableEmployee.class))
+                    .forEach(entity.employeeList::add);
+            }
+            entity.name = document.get("name", String.class);
+            return entity;
+        }
     }
 }

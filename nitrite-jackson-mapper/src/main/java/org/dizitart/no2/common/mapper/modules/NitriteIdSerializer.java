@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.common.mapper.extensions;
+package org.dizitart.no2.common.mapper.modules;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;

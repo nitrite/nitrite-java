@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.Test;
 
@@ -61,7 +62,7 @@ public class CollectionFindNegativeTest extends BaseCollectionTest {
         assertEquals(collection.find(skipBy(10).limit(1)).size(), 0);
     }
 
-    @Test(expected = ValidationException.class)
+    @Test(expected = InvalidOperationException.class)
     public void testFindInvalidSort() {
         insert();
         collection.find(orderBy("data", SortOrder.Descending)).toList();

@@ -22,6 +22,7 @@ import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.streams.MutatedObjectStream;
+import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.common.mapper.NitriteMapper;
@@ -83,8 +84,8 @@ class ObjectCursor<T> implements Cursor<T> {
             throw new ValidationException("Cannot project to array");
         } else if (Modifier.isAbstract(type.getModifiers())) {
             throw new ValidationException("Cannot project to abstract type");
-        } else if (nitriteMapper.isValueType(type)) {
-            throw new ValidationException("Cannot to project to nitrite mapper's value type");
+        } else if (ObjectUtils.isValueType(type, nitriteMapper)) {
+            throw new ValidationException("Cannot project to a value type");
         }
 
         Document dummyDoc = skeletonDocument(nitriteMapper, type);

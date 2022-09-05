@@ -54,11 +54,10 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
     /**
      * Gets the target fields for the index.
      *
-     * @param indexFields fields in the index
      * @return the target fields.
      */
     @Getter
-    private Fields indexFields;
+    private Fields fields;
 
     /**
      * Gets the collection name.
@@ -83,7 +82,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
         notEmpty(collectionName, "collectionName cannot be empty");
 
         this.indexType = indexType;
-        this.indexFields = fields;
+        this.fields = fields;
         this.collectionName = collectionName;
     }
 
@@ -100,13 +99,13 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
         // for two unique indices, the one with encompassing higher
         // number of fields has the higher cardinality
         if (this.isUniqueIndex()) {
-            return this.indexFields.compareTo(other.indexFields);
+            return this.fields.compareTo(other.fields);
         }
 
         // for two non-unique indices, the one with encompassing higher
         // number of fields has the higher cardinality
         if (!other.isUniqueIndex()) {
-            return this.indexFields.compareTo(other.indexFields);
+            return this.fields.compareTo(other.fields);
         }
 
         return -1;
@@ -118,7 +117,7 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
      * @return the boolean
      */
     public boolean isCompoundIndex() {
-        return indexFields.getFieldNames().size() > 1;
+        return fields.getFieldNames().size() > 1;
     }
 
     private boolean isUniqueIndex() {
@@ -127,13 +126,13 @@ public class IndexDescriptor implements Comparable<IndexDescriptor>, Serializabl
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
         stream.writeUTF(indexType);
-        stream.writeObject(indexFields);
+        stream.writeObject(fields);
         stream.writeUTF(collectionName);
     }
 
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         indexType = stream.readUTF();
-        indexFields = (Fields) stream.readObject();
+        fields = (Fields) stream.readObject();
         collectionName = stream.readUTF();
     }
 }

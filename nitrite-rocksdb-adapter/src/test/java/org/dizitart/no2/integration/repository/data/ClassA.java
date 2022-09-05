@@ -22,14 +22,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.util.UUID;
 
 @EqualsAndHashCode
 @ToString
-public class ClassA implements Mappable {
+public class ClassA {
     @Getter
     @Setter
     private ClassB b;
@@ -53,23 +53,33 @@ public class ClassA implements Mappable {
         return classA;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("b", b != null ? b.write(mapper) : null)
-            .put("uid", uid)
-            .put("string", string)
-            .put("blob", blob);
-    }
+    public static class ClassAConverter implements EntityConverter<ClassA> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        if (document.get("b") != null) {
-            b = new ClassB();
-            b.read(mapper, document.get("b", Document.class));
+        @Override
+        public Class<ClassA> getEntityType() {
+            return ClassA.class;
         }
-        uid = document.get("uid", UUID.class);
-        string = document.get("string", String.class);
-        blob = document.get("blob", byte[].class);
+
+        @Override
+        public Document toDocument(ClassA entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("b", nitriteMapper.convert(entity.b, Document.class))
+                .put("uid", entity.uid)
+                .put("string", entity.string)
+                .put("blob", entity.blob);
+        }
+
+        @Override
+        public ClassA fromDocument(Document document, NitriteMapper nitriteMapper) {
+            ClassA entity = new ClassA();
+            if (document.get("b") != null) {
+                Document doc = document.get("b", Document.class);
+                entity.b = nitriteMapper.convert(doc, ClassB.class);
+            }
+            entity.uid = document.get("uid", UUID.class);
+            entity.string = document.get("string", String.class);
+            entity.blob = document.get("blob", byte[].class);
+            return entity;
+        }
     }
 }

@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
@@ -29,17 +29,27 @@ import org.dizitart.no2.repository.annotations.Id;
  */
 @Getter
 @Setter
-public class WithObjectId implements Mappable {
+public class WithObjectId {
     @Id
     private WithOutId withOutId;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("withOutId", withOutId);
-    }
+    public static class Converter implements EntityConverter<WithObjectId> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        withOutId = document.get("withOutId", WithOutId.class);
+        @Override
+        public Class<WithObjectId> getEntityType() {
+            return WithObjectId.class;
+        }
+
+        @Override
+        public Document toDocument(WithObjectId entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("withOutId", entity.withOutId);
+        }
+
+        @Override
+        public WithObjectId fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithObjectId entity = new WithObjectId();
+            entity.withOutId = document.get("withOutId", WithOutId.class);
+            return entity;
+        }
     }
 }

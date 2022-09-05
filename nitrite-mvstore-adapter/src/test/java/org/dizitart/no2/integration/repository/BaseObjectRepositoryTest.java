@@ -17,10 +17,16 @@
 
 package org.dizitart.no2.integration.repository;
 
-import org.dizitart.no2.integration.Retry;
-import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.integration.Retry;
+import org.dizitart.no2.integration.repository.data.*;
+import org.dizitart.no2.integration.repository.decorator.ManufacturerConverter;
+import org.dizitart.no2.integration.repository.decorator.MiniProduct;
+import org.dizitart.no2.integration.repository.decorator.ProductConverter;
+import org.dizitart.no2.integration.repository.decorator.ProductIdConverter;
+import org.dizitart.no2.integration.transaction.TxData;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -135,6 +141,33 @@ public abstract class BaseObjectRepositoryTest {
         } else {
             db = nitriteBuilder.openOrCreate();
         }
+
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new RepositoryJoinTest.Person.Converter());
+        documentMapper.registerEntityConverter(new RepositoryJoinTest.Address.Converter());
+        documentMapper.registerEntityConverter(new RepositoryJoinTest.PersonDetails.Converter());
+        documentMapper.registerEntityConverter(new Company.CompanyConverter());
+        documentMapper.registerEntityConverter(new Employee.EmployeeConverter());
+        documentMapper.registerEntityConverter(new Note.NoteConverter());
+        documentMapper.registerEntityConverter(new Book.BookConverter());
+        documentMapper.registerEntityConverter(new BookId.BookIdConverter());
+        documentMapper.registerEntityConverter(new ClassA.ClassAConverter());
+        documentMapper.registerEntityConverter(new ClassBConverter());
+        documentMapper.registerEntityConverter(new ClassC.ClassCConverter());
+        documentMapper.registerEntityConverter(new ElemMatch.Converter());
+        documentMapper.registerEntityConverter(new InternalClass.Converter());
+        documentMapper.registerEntityConverter(new UniversalTextTokenizerTest.TextData.Converter());
+        documentMapper.registerEntityConverter(new SubEmployee.Converter());
+        documentMapper.registerEntityConverter(new ProductScore.Converter());
+        documentMapper.registerEntityConverter(new PersonEntity.Converter());
+        documentMapper.registerEntityConverter(new RepeatableIndexTest.Converter());
+        documentMapper.registerEntityConverter(new EncryptedPerson.Converter());
+        documentMapper.registerEntityConverter(new TxData.Converter());
+        documentMapper.registerEntityConverter(new WithNitriteId.WithNitriteIdConverter());
+        documentMapper.registerEntityConverter(new ProductConverter());
+        documentMapper.registerEntityConverter(new ProductIdConverter());
+        documentMapper.registerEntityConverter(new ManufacturerConverter());
+        documentMapper.registerEntityConverter(new MiniProduct.Converter());
     }
 
     @After

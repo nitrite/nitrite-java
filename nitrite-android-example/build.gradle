@@ -55,8 +55,6 @@ android {
         versionCode 1
         versionName "1.0"
 
-//        multiDexEnabled true
-
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
@@ -67,12 +65,7 @@ android {
         }
     }
 
-    dexOptions {
-        jumboMode true          // required
-    }
-
     compileOptions {
-//        coreLibraryDesugaringEnabled true
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }

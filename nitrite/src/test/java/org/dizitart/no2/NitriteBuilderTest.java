@@ -24,6 +24,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.common.module.PluginManager;
@@ -138,7 +139,7 @@ public class NitriteBuilderTest {
         assertFalse(actualOpenOrCreateResult.isClosed());
         assertFalse(store.isClosed());
         assertSame(store, pluginManager.getNitriteStore());
-        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleDocumentMapper);
     }
 
     @Test
@@ -152,7 +153,7 @@ public class NitriteBuilderTest {
         assertFalse(store.isClosed());
         PluginManager pluginManager = config.getPluginManager();
         assertEquals(3, pluginManager.getIndexerMap().size());
-        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleDocumentMapper);
         assertTrue(store.getCatalog().getKeyedRepositoryNames().isEmpty());
         assertSame(store, pluginManager.getNitriteStore());
         assertTrue(((InMemoryConfig) store.getStoreConfig()).eventListeners().isEmpty());
@@ -169,7 +170,7 @@ public class NitriteBuilderTest {
         assertFalse(store.isClosed());
         PluginManager pluginManager = config.getPluginManager();
         assertEquals(3, pluginManager.getIndexerMap().size());
-        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleDocumentMapper);
         assertTrue(store.getCatalog().getKeyedRepositoryNames().isEmpty());
         assertSame(store, pluginManager.getNitriteStore());
         assertTrue(((InMemoryConfig) store.getStoreConfig()).eventListeners().isEmpty());
@@ -184,7 +185,7 @@ public class NitriteBuilderTest {
         assertEquals(3, pluginManager.getIndexerMap().size());
         NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
         assertSame(nitriteStore, pluginManager.getNitriteStore());
-        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleDocumentMapper);
         assertFalse(nitriteStore.isClosed());
         assertTrue(((InMemoryConfig) nitriteStore.getStoreConfig()).eventListeners().isEmpty());
     }
@@ -198,7 +199,7 @@ public class NitriteBuilderTest {
         NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
         assertFalse(nitriteStore.isClosed());
         assertSame(nitriteStore, pluginManager.getNitriteStore());
-        assertTrue(pluginManager.getNitriteMapper() instanceof org.dizitart.no2.common.mapper.MappableMapper);
+        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleDocumentMapper);
     }
 
     @Test
@@ -310,16 +311,6 @@ public class NitriteBuilderTest {
         @Override
         public <Source, Target> Target convert(Source source, Class<Target> type) {
             return null;
-        }
-
-        @Override
-        public boolean isValueType(Class<?> type) {
-            return false;
-        }
-
-        @Override
-        public boolean isValue(Object object) {
-            return false;
         }
 
         @Override

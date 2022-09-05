@@ -18,15 +18,16 @@
 package org.dizitart.no2.integration.repository;
 
 import lombok.Getter;
-import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.SortOrder;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
 import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.Test;
@@ -364,21 +365,20 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         final ProductScore score6 = new ProductScore("xyz", 8);
 
         ObjectRepository<ElemMatch> repository = db.getRepository(ElemMatch.class);
-        ElemMatch e1 = new ElemMatch() {{
-            setId(1);
-            setStrArray(new String[]{"a", "b"});
-            setProductScores(new ProductScore[]{score1, score4});
-        }};
-        ElemMatch e2 = new ElemMatch() {{
-            setId(2);
-            setStrArray(new String[]{"d", "e"});
-            setProductScores(new ProductScore[]{score2, score5});
-        }};
-        ElemMatch e3 = new ElemMatch() {{
-            setId(3);
-            setStrArray(new String[]{"a", "f"});
-            setProductScores(new ProductScore[]{score3, score6});
-        }};
+        ElemMatch e1 = new ElemMatch();
+        e1.setId(1);
+        e1.setStrArray(new String[]{"a", "b"});
+        e1.setProductScores(new ProductScore[]{score1, score4});
+
+        ElemMatch e2 = new ElemMatch();
+        e2.setId(2);
+        e2.setStrArray(new String[]{"d", "e"});
+        e2.setProductScores(new ProductScore[]{score2, score5});
+
+        ElemMatch e3 = new ElemMatch();
+        e3.setId(3);
+        e3.setStrArray(new String[]{"a", "f"});
+        e3.setProductScores(new ProductScore[]{score3, score6});
 
         repository.insert(e1, e2, e3);
 
@@ -563,23 +563,36 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
     @Test
     public void testBetweenFilter() {
         @Getter
-        class TestData implements Mappable {
+        class TestData {
             private Date age;
 
             public TestData(Date age) {
                 this.age = age;
             }
+        }
+
+        class Converter implements EntityConverter<TestData> {
 
             @Override
-            public Document write(NitriteMapper mapper) {
-                return Document.createDocument("age", age);
+            public Class<TestData> getEntityType() {
+                return TestData.class;
             }
 
             @Override
-            public void read(NitriteMapper mapper, Document document) {
-                age = document.get("age", Date.class);
+            public Document toDocument(TestData entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("age", entity.age);
+            }
+
+            @Override
+            public TestData fromDocument(Document document, NitriteMapper nitriteMapper) {
+                TestData entity = new TestData(new Date());
+                entity.age = document.get("age", Date.class);
+                return entity;
             }
         }
+
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new Converter());
 
         TestData data1 = new TestData(new GregorianCalendar(2020, Calendar.JANUARY, 11).getTime());
         TestData data2 = new TestData(new GregorianCalendar(2021, Calendar.FEBRUARY, 12).getTime());

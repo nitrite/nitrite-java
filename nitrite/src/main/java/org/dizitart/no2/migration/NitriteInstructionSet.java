@@ -25,11 +25,11 @@ class NitriteInstructionSet implements InstructionSet {
     }
 
     @Override
-    public RepositoryInstruction forRepository(String typeName, String key) {
+    public RepositoryInstruction forRepository(String entityName, String key) {
         return new RepositoryInstruction() {
             @Override
             public String entityName() {
-                return typeName;
+                return entityName;
             }
 
             @Override

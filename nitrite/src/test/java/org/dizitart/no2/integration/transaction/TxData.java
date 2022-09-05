@@ -21,7 +21,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
@@ -31,20 +31,31 @@ import org.dizitart.no2.repository.annotations.Id;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-class TxData implements Mappable {
+public class TxData {
     @Id
     private Long id;
     private String name;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("id", id)
-            .put("name", name);
-    }
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        id = document.get("id", Long.class);
-        name = document.get("name", String.class);
+    public static class Converter implements EntityConverter<TxData> {
+
+        @Override
+        public Class<TxData> getEntityType() {
+            return TxData.class;
+        }
+
+        @Override
+        public Document toDocument(TxData entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("id", entity.id)
+                .put("name", entity.name);
+        }
+
+        @Override
+        public TxData fromDocument(Document document, NitriteMapper nitriteMapper) {
+            TxData entity = new TxData();
+            entity.id = document.get("id", Long.class);
+            entity.name = document.get("name", String.class);
+            return entity;
+        }
     }
 }

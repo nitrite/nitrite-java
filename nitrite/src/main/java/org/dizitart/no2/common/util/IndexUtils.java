@@ -41,7 +41,7 @@ public class IndexUtils {
             INTERNAL_NAME_SEPARATOR +
             descriptor.getCollectionName() +
             INTERNAL_NAME_SEPARATOR +
-            descriptor.getIndexFields().getEncodedName() +
+            descriptor.getFields().getEncodedName() +
             INTERNAL_NAME_SEPARATOR +
             descriptor.getIndexType();
     }

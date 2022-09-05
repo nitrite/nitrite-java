@@ -113,7 +113,7 @@ public class Exporter {
             }
 
             File parent = file.getParentFile();
-            // if parent dir does not exists, try to create it
+            // if parent dir does not exist, try to create it
             if (!parent.exists()) {
                 boolean result = parent.mkdirs();
                 if (!result) {

@@ -44,7 +44,6 @@ repositories {
 dependencies {
     api platform(project(':nitrite-bom'))
     api "org.slf4j:slf4j-api"
-    api "org.objenesis:objenesis"
     api "org.jasypt:jasypt"
     annotationProcessor "org.projectlombok:lombok:1.18.24"
 

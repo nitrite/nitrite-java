@@ -21,7 +21,11 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.CollectionFactory;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.index.IndexFields;
 import org.junit.Test;
+
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertThrows;
 
@@ -36,7 +40,7 @@ public class RepositoryFactoryTest {
     @Test
     public void testGetRepository2() {
         RepositoryFactory repositoryFactory = new RepositoryFactory(new CollectionFactory(new LockService()));
-        assertThrows(ValidationException.class, () -> repositoryFactory.getRepository(new NitriteConfig(), null));
+        assertThrows(ValidationException.class, () -> repositoryFactory.getRepository(new NitriteConfig(), (Class<?>) null));
     }
 
     @Test
@@ -49,7 +53,39 @@ public class RepositoryFactoryTest {
     public void testGetRepository4() {
         RepositoryFactory repositoryFactory = new RepositoryFactory(new CollectionFactory(new LockService()));
         assertThrows(ValidationException.class,
-            () -> repositoryFactory.getRepository(new NitriteConfig(), null, "Key"));
+            () -> repositoryFactory.getRepository(new NitriteConfig(), (Class<?>) null, "Key"));
+    }
+
+    @Test
+    public void testGetRepository5() {
+        RepositoryFactory repositoryFactory = new RepositoryFactory(new CollectionFactory(new LockService()));
+        assertThrows(ValidationException.class,
+            () -> repositoryFactory.getRepository(new NitriteConfig(), (EntityDecorator<? extends Object>) null, "Key"));
+    }
+
+    @Test
+    public void testGetRepository6() {
+        RepositoryFactory repositoryFactory = new RepositoryFactory(new CollectionFactory(new LockService()));
+        assertThrows(ValidationException.class,
+            () -> repositoryFactory.getRepository(null, new DemoDecorator(), "Key"));
+    }
+
+    public static class DemoDecorator implements EntityDecorator<Date> {
+
+        @Override
+        public Class<Date> getEntityType() {
+            return Date.class;
+        }
+
+        @Override
+        public EntityId getIdField() {
+            return null;
+        }
+
+        @Override
+        public List<IndexFields> getIndexFields() {
+            return null;
+        }
     }
 }
 

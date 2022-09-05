@@ -22,14 +22,18 @@ import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.meta.Attributes;
-import org.dizitart.no2.common.mapper.Mappable;
-import org.dizitart.no2.common.mapper.MappableMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.*;
+import org.dizitart.no2.integration.repository.decorator.ManufacturerConverter;
+import org.dizitart.no2.integration.repository.decorator.MiniProduct;
+import org.dizitart.no2.integration.repository.decorator.ProductConverter;
+import org.dizitart.no2.integration.repository.decorator.ProductIdConverter;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Entity;
@@ -66,7 +70,25 @@ public class ObjectRepositoryTest {
 
     @Before
     public void setUp() {
-        NitriteMapper mapper = new MappableMapper();
+        SimpleDocumentMapper mapper = new SimpleDocumentMapper();
+        mapper.registerEntityConverter(new InternalClass.Converter());
+        mapper.registerEntityConverter(new EmployeeEntity.Converter());
+        mapper.registerEntityConverter(new StressRecord.Converter());
+        mapper.registerEntityConverter(new WithClassField.Converter());
+        mapper.registerEntityConverter(new WithDateId.Converter());
+        mapper.registerEntityConverter(new WithTransientField.Converter());
+        mapper.registerEntityConverter(new WithOutId.Converter());
+        mapper.registerEntityConverter(new ChildClass.Converter());
+        mapper.registerEntityConverter(new WithOutGetterSetter.Converter());
+        mapper.registerEntityConverter(new WithPrivateConstructor.Converter());
+        mapper.registerEntityConverter(new WithPublicField.Converter());
+        mapper.registerEntityConverter(new Employee.EmployeeConverter());
+        mapper.registerEntityConverter(new Company.CompanyConverter());
+        mapper.registerEntityConverter(new ProductConverter());
+        mapper.registerEntityConverter(new ProductIdConverter());
+        mapper.registerEntityConverter(new ManufacturerConverter());
+        mapper.registerEntityConverter(new MiniProduct.Converter());
+
         RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
             .build();
@@ -350,7 +372,7 @@ public class ObjectRepositoryTest {
         @Index(value = "firstName", type = IndexType.NON_UNIQUE),
         @Index(value = "lastName", type = IndexType.NON_UNIQUE),
     })
-    private static class EmployeeEntity implements Mappable {
+    private static class EmployeeEntity {
         private static final Faker faker = new Faker();
 
         @Id
@@ -364,18 +386,28 @@ public class ObjectRepositoryTest {
             lastName = faker.name().lastName();
         }
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument("id", id)
-                .put("firstName", firstName)
-                .put("lastName", lastName);
-        }
+        public static class Converter implements EntityConverter<EmployeeEntity> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            id = document.get("id", Long.class);
-            firstName = document.get("firstName", String.class);
-            lastName = document.get("lastName", String.class);
+            @Override
+            public Class<EmployeeEntity> getEntityType() {
+                return EmployeeEntity.class;
+            }
+
+            @Override
+            public Document toDocument(EmployeeEntity entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("id", entity.id)
+                    .put("firstName", entity.firstName)
+                    .put("lastName", entity.lastName);
+            }
+
+            @Override
+            public EmployeeEntity fromDocument(Document document, NitriteMapper nitriteMapper) {
+                EmployeeEntity entity = new EmployeeEntity();
+                entity.id = document.get("id", Long.class);
+                entity.firstName = document.get("firstName", String.class);
+                entity.lastName = document.get("lastName", String.class);
+                return entity;
+            }
         }
     }
 }

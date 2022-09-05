@@ -59,11 +59,11 @@ public class StoreCatalog {
             document = Document.createDocument();
         }
 
-        // parse the document to create collection meta data object
+        // parse the document to create collection metadata object
         MapMetaData metaData = new MapMetaData(document);
         metaData.getMapNames().add(name);
 
-        // convert the meta data object to document and save
+        // convert the metadata object to document and save
         catalogMap.put(TAG_COLLECTIONS, metaData.getInfo());
     }
 
@@ -78,11 +78,11 @@ public class StoreCatalog {
             document = Document.createDocument();
         }
 
-        // parse the document to create collection meta data object
+        // parse the document to create collection metadata object
         MapMetaData metaData = new MapMetaData(document);
         metaData.getMapNames().add(name);
 
-        // convert the meta data object to document and save
+        // convert the metadata object to document and save
         catalogMap.put(TAG_REPOSITORIES, metaData.getInfo());
     }
 
@@ -97,7 +97,7 @@ public class StoreCatalog {
             document = Document.createDocument();
         }
 
-        // parse the document to create collection meta data object
+        // parse the document to create collection metadata object
         MapMetaData metaData = new MapMetaData(document);
         metaData.getMapNames().add(name);
 

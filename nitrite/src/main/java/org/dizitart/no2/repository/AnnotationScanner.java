@@ -49,7 +49,7 @@ class AnnotationScanner {
         this.collection = collection;
         this.reflector = new Reflector();
         this.indices = new HashSet<>();
-        this.indexValidator = new IndexValidator(reflector);
+        this.indexValidator = new IndexValidator();
     }
 
     public void createIndices() {

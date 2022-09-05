@@ -18,71 +18,46 @@ package org.dizitart.no2.common.mapper;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AccessLevel;
-import lombok.Getter;
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.*;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.util.ObjectUtils;
+import org.dizitart.no2.common.mapper.modules.NitriteIdModule;
 import org.dizitart.no2.exceptions.ObjectMappingException;
-import org.dizitart.no2.common.mapper.extensions.NitriteIdExtension;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
-import static org.dizitart.no2.common.util.Iterables.listOf;
+import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
  * @author Anindya Chatterjee
  */
 @Slf4j
-public class JacksonMapper extends MappableMapper {
-    private final List<JacksonExtension> jacksonExtensions;
-    private final List<Class<?>> moduleTypes;
+public class JacksonMapper implements NitriteMapper {
+    private ObjectMapper objectMapper;
 
-    @Getter(AccessLevel.PROTECTED)
-    private final ObjectMapper objectMapper;
-
-    public JacksonMapper() {
-        this.jacksonExtensions = new ArrayList<>();
-        this.moduleTypes = new ArrayList<>();
-        this.objectMapper = createObjectMapper();
-    }
-
-    public JacksonMapper(JacksonExtension... jacksonExtensions) {
-        this.jacksonExtensions = new ArrayList<>(listOf(jacksonExtensions));
-        this.moduleTypes = new ArrayList<>();
-        this.objectMapper = createObjectMapper();
-    }
-
-    protected ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(
-            objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
-                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
-        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        this.jacksonExtensions.add(new NitriteIdExtension());
-        for (JacksonExtension jacksonExtension : jacksonExtensions) {
-            loadJacksonExtension(jacksonExtension, objectMapper);
+    protected ObjectMapper getObjectMapper() {
+        if (objectMapper == null) {
+            objectMapper = new ObjectMapper();
+            objectMapper.setVisibility(
+                objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
+                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
+            objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+            objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.registerModule(new NitriteIdModule());
         }
         return objectMapper;
     }
 
-    @Override
-    protected void addValueType(Class<?> valueType) {
-        super.addValueType(valueType);
-        this.moduleTypes.add(valueType);
+    public void registerJacksonModule(Module module) {
+        notNull(module, "module cannot be null");
+        getObjectMapper().registerModule(module);
     }
 
     @Override
@@ -92,103 +67,61 @@ public class JacksonMapper extends MappableMapper {
             return null;
         }
 
-        if (isValue(source)) {
-            if (this.moduleTypes.contains(type)) {
-                return this.objectMapper.convertValue(source, type);
-            } else {
-                return (Target) convertValue(source);
-            }
-        } else {
-            if (Document.class.isAssignableFrom(type)) {
-                return (Target) convertToDocument(source);
-            } else if (source instanceof Document) {
-                return convertFromDocument((Document) source, type);
-            }
-        }
-
-        throw new ObjectMappingException("Failed to convert using jackson");
-    }
-
-    @Override
-    public boolean isValueType(Class<?> type) {
-        if (super.isValueType(type)) return true;
-        if (moduleTypes.contains(type)) return true;
-        if (type.isInterface() || Modifier.isAbstract(type.getModifiers())) return false;
-        Object item = ObjectUtils.newInstance(type, false);
-        return isValue(item);
-    }
-
-    @Override
-    public boolean isValue(Object object) {
         try {
-            JsonNode node = objectMapper.convertValue(object, JsonNode.class);
-            return node != null && node.isValueNode();
-        } catch (Exception ex) {
-            throw new ObjectMappingException("Error while checking for value type", ex);
+            JsonNode node = getObjectMapper().convertValue(source, JsonNode.class);
+            if (node == null) return null;
+
+            if (node.isValueNode()) {
+                return getNodeValue(node);
+            } else {
+                if (Document.class.isAssignableFrom(type)) {
+                    return (Target) convertToDocument(source);
+                } else if (source instanceof Document) {
+                    return convertFromDocument((Document) source, type);
+                }
+            }
+        } catch (Exception e) {
+            throw new ObjectMappingException("Failed to convert object of type "
+                + source.getClass() + " to type " + type, e);
         }
+
+        throw new ObjectMappingException("Can't convert object to type " + type
+            + ", try registering a jackson Module for it.");
     }
+
 
     @Override
     public void initialize(NitriteConfig nitriteConfig) {
-
     }
 
-    @Override
     protected <Target> Target convertFromDocument(Document source, Class<Target> type) {
         try {
-            return super.convertFromDocument(source, type);
-        } catch (ObjectMappingException ome) {
-            try {
-                return objectMapper.convertValue(source, type);
-            } catch (IllegalArgumentException iae) {
-                log.error("Error while converting document to object ", iae);
-                if (iae.getCause() instanceof JsonMappingException) {
-                    JsonMappingException jme = (JsonMappingException) iae.getCause();
-                    if (jme.getMessage().contains("Cannot construct instance")) {
-                        throw new ObjectMappingException(jme.getMessage());
-                    }
+            return getObjectMapper().convertValue(source, type);
+        } catch (IllegalArgumentException iae) {
+            if (iae.getCause() instanceof JsonMappingException) {
+                JsonMappingException jme = (JsonMappingException) iae.getCause();
+                if (jme.getMessage().contains("Cannot construct instance")) {
+                    throw new ObjectMappingException(jme.getMessage());
                 }
-                throw iae;
             }
+            throw iae;
         }
     }
 
-    @Override
     protected <Source> Document convertToDocument(Source source) {
-        try {
-            return super.convertToDocument(source);
-        } catch (ObjectMappingException ome) {
-            JsonNode node = objectMapper.convertValue(source, JsonNode.class);
-            return readDocument(node);
-        }
+        JsonNode node = getObjectMapper().convertValue(source, JsonNode.class);
+        return readDocument(node);
     }
 
-    private void loadJacksonExtension(JacksonExtension jacksonExtension, ObjectMapper objectMapper) {
-        for (Class<?> dataType : jacksonExtension.getSupportedTypes()) {
-            addValueType(dataType);
-        }
-        objectMapper.registerModule(jacksonExtension.getModule());
-    }
-
-    private Object convertValue(Object object) {
-        JsonNode node = objectMapper.convertValue(object, JsonNode.class);
-        if (node == null) {
-            return null;
-        }
-
+    @SuppressWarnings("unchecked")
+    private <T> T getNodeValue(JsonNode node) {
         switch (node.getNodeType()) {
             case NUMBER:
-                return node.numberValue();
+                return (T) node.numberValue();
             case STRING:
-                return node.textValue();
+                return (T) node.textValue();
             case BOOLEAN:
-                return node.booleanValue();
-            case ARRAY:
-            case BINARY:
-            case MISSING:
-            case NULL:
-            case OBJECT:
-            case POJO:
+                return (T) Boolean.valueOf(node.booleanValue());
             default:
                 return null;
         }

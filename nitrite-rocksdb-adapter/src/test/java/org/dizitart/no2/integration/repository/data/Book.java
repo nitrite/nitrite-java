@@ -19,7 +19,7 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.annotations.Entity;
@@ -39,7 +39,7 @@ import static org.dizitart.no2.collection.Document.createDocument;
     @Index(value = "description", type = IndexType.FULL_TEXT),
     @Index(value = { "price", "publisher" })
 })
-public class Book implements Mappable {
+public class Book {
     @Id(fieldName = "book_id", embeddedFields = { "isbn", "book_name" })
     private BookId bookId;
 
@@ -51,22 +51,32 @@ public class Book implements Mappable {
 
     private String description;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return createDocument("book_id", mapper.convert(bookId, Document.class))
-            .put("publisher", publisher)
-            .put("price", price)
-            .put("tags", tags)
-            .put("description", description);
-    }
+    public static class BookConverter implements EntityConverter<Book> {
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void read(NitriteMapper mapper, Document document) {
-        bookId = mapper.convert(document.get("book_id"), BookId.class);
-        publisher = document.get("publisher", String.class);
-        price = document.get("price", Double.class);
-        tags = (List<String>) document.get("tags", List.class);
-        description = document.get("description", String.class);
+        @Override
+        public Class<Book> getEntityType() {
+            return Book.class;
+        }
+
+        @Override
+        public Document toDocument(Book entity, NitriteMapper nitriteMapper) {
+            return createDocument("book_id", nitriteMapper.convert(entity.bookId, Document.class))
+                .put("publisher", entity.publisher)
+                .put("price", entity.price)
+                .put("tags", entity.tags)
+                .put("description", entity.description);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Book fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Book entity = new Book();
+            entity.bookId = nitriteMapper.convert(document.get("book_id"), BookId.class);
+            entity.publisher = document.get("publisher", String.class);
+            entity.price = document.get("price", Double.class);
+            entity.tags = (List<String>) document.get("tags", List.class);
+            entity.description = document.get("description", String.class);
+            return entity;
+        }
     }
 }

@@ -18,6 +18,7 @@
 package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.TestUtil;
 import org.dizitart.no2.collection.NitriteId;
@@ -48,6 +49,9 @@ public class NitriteIdAsIdTest {
     @Before
     public void before() {
         db = TestUtil.createDb();
+        SimpleDocumentMapper mapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        mapper.registerEntityConverter(new WithNitriteId.WithNitriteIdConverter());
+
         repo = db.getRepository(WithNitriteId.class);
     }
 

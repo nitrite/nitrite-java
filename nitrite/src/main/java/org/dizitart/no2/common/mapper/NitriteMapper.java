@@ -35,20 +35,4 @@ public interface NitriteMapper extends NitritePlugin {
      * @return the target
      */
     <Source, Target> Target convert(Source source, Class<Target> type);
-
-    /**
-     * Checks if the provided type is registered as a value type.
-     *
-     * @param type the type
-     * @return the boolean
-     */
-    boolean isValueType(Class<?> type);
-
-    /**
-     * Checks if an object is of a value type.
-     *
-     * @param object the object
-     * @return the boolean
-     */
-    boolean isValue(Object object);
 }

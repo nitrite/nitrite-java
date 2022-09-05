@@ -19,7 +19,7 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.util.ArrayList;
@@ -29,38 +29,46 @@ import java.util.List;
  * @author Anindya Chatterjee
  */
 @Data
-public class ElemMatch implements Mappable {
+public class ElemMatch {
     private long id;
     private String[] strArray;
     private ProductScore[] productScores;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        List<Document> list = new ArrayList<>();
-        if (productScores != null) {
-            for (ProductScore productScore : productScores) {
-                Document document = productScore.write(mapper);
-                list.add(document);
-            }
+    public static class Converter implements EntityConverter<ElemMatch> {
+
+        @Override
+        public Class<ElemMatch> getEntityType() {
+            return ElemMatch.class;
         }
 
-        return Document.createDocument("id", id)
-            .put("strArray", strArray)
-            .put("productScores", list);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void read(NitriteMapper mapper, Document document) {
-        id = document.get("id", Long.class);
-        strArray = document.get("strArray", String[].class);
-        List<Document> list = document.get("productScores", List.class);
-        if (list != null) {
-            productScores = new ProductScore[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                productScores[i] = new ProductScore();
-                productScores[i].read(mapper, list.get(i));
+        @Override
+        public Document toDocument(ElemMatch entity, NitriteMapper nitriteMapper) {
+            List<Document> list = new ArrayList<>();
+            if (entity.productScores != null) {
+                for (ProductScore productScore : entity.productScores) {
+                    Document document = nitriteMapper.convert(productScore, Document.class);
+                    list.add(document);
+                }
             }
+
+            return Document.createDocument("id", entity.id)
+                .put("strArray", entity.strArray)
+                .put("productScores", list);
+        }
+
+        @Override
+        public ElemMatch fromDocument(Document document, NitriteMapper nitriteMapper) {
+            ElemMatch entity = new ElemMatch();
+            entity.id = document.get("id", Long.class);
+            entity.strArray = document.get("strArray", String[].class);
+            List<Document> list = document.get("productScores", List.class);
+            if (list != null) {
+                entity.productScores = new ProductScore[list.size()];
+                for (int i = 0; i < list.size(); i++) {
+                    entity.productScores[i] = nitriteMapper.convert(list.get(i), ProductScore.class);
+                }
+            }
+            return entity;
         }
     }
 }

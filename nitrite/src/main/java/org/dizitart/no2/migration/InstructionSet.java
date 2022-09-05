@@ -1,5 +1,7 @@
 package org.dizitart.no2.migration;
 
+import org.dizitart.no2.repository.EntityDecorator;
+
 import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
 
 /**
@@ -19,21 +21,11 @@ public interface InstructionSet {
     /**
      * Creates a {@link RepositoryInstruction}.
      *
-     * @param typeName the type name
-     * @return the repository instruction
-     */
-    default RepositoryInstruction forRepository(String typeName) {
-        return forRepository(typeName, null);
-    }
-
-    /**
-     * Creates a {@link RepositoryInstruction}.
-     *
      * @param type the type
      * @return the repository instruction
      */
     default RepositoryInstruction forRepository(Class<?> type) {
-        return forRepository(getEntityName(type), null);
+        return forRepository(type, null);
     }
 
     /**
@@ -45,6 +37,37 @@ public interface InstructionSet {
      */
     default RepositoryInstruction forRepository(Class<?> type, String key) {
         return forRepository(getEntityName(type), key);
+    }
+
+    /**
+     * Creates a {@link RepositoryInstruction}.
+     *
+     * @param entityDecorator the entityDecorator
+     * @return the repository instruction
+     */
+    default RepositoryInstruction forRepository(EntityDecorator<?> entityDecorator) {
+        return forRepository(entityDecorator, null);
+    }
+
+    /**
+     * Creates a {@link RepositoryInstruction}.
+     *
+     * @param entityDecorator the entityDecorator
+     * @param key  the key
+     * @return the repository instruction
+     */
+    default RepositoryInstruction forRepository(EntityDecorator<?> entityDecorator, String key) {
+        return forRepository(entityDecorator.getEntityName(), key);
+    }
+
+    /**
+     * Creates a {@link RepositoryInstruction}.
+     *
+     * @param typeName the type name
+     * @return the repository instruction
+     */
+    default RepositoryInstruction forRepository(String typeName) {
+        return forRepository(typeName, null);
     }
 
     /**

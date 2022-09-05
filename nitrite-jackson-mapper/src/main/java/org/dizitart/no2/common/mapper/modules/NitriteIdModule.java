@@ -14,26 +14,23 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.common.mapper.extensions;
+package org.dizitart.no2.common.mapper.modules;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.dizitart.no2.collection.NitriteId;
 
-import java.io.IOException;
-
 /**
+ * Class that registers capability of serializing {@link NitriteId} with the Jackson core.
+ *
  * @author Anindya Chatterjee
+ * @since 1.0.0
  */
-class NitriteIdDeserializer extends StdScalarDeserializer<NitriteId> {
-
-    NitriteIdDeserializer() {
-        super(NitriteId.class);
-    }
+public class NitriteIdModule extends SimpleModule {
 
     @Override
-    public NitriteId deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
-        return NitriteId.createId(p.getValueAsString());
+    public void setupModule(SetupContext context) {
+        addSerializer(NitriteId.class, new NitriteIdSerializer());
+        addDeserializer(NitriteId.class, new NitriteIdDeserializer());
+        super.setupModule(context);
     }
 }

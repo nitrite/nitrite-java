@@ -77,11 +77,11 @@ public class NitriteTextIndexerTest {
         NitriteTextIndexer nitriteTextIndexer = new NitriteTextIndexer();
         IndexDescriptor indexDescriptor = mock(IndexDescriptor.class);
         when(indexDescriptor.getIndexType()).thenThrow(new IndexingException("An error occurred"));
-        when(indexDescriptor.getIndexFields()).thenReturn(new Fields());
+        when(indexDescriptor.getFields()).thenReturn(new Fields());
         when(indexDescriptor.getCollectionName()).thenReturn("foo");
         nitriteTextIndexer.dropIndex(indexDescriptor, new NitriteConfig());
         verify(indexDescriptor).getIndexType();
-        verify(indexDescriptor).getIndexFields();
+        verify(indexDescriptor).getFields();
         verify(indexDescriptor).getCollectionName();
     }
 
@@ -90,13 +90,13 @@ public class NitriteTextIndexerTest {
         NitriteTextIndexer nitriteTextIndexer = new NitriteTextIndexer();
         IndexDescriptor indexDescriptor = mock(IndexDescriptor.class);
         when(indexDescriptor.getIndexType()).thenReturn("foo");
-        when(indexDescriptor.getIndexFields()).thenReturn(new Fields());
+        when(indexDescriptor.getFields()).thenReturn(new Fields());
         when(indexDescriptor.getCollectionName()).thenReturn("foo");
         NitriteConfig nitriteConfig = mock(NitriteConfig.class);
         doReturn(new InMemoryStore()).when(nitriteConfig).getNitriteStore();
         nitriteTextIndexer.dropIndex(indexDescriptor, nitriteConfig);
         verify(indexDescriptor).getIndexType();
-        verify(indexDescriptor).getIndexFields();
+        verify(indexDescriptor).getFields();
         verify(indexDescriptor).getCollectionName();
         verify(nitriteConfig).getNitriteStore();
     }

@@ -19,9 +19,9 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.annotations.Index;
 
 /**
@@ -31,22 +31,32 @@ import org.dizitart.no2.repository.annotations.Index;
 @Index(value = "firstName")
 @Index(value = "age", type = IndexType.NON_UNIQUE)
 @Index(value = "lastName", type = IndexType.FULL_TEXT)
-public class RepeatableIndexTest implements Mappable {
+public class RepeatableIndexTest {
     private String firstName;
     private Integer age;
     private String lastName;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("firstName", firstName)
-            .put("age", age)
-            .put("lastName", lastName);
-    }
+    public static class Converter implements EntityConverter<RepeatableIndexTest> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        firstName = document.get("firstName", String.class);
-        age = document.get("age", Integer.class);
-        lastName = document.get("lastName", String.class);
+        @Override
+        public Class<RepeatableIndexTest> getEntityType() {
+            return RepeatableIndexTest.class;
+        }
+
+        @Override
+        public Document toDocument(RepeatableIndexTest entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("firstName", entity.firstName)
+                .put("age", entity.age)
+                .put("lastName", entity.lastName);
+        }
+
+        @Override
+        public RepeatableIndexTest fromDocument(Document document, NitriteMapper nitriteMapper) {
+            RepeatableIndexTest entity = new RepeatableIndexTest();
+            entity.firstName = document.get("firstName", String.class);
+            entity.age = document.get("age", Integer.class);
+            entity.lastName = document.get("lastName", String.class);
+            return entity;
+        }
     }
 }

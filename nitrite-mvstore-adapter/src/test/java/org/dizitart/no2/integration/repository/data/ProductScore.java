@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 /**
@@ -28,7 +28,7 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
  */
 @Getter
 @Setter
-public class ProductScore implements Mappable {
+public class ProductScore {
     private String product;
     private int score;
 
@@ -40,15 +40,25 @@ public class ProductScore implements Mappable {
         this.score = score;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("product", product)
-            .put("score", score);
-    }
+    public static class Converter implements EntityConverter<ProductScore> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        product = document.get("product", String.class);
-        score = document.get("score", Integer.class);
+        @Override
+        public Class<ProductScore> getEntityType() {
+            return ProductScore.class;
+        }
+
+        @Override
+        public Document toDocument(ProductScore entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("product", entity.product)
+                .put("score", entity.score);
+        }
+
+        @Override
+        public ProductScore fromDocument(Document document, NitriteMapper nitriteMapper) {
+            ProductScore entity = new ProductScore();
+            entity.product = document.get("product", String.class);
+            entity.score = document.get("score", Integer.class);
+            return entity;
+        }
     }
 }

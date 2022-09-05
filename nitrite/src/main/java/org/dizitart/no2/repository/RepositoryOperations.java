@@ -43,10 +43,11 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  */
 public class RepositoryOperations {
     private final NitriteMapper nitriteMapper;
-    private final Class<?> type;
     private final NitriteCollection collection;
-    private final AnnotationScanner annotationScanner;
+    private final Class<?> type;
+    private AnnotationScanner annotationScanner;
     private ObjectIdField objectIdField;
+    private EntityDecoratorReader entityDecoratorReader;
 
     /**
      * Instantiates a new {@link RepositoryOperations}.
@@ -56,8 +57,8 @@ public class RepositoryOperations {
      * @param collection    the collection
      */
     public RepositoryOperations(Class<?> type,
-                                NitriteMapper nitriteMapper,
-                                NitriteCollection collection) {
+            NitriteMapper nitriteMapper,
+            NitriteCollection collection) {
         this.type = type;
         this.nitriteMapper = nitriteMapper;
         this.collection = collection;
@@ -65,14 +66,31 @@ public class RepositoryOperations {
         validateCollection();
     }
 
+    public RepositoryOperations(EntityDecorator<?> entityDecorator,
+                                NitriteMapper nitriteMapper,
+                                NitriteCollection collection) {
+        this.type = entityDecorator.getEntityType();
+        this.nitriteMapper = nitriteMapper;
+        this.collection = collection;
+        this.entityDecoratorReader = new EntityDecoratorReader(entityDecorator, collection, nitriteMapper);
+        validateCollection();
+    }
+
     /**
      * Create indices.
      */
     public void createIndices() {
-        annotationScanner.performScan();
-        annotationScanner.createIndices();
-        annotationScanner.createIdIndex();
-        objectIdField = annotationScanner.getObjectIdField();
+        if (annotationScanner != null) {
+            annotationScanner.performScan();
+            annotationScanner.createIndices();
+            annotationScanner.createIdIndex();
+            objectIdField = annotationScanner.getObjectIdField();
+        } else if (entityDecoratorReader != null) {
+            entityDecoratorReader.readEntity();
+            entityDecoratorReader.createIndices();
+            entityDecoratorReader.createIdIndex();
+            objectIdField = entityDecoratorReader.getObjectIdField();
+        }
     }
 
     /**
@@ -100,7 +118,8 @@ public class RepositoryOperations {
      * @return the document [ ]
      */
     public <T> Document[] toDocuments(T[] others) {
-        if (others == null || others.length == 0) return null;
+        if (others == null || others.length == 0)
+            return null;
         Document[] documents = new Document[others.length];
         for (int i = 0; i < others.length; i++) {
             documents[i] = toDocument(others[i], false); // this method is for insert only
@@ -133,7 +152,8 @@ public class RepositoryOperations {
                         idField.set(object, id);
                         document.put(objectIdField.getIdFieldName(), nitriteMapper.convert(id, Comparable.class));
                     } else if (!update) {
-                        // if it is an insert, then we should not allow to insert the document with user provided id
+                        // if it is an insert, then we should not allow to insert the document with user
+                        // provided id
                         throw new InvalidIdException("Auto generated id should not be set manually");
                     }
                 } catch (IllegalAccessException iae) {
@@ -186,7 +206,7 @@ public class RepositoryOperations {
         if (objectIdField != null) {
             Field idField = objectIdField.getField();
             if (idField != null && !objectIdField.isEmbedded()
-                && idField.getType() == NitriteId.class) {
+                    && idField.getType() == NitriteId.class) {
                 document.remove(idField.getName());
             }
         }

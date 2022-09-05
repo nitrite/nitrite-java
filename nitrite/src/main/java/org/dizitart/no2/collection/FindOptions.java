@@ -44,6 +44,7 @@ public class FindOptions {
     /**
      * Specifies the {@link Collator}.
      *
+     * @param collator the collator
      * @return the collator.
      */
     @Setter(AccessLevel.PUBLIC)

@@ -15,7 +15,7 @@
  *
  */
 
-package org.dizitart.no2.common.mapper.extensions;
+package org.dizitart.no2.common.mapper.modules;
 
 import org.dizitart.no2.collection.NitriteId;
 import org.junit.Test;

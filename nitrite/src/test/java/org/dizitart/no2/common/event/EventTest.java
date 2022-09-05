@@ -19,6 +19,7 @@ package org.dizitart.no2.common.event;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.UpdateOptions;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -74,6 +75,9 @@ public class EventTest {
         } else {
             db = nitriteBuilder.openOrCreate();
         }
+
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new Employee.EmployeeConverter());
 
         employeeRepository = db.getRepository(Employee.class);
         listener = new SampleListenerCollection();

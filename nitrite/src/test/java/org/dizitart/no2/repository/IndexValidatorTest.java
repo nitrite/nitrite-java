@@ -29,7 +29,7 @@ public class IndexValidatorTest {
 
     @Test
     public void testValidate() {
-        IndexValidator indexValidator = new IndexValidator(new Reflector());
+        IndexValidator indexValidator = new IndexValidator();
         Class<?> fieldType = Object.class;
         assertThrows(IndexingException.class,
             () -> indexValidator.validate(fieldType, "Field", new NitriteBuilderTest.CustomNitriteMapper()));
@@ -37,7 +37,7 @@ public class IndexValidatorTest {
 
     @Test
     public void testValidate3() {
-        IndexValidator indexValidator = new IndexValidator(new Reflector());
+        IndexValidator indexValidator = new IndexValidator();
         Class<?> fieldType = Field.class;
         assertThrows(IndexingException.class,
             () -> indexValidator.validate(fieldType, "Field", new NitriteBuilderTest.CustomNitriteMapper()));
@@ -45,7 +45,7 @@ public class IndexValidatorTest {
 
     @Test
     public void testValidate4() {
-        IndexValidator indexValidator = new IndexValidator(new Reflector());
+        IndexValidator indexValidator = new IndexValidator();
         Class<?> fieldType = Object.class;
         assertThrows(IndexingException.class, () -> indexValidator.validate(fieldType, "invalid type specified ",
             new NitriteBuilderTest.CustomNitriteMapper()));

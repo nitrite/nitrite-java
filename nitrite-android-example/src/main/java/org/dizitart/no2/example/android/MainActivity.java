@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.events.CollectionEventListener;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.mvstore.MVStoreModule;
@@ -55,8 +56,11 @@ public class MainActivity extends AppCompatActivity {
             String fileName = getFilesDir().getPath() + "/test.db";
             Log.i("Nitrite", "Nitrite file - " + fileName);
 
+            SimpleDocumentMapper documentMapper = new SimpleDocumentMapper();
+            documentMapper.registerEntityConverter(new User.Converter());
             db = Nitrite.builder()
                 .loadModule(new MVStoreModule(fileName))
+                .loadModule(() -> Iterables.setOf(documentMapper))
                 .openOrCreate("test-user", "test-password");
             repository = db.getRepository(User.class);
 

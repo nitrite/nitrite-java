@@ -19,7 +19,7 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Entity;
 
@@ -30,25 +30,35 @@ import java.util.Date;
  */
 @Data
 @Entity
-public class EncryptedPerson implements Mappable {
+public class EncryptedPerson {
     private String name;
     private String creditCardNumber;
     private String cvv;
     private Date expiryDate;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("name", name)
-            .put("creditCardNumber", creditCardNumber)
-            .put("cvv", cvv)
-            .put("expiryDate", expiryDate);
-    }
+    public static class Converter implements EntityConverter<EncryptedPerson> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        creditCardNumber = document.get("creditCardNumber", String.class);
-        cvv = document.get("cvv", String.class);
-        expiryDate = document.get("expiryDate", Date.class);
+        @Override
+        public Class<EncryptedPerson> getEntityType() {
+            return EncryptedPerson.class;
+        }
+
+        @Override
+        public Document toDocument(EncryptedPerson entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("name", entity.name)
+                .put("creditCardNumber", entity.creditCardNumber)
+                .put("cvv", entity.cvv)
+                .put("expiryDate", entity.expiryDate);
+        }
+
+        @Override
+        public EncryptedPerson fromDocument(Document document, NitriteMapper nitriteMapper) {
+            EncryptedPerson entity = new EncryptedPerson();
+            entity.name = document.get("name", String.class);
+            entity.creditCardNumber = document.get("creditCardNumber", String.class);
+            entity.cvv = document.get("cvv", String.class);
+            entity.expiryDate = document.get("expiryDate", Date.class);
+            return entity;
+        }
     }
 }

@@ -157,7 +157,7 @@ public class ObjectRepositoryNegativeTest {
         repository.remove(object);
     }
 
-    @Test(expected = ValidationException.class)
+    @Test(expected = ObjectMappingException.class)
     public void testProjectionFailedInstantiate() {
         ObjectRepository<WithOutId> repository = db.getRepository(WithOutId.class);
         WithOutId object = new WithOutId();

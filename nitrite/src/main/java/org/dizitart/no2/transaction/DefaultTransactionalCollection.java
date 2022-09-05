@@ -394,7 +394,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         journalEntry.setChangeType(ChangeType.DropIndex);
         journalEntry.setCommit(() -> {
             for (IndexDescriptor entry : primary.listIndices()) {
-                if (entry.getIndexFields().equals(fields)) {
+                if (entry.getFields().equals(fields)) {
                     indexEntry.set(entry);
                     break;
                 }
@@ -429,7 +429,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         });
         journalEntry.setRollback(() -> {
             for (IndexDescriptor indexDescriptor : indexEntries) {
-                String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+                String[] fieldNames = indexDescriptor.getFields().getFieldNames().toArray(new String[0]);
                 primary.createIndex(indexOptions(indexDescriptor.getIndexType()), fieldNames);
             }
         });
@@ -624,9 +624,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
         notNull(indexDescriptor, "indexDescriptor cannot be null");
 
-        String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+        String[] fieldNames = indexDescriptor.getFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(fieldNames)) {
-            throw new IndexingException("Indexing on fields " + indexDescriptor.getIndexFields() + " is currently running");
+            throw new IndexingException("Indexing on fields " + indexDescriptor.getFields() + " is currently running");
         }
     }
 }

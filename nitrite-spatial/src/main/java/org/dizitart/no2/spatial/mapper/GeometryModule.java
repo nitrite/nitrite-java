@@ -14,16 +14,23 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.common.mapper;
+package org.dizitart.no2.spatial.mapper;
 
-import com.fasterxml.jackson.databind.Module;
-
-import java.util.List;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import org.locationtech.jts.geom.Geometry;
 
 /**
+ * Class that registers capability of serializing {@link Geometry} objects with the Jackson core.
+ *
  * @author Anindya Chatterjee
+ * @since 4.0.0
  */
-public interface JacksonExtension {
-    List<Class<?>> getSupportedTypes();
-    Module getModule();
+public class GeometryModule extends SimpleModule {
+
+    @Override
+    public void setupModule(SetupContext context) {
+        addSerializer(Geometry.class, new GeometrySerializer());
+        addDeserializer(Geometry.class, new GeometryDeserializer());
+        super.setupModule(context);
+    }
 }

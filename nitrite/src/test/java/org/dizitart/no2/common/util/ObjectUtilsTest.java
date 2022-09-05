@@ -23,15 +23,25 @@ import org.apache.commons.lang3.mutable.MutableByte;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.integration.repository.data.ChildClass;
+import org.dizitart.no2.integration.repository.data.Company;
 import org.dizitart.no2.integration.repository.data.Employee;
+import org.dizitart.no2.integration.repository.data.Note;
+import org.dizitart.no2.integration.repository.decorator.Manufacturer;
+import org.dizitart.no2.integration.repository.decorator.ManufacturerDecorator;
+import org.dizitart.no2.integration.repository.decorator.ProductDecorator;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Index;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
 import static org.junit.Assert.*;
@@ -52,6 +62,16 @@ public class ObjectUtilsTest implements Serializable {
         assertEquals("entityName+key", ObjectUtils.findRepositoryName("entityName", "key"));
         assertEquals("java.lang.Object+key", ObjectUtils.findRepositoryName(Object.class, "key"));
         assertEquals("java.lang.Object", ObjectUtils.findRepositoryName(Object.class, ""));
+    }
+
+    @Test
+    public void testFindRepositoryNameByDecorator() {
+        assertEquals("product", ObjectUtils.findRepositoryNameByDecorator(new ProductDecorator(), ""));
+        assertEquals("product+key", ObjectUtils.findRepositoryNameByDecorator(new ProductDecorator(), "key"));
+        assertEquals(Manufacturer.class.getName() + "+key",
+            ObjectUtils.findRepositoryNameByDecorator(new ManufacturerDecorator(), "key"));
+        assertEquals(Manufacturer.class.getName(),
+            ObjectUtils.findRepositoryNameByDecorator(new ManufacturerDecorator(), ""));
     }
 
     @Test
@@ -97,13 +117,21 @@ public class ObjectUtilsTest implements Serializable {
 
     @Test
     public void testNewInstance() {
-        EnclosingType type = newInstance(EnclosingType.class, true);
+        SimpleDocumentMapper mapper = new SimpleDocumentMapper();
+        mapper.registerEntityConverter(new EnclosingType.Converter());
+        mapper.registerEntityConverter(new ChildClass.Converter());
+        mapper.registerEntityConverter(new FieldType.Converter());
+        mapper.registerEntityConverter(new Employee.EmployeeConverter());
+        mapper.registerEntityConverter(new Company.CompanyConverter());
+        mapper.registerEntityConverter(new Note.NoteConverter());
+
+        EnclosingType type = newInstance(EnclosingType.class, true, mapper);
         System.out.println(type);
     }
 
     @Test
     public void testIsValueType() {
-        assertFalse(ObjectUtils.isValueType(Object.class));
+        assertFalse(ObjectUtils.isValueType(Object.class, new SimpleDocumentMapper()));
     }
 
     @Test
@@ -149,12 +177,64 @@ public class ObjectUtilsTest implements Serializable {
     private static class EnclosingType {
         private ChildClass childClass;
         private FieldType fieldType;
+
+        public static class Converter implements EntityConverter<EnclosingType> {
+
+            @Override
+            public Class<EnclosingType> getEntityType() {
+                return EnclosingType.class;
+            }
+
+            @Override
+            public Document toDocument(EnclosingType entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument()
+                    .put("childClass", nitriteMapper.convert(entity.childClass, Document.class))
+                    .put("fieldType", nitriteMapper.convert(entity.fieldType, Document.class));
+            }
+
+            @Override
+            public EnclosingType fromDocument(Document document, NitriteMapper nitriteMapper) {
+                EnclosingType entity = new EnclosingType();
+                entity.childClass = nitriteMapper.convert(document.get("childClass", Document.class),
+                    ChildClass.class);
+                entity.fieldType = nitriteMapper.convert(document.get("fieldType", Document.class),
+                    FieldType.class);
+                return entity;
+            }
+        }
     }
 
     @Data
     private static class FieldType {
         private Employee employee;
         private LocalDateTime currentDate;
+
+        public static class Converter implements EntityConverter<FieldType> {
+
+            @Override
+            public Class<FieldType> getEntityType() {
+                return FieldType.class;
+            }
+
+            @Override
+            public Document toDocument(FieldType entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument()
+                    .put("currentDate", entity.currentDate.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli())
+                    .put("employee", nitriteMapper.convert(entity.employee, Document.class));
+            }
+
+            @Override
+            public FieldType fromDocument(Document document, NitriteMapper nitriteMapper) {
+                FieldType entity = new FieldType();
+                entity.employee = nitriteMapper.convert(document.get("employee", Document.class), Employee.class);
+                if (document.get("currentDate", Long.class) != null) {
+                    entity.currentDate = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(document.get("currentDate", Long.class)),
+                        ZoneId.systemDefault());
+                }
+                return entity;
+            }
+        }
     }
 
     @Data

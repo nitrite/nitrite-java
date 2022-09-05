@@ -18,6 +18,7 @@
 package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.TestUtil;
 import org.dizitart.no2.collection.NitriteId;
@@ -45,6 +46,18 @@ public class ObjectRepositoryNegativeTest {
     @Before
     public void setUp() {
         db = TestUtil.createDb();
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new WithPublicField.Converter());
+        documentMapper.registerEntityConverter(new WithObjectId.Converter());
+        documentMapper.registerEntityConverter(new WithOutId.Converter());
+        documentMapper.registerEntityConverter(new WithoutEmbeddedId.Converter());
+        documentMapper.registerEntityConverter(new WithoutEmbeddedId.NestedId.Converter());
+        documentMapper.registerEntityConverter(new WithEmptyStringId.Converter());
+        documentMapper.registerEntityConverter(new WithNullId.Converter());
+        documentMapper.registerEntityConverter(new Employee.EmployeeConverter());
+        documentMapper.registerEntityConverter(new Company.CompanyConverter());
+        documentMapper.registerEntityConverter(new Note.NoteConverter());
+        documentMapper.registerEntityConverter(new WithNitriteId.WithNitriteIdConverter());
     }
 
     @After
@@ -156,7 +169,7 @@ public class ObjectRepositoryNegativeTest {
         repository.remove(object);
     }
 
-    @Test(expected = ValidationException.class)
+    @Test(expected = ObjectMappingException.class)
     public void testProjectionFailedInstantiate() {
         ObjectRepository<WithOutId> repository = db.getRepository(WithOutId.class);
         WithOutId object = new WithOutId();
