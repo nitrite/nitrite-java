@@ -21,7 +21,6 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.CollectionFactory;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.index.IndexFields;
 import org.junit.Test;
 
 import java.util.Date;
@@ -83,7 +82,7 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public List<IndexFields> getIndexFields() {
+        public List<EntityIndex> getIndexFields() {
             return null;
         }
     }

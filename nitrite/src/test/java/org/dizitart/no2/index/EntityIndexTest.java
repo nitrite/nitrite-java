@@ -18,40 +18,29 @@
 package org.dizitart.no2.index;
 
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.repository.EntityIndex;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public class IndexFieldsTest {
+public class EntityIndexTest {
 
     @Test
     public void testIndextype() {
-        IndexFields indexFields = IndexFields.create(IndexType.UNIQUE, "a", "b");
-        assertEquals(indexFields.getIndexType(), IndexType.UNIQUE);
+        EntityIndex entityIndex = new EntityIndex(IndexType.UNIQUE, "a", "b");
+        assertEquals(entityIndex.getIndexType(), IndexType.UNIQUE);
     }
 
     @Test
     public void testGetFields() {
-        IndexFields indexFields = IndexFields.create(IndexType.UNIQUE, "a", "b");
-        assertArrayEquals(indexFields.getFieldNames().toArray(), new String[] {"a", "b"});
+        EntityIndex entityIndex = new EntityIndex(IndexType.UNIQUE, "a", "b");
+        assertArrayEquals(entityIndex.getFieldNames().toArray(), new String[] {"a", "b"});
     }
 
     @Test(expected = ValidationException.class)
     public void testGetFieldsWithoutFields() {
-        IndexFields indexFields = IndexFields.create(IndexType.UNIQUE);
-        assertArrayEquals(indexFields.getFieldNames().toArray(), new String[0]);
-    }
-
-    @Test
-    public void testGetEncodedName() {
-        IndexFields indexFields = IndexFields.create(IndexType.UNIQUE, "a", "b");
-        assertEquals("Unique[a|b]", indexFields.getEncodedName());
-    }
-
-    @Test
-    public void testToString() {
-        IndexFields indexFields = IndexFields.create(IndexType.UNIQUE, "a", "b");
-        assertEquals("Unique[a|b]", indexFields.toString());
+        EntityIndex entityIndex = new EntityIndex(IndexType.UNIQUE);
+        assertArrayEquals(entityIndex.getFieldNames().toArray(), new String[0]);
     }
 }

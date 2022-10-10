@@ -22,7 +22,6 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
-import org.dizitart.no2.index.IndexFields;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.repository.data.ClassA;
 import org.junit.Before;
@@ -34,16 +33,16 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 
-public class EntityDecoratorReaderTest {
+public class EntityDecoratorScannerTest {
 
-    private EntityDecoratorReader reader;
+    private EntityDecoratorScanner reader;
     private NitriteCollection collection;
 
     @Before
     public void setUp() {
         NitriteMapper nitriteMapper = new SimpleDocumentMapper();
         collection = Nitrite.builder().openOrCreate().getCollection("test");
-        reader = new EntityDecoratorReader(new EntityADecorator(), collection, nitriteMapper);
+        reader = new EntityDecoratorScanner(new EntityADecorator(), collection, nitriteMapper);
     }
 
     @Test
@@ -60,8 +59,8 @@ public class EntityDecoratorReaderTest {
         assertArrayEquals(idField.getFieldNames(), new String[] {"uid", "string"});
         assertArrayEquals(idField.getEmbeddedFieldNames(), new String[] {"id.uid", "id.string"});
 
-        Set<IndexFields> indexFields = reader.getIndices();
-        assertEquals(indexFields.size(), 2);
+        Set<EntityIndex> entityIndexFields = reader.getIndices();
+        assertEquals(entityIndexFields.size(), 2);
     }
 
     @Test
@@ -115,10 +114,10 @@ public class EntityDecoratorReaderTest {
         }
 
         @Override
-        public List<IndexFields> getIndexFields() {
-            List<IndexFields> list = new ArrayList<>();
-            IndexFields fieldsA = IndexFields.create(IndexType.UNIQUE, "name", "age");
-            IndexFields fieldsB = IndexFields.create(IndexType.NON_UNIQUE, "address");
+        public List<EntityIndex> getIndexFields() {
+            List<EntityIndex> list = new ArrayList<>();
+            EntityIndex fieldsA = new EntityIndex(IndexType.UNIQUE, "name", "age");
+            EntityIndex fieldsB = new EntityIndex(IndexType.NON_UNIQUE, "address");
             list.add(fieldsA);
             list.add(fieldsB);
             return list;

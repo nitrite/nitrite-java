@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.integration.repository.decorator;
 
-import org.dizitart.no2.index.IndexFields;
+import org.dizitart.no2.repository.EntityIndex;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.EntityDecorator;
 import org.dizitart.no2.repository.EntityId;
@@ -37,10 +37,10 @@ public class ProductDecorator implements EntityDecorator<Product> {
     }
 
     @Override
-    public List<IndexFields> getIndexFields() {
+    public List<EntityIndex> getIndexFields() {
         return Arrays.asList(
-            IndexFields.create(IndexType.NON_UNIQUE, "manufacturer.name"),
-            IndexFields.create(IndexType.UNIQUE, "productName", "manufacturer.uniqueId")
+            new EntityIndex(IndexType.NON_UNIQUE, "manufacturer.name"),
+            new EntityIndex(IndexType.UNIQUE, "productName", "manufacturer.uniqueId")
         );
     }
 

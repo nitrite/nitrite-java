@@ -22,7 +22,6 @@ import lombok.Getter;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.util.StringUtils;
-import org.dizitart.no2.index.IndexFields;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ import static org.dizitart.no2.index.IndexOptions.indexOptions;
 /**
  * @author Anindya Chatterjee
  */
-public class EntityDecoratorReader {
+public class EntityDecoratorScanner {
     private final EntityDecorator<?> entityDecorator;
     private final NitriteCollection collection;
     private final NitriteMapper nitriteMapper;
@@ -44,14 +43,14 @@ public class EntityDecoratorReader {
     private final Reflector reflector;
 
     @Getter(AccessLevel.PACKAGE)
-    private final Set<IndexFields> indices;
+    private final Set<EntityIndex> indices;
 
     @Getter
     private ObjectIdField objectIdField;
 
-    public EntityDecoratorReader(EntityDecorator<?> entityDecorator,
-                                 NitriteCollection collection,
-                                 NitriteMapper nitriteMapper) {
+    public EntityDecoratorScanner(EntityDecorator<?> entityDecorator,
+                                  NitriteCollection collection,
+                                  NitriteMapper nitriteMapper) {
         this.entityDecorator = entityDecorator;
         this.collection = collection;
         this.nitriteMapper = nitriteMapper;
@@ -66,7 +65,7 @@ public class EntityDecoratorReader {
     }
 
     public void createIndices() {
-        for (IndexFields index : indices) {
+        for (EntityIndex index : indices) {
             String[] fields = index.getFieldNames().toArray(new String[0]);
             if (!collection.hasIndex(fields)) {
                 collection.createIndex(indexOptions(index.getIndexType()), fields);
@@ -85,7 +84,7 @@ public class EntityDecoratorReader {
 
     private void readIndices() {
         if (entityDecorator.getIndexFields() != null) {
-            for (IndexFields indexField : entityDecorator.getIndexFields()) {
+            for (EntityIndex indexField : entityDecorator.getIndexFields()) {
                 List<String> names = indexField.getFieldNames();
                 List<Field> entityFields = new ArrayList<>();
 

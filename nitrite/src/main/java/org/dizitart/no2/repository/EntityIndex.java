@@ -15,14 +15,14 @@
  *
  */
 
-package org.dizitart.no2.index;
+package org.dizitart.no2.repository;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.util.StringUtils;
+import org.dizitart.no2.index.IndexType;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
@@ -33,24 +33,15 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @author Anindya Chatterjee
  * @since 4.0
  */
-@EqualsAndHashCode(callSuper = true)
-public class IndexFields extends Fields {
-    private static final long serialVersionUID = 1662219840L;
+public class EntityIndex {
 
-    /**
-     * The index type.
-     */
     @Getter
     private String indexType;
 
-    /**
-     * Creates a {@link IndexFields} instance with field names and index type.
-     *
-     * @param indexType the index type
-     * @param fields    the fields
-     * @return the fields
-     */
-    public static IndexFields create(String indexType, String... fields) {
+    @Getter
+    private List<String> fieldNames;
+
+    public EntityIndex(String indexType, String... fields) {
         notNull(fields, "fields cannot be null");
         notEmpty(fields, "fields cannot be empty");
 
@@ -58,19 +49,7 @@ public class IndexFields extends Fields {
             indexType = IndexType.UNIQUE;
         }
 
-        IndexFields f = new IndexFields();
-        f.fieldNames.addAll(Arrays.asList(fields));
-        f.indexType = indexType;
-        return f;
-    }
-
-    @Override
-    public String getEncodedName() {
-        return indexType + "[" + super.getEncodedName() + "]";
-    }
-
-    @Override
-    public String toString() {
-        return this.getEncodedName();
+        this.fieldNames = Arrays.asList(fields);
+        this.indexType = StringUtils.isNullOrEmpty(indexType) ? IndexType.UNIQUE : indexType;
     }
 }

@@ -17,17 +17,47 @@
 
 package org.dizitart.no2.repository;
 
-import org.dizitart.no2.index.IndexFields;
-
 import java.util.List;
 
+/**
+ * A class that implements this interface can be used to decorate
+ * an entity of type T for nitrite database where using
+ * {@link org.dizitart.no2.repository.annotations.Entity}
+ * or its related annotations is not possible on a class.
+ *
+ * @param <T> the type parameter
+ * @see org.dizitart.no2.Nitrite#getRepository(EntityDecorator)
+ * @see org.dizitart.no2.Nitrite#getRepository(EntityDecorator, String)
+ * @since 4.0
+ * @author Anindya Chatterjee
+ */
 public interface EntityDecorator<T> {
+    /**
+     * Gets the entity type of the decorator.
+     *
+     * @return the entity type
+     */
     Class<T> getEntityType();
 
+    /**
+     * Gets id field declaration.
+     *
+     * @return the id field
+     */
     EntityId getIdField();
 
-    List<IndexFields> getIndexFields();
+    /**
+     * Gets index fields declaration.
+     *
+     * @return the index fields
+     */
+    List<EntityIndex> getIndexFields();
 
+    /**
+     * Gets entity name.
+     *
+     * @return the entity name
+     */
     default String getEntityName() {
         return getEntityType().getName();
     }

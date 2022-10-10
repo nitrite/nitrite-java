@@ -47,7 +47,7 @@ public class RepositoryOperations {
     private final Class<?> type;
     private AnnotationScanner annotationScanner;
     private ObjectIdField objectIdField;
-    private EntityDecoratorReader entityDecoratorReader;
+    private EntityDecoratorScanner entityDecoratorScanner;
 
     /**
      * Instantiates a new {@link RepositoryOperations}.
@@ -72,7 +72,7 @@ public class RepositoryOperations {
         this.type = entityDecorator.getEntityType();
         this.nitriteMapper = nitriteMapper;
         this.collection = collection;
-        this.entityDecoratorReader = new EntityDecoratorReader(entityDecorator, collection, nitriteMapper);
+        this.entityDecoratorScanner = new EntityDecoratorScanner(entityDecorator, collection, nitriteMapper);
         validateCollection();
     }
 
@@ -85,11 +85,11 @@ public class RepositoryOperations {
             annotationScanner.createIndices();
             annotationScanner.createIdIndex();
             objectIdField = annotationScanner.getObjectIdField();
-        } else if (entityDecoratorReader != null) {
-            entityDecoratorReader.readEntity();
-            entityDecoratorReader.createIndices();
-            entityDecoratorReader.createIdIndex();
-            objectIdField = entityDecoratorReader.getObjectIdField();
+        } else if (entityDecoratorScanner != null) {
+            entityDecoratorScanner.readEntity();
+            entityDecoratorScanner.createIndices();
+            entityDecoratorScanner.createIdIndex();
+            objectIdField = entityDecoratorScanner.getObjectIdField();
         }
     }
 

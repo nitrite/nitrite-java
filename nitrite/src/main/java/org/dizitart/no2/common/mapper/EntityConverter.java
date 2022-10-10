@@ -19,10 +19,37 @@ package org.dizitart.no2.common.mapper;
 
 import org.dizitart.no2.collection.Document;
 
+/**
+ * A class that implements this interface can be used to convert
+ * entity into a database {@link Document} and back again.
+ *
+ * @since 4.0
+ * @author Anindya Chatterjee
+ * @param <T> the type parameter
+ */
 public interface EntityConverter<T> {
+    /**
+     * Gets the entity type.
+     *
+     * @return the entity type
+     */
     Class<T> getEntityType();
 
+    /**
+     * Converts the entity to a {@link Document}.
+     *
+     * @param entity        the entity
+     * @param nitriteMapper the nitrite mapper
+     * @return the document
+     */
     Document toDocument(T entity, NitriteMapper nitriteMapper);
 
+    /**
+     * Converts a {@link Document} to an entity of type {@link T}.
+     *
+     * @param document      the document
+     * @param nitriteMapper the nitrite mapper
+     * @return the t
+     */
     T fromDocument(Document document, NitriteMapper nitriteMapper);
 }
