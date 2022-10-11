@@ -164,6 +164,9 @@ public class ObjectUtilsTest implements Serializable {
         assertTrue(ObjectUtils.isValueType(Pattern.class, simpleDocumentMapper));
         assertFalse(ObjectUtils.isValueType(NitriteId.class, simpleDocumentMapper));
         assertFalse(ObjectUtils.isValueType(Document.class, simpleDocumentMapper));
+
+        simpleDocumentMapper.addValueType(ValidEntity5.class);
+        assertTrue(ObjectUtils.isValueType(ValidEntity5.class, simpleDocumentMapper));
     }
 
     @Test
