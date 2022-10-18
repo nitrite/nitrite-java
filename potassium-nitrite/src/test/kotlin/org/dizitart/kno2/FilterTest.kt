@@ -322,7 +322,7 @@ class FilterTest : BaseTest() {
     @Test
     fun testBetweenFilter() {
         @Getter
-        class TestData(private val age: Date)
+        class TestData(private val age: Date = Date())
 
         val data1 = TestData(GregorianCalendar(2020, Calendar.JANUARY, 11).time)
         val data2 = TestData(GregorianCalendar(2021, Calendar.FEBRUARY, 12).time)

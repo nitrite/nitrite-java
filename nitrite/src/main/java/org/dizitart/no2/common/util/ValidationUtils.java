@@ -22,6 +22,7 @@ import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
@@ -180,6 +181,11 @@ public class ValidationUtils {
     public static void validateRepositoryType(Class<?> type, NitriteMapper nitriteMapper) {
         Object value;
         try {
+            if (type.isInterface() || Modifier.isAbstract(type.getModifiers())) {
+                // defer validation during insertion
+                return;
+            }
+
             value = newInstance(type, false, nitriteMapper);
             if (value == null) {
                 throw new ValidationException("Cannot create new instance of type " + type);

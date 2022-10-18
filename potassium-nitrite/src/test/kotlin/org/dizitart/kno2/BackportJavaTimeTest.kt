@@ -41,7 +41,7 @@ class BackportJavaTimeTest {
     @Index(value = ["time"], type = IndexType.NON_UNIQUE)
     data class TestData(
             @Id val id: String = UUID.randomUUID().toString(),
-            val time: LocalDateTime
+            val time: LocalDateTime = LocalDateTime.now()
     )
 
     class ThreeTenAbpModule : SimpleModule() {
