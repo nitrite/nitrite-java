@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2021 Nitrite author or authors.
+ * Copyright (c) 2017-2022 Nitrite author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,31 +17,17 @@
 
 package org.dizitart.no2.integration.repository.data;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
-@EqualsAndHashCode
-@ToString
-class ClassB implements Comparable<ClassB> {
-    @Getter
-    @Setter
-    private Integer number;
-    @Getter
-    @Setter
-    private String text;
+import java.util.Date;
 
-    static ClassB create(int seed) {
-        ClassB classB = new ClassB();
-        classB.setNumber(seed + 100);
-        classB.setText(Integer.toBinaryString(seed));
-        return classB;
+@Getter
+@NoArgsConstructor
+public class TestData {
+    private Date age;
+
+    public TestData(Date age) {
+        this.age = age;
     }
-
-    @Override
-    public int compareTo(ClassB o) {
-        return Integer.compare(number, o.number);
-    }
-
 }

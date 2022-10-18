@@ -23,14 +23,16 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
+import java.io.Serializable;
+
 /**
  * @author Anindya Chatterjee.
  */
 @Getter
 @Setter
-public class WithOutId implements Comparable<WithOutId> {
+public class WithOutId implements Comparable<WithOutId>, Serializable {
     private String name;
-    private long number;
+    private Long number;
 
     @Override
     public int compareTo(WithOutId o) {

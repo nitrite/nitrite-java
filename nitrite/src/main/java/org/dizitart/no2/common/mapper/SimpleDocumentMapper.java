@@ -151,9 +151,7 @@ public class SimpleDocumentMapper implements NitriteMapper {
     }
 
     private void init(List<Class<?>> valueTypes) {
-        for (Class<?> builtInType : ObjectUtils.builtInTypes()) {
-            this.valueTypes.add(builtInType);
-        }
+        this.valueTypes.addAll(ObjectUtils.builtInTypes());
 
         this.valueTypes.add(Enum.class);
         this.valueTypes.add(NitriteId.class);

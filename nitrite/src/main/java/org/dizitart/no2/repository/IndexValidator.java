@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.repository;
 
+import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.util.ObjectUtils;
@@ -41,7 +42,7 @@ public class IndexValidator {
         if (fieldType.isPrimitive()
             || fieldType == NitriteId.class
             || fieldType.isInterface()
-            || ObjectUtils.isValueType(fieldType, nitriteMapper)
+//            || ObjectUtils.isValueType(fieldType, nitriteMapper)
             || Modifier.isAbstract(fieldType.getModifiers())
             || fieldType.isArray()
             || Iterable.class.isAssignableFrom(fieldType)) {
@@ -56,34 +57,28 @@ public class IndexValidator {
 
     public void validateId(Id id, Class<?> fieldType, String field, NitriteMapper nitriteMapper) {
         if (fieldType.isPrimitive()
-            || fieldType == NitriteId.class
-            || fieldType.isInterface()
-            || ObjectUtils.isValueType(fieldType, nitriteMapper)
-            || Modifier.isAbstract(fieldType.getModifiers())
-            || fieldType.isArray()
-            || Iterable.class.isAssignableFrom(fieldType)) {
-            // we will validate the solid class during insertion/update
+            || fieldType == NitriteId.class) {
             return;
         }
 
-        if (id.embeddedFields().length == 0) {
+        Object dummyValue = ObjectUtils.newInstance(fieldType, true, nitriteMapper);
+        Document dummyDocument = nitriteMapper.convert(dummyValue, Document.class);
+
+        if (dummyDocument != null && dummyDocument.size() != 0 && id.embeddedFields().length == 0) {
             throw new IndexingException("Invalid Id field " + field);
         }
     }
 
     public void validateId(EntityId entityId, Class<?> fieldType, String field, NitriteMapper nitriteMapper) {
         if (fieldType.isPrimitive()
-            || fieldType == NitriteId.class
-            || fieldType.isInterface()
-            || ObjectUtils.isValueType(fieldType, nitriteMapper)
-            || Modifier.isAbstract(fieldType.getModifiers())
-            || fieldType.isArray()
-            || Iterable.class.isAssignableFrom(fieldType)) {
-            // we will validate the solid class during insertion/update
+            || fieldType == NitriteId.class) {
             return;
         }
 
-        if (entityId.getEmbeddedFieldNames().size() == 0) {
+        Object dummyValue = ObjectUtils.newInstance(fieldType, true, nitriteMapper);
+        Document dummyDocument = nitriteMapper.convert(dummyValue, Document.class);
+
+        if (dummyDocument.size() != 0 && entityId.getEmbeddedFieldNames().size() == 0) {
             throw new IndexingException("Invalid Id field " + field);
         }
     }

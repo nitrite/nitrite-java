@@ -51,10 +51,10 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
     @Override
     public void setUp() {
         openDb();
-
-        textRepository = db.getRepository(TextData.class);
         SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TextData.Converter());
+
+        textRepository = db.getRepository(TextData.class);
 
         for (int i = 0; i < 10; i++) {
             TextData data = new TextData();
@@ -161,7 +161,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
         @Index(value = "text", type = IndexType.FULL_TEXT)
     )
     public static class TextData {
-        public int id;
+        public Integer id;
         public String text;
 
         public static class Converter implements EntityConverter<TextData> {

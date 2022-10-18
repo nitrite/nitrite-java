@@ -30,9 +30,9 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 @Setter
 public class StressRecord {
     private String firstName;
-    private boolean processed;
+    private Boolean processed;
     private String lastName;
-    private boolean failed;
+    private Boolean failed;
     private String notes;
 
     public static class Converter implements EntityConverter<StressRecord> {

@@ -29,7 +29,7 @@ import org.dizitart.no2.repository.annotations.Id;
 @Data
 class InternalClass {
     @Id
-    private long id;
+    private Long id;
     private String name;
 
     public static class Converter implements EntityConverter<InternalClass> {

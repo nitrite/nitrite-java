@@ -72,7 +72,7 @@ public class ObjectRepositoryNegativeTest {
         deleteDb(dbPath);
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test(expected = ValidationException.class)
     public void testWithCircularReference() {
         ObjectRepository<WithCircularReference> repository = db.getRepository(WithCircularReference.class);
 
@@ -92,7 +92,7 @@ public class ObjectRepositoryNegativeTest {
         }
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test(expected = ValidationException.class)
     public void testWithCustomConstructor() {
         ObjectRepository<WithCustomConstructor> repository = db.getRepository(WithCustomConstructor.class);
 
@@ -150,7 +150,7 @@ public class ObjectRepositoryNegativeTest {
         ObjectRepository<WithObjectId> repository = db.getRepository(WithObjectId.class);
         WithOutId id = new WithOutId();
         id.setName("test");
-        id.setNumber(1);
+        id.setNumber(1L);
 
         WithObjectId object = new WithObjectId();
         object.setWithOutId(id);
@@ -175,7 +175,7 @@ public class ObjectRepositoryNegativeTest {
         repository.remove(object);
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test(expected = ValidationException.class)
     public void testProjectionFailedInstantiate() {
         ObjectRepository<WithOutId> repository = db.getRepository(WithOutId.class);
         WithOutId object = new WithOutId();
@@ -198,7 +198,7 @@ public class ObjectRepositoryNegativeTest {
         ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
         WithPublicField object = new WithPublicField();
         object.name = "test";
-        object.number = 2;
+        object.number = 2L;
 
         repository.insert(object);
         WithPublicField instance = repository.getById(null);
@@ -234,7 +234,7 @@ public class ObjectRepositoryNegativeTest {
         ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
         WithPublicField object = new WithPublicField();
         object.name = "test";
-        object.number = 2;
+        object.number = 2L;
 
         repository.insert(object);
 

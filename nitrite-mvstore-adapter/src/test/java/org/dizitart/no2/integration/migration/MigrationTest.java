@@ -61,6 +61,8 @@ public class MigrationTest {
         SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new OldClass.Converter());
         documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Literature.Converter());
 
         faker = new Faker();
     }
@@ -125,6 +127,12 @@ public class MigrationTest {
             .schemaVersion(2)
             .addMigrations(migration)
             .openOrCreate("test-user", "test-password");
+
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new OldClass.Converter());
+        documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Literature.Converter());
 
         ObjectRepository<NewClass> newRepo = db.getRepository(NewClass.class);
         assertEquals(newRepo.size(), 10);

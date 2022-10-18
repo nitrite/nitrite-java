@@ -193,7 +193,7 @@ public class ObjectUtils {
 
     public static <T> T newInstance(Class<T> type, boolean createSkeleton, NitriteMapper nitriteMapper) {
         try {
-            if (type.isPrimitive() || type.isArray() || type == String.class) {
+            if (type.isPrimitive() || type.isArray() || type == String.class || isBuiltInValueType(type)) {
                 return defaultValue(type);
             }
 
@@ -220,30 +220,6 @@ public class ObjectUtils {
             return item;
         } catch (Throwable e) {
             throw new ObjectMappingException("Failed to instantiate type " + type.getName(), e);
-        }
-    }
-
-    public static boolean isValue(Object value, NitriteMapper nitriteMapper) {
-        try {
-            if (value == null) return true; // special case
-
-            nitriteMapper.convert(value, Comparable.class);
-            return true;
-        } catch (Exception e) {
-            return isBuiltInValueType(value.getClass());
-        }
-    }
-
-    public static boolean isValueType(Class<?> type, NitriteMapper nitriteMapper) {
-        try {
-            Object value = newInstance(type, false, nitriteMapper);
-            if (value != null) {
-                return isValue(value, nitriteMapper);
-            } else {
-                return isBuiltInValueType(type);
-            }
-        } catch (Exception e) {
-            return isBuiltInValueType(type);
         }
     }
 
@@ -364,7 +340,7 @@ public class ObjectUtils {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T defaultValue(Class<T> type) {
+    public static <T> T defaultValue(Class<T> type) {
         if (type.isPrimitive()) {
             switch (type.getName()) {
                 case "boolean":

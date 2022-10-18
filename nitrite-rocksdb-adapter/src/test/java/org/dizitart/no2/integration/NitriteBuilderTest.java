@@ -344,7 +344,10 @@ public class NitriteBuilderTest {
 
             @Override
             public TestObject fromDocument(Document document, NitriteMapper nitriteMapper) {
-                return null;
+                TestObject entity = new TestObject();
+                entity.stringValue = document.get("stringValue", String.class);
+                entity.longValue = document.get("longValue", Long.class);
+                return entity;
             }
         }
     }

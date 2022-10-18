@@ -36,6 +36,7 @@ import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.TestUtil;
+import org.dizitart.no2.integration.repository.data.EmptyClass;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
@@ -88,6 +89,7 @@ public class NitriteTest {
         SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new CompatChild.Converter());
         documentMapper.registerEntityConverter(new Receipt.Converter());
+        documentMapper.registerEntityConverter(new EmptyClass.Converter());
 
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
@@ -137,9 +139,14 @@ public class NitriteTest {
         assertEquals(collectionNames.size(), 1);
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testListRepositories() {
         db.getRepository(getClass());
+    }
+
+    @Test
+    public void testListRepositories2() {
+        db.getRepository(Receipt.class);
         Set<String> repositories = db.listRepositories();
         assertEquals(repositories.size(), 1);
     }
@@ -150,10 +157,15 @@ public class NitriteTest {
         assertFalse(db.hasCollection("lucene" + INTERNAL_NAME_SEPARATOR + "test"));
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testHasRepository() {
         db.getRepository(getClass());
-        assertTrue(db.hasRepository(getClass()));
+    }
+
+    @Test
+    public void testHasRepository2() {
+        db.getRepository(Receipt.class);
+        assertTrue(db.hasRepository(Receipt.class));
         assertFalse(db.hasRepository(String.class));
     }
 
@@ -245,20 +257,30 @@ public class NitriteTest {
         assertEquals(collection.getName(), "test-collection");
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testGetRepository() {
-        ObjectRepository<NitriteTest> repository = db.getRepository(NitriteTest.class);
-        assertNotNull(repository);
-        assertEquals(repository.getType(), NitriteTest.class);
+        ObjectRepository<EmptyClass> repository = db.getRepository(EmptyClass.class);
     }
 
     @Test
-    public void testGetRepositoryWithKey() {
-        ObjectRepository<NitriteTest> repository = db.getRepository(NitriteTest.class, "key");
+    public void testGetRepository2() {
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
         assertNotNull(repository);
-        assertEquals(repository.getType(), NitriteTest.class);
-        assertFalse(db.hasRepository(NitriteTest.class));
-        assertTrue(db.hasRepository(NitriteTest.class, "key"));
+        assertEquals(repository.getType(), Receipt.class);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testGetRepositoryWithKey() {
+        ObjectRepository<EmptyClass> repository = db.getRepository(EmptyClass.class, "key");
+    }
+
+    @Test
+    public void testGetRepositoryWithKey2() {
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class, "key");
+        assertNotNull(repository);
+        assertEquals(repository.getType(), Receipt.class);
+        assertFalse(db.hasRepository(Receipt.class));
+        assertTrue(db.hasRepository(Receipt.class, "key"));
     }
 
     @Test
@@ -274,13 +296,13 @@ public class NitriteTest {
 
     @Test
     public void testMultipleGetRepository() {
-        ObjectRepository<NitriteTest> repository = db.getRepository(NitriteTest.class);
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
         assertNotNull(repository);
-        assertEquals(repository.getType(), NitriteTest.class);
+        assertEquals(repository.getType(), Receipt.class);
 
-        ObjectRepository<NitriteTest> repository2 = db.getRepository(NitriteTest.class);
+        ObjectRepository<Receipt> repository2 = db.getRepository(Receipt.class);
         assertNotNull(repository2);
-        assertEquals(repository2.getType(), NitriteTest.class);
+        assertEquals(repository2.getType(), Receipt.class);
     }
 
     @Test(expected = ValidationException.class)
@@ -632,10 +654,12 @@ public class NitriteTest {
                 Receipt receipt = new Receipt();
                 if (document != null) {
                     Object status = document.get("status");
-                    if (status instanceof Status) {
-                        receipt.status = (Status) status;
-                    } else {
-                        receipt.status = Status.valueOf(status.toString());
+                    if (status != null) {
+                        if (status instanceof Receipt.Status) {
+                            receipt.status = (Receipt.Status) status;
+                        } else {
+                            receipt.status = Receipt.Status.valueOf(status.toString());
+                        }
                     }
                     receipt.clientRef = document.get("clientRef", String.class);
                     receipt.synced = document.get("synced", Boolean.class);

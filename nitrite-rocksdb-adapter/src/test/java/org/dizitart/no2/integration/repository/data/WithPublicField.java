@@ -28,7 +28,7 @@ import org.dizitart.no2.repository.annotations.Id;
 public class WithPublicField {
     @Id
     public String name;
-    public long number;
+    public Long number;
 
     public static class Converter implements EntityConverter<WithPublicField> {
 

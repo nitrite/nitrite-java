@@ -30,7 +30,7 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 @Setter
 public class WithOutId implements Comparable<WithOutId> {
     private String name;
-    private long number;
+    private Long number;
 
     @Override
     public int compareTo(WithOutId o) {

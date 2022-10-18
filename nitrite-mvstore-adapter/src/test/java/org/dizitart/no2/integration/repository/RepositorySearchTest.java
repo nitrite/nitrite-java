@@ -366,17 +366,17 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
         ObjectRepository<ElemMatch> repository = db.getRepository(ElemMatch.class);
         ElemMatch e1 = new ElemMatch();
-        e1.setId(1);
+        e1.setId(1L);
         e1.setStrArray(new String[]{"a", "b"});
         e1.setProductScores(new ProductScore[]{score1, score4});
 
         ElemMatch e2 = new ElemMatch();
-        e2.setId(2);
+        e2.setId(2L);
         e2.setStrArray(new String[]{"d", "e"});
         e2.setProductScores(new ProductScore[]{score2, score5});
 
         ElemMatch e3 = new ElemMatch();
-        e3.setId(3);
+        e3.setId(3L);
         e3.setStrArray(new String[]{"a", "f"});
         e3.setProductScores(new ProductScore[]{score3, score6});
 

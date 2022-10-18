@@ -28,14 +28,14 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 @EqualsAndHashCode
 public class WithPrivateConstructor {
     private String name;
-    private long number;
+    private Long number;
 
     private WithPrivateConstructor() {
         name = "test";
-        number = 2;
+        number = 2L;
     }
 
-    public static WithPrivateConstructor create(final String name, final long number) {
+    public static WithPrivateConstructor create(final String name, final Long number) {
         WithPrivateConstructor obj = new WithPrivateConstructor();
         obj.number = number;
         obj.name = name;

@@ -17,7 +17,6 @@
 
 package org.dizitart.no2.integration.repository;
 
-import lombok.Getter;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.InvalidIdException;
@@ -544,15 +543,6 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testBetweenFilter() {
-        @Getter
-        class TestData {
-            private final Date age;
-
-            public TestData(Date age) {
-                this.age = age;
-            }
-        }
-
         TestData data1 = new TestData(new GregorianCalendar(2020, Calendar.JANUARY, 11).getTime());
         TestData data2 = new TestData(new GregorianCalendar(2021, Calendar.FEBRUARY, 12).getTime());
         TestData data3 = new TestData(new GregorianCalendar(2022, Calendar.MARCH, 13).getTime());

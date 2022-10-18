@@ -81,9 +81,7 @@ public class ObjectCursorTest {
 
     @Test
     public void testProject3() {
-        Class<?> forNameResult = Object.class;
-        Class<?> forNameResult1 = Object.class;
-        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper(forNameResult, forNameResult1, Object.class);
+        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
         RecordStream<Pair<NitriteId, Document>> recordStream = (RecordStream<Pair<NitriteId, Document>>) mock(
             RecordStream.class);
         DocumentStream cursor = new DocumentStream(recordStream, new ProcessorChain());

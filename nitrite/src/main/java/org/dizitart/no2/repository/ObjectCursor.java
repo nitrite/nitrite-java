@@ -21,17 +21,17 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.streams.MutatedObjectStream;
-import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 
 import static org.dizitart.no2.common.util.DocumentUtils.skeletonDocument;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
+import static org.dizitart.no2.common.util.ValidationUtils.validateProjectionType;
 
 /**
  * @author Anindya Chatterjee.
@@ -84,12 +84,12 @@ class ObjectCursor<T> implements Cursor<T> {
             throw new ValidationException("Cannot project to array");
         } else if (Modifier.isAbstract(type.getModifiers())) {
             throw new ValidationException("Cannot project to abstract type");
-        } else if (ObjectUtils.isValueType(type, nitriteMapper)) {
-            throw new ValidationException("Cannot project to a value type");
         }
 
+        validateProjectionType(type, nitriteMapper);
+
         Document dummyDoc = skeletonDocument(nitriteMapper, type);
-        if (dummyDoc == null) {
+        if (dummyDoc == null || dummyDoc.size() == 0) {
             throw new ValidationException("Cannot project to empty type");
         } else {
             return dummyDoc;

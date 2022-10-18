@@ -123,7 +123,7 @@ public class ObjectRepositoryTest {
         ObjectRepository<WithOutId> repository = db.getRepository(WithOutId.class);
         WithOutId object = new WithOutId();
         object.setName("test");
-        object.setNumber(2);
+        object.setNumber(2L);
 
         repository.insert(object);
         for (WithOutId instance : repository.find()) {
@@ -137,7 +137,7 @@ public class ObjectRepositoryTest {
         ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
         WithPublicField object = new WithPublicField();
         object.name = "test";
-        object.number = 2;
+        object.number = 2L;
 
         repository.insert(object);
         WithPublicField instance = repository.getById("test");
@@ -149,7 +149,7 @@ public class ObjectRepositoryTest {
     public void testWithTransientField() {
         ObjectRepository<WithTransientField> repository = db.getRepository(WithTransientField.class);
         WithTransientField object = new WithTransientField();
-        object.setNumber(2);
+        object.setNumber(2L);
         object.setName("test");
 
         repository.insert(object);
@@ -187,7 +187,7 @@ public class ObjectRepositoryTest {
     public void testWithPackagePrivateClass() {
         ObjectRepository<InternalClass> repository = db.getRepository(InternalClass.class);
         InternalClass internalClass = new InternalClass();
-        internalClass.setId(1);
+        internalClass.setId(1L);
         internalClass.setName("name");
 
         repository.insert(internalClass);

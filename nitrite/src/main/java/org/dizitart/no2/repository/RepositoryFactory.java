@@ -19,11 +19,10 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.CollectionFactory;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.util.ObjectUtils;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreCatalog;
 
@@ -33,6 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryNameByDecorator;
+import static org.dizitart.no2.common.util.ValidationUtils.validateRepositoryType;
 
 /**
  * The {@link ObjectRepository} factory.
@@ -163,9 +163,8 @@ public class RepositoryFactory {
                                                      String collectionName, String key) {
         NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
-        if (ObjectUtils.isValueType(type, nitriteMapper)) {
-            throw new ValidationException("Cannot create a repository for a value type");
-        }
+
+        validateRepositoryType(type, nitriteMapper);
 
         if (store.getCollectionNames().contains(collectionName)) {
             throw new ValidationException("A collection with same entity name already exists");
@@ -190,9 +189,7 @@ public class RepositoryFactory {
             throw new ValidationException("A collection with same entity name already exists");
         }
 
-        if (ObjectUtils.isValueType(entityDecorator.getEntityType(), nitriteMapper)) {
-            throw new ValidationException("Cannot create a repository for a value type");
-        }
+        validateRepositoryType(entityDecorator.getEntityType(), nitriteMapper);
 
         NitriteCollection nitriteCollection = collectionFactory.getCollection(collectionName,
             nitriteConfig, false);

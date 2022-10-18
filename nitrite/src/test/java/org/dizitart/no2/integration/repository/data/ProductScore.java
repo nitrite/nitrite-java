@@ -30,7 +30,7 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 @Setter
 public class ProductScore {
     private String product;
-    private int score;
+    private Integer score;
 
     public ProductScore() {
     }

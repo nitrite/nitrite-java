@@ -30,7 +30,7 @@ import java.util.List;
  */
 @Data
 public class ElemMatch {
-    private long id;
+    private Long id;
     private String[] strArray;
     private ProductScore[] productScores;
 

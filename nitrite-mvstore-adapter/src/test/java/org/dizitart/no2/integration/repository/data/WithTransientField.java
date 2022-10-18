@@ -32,7 +32,7 @@ import org.dizitart.no2.repository.annotations.Id;
 public class WithTransientField {
     private transient String name;
     @Id
-    private long number;
+    private Long number;
 
     public static class Converter implements EntityConverter<WithTransientField> {
 

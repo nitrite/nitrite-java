@@ -21,9 +21,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.exceptions.FilterException;
 
-import static org.dizitart.no2.common.util.ObjectUtils.isValue;
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -68,7 +66,7 @@ public abstract class FieldBasedFilter extends NitriteFilter {
         if (getObjectFilter()) {
             NitriteMapper nitriteMapper = getNitriteConfig().nitriteMapper();
             validateSearchTerm(nitriteMapper, field, value);
-            if (isValue(value, nitriteMapper)) {
+            if (value instanceof Comparable) {
                 value = nitriteMapper.convert(value, Comparable.class);
             }
         }
@@ -80,11 +78,5 @@ public abstract class FieldBasedFilter extends NitriteFilter {
     protected void validateSearchTerm(NitriteMapper nitriteMapper, String field, Object value) {
         notNull(field, "field cannot be null");
         notEmpty(field, "field cannot be empty");
-
-        if (value != null) {
-            if (!isValue(value, nitriteMapper) && !(value instanceof Comparable)) {
-                throw new FilterException("The value for field '" + field + "' is not a valid search term");
-            }
-        }
     }
 }

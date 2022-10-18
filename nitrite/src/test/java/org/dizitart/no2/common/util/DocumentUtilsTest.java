@@ -21,7 +21,6 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
-import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.integration.Retry;
@@ -88,11 +87,11 @@ public class DocumentUtilsTest {
         assertEquals(0, DocumentUtils.skeletonDocument(nitriteMapper, Object.class).size());
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test
     public void testSkeletonDocument3() {
         SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
         Document document = DocumentUtils.skeletonDocument(nitriteMapper, Integer.class);
-        assertEquals(0, document.size());
+        assertNull(document);
     }
 
     @Test

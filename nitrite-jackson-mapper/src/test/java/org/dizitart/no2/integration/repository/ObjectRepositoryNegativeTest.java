@@ -76,7 +76,7 @@ public class ObjectRepositoryNegativeTest {
         assertEquals(instance.getParent().getName(), object.getParent().getName());
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test(expected = ValidationException.class)
     public void testWithCustomConstructor() {
         ObjectRepository<WithCustomConstructor> repository = db.getRepository(WithCustomConstructor.class);
 
@@ -157,7 +157,7 @@ public class ObjectRepositoryNegativeTest {
         repository.remove(object);
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test(expected = ValidationException.class)
     public void testProjectionFailedInstantiate() {
         ObjectRepository<WithOutId> repository = db.getRepository(WithOutId.class);
         WithOutId object = new WithOutId();

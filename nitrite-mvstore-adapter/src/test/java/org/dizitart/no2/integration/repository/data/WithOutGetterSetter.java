@@ -28,11 +28,11 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 @EqualsAndHashCode
 public class WithOutGetterSetter {
     private String name;
-    private long number;
+    private Long number;
 
     public WithOutGetterSetter() {
         name = "test";
-        number = 2;
+        number = 2L;
     }
 
     public static class Converter implements EntityConverter<WithOutGetterSetter> {
