@@ -28,6 +28,7 @@ class ClassB implements Comparable<ClassB> {
     @Getter
     @Setter
     private int number;
+
     @Getter
     @Setter
     private String text;

@@ -25,8 +25,7 @@ import org.dizitart.no2.exceptions.ValidationException;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 
-import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
-import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
+import static org.dizitart.no2.common.util.ObjectUtils.*;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
@@ -176,12 +175,17 @@ public class ValidationUtils {
         if (value == null) {
             throw new ValidationException("Invalid projection type");
         }
+
+        Document document = nitriteMapper.convert(value, Document.class);
+        if (document == null || document.size() == 0) {
+            throw new ValidationException("Cannot project to empty type " + type);
+        }
     }
 
     public static void validateRepositoryType(Class<?> type, NitriteMapper nitriteMapper) {
         Object value;
         try {
-            if (type.isInterface() || Modifier.isAbstract(type.getModifiers())) {
+            if (type.isInterface() || (Modifier.isAbstract(type.getModifiers()) && !isBuiltInValueType(type))) {
                 // defer validation during insertion
                 return;
             }
