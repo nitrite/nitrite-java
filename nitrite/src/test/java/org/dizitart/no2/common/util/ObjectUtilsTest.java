@@ -26,7 +26,9 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.integration.NitriteTest;
 import org.dizitart.no2.integration.repository.data.ChildClass;
 import org.dizitart.no2.integration.repository.data.Company;
 import org.dizitart.no2.integration.repository.data.Employee;
@@ -39,9 +41,15 @@ import org.dizitart.no2.repository.annotations.Index;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.net.URL;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
 import static org.junit.Assert.*;
@@ -126,47 +134,38 @@ public class ObjectUtilsTest implements Serializable {
         mapper.registerEntityConverter(new Note.NoteConverter());
 
         EnclosingType type = newInstance(EnclosingType.class, true, mapper);
-        System.out.println(type);
-    }
+        assertNotNull(type);
 
-//    @Test
-//    public void testIsValueType() {
-//        SimpleDocumentMapper simpleDocumentMapper = new SimpleDocumentMapper();
-//        assertFalse(ObjectUtils.isValueType(Object.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Number.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Byte.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Short.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Integer.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Long.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Float.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Double.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(BigDecimal.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(BigInteger.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Boolean.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Character.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(String.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Date.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(URL.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(URI.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Currency.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Calendar.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(StringBuffer.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(StringBuilder.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Locale.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Void.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(UUID.class, simpleDocumentMapper));
-//        assertTrue(ObjectUtils.isValueType(Pattern.class, simpleDocumentMapper));
-//        assertFalse(ObjectUtils.isValueType(NitriteId.class, simpleDocumentMapper));
-//        assertFalse(ObjectUtils.isValueType(Document.class, simpleDocumentMapper));
-//
-//        simpleDocumentMapper.addValueType(ValidEntity5.class);
-//        assertTrue(ObjectUtils.isValueType(ValidEntity5.class, simpleDocumentMapper));
-//    }
-//
-//    @Test
-//    public void testIsValue() {
-//        assertFalse(ObjectUtils.isValueType(Object.class, new SimpleDocumentMapper()));
-//    }
+        assertThrows(ObjectMappingException.class, () -> newInstance(Object.class, false, mapper));
+        assertThrows(ObjectMappingException.class, () -> newInstance(NitriteTest.Receipt.class, false, mapper));
+
+        assertNull(newInstance(byte[].class, false, mapper));
+        assertNull(newInstance(Number.class, false, mapper));
+        assertNull(newInstance(Byte.class, false, mapper));
+        assertNull(newInstance(Short.class, false, mapper));
+        assertNull(newInstance(Integer.class, false, mapper));
+        assertNull(newInstance(Long.class, false, mapper));
+        assertNull(newInstance(Float.class, false, mapper));
+        assertNull(newInstance(Double.class, false, mapper));
+        assertNull(newInstance(BigDecimal.class, false, mapper));
+        assertNull(newInstance(BigInteger.class, false, mapper));
+        assertNull(newInstance(Boolean.class, false, mapper));
+        assertNull(newInstance(Character.class, false, mapper));
+        assertNull(newInstance(String.class, false, mapper));
+        assertNull(newInstance(Date.class, false, mapper));
+        assertNull(newInstance(URL.class, false, mapper));
+        assertNull(newInstance(URI.class, false, mapper));
+        assertNull(newInstance(Currency.class, false, mapper));
+        assertNull(newInstance(Calendar.class, false, mapper));
+        assertNull(newInstance(StringBuffer.class, false, mapper));
+        assertNull(newInstance(StringBuilder.class, false, mapper));
+        assertNull(newInstance(Locale.class, false, mapper));
+        assertNull(newInstance(Void.class, false, mapper));
+        assertNull(newInstance(UUID.class, false, mapper));
+        assertNull(newInstance(Pattern.class, false, mapper));
+
+        assertNull(newInstance(GregorianCalendar.class, false, mapper));
+    }
 
     @Test
     public void testIsCompatibleTypes() {

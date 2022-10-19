@@ -228,7 +228,11 @@ public class ObjectUtils {
         if (Number.class.isAssignableFrom(retType)) return true;
         if (byte[].class.isAssignableFrom(retType)) return true;
         if (Enum.class.isAssignableFrom(retType)) return true;
-        return builtInTypes().contains(retType);
+        if (builtInTypes().contains(retType)) return true;
+        for (Class<?> builtInType : builtInTypes()) {
+            if (builtInType.isAssignableFrom(retType)) return true;
+        }
+        return false;
     }
 
     public static List<Class<?>> builtInTypes() {
