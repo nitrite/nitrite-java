@@ -379,7 +379,7 @@ public class NitriteBuilderTest {
         }
     }
 
-    @Index(value = "longValue")
+    @Index(fields = "longValue")
     private static class TestObject {
         private String stringValue;
         private Long longValue;
@@ -416,7 +416,7 @@ public class NitriteBuilderTest {
         }
     }
 
-    @Index(value = "longValue")
+    @Index(fields = "longValue")
     private static class TestObject2 {
         private String stringValue;
         private Long longValue;

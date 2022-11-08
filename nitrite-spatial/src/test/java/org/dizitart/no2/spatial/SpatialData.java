@@ -27,7 +27,7 @@ import static org.dizitart.no2.spatial.SpatialIndexer.SPATIAL_INDEX;
  * @author Anindya Chatterjee
  */
 @Data
-@Index(value = "geometry", type = SPATIAL_INDEX)
+@Index(fields = "geometry", type = SPATIAL_INDEX)
 public class SpatialData {
     @Id
     private Long id;

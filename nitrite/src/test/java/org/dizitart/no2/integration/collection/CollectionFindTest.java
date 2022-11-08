@@ -274,6 +274,12 @@ public class CollectionFindTest extends BaseCollectionTest {
         insert();
         DocumentCursor cursor = collection.find(orderBy("my-value", SortOrder.Descending));
         assertEquals(cursor.size(), 3);
+
+        List<Date> dateList = new ArrayList<>();
+        for (Document document : cursor) {
+            dateList.add(document.get("birthDay", Date.class));
+        }
+        assertFalse(isSorted(dateList, true));
     }
 
     @Test
@@ -281,6 +287,12 @@ public class CollectionFindTest extends BaseCollectionTest {
         insert();
         DocumentCursor cursor = collection.find(where("myField").eq("myData"));
         assertEquals(cursor.size(), 0);
+
+        cursor = collection.find(where("myField").notEq(null));
+        assertEquals(cursor.size(), 0);
+
+        cursor = collection.find(where("myField").eq(null));
+        assertEquals(cursor.size(), 3);
     }
 
     @Test
@@ -305,6 +317,9 @@ public class CollectionFindTest extends BaseCollectionTest {
         assertNull(document);
 
         document = collection.find().firstOrNull();
+        id = document.getId();
+
+        document = collection.getById(id);
 
         assertEquals(document.get(DOC_ID), document.getId().getIdValue());
         assertEquals(document.get("firstName"), "fn1");
@@ -359,6 +374,7 @@ public class CollectionFindTest extends BaseCollectionTest {
         }
         assertEquals(iteration, 3);
     }
+
     @Test
     public void testProjection() {
         Document doc1 = Document.createDocument("name", "John")

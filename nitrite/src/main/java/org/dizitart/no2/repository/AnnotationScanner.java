@@ -54,7 +54,7 @@ class AnnotationScanner {
 
     public void createIndices() {
         for (Index index : indices) {
-            String[] fields = index.value();
+            String[] fields = index.fields();
             if (!collection.hasIndex(fields)) {
                 collection.createIndex(indexOptions(index.type()), fields);
             }
@@ -154,7 +154,7 @@ class AnnotationScanner {
 
     private void populateIndex(List<Index> indexList) {
         for (Index index : indexList) {
-            String[] names = index.value();
+            String[] names = index.fields();
             List<Field> entityFields = new ArrayList<>();
 
             for (String name : names) {

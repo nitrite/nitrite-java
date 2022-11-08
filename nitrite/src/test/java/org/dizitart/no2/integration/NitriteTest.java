@@ -434,7 +434,7 @@ public class NitriteTest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Indices({
-        @Index(value = "synced", type = IndexType.NON_UNIQUE)
+        @Index(fields = "synced", type = IndexType.NON_UNIQUE)
     })
     public static class Receipt {
         @Id

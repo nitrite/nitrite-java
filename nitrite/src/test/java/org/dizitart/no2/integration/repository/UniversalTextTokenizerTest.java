@@ -158,7 +158,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
     }
 
     @Indices(
-        @Index(value = "text", type = IndexType.FULL_TEXT)
+        @Index(fields = "text", type = IndexType.FULL_TEXT)
     )
     public static class TextData {
         public Integer id;

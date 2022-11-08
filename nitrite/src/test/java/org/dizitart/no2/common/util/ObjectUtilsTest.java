@@ -296,7 +296,7 @@ public class ObjectUtilsTest implements Serializable {
 
     @Data
     @Entity(indices = {
-        @Index(value = "value")
+        @Index(fields = "value")
     })
     private static class ValidEntity5 {
         private String value;

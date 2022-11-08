@@ -37,7 +37,7 @@ import java.util.Map;
  */
 @EqualsAndHashCode
 @Indices({
-    @Index(value = "companyName")
+    @Index(fields = "companyName")
 })
 public class Company implements Serializable {
     @Id(fieldName = "company_id")

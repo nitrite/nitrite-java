@@ -17,12 +17,10 @@
 package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.text
-import org.dizitart.no2.collection.FindOptions
 import org.dizitart.no2.collection.FindOptions.orderBy
 import org.dizitart.no2.collection.FindOptions.skipBy
 import org.dizitart.no2.common.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
-import org.dizitart.no2.index.IndexOptions
 import org.dizitart.no2.index.IndexOptions.indexOptions
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.mvstore.MVStoreModule
@@ -191,7 +189,7 @@ interface MyInterface {
     val id: UUID
 }
 
-@Indices(value = [(Index(value = ["name"], type = IndexType.NON_UNIQUE))])
+@Indices(value = [(Index(fields = ["name"], type = IndexType.NON_UNIQUE))])
 abstract class SomeAbsClass(
         @Id override val id: UUID = UUID.randomUUID(),
         open val name: String = "abcd"
@@ -218,7 +216,7 @@ data class CaObject(
         val name: String = ""
 )
 
-@Indices(value = [(Index(value = ["time"], type = IndexType.UNIQUE))])
+@Indices(value = [(Index(fields = ["time"], type = IndexType.UNIQUE))])
 data class ClassWithLocalDateTime(
     val name: String = "",
     val time: LocalDateTime = LocalDateTime.now()

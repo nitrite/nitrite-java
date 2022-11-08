@@ -35,9 +35,9 @@ import static org.dizitart.no2.collection.Document.createDocument;
  */
 @Data
 @Entity(value = "books", indices = {
-    @Index(value = "tags", type = IndexType.NON_UNIQUE),
-    @Index(value = "description", type = IndexType.FULL_TEXT),
-    @Index(value = { "price", "publisher" })
+    @Index(fields = "tags", type = IndexType.NON_UNIQUE),
+    @Index(fields = "description", type = IndexType.FULL_TEXT),
+    @Index(fields = { "price", "publisher" })
 })
 public class Book {
     @Id(fieldName = "book_id", embeddedFields = { "isbn", "book_name" })

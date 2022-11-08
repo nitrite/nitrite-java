@@ -223,9 +223,9 @@ public class StressTest {
     }
 
     @Indices({
-        @Index(value = "firstName", type = IndexType.NON_UNIQUE),
-        @Index(value = "age", type = IndexType.NON_UNIQUE),
-        @Index(value = "text", type = IndexType.FULL_TEXT),
+        @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
+        @Index(fields = "age", type = IndexType.NON_UNIQUE),
+        @Index(fields = "text", type = IndexType.FULL_TEXT),
     })
     private static class PerfTestIndexed extends PerfTest {
         public static class PerfTestIndexedConverter implements EntityConverter<PerfTestIndexed> {

@@ -35,7 +35,7 @@ public @interface Index {
      *
      * @return the field name
      */
-    String[] value();
+    String[] fields();
 
     /**
      * Type of the index.

@@ -28,9 +28,9 @@ import org.dizitart.no2.repository.annotations.Index;
  * @author Anindya Chatterjee
  */
 @Data
-@Index(value = "firstName")
-@Index(value = "age", type = IndexType.NON_UNIQUE)
-@Index(value = "lastName", type = IndexType.FULL_TEXT)
+@Index(fields = "firstName")
+@Index(fields = "age", type = IndexType.NON_UNIQUE)
+@Index(fields = "lastName", type = IndexType.FULL_TEXT)
 public class RepeatableIndexTest {
     private String firstName;
     private Integer age;
