@@ -782,7 +782,7 @@ public class CollectionFindTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 1);
 
         Document byId = cursor.iterator().next();
-        assertEquals(byId.get("lastName"), "ln1");
+        assertEquals(collection.getById(byId.getId()).get("lastName"), "ln1");
     }
 
     @Test
