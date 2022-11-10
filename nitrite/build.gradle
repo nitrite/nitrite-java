@@ -65,7 +65,7 @@ dependencies {
     }
     testImplementation "commons-io:commons-io:2.11.0"
     testImplementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.0'
-    testImplementation 'com.sun.xml.bind:jaxb-impl:4.0.0'
+    testImplementation 'com.sun.xml.bind:jaxb-impl:4.0.1'
     testImplementation 'org.yaml:snakeyaml:1.30'
 }
 
