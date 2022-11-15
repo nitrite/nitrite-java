@@ -23,7 +23,9 @@ public class Comparables {
             Number number2 = (Number) second;
             int result = Numbers.compare(number1, number2);
             if (!first.getClass().equals(second.getClass())) {
-                if (result == 0) return 1;
+                if (result == 0) {
+                    return first.toString().compareTo(second.toString());
+                }
             }
             return result;
         }
