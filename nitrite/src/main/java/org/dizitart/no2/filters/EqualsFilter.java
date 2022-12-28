@@ -44,6 +44,10 @@ public class EqualsFilter extends ComparableFilter {
     @Override
     public List<?> applyOnIndex(IndexMap indexMap) {
         Object value = indexMap.get((Comparable<?>) getValue());
+        if (value == null) {
+            return new ArrayList<>();
+        }
+
         if (value instanceof List) {
             return ((List<?>) value);
         }
