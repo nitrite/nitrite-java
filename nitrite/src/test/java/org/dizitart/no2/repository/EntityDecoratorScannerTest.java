@@ -43,7 +43,7 @@ public class EntityDecoratorScannerTest {
         SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
         nitriteMapper.registerEntityConverter(new ClassA.ClassAConverter());
         nitriteMapper.registerEntityConverter(new ClassBConverter());
-        collection = Nitrite.builder().openOrCreate().getCollection("test");
+        collection = Nitrite.builder().fieldSeparator(".").openOrCreate().getCollection("test");
         reader = new EntityDecoratorScanner(new EntityADecorator(), collection, nitriteMapper);
     }
 
