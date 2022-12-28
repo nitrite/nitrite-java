@@ -26,6 +26,7 @@ import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.Retry;
@@ -82,9 +83,9 @@ public class ObjectRepositoryTest {
         mapper.registerEntityConverter(new MiniProduct.Converter());
 
         db = Nitrite.builder()
-            .loadModule(module(mapper))
-            .fieldSeparator(".")
-            .openOrCreate();
+                .loadModule(module(mapper))
+                .fieldSeparator(".")
+                .openOrCreate();
     }
 
     @After
@@ -175,8 +176,7 @@ public class ObjectRepositoryTest {
             repository.insert(record);
         }
 
-        Cursor<StressRecord> cursor
-            = repository.find(where("failed").eq(false));
+        Cursor<StressRecord> cursor = repository.find(where("failed").eq(false));
         for (StressRecord record : cursor) {
             record.setProcessed(true);
             repository.update(where("firstName").eq(record.getFirstName()), record);
@@ -198,8 +198,7 @@ public class ObjectRepositoryTest {
 
     @Test
     public void testWithPrivateConstructor() {
-        ObjectRepository<WithPrivateConstructor> repository =
-            db.getRepository(WithPrivateConstructor.class);
+        ObjectRepository<WithPrivateConstructor> repository = db.getRepository(WithPrivateConstructor.class);
 
         WithPrivateConstructor object = WithPrivateConstructor.create("test", 2L);
         repository.insert(object);
@@ -223,9 +222,9 @@ public class ObjectRepositoryTest {
         repository.insert(object2);
 
         assertEquals(repository.find(where("id").eq(new Date(1482773634L)))
-            .firstOrNull(), object1);
+                .firstOrNull(), object1);
         assertEquals(repository.find(where("id").eq(new Date(1482773720L)))
-            .firstOrNull(), object2);
+                .firstOrNull(), object2);
     }
 
     @Test
@@ -363,7 +362,7 @@ public class ObjectRepositoryTest {
 
         assertEquals(productRepository.getDocumentCollection().getName(), "product");
         assertEquals(upcomingProductRepository.getDocumentCollection().getName(),
-            "product+upcoming");
+                "product+upcoming");
         assertEquals(manufacturerRepository.getDocumentCollection().getName(), Manufacturer.class.getName());
         assertEquals(exManufacturerRepository.getDocumentCollection().getName(), Manufacturer.class.getName() + "+ex");
         assertEquals(employeeRepository.getDocumentCollection().getName(), Employee.class.getName());
@@ -492,10 +491,35 @@ public class ObjectRepositoryTest {
         assertFalse(db.hasRepository(new ProductDecorator(), "ex"));
     }
 
+    @Test
+    public void testIssue767() {
+        ObjectRepository<Company> companyRepository = db.getRepository(Company.class);
+        Company company1 = new Company();
+        company1.setCompanyId(1L);
+        company1.setCompanyName("ABCD");
+        company1.setDateCreated(new Date());
+        companyRepository.insert(company1);
+
+        Company company2 = new Company();
+        company2.setCompanyId(2L);
+        company2.setCompanyName("ABCD");
+
+        boolean uniqueConstraintError = false;
+        try {
+            companyRepository.insert(company2);
+        } catch (UniqueConstraintException e) {
+            uniqueConstraintError = true;
+        } finally {
+            assertTrue(uniqueConstraintError);
+        }
+
+        assertEquals(companyRepository.find().size(), 1);
+    }
+
     @Data
     @Entity(value = "entity.employee", indices = {
-        @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
-        @Index(fields = "lastName", type = IndexType.NON_UNIQUE),
+            @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
+            @Index(fields = "lastName", type = IndexType.NON_UNIQUE),
     })
     private static class EmployeeEntity {
         private static final Faker faker = new Faker();
@@ -521,8 +545,8 @@ public class ObjectRepositoryTest {
             @Override
             public Document toDocument(EmployeeEntity entity, NitriteMapper nitriteMapper) {
                 return Document.createDocument("id", entity.id)
-                    .put("firstName", entity.firstName)
-                    .put("lastName", entity.lastName);
+                        .put("firstName", entity.firstName)
+                        .put("lastName", entity.lastName);
             }
 
             @Override
