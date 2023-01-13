@@ -19,6 +19,8 @@ package org.dizitart.no2.integration.repository;
 
 import com.github.javafaker.Faker;
 import lombok.Data;
+
+import org.apache.commons.lang3.time.StopWatch;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
@@ -164,6 +166,8 @@ public class ObjectRepositoryTest {
     public void testWriteThousandRecords() {
         int count = 5000;
 
+        StopWatch sw = new StopWatch();
+        sw.start();
         ObjectRepository<StressRecord> repository = db.getRepository(StressRecord.class);
 
         for (int i = 0; i < count; i++) {
@@ -181,6 +185,8 @@ public class ObjectRepositoryTest {
             record.setProcessed(true);
             repository.update(where("firstName").eq(record.getFirstName()), record);
         }
+        sw.stop();
+        System.out.println("Sequential Time (s) - " + sw.getTime());
     }
 
     @Test
@@ -242,7 +248,7 @@ public class ObjectRepositoryTest {
         repository.insert(childClass);
 
         childClass = new ChildClass();
-        childClass.setName("seconds");
+        childClass.setName("second");
         childClass.setDate(new Date(100001L));
         childClass.setId(2L);
         childClass.setText("I am second class");
@@ -333,7 +339,7 @@ public class ObjectRepositoryTest {
 
         assertTrue(managerRepo.hasIndex("firstName"));
         assertTrue(managerRepo.hasIndex("lastName"));
-        assertTrue(employeeRepo.hasIndex("lastName"));
+        assertTrue(employeeRepo.hasIndex("firstName"));
         assertTrue(employeeRepo.hasIndex("lastName"));
 
         managerRepo.drop();
