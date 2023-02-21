@@ -56,7 +56,7 @@ dependencies {
     testImplementation 'org.glassfish.tyrus:tyrus-server:2.1.2'
     testImplementation 'org.glassfish.tyrus:tyrus-container-grizzly-server:2.1.2'
     testImplementation 'org.awaitility:awaitility:4.2.0'
-    testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.18.0'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.20.0'
     testImplementation 'org.apache.logging.log4j:log4j-core:2.19.0'
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.testcontainers:testcontainers:1.17.3"
