@@ -131,6 +131,7 @@ public class ErrorCodes {
     public static final int NIOE_FILE_CREATE_FAILED = 2013;
     public static final int NIOE_IN_MEMORY_READONLY_DB = 2014;
     public static final int NIOE_PATH_IS_DIRECTORY = 2018;
+    public static final int NIOE_FAILED_TO_ACCESS_FILE = 2019;
 
     /* InvalidOperationException Codes */
     public static final int IOE_IN_MEMORY_READONLY_DB = 3001;

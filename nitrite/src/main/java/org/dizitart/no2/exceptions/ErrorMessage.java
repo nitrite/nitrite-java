@@ -301,9 +301,13 @@ public class ErrorMessage {
             new ErrorMessage("unable create readonly in-memory database",
                     IOE_IN_MEMORY_READONLY_DB);
 
-    public static final ErrorMessage FAILED_TO_CREATE_IN_MEMORY_READONLY_DB =
-            new ErrorMessage("can not create readonly in-memory database",
+    public static final ErrorMessage FAILED_TO_OPEN_IN_READONLY_MODE =
+            new ErrorMessage("can not open database in readonly mode",
                     NIOE_IN_MEMORY_READONLY_DB);
+
+    public static final ErrorMessage FAILED_TO_ACCESS_DB_FILE =
+        new ErrorMessage("can not access database file",
+            NIOE_FAILED_TO_ACCESS_FILE);
 
     public static final ErrorMessage UNABLE_TO_SORT_ON_ARRAY =
             new ErrorMessage("can not sort on array or collection objects",

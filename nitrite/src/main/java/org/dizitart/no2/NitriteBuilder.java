@@ -479,8 +479,9 @@ public class NitriteBuilder {
                         store = builder.open();
                     } else {
                         if (readOnly) {
-                            throw new NitriteIOException(FAILED_TO_CREATE_IN_MEMORY_READONLY_DB, ise);
+                            throw new NitriteIOException(FAILED_TO_OPEN_IN_READONLY_MODE, ise);
                         }
+                        throw new NitriteIOException(FAILED_TO_ACCESS_DB_FILE, ise);
                     }
                 } catch (InvalidOperationException ioe) {
                     throw ioe;
@@ -506,42 +507,39 @@ public class NitriteBuilder {
             }
         }
 
-        if (store != null) {
-            NitriteContext context = new NitriteContext();
-            context.setTextIndexingService(textIndexingService);
-            if (textTokenizer == null) {
-                textTokenizer = new EnglishTextTokenizer();
-            }
-            context.setTextTokenizer(textTokenizer);
-            context.setFilePath(filePath);
-            if (autoCommitBufferSize > 0) {
-                context.setAutoCommitBufferSize(autoCommitBufferSize);
-            } else {
-                context.setAutoCommitBufferSize(1024);
-            }
-            context.setInMemory(isNullOrEmpty(filePath));
-            context.setReadOnly(readOnly);
-            context.setCompressed(compress);
-            context.setAutoCommitEnabled(autoCommit);
-            context.setAutoCompactEnabled(autoCompact);
-            context.setNitriteMapper(nitriteMapper);
-            context.setJacksonModule(jacksonModules);
-
-            NitriteStore nitriteStore = new NitriteMVStore(store);
-
-            // populate existing maps
-            context.setCollectionRegistry(populateCollections(nitriteStore));
-            context.setRepositoryRegistry(populateRepositories(nitriteStore));
-
-            Nitrite db = new Nitrite(nitriteStore, context);
-
-            // shutdown hook to close db file gracefully
-            if (shutdownHook) {
-                Runtime.getRuntime().addShutdownHook(new NitriteShutDownHook(db));
-            }
-            return db;
+        NitriteContext context = new NitriteContext();
+        context.setTextIndexingService(textIndexingService);
+        if (textTokenizer == null) {
+            textTokenizer = new EnglishTextTokenizer();
         }
-        return null;
+        context.setTextTokenizer(textTokenizer);
+        context.setFilePath(filePath);
+        if (autoCommitBufferSize > 0) {
+            context.setAutoCommitBufferSize(autoCommitBufferSize);
+        } else {
+            context.setAutoCommitBufferSize(1024);
+        }
+        context.setInMemory(isNullOrEmpty(filePath));
+        context.setReadOnly(readOnly);
+        context.setCompressed(compress);
+        context.setAutoCommitEnabled(autoCommit);
+        context.setAutoCompactEnabled(autoCompact);
+        context.setNitriteMapper(nitriteMapper);
+        context.setJacksonModule(jacksonModules);
+
+        NitriteStore nitriteStore = new NitriteMVStore(store);
+
+        // populate existing maps
+        context.setCollectionRegistry(populateCollections(nitriteStore));
+        context.setRepositoryRegistry(populateRepositories(nitriteStore));
+
+        Nitrite db = new Nitrite(nitriteStore, context);
+
+        // shutdown hook to close db file gracefully
+        if (shutdownHook) {
+            Runtime.getRuntime().addShutdownHook(new NitriteShutDownHook(db));
+        }
+        return db;
     }
 
     private Set<String> populateCollections(NitriteStore store) {
