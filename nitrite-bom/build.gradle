@@ -34,7 +34,7 @@ dependencies {
         api "com.esotericsoftware.kryo:kryo5:5.4.0"
         api "org.locationtech.jts:jts-core:1.19.0"
         api "commons-codec:commons-codec:1.15"
-        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21"
+        api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20"
         api "org.jetbrains.kotlin:kotlin-reflect:1.7.10"
     }
 }
