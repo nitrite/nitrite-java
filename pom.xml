@@ -54,7 +54,7 @@
 
         <error-prone.version>2.20.0</error-prone.version>
         <jacoco.version>0.8.10</jacoco.version>
-        <surefire.version>3.0.0</surefire.version>
+        <surefire.version>3.1.2</surefire.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
