@@ -1,2 +1,2 @@
 tasks:
-  - init: ./gradlew clean build
+  - init: mvn clean install

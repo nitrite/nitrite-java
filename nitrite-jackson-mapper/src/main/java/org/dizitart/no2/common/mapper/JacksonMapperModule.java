@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.common.mapper;
 
+import com.fasterxml.jackson.databind.Module;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 
@@ -33,8 +34,11 @@ public class JacksonMapperModule implements NitriteModule {
         jacksonMapper = new JacksonMapper();
     }
 
-    public JacksonMapperModule(JacksonExtension... jacksonExtensions) {
-        jacksonMapper = new JacksonMapper(jacksonExtensions);
+    public JacksonMapperModule(Module... jacksonModules) {
+        jacksonMapper = new JacksonMapper();
+        for (Module jacksonModule : jacksonModules) {
+            jacksonMapper.registerJacksonModule(jacksonModule);
+        }
     }
 
     @Override

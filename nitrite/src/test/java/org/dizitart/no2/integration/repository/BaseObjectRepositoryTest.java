@@ -19,8 +19,11 @@ package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.*;
+import org.dizitart.no2.integration.repository.decorator.*;
+import org.dizitart.no2.integration.transaction.TxData;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Before;
@@ -44,6 +47,8 @@ public abstract class BaseObjectRepositoryTest {
     protected ObjectRepository<ClassA> aObjectRepository;
     protected ObjectRepository<ClassC> cObjectRepository;
     protected ObjectRepository<Book> bookRepository;
+    protected ObjectRepository<Product> productRepository;
+    protected ObjectRepository<Product> upcomingProductRepository;
 
     @Rule
     public Retry retry = new Retry(3);
@@ -68,6 +73,9 @@ public abstract class BaseObjectRepositoryTest {
 
         bookRepository = db.getRepository(Book.class);
 
+        productRepository = db.getRepository(new ProductDecorator());
+        upcomingProductRepository = db.getRepository(new ProductDecorator(), "upcoming");
+
         for (int i = 0; i < 10; i++) {
             Company company = DataGenerator.generateCompanyRecord();
             companyRepository.insert(company);
@@ -80,6 +88,12 @@ public abstract class BaseObjectRepositoryTest {
 
             Book book = DataGenerator.randomBook();
             bookRepository.insert(book);
+
+            Product product = DataGenerator.randomProduct();
+            productRepository.insert(product);
+
+            product = DataGenerator.randomProduct();
+            upcomingProductRepository.insert(product);
         }
     }
 
@@ -92,6 +106,30 @@ public abstract class BaseObjectRepositoryTest {
         } else {
             db = nitriteBuilder.openOrCreate();
         }
+
+        SimpleDocumentMapper mapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        mapper.registerEntityConverter(new Company.CompanyConverter());
+        mapper.registerEntityConverter(new Employee.EmployeeConverter());
+        mapper.registerEntityConverter(new Note.NoteConverter());
+        mapper.registerEntityConverter(new Book.BookConverter());
+        mapper.registerEntityConverter(new BookId.BookIdConverter());
+        mapper.registerEntityConverter(new ClassA.ClassAConverter());
+        mapper.registerEntityConverter(new ClassBConverter());
+        mapper.registerEntityConverter(new ClassC.ClassCConverter());
+        mapper.registerEntityConverter(new ElemMatch.Converter());
+        mapper.registerEntityConverter(new InternalClass.Converter());
+        mapper.registerEntityConverter(new UniversalTextTokenizerTest.TextData.Converter());
+        mapper.registerEntityConverter(new SubEmployee.Converter());
+        mapper.registerEntityConverter(new ProductScore.Converter());
+        mapper.registerEntityConverter(new PersonEntity.Converter());
+        mapper.registerEntityConverter(new RepeatableIndexTest.Converter());
+        mapper.registerEntityConverter(new EncryptedPerson.Converter());
+        mapper.registerEntityConverter(new TxData.Converter());
+        mapper.registerEntityConverter(new WithNitriteId.WithNitriteIdConverter());
+        mapper.registerEntityConverter(new ProductConverter());
+        mapper.registerEntityConverter(new ProductIdConverter());
+        mapper.registerEntityConverter(new ManufacturerConverter());
+        mapper.registerEntityConverter(new MiniProduct.Converter());
     }
 
     @After
@@ -114,6 +152,14 @@ public abstract class BaseObjectRepositoryTest {
 
         if (bookRepository != null && !bookRepository.isDropped()) {
             bookRepository.remove(ALL);
+        }
+
+        if (productRepository != null && !productRepository.isDropped()) {
+            productRepository.remove(ALL);
+        }
+
+        if (upcomingProductRepository != null && !upcomingProductRepository.isDropped()) {
+            upcomingProductRepository.remove(ALL);
         }
 
         if (db != null && !db.isClosed()) {

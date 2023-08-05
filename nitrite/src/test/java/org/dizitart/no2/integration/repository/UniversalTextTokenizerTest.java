@@ -20,12 +20,13 @@ package org.dizitart.no2.integration.repository;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.index.NitriteTextIndexer;
 import org.dizitart.no2.index.fulltext.Languages;
 import org.dizitart.no2.index.fulltext.UniversalTextTokenizer;
-import org.dizitart.no2.common.mapper.Mappable;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Index;
@@ -34,10 +35,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.dizitart.no2.integration.DbTestOperations.getRandomTempDbFile;
+import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -45,13 +45,14 @@ import static org.junit.Assert.fail;
  * @author Anindya Chatterjee
  */
 public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
-    private final String fileName = getRandomTempDbFile();
     private ObjectRepository<TextData> textRepository;
 
     @Before
     @Override
     public void setUp() {
         openDb();
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new TextData.Converter());
 
         textRepository = db.getRepository(TextData.class);
 
@@ -157,22 +158,31 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
     }
 
     @Indices(
-        @Index(value = "text", type = IndexType.FULL_TEXT)
+        @Index(fields = "text", type = IndexType.FULL_TEXT)
     )
-    public static class TextData implements Mappable {
-        public int id;
+    public static class TextData {
+        public Integer id;
         public String text;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument("id", id)
-                .put("text", text);
-        }
+        public static class Converter implements EntityConverter<TextData> {
+            @Override
+            public Class<TextData> getEntityType() {
+                return TextData.class;
+            }
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            id = document.get("id", Integer.class);
-            text = document.get("text", String.class);
+            @Override
+            public Document toDocument(TextData entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("id", entity.id)
+                    .put("text", entity.text);
+            }
+
+            @Override
+            public TextData fromDocument(Document document, NitriteMapper nitriteMapper) {
+                TextData entity = new TextData();
+                entity.id = document.get("id", Integer.class);
+                entity.text = document.get("text", String.class);
+                return entity;
+            }
         }
     }
 }

@@ -20,9 +20,6 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.io.Serializable;
 

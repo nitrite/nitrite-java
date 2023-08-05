@@ -16,20 +16,14 @@
 
 package org.dizitart.kno2
 
+import com.fasterxml.jackson.databind.Module
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.dizitart.no2.common.mapper.JacksonMapper
-import org.dizitart.no2.common.mapper.JacksonExtension
-import org.dizitart.no2.spatial.mapper.GeometryExtension
-import java.time.ZoneId
-import java.time.chrono.ChronoPeriod
-import java.time.temporal.Temporal
-import java.time.temporal.TemporalAdjuster
-import java.time.temporal.TemporalAmount
-import java.util.*
+import org.dizitart.no2.spatial.mapper.GeometryModule
 
 /**
  * Default [JacksonMapper] for potassium nitrite.
@@ -38,25 +32,18 @@ import java.util.*
  * @author Stefan Mandel
  * @since 2.1.0
  */
-open class KNO2JacksonMapper(vararg extensions: JacksonExtension) : JacksonMapper(GeometryExtension(), *extensions) {
+open class KNO2JacksonMapper(private vararg val modules: Module) : JacksonMapper() {
 
-    override fun createObjectMapper(): ObjectMapper {
-        // add value types from JavaTimeModule
-        addValueType(Temporal::class.java)
-        addValueType(TemporalAdjuster::class.java)
-        addValueType(TemporalAmount::class.java)
-        addValueType(ChronoPeriod::class.java)
-        addValueType(ZoneId::class.java)
-
-        // add value types from Jdk8Module
-        addValueType(OptionalInt::class.java)
-        addValueType(OptionalLong::class.java)
-        addValueType(OptionalDouble::class.java)
-
-        val objectMapper = super.createObjectMapper()
+    override fun getObjectMapper(): ObjectMapper {
+        val objectMapper = super.getObjectMapper()
         objectMapper.registerModule(KotlinModule.Builder().build())
         objectMapper.registerModule(Jdk8Module())
         objectMapper.registerModule(JavaTimeModule())
+        objectMapper.registerModule(GeometryModule())
+        for (module in modules) {
+            objectMapper.registerModule(module)
+        }
+
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
         return objectMapper

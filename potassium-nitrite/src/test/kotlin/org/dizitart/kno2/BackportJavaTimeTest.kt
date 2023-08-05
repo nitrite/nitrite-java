@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
-import org.dizitart.no2.common.mapper.JacksonExtension
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
 import org.threeten.bp.LocalDateTime
@@ -39,42 +38,34 @@ import java.util.*
 class BackportJavaTimeTest {
     private val dbPath = getRandomTempDbFile()
 
-    @Index(value = ["time"], type = IndexType.NON_UNIQUE)
+    @Index(fields = ["time"], type = IndexType.NON_UNIQUE)
     data class TestData(
             @Id val id: String = UUID.randomUUID().toString(),
-            val time: LocalDateTime
+            val time: LocalDateTime = LocalDateTime.now()
     )
 
-    class ThreeTenAbpExtension : JacksonExtension {
-        override fun getModule(): Module {
-            return object : SimpleModule() {
-                override fun setupModule(context: SetupContext?) {
-                    addDeserializer(LocalDateTime::class.java, object : JsonDeserializer<LocalDateTime>() {
-                        override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): LocalDateTime? {
-                            val timeStamp = p?.longValue
-                            return if (timeStamp == -1L || timeStamp == null) null else {
-                                LocalDateTime.ofEpochSecond(timeStamp, 0, ZoneOffset.UTC)
-                            }
-                        }
-                    })
-
-                    addSerializer(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>() {
-                        override fun serialize(value: LocalDateTime?, gen: JsonGenerator?, serializers: SerializerProvider?) {
-                            if (value == null) {
-                                gen?.writeNull()
-                            } else {
-                                val timeStamp = value.toEpochSecond(ZoneOffset.UTC)
-                                gen?.writeNumber(timeStamp)
-                            }
-                        }
-                    })
-                    super.setupModule(context)
+    class ThreeTenAbpModule : SimpleModule() {
+        override fun setupModule(context: SetupContext?) {
+            addDeserializer(LocalDateTime::class.java, object : JsonDeserializer<LocalDateTime>() {
+                override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): LocalDateTime? {
+                    val timeStamp = p?.longValue
+                    return if (timeStamp == -1L || timeStamp == null) null else {
+                        LocalDateTime.ofEpochSecond(timeStamp, 0, ZoneOffset.UTC)
+                    }
                 }
-            }
-        }
+            })
 
-        override fun getSupportedTypes(): List<Class<*>> {
-            return listOf(LocalDateTime::class.java)
+            addSerializer(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>() {
+                override fun serialize(value: LocalDateTime?, gen: JsonGenerator?, serializers: SerializerProvider?) {
+                    if (value == null) {
+                        gen?.writeNull()
+                    } else {
+                        val timeStamp = value.toEpochSecond(ZoneOffset.UTC)
+                        gen?.writeNumber(timeStamp)
+                    }
+                }
+            })
+            super.setupModule(context)
         }
     }
 
@@ -82,7 +73,7 @@ class BackportJavaTimeTest {
     fun testIssue59() {
         val db = nitrite {
             loadModule(MVStoreModule(dbPath))
-            loadModule(KNO2Module(ThreeTenAbpExtension()))
+            loadModule(KNO2Module(ThreeTenAbpModule()))
         }
 
         val repo = db.getRepository<TestData>()

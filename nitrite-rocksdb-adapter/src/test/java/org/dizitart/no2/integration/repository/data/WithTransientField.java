@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
@@ -29,19 +29,29 @@ import org.dizitart.no2.repository.annotations.Id;
  */
 @Getter
 @Setter
-public class WithTransientField implements Mappable {
+public class WithTransientField {
     private transient String name;
     @Id
-    private long number;
+    private Long number;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("number", number);
-    }
+    public static class Converter implements EntityConverter<WithTransientField> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        number = document.get("number", Long.class);
+        @Override
+        public Class<WithTransientField> getEntityType() {
+            return WithTransientField.class;
+        }
+
+        @Override
+        public Document toDocument(WithTransientField entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("number", entity.number);
+        }
+
+        @Override
+        public WithTransientField fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithTransientField entity = new WithTransientField();
+            entity.number = document.get("number", Long.class);
+            return entity;
+        }
     }
 }

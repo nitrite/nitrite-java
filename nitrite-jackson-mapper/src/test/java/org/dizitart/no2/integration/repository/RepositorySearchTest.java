@@ -17,8 +17,9 @@
 
 package org.dizitart.no2.integration.repository;
 
-import lombok.Getter;
+import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.SortOrder;
+import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
@@ -544,15 +545,6 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
 
     @Test
     public void testBetweenFilter() {
-        @Getter
-        class TestData {
-            private final Date age;
-
-            public TestData(Date age) {
-                this.age = age;
-            }
-        }
-
         TestData data1 = new TestData(new GregorianCalendar(2020, Calendar.JANUARY, 11).getTime());
         TestData data2 = new TestData(new GregorianCalendar(2021, Calendar.FEBRUARY, 12).getTime());
         TestData data3 = new TestData(new GregorianCalendar(2022, Calendar.MARCH, 13).getTime());
@@ -577,5 +569,19 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
             new GregorianCalendar(2020, Calendar.JANUARY, 11).getTime(),
             new GregorianCalendar(2025, Calendar.JUNE, 16).getTime(), false, true));
         assertEquals(cursor.size(), 5);
+    }
+
+    @Test
+    public void testFindByEntityId() {
+        ObjectRepository<Book> bookRepo = db.getRepository(Book.class);
+        Book book = DataGenerator.randomBook();
+        bookRepo.insert(book);
+
+        WriteResult writeResult = bookRepo.update(where("book_id").eq(book.getBookId()),
+            Document.createDocument("price", 100.0));
+        assertEquals(writeResult.getAffectedCount(), 1);
+
+        Book book1 = bookRepo.find(where("price").eq(100.0)).firstOrNull();
+        assertNotNull(book1);
     }
 }

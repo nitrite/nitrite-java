@@ -19,6 +19,7 @@ package org.dizitart.no2.support;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.dizitart.no2.common.Constants.*;
+import static org.dizitart.no2.common.util.Iterables.setOf;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -59,7 +61,7 @@ public abstract class BaseExternalTest {
         if (!file.exists()) {
             assertTrue(file.mkdirs());
         }
-        return file.getPath() + File.separator + UUID.randomUUID().toString() + ".db";
+        return file.getPath() + File.separator + UUID.randomUUID() + ".db";
     }
 
     @Before
@@ -108,8 +110,14 @@ public abstract class BaseExternalTest {
             .filePath(filePath)
             .build();
 
+        SimpleDocumentMapper documentMapper = new SimpleDocumentMapper();
+        documentMapper.registerEntityConverter(new Employee.EmployeeConverter());
+        documentMapper.registerEntityConverter(new Company.CompanyConverter());
+        documentMapper.registerEntityConverter(new Note.NoteConverter());
+
         return Nitrite.builder()
             .loadModule(storeModule)
+            .loadModule(() -> setOf(documentMapper))
             .fieldSeparator(".")
             .openOrCreate();
     }

@@ -1,11 +1,9 @@
 package org.dizitart.no2.integration.repository;
 
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.common.mapper.JacksonExtension;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.mvstore.MVStoreModule;
@@ -18,10 +16,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
-import static org.dizitart.no2.common.util.Iterables.listOf;
 import static org.dizitart.no2.integration.repository.BaseObjectRepositoryTest.getRandomTempDbFile;
 import static org.junit.Assert.assertEquals;
 
@@ -75,7 +71,7 @@ public class JacksonModuleTest {
             .build();
 
         NitriteBuilder nitriteBuilder = Nitrite.builder()
-            .loadModule(new JacksonMapperModule(new JavaTimeExtension()))
+            .loadModule(new JacksonMapperModule(new JavaTimeModule()))
             .fieldSeparator(".")
             .loadModule(storeModule);
 
@@ -101,18 +97,5 @@ public class JacksonModuleTest {
         private String id;
         private LocalDateTime localDateTime;
         private Duration duration;
-    }
-
-    public static class JavaTimeExtension implements JacksonExtension {
-
-        @Override
-        public List<Class<?>> getSupportedTypes() {
-            return listOf(LocalDateTime.class, Duration.class);
-        }
-
-        @Override
-        public Module getModule() {
-            return new JavaTimeModule();
-        }
     }
 }

@@ -44,7 +44,7 @@ fun documentOf() = emptyDocument()
  *
  * @return a [Document] containing the [pair]
  */
-fun documentOf(pair: Pair<String, Any>): Document {
+fun documentOf(pair: Pair<String, Any?>): Document {
     return createDocument(pair.first, pair.second)!!
 }
 
@@ -67,7 +67,7 @@ fun Document.isNotEmpty() = !this.isEmpty()
  *
  * @return a [Document] containing the [pairs]
  */
-fun documentOf(vararg pairs: Pair<String, Any>): Document {
+fun documentOf(vararg pairs: Pair<String, Any?>): Document {
     return if (pairs.isEmpty()) {
         emptyDocument()
     } else {

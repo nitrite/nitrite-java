@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Constants used in Nitrite.
@@ -32,14 +34,15 @@ import java.nio.charset.StandardCharsets;
  * @since 1.0
  */
 public class Constants {
-    private Constants() {}
+    private Constants() {
+    }
 
     static {
         String v = "unknown";
         try (InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("version")) {
             if (is != null) {
-                try(InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-                    try(BufferedReader bufferedReader = new BufferedReader(reader)) {
+                try (InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                    try (BufferedReader bufferedReader = new BufferedReader(reader)) {
                         v = bufferedReader.readLine();
                     }
                 }
@@ -103,17 +106,17 @@ public class Constants {
     /**
      * The constant RESERVED_NAMES.
      */
-    public static final String[] RESERVED_NAMES = new String[]{
-        INDEX_META_PREFIX,
-        INDEX_PREFIX,
-        INTERNAL_NAME_SEPARATOR,
-        USER_MAP,
-        OBJECT_STORE_NAME_SEPARATOR,
-        META_MAP_NAME,
-        STORE_INFO,
-        COLLECTION_CATALOG,
-        KEY_OBJ_SEPARATOR
-    };
+    public static final List<String> RESERVED_NAMES = Arrays.asList(
+            INDEX_META_PREFIX,
+            INDEX_PREFIX,
+            INTERNAL_NAME_SEPARATOR,
+            USER_MAP,
+            OBJECT_STORE_NAME_SEPARATOR,
+            META_MAP_NAME,
+            STORE_INFO,
+            COLLECTION_CATALOG,
+            KEY_OBJ_SEPARATOR
+    );
 
     /**
      * The constant ID_PREFIX used in {@link NitriteId#toString()}.
@@ -234,5 +237,4 @@ public class Constants {
      * The constant INITIAL_REVISION.
      */
     public static final Integer INITIAL_SCHEMA_VERSION = 1;
-
 }

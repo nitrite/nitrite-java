@@ -218,7 +218,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.createIndex(indexOptions(IndexType.FULL_TEXT), "firstName");
 
                 assertTrue(txCol.hasIndex("firstName"));
-                assertFalse(collection.hasIndex("firstName"));
+                assertTrue(collection.hasIndex("firstName"));
 
                 transaction.commit();
 
@@ -242,7 +242,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.createIndex("firstName");
 
                 assertTrue(txCol.hasIndex("firstName"));
-                assertFalse(collection.hasIndex("firstName"));
+                assertTrue(collection.hasIndex("firstName"));
 
                 txCol.insert(document2);
                 collection.insert(document2);
@@ -253,7 +253,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertFalse(collection.hasIndex("firstName"));
+                assertTrue(collection.hasIndex("firstName"));
             }
         }
     }
@@ -269,7 +269,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.clear();
 
                 assertEquals(0, txCol.size());
-                assertEquals(1, collection.size());
+                assertEquals(0, collection.size());
 
                 transaction.commit();
 
@@ -294,7 +294,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.clear();
 
                 assertEquals(0, txCol.size());
-                assertEquals(1, collection.size());
+                assertEquals(0, collection.size());
 
                 txCol.insert(document2);
                 collection.insert(document2);
@@ -320,7 +320,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.dropIndex("firstName");
 
                 assertFalse(txCol.hasIndex("firstName"));
-                assertTrue(collection.hasIndex("firstName"));
+                assertFalse(collection.hasIndex("firstName"));
 
                 transaction.commit();
 
@@ -345,7 +345,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 txCol.dropIndex("lastName");
 
                 assertFalse(txCol.hasIndex("lastName"));
-                assertTrue(collection.hasIndex("lastName"));
+                assertFalse(collection.hasIndex("lastName"));
 
                 txCol.insert(document2);
                 collection.insert(document2);
@@ -356,7 +356,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertTrue(collection.hasIndex("lastName"));
+                assertFalse(collection.hasIndex("lastName"));
             }
         }
     }
@@ -375,8 +375,8 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
                 assertFalse(txCol.hasIndex("firstName"));
                 assertFalse(txCol.hasIndex("lastName"));
-                assertTrue(collection.hasIndex("firstName"));
-                assertTrue(collection.hasIndex("lastName"));
+                assertFalse(collection.hasIndex("firstName"));
+                assertFalse(collection.hasIndex("lastName"));
 
                 transaction.commit();
 
@@ -402,8 +402,8 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
                 assertFalse(txCol.hasIndex("firstName"));
                 assertFalse(txCol.hasIndex("lastName"));
-                assertTrue(collection.hasIndex("firstName"));
-                assertTrue(collection.hasIndex("lastName"));
+                assertFalse(collection.hasIndex("firstName"));
+                assertFalse(collection.hasIndex("lastName"));
 
                 txCol.insert(createDocument("firstName", "Jane").put("lastName", "Doe"));
                 collection.insert(createDocument("firstName", "Jane").put("lastName", "Doe"));
@@ -412,8 +412,8 @@ public class TransactionCollectionTest extends BaseCollectionTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertTrue(collection.hasIndex("firstName"));
-                assertTrue(collection.hasIndex("lastName"));
+                assertFalse(collection.hasIndex("firstName"));
+                assertFalse(collection.hasIndex("lastName"));
             }
         }
     }
@@ -428,24 +428,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 NitriteCollection txCol = transaction.getCollection("test");
                 txCol.drop();
 
-                boolean expectedException = false;
-                try {
-                    assertEquals(0, txCol.size());
-                } catch (TransactionException e) {
-                    expectedException = true;
-                }
-                assertTrue(expectedException);
-                assertEquals(1, collection.size());
-
-                transaction.commit();
-
-                expectedException = false;
-                try {
-                    assertEquals(0, collection.size());
-                } catch (NitriteIOException e) {
-                    expectedException = true;
-                }
-                assertTrue(expectedException);
+                assertFalse(db.hasCollection("test"));
             }
         }
     }
@@ -464,20 +447,13 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
                 txCol.drop();
 
-                boolean expectedException = false;
-                try {
-                    assertEquals(0, txCol.size());
-                } catch (NitriteIOException e) {
-                    expectedException = true;
-                }
-                assertTrue(expectedException);
-                assertEquals(1, collection.size());
+                assertFalse(db.hasCollection("test"));
 
                 throw new TransactionException("failed");
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(1, collection.size());
+                assertFalse(db.hasCollection("test"));
             }
         }
     }

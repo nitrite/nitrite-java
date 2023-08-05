@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.support;
 
-
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.repository.ObjectRepository;

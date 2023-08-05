@@ -222,7 +222,7 @@ class FindOptimizer {
         NavigableMap<IndexDescriptor, List<ComparableFilter>> indexFilterMap = new TreeMap<>(Collections.reverseOrder());
 
         for (IndexDescriptor indexDescriptor : indexDescriptors) {
-            List<String> fieldNames = indexDescriptor.getIndexFields().getFieldNames();
+            List<String> fieldNames = indexDescriptor.getFields().getFieldNames();
 
             List<ComparableFilter> indexedFilters = new ArrayList<>();
             for (String fieldName : fieldNames) {
@@ -299,7 +299,7 @@ class FindOptimizer {
 
             if (indexDescriptor != null) {
                 // get index field names
-                List<String> indexedFieldNames = indexDescriptor.getIndexFields().getFieldNames();
+                List<String> indexedFieldNames = indexDescriptor.getFields().getFieldNames();
 
                 boolean canUseIndex = false;
                 Map<String, Boolean> indexScanOrder = new HashMap<>();

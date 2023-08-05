@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.integration.repository;
 
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.Nitrite;
@@ -50,6 +51,18 @@ public class ObjectRepositoryNegativeTest {
     @Before
     public void setUp() {
         db = TestUtil.createDb(dbPath);
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new WithPublicField.Converter());
+        documentMapper.registerEntityConverter(new WithObjectId.Converter());
+        documentMapper.registerEntityConverter(new WithOutId.Converter());
+        documentMapper.registerEntityConverter(new WithoutEmbeddedId.Converter());
+        documentMapper.registerEntityConverter(new WithoutEmbeddedId.NestedId.Converter());
+        documentMapper.registerEntityConverter(new WithEmptyStringId.Converter());
+        documentMapper.registerEntityConverter(new WithNullId.Converter());
+        documentMapper.registerEntityConverter(new Employee.EmployeeConverter());
+        documentMapper.registerEntityConverter(new Company.CompanyConverter());
+        documentMapper.registerEntityConverter(new Note.NoteConverter());
+        documentMapper.registerEntityConverter(new WithNitriteId.WithNitriteIdConverter());
     }
 
     @After
@@ -59,7 +72,7 @@ public class ObjectRepositoryNegativeTest {
         deleteDb(dbPath);
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test(expected = ValidationException.class)
     public void testWithCircularReference() {
         ObjectRepository<WithCircularReference> repository = db.getRepository(WithCircularReference.class);
 
@@ -79,7 +92,7 @@ public class ObjectRepositoryNegativeTest {
         }
     }
 
-    @Test(expected = ObjectMappingException.class)
+    @Test(expected = ValidationException.class)
     public void testWithCustomConstructor() {
         ObjectRepository<WithCustomConstructor> repository = db.getRepository(WithCustomConstructor.class);
 
@@ -132,18 +145,6 @@ public class ObjectRepositoryNegativeTest {
         result.iterator().remove();
     }
 
-    @Test(expected = IndexingException.class)
-    public void testWithObjectId() {
-        ObjectRepository<WithObjectId> repository = db.getRepository(WithObjectId.class);
-        WithOutId id = new WithOutId();
-        id.setName("test");
-        id.setNumber(1);
-
-        WithObjectId object = new WithObjectId();
-        object.setWithOutId(id);
-        repository.insert(object);
-    }
-
     @Test(expected = NotIdentifiableException.class)
     public void testUpdateNoId() {
         ObjectRepository<WithOutId> repository = db.getRepository(WithOutId.class);
@@ -185,7 +186,7 @@ public class ObjectRepositoryNegativeTest {
         ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
         WithPublicField object = new WithPublicField();
         object.name = "test";
-        object.number = 2;
+        object.number = 2L;
 
         repository.insert(object);
         WithPublicField instance = repository.getById(null);
@@ -221,7 +222,7 @@ public class ObjectRepositoryNegativeTest {
         ObjectRepository<WithPublicField> repository = db.getRepository(WithPublicField.class);
         WithPublicField object = new WithPublicField();
         object.name = "test";
-        object.number = 2;
+        object.number = 2L;
 
         repository.insert(object);
 

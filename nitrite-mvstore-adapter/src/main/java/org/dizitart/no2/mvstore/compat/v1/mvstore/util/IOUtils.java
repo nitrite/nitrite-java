@@ -20,7 +20,7 @@ public class IOUtils {
     public static void closeSilently(AutoCloseable var0) {
         if (var0 != null) {
             try {
-                trace("closeSilently", (String)null, var0);
+                trace("closeSilently", null, var0);
                 var0.close();
             } catch (Exception var2) {
             }

@@ -19,7 +19,9 @@ package org.dizitart.no2.integration;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.integration.repository.data.ClassA;
+import org.dizitart.no2.integration.repository.data.ClassBConverter;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,6 +39,11 @@ public class NitriteTest {
     @Before
     public void setUp() {
         db = createDb(fileName);
+        SimpleDocumentMapper nitriteMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        nitriteMapper.registerEntityConverter(new ClassA.ClassAConverter());
+        nitriteMapper.registerEntityConverter(new ClassBConverter());
+
+
         NitriteCollection collection = db.getCollection("test");
         assertNotNull(collection);
     }

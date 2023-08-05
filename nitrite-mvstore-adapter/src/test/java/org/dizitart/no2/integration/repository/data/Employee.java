@@ -22,9 +22,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
 
@@ -36,10 +36,10 @@ import java.util.Date;
  */
 @ToString
 @EqualsAndHashCode
-@Index(value = "joinDate", type = IndexType.NON_UNIQUE)
-@Index(value = "address", type = IndexType.FULL_TEXT)
-@Index(value = "employeeNote.text", type = IndexType.FULL_TEXT)
-public class Employee implements Serializable, Mappable {
+@Index(fields = "joinDate", type = IndexType.NON_UNIQUE)
+@Index(fields = "address", type = IndexType.FULL_TEXT)
+@Index(fields = "employeeNote.text", type = IndexType.FULL_TEXT)
+public class Employee implements Serializable {
     @Id
     @Getter
     @Setter
@@ -82,28 +82,39 @@ public class Employee implements Serializable, Mappable {
         emailAddress = copy.emailAddress;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("empId", empId)
-            .put("joinDate", joinDate)
-            .put("address", address)
-            .put("blob", blob)
-            .put("emailAddress", emailAddress)
-            .put("employeeNote", employeeNote != null ? employeeNote.write(mapper) : null);
-    }
+    public static class EmployeeConverter implements EntityConverter<Employee> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        empId = document.get("empId", Long.class);
-        joinDate = document.get("joinDate", Date.class);
-        address = document.get("address", String.class);
-        blob = document.get("blob", byte[].class);
-        emailAddress = document.get("emailAddress", String.class);
+        @Override
+        public Class<Employee> getEntityType() {
+            return Employee.class;
+        }
 
-        if (document.get("employeeNote") != null) {
-            employeeNote = new Note();
-            employeeNote.read(mapper, document.get("employeeNote", Document.class));
+        @Override
+        public Document toDocument(Employee entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("empId", entity.empId)
+                .put("joinDate", entity.joinDate)
+                .put("address", entity.address)
+                .put("blob", entity.blob)
+                .put("emailAddress", entity.emailAddress)
+                .put("employeeNote", nitriteMapper.tryConvert(entity.employeeNote, Document.class));
+        }
+
+        @Override
+        public Employee fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Employee entity = new Employee();
+
+            entity.empId = document.get("empId", Long.class);
+            entity.joinDate = document.get("joinDate", Date.class);
+            entity.address = document.get("address", String.class);
+            entity.blob = document.get("blob", byte[].class);
+            entity.emailAddress = document.get("emailAddress", String.class);
+
+            if (document.get("employeeNote") != null) {
+                Document doc = document.get("employeeNote", Document.class);
+                entity.employeeNote = (Note) nitriteMapper.tryConvert(doc, Note.class);
+            }
+            return entity;
         }
     }
 }

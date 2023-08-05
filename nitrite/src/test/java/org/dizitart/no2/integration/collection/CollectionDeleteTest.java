@@ -90,7 +90,7 @@ public class CollectionDeleteTest extends BaseCollectionTest {
             assertTrue(uniqueError);
         }
 
-        collection.remove(Filter.ALL);
+        collection.clear();
 
         cursor = collection.find();
         assertEquals(cursor.size(), 0);

@@ -18,16 +18,18 @@
 package org.dizitart.no2.integration.repository;
 
 
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.integration.repository.data.ClassA;
 import org.dizitart.no2.integration.repository.data.ClassC;
+import org.dizitart.no2.integration.repository.decorator.MiniProduct;
+import org.dizitart.no2.integration.repository.decorator.Product;
 import org.dizitart.no2.repository.Cursor;
 import org.junit.Test;
 
 import static org.dizitart.no2.collection.FindOptions.orderBy;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -72,6 +74,66 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
         Iterable<ClassC> findRecordC = cursor.project(ClassC.class);
         for (ClassC classC : findRecordC) {
             System.out.println(classC);
+        }
+    }
+
+    @Test
+    public void testDecoratedEntityFind() {
+        Cursor<Product> cursor = productRepository.find();
+        assertEquals(cursor.size(), 10);
+        assertFalse(cursor.isEmpty());
+
+        assertTrue(productRepository.hasIndex("productId.uniqueId", "productId.productCode"));
+        assertTrue(productRepository.hasIndex("manufacturer.name"));
+        assertTrue(productRepository.hasIndex("productName", "manufacturer.uniqueId"));
+
+        cursor = productRepository.find(where("productId.uniqueId").notEq(null)
+            .and(where("price").gt(0.0)));
+
+        assertTrue(!cursor.isEmpty());
+        assertEquals(cursor.size(), 10);
+
+        RecordStream<MiniProduct> miniProducts = cursor.project(MiniProduct.class);
+
+        for (MiniProduct miniProduct : miniProducts) {
+            Cursor<Product> products = productRepository.find(where("productId.uniqueId")
+                .eq(miniProduct.getUniqueId()));
+
+            assertNotNull(products);
+            assertFalse(products.isEmpty());
+            assertEquals(1, products.size());
+            assertEquals(miniProduct.getManufacturerName(), products.firstOrNull().getManufacturer().getName());
+            assertEquals(miniProduct.getPrice(), products.firstOrNull().getPrice());
+        }
+    }
+
+    @Test
+    public void testDecoratedEntityFindWithTag() {
+        Cursor<Product> cursor = upcomingProductRepository.find();
+        assertEquals(cursor.size(), 10);
+        assertFalse(cursor.isEmpty());
+
+        assertTrue(upcomingProductRepository.hasIndex("productId.uniqueId", "productId.productCode"));
+        assertTrue(upcomingProductRepository.hasIndex("manufacturer.name"));
+        assertTrue(upcomingProductRepository.hasIndex("productName", "manufacturer.uniqueId"));
+
+        cursor = upcomingProductRepository.find(where("productId.uniqueId").notEq(null)
+            .and(where("price").gt(0.0)));
+
+        assertTrue(!cursor.isEmpty());
+        assertEquals(cursor.size(), 10);
+
+        RecordStream<MiniProduct> miniProducts = cursor.project(MiniProduct.class);
+
+        for (MiniProduct miniProduct : miniProducts) {
+            Cursor<Product> products = upcomingProductRepository.find(where("productId.uniqueId")
+                .eq(miniProduct.getUniqueId()));
+
+            assertNotNull(products);
+            assertFalse(products.isEmpty());
+            assertEquals(1, products.size());
+            assertEquals(miniProduct.getManufacturerName(), products.firstOrNull().getManufacturer().getName());
+            assertEquals(miniProduct.getPrice(), products.firstOrNull().getPrice());
         }
     }
 }

@@ -20,8 +20,11 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.exceptions.FilterException;
+
+import java.util.List;
+import java.util.NavigableMap;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
@@ -67,8 +70,8 @@ public abstract class FieldBasedFilter extends NitriteFilter {
         if (getObjectFilter()) {
             NitriteMapper nitriteMapper = getNitriteConfig().nitriteMapper();
             validateSearchTerm(nitriteMapper, field, value);
-            if (nitriteMapper.isValue(value)) {
-                value = nitriteMapper.convert(value, Comparable.class);
+            if (value instanceof Comparable) {
+                value = nitriteMapper.tryConvert(value, Comparable.class);
             }
         }
 
@@ -79,11 +82,27 @@ public abstract class FieldBasedFilter extends NitriteFilter {
     protected void validateSearchTerm(NitriteMapper nitriteMapper, String field, Object value) {
         notNull(field, "field cannot be null");
         notEmpty(field, "field cannot be empty");
+    }
 
-        if (value != null) {
-            if (!nitriteMapper.isValue(value) && !(value instanceof Comparable)) {
-                throw new FilterException("The value for field '" + field + "' is not a valid search term");
-            }
+    /**
+     * Process values after index scanning.
+     *
+     * @param value      the value
+     * @param subMap     the sub map
+     * @param nitriteIds the nitrite ids
+     */
+    @SuppressWarnings("unchecked")
+    protected void processIndexValue(Object value,
+                                     List<NavigableMap<Comparable<?>, Object>> subMap,
+                                     List<NitriteId> nitriteIds) {
+        if (value instanceof List) {
+            // if it is list then add it directly to nitrite ids
+            List<NitriteId> result = (List<NitriteId>) value;
+            nitriteIds.addAll(result);
+        }
+
+        if (value instanceof NavigableMap) {
+            subMap.add((NavigableMap<Comparable<?>, Object>) value);
         }
     }
 }

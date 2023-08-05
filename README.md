@@ -1,20 +1,15 @@
 # Nitrite Database
 
-![Build](https://github.com/nitrite/nitrite-java/workflows/Gradle%20Build/badge.svg?branch=develop)
-![CodeQL](https://github.com/nitrite/nitrite-java/workflows/CodeQL/badge.svg?branch=develop)
-[![Codacy](https://app.codacy.com/project/badge/Grade/3ee6a6f3f0044b0c9e75d48e47e5d012)](https://www.codacy.com/gh/nitrite/nitrite-java/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=nitrite/nitrite-java&amp;utm_campaign=Badge_Grade)
+[![Build](https://github.com/nitrite/nitrite-java/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/nitrite/nitrite-java/actions/workflows/build.yml)
+[![CodeQL](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml)
 [![codecov](https://codecov.io/gh/nitrite/nitrite-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/nitrite/nitrite-java)
 ![Javadocs](https://javadoc.io/badge/org.dizitart/nitrite.svg)
 [![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/nitrite/nitrite-java/discussions)
-![Backers on Open Collective](https://opencollective.com/nitrite-database/backers/badge.svg)
-![Backers on Open Collective](https://opencollective.com/nitrite-database/sponsors/badge.svg)
-[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/nitrite/nitrite-java)
 
 <img src="http://www.dizitart.org/nitrite-database/logo/nitrite-logo.svg" alt="Logo" width="200"/>
 
 **NO**sql **O**bject (**NO<sub>2</sub>** a.k.a Nitrite) database is an open source nosql embedded
-document store written in Java. It has MongoDB like API. It supports both
-in-memory and file based persistent store.
+document store written in Java. It supports both in-memory and file based persistent store.
 
 Nitrite is an embedded database ideal for desktop, mobile or small web applications.
 
@@ -22,23 +17,27 @@ Nitrite is an embedded database ideal for desktop, mobile or small web applicati
 
 -   Schemaless document collection and object repository
 -   In-memory / file-based store
--   Pluggable storage engines - mvstore, mapdb, rocksdb
--   ACID transaction
+-   Pluggable storage engines - mvstore, rocksdb
+-   Transaction support
 -   Schema migration
--   Indexing
+-   Simple Index
+-   Compound Index
 -   Full text search
--   Both way replication via Nitrite DataGate server
 -   Very fast, lightweight and fluent API 
--   Android compatibility (API Level 19)
+-   Android compatibility (API Level 24)
 
 ## Kotlin Extension
 
 Nitrite has a kotlin extension called **Potassium Nitrite** for kotlin developers.
-Visit [here](https://github.com/nitrite/nitrite-java/tree/develop/potassium-nitrite) for more details.
+Visit [here](https://github.com/nitrite/nitrite-java/tree/main/potassium-nitrite) for more details.
+
+## Flutter Version
+
+If you are looking for Nitrite for Flutter/Dart, head over to [nitrite-flutter](https://github.com/nitrite/nitrite-flutter).
 
 ## Getting Started with Nitrite
 
-**NOTE:** There are breaking api changes in version 4.x.x. So please exercise caution when upgrading from 3.x.x  
+**NOTE:** There are breaking api changes in version 4.x. So please exercise caution when upgrading from 3.x.x  
 especially for **package name changes**.
 
 ### How To Install
@@ -54,9 +53,9 @@ then add required dependencies:
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-bom</artifactId>
-            <version>4.0.0-SNAPSHOT</version>
-            <type>pom</type>
+            <version>[latest version]</version>
             <scope>import</scope>
+            <type>pom</type>
         </dependency>
     </dependencies>
 </dependencyManagement>
@@ -79,7 +78,7 @@ then add required dependencies:
 
 ```groovy
 
-implementation(platform("org.dizitart:nitrite-bom:4.0.0-SNAPSHOT"))
+implementation(platform("org.dizitart:nitrite-bom:[latest version]"))
     
 implementation 'org.dizitart:nitrite'
 implementation 'org.dizitart:nitrite-mvstore-adapter'
@@ -164,7 +163,7 @@ Document doc = createDocument("firstName", "John")
 collection.insert(doc);
 
 // find a document
-collection.find(where("firstName").eq("John").and(where("lastName").eq("Doe")));
+collection.find(where("firstName").eq("John").and(where("lastName").eq("Doe"));
 
 // update the document
 collection.update(where("firstName").eq("John"), createDocument("lastName", "Wick"));
@@ -187,11 +186,11 @@ repository.insert(emp);
 ```java
 
 // create document index
-collection.createIndex("firstName", indexOptions(IndexType.NonUnique));
-collection.createIndex("note", indexOptions(IndexType.Fulltext));
+collection.createIndex(indexOptions(IndexType.NonUnique), "firstName", "lastName"); // compound index
+collection.createIndex(indexOptions(IndexType.Fulltext), "note"); // full-text index
 
 // create object index. It can also be provided via annotation
-repository.createIndex("firstName", indexOptions(IndexType.NonUnique));
+repository.createIndex(indexOptions(IndexType.NonUnique), "firstName");
 
 ```
 
@@ -263,7 +262,7 @@ Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
             .changeDataType("empId", (TypeConverter<String, Long>) Long::parseLong)
 
             // change id field from uuid to empId
-            .changeIdField("uuid", "empId")
+            .changeIdField(Fields.withNames("uuid"), Fields.withNames("empId"))
 
             // delete uuid field
             .deleteField("uuid")
@@ -311,24 +310,6 @@ db = Nitrite.builder()
 
 ```
 
-**Automatic Replication**
-
-```java
-
-NitriteCollection collection = db.getCollection("products");
-
-Replica replica = Replica.builder()
-    .of(collection)
-    // replication via websocket (ws/wss)
-    .remote("ws://127.0.0.1:9090/datagate/john/products")
-    // user authentication via JWT token
-    .jwtAuth("john", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
-    .create();
-
-replica.connect();
-
-```
-
 **Import/Export Data**
 
 ```java
@@ -363,7 +344,7 @@ Release notes are available [here](https://github.com/nitrite/nitrite-java/relea
 </thead>
 <tbody>
 <tr class="odd">
-<td><p><a href="http://www.dizitart.org/nitrite-database">Document</a></p></td>
+<td><p><a href="https://www.dizitart.org/nitrite-database">Document</a></p></td>
 <td><p><a href="https://javadoc.io/doc/org.dizitart/nitrite">JavaDoc</a></p></td>
 </tr>
 </tbody>
@@ -371,19 +352,19 @@ Release notes are available [here](https://github.com/nitrite/nitrite-java/relea
 
 ## Build
 
-To build and test Nitrite
+To build and test Nitrite, ensure you have JDK 11 (or higher) and Maven 3 installed.
 
 ```shell script
 
 git clone https://github.com/nitrite/nitrite-java.git
 cd nitrite-java
-./gradlew build
+mvn clean install
 
 ```
 
 ## Support / Feedback
 
-For issues with, questions about, or feedback talk to us at [Gitter](https://gitter.im/nitrite-db/nitrite-java).
+For issues with, questions about, or feedback create a [discussion](https://github.com/nitrite/nitrite-java/discussions).
 
 ## Bugs / Feature Requests
 
@@ -396,24 +377,11 @@ before you file an issue please check if it is already existing or not.
 
 ## Contributors
 
-This project exists thanks to all the people who contribute. [Contribute](https://github.com/dizitart/nitrite-database/blob/master/CONTRIBUTING.md).
-![Contributors](https://opencollective.com/nitrite-database/contributors.svg?width=890)
-
-## Backers
-
-Thank you to all our backers! 🙏 [Become a backer](https://opencollective.com/nitrite-database#backer)
-
-![Backers](https://opencollective.com/nitrite-database/backers.svg?width=890)
+This project exists thanks to all the people who contribute. For more details please visit [CONTRIBUTING.md](https://github.com/nitrite/nitrite-java/blob/main/CONTRIBUTING.md).
 
 ## Sponsors
 
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://opencollective.com/nitrite-database#sponsor)
-
-![Sponsor](https://opencollective.com/nitrite-database/sponsor/0/avatar.svg)
-![Sponsor](https://opencollective.com/nitrite-database/sponsor/1/avatar.svg)
-![Sponsor](https://opencollective.com/nitrite-database/sponsor/2/avatar.svg)
-![Sponsor](https://opencollective.com/nitrite-database/sponsor/3/avatar.svg)
-![Sponsor](https://opencollective.com/nitrite-database/sponsor/4/avatar.svg)
+Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [Become a sponsor](https://github.com/sponsors/anidotnet) for this project.
 
 ## Presentation & Talks
 

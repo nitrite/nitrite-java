@@ -16,17 +16,17 @@
 
 package org.dizitart.no2.collection;
 
-import lombok.Getter;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.collection.operation.CollectionOperations;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.LockService;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.common.event.NitriteEventBus;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
@@ -35,7 +35,6 @@ import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
@@ -63,8 +62,6 @@ class DefaultNitriteCollection implements NitriteCollection {
     private Lock readLock;
     private CollectionOperations collectionOperations;
     private EventBus<CollectionEventInfo<?>, CollectionEventListener> eventBus;
-
-    @Getter
     private volatile boolean isDropped;
 
     DefaultNitriteCollection(String name, NitriteMap<NitriteId, Document> nitriteMap,
@@ -305,9 +302,6 @@ class DefaultNitriteCollection implements NitriteCollection {
             if (collectionOperations != null) {
                 // drop collection and indexes
                 collectionOperations.dropCollection();
-
-                // close collection and indexes
-//                collectionOperations.close();
             }
 
             // set all reference to null
@@ -458,7 +452,7 @@ class DefaultNitriteCollection implements NitriteCollection {
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
         notNull(indexDescriptor, "index cannot be null");
 
-        String[] indexFields = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+        String[] indexFields = indexDescriptor.getFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(indexFields)) {
             throw new IndexingException("Cannot rebuild index, index is currently being built");
         }

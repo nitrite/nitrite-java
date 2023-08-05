@@ -22,13 +22,13 @@ import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.Collection;
@@ -43,13 +43,23 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 class DefaultObjectRepository<T> implements ObjectRepository<T> {
     private final NitriteCollection collection;
     private final NitriteConfig nitriteConfig;
-    private final Class<T> type;
+    private Class<T> type;
+    private EntityDecorator<T> entityDecorator;
     private RepositoryOperations operations;
 
     DefaultObjectRepository(Class<T> type,
                             NitriteCollection collection,
                             NitriteConfig nitriteConfig) {
         this.type = type;
+        this.collection = collection;
+        this.nitriteConfig = nitriteConfig;
+        initialize();
+    }
+
+    DefaultObjectRepository(EntityDecorator<T> entityDecorator,
+                            NitriteCollection collection,
+                            NitriteConfig nitriteConfig) {
+        this.entityDecorator = entityDecorator;
         this.collection = collection;
         this.nitriteConfig = nitriteConfig;
         initialize();
@@ -148,7 +158,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     @Override
     public Cursor<T> find(Filter filter, FindOptions findOptions) {
-        return operations.find(filter, findOptions, type);
+        return operations.find(filter, findOptions, getType());
     }
 
     @Override
@@ -209,7 +219,11 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
 
     @Override
     public Class<T> getType() {
-        return type;
+        if (entityDecorator != null) {
+            return entityDecorator.getEntityType();
+        } else {
+            return type;
+        }
     }
 
     @Override
@@ -218,9 +232,11 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     private void initialize() {
-        NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
-        operations = new RepositoryOperations(type, nitriteMapper, collection);
+        if (entityDecorator != null) {
+            operations = new RepositoryOperations(entityDecorator, collection, nitriteConfig);
+        } else {
+            operations = new RepositoryOperations(type, collection, nitriteConfig);
+        }
         operations.createIndices();
     }
-
 }

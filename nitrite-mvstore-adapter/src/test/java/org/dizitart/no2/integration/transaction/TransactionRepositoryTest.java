@@ -18,15 +18,15 @@
 package org.dizitart.no2.integration.transaction;
 
 import com.github.javafaker.Faker;
-import org.dizitart.no2.integration.repository.BaseObjectRepositoryTest;
-import org.dizitart.no2.integration.repository.data.SubEmployee;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.integration.repository.BaseObjectRepositoryTest;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.integration.repository.data.SubEmployee;
 import org.dizitart.no2.transaction.Session;
 import org.dizitart.no2.transaction.Transaction;
 import org.junit.Test;
@@ -240,13 +240,12 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.createIndex(indexOptions(IndexType.FULL_TEXT), "name");
 
                 assertTrue(txRepo.hasIndex("name"));
-                assertFalse(repository.hasIndex("name"));
-
-                transaction.commit();
-
+                // auto committed
                 assertTrue(repository.hasIndex("name"));
             }
         }
+
+        assertTrue(repository.hasIndex("name"));
     }
 
     @Test
@@ -265,7 +264,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.createIndex(indexOptions(IndexType.FULL_TEXT), "name");
 
                 assertTrue(txRepo.hasIndex("name"));
-                assertFalse(repository.hasIndex("name"));
+                assertTrue(repository.hasIndex("name"));
 
                 txRepo.insert(txData2);
                 repository.insert(txData2);
@@ -275,7 +274,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertFalse(repository.hasIndex("name"));
+                assertTrue(repository.hasIndex("name"));
             }
         }
     }
@@ -292,7 +291,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.clear();
 
                 assertEquals(0, txRepo.size());
-                assertEquals(1, repository.size());
+                assertEquals(0, repository.size());
 
                 transaction.commit();
 
@@ -318,7 +317,8 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.clear();
 
                 assertEquals(0, txRepo.size());
-                assertEquals(1, repository.size());
+                // auto committed
+                assertEquals(0, repository.size());
 
                 txRepo.insert(txData2);
                 repository.insert(txData2);
@@ -327,7 +327,8 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(0, repository.size());
+                // clear/drop can't be rolled back
+                assertEquals(1, repository.size());
             }
         }
     }
@@ -345,7 +346,9 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.dropIndex("name");
 
                 assertFalse(txRepo.hasIndex("name"));
-                assertTrue(repository.hasIndex("name"));
+
+                // auto committed
+                assertFalse(repository.hasIndex("name"));
 
                 transaction.commit();
 
@@ -371,7 +374,8 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.dropIndex("name");
 
                 assertFalse(txRepo.hasIndex("name"));
-                assertTrue(repository.hasIndex("name"));
+                // auto committed
+                assertFalse(repository.hasIndex("name"));
 
                 txRepo.insert(txData2);
                 repository.insert(txData2);
@@ -381,7 +385,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertTrue(repository.hasIndex("name"));
+                assertFalse(repository.hasIndex("name"));
             }
         }
     }
@@ -399,7 +403,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.dropAllIndices();
 
                 assertFalse(txRepo.hasIndex("name"));
-                assertTrue(repository.hasIndex("name"));
+                assertFalse(repository.hasIndex("name"));
 
                 transaction.commit();
 
@@ -425,7 +429,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 txRepo.dropAllIndices();
 
                 assertFalse(txRepo.hasIndex("name"));
-                assertTrue(repository.hasIndex("name"));
+                assertFalse(repository.hasIndex("name"));
 
                 txRepo.insert(txData2);
                 repository.insert(txData2);
@@ -434,7 +438,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertTrue(repository.hasIndex("name"));
+                assertFalse(repository.hasIndex("name"));
             }
         }
     }
@@ -457,17 +461,8 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                     expectedException = true;
                 }
                 assertTrue(expectedException);
-                assertEquals(1, repository.size());
-
-                transaction.commit();
-
-                expectedException = false;
-                try {
-                    assertEquals(0, repository.size());
-                } catch (NitriteIOException e) {
-                    expectedException = true;
-                }
-                assertTrue(expectedException);
+                // auto committed
+                assertFalse(db.hasRepository(TxData.class));
             }
         }
     }
@@ -485,7 +480,9 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             try {
                 transaction = session.beginTransaction();
                 ObjectRepository<TxData> txRepo = transaction.getRepository(TxData.class);
+                assertTrue(db.hasRepository(TxData.class));
                 txRepo.drop();
+                assertFalse(db.hasRepository(TxData.class));
 
                 boolean expectedException = false;
                 try {
@@ -500,7 +497,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             } catch (TransactionException e) {
                 assert transaction != null;
                 transaction.rollback();
-                assertEquals(1, repository.size());
+                assertFalse(db.hasRepository(TxData.class));
             }
         }
     }

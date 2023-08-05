@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Represents a nitrite nitrite stream backed by an index.
+ * Represents a nitrite stream backed by an index.
  *
  * @author Anindya Chatterjee
  * @since 4.0

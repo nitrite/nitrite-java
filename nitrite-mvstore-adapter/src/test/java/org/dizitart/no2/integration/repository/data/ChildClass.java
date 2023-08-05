@@ -20,8 +20,11 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.InheritIndices;
+
+import java.util.Date;
 
 /**
  * @author Anindya Chatterjee
@@ -32,14 +35,30 @@ import org.dizitart.no2.repository.annotations.InheritIndices;
 public class ChildClass extends ParentClass {
     private String name;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return super.write(mapper).put("name", name);
-    }
+    public static class Converter implements EntityConverter<ChildClass> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        super.read(mapper, document);
-        name = document.get("name", String.class);
+        @Override
+        public Class<ChildClass> getEntityType() {
+            return ChildClass.class;
+        }
+
+        @Override
+        public Document toDocument(ChildClass entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("name", entity.getName())
+                .put("id", entity.getId())
+                .put("date", entity.getDate())
+                .put("text", entity.getText());
+        }
+
+        @Override
+        public ChildClass fromDocument(Document document, NitriteMapper nitriteMapper) {
+            ChildClass entity = new ChildClass();
+            entity.setId(document.get("id", Long.class));
+            entity.setDate(document.get("date", Date.class));
+            entity.setText(document.get("text", String.class));
+            entity.setName(document.get("name", String.class));
+            return entity;
+        }
     }
 }

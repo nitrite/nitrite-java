@@ -19,32 +19,41 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.EqualsAndHashCode;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 /**
  * @author Anindya Chatterjee.
  */
 @EqualsAndHashCode
-public class WithOutGetterSetter implements Mappable {
+public class WithOutGetterSetter {
     private String name;
-    private long number;
+    private Long number;
 
     public WithOutGetterSetter() {
         name = "test";
-        number = 2;
+        number = 2L;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("name", name)
-            .put("number", number);
+    public static class Converter implements EntityConverter<WithOutGetterSetter> {
 
-    }
+        @Override
+        public Class<WithOutGetterSetter> getEntityType() {
+            return WithOutGetterSetter.class;
+        }
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        number = document.get("number", Long.class);
+        @Override
+        public Document toDocument(WithOutGetterSetter entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("name", entity.name)
+                .put("number", entity.number);
+        }
+
+        @Override
+        public WithOutGetterSetter fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithOutGetterSetter entity = new WithOutGetterSetter();
+            entity.name = document.get("name", String.class);
+            entity.number = document.get("number", Long.class);
+            return entity;
+        }
     }
 }

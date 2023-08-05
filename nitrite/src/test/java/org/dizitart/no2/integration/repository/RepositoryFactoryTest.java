@@ -59,10 +59,10 @@ public class RepositoryFactoryTest {
     public void testNullType() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
         db = TestUtil.createDb();
-        factory.getRepository(db.getConfig(), null, "dummy");
+        factory.getRepository(db.getConfig(), (Class<?>) null, "dummy");
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testNullCollection() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
         db = TestUtil.createDb();

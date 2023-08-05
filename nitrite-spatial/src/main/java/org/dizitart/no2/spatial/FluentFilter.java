@@ -46,7 +46,7 @@ public class FluentFilter {
     }
 
     /**
-     * Creates an spatial filter which matches documents where the spatial data
+     * Creates a spatial filter which matches documents where the spatial data
      * of a field intersects the specified {@link Geometry} value.
      *
      * @param geometry the geometry

@@ -56,14 +56,14 @@ public class InMemoryMapTest {
 
     @Test
     public void testGet4() {
-        InMemoryMap<Object, Object> inMemoryMap = new InMemoryMap<>("", null);
+        InMemoryMap<Object, Object> inMemoryMap = new InMemoryMap<>("test", new InMemoryStore());
         inMemoryMap.put((byte) 'A', "Value");
         assertNull(inMemoryMap.get((byte) 0));
     }
 
     @Test
     public void testClear() {
-        InMemoryMap<Object, Object> inMemoryMap = new InMemoryMap<>("", null);
+        InMemoryMap<Object, Object> inMemoryMap = new InMemoryMap<>("test", new InMemoryStore());
         inMemoryMap.put("Key", "Value");
         inMemoryMap.clear();
         assertEquals(0L, inMemoryMap.size());
@@ -362,7 +362,7 @@ public class InMemoryMapTest {
 
     @Test
     public void testClose() {
-        (new InMemoryMap<>("Map Name", null)).close();
+        (new InMemoryMap<>("Map Name", new InMemoryStore())).close();
     }
 
     @Test

@@ -18,11 +18,13 @@
 package org.dizitart.no2.repository;
 
 import org.dizitart.no2.NitriteBuilderTest;
+import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.common.streams.DocumentStream;
 import org.dizitart.no2.common.tuples.Pair;
@@ -40,25 +42,25 @@ public class RepositoryOperationsTest {
     public void testConstructor() {
         Class<?> type = Object.class;
         assertThrows(ValidationException.class,
-            () -> new RepositoryOperations(type, new NitriteBuilderTest.CustomNitriteMapper(), null));
+            () -> new RepositoryOperations(type, null, new CustomNitriteConfig()));
     }
 
     @Test(expected = ObjectMappingException.class)
     public void testToDocuments() {
         Class<?> type = Object.class;
         assertEquals(3,
-            (new RepositoryOperations(type, new NitriteBuilderTest.CustomNitriteMapper(), mock(NitriteCollection.class)))
+            (new RepositoryOperations(type, mock(NitriteCollection.class), new CustomNitriteConfig()))
                 .toDocuments(new Object[]{"42", "42", "42"}).length);
     }
 
     @Test
     public void testToDocuments2() {
-        assertNull((new RepositoryOperations(Object.class, null, mock(NitriteCollection.class))).toDocuments(null));
+        assertNull((new RepositoryOperations(Object.class, mock(NitriteCollection.class), new CustomNitriteConfig())).toDocuments(null));
     }
 
     @Test
     public void testToDocuments3() {
-        assertNull((new RepositoryOperations(Object.class, null, mock(NitriteCollection.class)))
+        assertNull((new RepositoryOperations(Object.class, mock(NitriteCollection.class), new CustomNitriteConfig()))
             .toDocuments(new Object[]{}));
     }
 
@@ -66,7 +68,7 @@ public class RepositoryOperationsTest {
     public void testToDocument() {
         Class<?> type = Object.class;
         assertNull(
-            (new RepositoryOperations(type, new NitriteBuilderTest.CustomNitriteMapper(), mock(NitriteCollection.class)))
+            (new RepositoryOperations(type, mock(NitriteCollection.class), new CustomNitriteConfig()))
                 .<Object>toDocument("Object", true));
     }
 
@@ -74,17 +76,18 @@ public class RepositoryOperationsTest {
     public void testCreateUniqueFilter() {
         Class<?> type = Object.class;
         assertThrows(NotIdentifiableException.class, () -> (new RepositoryOperations(type,
-            new NitriteBuilderTest.CustomNitriteMapper(), mock(NitriteCollection.class))).createUniqueFilter("Object"));
+            mock(NitriteCollection.class), new CustomNitriteConfig())).createUniqueFilter("Object"));
     }
 
     @Test
     public void testCreateIdFilter() {
         Class<?> type = Object.class;
         assertThrows(NotIdentifiableException.class, () -> (new RepositoryOperations(type,
-            new NitriteBuilderTest.CustomNitriteMapper(), mock(NitriteCollection.class))).<Object>createIdFilter("Id"));
+            mock(NitriteCollection.class), new CustomNitriteConfig())).<Object>createIdFilter("Id"));
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testFind() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
         RecordStream<Pair<NitriteId, Document>> recordStream = (RecordStream<Pair<NitriteId, Document>>) mock(
@@ -93,11 +96,18 @@ public class RepositoryOperationsTest {
             .thenReturn(new DocumentStream(recordStream, new ProcessorChain()));
         Class<?> type = Object.class;
         RepositoryOperations repositoryOperations = new RepositoryOperations(type,
-            new NitriteBuilderTest.CustomNitriteMapper(), nitriteCollection);
+            nitriteCollection, new CustomNitriteConfig());
         Filter filter = mock(Filter.class);
         FindOptions findOptions = new FindOptions();
         assertNull(repositoryOperations.find(filter, findOptions, Object.class).getFindPlan());
         verify(nitriteCollection).find(any(), any());
+    }
+
+    static class CustomNitriteConfig extends NitriteConfig {
+        @Override
+        public NitriteMapper nitriteMapper() {
+            return new NitriteBuilderTest.CustomNitriteMapper();
+        }
     }
 }
 

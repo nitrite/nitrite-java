@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
@@ -35,13 +35,13 @@ import java.util.Map;
 /**
  * @author Anindya Chatterjee.
  */
+@Getter
 @EqualsAndHashCode
 @Indices({
-    @Index(value = "companyName")
+    @Index(fields = "companyName")
 })
-public class Company implements Serializable, Mappable {
+public class Company implements Serializable {
     @Id(fieldName = "company_id")
-    @Getter
     @Setter
     private Long companyId;
 
@@ -62,25 +62,6 @@ public class Company implements Serializable, Mappable {
     private Map<String, List<Employee>> employeeRecord;
 
     @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("company_id", companyId)
-            .put("companyName", companyName)
-            .put("dateCreated", dateCreated)
-            .put("departments", departments)
-            .put("employeeRecord", employeeRecord);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public void read(NitriteMapper mapper, Document document) {
-        companyId = document.get("company_id", Long.class);
-        companyName = document.get("companyName", String.class);
-        dateCreated = document.get("dateCreated", Date.class);
-        departments = document.get("departments", List.class);
-        employeeRecord = document.get("employeeRecord", Map.class);
-    }
-
-    @Override
     public String toString() {
         return "Company{" +
             "companyId=" + companyId +
@@ -88,5 +69,34 @@ public class Company implements Serializable, Mappable {
             ", dateCreated=" + dateCreated +
             ", departments=" + departments +
             '}';
+    }
+
+    public static class CompanyConverter implements EntityConverter<Company> {
+
+        @Override
+        public Class<Company> getEntityType() {
+            return Company.class;
+        }
+
+        @Override
+        public Document toDocument(Company entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("company_id", entity.companyId)
+                .put("companyName", entity.companyName)
+                .put("dateCreated", entity.dateCreated)
+                .put("departments", entity.departments)
+                .put("employeeRecord", entity.employeeRecord);
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public Company fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Company entity = new Company();
+            entity.companyId = document.get("company_id", Long.class);
+            entity.companyName = document.get("companyName", String.class);
+            entity.dateCreated = document.get("dateCreated", Date.class);
+            entity.departments = document.get("departments", List.class);
+            entity.employeeRecord = document.get("employeeRecord", Map.class);
+            return entity;
+        }
     }
 }

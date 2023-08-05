@@ -77,11 +77,6 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
     }
 
     @Override
-    public void removeRTree(String mapName) {
-        this.removeMap(mapName);
-    }
-
-    @Override
     public void subscribe(StoreEventListener listener) {
         eventBus.register(listener);
     }

@@ -22,7 +22,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.PluginException;
 import org.dizitart.no2.index.*;
-import org.dizitart.no2.common.mapper.MappableMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryStoreModule;
@@ -188,7 +188,7 @@ public class PluginManager implements AutoCloseable {
 
         if (nitriteMapper == null) {
             log.debug("Loading mappable mapper");
-            NitritePlugin plugin = new MappableMapper();
+            NitritePlugin plugin = new SimpleDocumentMapper();
             loadPlugin(plugin);
         }
 

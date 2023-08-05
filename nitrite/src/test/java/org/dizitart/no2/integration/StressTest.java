@@ -22,11 +22,12 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.mapper.Mappable;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.Indices;
@@ -60,6 +61,10 @@ public class StressTest {
         db = Nitrite.builder()
             .fieldSeparator(".")
             .openOrCreate();
+
+        SimpleDocumentMapper mapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        mapper.registerEntityConverter(new PerfTest.PerfTestConverter());
+        mapper.registerEntityConverter(new PerfTestIndexed.PerfTestIndexedConverter());
 
         collection = db.getCollection("test");
     }
@@ -182,36 +187,73 @@ public class StressTest {
     }
 
     @Data
-    public static class PerfTest implements Mappable {
+    public static class PerfTest {
         private String firstName;
         private String lastName;
         private Integer age;
         private String text;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            Document document = Document.createDocument();
-            document.put("firstName", firstName);
-            document.put("lastName", lastName);
-            document.put("age", age);
-            document.put("text", text);
-            return document;
-        }
+        public static class PerfTestConverter implements EntityConverter<PerfTest> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            this.firstName = (String) document.get("firstName");
-            this.lastName = (String) document.get("lastName");
-            this.age = (Integer) document.get("age");
-            this.text = (String) document.get("text");
+            @Override
+            public Class<PerfTest> getEntityType() {
+                return PerfTest.class;
+            }
+
+            @Override
+            public Document toDocument(PerfTest entity, NitriteMapper nitriteMapper) {
+                Document document = Document.createDocument();
+                document.put("firstName", entity.firstName);
+                document.put("lastName", entity.lastName);
+                document.put("age", entity.age);
+                document.put("text", entity.text);
+                return document;
+            }
+
+            @Override
+            public PerfTest fromDocument(Document document, NitriteMapper nitriteMapper) {
+                PerfTest entity = new PerfTest();
+                entity.firstName = (String) document.get("firstName");
+                entity.lastName = (String) document.get("lastName");
+                entity.age = (Integer) document.get("age");
+                entity.text = (String) document.get("text");
+                return entity;
+            }
         }
     }
 
     @Indices({
-        @Index(value = "firstName", type = IndexType.NON_UNIQUE),
-        @Index(value = "age", type = IndexType.NON_UNIQUE),
-        @Index(value = "text", type = IndexType.FULL_TEXT),
+        @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
+        @Index(fields = "age", type = IndexType.NON_UNIQUE),
+        @Index(fields = "text", type = IndexType.FULL_TEXT),
     })
     private static class PerfTestIndexed extends PerfTest {
+        public static class PerfTestIndexedConverter implements EntityConverter<PerfTestIndexed> {
+
+            @Override
+            public Class<PerfTestIndexed> getEntityType() {
+                return PerfTestIndexed.class;
+            }
+
+            @Override
+            public Document toDocument(PerfTestIndexed entity, NitriteMapper nitriteMapper) {
+                Document document = Document.createDocument();
+                document.put("firstName", entity.getFirstName());
+                document.put("lastName", entity.getLastName());
+                document.put("age", entity.getAge());
+                document.put("text", entity.getText());
+                return document;
+            }
+
+            @Override
+            public PerfTestIndexed fromDocument(Document document, NitriteMapper nitriteMapper) {
+                PerfTestIndexed entity = new PerfTestIndexed();
+                entity.setFirstName((String) document.get("firstName"));
+                entity.setLastName((String) document.get("lastName"));
+                entity.setAge((Integer) document.get("age"));
+                entity.setText((String) document.get("text"));
+                return entity;
+            }
+        }
     }
 }

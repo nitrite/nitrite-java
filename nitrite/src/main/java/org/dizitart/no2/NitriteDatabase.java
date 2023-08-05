@@ -27,6 +27,7 @@ import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.MigrationManager;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
+import org.dizitart.no2.repository.EntityDecorator;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreMetaData;
@@ -39,6 +40,7 @@ import java.util.Set;
 import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
 import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryNameByDecorator;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
@@ -81,6 +83,18 @@ class NitriteDatabase implements Nitrite {
     }
 
     @Override
+    public <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator) {
+        checkOpened();
+        return repositoryFactory.getRepository(nitriteConfig, entityDecorator);
+    }
+
+    @Override
+    public <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator, String key) {
+        checkOpened();
+        return repositoryFactory.getRepository(nitriteConfig, entityDecorator, key);
+    }
+
+    @Override
     public void destroyCollection(String name) {
         checkOpened();
         store.removeMap(name);
@@ -97,6 +111,20 @@ class NitriteDatabase implements Nitrite {
     public <T> void destroyRepository(Class<T> type, String key) {
         checkOpened();
         String mapName = findRepositoryName(type, key);
+        store.removeMap(mapName);
+    }
+
+    @Override
+    public <T> void destroyRepository(EntityDecorator<T> type) {
+        checkOpened();
+        String mapName = findRepositoryNameByDecorator(type, null);
+        store.removeMap(mapName);
+    }
+
+    @Override
+    public <T> void destroyRepository(EntityDecorator<T> type, String key) {
+        checkOpened();
+        String mapName = findRepositoryNameByDecorator(type, key);
         store.removeMap(mapName);
     }
 

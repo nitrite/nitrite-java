@@ -16,9 +16,12 @@
 
 package org.dizitart.no2.rocksdb;
 
+import java.lang.ref.Cleaner;
+
 /**
  * @author Anindya Chatterjee
  */
 public class Constants {
     public static final byte[] DB_NULL = new byte[]{-1};
+    static final Cleaner CLEANER = Cleaner.create();
 }

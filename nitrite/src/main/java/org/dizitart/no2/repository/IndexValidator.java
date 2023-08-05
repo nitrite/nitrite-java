@@ -20,24 +20,16 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.repository.annotations.Embedded;
+import org.dizitart.no2.repository.annotations.Id;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.List;
-
-import static org.dizitart.no2.common.util.DocumentUtils.skeletonDocument;
 
 /**
  * @author Anindya Chatterjee
  */
 public class IndexValidator {
-    private final Reflector reflector;
-
-    public IndexValidator(Reflector reflector) {
-        this.reflector = reflector;
-    }
 
     /**
      * Validate an index field of an {@link org.dizitart.no2.repository.annotations.Entity} object.
@@ -50,7 +42,6 @@ public class IndexValidator {
         if (fieldType.isPrimitive()
             || fieldType == NitriteId.class
             || fieldType.isInterface()
-            || nitriteMapper.isValueType(fieldType)
             || Modifier.isAbstract(fieldType.getModifiers())
             || fieldType.isArray()
             || Iterable.class.isAssignableFrom(fieldType)) {
@@ -58,32 +49,36 @@ public class IndexValidator {
             return;
         }
 
-        Document document;
-        try {
-            document = skeletonDocument(nitriteMapper, fieldType);
-            if (document.size() > 0) {
-                // compound index
-                boolean embeddedFieldFound = false;
-                List<Field> fields = reflector.getAllFields(fieldType);
-                for (Field indexField : fields) {
-                    if (indexField.isAnnotationPresent(Embedded.class)) {
-                        embeddedFieldFound = true;
-                        break;
-                    }
-                }
+        if (!Comparable.class.isAssignableFrom(fieldType)) {
+            throw new IndexingException("Cannot create index on non comparable field " + field);
+        }
+    }
 
-                if (!embeddedFieldFound) {
-                    throw new IndexingException("No embedded field found for object id");
-                }
-            } else {
-                if (!Comparable.class.isAssignableFrom(fieldType)) {
-                    throw new IndexingException("Cannot index on non comparable field " + field);
-                }
-            }
-        } catch (IndexingException ie) {
-            throw ie;
-        } catch (Throwable e) {
-            throw new IndexingException("Invalid type specified " + fieldType.getName() + " for indexing", e);
+    public void validateId(Id id, Class<?> fieldType, String field, NitriteMapper nitriteMapper) {
+        if (fieldType.isPrimitive()
+            || fieldType == NitriteId.class) {
+            return;
+        }
+
+        Object dummyValue = ObjectUtils.newInstance(fieldType, true, nitriteMapper);
+        Document dummyDocument = (Document) nitriteMapper.tryConvert(dummyValue, Document.class);
+
+        if (dummyDocument != null && dummyDocument.size() != 0 && id.embeddedFields().length == 0) {
+            throw new IndexingException("Invalid Id field " + field);
+        }
+    }
+
+    public void validateId(EntityId entityId, Class<?> fieldType, String field, NitriteMapper nitriteMapper) {
+        if (fieldType.isPrimitive()
+            || fieldType == NitriteId.class) {
+            return;
+        }
+
+        Object dummyValue = ObjectUtils.newInstance(fieldType, true, nitriteMapper);
+        Document dummyDocument = (Document) nitriteMapper.tryConvert(dummyValue, Document.class);
+
+        if (dummyDocument.size() != 0 && entityId.getEmbeddedFieldNames().isEmpty()) {
+            throw new IndexingException("Invalid Id field " + field);
         }
     }
 }

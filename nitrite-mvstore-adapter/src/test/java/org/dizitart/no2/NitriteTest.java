@@ -27,14 +27,16 @@ import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.TestUtil;
+import org.dizitart.no2.integration.repository.data.EmptyClass;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
@@ -84,6 +86,11 @@ public class NitriteTest {
     public void setUp() throws ParseException {
         db = TestUtil.createDb(fileName, "test-user", "test-password");
 
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new CompatChild.Converter());
+        documentMapper.registerEntityConverter(new Receipt.Converter());
+        documentMapper.registerEntityConverter(new EmptyClass.Converter());
+
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 
         Document doc1 = createDocument("firstName", "fn1")
@@ -132,9 +139,14 @@ public class NitriteTest {
         assertEquals(collectionNames.size(), 1);
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testListRepositories() {
         db.getRepository(getClass());
+    }
+
+    @Test
+    public void testListRepositories2() {
+        db.getRepository(Receipt.class);
         Set<String> repositories = db.listRepositories();
         assertEquals(repositories.size(), 1);
     }
@@ -145,10 +157,15 @@ public class NitriteTest {
         assertFalse(db.hasCollection("lucene" + INTERNAL_NAME_SEPARATOR + "test"));
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testHasRepository() {
         db.getRepository(getClass());
-        assertTrue(db.hasRepository(getClass()));
+    }
+
+    @Test
+    public void testHasRepository2() {
+        db.getRepository(Receipt.class);
+        assertTrue(db.hasRepository(Receipt.class));
         assertFalse(db.hasRepository(String.class));
     }
 
@@ -240,20 +257,30 @@ public class NitriteTest {
         assertEquals(collection.getName(), "test-collection");
     }
 
-    @Test
+    @Test(expected = ValidationException.class)
     public void testGetRepository() {
-        ObjectRepository<NitriteTest> repository = db.getRepository(NitriteTest.class);
-        assertNotNull(repository);
-        assertEquals(repository.getType(), NitriteTest.class);
+        ObjectRepository<EmptyClass> repository = db.getRepository(EmptyClass.class);
     }
 
     @Test
-    public void testGetRepositoryWithKey() {
-        ObjectRepository<NitriteTest> repository = db.getRepository(NitriteTest.class, "key");
+    public void testGetRepository2() {
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
         assertNotNull(repository);
-        assertEquals(repository.getType(), NitriteTest.class);
-        assertFalse(db.hasRepository(NitriteTest.class));
-        assertTrue(db.hasRepository(NitriteTest.class, "key"));
+        assertEquals(repository.getType(), Receipt.class);
+    }
+
+    @Test(expected = ValidationException.class)
+    public void testGetRepositoryWithKey() {
+        ObjectRepository<EmptyClass> repository = db.getRepository(EmptyClass.class, "key");
+    }
+
+    @Test
+    public void testGetRepositoryWithKey2() {
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class, "key");
+        assertNotNull(repository);
+        assertEquals(repository.getType(), Receipt.class);
+        assertFalse(db.hasRepository(Receipt.class));
+        assertTrue(db.hasRepository(Receipt.class, "key"));
     }
 
     @Test
@@ -269,18 +296,18 @@ public class NitriteTest {
 
     @Test
     public void testMultipleGetRepository() {
-        ObjectRepository<NitriteTest> repository = db.getRepository(NitriteTest.class);
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
         assertNotNull(repository);
-        assertEquals(repository.getType(), NitriteTest.class);
+        assertEquals(repository.getType(), Receipt.class);
 
-        ObjectRepository<NitriteTest> repository2 = db.getRepository(NitriteTest.class);
+        ObjectRepository<Receipt> repository2 = db.getRepository(Receipt.class);
         assertNotNull(repository2);
-        assertEquals(repository2.getType(), NitriteTest.class);
+        assertEquals(repository2.getType(), Receipt.class);
     }
 
     @Test(expected = ValidationException.class)
     public void testGetRepositoryInvalid() {
-        db.getRepository(null);
+        db.getRepository((Class<? extends Object>) null);
     }
 
     @Test(expected = NitriteIOException.class)
@@ -464,10 +491,12 @@ public class NitriteTest {
 
         String oldDbFile = System.getProperty("java.io.tmpdir") + File.separator + "old.db";
         Nitrite db = TestUtil.createDb(oldDbFile, "test-user", "test-password");
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new Receipt.Converter());
 
         NitriteCollection collection = db.getCollection("test");
 
-        // text filter has be the first filter in and clause
+        // text filter has been the first filter in and clause
         List<Document> cursor = collection.find(
             and(where("second_key").text("fox"), where("first_key").eq(1))).toList();
         assertEquals(cursor.size(), 1);
@@ -565,20 +594,30 @@ public class NitriteTest {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class CompatChild implements Mappable {
+    public static class CompatChild {
         private Long childId;
         private String lastName;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument("childId", childId)
-                .put("lastName", lastName);
-        }
+        public static class Converter implements EntityConverter<CompatChild> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            childId = document.get("childId", Long.class);
-            lastName = document.get("lastName", String.class);
+            @Override
+            public Class<CompatChild> getEntityType() {
+                return CompatChild.class;
+            }
+
+            @Override
+            public Document toDocument(CompatChild entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("childId", entity.childId)
+                    .put("lastName", entity.lastName);
+            }
+
+            @Override
+            public CompatChild fromDocument(Document document, NitriteMapper nitriteMapper) {
+                CompatChild entity = new CompatChild();
+                entity.childId = document.get("childId", Long.class);
+                entity.lastName = document.get("lastName", String.class);
+                return entity;
+            }
         }
     }
 
@@ -586,35 +625,47 @@ public class NitriteTest {
     @NoArgsConstructor
     @AllArgsConstructor
     @Indices({
-        @Index(value = "synced", type = IndexType.NON_UNIQUE)
+        @Index(fields = "synced", type = IndexType.NON_UNIQUE)
     })
-    public static class Receipt implements Mappable {
+    public static class Receipt {
         @Id
         private String clientRef;
         private Boolean synced;
         private Status status;
         private Long createdTimestamp = System.currentTimeMillis();
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument("status", status)
-                .put("clientRef", clientRef)
-                .put("synced", synced)
-                .put("createdTimestamp", createdTimestamp);
-        }
+        public static class Converter implements EntityConverter<Receipt> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            if (document != null) {
-                Object status = document.get("status");
-                if (status instanceof Status) {
-                    this.status = (Status) status;
-                } else {
-                    this.status = Status.valueOf(status.toString());
+            @Override
+            public Class<Receipt> getEntityType() {
+                return Receipt.class;
+            }
+
+            @Override
+            public Document toDocument(Receipt entity, NitriteMapper nitriteMapper) {
+                return createDocument("status", entity.status)
+                    .put("clientRef", entity.clientRef)
+                    .put("synced", entity.synced)
+                    .put("createdTimestamp", entity.createdTimestamp);
+            }
+
+            @Override
+            public Receipt fromDocument(Document document, NitriteMapper nitriteMapper) {
+                Receipt receipt = new Receipt();
+                if (document != null) {
+                    Object status = document.get("status");
+                    if (status != null) {
+                        if (status instanceof Status) {
+                            receipt.status = (Status) status;
+                        } else {
+                            receipt.status = Status.valueOf(status.toString());
+                        }
+                    }
+                    receipt.clientRef = document.get("clientRef", String.class);
+                    receipt.synced = document.get("synced", Boolean.class);
+                    receipt.createdTimestamp = document.get("createdTimestamp", Long.class);
                 }
-                this.clientRef = document.get("clientRef", String.class);
-                this.synced = document.get("synced", Boolean.class);
-                this.createdTimestamp = document.get("createdTimestamp", Long.class);
+                return receipt;
             }
         }
 

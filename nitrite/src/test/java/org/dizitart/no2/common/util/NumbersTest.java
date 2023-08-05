@@ -78,7 +78,7 @@ public class NumbersTest {
 
     @Test
     public void testCompare2() {
-        Integer x = new Integer(1);
-        assertEquals(0, Numbers.compare(x, new Integer(1)));
+        Integer x = 1;
+        assertEquals(0, Numbers.compare(x, 1));
     }
 }

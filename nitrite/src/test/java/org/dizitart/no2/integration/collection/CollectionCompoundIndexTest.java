@@ -177,9 +177,9 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
         insert();
         collection.insert(document);
 
-        DocumentCursor cursor = collection.find(where("fistName").eq(null));
+        DocumentCursor cursor = collection.find(where("firstName").eq(null));
         assertEquals("ln1", cursor.firstOrNull().get("lastName", String.class));
-        assertNull(cursor.firstOrNull().get("fistName", String.class));
+        assertNull(cursor.firstOrNull().get("firstName", String.class));
 
         document = createDocument("firstName", "fn4")
             .put("lastName", null)
@@ -195,7 +195,7 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
 
         cursor = collection.find(where("lastName").eq(null));
         assertEquals("fn4", cursor.firstOrNull().get("firstName", String.class));
-        assertNull(cursor.firstOrNull().get("fistName", String.class));
+        assertNull(cursor.firstOrNull().get("lastName", String.class));
 
         cursor = collection.find(and(where("lastName").eq(null), where("birthDay").eq(null)));
         assertNull(cursor.firstOrNull().get("lastName", String.class));

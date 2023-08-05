@@ -5,6 +5,8 @@ import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.*;
 import org.dizitart.no2.store.events.StoreEventListener;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,6 +18,7 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     private final NitriteStore<T> primaryStore;
     private final Map<String, NitriteMap<?, ?>> mapRegistry;
     private final Map<String, NitriteRTree<?, ?>> rTreeRegistry;
+    private final List<String> deletedMap = new ArrayList<>();
 
     public TransactionStore(NitriteStore<T> store) {
         this.primaryStore = store;
@@ -65,6 +68,10 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
 
     @Override
     public boolean hasMap(String mapName) {
+        if (deletedMap.contains(mapName)) {
+            return false;
+        }
+
         boolean result = primaryStore.hasMap(mapName);
         if (!result) {
             result = mapRegistry.containsKey(mapName);
@@ -98,23 +105,6 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     }
 
     @Override
-    public void closeMap(String mapName) {
-        // nothing to close as it is volatile map, moreover,
-        // removing it from registry means losing the map
-    }
-
-    @Override
-    public void closeRTree(String rTreeName) {
-        // nothing to close as it is volatile map, moreover,
-        // removing it from registry means losing the map
-    }
-
-    @Override
-    public void removeMap(String mapName) {
-        mapRegistry.remove(mapName);
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
                                                                                Class<?> keyType,
@@ -134,8 +124,25 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     }
 
     @Override
+    public void closeMap(String mapName) {
+        mapRegistry.remove(mapName);
+    }
+
+    @Override
+    public void closeRTree(String rTreeName) {
+        rTreeRegistry.remove(rTreeName);
+    }
+
+    @Override
+    public void removeMap(String mapName) {
+        mapRegistry.remove(mapName);
+        deletedMap.add(mapName);
+    }
+
+    @Override
     public void removeRTree(String rTreeName) {
         rTreeRegistry.remove(rTreeName);
+        deletedMap.add(rTreeName);
     }
 
     @Override

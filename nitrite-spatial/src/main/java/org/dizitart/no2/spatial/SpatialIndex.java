@@ -154,7 +154,7 @@ public class SpatialIndex implements NitriteIndex {
     private Geometry parseGeometry(String field, Object fieldValue) {
         if (fieldValue == null) return null;
         if (fieldValue instanceof String) {
-            return nitriteConfig.nitriteMapper().convert(fieldValue, Geometry.class);
+            return GeometryUtils.fromString((String) fieldValue);
         } else if (fieldValue instanceof Geometry) {
             return (Geometry) fieldValue;
         }

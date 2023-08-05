@@ -18,17 +18,21 @@ package org.dizitart.no2;
 
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
+import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.ObjectRepository;
-import org.dizitart.no2.store.StoreMetaData;
+import org.dizitart.no2.repository.EntityDecorator;
 import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.StoreMetaData;
 import org.dizitart.no2.transaction.Session;
 
 import java.util.Map;
 import java.util.Set;
 
 import static org.dizitart.no2.common.Constants.RESERVED_NAMES;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryNameByDecorator;
 import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
@@ -113,6 +117,33 @@ public interface Nitrite extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(Class<T> type, String key);
 
     /**
+     * Opens a type-safe object repository using a {@link EntityDecorator}. If the repository
+     * does not exist it will be created automatically and returned. If a
+     * repository is already opened, it is returned as is.
+     * <p>
+     * The returned repository is thread-safe for concurrent use.
+     *
+     * @param <T>       the type parameter
+     * @param entityDecorator the entityDecorator
+     * @return the repository
+     */
+    <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator);
+
+    /**
+     * Opens a type-safe object repository using a {@link EntityDecorator} and a key identifier
+     * from the store. If the repository does not exist it will be created automatically and
+     * returned. If a repository is already opened, it is returned as is.
+     * <p>
+     * The returned repository is thread-safe for concurrent use.
+     *
+     * @param <T>       the type parameter
+     * @param entityDecorator the entityDecorator
+     * @param key       the key
+     * @return the repository
+     */
+    <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator, String key);
+
+    /**
      * Destroys a {@link NitriteCollection} without opening it first.
      *
      * @param name the name of the collection
@@ -128,13 +159,30 @@ public interface Nitrite extends AutoCloseable {
     <T> void destroyRepository(Class<T> type);
 
     /**
-     * Destroys an keyed-{@link ObjectRepository} without opening it first.
+     * Destroys a keyed-{@link ObjectRepository} without opening it first.
      *
      * @param <T>  the type parameter
      * @param type the type
      * @param key  the key
      */
     <T> void destroyRepository(Class<T> type, String key);
+
+    /**
+     * Destroys an {@link ObjectRepository} without opening it first.
+     *
+     * @param <T>  the type parameter
+     * @param type the type
+     */
+    <T> void destroyRepository(EntityDecorator<T> type);
+
+    /**
+     * Destroys a keyed-{@link ObjectRepository} without opening it first.
+     *
+     * @param <T>  the type parameter
+     * @param type the type
+     * @param key  the key
+     */
+    <T> void destroyRepository(EntityDecorator<T> type, String key);
 
     /**
      * Gets the set of all {@link NitriteCollection}s' names saved in the store.
@@ -226,7 +274,8 @@ public interface Nitrite extends AutoCloseable {
      */
     default <T> boolean hasRepository(Class<T> type) {
         checkOpened();
-        return listRepositories().contains(type.getName());
+        String name = findRepositoryName(type, null);
+        return listRepositories().contains(name);
     }
 
     /**
@@ -239,8 +288,36 @@ public interface Nitrite extends AutoCloseable {
      */
     default <T> boolean hasRepository(Class<T> type, String key) {
         checkOpened();
+        String entityName = ObjectUtils.getEntityName(type);
         return listKeyedRepositories().containsKey(key)
-            && listKeyedRepositories().get(key).contains(type.getName());
+            && listKeyedRepositories().get(key).contains(entityName);
+    }
+
+    /**
+     * Checks whether a particular {@link ObjectRepository} exists in the store.
+     *
+     * @param <T>  the type parameter
+     * @param entityDecorator entityDecorator
+     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
+     */
+    default <T> boolean hasRepository(EntityDecorator<T> entityDecorator) {
+        checkOpened();
+        String name = findRepositoryNameByDecorator(entityDecorator, null);
+        return listRepositories().contains(name);
+    }
+
+    /**
+     * Checks whether a particular keyed-{@link ObjectRepository} exists in the store.
+     *
+     * @param <T>  the type parameter.
+     * @param entityDecorator entityDecorator.
+     * @param key  the key, which will be appended to the repositories name.
+     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
+     */
+    default <T> boolean hasRepository(EntityDecorator<T> entityDecorator, String key) {
+        checkOpened();
+        return listKeyedRepositories().containsKey(key)
+            && listKeyedRepositories().get(key).contains(entityDecorator.getEntityName());
     }
 
     /**

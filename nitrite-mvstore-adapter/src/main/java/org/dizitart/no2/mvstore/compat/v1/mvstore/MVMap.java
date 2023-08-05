@@ -789,7 +789,7 @@ public class MVMap<K, V> extends AbstractMap<K, V>
     }
 
     @Override
-    public final Set<Map.Entry<K, V>> entrySet() {
+    public final Set<Entry<K, V>> entrySet() {
         final Page root = this.getRootPage();
         return new AbstractSet<Entry<K, V>>() {
 

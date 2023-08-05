@@ -19,9 +19,9 @@ package org.dizitart.no2.integration.migration;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
@@ -31,11 +31,11 @@ import org.dizitart.no2.repository.annotations.Index;
  */
 @Data
 @Entity(value = "new", indices = {
-    @Index(value = "familyName", type = IndexType.NON_UNIQUE),
-    @Index(value = "fullName", type = IndexType.NON_UNIQUE),
-    @Index(value = "literature.ratings", type = IndexType.NON_UNIQUE),
+    @Index(fields = "familyName", type = IndexType.NON_UNIQUE),
+    @Index(fields = "fullName", type = IndexType.NON_UNIQUE),
+    @Index(fields = "literature.ratings", type = IndexType.NON_UNIQUE),
 })
-public class NewClass implements Mappable {
+public class NewClass {
     @Id
     private Long empId;
     private String firstName;
@@ -43,42 +43,61 @@ public class NewClass implements Mappable {
     private String fullName;
     private Literature literature;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("empId", empId)
-            .put("firstName", firstName)
-            .put("familyName", familyName)
-            .put("fullName", fullName)
-            .put("literature", literature.write(mapper));
-    }
-
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        empId = document.get("empId", Long.class);
-        firstName = document.get("firstName", String.class);
-        familyName = document.get("familyName", String.class);
-        fullName = document.get("fullName", String.class);
-
-        Document doc = document.get("literature", Document.class);
-        literature = new Literature();
-        literature.read(mapper, doc);
-    }
-
-    @Data
-    public static class Literature implements Mappable {
-        private String text;
-        private Integer ratings;
+    public static class Converter implements EntityConverter<NewClass> {
 
         @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument("text", text)
-                .put("ratings", ratings);
+        public Class<NewClass> getEntityType() {
+            return NewClass.class;
         }
 
         @Override
-        public void read(NitriteMapper mapper, Document document) {
-            text = document.get("text", String.class);
-            ratings = document.get("ratings", Integer.class);
+        public Document toDocument(NewClass entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("empId", entity.empId)
+                .put("firstName", entity.firstName)
+                .put("familyName", entity.familyName)
+                .put("fullName", entity.fullName)
+                .put("literature", nitriteMapper.tryConvert(entity.literature, Document.class));
+        }
+
+        @Override
+        public NewClass fromDocument(Document document, NitriteMapper nitriteMapper) {
+            NewClass entity = new NewClass();
+            entity.empId = document.get("empId", Long.class);
+            entity.firstName = document.get("firstName", String.class);
+            entity.familyName = document.get("familyName", String.class);
+            entity.fullName = document.get("fullName", String.class);
+
+            Document doc = document.get("literature", Document.class);
+            entity.literature = (Literature) nitriteMapper.tryConvert(doc, Literature.class);
+            return entity;
+        }
+    }
+
+    @Data
+    public static class Literature {
+        private String text;
+        private Integer ratings;
+
+        public static class Converter implements EntityConverter<Literature> {
+
+            @Override
+            public Class<Literature> getEntityType() {
+                return Literature.class;
+            }
+
+            @Override
+            public Document toDocument(Literature entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("text", entity.text)
+                    .put("ratings", entity.ratings);
+            }
+
+            @Override
+            public Literature fromDocument(Document document, NitriteMapper nitriteMapper) {
+                Literature entity = new Literature();
+                entity.text = document.get("text", String.class);
+                entity.ratings = document.get("ratings", Integer.class);
+                return entity;
+            }
         }
     }
 }

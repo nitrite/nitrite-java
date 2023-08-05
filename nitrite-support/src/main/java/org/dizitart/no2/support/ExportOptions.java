@@ -57,7 +57,7 @@ public class ExportOptions {
     private boolean exportData = true;
 
     /**
-     * Specifies a list of {@link org.dizitart.no2.common.PersistentCollection}s to be exported.
+     * Specifies a list of {@link PersistentCollection}s to be exported.
      * <p>
      * [icon="{@docRoot}/note.png"]
      * NOTE: If empty, all collections will be exported.

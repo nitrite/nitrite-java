@@ -19,7 +19,7 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
@@ -27,39 +27,60 @@ import org.dizitart.no2.repository.annotations.Id;
  * @author Anindya Chatterjee
  */
 @Data
-public class WithoutEmbeddedId implements Mappable {
+public class WithoutEmbeddedId {
     @Id
     private NestedId nestedId;
     private String data;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("nestedId", nestedId.write(mapper))
-            .put("data", data);
-    }
-
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        Document nestedId = document.get("nestedId", Document.class);
-        this.nestedId = mapper.convert(nestedId, NestedId.class);
-        this.data = document.get("data", String.class);
-    }
-
-
     @Data
-    public static class NestedId implements Mappable {
+    public static class NestedId {
         private Long id;
 
+        public static class Converter implements EntityConverter<NestedId> {
+
+            @Override
+            public Class<NestedId> getEntityType() {
+                return NestedId.class;
+            }
+
+            @Override
+            public Document toDocument(NestedId entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument()
+                    .put("id", entity.id);
+            }
+
+            @Override
+            public NestedId fromDocument(Document document, NitriteMapper nitriteMapper) {
+                NestedId entity = new NestedId();
+                entity.id = document.get("id", Long.class);
+                return entity;
+            }
+        }
+    }
+
+    public static class Converter implements EntityConverter<WithoutEmbeddedId> {
+
         @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument()
-                .put("id", id);
+        public Class<WithoutEmbeddedId> getEntityType() {
+            return WithoutEmbeddedId.class;
         }
 
         @Override
-        public void read(NitriteMapper mapper, Document document) {
-            id = document.get("id", Long.class);
+        public Document toDocument(WithoutEmbeddedId entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("nestedId", nitriteMapper.tryConvert(entity.nestedId, Document.class))
+                .put("data", entity.data);
+        }
+
+        @Override
+        public WithoutEmbeddedId fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithoutEmbeddedId entity = new WithoutEmbeddedId();
+            Document nestedId = document.get("nestedId", Document.class);
+
+            entity.nestedId = (NestedId) nitriteMapper.tryConvert(nestedId, NestedId.class);
+            entity.data = document.get("data", String.class);
+
+            return entity;
         }
     }
 }

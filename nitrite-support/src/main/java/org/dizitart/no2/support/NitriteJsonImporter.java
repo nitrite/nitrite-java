@@ -181,8 +181,8 @@ class NitriteJsonImporter {
                     String data = parser.readValueAs(String.class);
                     IndexDescriptor index = (IndexDescriptor) readEncodedObject(data);
                     if (index != null) {
-                        String[] fieldNames = index.getIndexFields().getFieldNames().toArray(new String[0]);
-                        if (collection != null && index.getIndexFields() != null && !collection.hasIndex(fieldNames)) {
+                        String[] fieldNames = index.getFields().getFieldNames().toArray(new String[0]);
+                        if (collection != null && index.getFields() != null && !collection.hasIndex(fieldNames)) {
                             collection.createIndex(indexOptions(index.getIndexType()), fieldNames);
                         }
                     }

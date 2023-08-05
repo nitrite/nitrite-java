@@ -5,10 +5,6 @@ insert_final_newline = false
 indent_style = space
 indent_size = 4
 
-[{.babelrc, .stylelintrc, .eslintrc, *.bowerrc, *.jsb3, *.jsb2, *.schema, *.json}]
-indent_style = space
-indent_size = 2
-
 [{*.ddl, *.sql}]
 indent_style = space
 indent_size = 2

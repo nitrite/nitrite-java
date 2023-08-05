@@ -16,13 +16,16 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 
-import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
+import static org.dizitart.no2.common.util.ObjectUtils.*;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
@@ -158,6 +161,46 @@ public class ValidationUtils {
                 if (value == null) continue;
                 validateArrayFilterItem(value, field);
             }
+        }
+    }
+
+    public static void validateProjectionType(Class<?> type, NitriteMapper nitriteMapper) {
+        Object value;
+        try {
+            value = newInstance(type, false, nitriteMapper);
+        } catch (Exception e) {
+            throw new ValidationException("Invalid projection type", e);
+        }
+
+        if (value == null) {
+            throw new ValidationException("Invalid projection type");
+        }
+
+        Document document = (Document) nitriteMapper.tryConvert(value, Document.class);
+        if (document == null || document.size() == 0) {
+            throw new ValidationException("Cannot project to empty type " + type);
+        }
+    }
+
+    public static void validateRepositoryType(Class<?> type, NitriteMapper nitriteMapper) {
+        Object value;
+        try {
+            if (type.isInterface() || (Modifier.isAbstract(type.getModifiers()) && !isBuiltInValueType(type))) {
+                // defer validation during insertion
+                return;
+            }
+
+            value = newInstance(type, false, nitriteMapper);
+            if (value == null) {
+                throw new ValidationException("Cannot create new instance of type " + type);
+            }
+
+            Document document = (Document) nitriteMapper.tryConvert(value, Document.class);
+            if (document == null || document.size() == 0) {
+                throw new ValidationException("Cannot convert to document from type " + type);
+            }
+        } catch (Exception e) {
+            throw new ValidationException("Invalid repository type", e);
         }
     }
 

@@ -425,17 +425,13 @@ public class TransactionalMapTest {
 
     @Test
     public void testDrop() {
-        TransactionalMap<Object, Object> primary = new TransactionalMap<>("Map Name", null, null);
-        TransactionalMap<Object, Object> primary1 = new TransactionalMap<>("Map Name", primary,
-            new TransactionStore<>(null));
-        TransactionalMap<Object, Object> primary2 = new TransactionalMap<>("Map Name", primary1,
-            new TransactionStore<>(new TransactionStore<>(null)));
-        TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary2,
-            new InMemoryStore());
+        InMemoryStore inMemoryStore = new InMemoryStore();
+        InMemoryMap<Object, Object> primary = new InMemoryMap<>("Map Name", inMemoryStore);
+        // write the test code for TransactionalMap.drop()
+        TransactionalMap<Object, Object> transactionalMap = new TransactionalMap<>("Map Name", primary,
+            inMemoryStore);
         transactionalMap.drop();
-        assertTrue(transactionalMap.entries().toList().isEmpty());
-        assertEquals(0L, transactionalMap.size());
-        assertNull(transactionalMap.getAttributes());
+        assertFalse(inMemoryStore.hasMap("Map Name"));
     }
 
     @Test

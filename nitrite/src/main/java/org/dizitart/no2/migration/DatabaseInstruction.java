@@ -3,6 +3,7 @@ package org.dizitart.no2.migration;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.tuples.Triplet;
 import org.dizitart.no2.common.util.SecureString;
+import org.dizitart.no2.repository.EntityDecorator;
 
 import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
 
@@ -15,7 +16,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.getEntityName;
 public interface DatabaseInstruction extends Instruction {
 
     /**
-     * Adds an instruction to set an user authentication to the database.
+     * Adds an instruction to set a user authentication to the database.
      *
      * @param username the username
      * @param password the password
@@ -66,17 +67,7 @@ public interface DatabaseInstruction extends Instruction {
      * @return the database instruction
      */
     default DatabaseInstruction dropRepository(Class<?> type) {
-        return dropRepository(getEntityName(type));
-    }
-
-    /**
-     * Adds an instruction to drop an {@link org.dizitart.no2.repository.ObjectRepository} from the database.
-     *
-     * @param typeName the type name
-     * @return the database instruction
-     */
-    default DatabaseInstruction dropRepository(String typeName) {
-        return dropRepository(typeName, null);
+        return dropRepository(type, null);
     }
 
     /**
@@ -88,6 +79,36 @@ public interface DatabaseInstruction extends Instruction {
      */
     default DatabaseInstruction dropRepository(Class<?> type, String key) {
         return dropRepository(getEntityName(type), key);
+    }
+
+    /**
+     * Adds an instruction to drop an {@link org.dizitart.no2.repository.ObjectRepository} from the database.
+     *
+     * @param entityDecorator the entityDecorator
+     * @return the database instruction
+     */
+    default DatabaseInstruction dropRepository(EntityDecorator<?> entityDecorator) {
+        return dropRepository(entityDecorator, null);
+    }
+
+    /**
+     * Adds an instruction to drop an {@link org.dizitart.no2.repository.ObjectRepository} from the database.
+     *
+     * @param entityDecorator the entityDecorator
+     * @return the database instruction
+     */
+    default DatabaseInstruction dropRepository(EntityDecorator<?> entityDecorator, String key) {
+        return dropRepository(entityDecorator.getEntityName(), key);
+    }
+
+    /**
+     * Adds an instruction to drop an {@link org.dizitart.no2.repository.ObjectRepository} from the database.
+     *
+     * @param typeName the type name
+     * @return the database instruction
+     */
+    default DatabaseInstruction dropRepository(String typeName) {
+        return dropRepository(typeName, null);
     }
 
     /**

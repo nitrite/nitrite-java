@@ -19,6 +19,9 @@ package org.dizitart.no2.integration.repository.data;
 
 import com.github.javafaker.Faker;
 import lombok.val;
+import org.dizitart.no2.integration.repository.decorator.Manufacturer;
+import org.dizitart.no2.integration.repository.decorator.Product;
+import org.dizitart.no2.integration.repository.decorator.ProductId;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -102,6 +105,15 @@ public class DataGenerator {
         return book;
     }
 
+    public static Product randomProduct() {
+        Product product = new Product();
+        product.setProductName(faker.name().name());
+        product.setProductId(randomProductId());
+        product.setManufacturer(randomManufacturer());
+        product.setPrice(Double.parseDouble(faker.commerce().price()));
+        return product;
+    }
+
     private static List<String> departments() {
         return new ArrayList<String>() {{
             add("dev");
@@ -113,5 +125,20 @@ public class DataGenerator {
             add("design");
             add("support");
         }};
+    }
+
+    private static ProductId randomProductId() {
+        ProductId productId = new ProductId();
+        productId.setProductCode(faker.code().ean13());
+        productId.setUniqueId(UUID.randomUUID().toString());
+        return productId;
+    }
+
+    private static Manufacturer randomManufacturer() {
+        Manufacturer manufacturer = new Manufacturer();
+        manufacturer.setUniqueId(random.nextInt());
+        manufacturer.setName(faker.name().name());
+        manufacturer.setAddress(faker.address().fullAddress());
+        return manufacturer;
     }
 }

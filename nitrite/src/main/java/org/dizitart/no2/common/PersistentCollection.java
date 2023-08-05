@@ -79,7 +79,7 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
      * @param indexOptions index options.
      * @param fields       the fields to be indexed.
      * @throws org.dizitart.no2.exceptions.IndexingException if an index already exists on the field.
-     * @see org.dizitart.no2.index.IndexOptions
+     * @see IndexOptions
      * @see IndexType
      */
     void createIndex(IndexOptions indexOptions, String... fields);
@@ -137,7 +137,7 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
      * Inserts elements into this collection. If the element has an <b>_id</b> field,
      * then the value will be used as an unique key to identify the element
      * in the collection. If the element does not have any <b>_id</b> field,
-     * then nitrite will generate a new {@link org.dizitart.no2.collection.NitriteId} and will add it to the <b>_id</b>
+     * then nitrite will generate a new {@link NitriteId} and will add it to the <b>_id</b>
      * field.
      * <p>
      * If any of the value is already indexed in the collection, then after insertion the

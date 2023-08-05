@@ -22,7 +22,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -31,10 +31,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.collection.FindOptions.skipBy;
@@ -138,80 +135,121 @@ public class RepositoryJoinTest extends BaseObjectRepositoryTest {
     }
 
     @Data
-    public static class Person implements Mappable {
+    public static class Person {
         @Id
         private NitriteId nitriteId;
         private String id;
         private String name;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument()
-                .put("nitriteId", nitriteId)
-                .put("id", id)
-                .put("name", name);
-        }
+        public static class Converter implements EntityConverter<Person> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            nitriteId = document.get("nitriteId", NitriteId.class);
-            id = document.get("id", String.class);
-            name = document.get("name", String.class);
+            @Override
+            public Class<Person> getEntityType() {
+                return Person.class;
+            }
+
+            @Override
+            public Document toDocument(Person entity, NitriteMapper nitriteMapper) {
+                return createDocument()
+                    .put("nitriteId", entity.nitriteId)
+                    .put("id", entity.id)
+                    .put("name", entity.name);
+            }
+
+            @Override
+            public Person fromDocument(Document document, NitriteMapper nitriteMapper) {
+                Person entity = new Person();
+                entity.nitriteId = document.get("nitriteId", NitriteId.class);
+                entity.id = document.get("id", String.class);
+                entity.name = document.get("name", String.class);
+                return entity;
+            }
         }
     }
 
     @Data
-    public static class Address implements Mappable {
+    public static class Address {
         @Id
         private NitriteId nitriteId;
         private String personId;
         private String street;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument()
-                .put("nitriteId", nitriteId)
-                .put("personId", personId)
-                .put("street", street);
-        }
+        public static class Converter implements EntityConverter<Address> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            nitriteId = document.get("nitriteId", NitriteId.class);
-            personId = document.get("personId", String.class);
-            street = document.get("street", String.class);
+            @Override
+            public Class<Address> getEntityType() {
+                return Address.class;
+            }
+
+            @Override
+            public Document toDocument(Address entity, NitriteMapper nitriteMapper) {
+                return createDocument()
+                    .put("nitriteId", entity.nitriteId)
+                    .put("personId", entity.personId)
+                    .put("street", entity.street);
+            }
+
+            @Override
+            public Address fromDocument(Document document, NitriteMapper nitriteMapper) {
+                Address entity = new Address();
+                entity.nitriteId = document.get("nitriteId", NitriteId.class);
+                entity.personId = document.get("personId", String.class);
+                entity.street = document.get("street", String.class);
+                return entity;
+            }
         }
     }
 
     @Data
-    public static class PersonDetails implements Mappable {
+    public static class PersonDetails {
         @Id
         private NitriteId nitriteId;
         private String id;
         private String name;
         private List<Address> addresses;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument()
-                .put("nitriteId", nitriteId)
-                .put("personId", id)
-                .put("street", name)
-                .put("addresses", addresses);
-        }
+        public static class Converter implements EntityConverter<PersonDetails> {
 
-        @Override
-        @SuppressWarnings("unchecked")
-        public void read(NitriteMapper mapper, Document document) {
-            nitriteId = document.get("nitriteId", NitriteId.class);
-            id = document.get("id", String.class);
-            name = document.get("name", String.class);
-            Set<Document> documents = document.get("addresses", Set.class);
-            this.addresses = new ArrayList<>();
-            for (Document doc : documents) {
-                Address address = new Address();
-                address.read(mapper, doc);
-                addresses.add(address);
+            @Override
+            public Class<PersonDetails> getEntityType() {
+                return PersonDetails.class;
+            }
+
+            @Override
+            public Document toDocument(PersonDetails entity, NitriteMapper nitriteMapper) {
+                List<Document> documents = new ArrayList<>();
+                if (entity.addresses != null) {
+                    for (Address address : entity.addresses) {
+                        documents.add((Document) nitriteMapper.tryConvert(address, Document.class));
+                    }
+                }
+
+                return createDocument()
+                    .put("nitriteId", entity.nitriteId)
+                    .put("personId", entity.id)
+                    .put("street", entity.name)
+                    .put("addresses", documents);
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public PersonDetails fromDocument(Document document, NitriteMapper nitriteMapper) {
+                PersonDetails entity = new PersonDetails();
+
+                entity.nitriteId = document.get("nitriteId", NitriteId.class);
+                entity.id = document.get("id", String.class);
+                entity.name = document.get("name", String.class);
+
+                Collection<Document> documents = document.get("addresses", Collection.class);
+                if (documents != null) {
+                    entity.addresses = new ArrayList<>();
+                    for (Document doc : documents) {
+                        Address address = (Address) nitriteMapper.tryConvert(doc, Address.class);
+                        entity.addresses.add(address);
+                    }
+                }
+
+                return entity;
             }
         }
     }

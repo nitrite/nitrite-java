@@ -115,12 +115,12 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
         try {
             byte[] key = objectFormatter.encodeKey(k);
 
-            // if the definitely does not exists return null
+            // if the definitely does not exist return null
             if (!rocksDB.keyMayExist(columnFamilyHandle, key, null)) {
                 return null;
             }
 
-            // double check if the key exists, if does not return null
+            // double check if the key exists, if it does not return null
             byte[] value = reference.getRocksDB().get(columnFamilyHandle, key);
             if (value == null) {
                 return null;

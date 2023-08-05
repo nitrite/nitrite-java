@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.util.Date;
@@ -30,7 +30,7 @@ import java.util.Date;
  * @author Anindya Chatterjee.
  */
 @EqualsAndHashCode
-public class SubEmployee implements Mappable {
+public class SubEmployee {
     @Getter
     @Setter
     private Long empId;
@@ -43,18 +43,28 @@ public class SubEmployee implements Mappable {
     @Setter
     private String address;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("empId", empId)
-            .put("joinDate", joinDate)
-            .put("address", address);
-    }
+    public static class Converter implements EntityConverter<SubEmployee> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        empId = document.get("empId", Long.class);
-        joinDate = document.get("joinDate", Date.class);
-        address = document.get("address", String.class);
+        @Override
+        public Class<SubEmployee> getEntityType() {
+            return SubEmployee.class;
+        }
+
+        @Override
+        public Document toDocument(SubEmployee entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("empId", entity.empId)
+                .put("joinDate", entity.joinDate)
+                .put("address", entity.address);
+        }
+
+        @Override
+        public SubEmployee fromDocument(Document document, NitriteMapper nitriteMapper) {
+            SubEmployee entity = new SubEmployee();
+            entity.empId = document.get("empId", Long.class);
+            entity.joinDate = document.get("joinDate", Date.class);
+            entity.address = document.get("address", String.class);
+            return entity;
+        }
     }
 }

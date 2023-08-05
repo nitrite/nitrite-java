@@ -27,8 +27,8 @@ import java.util.*;
 /**
  * @author Anindya Chatterjee
  */
+@Getter
 class NotInFilter extends ComparableArrayFilter {
-    @Getter
     private final Set<Comparable<?>> comparableSet;
 
     NotInFilter(String field, Comparable<?>... values) {

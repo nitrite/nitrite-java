@@ -19,9 +19,8 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.repository.annotations.Embedded;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 
@@ -29,26 +28,34 @@ import static org.dizitart.no2.collection.Document.createDocument;
  * @author Anindya Chatterjee
  */
 @Data
-public class BookId implements Mappable {
-    @Embedded(order = 0)
+public class BookId {
     private String isbn;
 
-    @Embedded(order = 1, fieldName = "book_name")
     private String name;
 
     private String author;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return createDocument("isbn", isbn)
-            .put("book_name", name)
-            .put("author", author);
-    }
+    public static class BookIdConverter implements EntityConverter<BookId> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        isbn = document.get("isbn", String.class);
-        name = document.get("book_name", String.class);
-        author = document.get("author", String.class);
+        @Override
+        public Class<BookId> getEntityType() {
+            return BookId.class;
+        }
+
+        @Override
+        public Document toDocument(BookId entity, NitriteMapper nitriteMapper) {
+            return createDocument("isbn", entity.isbn)
+                .put("book_name", entity.name)
+                .put("author", entity.author);
+        }
+
+        @Override
+        public BookId fromDocument(Document document, NitriteMapper nitriteMapper) {
+            BookId entity = new BookId();
+            entity.isbn = document.get("isbn", String.class);
+            entity.name = document.get("book_name", String.class);
+            entity.author = document.get("author", String.class);
+            return entity;
+        }
     }
 }

@@ -22,8 +22,9 @@ import jakarta.xml.bind.annotation.XmlSchemaType;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -52,6 +53,8 @@ public class NitriteStressTest {
     @Test
     public void stressTest() {
         Nitrite database = createDb();
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) database.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new TestDto.Converter());
         ObjectRepository<TestDto> testRepository = database.getRepository(TestDto.class);
         testRepository.createIndex(IndexOptions.indexOptions(IndexType.FULL_TEXT), "lastName");
         testRepository.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "birthDate");
@@ -78,7 +81,7 @@ public class NitriteStressTest {
     }
 
     @Data
-    public static class TestDto implements Mappable {
+    public static class TestDto {
 
         @XmlElement(
             name = "StudentNumber",
@@ -126,27 +129,37 @@ public class NitriteStressTest {
         public TestDto() {
         }
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument()
-                .put("studentNumber", studentNumber)
-                .put("lastName", lastName)
-                .put("prefixes", prefixes)
-                .put("initials", initials)
-                .put("firstNames", firstNames)
-                .put("nickName", nickName)
-                .put("birthDate", birthDate);
-        }
+        public static class Converter implements EntityConverter<TestDto> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            studentNumber = document.get("studentNumber", String.class);
-            lastName = document.get("lastName", String.class);
-            prefixes = document.get("prefixes", String.class);
-            initials = document.get("initials", String.class);
-            firstNames = document.get("firstNames", String.class);
-            nickName = document.get("nickName", String.class);
-            birthDate = document.get("birthDate", String.class);
+            @Override
+            public Class<TestDto> getEntityType() {
+                return TestDto.class;
+            }
+
+            @Override
+            public Document toDocument(TestDto entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument()
+                    .put("studentNumber", entity.studentNumber)
+                    .put("lastName", entity.lastName)
+                    .put("prefixes", entity.prefixes)
+                    .put("initials", entity.initials)
+                    .put("firstNames", entity.firstNames)
+                    .put("nickName", entity.nickName)
+                    .put("birthDate", entity.birthDate);
+            }
+
+            @Override
+            public TestDto fromDocument(Document document, NitriteMapper nitriteMapper) {
+                TestDto entity = new TestDto();
+                entity.studentNumber = document.get("studentNumber", String.class);
+                entity.lastName = document.get("lastName", String.class);
+                entity.prefixes = document.get("prefixes", String.class);
+                entity.initials = document.get("initials", String.class);
+                entity.firstNames = document.get("firstNames", String.class);
+                entity.nickName = document.get("nickName", String.class);
+                entity.birthDate = document.get("birthDate", String.class);
+                return entity;
+            }
         }
     }
 }

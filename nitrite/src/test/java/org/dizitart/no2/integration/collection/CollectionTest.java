@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Anindya Chatterjee
@@ -38,7 +39,7 @@ public class CollectionTest extends BaseCollectionTest {
     public void testDropCollection() {
         // check if collection exists
         // the collection is noty opened yet
-        db.hasCollection("test");
+        assertTrue(db.hasCollection("test"));
 
         // destroy the collection
         collection.drop();
@@ -50,9 +51,9 @@ public class CollectionTest extends BaseCollectionTest {
     }
 
     @Test
-    public void testCloseConnection() {
+    public void testCloseCollection() {
+        assertTrue(collection.isOpen());
         collection.close();
-
         assertFalse(collection.isOpen());
     }
 

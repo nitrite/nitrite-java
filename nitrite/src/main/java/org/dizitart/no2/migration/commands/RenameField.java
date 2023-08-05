@@ -47,9 +47,9 @@ public class RenameField extends BaseCommand implements Command {
                 for (IndexDescriptor matchingIndexDescriptor : matchingIndexDescriptors) {
                     String indexType = matchingIndexDescriptor.getIndexType();
 
-                    Fields oldIndexFields = matchingIndexDescriptor.getIndexFields();
+                    Fields oldIndexFields = matchingIndexDescriptor.getFields();
                     Fields newIndexFields = getNewIndexFields(oldIndexFields, oldName, newName);
-                    operations.dropIndex(matchingIndexDescriptor.getIndexFields());
+                    operations.dropIndex(matchingIndexDescriptor.getFields());
                     operations.createIndex(newIndexFields, indexType);
                 }
             }

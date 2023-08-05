@@ -117,7 +117,9 @@ public class CollectionFactory {
         try {
             lock.lock();
             for (NitriteCollection collection : collectionMap.values()) {
-                collection.close();
+                if (collection.isOpen()) {
+                    collection.close();
+                }
             }
             collectionMap.clear();
         } catch (Exception e) {

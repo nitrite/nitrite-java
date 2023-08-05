@@ -29,7 +29,7 @@ import java.util.Date;
  */
 @Getter
 @Setter
-@Index(value = "date")
+@Index(fields = "date")
 public class ParentClass extends SuperDuperClass {
     @Id
     protected Long id;

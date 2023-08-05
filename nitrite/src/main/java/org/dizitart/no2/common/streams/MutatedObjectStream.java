@@ -62,12 +62,13 @@ public class MutatedObjectStream<T> implements RecordStream<T> {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public T next() {
             Document item = documentIterator.next();
             if (item != null) {
                 Document record = item.clone();
                 record.remove(DOC_ID);
-                return nitriteMapper.convert(record, mutationType);
+                return (T) nitriteMapper.tryConvert(record, mutationType);
             }
             return null;
         }

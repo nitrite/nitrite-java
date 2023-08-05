@@ -16,13 +16,11 @@
 
 package org.dizitart.no2.support;
 
+import com.github.javafaker.Faker;
 import lombok.experimental.UtilityClass;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -32,12 +30,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class DataGenerator {
     private static Random random = new Random(System.currentTimeMillis());
     private static AtomicInteger counter = new AtomicInteger(random.nextInt());
+    private static Faker faker = new Faker();
 
     public static Company generateCompanyRecord() {
         Company company = new Company();
         company.setCompanyId(System.nanoTime() + counter.incrementAndGet());
-        company.setCompanyName(randomCompanyName());
-        company.setDateCreated(randomDate());
+        company.setCompanyName(faker.company().name());
+        company.setDateCreated(faker.date().past(20 * 365, TimeUnit.DAYS));
         List<String> departments = departments();
         company.setDepartments(departments);
 
@@ -63,8 +62,8 @@ public class DataGenerator {
     public static Employee generateEmployee() {
         Employee employee = new Employee();
         employee.setEmpId(System.nanoTime() + counter.incrementAndGet());
-        employee.setJoinDate(randomDate());
-        employee.setAddress(UUID.randomUUID().toString().replace('-', ' '));
+        employee.setJoinDate(faker.date().birthday());
+        employee.setAddress(faker.address().fullAddress());
 
         byte[] blob = new byte[random.nextInt(8000)];
         random.nextBytes(blob);
@@ -74,65 +73,18 @@ public class DataGenerator {
         return employee;
     }
 
-    private static Date randomDate() {
-        return new Date(-946771200000L +
-            (Math.abs(random.nextLong()) % (70L * 365 * 24 * 60 * 60 * 1000)));
-    }
-
     public static Note randomNote() {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("test.text");
-
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String strLine;
-            long line = random.nextInt(49);
-            int count = 0;
-            while ((strLine = br.readLine()) != null) {
-                if (count == line) {
-                    Note note = new Note();
-                    note.setNoteId(line);
-                    note.setText(strLine);
-                    return note;
-                }
-                count++;
-            }
-        } catch (IOException e) {
-            // ignore
-        }
-        // ignore
-        return null;
-    }
-
-    private static String randomCompanyName() {
-        InputStream inputStream = ClassLoader.getSystemResourceAsStream("english.stop");
-
-        assert inputStream != null;
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream))) {
-            String strLine;
-            int line = random.nextInt(570);
-            int count = 0;
-            while ((strLine = br.readLine()) != null) {
-                if (count == line) {
-                    return strLine + System.nanoTime() + " inc.";
-                }
-                count++;
-            }
-        } catch (IOException e) {
-            // ignore
-        }
-        // ignore
-        return null;
+        Note note = new Note();
+        note.setNoteId((long) counter.incrementAndGet());
+        note.setText(faker.lorem().paragraph());
+        return note;
     }
 
     private static List<String> departments() {
-        return new ArrayList<String>() {{
-            add("dev");
-            add("hr");
-            add("qa");
-            add("dev-ops");
-            add("sales");
-            add("marketing");
-            add("design");
-            add("support");
-        }};
+        List<String> departments = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            departments.add(faker.job().title());
+        }
+        return departments;
     }
 }

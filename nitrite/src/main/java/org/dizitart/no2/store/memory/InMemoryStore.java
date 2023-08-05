@@ -9,6 +9,8 @@ import org.dizitart.no2.store.events.StoreEvents;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
 
@@ -61,19 +63,22 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     @Override
     public void close() {
         closed = true;
+        Consumer<Map.Entry<?, ?>> closeConsumer = entry -> {
+            if (entry.getValue() instanceof AutoCloseable) {
+                try {
+                    ((AutoCloseable) entry.getValue()).close();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        };
 
-        for (NitriteMap<?, ?> map : nitriteMapRegistry.values()) {
-            map.close();
-        }
-
-        for (NitriteRTree<?, ?> rTree : nitriteRTreeMapRegistry.values()) {
-            rTree.close();
-        }
+        nitriteMapRegistry.entrySet().forEach(closeConsumer);
+        nitriteRTreeMapRegistry.entrySet().forEach(closeConsumer);
 
         nitriteMapRegistry.clear();
         nitriteRTreeMapRegistry.clear();
-        alert(StoreEvents.Closed);
-        eventBus.close();
+        super.close();
     }
 
     @Override
@@ -95,20 +100,32 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
 
         NitriteMap<Key, Value> nitriteMap = new InMemoryMap<>(mapName, this);
         nitriteMapRegistry.put(mapName, nitriteMap);
-
         return nitriteMap;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
+                                                                               Class<?> keyType,
+                                                                               Class<?> valueType) {
+        if (nitriteRTreeMapRegistry.containsKey(rTreeName)) {
+            return (InMemoryRTree<Key, Value>) nitriteRTreeMapRegistry.get(rTreeName);
+        }
+
+        NitriteRTree<Key, Value> rTree = new InMemoryRTree<>(rTreeName, this);
+        nitriteRTreeMapRegistry.put(rTreeName, rTree);
+
+        return rTree;
+    }
+
+    @Override
     public void closeMap(String mapName) {
-        // nothing to close as it is volatile map, moreover,
-        // removing it from registry means losing the map
+        nitriteMapRegistry.remove(mapName);
     }
 
     @Override
     public void closeRTree(String rTreeName) {
-        // nothing to close as it is volatile map, moreover,
-        // removing it from registry means losing the map
+        nitriteRTreeMapRegistry.remove(rTreeName);
     }
 
     @Override
@@ -125,18 +142,13 @@ public final class InMemoryStore extends AbstractNitriteStore<InMemoryConfig> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName,
-                                                                               Class<?> keyType,
-                                                                               Class<?> valueType) {
+    public void removeRTree(String rTreeName) {
         if (nitriteRTreeMapRegistry.containsKey(rTreeName)) {
-            return (InMemoryRTree<Key, Value>) nitriteRTreeMapRegistry.get(rTreeName);
+            NitriteRTree<?, ?> rTree = nitriteRTreeMapRegistry.get(rTreeName);
+            rTree.close();
+            nitriteRTreeMapRegistry.remove(rTreeName);
+            getCatalog().remove(rTreeName);
         }
-
-        NitriteRTree<Key, Value> rTree = new InMemoryRTree<>();
-        nitriteRTreeMapRegistry.put(rTreeName, rTree);
-
-        return rTree;
     }
 
     @Override

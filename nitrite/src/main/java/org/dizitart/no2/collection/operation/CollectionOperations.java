@@ -262,7 +262,7 @@ public class CollectionOperations implements AutoCloseable {
         indexOperations.clear();
     }
 
-    private void initialize() {
+    public void initialize() {
         this.processorChain = new ProcessorChain();
         this.indexOperations = new IndexOperations(collectionName, nitriteConfig, nitriteMap, eventBus);
         this.readOperations = new ReadOperations(collectionName, indexOperations,

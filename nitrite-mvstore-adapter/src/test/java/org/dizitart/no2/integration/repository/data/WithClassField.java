@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
@@ -29,20 +29,29 @@ import org.dizitart.no2.repository.annotations.Id;
  */
 @Getter
 @Setter
-public class WithClassField implements Mappable {
+public class WithClassField {
     @Id
     private String name;
     private Class<?> clazz;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("name", name)
-            .put("clazz", clazz);
-    }
+    public static class Converter implements EntityConverter<WithClassField> {
+        @Override
+        public Class<WithClassField> getEntityType() {
+            return WithClassField.class;
+        }
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        clazz = document.get("clazz", Class.class);
+        @Override
+        public Document toDocument(WithClassField entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("name", entity.name)
+                .put("clazz", entity.clazz);
+        }
+
+        @Override
+        public WithClassField fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithClassField entity = new WithClassField();
+            entity.name = document.get("name", String.class);
+            entity.clazz = document.get("clazz", Class.class);
+            return entity;
+        }
     }
 }

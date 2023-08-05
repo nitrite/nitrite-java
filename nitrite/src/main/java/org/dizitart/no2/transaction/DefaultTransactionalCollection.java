@@ -8,7 +8,6 @@ import org.dizitart.no2.collection.*;
 import org.dizitart.no2.collection.events.CollectionEventInfo;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.collection.operation.CollectionOperations;
-import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.event.EventBus;
 import org.dizitart.no2.common.event.NitriteEventBus;
@@ -18,12 +17,10 @@ import org.dizitart.no2.exceptions.*;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,7 +31,6 @@ import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
 import static org.dizitart.no2.common.util.ValidationUtils.containsNull;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
-import static org.dizitart.no2.index.IndexOptions.indexOptions;
 
 /**
  * @author Anindya Chatterjee
@@ -278,62 +274,24 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void createIndex(IndexOptions indexOptions, String... fieldNames) {
-        notNull(fieldNames, "fieldNames cannot be null");
-
-        // by default async is false while creating index
         try {
-            Fields fields = Fields.withNames(fieldNames);
             writeLock.lock();
             checkOpened();
-            if (indexOptions == null) {
-                collectionOperations.createIndex(fields, IndexType.UNIQUE);
-            } else {
-                collectionOperations.createIndex(fields, indexOptions.getIndexType());
-            }
+            primary.createIndex(indexOptions, fieldNames);
         } finally {
             writeLock.unlock();
         }
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.CreateIndex);
-        journalEntry.setCommit(() -> primary.createIndex(indexOptions, fieldNames));
-        journalEntry.setRollback(() -> primary.dropIndex(fieldNames));
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
     public void rebuildIndex(String... fieldNames) {
-        notNull(fieldNames, "fieldNames cannot be null");
-
-        IndexDescriptor indexDescriptor;
         try {
-            Fields fields = Fields.withNames(fieldNames);
-            readLock.lock();
+            writeLock.lock();
             checkOpened();
-            indexDescriptor = collectionOperations.findIndex(fields);
+            primary.rebuildIndex(fieldNames);
         } finally {
-            readLock.unlock();
+            writeLock.unlock();
         }
-
-        if (indexDescriptor != null) {
-            validateRebuildIndex(indexDescriptor);
-
-            try {
-                writeLock.lock();
-                checkOpened();
-                collectionOperations.rebuildIndex(indexDescriptor);
-            } finally {
-                writeLock.unlock();
-            }
-        } else {
-            throw new IndexingException(Arrays.toString(fieldNames) + " is not indexed");
-        }
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.RebuildIndex);
-        journalEntry.setCommit(() -> primary.rebuildIndex(fieldNames));
-        journalEntry.setRollback(() -> primary.rebuildIndex(fieldNames));
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
@@ -341,7 +299,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
         try {
             readLock.lock();
             checkOpened();
-            return collectionOperations.listIndexes();
+            return primary.listIndices();
         } finally {
             readLock.unlock();
         }
@@ -349,13 +307,10 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public boolean hasIndex(String... fieldNames) {
-        notNull(fieldNames, "fieldNames cannot be null");
-
         try {
-            Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
             checkOpened();
-            return collectionOperations.hasIndex(fields);
+            return primary.hasIndex(fieldNames);
         } finally {
             readLock.unlock();
         }
@@ -363,13 +318,10 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public boolean isIndexing(String... fieldNames) {
-        notNull(fieldNames, "fieldNames cannot be null");
-
         try {
-            Fields fields = Fields.withNames(fieldNames);
             readLock.lock();
             checkOpened();
-            return collectionOperations.isIndexing(fields);
+            return primary.isIndexing(fieldNames);
         } finally {
             readLock.unlock();
         }
@@ -377,36 +329,13 @@ class DefaultTransactionalCollection implements NitriteCollection {
 
     @Override
     public void dropIndex(String... fieldNames) {
-        notNull(fieldNames, "fieldNames cannot be null");
-
-        Fields fields = Fields.withNames(fieldNames);
         try {
             writeLock.lock();
             checkOpened();
-            collectionOperations.dropIndex(fields);
+            primary.dropIndex(fieldNames);
         } finally {
             writeLock.unlock();
         }
-
-        final AtomicReference<IndexDescriptor> indexEntry = new AtomicReference<>();
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.DropIndex);
-        journalEntry.setCommit(() -> {
-            for (IndexDescriptor entry : primary.listIndices()) {
-                if (entry.getIndexFields().equals(fields)) {
-                    indexEntry.set(entry);
-                    break;
-                }
-            }
-            primary.dropIndex(fieldNames);
-        });
-        journalEntry.setRollback(() -> {
-            if (indexEntry.get() != null) {
-                primary.createIndex(indexOptions(indexEntry.get().getIndexType()), fieldNames);
-            }
-        });
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
@@ -414,26 +343,11 @@ class DefaultTransactionalCollection implements NitriteCollection {
         try {
             writeLock.lock();
             checkOpened();
-            collectionOperations.dropAllIndices();
+            primary.dropAllIndices();
+            collectionOperations.initialize();
         } finally {
             writeLock.unlock();
         }
-
-        List<IndexDescriptor> indexEntries = new ArrayList<>();
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.DropAllIndexes);
-        journalEntry.setCommit(() -> {
-            indexEntries.addAll(primary.listIndices());
-            primary.dropAllIndices();
-        });
-        journalEntry.setRollback(() -> {
-            for (IndexDescriptor indexDescriptor : indexEntries) {
-                String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
-                primary.createIndex(indexOptions(indexDescriptor.getIndexType()), fieldNames);
-            }
-        });
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
@@ -441,16 +355,10 @@ class DefaultTransactionalCollection implements NitriteCollection {
         try {
             writeLock.lock();
             checkOpened();
-            collectionOperations.clear();
+            primary.clear();
         } finally {
             writeLock.unlock();
         }
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.Clear);
-        journalEntry.setCommit(primary::clear);
-        journalEntry.setRollback(() -> {}); // can't be rolled back
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
@@ -458,17 +366,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
         try {
             writeLock.lock();
             checkOpened();
-            collectionOperations.dropCollection();
+            primary.drop();
         } finally {
+            close();
             writeLock.unlock();
         }
         isDropped = true;
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.DropCollection);
-        journalEntry.setCommit(primary::drop);
-        journalEntry.setRollback(() -> {}); // can't be rolled back
-        transactionContext.getJournal().add(journalEntry);
     }
 
     @Override
@@ -575,8 +478,6 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private void initialize() {
         this.collectionName = transactionContext.getCollectionName();
         this.nitriteMap = transactionContext.getNitriteMap();
-        NitriteConfig nitriteConfig = transactionContext.getConfig();
-        this.nitriteStore = nitriteConfig.getNitriteStore();
         this.isDropped = false;
 
         ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock();
@@ -584,6 +485,12 @@ class DefaultTransactionalCollection implements NitriteCollection {
         this.writeLock = rwLock.writeLock();
 
         this.eventBus = new CollectionEventBus();
+        initializeOperation();
+    }
+
+    private void initializeOperation() {
+        NitriteConfig nitriteConfig = transactionContext.getConfig();
+        this.nitriteStore = nitriteConfig.getNitriteStore();
         this.collectionOperations = new CollectionOperations(collectionName, nitriteMap, nitriteConfig, eventBus);
     }
 
@@ -624,9 +531,9 @@ class DefaultTransactionalCollection implements NitriteCollection {
     private void validateRebuildIndex(IndexDescriptor indexDescriptor) {
         notNull(indexDescriptor, "indexDescriptor cannot be null");
 
-        String[] fieldNames = indexDescriptor.getIndexFields().getFieldNames().toArray(new String[0]);
+        String[] fieldNames = indexDescriptor.getFields().getFieldNames().toArray(new String[0]);
         if (isIndexing(fieldNames)) {
-            throw new IndexingException("Indexing on fields " + indexDescriptor.getIndexFields() + " is currently running");
+            throw new IndexingException("Indexing on fields " + indexDescriptor.getFields() + " is currently running");
         }
     }
 }

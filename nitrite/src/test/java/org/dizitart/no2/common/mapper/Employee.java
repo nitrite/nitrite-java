@@ -27,34 +27,44 @@ import java.util.Date;
  */
 @Data
 @ToString
-public class Employee implements Mappable {
+public class Employee {
     private String empId;
     private String name;
     private Date joiningDate;
     private Employee boss;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        Document document = Document.createDocument("empId", getEmpId())
-            .put("name", getName())
-            .put("joiningDate", getJoiningDate());
+    public static class Converter implements EntityConverter<Employee> {
 
-        if (getBoss() != null) {
-            document.put("boss", mapper.convert(getBoss(), Document.class));
+        @Override
+        public Class<Employee> getEntityType() {
+            return Employee.class;
         }
-        return document;
-    }
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        setEmpId(document.get("empId", String.class));
-        setName(document.get("name", String.class));
-        setJoiningDate(document.get("joiningDate", Date.class));
+        @Override
+        public Document toDocument(Employee entity, NitriteMapper nitriteMapper) {
+            Document document = Document.createDocument("empId", entity.getEmpId())
+                .put("name", entity.getName())
+                .put("joiningDate", entity.getJoiningDate());
 
-        Document bossDoc = document.get("boss", Document.class);
-        if (bossDoc != null) {
-            Employee boss = mapper.convert(bossDoc, Employee.class);
-            setBoss(boss);
+            if (entity.getBoss() != null) {
+                document.put("boss", nitriteMapper.tryConvert(entity.getBoss(), Document.class));
+            }
+            return document;
+        }
+
+        @Override
+        public Employee fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Employee entity = new Employee();
+            entity.setEmpId(document.get("empId", String.class));
+            entity.setName(document.get("name", String.class));
+            entity.setJoiningDate(document.get("joiningDate", Date.class));
+
+            Document bossDoc = document.get("boss", Document.class);
+            if (bossDoc != null) {
+                Employee boss = (Employee) nitriteMapper.tryConvert(bossDoc, Employee.class);
+                entity.setBoss(boss);
+            }
+            return entity;
         }
     }
 }

@@ -543,7 +543,7 @@ public abstract class Page implements Cloneable {
      */
     public void remove(int index) {
         int keyCount = getKeyCount();
-        org.dizitart.no2.mvstore.compat.v1.mvstore.type.DataType keyType = map.getKeyType();
+        DataType keyType = map.getKeyType();
         if (index == keyCount) {
             --index;
         }

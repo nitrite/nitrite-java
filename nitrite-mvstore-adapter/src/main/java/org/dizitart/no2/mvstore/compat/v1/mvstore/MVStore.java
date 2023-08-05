@@ -3538,7 +3538,7 @@ public class MVStore implements AutoCloseable
          * @return this
          */
         public Builder backgroundExceptionHandler(
-            Thread.UncaughtExceptionHandler exceptionHandler) {
+            UncaughtExceptionHandler exceptionHandler) {
             return set("backgroundExceptionHandler", exceptionHandler);
         }
 

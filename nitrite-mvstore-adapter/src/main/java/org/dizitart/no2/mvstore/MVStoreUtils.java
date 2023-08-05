@@ -76,6 +76,7 @@ class MVStoreUtils {
                         if (storeConfig.isReadOnly()) {
                             throw new NitriteIOException("Cannot create readonly database", me);
                         }
+                        throw new NitriteIOException("Cannot access database file", me);
                     }
                 } catch (InvalidOperationException | NitriteIOException ex) {
                     throw ex;
@@ -175,7 +176,17 @@ class MVStoreUtils {
         newStoreConfig.filePath(newFile.getPath());
         MVStore.Builder newBuilder = createBuilder(newStoreConfig);
 
-        UpgradeUtil.tryUpgrade(newBuilder, storeConfig);
+        try {
+            UpgradeUtil.tryUpgrade(newBuilder, storeConfig);
+        } catch (Exception e) {
+            // if the update fails, delete te new file and rethrow the exception
+            if (newFile.exists()) {
+                if (!newFile.delete()) {
+                    throw new NitriteIOException("Could not upgrade the data file", e);
+                }
+            }
+            throw e;
+        }
 
         // switch the file
         switchFiles(newFile, orgFile);

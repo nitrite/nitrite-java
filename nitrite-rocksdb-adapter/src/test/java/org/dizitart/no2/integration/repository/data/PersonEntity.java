@@ -19,9 +19,9 @@ package org.dizitart.no2.integration.repository.data;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.index.IndexType;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
@@ -34,10 +34,10 @@ import java.util.UUID;
  */
 @Data
 @Entity(value = "MyPerson", indices = {
-    @Index(value = "name", type = IndexType.FULL_TEXT),
-    @Index(value = "status", type = IndexType.NON_UNIQUE)
+    @Index(fields = "name", type = IndexType.FULL_TEXT),
+    @Index(fields = "status", type = IndexType.NON_UNIQUE)
 })
-public class PersonEntity implements Mappable {
+public class PersonEntity {
     @Id
     private String uuid;
     private String name;
@@ -56,24 +56,34 @@ public class PersonEntity implements Mappable {
         this.dateCreated = new Date();
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("uuid", uuid)
-            .put("name", name)
-            .put("status", status)
-            .put("friend", friend != null ? friend.write(mapper) : null)
-            .put("dateCreated", dateCreated);
-    }
+    public static class Converter implements EntityConverter<PersonEntity> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        if (document != null) {
-            uuid = document.get("uuid", String.class);
-            name = document.get("name", String.class);
-            status = document.get("status", String.class);
-            dateCreated = document.get("dateCreated", Date.class);
-            friend = new PersonEntity();
-            friend.read(mapper, document.get("friend", Document.class));
+        @Override
+        public Class<PersonEntity> getEntityType() {
+            return PersonEntity.class;
+        }
+
+        @Override
+        public Document toDocument(PersonEntity entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("uuid", entity.uuid)
+                .put("name", entity.name)
+                .put("status", entity.status)
+                .put("friend", entity.friend != null ? nitriteMapper.tryConvert(entity.friend, Document.class) : null)
+                .put("dateCreated", entity.dateCreated);
+        }
+
+        @Override
+        public PersonEntity fromDocument(Document document, NitriteMapper nitriteMapper) {
+            if (document != null) {
+                PersonEntity entity = new PersonEntity();
+                entity.uuid = document.get("uuid", String.class);
+                entity.name = document.get("name", String.class);
+                entity.status = document.get("status", String.class);
+                entity.dateCreated = document.get("dateCreated", Date.class);
+                entity.friend = (PersonEntity) nitriteMapper.tryConvert(document.get("friend", Document.class), PersonEntity.class);
+                return entity;
+            }
+            return null;
         }
     }
 }

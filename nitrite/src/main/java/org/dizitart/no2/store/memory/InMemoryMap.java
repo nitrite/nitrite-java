@@ -187,6 +187,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     @Override
     public void close() {
         closedFlag.compareAndSet(false, true);
+        getStore().closeMap(mapName);
     }
 
     @Override
@@ -198,6 +199,7 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     public void clear() {
         checkOpened();
         backingMap.clear();
+        getStore().closeMap(mapName);
         updateLastModifiedTime();
     }
 

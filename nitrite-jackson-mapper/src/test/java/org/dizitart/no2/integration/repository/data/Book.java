@@ -31,13 +31,13 @@ import java.util.List;
  */
 @Data
 @Entity(value = "books", indices = {
-    @Index(value = "tags", type = IndexType.NON_UNIQUE),
-    @Index(value = "description", type = IndexType.FULL_TEXT),
-    @Index(value = { "price", "publisher" })
+    @Index(fields = "tags", type = IndexType.NON_UNIQUE),
+    @Index(fields = "description", type = IndexType.FULL_TEXT),
+    @Index(fields = { "price", "publisher" })
 })
 public class Book {
     @JsonProperty("book_id")
-    @Id(fieldName = "book_id")
+    @Id(fieldName = "book_id", embeddedFields = { "isbn", "book_name" })
     private BookId bookId;
 
     private String publisher;

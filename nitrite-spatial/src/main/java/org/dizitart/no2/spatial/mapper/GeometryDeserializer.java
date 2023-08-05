@@ -20,13 +20,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.spatial.GeometryUtils;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.io.ParseException;
-import org.locationtech.jts.io.WKTReader;
 
 import java.io.IOException;
-
-import static org.dizitart.no2.spatial.mapper.GeometryExtension.GEOMETRY_ID;
 
 /**
  * @author Anindya Chatterjee
@@ -41,17 +38,6 @@ class GeometryDeserializer extends StdScalarDeserializer<Geometry> {
     @Override
     public Geometry deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         String value = p.getValueAsString();
-        WKTReader reader = new WKTReader();
-        try {
-            if (value.contains(GEOMETRY_ID)) {
-                String geometry = value.replace(GEOMETRY_ID, "");
-                return reader.read(geometry);
-            } else {
-                throw new ParseException("Not a valid geometry value " + value);
-            }
-        } catch (ParseException e) {
-            log.error("Error while parsing WKT geometry string", e);
-            throw new IOException(e);
-        }
+        return GeometryUtils.fromString(value);
     }
 }

@@ -24,7 +24,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.*;
 /**
  * @author Anindya Chatterjee
  */
-abstract class ComparableArrayFilter extends ComparableFilter {
+abstract class ComparableArrayFilter extends FieldBasedFilter {
     /**
      * Instantiates a new Comparable filter.
      *

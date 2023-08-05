@@ -20,33 +20,45 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+
+import java.io.Serializable;
 
 /**
  * @author Anindya Chatterjee.
  */
 @Getter
 @Setter
-public class WithOutId implements Comparable<WithOutId>, Mappable {
+public class WithOutId implements Comparable<WithOutId>, Serializable {
     private String name;
-    private long number;
+    private Long number;
 
     @Override
     public int compareTo(WithOutId o) {
         return Long.compare(number, o.number);
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("name", name)
-            .put("number", number);
-    }
+    public static class Converter implements EntityConverter<WithOutId> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        number = document.get("number", Long.class);
+        @Override
+        public Class<WithOutId> getEntityType() {
+            return WithOutId.class;
+        }
+
+        @Override
+        public Document toDocument(WithOutId entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("name", entity.name)
+                .put("number", entity.number);
+        }
+
+        @Override
+        public WithOutId fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithOutId entity = new WithOutId();
+            entity.name = document.get("name", String.class);
+            entity.number = document.get("number", Long.class);
+            return entity;
+        }
     }
 }

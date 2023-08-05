@@ -6,6 +6,7 @@ import org.dizitart.no2.common.util.SpatialKey;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.NitriteRTree;
+import org.dizitart.no2.store.NitriteStore;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -25,14 +26,18 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
     private final Map<SpatialKey, Key> backingMap;
     private final AtomicBoolean droppedFlag;
     private final AtomicBoolean closedFlag;
+    private final String mapName;
+    private final NitriteStore<?> nitriteStore;
 
     /**
      * Instantiates a new {@link InMemoryRTree}.
      */
-    public InMemoryRTree() {
+    public InMemoryRTree(String mapName, NitriteStore<?> nitriteStore) {
         this.backingMap = new ConcurrentHashMap<>();
         this.closedFlag = new AtomicBoolean(false);
         this.droppedFlag = new AtomicBoolean(false);
+        this.mapName = mapName;
+        this.nitriteStore = nitriteStore;
     }
 
     @Override
@@ -105,6 +110,7 @@ public class InMemoryRTree<Key extends BoundingBox, Value> implements NitriteRTr
         checkOpened();
         droppedFlag.compareAndSet(false, true);
         backingMap.clear();
+        nitriteStore.removeRTree(mapName);
     }
 
     private SpatialKey getKey(Key key, long id) {

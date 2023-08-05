@@ -100,7 +100,12 @@ class Compat {
      * The type Nitrite id.
      */
     @Data
-    static class NitriteId implements Serializable {
+    static class NitriteId implements Serializable, Comparable<NitriteId> {
         private Long idValue;
+
+        @Override
+        public int compareTo(NitriteId o) {
+            return idValue.compareTo(o.idValue);
+        }
     }
 }

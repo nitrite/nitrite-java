@@ -70,11 +70,8 @@ public class DocumentUtils {
      * @return the document
      */
     public static <T> Document skeletonDocument(NitriteMapper nitriteMapper, Class<T> type) {
-        if (nitriteMapper.isValueType(type)) {
-            return Document.createDocument();
-        }
-        T dummy = newInstance(type, true);
-        Document document = nitriteMapper.convert(dummy, Document.class);
+        Object dummy = newInstance(type, true, nitriteMapper);
+        Document document = (Document) nitriteMapper.tryConvert(dummy, Document.class);
         return removeValues(document);
     }
 
@@ -106,13 +103,14 @@ public class DocumentUtils {
 
     private static Document removeValues(Document document) {
         if (document == null) return null;
+        Document newDoc = Document.createDocument();
         for (Pair<String, Object> entry : document) {
             if (entry.getSecond() instanceof Document) {
-                document.put(entry.getFirst(), removeValues((Document) entry.getSecond()));
+                newDoc.put(entry.getFirst(), removeValues((Document) entry.getSecond()));
             } else {
-                document.put(entry.getFirst(), null);
+                newDoc.put(entry.getFirst(), null);
             }
         }
-        return document;
+        return newDoc;
     }
 }

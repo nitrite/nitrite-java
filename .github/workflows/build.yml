@@ -1,77 +1,81 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
-
-name: "Build"
+name: Build
 
 on:
   push:
     branches:
-      - 4.x
+      - main
       - develop
-
+      - release
+    paths-ignore:
+      - "README.md"
   pull_request:
     branches:
-      - 4.x
+      - main
       - develop
+      - release
+    paths-ignore:
+      - "README.md"
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [ '11' ]
+        java: ['11', '17']
+        os: ['ubuntu-latest']
     env:
-      PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
       MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
       MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
       PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
-      GITHUB_TOKEN: ${{ secrets.NITRITE_GH_TOKEN }}
-    name: Build with Java ${{ matrix.Java }}
+      PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+    name: Build with Java ${{ matrix.java }} on ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK ${{ matrix.Java }}
+      - name: Set up JDK ${{ matrix.java }} on ${{ matrix.os }}
         uses: actions/setup-java@v3
         with:
+          java-version: ${{ matrix.java }}
           distribution: 'zulu'
-          java-version: ${{ matrix.Java }}
           java-package: jdk
           architecture: x64
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew clean build
-
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '11'
-          java-package: jdk
-          architecture: x64
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+          cache: 'maven'
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
 
       - name: Prepare PGP Keys
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/release'
         run: openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out $GITHUB_WORKSPACE/secring.gpg -d -md md5
         env:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
-      - name: Publish packages to snapshot
+      - name: Build with Maven
+        run: mvn -B -ff -ntp clean install
+
+      - name: Deploy Snapshot
         if: github.ref == 'refs/heads/develop'
-        run: ./gradlew publish -Psigning.keyId=$PGP_KEY_ID -Psigning.password=$PGP_KEY_PASSWORD -Psigning.secretKeyRingFile=$GITHUB_WORKSPACE/secring.gpg
+        run: mvn -B -ff -ntp deploy -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.NITRITE_GH_TOKEN }}
+
+      - name: Deploy Release
+        if: github.ref == 'refs/heads/release'
+        run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
+          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+
+      - name: Publish Code Coverage
+        if: github.ref == 'refs/heads/release'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unittests
+          name: codecov-umbrella

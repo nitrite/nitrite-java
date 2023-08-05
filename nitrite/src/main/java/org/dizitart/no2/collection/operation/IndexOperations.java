@@ -70,12 +70,12 @@ class IndexOperations implements AutoCloseable {
     // call to this method is already synchronized, only one thread per field
     // can access it only if rebuild is already not running for that field
     void buildIndex(IndexDescriptor indexDescriptor, boolean rebuild) {
-        final Fields fields = indexDescriptor.getIndexFields();
+        final Fields fields = indexDescriptor.getFields();
         if (getBuildFlag(fields).compareAndSet(false, true)) {
             buildIndexInternal(indexDescriptor, rebuild);
             return;
         }
-        throw new IndexingException("Index build already in progress on fields: " + indexDescriptor.getIndexFields());
+        throw new IndexingException("Index build already in progress on fields: " + indexDescriptor.getFields());
     }
 
     void dropIndex(Fields fields) {
@@ -106,7 +106,7 @@ class IndexOperations implements AutoCloseable {
         // we can drop all indices in parallel
         List<Future<?>> futures = new ArrayList<>();
         for (IndexDescriptor index : listIndexes()) {
-            futures.add(runAsync(() -> dropIndex(index.getIndexFields())));
+            futures.add(runAsync(() -> dropIndex(index.getFields())));
         }
 
         for (Future<?> future : futures) {
@@ -123,7 +123,7 @@ class IndexOperations implements AutoCloseable {
 
         // recreate index manager to discard old native resources
         // special measure for RocksDB adapter
-        this.indexManager = new IndexManager(collectionName, nitriteConfig);
+        indexManager = new IndexManager(collectionName, nitriteConfig);
     }
 
     void clear() {
@@ -170,7 +170,7 @@ class IndexOperations implements AutoCloseable {
     }
 
     private void buildIndexInternal(IndexDescriptor indexDescriptor, boolean rebuild) {
-        Fields fields = indexDescriptor.getIndexFields();
+        Fields fields = indexDescriptor.getFields();
         try {
             alert(EventType.IndexStart, fields);
             // first put dirty marker
@@ -186,7 +186,7 @@ class IndexOperations implements AutoCloseable {
 
             for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
                 Document document = entry.getSecond();
-                FieldValues fieldValues = DocumentUtils.getValues(document, indexDescriptor.getIndexFields());
+                FieldValues fieldValues = DocumentUtils.getValues(document, indexDescriptor.getFields());
                 nitriteIndexer.writeIndexEntry(fieldValues, indexDescriptor, nitriteConfig);
             }
         } finally {

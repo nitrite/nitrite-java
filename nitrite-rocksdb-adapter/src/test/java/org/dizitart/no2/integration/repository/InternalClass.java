@@ -19,7 +19,7 @@ package org.dizitart.no2.integration.repository;
 
 import lombok.Data;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 
@@ -27,20 +27,29 @@ import org.dizitart.no2.repository.annotations.Id;
  * @author Anindya Chatterjee.
  */
 @Data
-class InternalClass implements Mappable {
+class InternalClass {
     @Id
-    private long id;
+    private Long id;
     private String name;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("id", id)
-            .put("name", name);
-    }
+    public static class Converter implements EntityConverter<InternalClass> {
+        @Override
+        public Class<InternalClass> getEntityType() {
+            return InternalClass.class;
+        }
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        id = document.get("id", Long.class);
-        name = document.get("name", String.class);
+        @Override
+        public Document toDocument(InternalClass entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("id", entity.id)
+                .put("name", entity.name);
+        }
+
+        @Override
+        public InternalClass fromDocument(Document document, NitriteMapper nitriteMapper) {
+            InternalClass entity = new InternalClass();
+            entity.id = document.get("id", Long.class);
+            entity.name = document.get("name", String.class);
+            return entity;
+        }
     }
 }

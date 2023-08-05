@@ -49,12 +49,12 @@ class AnnotationScanner {
         this.collection = collection;
         this.reflector = new Reflector();
         this.indices = new HashSet<>();
-        this.indexValidator = new IndexValidator(reflector);
+        this.indexValidator = new IndexValidator();
     }
 
     public void createIndices() {
         for (Index index : indices) {
-            String[] fields = index.value();
+            String[] fields = index.fields();
             if (!collection.hasIndex(fields)) {
                 collection.createIndex(indexOptions(index.type()), fields);
             }
@@ -63,14 +63,14 @@ class AnnotationScanner {
 
     public void createIdIndex() {
         if (objectIdField != null) {
-            String[] fieldNames = objectIdField.getFieldNames(nitriteMapper);
+            String[] fieldNames = objectIdField.getEmbeddedFieldNames();
             if (!collection.hasIndex(fieldNames)) {
                 collection.createIndex(fieldNames);
             }
         }
     }
 
-    public void scanIndices() {
+    public void performScan() {
         // populate from @Indices
         scanIndicesAnnotation();
 
@@ -137,7 +137,7 @@ class AnnotationScanner {
             if (field.isAnnotationPresent(Id.class)) {
                 Id id = field.getAnnotation(Id.class);
                 String fieldName = StringUtils.isNullOrEmpty(id.fieldName()) ? field.getName() : id.fieldName();
-                indexValidator.validate(field.getType(), fieldName, nitriteMapper);
+                indexValidator.validateId(id, field.getType(), fieldName, nitriteMapper);
                 if (alreadyIdFound) {
                     throw new NotIdentifiableException("Multiple id fields found for the type");
                 } else {
@@ -145,27 +145,16 @@ class AnnotationScanner {
                     objectIdField = new ObjectIdField();
                     objectIdField.setField(field);
                     objectIdField.setIdFieldName(fieldName);
-                    objectIdField.setEmbedded(isEmbeddedId(field));
+                    objectIdField.setEmbedded(id.embeddedFields().length > 0);
+                    objectIdField.setFieldNames(id.embeddedFields());
                 }
             }
         }
     }
 
-    private boolean isEmbeddedId(Field field) {
-        List<Field> fields = reflector.getAllFields(field.getType());
-        if (fields.size() == 0) return false;
-
-        for (Field f : fields) {
-            if (f.isAnnotationPresent(Embedded.class)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void populateIndex(List<Index> indexList) {
         for (Index index : indexList) {
-            String[] names = index.value();
+            String[] names = index.fields();
             List<Field> entityFields = new ArrayList<>();
 
             for (String name : names) {

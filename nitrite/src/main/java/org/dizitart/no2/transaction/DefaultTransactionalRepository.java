@@ -6,16 +6,17 @@ import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventListener;
-import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.WriteResult;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexOptions;
-import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryOperations;
+import org.dizitart.no2.repository.EntityDecorator;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.Collection;
@@ -29,17 +30,29 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @since 4.0
  */
 class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
-    private final Class<T> type;
     private final ObjectRepository<T> primary;
     private final NitriteCollection backingCollection;
     private final NitriteConfig nitriteConfig;
     private RepositoryOperations operations;
+    private Class<T> type;
+    private EntityDecorator<T> entityDecorator;
 
     public DefaultTransactionalRepository(Class<T> type,
                                           ObjectRepository<T> primary,
                                           NitriteCollection backingCollection,
                                           NitriteConfig nitriteConfig) {
         this.type = type;
+        this.primary = primary;
+        this.backingCollection = backingCollection;
+        this.nitriteConfig = nitriteConfig;
+        initialize();
+    }
+
+    public DefaultTransactionalRepository(EntityDecorator<T> entityDecorator,
+                                          ObjectRepository<T> primary,
+                                          NitriteCollection backingCollection,
+                                          TransactionConfig nitriteConfig) {
+        this.entityDecorator = entityDecorator;
         this.primary = primary;
         this.backingCollection = backingCollection;
         this.nitriteConfig = nitriteConfig;
@@ -206,7 +219,11 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
 
     @Override
     public Class<T> getType() {
-        return type;
+        if (entityDecorator != null) {
+            return entityDecorator.getEntityType();
+        } else {
+            return type;
+        }
     }
 
     @Override
@@ -215,8 +232,11 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     private void initialize() {
-        NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
-        this.operations = new RepositoryOperations(type, nitriteMapper, backingCollection);
+        if (entityDecorator != null) {
+            this.operations = new RepositoryOperations(entityDecorator, backingCollection, nitriteConfig);
+        } else {
+            this.operations = new RepositoryOperations(type, backingCollection, nitriteConfig);
+        }
         this.operations.createIndices();
     }
 }

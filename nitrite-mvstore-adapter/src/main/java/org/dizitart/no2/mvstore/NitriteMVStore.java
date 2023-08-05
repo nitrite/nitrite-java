@@ -36,7 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 1.0
  * @author Anindya Chatterjee
  */
-@Slf4j
 public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     private MVStore mvStore;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
@@ -137,6 +136,15 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         mvStore.removeMap(mvMap);
         getCatalog().remove(name);
         nitriteMapRegistry.remove(name);
+    }
+
+    @Override
+    @SuppressWarnings({"rawtypes"})
+    public void removeRTree(String rTreeName) {
+        MVMap mvMap = mvStore.openMap(rTreeName, new MVRTreeMap.Builder<>());
+        mvStore.removeMap(mvMap);
+        getCatalog().remove(rTreeName);
+        nitriteRTreeMapRegistry.remove(rTreeName);
     }
 
     @Override

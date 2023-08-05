@@ -81,7 +81,7 @@ class DocumentIndexWriter {
     private void writeIndexEntryInternal(IndexDescriptor indexDescriptor, Document document,
                                          NitriteIndexer nitriteIndexer) {
         if (indexDescriptor != null) {
-            Fields fields = indexDescriptor.getIndexFields();
+            Fields fields = indexDescriptor.getFields();
             FieldValues fieldValues = DocumentUtils.getValues(document, fields);
 
             // if dirty index and currently indexing is not running, rebuild
@@ -97,7 +97,7 @@ class DocumentIndexWriter {
     private void removeIndexEntryInternal(IndexDescriptor indexDescriptor, Document document,
                                           NitriteIndexer nitriteIndexer) {
         if (indexDescriptor != null) {
-            Fields fields = indexDescriptor.getIndexFields();
+            Fields fields = indexDescriptor.getFields();
             FieldValues fieldValues = DocumentUtils.getValues(document, fields);
 
             // if dirty index and currently indexing is not running, rebuild

@@ -33,7 +33,7 @@ public class IndexUtilsTest {
     @Test
     public void testDeriveIndexMapName2() {
         IndexDescriptor indexDescriptor = new IndexDescriptor("Index Type", new Fields(), "Collection Name");
-        indexDescriptor.setIndexFields(new Fields());
+        indexDescriptor.setFields(new Fields());
         assertEquals("$nitrite_index|Collection Name||Index Type", IndexUtils.deriveIndexMapName(indexDescriptor));
     }
 

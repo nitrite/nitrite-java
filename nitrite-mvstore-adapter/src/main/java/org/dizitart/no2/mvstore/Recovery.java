@@ -223,6 +223,8 @@ public class Recovery {
             }
             pw.flush();
             return newestVersion;
+        } catch (Exception e) {
+            throw new NitriteIOException("Failed to rollback database", e);
         }
     }
 

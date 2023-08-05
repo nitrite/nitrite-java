@@ -16,15 +16,18 @@
 
 package org.dizitart.no2.common.util;
 
-import org.dizitart.no2.integration.Retry;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.integration.Retry;
+import org.dizitart.no2.integration.repository.data.ClassA;
+import org.dizitart.no2.integration.repository.data.ClassBConverter;
+import org.dizitart.no2.integration.repository.data.ClassC;
+import org.dizitart.no2.integration.repository.data.EmptyClass;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
-import static org.dizitart.no2.common.util.ValidationUtils.notNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.dizitart.no2.common.util.ValidationUtils.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -72,5 +75,39 @@ public class ValidationUtilsTest {
         } finally {
             assertTrue(invalid);
         }
+    }
+
+    @Test
+    public void testValidateProjectionType() {
+        SimpleDocumentMapper documentMapper = new SimpleDocumentMapper();
+        documentMapper.registerEntityConverter(new ClassA.ClassAConverter());
+        documentMapper.registerEntityConverter(new ClassBConverter());
+        documentMapper.registerEntityConverter(new EmptyClass.Converter());
+
+        validateProjectionType(ClassA.class, documentMapper);
+
+        assertThrows(ValidationException.class, () -> validateProjectionType(EmptyClass.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateProjectionType(ClassC.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateProjectionType(String.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateProjectionType(Number.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateProjectionType(Integer.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateProjectionType(Object.class, documentMapper));
+    }
+
+    @Test
+    public void testValidateRepositoryType() {
+        SimpleDocumentMapper documentMapper = new SimpleDocumentMapper();
+        documentMapper.registerEntityConverter(new ClassA.ClassAConverter());
+        documentMapper.registerEntityConverter(new ClassBConverter());
+        documentMapper.registerEntityConverter(new EmptyClass.Converter());
+
+        validateRepositoryType(ClassA.class, documentMapper);
+
+        assertThrows(ValidationException.class, () -> validateRepositoryType(EmptyClass.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(ClassC.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(String.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(Number.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(Integer.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(Object.class, documentMapper));
     }
 }

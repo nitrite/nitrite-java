@@ -1,17 +1,13 @@
 version: 2
 updates:
-  - package-ecosystem: gradle
+  - package-ecosystem: maven
     directory: "/"
     schedule:
       interval: daily
-    target-branch: develop
-    ignore:
-      - dependency-name: org.objenesis:objenesis
-        versions:
-          - "> 2.6"
+    target-branch: main
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
-    target-branch: develop
+    target-branch: main

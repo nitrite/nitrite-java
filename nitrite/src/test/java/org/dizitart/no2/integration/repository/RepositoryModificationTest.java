@@ -551,7 +551,7 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     /*
      * Upsert Use Cases
      *
-     * 1. Object does not exists
+     * 1. Object does not exist
      *      a. if upsert true, it will insert
      *      b. if upsert false, nothing happens
      * 2. Object exists
@@ -564,12 +564,12 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     public void testUpdateObjectNotExistsUpsertTrue() {
         ObjectRepository<InternalClass> repo = db.getRepository(InternalClass.class);
         InternalClass a = new InternalClass();
-        a.setId(1);
+        a.setId(1L);
         a.setName("first");
         repo.insert(a);
 
         a = new InternalClass();
-        a.setId(2);
+        a.setId(2L);
         a.setName("second");
 
         // it will insert as new object
@@ -581,18 +581,18 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     public void testUpdateObjectNotExistsUpsertFalse() {
         ObjectRepository<InternalClass> repo = db.getRepository(InternalClass.class);
         InternalClass a = new InternalClass();
-        a.setId(1);
+        a.setId(1L);
         a.setName("first");
         repo.insert(a);
 
         a = new InternalClass();
-        a.setId(2);
+        a.setId(2L);
         a.setName("second");
 
         // no changes will happen to repository
         repo.update(a, false);
         assertEquals(repo.size(), 1);
-        assertEquals(repo.find().firstOrNull().getId(), 1);
+        assertEquals(repo.find().firstOrNull().getId().longValue(), 1L);
         assertEquals(repo.find().firstOrNull().getName(), "first");
     }
 
@@ -600,18 +600,18 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     public void testUpdateObjectExistsUpsertTrue() {
         ObjectRepository<InternalClass> repo = db.getRepository(InternalClass.class);
         InternalClass a = new InternalClass();
-        a.setId(1);
+        a.setId(1L);
         a.setName("first");
         repo.insert(a);
 
         a = new InternalClass();
-        a.setId(1);
+        a.setId(1L);
         a.setName("second");
 
         // update existing object, keep id same
         repo.update(a, true);
         assertEquals(repo.size(), 1);
-        assertEquals(repo.find().firstOrNull().getId(), 1);
+        assertEquals(repo.find().firstOrNull().getId().longValue(), 1L);
         assertEquals(repo.find().firstOrNull().getName(), "second");
     }
 
@@ -619,18 +619,18 @@ public class RepositoryModificationTest extends BaseObjectRepositoryTest {
     public void testUpdateObjectExistsUpsertFalse() {
         ObjectRepository<InternalClass> repo = db.getRepository(InternalClass.class);
         InternalClass a = new InternalClass();
-        a.setId(1);
+        a.setId(1L);
         a.setName("first");
         repo.insert(a);
 
         a = new InternalClass();
-        a.setId(1);
+        a.setId(1L);
         a.setName("second");
 
         // update existing object, keep id same
         repo.update(a, false);
         assertEquals(repo.size(), 1);
-        assertEquals(repo.find().firstOrNull().getId(), 1);
+        assertEquals(repo.find().firstOrNull().getId().longValue(), 1L);
         assertEquals(repo.find().firstOrNull().getName(), "second");
     }
 

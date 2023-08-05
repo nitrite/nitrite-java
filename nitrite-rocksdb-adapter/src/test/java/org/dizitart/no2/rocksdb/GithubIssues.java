@@ -20,10 +20,13 @@ package org.dizitart.no2.rocksdb;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.Test;
+
+import java.io.File;
 
 /**
  * @author Anindya Chatterjee
@@ -32,11 +35,15 @@ public class GithubIssues {
     @Test
     public void testIssue412() {
         RocksDBModule dbModule = RocksDBModule.withConfig()
-            .filePath("/tmp/rocks-demo")
+            .filePath(System.getProperty("java.io.tmpdir") + File.separator + "rocks-demo")
             .build();
+
         Nitrite db = Nitrite.builder()
             .loadModule(dbModule)
             .openOrCreate();
+
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new TestData.Converter());
 
         // Step 1
 //        NitriteCollection collection = db.getCollection("test");
@@ -54,19 +61,30 @@ public class GithubIssues {
     }
 
     @Data
-    public static class TestData implements Mappable {
+    public static class TestData {
         private Integer id;
         private String name;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return Document.createDocument("id", id).put("name", name);
-        }
+        public static class Converter implements EntityConverter<TestData> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            id = document.get("id", Integer.class);
-            name = document.get("name", String.class);
+            @Override
+            public Class<TestData> getEntityType() {
+                return TestData.class;
+            }
+
+            @Override
+            public Document toDocument(TestData entity, NitriteMapper nitriteMapper) {
+                return Document.createDocument("id", entity.id)
+                    .put("name", entity.name);
+            }
+
+            @Override
+            public TestData fromDocument(Document document, NitriteMapper nitriteMapper) {
+                TestData entity = new TestData();
+                entity.id = document.get("id", Integer.class);
+                entity.name = document.get("name", String.class);
+                return entity;
+            }
         }
     }
 }

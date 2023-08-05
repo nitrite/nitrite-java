@@ -23,6 +23,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
@@ -57,6 +58,12 @@ public class MigrationTest {
     @Before
     public void setUp() {
         db = createDb(dbPath);
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new OldClass.Converter());
+        documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Literature.Converter());
+
         faker = new Faker();
     }
 
@@ -119,6 +126,12 @@ public class MigrationTest {
             .schemaVersion(2)
             .addMigrations(migration)
             .openOrCreate("test-user", "test-password");
+
+        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        documentMapper.registerEntityConverter(new OldClass.Converter());
+        documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Converter());
+        documentMapper.registerEntityConverter(new NewClass.Literature.Converter());
 
         ObjectRepository<NewClass> newRepo = db.getRepository(NewClass.class);
         assertEquals(newRepo.size(), 10);

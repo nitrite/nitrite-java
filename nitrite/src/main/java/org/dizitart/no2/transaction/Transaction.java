@@ -2,6 +2,7 @@ package org.dizitart.no2.transaction;
 
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.repository.EntityDecorator;
 
 /**
  * Represents an ACID transaction on nitrite database.
@@ -50,6 +51,26 @@ public interface Transaction extends AutoCloseable {
      * @return the repository
      */
     <T> ObjectRepository<T> getRepository(Class<T> type, String key);
+
+
+    /**
+     * Gets an {@link ObjectRepository} to perform ACID operations on it.
+     *
+     * @param <T>  the type parameter
+     * @param entityDecorator the entityDecorator
+     * @return the repository
+     */
+    <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator);
+
+    /**
+     * Gets an {@link ObjectRepository} to perform ACID operations on it.
+     *
+     * @param <T>  the type parameter
+     * @param entityDecorator the entityDecorator
+     * @param key  the key
+     * @return the repository
+     */
+    <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator, String key);
 
     /**
      * Completes the transaction and commits the data to the underlying store.

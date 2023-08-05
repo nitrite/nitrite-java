@@ -17,12 +17,10 @@
 package org.dizitart.kno2
 
 import org.dizitart.kno2.filters.text
-import org.dizitart.no2.collection.FindOptions
 import org.dizitart.no2.collection.FindOptions.orderBy
 import org.dizitart.no2.collection.FindOptions.skipBy
 import org.dizitart.no2.common.SortOrder
 import org.dizitart.no2.exceptions.UniqueConstraintException
-import org.dizitart.no2.index.IndexOptions
 import org.dizitart.no2.index.IndexOptions.indexOptions
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.mvstore.MVStoreModule
@@ -191,7 +189,7 @@ interface MyInterface {
     val id: UUID
 }
 
-@Indices(value = [(Index(value = ["name"], type = IndexType.NON_UNIQUE))])
+@Indices(value = [(Index(fields = ["name"], type = IndexType.NON_UNIQUE))])
 abstract class SomeAbsClass(
         @Id override val id: UUID = UUID.randomUUID(),
         open val name: String = "abcd"
@@ -201,29 +199,29 @@ abstract class SomeAbsClass(
 
 @InheritIndices
 class MyClass(
-    override val id: UUID,
-    override val name: String,
-    override val checked: Boolean) : SomeAbsClass(id, name)
+    override val id: UUID = UUID.randomUUID(),
+    override val name: String = "",
+    override val checked: Boolean = false) : SomeAbsClass(id, name)
 
 @InheritIndices
 class MyClass2(
-    override val id: UUID,
-    override val name: String,
-    override val checked: Boolean,
-    val importance: Int
+    override val id: UUID = UUID.randomUUID(),
+    override val name: String = "",
+    override val checked: Boolean = false,
+    val importance: Int = 0
 ) : SomeAbsClass(id, name)
 
 data class CaObject(
-        @Id val localId: UUID,
-        val name: String
+        @Id val localId: UUID = UUID.randomUUID(),
+        val name: String = ""
 )
 
-@Indices(value = [(Index(value = ["time"], type = IndexType.UNIQUE))])
+@Indices(value = [(Index(fields = ["time"], type = IndexType.UNIQUE))])
 data class ClassWithLocalDateTime(
-    val name: String,
-    val time: LocalDateTime
+    val name: String = "",
+    val time: LocalDateTime = LocalDateTime.now()
 )
 
-data class NestedObjects(var ob1: String, @Id val id: String, val list: List<TempObject>)
-data class TempObject(val name: String, val aga: Int, val add: LevelUnder)
-data class LevelUnder(val street: String, val number: Int)
+data class NestedObjects(var ob1: String = "", @Id val id: String = "", val list: List<TempObject> = listOf())
+data class TempObject(val name: String = "", val aga: Int = 0, val add: LevelUnder = LevelUnder())
+data class LevelUnder(val street: String = "", val number: Int = 0)

@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.mvstore;
 
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -25,6 +26,10 @@ public class RecoveryTest {
     @Test
     public void testRecover() {
         assertFalse(Recovery.recover("foo.txt"));
+    }
+
+    @Test
+    public void testRecoverNegative() {
         assertFalse(Recovery.recover("File not found: "));
     }
 }

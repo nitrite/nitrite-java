@@ -22,12 +22,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 @EqualsAndHashCode
 @ToString
-public class ClassC implements Mappable {
+public class ClassC {
     @Getter
     @Setter
     private long id;
@@ -46,21 +46,37 @@ public class ClassC implements Mappable {
         return classC;
     }
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument()
-            .put("id", id)
-            .put("digit", digit)
-            .put("parent", parent != null ? parent.write(mapper) : null);
-    }
+    public static class ClassCConverter implements EntityConverter<ClassC> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        id = document.get("id", Long.class);
-        digit = document.get("digit", Double.class);
-        if (document.get("parent") != null) {
-            parent = new ClassA();
-            parent.read(mapper, document.get("parent", Document.class));
+        @Override
+        public Class<ClassC> getEntityType() {
+            return ClassC.class;
+        }
+
+        @Override
+        public Document toDocument(ClassC entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("id", entity.id)
+                .put("digit", entity.digit)
+                .put("parent", nitriteMapper.tryConvert(entity.parent, Document.class));
+        }
+
+        @Override
+        public ClassC fromDocument(Document document, NitriteMapper nitriteMapper) {
+            ClassC entity = new ClassC();
+            if (document.get("id") != null) {
+                entity.id = document.get("id", Long.class);
+            }
+
+            if (document.get("digit") != null) {
+                entity.digit = document.get("digit", Double.class);
+            }
+
+            if (document.get("parent") != null) {
+                Document doc = document.get("parent", Document.class);
+                entity.parent = (ClassA) nitriteMapper.tryConvert(doc, ClassA.class);
+            }
+            return entity;
         }
     }
 }

@@ -12,67 +12,67 @@ public class TripletTest {
 
     @Test
     public void testEquals() {
-        Triplet triplet = new Triplet(new Triplet(), "second", "third");
-        assertFalse(triplet.equals(new Triplet()));
+        Triplet<?, ?, ?> triplet = new Triplet<>(new Triplet<>(), "second", "third");
+        assertNotEquals(triplet, new Triplet<>());
     }
 
     @Test
     public void testEquals10() {
-        Triplet triplet = new Triplet("first", "second", new Triplet());
-        assertFalse(triplet.equals(new Triplet("first", "second", "third")));
+        Triplet<?, ?, ?> triplet = new Triplet<>("first", "second", new Triplet<>());
+        assertNotEquals(triplet, new Triplet<>("first", "second", "third"));
     }
 
     @Test
     public void testEquals11() {
-        Triplet triplet = new Triplet("first", "second", "third");
-        assertFalse(triplet.equals(new Triplet()));
+        Triplet<?, ?, ?> triplet = new Triplet<>("first", "second", "third");
+        assertNotEquals(triplet, new Triplet<>());
     }
 
     @Test
     public void testEquals2() {
-        Triplet o = new Triplet("first", "second", "third");
-        assertFalse((new Triplet<>()).equals(o));
+        Triplet<?, ?, ?> o = new Triplet<>("first", "second", "third");
+        assertNotEquals((new Triplet<>()), o);
     }
 
     @Test
     public void testEquals3() {
-        Triplet o = new Triplet(null, "second", "third");
-        assertFalse((new Triplet<>()).equals(o));
+        Triplet<?, ?, ?> o = new Triplet<>(null, "second", "third");
+        assertNotEquals((new Triplet<>()), o);
     }
 
     @Test
     public void testEquals4() {
-        Triplet triplet = new Triplet("first", "second", "third");
-        assertTrue(triplet.equals(new Triplet("first", "second", "third")));
+        Triplet<?, ?, ?> triplet = new Triplet<>("first", "second", "third");
+        assertEquals(triplet, new Triplet<>("first", "second", "third"));
     }
 
     @Test
     public void testEquals5() {
-        assertFalse((new Triplet<>()).equals("o"));
+        assertNotEquals("o", (new Triplet<>()));
     }
 
     @Test
     public void testEquals6() {
         Triplet<Object, Object, Object> triplet = new Triplet<>();
-        assertTrue(triplet.equals(new Triplet()));
+        assertEquals(triplet, new Triplet<>());
     }
 
     @Test
     public void testEquals7() {
-        Triplet triplet = new Triplet("first", new Triplet(), "third");
-        assertFalse(triplet.equals(new Triplet("first", "second", "third")));
+        Triplet<?, ?, ?> triplet = new Triplet<>("first", new Triplet<>(), "third");
+        assertNotEquals(triplet, new Triplet<>("first", "second", "third"));
     }
 
     @Test
     public void testEquals8() {
-        Triplet triplet = new Triplet("first", "second", null);
-        assertFalse(triplet.equals(new Triplet("first", "second", "third")));
+        Triplet<?, ?, ?> triplet = new Triplet<>("first", "second", null);
+        assertNotEquals(triplet, new Triplet<>("first", "second", "third"));
     }
 
     @Test
     public void testEquals9() {
-        Triplet triplet = new Triplet(null, "second", "third");
-        assertFalse(triplet.equals(new Triplet()));
+        Triplet<?, ?, ?> triplet = new Triplet<>(null, "second", "third");
+        assertNotEquals(triplet, new Triplet<>());
     }
 
     @Test

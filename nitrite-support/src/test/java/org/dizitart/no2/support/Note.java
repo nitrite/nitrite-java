@@ -20,7 +20,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.io.Serializable;
@@ -29,7 +29,7 @@ import java.io.Serializable;
  * @author Anindya Chatterjee.
  */
 @EqualsAndHashCode
-public class Note implements Serializable, Mappable {
+public class Note implements Serializable {
     @Getter
     @Setter
     private Long noteId;
@@ -37,14 +37,26 @@ public class Note implements Serializable, Mappable {
     @Setter
     private String text;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument().put("noteId", noteId).put("text", text);
-    }
+    public static class NoteConverter implements EntityConverter<Note> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        noteId = document.get("noteId", Long.class);
-        text = document.get("text", String.class);
+        @Override
+        public Class<Note> getEntityType() {
+            return Note.class;
+        }
+
+        @Override
+        public Document toDocument(Note entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument()
+                .put("noteId", entity.noteId)
+                .put("text", entity.text);
+        }
+
+        @Override
+        public Note fromDocument(Document document, NitriteMapper nitriteMapper) {
+            Note entity = new Note();
+            entity.noteId = document.get("noteId", Long.class);
+            entity.text = document.get("text", String.class);
+            return entity;
+        }
     }
 }

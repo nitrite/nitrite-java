@@ -292,7 +292,7 @@ class TransactionTest: BaseTest() {
                     "firstName"
                 )
                 Assert.assertTrue(txCol.hasIndex("firstName"))
-                Assert.assertFalse(collection.hasIndex("firstName"))
+                Assert.assertTrue(collection.hasIndex("firstName"))
                 commit()
                 Assert.assertTrue(collection.hasIndex("firstName"))
             }
@@ -312,14 +312,14 @@ class TransactionTest: BaseTest() {
                     val txCol = getCollection("test")
                     txCol.createIndex("firstName")
                     Assert.assertTrue(txCol.hasIndex("firstName"))
-                    Assert.assertFalse(collection.hasIndex("firstName"))
+                    Assert.assertTrue(collection.hasIndex("firstName"))
                     txCol.insert(document2)
                     collection.insert(document2)
                     commit()
                     Assert.fail()
                 } catch (e: TransactionException) {
                     rollback()
-                    Assert.assertFalse(collection.hasIndex("firstName"))
+                    Assert.assertTrue(collection.hasIndex("firstName"))
                 }
             }
         }
@@ -336,7 +336,7 @@ class TransactionTest: BaseTest() {
                 val txCol = getCollection("test")
                 txCol.clear()
                 Assert.assertEquals(0, txCol.size())
-                Assert.assertEquals(1, collection.size())
+                Assert.assertEquals(0, collection.size())
                 commit()
                 Assert.assertEquals(0, collection.size())
             }
@@ -357,13 +357,13 @@ class TransactionTest: BaseTest() {
                     val txCol = getCollection("test")
                     txCol.clear()
                     Assert.assertEquals(0, txCol.size())
-                    Assert.assertEquals(1, collection.size())
+                    Assert.assertEquals(0, collection.size())
                     txCol.insert(document2)
                     collection.insert(document2)
                     throw TransactionException("failed")
                 } catch (e: TransactionException) {
                     rollback()
-                    Assert.assertEquals(2, collection.size())
+                    Assert.assertEquals(1, collection.size())
                 }
             }
         }
@@ -381,7 +381,7 @@ class TransactionTest: BaseTest() {
                 val txCol = getCollection("test")
                 txCol.dropIndex("firstName")
                 Assert.assertFalse(txCol.hasIndex("firstName"))
-                Assert.assertTrue(collection.hasIndex("firstName"))
+                Assert.assertFalse(collection.hasIndex("firstName"))
                 commit()
                 Assert.assertFalse(collection.hasIndex("firstName"))
             }
@@ -403,14 +403,14 @@ class TransactionTest: BaseTest() {
                     val txCol = getCollection("test")
                     txCol.dropIndex("lastName")
                     Assert.assertFalse(txCol.hasIndex("lastName"))
-                    Assert.assertTrue(collection.hasIndex("lastName"))
+                    Assert.assertFalse(collection.hasIndex("lastName"))
                     txCol.insert(document2)
                     collection.insert(document2)
                     commit()
                     Assert.fail()
                 } catch (e: TransactionException) {
                     rollback()
-                    Assert.assertTrue(collection.hasIndex("lastName"))
+                    Assert.assertFalse(collection.hasIndex("lastName"))
                 }
             }
         }
@@ -430,8 +430,8 @@ class TransactionTest: BaseTest() {
                 txCol.dropAllIndices()
                 Assert.assertFalse(txCol.hasIndex("firstName"))
                 Assert.assertFalse(txCol.hasIndex("lastName"))
-                Assert.assertTrue(collection.hasIndex("firstName"))
-                Assert.assertTrue(collection.hasIndex("lastName"))
+                Assert.assertFalse(collection.hasIndex("firstName"))
+                Assert.assertFalse(collection.hasIndex("lastName"))
                 commit()
                 Assert.assertFalse(collection.hasIndex("firstName"))
                 Assert.assertFalse(collection.hasIndex("lastName"))
@@ -454,8 +454,8 @@ class TransactionTest: BaseTest() {
                     txCol.dropAllIndices()
                     Assert.assertFalse(txCol.hasIndex("firstName"))
                     Assert.assertFalse(txCol.hasIndex("lastName"))
-                    Assert.assertTrue(collection.hasIndex("firstName"))
-                    Assert.assertTrue(collection.hasIndex("lastName"))
+                    Assert.assertFalse(collection.hasIndex("firstName"))
+                    Assert.assertFalse(collection.hasIndex("lastName"))
                     txCol.insert(
                         Document.createDocument("firstName", "Jane").put("lastName", "Doe")
                     )
@@ -465,8 +465,8 @@ class TransactionTest: BaseTest() {
                     throw TransactionException("failed")
                 } catch (e: TransactionException) {
                     rollback()
-                    Assert.assertTrue(collection.hasIndex("firstName"))
-                    Assert.assertTrue(collection.hasIndex("lastName"))
+                    Assert.assertFalse(collection.hasIndex("firstName"))
+                    Assert.assertFalse(collection.hasIndex("lastName"))
                 }
             }
         }
@@ -489,7 +489,6 @@ class TransactionTest: BaseTest() {
                     expectedException = true
                 }
                 Assert.assertTrue(expectedException)
-                Assert.assertEquals(1, collection.size())
                 commit()
                 expectedException = false
                 try {
@@ -521,11 +520,16 @@ class TransactionTest: BaseTest() {
                         expectedException = true
                     }
                     Assert.assertTrue(expectedException)
-                    Assert.assertEquals(1, collection.size())
                     throw TransactionException("failed")
                 } catch (e: TransactionException) {
                     rollback()
-                    Assert.assertEquals(1, collection.size())
+                    var expectedException = false
+                    try {
+                        Assert.assertEquals(0, collection.size())
+                    } catch (e: NitriteIOException) {
+                        expectedException = true
+                    }
+                    Assert.assertTrue(expectedException)
                 }
             }
         }

@@ -19,8 +19,8 @@ package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.integration.repository.data.Employee;
+import org.dizitart.no2.repository.Cursor;
 import org.junit.Test;
 
 import java.util.AbstractCollection;

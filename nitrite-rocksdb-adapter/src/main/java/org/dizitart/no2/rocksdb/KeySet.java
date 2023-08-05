@@ -5,7 +5,10 @@ import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
 
+import java.lang.ref.Cleaner;
 import java.util.Iterator;
+
+import static org.dizitart.no2.rocksdb.Constants.CLEANER;
 
 class KeySet<K> implements Iterable<K> {
     private final ObjectFormatter objectFormatter;
@@ -25,12 +28,14 @@ class KeySet<K> implements Iterable<K> {
         return new KeyIterator();
     }
 
-    private class KeyIterator implements Iterator<K> {
+    private class KeyIterator implements Iterator<K>, AutoCloseable {
         private final RocksIterator rawEntryIterator;
+        private final Cleaner.Cleanable cleanable;
 
         public KeyIterator() {
             rawEntryIterator = rocksDB.newIterator(columnFamilyHandle);
             rawEntryIterator.seekToFirst();
+            cleanable = CLEANER.register(this, new CleaningAction(rawEntryIterator));
         }
 
         @Override
@@ -55,9 +60,8 @@ class KeySet<K> implements Iterable<K> {
         }
 
         @Override
-        protected void finalize() throws Throwable {
-            rawEntryIterator.close();
-            super.finalize();
+        public void close() {
+            cleanable.clean();
         }
     }
 }

@@ -14,6 +14,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SortedProperties extends Properties {
     private static final long serialVersionUID = 1L;
 
@@ -21,7 +22,7 @@ public class SortedProperties extends Properties {
     }
 
     public synchronized Enumeration<Object> keys() {
-        Vector var1 = new Vector();
+        Vector var1 = new Vector<>();
         Iterator var2 = this.keySet().iterator();
 
         while(var2.hasNext()) {

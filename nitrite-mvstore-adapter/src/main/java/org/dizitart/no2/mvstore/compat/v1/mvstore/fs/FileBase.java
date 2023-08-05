@@ -56,7 +56,7 @@ public abstract class FileBase extends FileChannel {
         throw new UnsupportedOperationException();
     }
 
-    public MappedByteBuffer map(FileChannel.MapMode var1, long var2, long var4) throws IOException {
+    public MappedByteBuffer map(MapMode var1, long var2, long var4) throws IOException {
         throw new UnsupportedOperationException();
     }
 

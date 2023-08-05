@@ -19,10 +19,10 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.CollectionFactory;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreCatalog;
 
@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryNameByDecorator;
+import static org.dizitart.no2.common.util.ValidationUtils.validateRepositoryType;
 
 /**
  * The {@link ObjectRepository} factory.
@@ -105,6 +107,41 @@ public class RepositoryFactory {
         }
     }
 
+
+    public <T> ObjectRepository<T> getRepository(NitriteConfig nitriteConfig, EntityDecorator<T> entityDecorator) {
+        return getRepository(nitriteConfig, entityDecorator, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> ObjectRepository<T> getRepository(NitriteConfig nitriteConfig, EntityDecorator<T> entityDecorator, String key) {
+        if (entityDecorator == null) {
+            throw new ValidationException("entityDecorator cannot be null");
+        }
+
+        if (nitriteConfig == null) {
+            throw new ValidationException("nitriteConfig cannot be null");
+        }
+
+        String collectionName = findRepositoryNameByDecorator(entityDecorator, key);
+
+        try {
+            lock.lock();
+            if (repositoryMap.containsKey(collectionName)) {
+                ObjectRepository<T> repository = (ObjectRepository<T>) repositoryMap.get(collectionName);
+                if (repository.isDropped() || !repository.isOpen()) {
+                    repositoryMap.remove(collectionName);
+                    return createRepositoryByDecorator(nitriteConfig, entityDecorator, collectionName, key);
+                } else {
+                    return repository;
+                }
+            } else {
+                return createRepositoryByDecorator(nitriteConfig, entityDecorator, collectionName, key);
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
     /**
      * Closes all opened {@link ObjectRepository}s and clear internal data from this class.
      */
@@ -126,9 +163,8 @@ public class RepositoryFactory {
                                                      String collectionName, String key) {
         NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
-        if (nitriteMapper.isValueType(type)) {
-            throw new ValidationException("Cannot create a repository for a value type");
-        }
+
+        validateRepositoryType(type, nitriteMapper);
 
         if (store.getCollectionNames().contains(collectionName)) {
             throw new ValidationException("A collection with same entity name already exists");
@@ -137,6 +173,28 @@ public class RepositoryFactory {
         NitriteCollection nitriteCollection = collectionFactory.getCollection(collectionName,
             nitriteConfig, false);
         ObjectRepository<T> repository = new DefaultObjectRepository<>(type, nitriteCollection, nitriteConfig);
+        repositoryMap.put(collectionName, repository);
+
+        writeCatalog(store, collectionName, key);
+        return repository;
+    }
+
+    private <T> ObjectRepository<T> createRepositoryByDecorator(NitriteConfig nitriteConfig,
+                                                                EntityDecorator<T> entityDecorator,
+                                                                String collectionName, String key) {
+        NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
+        NitriteStore<?> store = nitriteConfig.getNitriteStore();
+
+        if (store.getCollectionNames().contains(collectionName)) {
+            throw new ValidationException("A collection with same entity name already exists");
+        }
+
+        validateRepositoryType(entityDecorator.getEntityType(), nitriteMapper);
+
+        NitriteCollection nitriteCollection = collectionFactory.getCollection(collectionName,
+            nitriteConfig, false);
+
+        ObjectRepository<T> repository = new DefaultObjectRepository<>(entityDecorator, nitriteCollection, nitriteConfig);
         repositoryMap.put(collectionName, repository);
 
         writeCatalog(store, collectionName, key);

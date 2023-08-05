@@ -73,7 +73,7 @@ public class TransactionStoreTest {
     public void testOpenRTree() {
         NitriteStore<StoreConfig> nitriteStore = (NitriteStore<StoreConfig>) mock(NitriteStore.class);
         when(nitriteStore.openRTree(anyString(), any(), any()))
-            .thenReturn(new InMemoryRTree<>());
+            .thenReturn(new InMemoryRTree<>(null, null));
         when(nitriteStore.hasMap(anyString())).thenReturn(true);
         TransactionStore<StoreConfig> transactionStore = new TransactionStore<>(
             new TransactionStore<>(new TransactionStore<>(nitriteStore)));
@@ -88,7 +88,7 @@ public class TransactionStoreTest {
     public void testOpenRTree2() {
         NitriteStore<StoreConfig> nitriteStore = (NitriteStore<StoreConfig>) mock(NitriteStore.class);
         when(nitriteStore.openRTree(anyString(), any(), any()))
-            .thenReturn(new InMemoryRTree<>());
+            .thenReturn(new InMemoryRTree<>(null, null));
         when(nitriteStore.hasMap(anyString())).thenReturn(false);
         TransactionStore<StoreConfig> transactionStore = new TransactionStore<>(
             new TransactionStore<>(new TransactionStore<>(nitriteStore)));

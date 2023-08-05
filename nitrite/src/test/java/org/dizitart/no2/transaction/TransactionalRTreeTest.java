@@ -31,7 +31,7 @@ public class TransactionalRTreeTest {
     @Test
     public void testAdd2() {
         TransactionalRTree<BoundingBox, Object> transactionalRTree = new TransactionalRTree<>(
-            new InMemoryRTree<>());
+            new InMemoryRTree<>(null, null));
         BoundingBox boundingBox = mock(BoundingBox.class);
         when(boundingBox.getMaxY()).thenReturn(10.0f);
         when(boundingBox.getMinY()).thenReturn(10.0f);
@@ -48,7 +48,7 @@ public class TransactionalRTreeTest {
     @Test
     public void testRemove2() {
         TransactionalRTree<BoundingBox, Object> transactionalRTree = new TransactionalRTree<>(
-            new InMemoryRTree<>());
+            new InMemoryRTree<>(null, null));
         BoundingBox boundingBox = mock(BoundingBox.class);
         when(boundingBox.getMaxY()).thenReturn(10.0f);
         when(boundingBox.getMinY()).thenReturn(10.0f);
@@ -65,7 +65,7 @@ public class TransactionalRTreeTest {
     @Test
     public void testFindIntersectingKeys() {
         TransactionalRTree<BoundingBox, Object> transactionalRTree = new TransactionalRTree<>(
-            new InMemoryRTree<>());
+            new InMemoryRTree<>(null, null));
         BoundingBox boundingBox = mock(BoundingBox.class);
         when(boundingBox.getMaxY()).thenReturn(10.0f);
         when(boundingBox.getMinY()).thenReturn(10.0f);
@@ -81,7 +81,7 @@ public class TransactionalRTreeTest {
     @Test
     public void testFindIntersectingKeys2() {
         TransactionalRTree<BoundingBox, Object> transactionalRTree = new TransactionalRTree<>(
-            new TransactionalRTree<>(new InMemoryRTree<>()));
+            new TransactionalRTree<>(new InMemoryRTree<>(null, null)));
         BoundingBox boundingBox = mock(BoundingBox.class);
         when(boundingBox.getMaxY()).thenReturn(10.0f);
         when(boundingBox.getMinY()).thenReturn(10.0f);
@@ -97,7 +97,7 @@ public class TransactionalRTreeTest {
     @Test
     public void testFindContainedKeys() {
         TransactionalRTree<BoundingBox, Object> transactionalRTree = new TransactionalRTree<>(
-            new InMemoryRTree<>());
+            new InMemoryRTree<>(null, null));
         BoundingBox boundingBox = mock(BoundingBox.class);
         when(boundingBox.getMaxY()).thenReturn(10.0f);
         when(boundingBox.getMinY()).thenReturn(10.0f);
@@ -113,7 +113,7 @@ public class TransactionalRTreeTest {
     @Test
     public void testFindContainedKeys2() {
         TransactionalRTree<BoundingBox, Object> transactionalRTree = new TransactionalRTree<>(
-            new TransactionalRTree<>(new InMemoryRTree<>()));
+            new TransactionalRTree<>(new InMemoryRTree<>(null, null)));
         BoundingBox boundingBox = mock(BoundingBox.class);
         when(boundingBox.getMaxY()).thenReturn(10.0f);
         when(boundingBox.getMinY()).thenReturn(10.0f);
@@ -128,20 +128,20 @@ public class TransactionalRTreeTest {
 
     @Test
     public void testSize() {
-        assertEquals(0L, (new TransactionalRTree<>(new InMemoryRTree<>())).size());
+        assertEquals(0L, (new TransactionalRTree<>(new InMemoryRTree<>(null, null))).size());
     }
 
     @Test
     public void testClose() {
         TransactionalRTree<BoundingBox, Object> transactionalRTree = new TransactionalRTree<>(
-            new InMemoryRTree<>());
+            new InMemoryRTree<>(null, null));
         transactionalRTree.close();
         assertEquals(0L, transactionalRTree.size());
     }
 
     @Test
     public void testConstructor() {
-        assertEquals(0L, (new TransactionalRTree<>(new InMemoryRTree<>())).size());
+        assertEquals(0L, (new TransactionalRTree<>(new InMemoryRTree<>(null, null))).size());
     }
 }
 

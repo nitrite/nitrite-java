@@ -21,7 +21,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.util.Date;
@@ -32,19 +32,29 @@ import java.util.Date;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class WithDateId implements Mappable {
+public class WithDateId {
     private Date id;
     private String name;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument("name", name)
-            .put("id", id);
-    }
+    public static class Converter implements EntityConverter<WithDateId> {
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        name = document.get("name", String.class);
-        id = document.get("id", Date.class);
+        @Override
+        public Class<WithDateId> getEntityType() {
+            return WithDateId.class;
+        }
+
+        @Override
+        public Document toDocument(WithDateId entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("name", entity.name)
+                .put("id", entity.id);
+        }
+
+        @Override
+        public WithDateId fromDocument(Document document, NitriteMapper nitriteMapper) {
+            WithDateId entity = new WithDateId();
+            entity.name = document.get("name", String.class);
+            entity.id = document.get("id", Date.class);
+            return entity;
+        }
     }
 }

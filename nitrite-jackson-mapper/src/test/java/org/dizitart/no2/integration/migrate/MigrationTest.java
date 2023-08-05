@@ -121,6 +121,7 @@ public class MigrationTest {
 
         db = Nitrite.builder()
             .loadModule(storeModule)
+            .loadModule(new JacksonMapperModule())
             .fieldSeparator(".")
             .schemaVersion(2)
             .addMigrations(migration)

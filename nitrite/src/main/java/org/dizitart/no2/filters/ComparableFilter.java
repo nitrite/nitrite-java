@@ -60,26 +60,4 @@ public abstract class ComparableFilter extends FieldBasedFilter {
      * @return the object
      */
     public abstract List<?> applyOnIndex(IndexMap indexMap);
-
-    /**
-     * Process values after index scanning.
-     *
-     * @param value      the value
-     * @param subMap     the sub map
-     * @param nitriteIds the nitrite ids
-     */
-    @SuppressWarnings("unchecked")
-    protected void processIndexValue(Object value,
-                                     List<NavigableMap<Comparable<?>, Object>> subMap,
-                                     List<NitriteId> nitriteIds) {
-        if (value instanceof List) {
-            // if it is list then add it directly to nitrite ids
-            List<NitriteId> result = (List<NitriteId>) value;
-            nitriteIds.addAll(result);
-        }
-
-        if (value instanceof NavigableMap) {
-            subMap.add((NavigableMap<Comparable<?>, Object>) value);
-        }
-    }
 }

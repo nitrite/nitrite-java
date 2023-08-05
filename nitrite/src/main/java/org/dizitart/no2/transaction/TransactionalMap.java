@@ -82,7 +82,9 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     @Override
     public void clear() {
         backingMap.clear();
+//        primary.clear();
         cleared = true;
+        getStore().closeMap(mapName);
     }
 
     @Override
@@ -286,8 +288,10 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         if (!droppedFlag.get()) {
             backingMap.clear();
             tombstones.clear();
+            primary.drop();
             cleared = true;
             droppedFlag.compareAndSet(false, true);
+            getStore().removeMap(mapName);
         }
     }
 
@@ -302,10 +306,12 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         tombstones.clear();
         cleared = true;
         closedFlag.compareAndSet(false, true);
+        getStore().closeMap(mapName);
     }
 
     @Override
     public boolean isClosed() {
+        if (primary.isClosed() || primary.isDropped()) return true;
         return closedFlag.get();
     }
 

@@ -18,9 +18,9 @@ package org.dizitart.no2.common.util;
 
 import org.dizitart.no2.NitriteBuilderTest;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
-import org.dizitart.no2.common.mapper.MappableMapper;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.integration.Retry;
@@ -83,8 +83,15 @@ public class DocumentUtilsTest {
     public void testSkeletonDocument2() {
         Class<?> forNameResult = Object.class;
         Class<?> forNameResult1 = Object.class;
-        MappableMapper nitriteMapper = new MappableMapper(forNameResult, forNameResult1, Object.class);
+        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper(forNameResult, forNameResult1, Object.class);
         assertEquals(0, DocumentUtils.skeletonDocument(nitriteMapper, Object.class).size());
+    }
+
+    @Test
+    public void testSkeletonDocument3() {
+        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
+        Document document = DocumentUtils.skeletonDocument(nitriteMapper, Integer.class);
+        assertNull(document);
     }
 
     @Test
@@ -103,7 +110,9 @@ public class DocumentUtilsTest {
 
     @Test
     public void testDummyDocument() {
-        NitriteMapper nitriteMapper = new MappableMapper();
+        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
+        nitriteMapper.registerEntityConverter(new DummyTest.Converter());
+
         Document document = skeletonDocument(nitriteMapper, DummyTest.class);
         assertTrue(document.containsKey("first"));
         assertTrue(document.containsKey("second"));
@@ -111,20 +120,30 @@ public class DocumentUtilsTest {
         assertNull(document.get("second"));
     }
 
-    private static class DummyTest implements Mappable {
+    private static class DummyTest {
         private String first;
         private Double second;
 
-        @Override
-        public Document write(NitriteMapper mapper) {
-            return createDocument("first", first)
-                .put("second", second);
-        }
+        public static class Converter implements EntityConverter<DummyTest> {
 
-        @Override
-        public void read(NitriteMapper mapper, Document document) {
-            first = document.get("first", String.class);
-            second = document.get("second", Double.class);
+            @Override
+            public Class<DummyTest> getEntityType() {
+                return DummyTest.class;
+            }
+
+            @Override
+            public Document toDocument(DummyTest entity, NitriteMapper nitriteMapper) {
+                return createDocument("first", entity.first)
+                    .put("second", entity.second);
+            }
+
+            @Override
+            public DummyTest fromDocument(Document document, NitriteMapper nitriteMapper) {
+                DummyTest entity = new DummyTest();
+                entity.first = document.get("first", String.class);
+                entity.second = document.get("second", Double.class);
+                return entity;
+            }
         }
     }
 }

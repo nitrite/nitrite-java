@@ -26,6 +26,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("unchecked")
 public class NitriteMVMapTest {
     @Test
     public void testValues() {

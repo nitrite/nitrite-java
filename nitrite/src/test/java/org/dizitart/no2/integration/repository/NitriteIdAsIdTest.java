@@ -18,6 +18,7 @@
 package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.TestUtil;
 import org.dizitart.no2.collection.NitriteId;
@@ -48,6 +49,9 @@ public class NitriteIdAsIdTest {
     @Before
     public void before() {
         db = TestUtil.createDb();
+        SimpleDocumentMapper mapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        mapper.registerEntityConverter(new WithNitriteId.WithNitriteIdConverter());
+
         repo = db.getRepository(WithNitriteId.class);
     }
 
@@ -84,7 +88,7 @@ public class NitriteIdAsIdTest {
     }
 
     @Test(expected = InvalidIdException.class)
-    public void setIdDuringInsert() {
+    public void testSetIdDuringInsert() {
         WithNitriteId item1 = new WithNitriteId();
         item1.name = "first";
         item1.idField = NitriteId.newId();
@@ -93,7 +97,7 @@ public class NitriteIdAsIdTest {
     }
 
     @Test
-    public void changeIdDuringUpdate() {
+    public void testChangeIdDuringUpdate() {
         WithNitriteId item2 = new WithNitriteId();
         item2.name = "second";
         WriteResult result = repo.insert(item2);

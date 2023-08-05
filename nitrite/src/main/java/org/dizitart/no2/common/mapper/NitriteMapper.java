@@ -26,7 +26,8 @@ import org.dizitart.no2.common.module.NitritePlugin;
  */
 public interface NitriteMapper extends NitritePlugin {
     /**
-     * Converts an object of type <code>Source</code> to an object of type <code>Target</code>.
+     * Tries to convert an object of type <code>Source</code> to an object of type <code>Target</code>.
+     * If the conversion is not possible, it will return the source object.
      *
      * @param <Source> the type parameter
      * @param <Target> the type parameter
@@ -34,21 +35,5 @@ public interface NitriteMapper extends NitritePlugin {
      * @param type     the type
      * @return the target
      */
-    <Source, Target> Target convert(Source source, Class<Target> type);
-
-    /**
-     * Checks if the provided type is registered as a value type.
-     *
-     * @param type the type
-     * @return the boolean
-     */
-    boolean isValueType(Class<?> type);
-
-    /**
-     * Checks if an object is of a value type.
-     *
-     * @param object the object
-     * @return the boolean
-     */
-    boolean isValue(Object object);
+    <Source, Target> Object tryConvert(Source source, Class<Target> type);
 }

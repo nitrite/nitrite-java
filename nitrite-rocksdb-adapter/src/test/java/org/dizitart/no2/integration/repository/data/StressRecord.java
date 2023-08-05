@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository.data;
 import lombok.Getter;
 import lombok.Setter;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.mapper.Mappable;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 
 /**
@@ -28,28 +28,37 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
  */
 @Getter
 @Setter
-public class StressRecord implements Mappable {
+public class StressRecord {
     private String firstName;
-    private boolean processed;
+    private Boolean processed;
     private String lastName;
-    private boolean failed;
+    private Boolean failed;
     private String notes;
 
-    @Override
-    public Document write(NitriteMapper mapper) {
-        return Document.createDocument().put("firstName", firstName)
-            .put("processed", processed)
-            .put("lastName", lastName)
-            .put("failed", failed)
-            .put("notes", notes);
-    }
+    public static class Converter implements EntityConverter<StressRecord> {
+        @Override
+        public Class<StressRecord> getEntityType() {
+            return StressRecord.class;
+        }
 
-    @Override
-    public void read(NitriteMapper mapper, Document document) {
-        firstName = document.get("firstName", String.class);
-        processed = document.get("processed", Boolean.class);
-        lastName = document.get("lastName", String.class);
-        failed = document.get("failed", Boolean.class);
-        notes = document.get("notes", String.class);
+        @Override
+        public Document toDocument(StressRecord entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument().put("firstName", entity.firstName)
+                .put("processed", entity.processed)
+                .put("lastName", entity.lastName)
+                .put("failed", entity.failed)
+                .put("notes", entity.notes);
+        }
+
+        @Override
+        public StressRecord fromDocument(Document document, NitriteMapper nitriteMapper) {
+            StressRecord entity = new StressRecord();
+            entity.firstName = document.get("firstName", String.class);
+            entity.processed = document.get("processed", Boolean.class);
+            entity.lastName = document.get("lastName", String.class);
+            entity.failed = document.get("failed", Boolean.class);
+            entity.notes = document.get("notes", String.class);
+            return entity;
+        }
     }
 }

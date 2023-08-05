@@ -63,7 +63,7 @@ public class RepositoryFactoryTest {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
         JacksonMapper mapper = new JacksonMapper();
         db = TestUtil.createDb(fileName, NitriteModule.module(mapper));
-        factory.getRepository(db.getConfig(), null, "dummy");
+        factory.getRepository(db.getConfig(), (Class<? extends Object>) null, "dummy");
     }
 
     @Test

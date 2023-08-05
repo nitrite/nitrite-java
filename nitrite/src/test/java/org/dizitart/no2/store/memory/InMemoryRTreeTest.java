@@ -9,12 +9,12 @@ import static org.junit.Assert.assertEquals;
 public class InMemoryRTreeTest {
     @Test
     public void testConstructor() {
-        assertEquals(0L, (new InMemoryRTree<>()).size());
+        assertEquals(0L, (new InMemoryRTree<>("test", new InMemoryStore())).size());
     }
 
     @Test
     public void testSize() {
-        assertEquals(0L, (new InMemoryRTree<>()).size());
+        assertEquals(0L, (new InMemoryRTree<>("test", new InMemoryStore())).size());
     }
 
     @Test
