@@ -34,49 +34,50 @@ import java.util.Set;
  * @since 4.0.0
  * @author Anindya Chatterjee
  */
+@Getter
 @Accessors(fluent = true)
 public class MVStoreConfig implements StoreConfig {
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private Set<StoreEventListener> eventListeners;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private String filePath;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private int autoCommitBufferSize;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private char[] encryptionKey;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private Boolean isReadOnly = false;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private boolean compress;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private boolean compressHigh;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private boolean autoCommit;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private boolean autoCompact;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private boolean recoveryMode;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private int cacheSize;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private int cacheConcurrency;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
     private int pageSplitSize;
 
-    @Getter @Setter(AccessLevel.PACKAGE)
-    private FileStore fileStore;
+    @Setter(AccessLevel.PACKAGE)
+    private FileStore<?> fileStore;
 
     MVStoreConfig() {
         eventListeners = new HashSet<>();

@@ -36,6 +36,7 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  * @since 4.0.0
  */
 @Slf4j
+@SuppressWarnings("ALL")
 class MVStoreUtils {
     private MVStoreUtils() {
     }
@@ -97,7 +98,7 @@ class MVStoreUtils {
             if (store != null) {
                 store.setRetentionTime(0);
                 store.setVersionsToKeep(0);
-                store.setReuseSpace(true);
+//                store.setReuseSpace(true);
             }
         }
 

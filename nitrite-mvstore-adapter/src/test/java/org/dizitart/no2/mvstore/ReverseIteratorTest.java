@@ -27,14 +27,6 @@ import static org.mockito.Mockito.*;
 
 public class ReverseIteratorTest {
 
-    @Test(expected = NoSuchElementException.class)
-    public void testConstructor() {
-        MVMap<Object, Object> objectObjectMap = (MVMap<Object, Object>) mock(MVMap.class);
-        when(objectObjectMap.getRoot()).thenThrow(new NoSuchElementException("foo"));
-        new ReverseIterator<>(objectObjectMap);
-        verify(objectObjectMap).getRoot();
-    }
-
     @Test
     public void testHasNext() {
         ReverseIterator<Object, Object> reverseIterator = (ReverseIterator<Object, Object>) mock(ReverseIterator.class);

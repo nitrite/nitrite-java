@@ -45,7 +45,7 @@ public class MVStoreModuleBuilder {
     private int cacheSize = 16;
     private int cacheConcurrency = 16;
     private int pageSplitSize = 16;
-    private FileStore fileStore;
+    private FileStore<?> fileStore;
     private MVStoreConfig dbConfig;
 
     @Setter(AccessLevel.NONE)

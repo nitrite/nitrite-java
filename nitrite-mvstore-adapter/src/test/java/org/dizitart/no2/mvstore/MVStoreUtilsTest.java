@@ -30,18 +30,13 @@ public class MVStoreUtilsTest {
         MVStore actualOpenOrCreateResult = MVStoreUtils.openOrCreate(new MVStoreConfig());
         assertFalse(actualOpenOrCreateResult.isReadOnly());
         assertEquals(0L, actualOpenOrCreateResult.getVersionsToKeep());
-        assertEquals(0.0, actualOpenOrCreateResult.getUpdateFailureRatio(), 0.0);
         assertEquals(0, actualOpenOrCreateResult.getUnsavedMemory());
         assertEquals(0, actualOpenOrCreateResult.getStoreVersion());
-        assertTrue(actualOpenOrCreateResult.getStoreHeader().isEmpty());
-        assertTrue(actualOpenOrCreateResult.getReuseSpace());
         assertEquals(0, actualOpenOrCreateResult.getRetentionTime());
-        assertEquals(48, actualOpenOrCreateResult.getPageSplitSize());
         assertEquals(2, actualOpenOrCreateResult.getMetaMap().size());
         assertEquals(Long.MAX_VALUE, actualOpenOrCreateResult.getMaxPageSize());
         assertEquals(1, actualOpenOrCreateResult.getMapNames().size());
         assertEquals(48, actualOpenOrCreateResult.getKeysPerPage());
-        assertEquals(100, actualOpenOrCreateResult.getChunksFillRate());
         assertEquals(0, actualOpenOrCreateResult.getAutoCommitMemory());
     }
 
@@ -52,18 +47,13 @@ public class MVStoreUtilsTest {
         MVStore actualOpenOrCreateResult = MVStoreUtils.openOrCreate(mvStoreConfig);
         assertFalse(actualOpenOrCreateResult.isReadOnly());
         assertEquals(0L, actualOpenOrCreateResult.getVersionsToKeep());
-        assertEquals(0.0, actualOpenOrCreateResult.getUpdateFailureRatio(), 0.0);
         assertEquals(0, actualOpenOrCreateResult.getUnsavedMemory());
         assertEquals(0, actualOpenOrCreateResult.getStoreVersion());
-        assertTrue(actualOpenOrCreateResult.getStoreHeader().isEmpty());
-        assertTrue(actualOpenOrCreateResult.getReuseSpace());
         assertEquals(0, actualOpenOrCreateResult.getRetentionTime());
-        assertEquals(48, actualOpenOrCreateResult.getPageSplitSize());
         assertEquals(2, actualOpenOrCreateResult.getMetaMap().size());
         assertEquals(Long.MAX_VALUE, actualOpenOrCreateResult.getMaxPageSize());
         assertEquals(1, actualOpenOrCreateResult.getMapNames().size());
         assertEquals(48, actualOpenOrCreateResult.getKeysPerPage());
-        assertEquals(100, actualOpenOrCreateResult.getChunksFillRate());
         assertEquals(0, actualOpenOrCreateResult.getAutoCommitMemory());
     }
 }

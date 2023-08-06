@@ -55,24 +55,24 @@ public class DefaultObjectRepositoryTest {
     @Test
     public void testCreateIndex() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        doNothing().when(nitriteCollection).createIndex(any(), any());
+        doNothing().when(nitriteCollection).createIndex(any(IndexOptions.class), any(String[].class));
         Class<Object> type = Object.class;
         DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
             nitriteCollection, new NitriteConfig());
         defaultObjectRepository.createIndex(IndexOptions.indexOptions("Index Type"), "foo", "foo", "foo");
-        verify(nitriteCollection).createIndex(any(), any());
+        verify(nitriteCollection).createIndex(any(IndexOptions.class), any(String[].class));
         assertNull(defaultObjectRepository.getAttributes());
     }
 
     @Test
     public void testRebuildIndex() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        doNothing().when(nitriteCollection).rebuildIndex(any());
+        doNothing().when(nitriteCollection).rebuildIndex(any(String[].class));
         Class<Object> type = Object.class;
         DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
             nitriteCollection, new NitriteConfig());
         defaultObjectRepository.rebuildIndex("foo", "foo", "foo");
-        verify(nitriteCollection).rebuildIndex(any());
+        verify(nitriteCollection).rebuildIndex(any(String[].class));
         assertNull(defaultObjectRepository.getAttributes());
     }
 
@@ -94,36 +94,36 @@ public class DefaultObjectRepositoryTest {
     @Test
     public void testHasIndex() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        when(nitriteCollection.hasIndex(any())).thenReturn(true);
+        when(nitriteCollection.hasIndex(any(String[].class))).thenReturn(true);
         Class<Object> type = Object.class;
         DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
             nitriteCollection, new NitriteConfig());
         assertTrue(defaultObjectRepository.hasIndex("foo", "foo", "foo"));
-        verify(nitriteCollection).hasIndex(any());
+        verify(nitriteCollection).hasIndex(any(String[].class));
         assertNull(defaultObjectRepository.getAttributes());
     }
 
     @Test
     public void testIsIndexing() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        when(nitriteCollection.isIndexing(any())).thenReturn(true);
+        when(nitriteCollection.isIndexing(any(String[].class))).thenReturn(true);
         Class<Object> type = Object.class;
         DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
             nitriteCollection, new NitriteConfig());
         assertTrue(defaultObjectRepository.isIndexing("foo", "foo", "foo"));
-        verify(nitriteCollection).isIndexing(any());
+        verify(nitriteCollection).isIndexing(any(String[].class));
         assertNull(defaultObjectRepository.getAttributes());
     }
 
     @Test
     public void testDropIndex() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        doNothing().when(nitriteCollection).dropIndex(any());
+        doNothing().when(nitriteCollection).dropIndex(any(String[].class));
         Class<Object> type = Object.class;
         DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
             nitriteCollection, new NitriteConfig());
         defaultObjectRepository.dropIndex("foo", "foo", "foo");
-        verify(nitriteCollection).dropIndex(any());
+        verify(nitriteCollection).dropIndex(any(String[].class));
         assertNull(defaultObjectRepository.getAttributes());
     }
 

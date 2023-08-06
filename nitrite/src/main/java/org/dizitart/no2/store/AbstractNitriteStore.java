@@ -20,11 +20,12 @@ import java.util.Set;
  * @author Anindya Chatterjee
  * @since 4.0
  */
+@Getter
 @Slf4j
 public abstract class AbstractNitriteStore<Config extends StoreConfig>
     implements NitriteStore<Config> {
 
-    @Getter @Setter
+    @Setter
     private Config storeConfig;
 
     /**

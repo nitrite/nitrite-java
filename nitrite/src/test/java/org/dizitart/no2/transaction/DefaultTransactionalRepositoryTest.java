@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.mockito.Mockito.*;
 
+@SuppressWarnings("all")
 public class DefaultTransactionalRepositoryTest {
     @Test
     public void testAddProcessor() {
@@ -44,18 +45,18 @@ public class DefaultTransactionalRepositoryTest {
     public void testCreateIndex() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        doNothing().when(defaultTransactionalRepository).createIndex(any(), any());
+        doNothing().when(defaultTransactionalRepository).createIndex(any(IndexOptions.class), any(String[].class));
         defaultTransactionalRepository.createIndex(IndexOptions.indexOptions("Index Type"), "foo", "foo", "foo");
-        verify(defaultTransactionalRepository).createIndex(any(), any());
+        verify(defaultTransactionalRepository).createIndex(any(IndexOptions.class), any(String[].class));
     }
 
     @Test
     public void testRebuildIndex() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        doNothing().when(defaultTransactionalRepository).rebuildIndex(any());
+        doNothing().when(defaultTransactionalRepository).rebuildIndex(any(String[].class));
         defaultTransactionalRepository.rebuildIndex("foo", "foo", "foo");
-        verify(defaultTransactionalRepository).rebuildIndex(any());
+        verify(defaultTransactionalRepository).rebuildIndex(any(String[].class));
     }
 
     @Test
@@ -71,27 +72,27 @@ public class DefaultTransactionalRepositoryTest {
     public void testHasIndex() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        when(defaultTransactionalRepository.hasIndex(any())).thenReturn(true);
+        when(defaultTransactionalRepository.hasIndex(any(String[].class))).thenReturn(true);
         defaultTransactionalRepository.hasIndex("foo", "foo", "foo");
-        verify(defaultTransactionalRepository).hasIndex(any());
+        verify(defaultTransactionalRepository).hasIndex(any(String[].class));
     }
 
     @Test
     public void testIsIndexing() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        when(defaultTransactionalRepository.isIndexing(any())).thenReturn(true);
+        when(defaultTransactionalRepository.isIndexing(any(String[].class))).thenReturn(true);
         defaultTransactionalRepository.isIndexing("foo", "foo", "foo");
-        verify(defaultTransactionalRepository).isIndexing(any());
+        verify(defaultTransactionalRepository).isIndexing(any(String[].class));
     }
 
     @Test
     public void testDropIndex() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        doNothing().when(defaultTransactionalRepository).dropIndex(any());
+        doNothing().when(defaultTransactionalRepository).dropIndex(any(String[].class));
         defaultTransactionalRepository.dropIndex("foo", "foo", "foo");
-        verify(defaultTransactionalRepository).dropIndex(any());
+        verify(defaultTransactionalRepository).dropIndex(any(String[].class));
     }
 
     @Test

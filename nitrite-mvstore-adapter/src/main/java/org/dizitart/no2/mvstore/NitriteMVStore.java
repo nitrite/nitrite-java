@@ -17,7 +17,6 @@
 package org.dizitart.no2.mvstore;
 
 
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.AbstractNitriteStore;
@@ -77,10 +76,6 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     public void close() {
-        if (getStoreConfig().autoCompact()) {
-            compact();
-        }
-
         // close nitrite maps
         for (NitriteMap<?, ?> nitriteMap : nitriteMapRegistry.values()) {
             nitriteMap.close();
@@ -93,7 +88,11 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         nitriteMapRegistry.clear();
         nitriteRTreeMapRegistry.clear();
 
-        mvStore.close();
+        if (getStoreConfig().autoCompact()) {
+           mvStore.close(-1);
+        } else {
+            mvStore.close();
+        }
         alert(StoreEvents.Closed);
         eventBus.close();
     }
@@ -163,10 +162,6 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     @Override
     public String getStoreVersion() {
         return "MVStore/" + org.h2.engine.Constants.VERSION;
-    }
-
-    public void compact() {
-        mvStore.compactMoveChunks();
     }
 
     private void initEventBus() {

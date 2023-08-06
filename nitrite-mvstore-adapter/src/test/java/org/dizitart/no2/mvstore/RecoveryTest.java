@@ -23,14 +23,14 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 
 public class RecoveryTest {
-    @Test
-    public void testRecover() {
-        assertFalse(Recovery.recover("foo.txt"));
+    @Test(expected = NitriteIOException.class)
+    public void testRecoverNegative() {
+        Recovery.recover("foo.txt");
     }
 
-    @Test
-    public void testRecoverNegative() {
-        assertFalse(Recovery.recover("File not found: "));
+    @Test(expected = NitriteIOException.class)
+    public void testRecoverNegative2() {
+        Recovery.recover("File not found: ");
     }
 }
 
