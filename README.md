@@ -1,8 +1,8 @@
 # Nitrite Database
 
-[![Build](https://github.com/nitrite/nitrite-java/actions/workflows/build.yml/badge.svg?branch=develop)](https://github.com/nitrite/nitrite-java/actions/workflows/build.yml)
-[![CodeQL](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml)
-[![codecov](https://codecov.io/gh/nitrite/nitrite-java/branch/develop/graph/badge.svg)](https://codecov.io/gh/nitrite/nitrite-java)
+[![Build](https://github.com/nitrite/nitrite-java/actions/workflows/build.yml/badge.svg?branch=main)](https://github.com/nitrite/nitrite-java/actions/workflows/build.yml)
+[![CodeQL](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml)
+[![codecov](https://codecov.io/gh/nitrite/nitrite-java/branch/main/graph/badge.svg)](https://codecov.io/gh/nitrite/nitrite-java)
 ![Javadocs](https://javadoc.io/badge/org.dizitart/nitrite.svg)
 [![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/nitrite/nitrite-java/discussions)
 
