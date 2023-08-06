@@ -73,7 +73,7 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Publish Code Coverage
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/main'
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
