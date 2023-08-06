@@ -144,7 +144,7 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
                     <excludes>
-                        <exclude>**/compat.v1/*</exclude>
+                        <exclude>**/compat/v1/**/*</exclude>
                     </excludes>
                 </configuration>
             </plugin>
