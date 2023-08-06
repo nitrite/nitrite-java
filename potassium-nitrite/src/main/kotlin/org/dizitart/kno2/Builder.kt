@@ -19,6 +19,7 @@ package org.dizitart.kno2
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.NitriteBuilder
 import org.dizitart.no2.NitriteConfig
+import org.dizitart.no2.common.mapper.NitriteMapper
 import org.dizitart.no2.common.module.NitriteModule
 import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.spatial.SpatialIndexer
@@ -57,7 +58,7 @@ class Builder internal constructor() {
     }
 
     private fun loadDefaultPlugins(builder: NitriteBuilder) {
-        val mapperFound = modules.any { module -> module.plugins().any { it is KNO2JacksonMapper } }
+        val mapperFound = modules.any { module -> module.plugins().any { it is NitriteMapper } }
         val spatialIndexerFound = modules.any { module -> module.plugins().any { it is SpatialIndexer } }
 
         if (!mapperFound && spatialIndexerFound) {
