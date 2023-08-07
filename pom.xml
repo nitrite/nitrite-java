@@ -51,7 +51,7 @@
         <jaxb-impl.version>4.0.0</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
         <guava.version>32.1.1-jre</guava.version>
-        <threetenbp.version>1.6.0</threetenbp.version>
+        <threetenbp.version>1.6.8</threetenbp.version>
 
         <error-prone.version>2.20.0</error-prone.version>
         <jacoco.version>0.8.10</jacoco.version>
