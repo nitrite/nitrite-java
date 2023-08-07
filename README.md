@@ -6,7 +6,9 @@
 ![Javadocs](https://javadoc.io/badge/org.dizitart/nitrite.svg)
 [![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/nitrite/nitrite-java/discussions)
 
-<img src="http://www.dizitart.org/nitrite-database/logo/nitrite-logo.svg" alt="Logo" width="200"/>
+<p align="center">
+    <img src="assets/nitrite-logo.svg" width="256"  alt="nitrite logo">
+</p>
 
 **NO**sql **O**bject (**NO<sub>2</sub>** a.k.a Nitrite) database is an open source nosql embedded
 document store written in Java. It supports both in-memory and file based persistent store.
