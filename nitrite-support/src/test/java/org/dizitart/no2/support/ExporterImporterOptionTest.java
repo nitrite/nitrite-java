@@ -14,79 +14,84 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.support;
+ package org.dizitart.no2.support;
 
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.PersistentCollection;
-import org.dizitart.no2.index.IndexDescriptor;
-import org.dizitart.no2.repository.ObjectRepository;
-import org.junit.Test;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.Random;
-
-import static org.dizitart.no2.collection.Document.createDocument;
-import static org.junit.Assert.assertEquals;
-
-/**
- * @author Anindya Chatterjee.
- */
-public class ExporterImporterOptionTest extends BaseExternalTest {
-
-    @Test
-    public void testImportExportSingle() {
-        schemaFile = System.getProperty("java.io.tmpdir") + File.separator
-            + "nitrite" + File.separator + "single-schema.json";
-
-        Random random = new Random();
-        for (int i = 0; i < 5; i++) {
-            sourceEmpRepo.insert(DataGenerator.generateEmployee());
-            sourceKeyedEmpRepo.insert(DataGenerator.generateEmployee());
-
-            Document document = createDocument("first-field", random.nextGaussian());
-            sourceFirstColl.insert(document);
-        }
-
-        Exporter exporter = Exporter.of(sourceDb);
-        exporter.withOptions(new ExportOptions() {{
-            setCollections(new ArrayList<PersistentCollection<?>>() {{
-                add(sourceEmpRepo);
-                add(sourceKeyedEmpRepo);
-                add(sourceFirstColl);
-            }});
-        }});
-        exporter.exportTo(schemaFile);
-
-        Importer importer = Importer.of(destDb);
-        importer.importFrom(schemaFile);
-
-        ObjectRepository<Employee> destEmpRepo = destDb.getRepository(Employee.class);
-        ObjectRepository<Employee> destKeyedEmpRepo = destDb.getRepository(Employee.class, "key");
-        NitriteCollection destFirstColl = destDb.getCollection("first");
-
-        assertEquals(filter(sourceFirstColl.find().toList()),
-            filter(destFirstColl.find().toList()));
-        assertEquals(sourceEmpRepo.find().toList(),
-            destEmpRepo.find().toList());
-        assertEquals(sourceKeyedEmpRepo.find().toList(),
-            destKeyedEmpRepo.find().toList());
-
-        assertEquals(sourceEmpRepo.listIndices(), destEmpRepo.listIndices());
-        assertEquals(sourceKeyedEmpRepo.listIndices(), destKeyedEmpRepo.listIndices());
-        assertEquals(sourceFirstColl.listIndices(), destFirstColl.listIndices());
-
-        ObjectRepository<Company> destCompRepo = destDb.getRepository(Company.class);
-        NitriteCollection destSecondColl = destDb.getCollection("second");
-
-        assertEquals(filter(destSecondColl.find().toList()),
-            new ArrayList<Document>());
-        assertEquals(destCompRepo.find().toList(),
-            new ArrayList<Company>());
-
-        assertEquals(destCompRepo.listIndices(), sourceCompRepo.listIndices());
-        assertEquals(destSecondColl.listIndices(), new LinkedHashSet<IndexDescriptor>());
-    }
-}
+ import org.dizitart.no2.Nitrite;
+ import org.dizitart.no2.collection.Document;
+ import org.dizitart.no2.collection.NitriteCollection;
+ import org.dizitart.no2.common.PersistentCollection;
+ import org.dizitart.no2.index.IndexDescriptor;
+ import org.dizitart.no2.repository.ObjectRepository;
+ import org.junit.Test;
+ 
+ import java.io.File;
+ import java.util.*;
+ 
+ import static org.dizitart.no2.collection.Document.createDocument;
+ import static org.junit.Assert.assertEquals;
+ 
+ /**
+  * @author Anindya Chatterjee.
+  */
+ public class ExporterImporterOptionTest extends BaseExternalTest {
+ 
+     @Test
+     public void testImportExportSingle() {
+         schemaFile = System.getProperty("java.io.tmpdir") + File.separator
+             + "nitrite" + File.separator + "single-schema.json";
+ 
+         Random random = new Random();
+         for (int i = 0; i < 5; i++) {
+             sourceEmpRepo.insert(DataGenerator.generateEmployee());
+             sourceKeyedEmpRepo.insert(DataGenerator.generateEmployee());
+ 
+             Document document = createDocument("first-field", random.nextGaussian());
+             sourceFirstColl.insert(document);
+         }
+         closeDb();
+ 
+         ExportOptions exportOptions = new ExportOptions();
+         exportOptions.setNitriteFactory(() -> createDb(sourceDbFile));
+         exportOptions.setCollections(List.of("first"));
+         exportOptions.setRepositories(List.of("org.dizitart.no2.support.Employee"));
+         exportOptions.setKeyedRepositories(Map.of("key", Set.of("org.dizitart.no2.support.Employee")));
+ 
+         Exporter exporter = Exporter.withOptions(exportOptions);
+         exporter.exportTo(schemaFile);
+ 
+         ImportOptions importOptions = new ImportOptions();
+         importOptions.setNitriteFactory(() -> createDb(destDbFile));
+ 
+         Importer importer = Importer.withOptions(importOptions);
+         importer.importFrom(schemaFile);
+ 
+         openDb();
+ 
+         ObjectRepository<Employee> destEmpRepo = destDb.getRepository(Employee.class);
+         ObjectRepository<Employee> destKeyedEmpRepo = destDb.getRepository(Employee.class, "key");
+         NitriteCollection destFirstColl = destDb.getCollection("first");
+ 
+         assertEquals(filter(sourceFirstColl.find().toList()),
+             filter(destFirstColl.find().toList()));
+         assertEquals(sourceEmpRepo.find().toList(),
+             destEmpRepo.find().toList());
+         assertEquals(sourceKeyedEmpRepo.find().toList(),
+             destKeyedEmpRepo.find().toList());
+ 
+         assertEquals(sourceEmpRepo.listIndices(), destEmpRepo.listIndices());
+         assertEquals(sourceKeyedEmpRepo.listIndices(), destKeyedEmpRepo.listIndices());
+         assertEquals(sourceFirstColl.listIndices(), destFirstColl.listIndices());
+ 
+         ObjectRepository<Company> destCompRepo = destDb.getRepository(Company.class);
+         NitriteCollection destSecondColl = destDb.getCollection("second");
+ 
+         assertEquals(filter(destSecondColl.find().toList()),
+             new ArrayList<Document>());
+         assertEquals(destCompRepo.find().toList(),
+             new ArrayList<Company>());
+ 
+         assertEquals(destCompRepo.listIndices(), sourceCompRepo.listIndices());
+         assertEquals(destSecondColl.listIndices(), new LinkedHashSet<IndexDescriptor>());
+     }
+ }
+ 

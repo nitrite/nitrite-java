@@ -14,245 +14,195 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.support;
+ package org.dizitart.no2.support;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import lombok.Setter;
-import org.apache.commons.codec.binary.Hex;
-import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.operation.IndexManager;
-import org.dizitart.no2.common.PersistentCollection;
-import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.index.IndexDescriptor;
-import org.dizitart.no2.repository.ObjectRepository;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.dizitart.no2.common.Constants.*;
-import static org.dizitart.no2.common.util.ObjectUtils.*;
-
-/**
- * @author Anindya Chatterjee
- */
-@Setter
-class NitriteJsonExporter {
-    private JsonGenerator generator;
-    private ExportOptions options;
-
-    public void exportData() throws IOException, ClassNotFoundException {
-        Nitrite db = options.getNitriteFactory().create();
-        Set<String> collectionNames = db.listCollectionNames();
-        Set<String> repositoryNames = db.listRepositories();
-        Map<String, Set<String>> keyedRepositoryNames = db.listKeyedRepositories();
-        List<IndexDescriptor> indexDescriptors = new ArrayList<>();
-
-        if (!options.getCollections().isEmpty()) {
-            collectionNames = new HashSet<>(options.getCollections());
-        }
-
-        if (!options.getRepositories().isEmpty()) {
-            repositoryNames = new HashSet<>(options.getRepositories());
-        }
-
-        if (!options.getKeyedRepositories().isEmpty()) {
-            keyedRepositoryNames = options.getKeyedRepositories();
-        }
-
-        if (options.isExportIndices()) {
-            for (String collectionName : collectionNames) {
-                IndexManager indexManager = new IndexManager(collectionName, db.getConfig());
-                indexDescriptors.addAll(indexManager.getIndexDescriptors());
-            }
-
-            for (String repositoryName : repositoryNames) {
-                IndexManager indexManager = new IndexManager(repositoryName, db.getConfig());
-                indexDescriptors.addAll(indexManager.getIndexDescriptors());
-            }
-
-            for (Map.Entry<String, Set<String>> entry : keyedRepositoryNames.entrySet()) {
-                String key = entry.getKey();
-                Set<String> enttityNameSet = entry.getValue();
-                for (String entityName : enttityNameSet) {
-                    String repositoryName = findRepositoryName(key, entityName);
-                    IndexManager indexManager = new IndexManager(repositoryName, db.getConfig());
-                    indexDescriptors.addAll(indexManager.getIndexDescriptors());
-                }
-            }
-        }
-
-
-
-        List<PersistentCollection<?>> collections = options.getCollections();
-        Set<String> collectionNames;
-        Set<String> repositoryNames;
-        Map<String, Set<String>> keyedRepositoryNames;
-        if (collections.isEmpty()) {
-            collectionNames = db.listCollectionNames();
-            repositoryNames = db.listRepositories();
-            keyedRepositoryNames = db.listKeyedRepositories();
-        } else {
-            collectionNames = new HashSet<>();
-            repositoryNames = new HashSet<>();
-            keyedRepositoryNames = new HashMap<>();
-            for (PersistentCollection<?> collection : collections) {
-                String name;
-                if (collection instanceof NitriteCollection) {
-                    NitriteCollection nitriteCollection = (NitriteCollection) collection;
-                    name = nitriteCollection.getName();
-                    collectionNames.add(name);
-                } else if (collection instanceof ObjectRepository) {
-                    ObjectRepository<?> repository = (ObjectRepository<?>) collection;
-                    name = repository.getDocumentCollection().getName();
-                    if (name.contains(KEY_OBJ_SEPARATOR)) {
-                        String key = getKeyName(name);
-                        String type = getKeyedRepositoryType(name);
-                        Set<String> types;
-                        if (keyedRepositoryNames.containsKey(key)) {
-                            types = keyedRepositoryNames.get(key);
-                        } else {
-                            types = new LinkedHashSet<>();
-                        }
-                        types.add(type);
-                        keyedRepositoryNames.put(key, types);
-                    } else {
-                        repositoryNames.add(name);
-                    }
-                }
-            }
-        }
-        exportData(collectionNames, repositoryNames, keyedRepositoryNames);
-        generator.close();
-    }
-
-    private void exportData(Set<String> collectionNames,
-                            Set<String> repositoryNames,
-                            Map<String, Set<String>> keyedRepositoryNames) throws IOException, ClassNotFoundException {
-        generator.writeStartObject();
-
-        generator.writeFieldName(TAG_COLLECTIONS);
-        generator.writeStartArray();
-        for (String collectionName : collectionNames) {
-            NitriteCollection nitriteCollection = db.getCollection(collectionName);
-            writeCollection(nitriteCollection);
-        }
-        generator.writeEndArray();
-
-        generator.writeFieldName(TAG_REPOSITORIES);
-        generator.writeStartArray();
-        for (String repoName : repositoryNames) {
-            Class<?> type = Class.forName(repoName);
-            ObjectRepository<?> repository = db.getRepository(type);
-            writeRepository(repository);
-        }
-        generator.writeEndArray();
-
-        generator.writeFieldName(TAG_KEYED_REPOSITORIES);
-        generator.writeStartArray();
-        for (Map.Entry<String, Set<String>> entry : keyedRepositoryNames.entrySet()) {
-            String key = entry.getKey();
-            Set<String> typeNames = entry.getValue();
-            for (String typeName : typeNames) {
-                Class<?> type = Class.forName(typeName);
-                ObjectRepository<?> repository = db.getRepository(type, key);
-                writeKeyedRepository(key, repository);
-            }
-        }
-        generator.writeEndArray();
-
-        generator.writeEndObject();
-    }
-
-
-    private void writeRepository(ObjectRepository<?> repository) throws IOException {
-        generator.writeStartObject();
-        generator.writeFieldName(TAG_TYPE);
-        generator.writeString(repository.getType().getName());
-
-        Collection<IndexDescriptor> indices = repository.listIndices();
-        writeIndices(indices);
-
-        DocumentCursor cursor = repository.getDocumentCollection().find();
-        writeContent(cursor);
-        generator.writeEndObject();
-    }
-
-    private void writeKeyedRepository(String key, ObjectRepository<?> repository) throws IOException {
-        generator.writeStartObject();
-
-        generator.writeFieldName(TAG_KEY);
-        generator.writeString(key);
-
-        generator.writeFieldName(TAG_TYPE);
-        generator.writeString(repository.getType().getName());
-
-        Collection<IndexDescriptor> indices = repository.listIndices();
-        writeIndices(indices);
-
-        DocumentCursor cursor = repository.getDocumentCollection().find();
-        writeContent(cursor);
-        generator.writeEndObject();
-    }
-
-    private void writeCollection(NitriteCollection nitriteCollection) throws IOException {
-        generator.writeStartObject();
-        generator.writeFieldName(TAG_NAME);
-        generator.writeString(nitriteCollection.getName());
-
-        Collection<IndexDescriptor> indices = nitriteCollection.listIndices();
-        writeIndices(indices);
-
-        DocumentCursor cursor = nitriteCollection.find();
-        writeContent(cursor);
-        generator.writeEndObject();
-    }
-
-    private void writeIndices(Collection<IndexDescriptor> indices) throws IOException {
-        generator.writeFieldName(TAG_INDICES);
-        generator.writeStartArray();
-        if (options.isExportIndices()) {
-            for (IndexDescriptor index : indices) {
-                generator.writeStartObject();
-                generator.writeFieldName(TAG_INDEX);
-                generator.writeObject(writeEncodedObject(index));
-                generator.writeEndObject();
-            }
-        }
-        generator.writeEndArray();
-    }
-
-    private void writeContent(DocumentCursor cursor) throws IOException {
-        generator.writeFieldName(TAG_DATA);
-        generator.writeStartArray();
-        if (options.isExportData()) {
-            for (Document document : cursor) {
-                generator.writeStartObject();
-                generator.writeFieldName(TAG_KEY);
-                generator.writeObject(writeEncodedObject(document.get(DOC_ID)));
-
-                generator.writeFieldName(TAG_VALUE);
-                generator.writeObject(writeEncodedObject(document));
-                generator.writeEndObject();
-            }
-        }
-        generator.writeEndArray();
-    }
-
-    private String writeEncodedObject(Object object) {
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            try (ObjectOutputStream oos = new ObjectOutputStream(os)) {
-                oos.writeObject(object);
-                byte[] data = os.toByteArray();
-                return Hex.encodeHexString(data);
-            }
-        } catch (IOException e) {
-            throw new NitriteIOException("Failed to write object", e);
-        }
-    }
-}
+ import com.fasterxml.jackson.core.JsonGenerator;
+ import lombok.Setter;
+ import org.apache.commons.codec.binary.Hex;
+ import org.dizitart.no2.Nitrite;
+ import org.dizitart.no2.collection.Document;
+ import org.dizitart.no2.collection.DocumentCursor;
+ import org.dizitart.no2.collection.NitriteCollection;
+ import org.dizitart.no2.collection.NitriteId;
+ import org.dizitart.no2.collection.operation.IndexManager;
+ import org.dizitart.no2.common.tuples.Pair;
+ import org.dizitart.no2.exceptions.NitriteIOException;
+ import org.dizitart.no2.index.IndexDescriptor;
+ import org.dizitart.no2.repository.ObjectRepository;
+ import org.dizitart.no2.store.NitriteMap;
+ import org.dizitart.no2.store.NitriteStore;
+ 
+ import java.io.ByteArrayOutputStream;
+ import java.io.IOException;
+ import java.io.ObjectOutputStream;
+ import java.util.*;
+ import java.util.stream.Collectors;
+ 
+ import static org.dizitart.no2.common.Constants.*;
+ import static org.dizitart.no2.common.util.ObjectUtils.*;
+ 
+ /**
+  * @author Anindya Chatterjee
+  */
+ @Setter
+ class NitriteJsonExporter {
+     private JsonGenerator generator;
+     private ExportOptions options;
+ 
+     public void exportData() throws IOException, ClassNotFoundException {
+         try(Nitrite db = options.getNitriteFactory().create()) {
+             Set<String> collectionNames = options.getCollections() == null ? db.listCollectionNames() : Set.of();
+             Set<String> repositoryNames = options.getRepositories() == null ? db.listRepositories() : Set.of();
+             Map<String, Set<String>> keyedRepositoryNames = options.getKeyedRepositories() == null
+                 ? db.listKeyedRepositories() : Map.of();
+ 
+             List<IndexDescriptor> indexDescriptors = new ArrayList<>();
+             if (options.getCollections() != null && !options.getCollections().isEmpty()) {
+                 collectionNames = new HashSet<>(options.getCollections());
+             }
+ 
+             if (options.getRepositories() != null && !options.getRepositories().isEmpty()) {
+                 repositoryNames = new HashSet<>(options.getRepositories());
+             }
+ 
+             if (options.getKeyedRepositories() != null && !options.getKeyedRepositories().isEmpty()) {
+                 keyedRepositoryNames = options.getKeyedRepositories();
+             }
+ 
+             if (options.isExportIndices()) {
+                 for (String collectionName : collectionNames) {
+                     try(IndexManager indexManager = new IndexManager(collectionName, db.getConfig())) {
+                         indexDescriptors.addAll(indexManager.getIndexDescriptors());
+                     }
+                 }
+ 
+                 for (String repositoryName : repositoryNames) {
+                     try(IndexManager indexManager = new IndexManager(repositoryName, db.getConfig())) {
+                         indexDescriptors.addAll(indexManager.getIndexDescriptors());
+                     }
+                 }
+ 
+                 for (Map.Entry<String, Set<String>> entry : keyedRepositoryNames.entrySet()) {
+                     String key = entry.getKey();
+                     Set<String> enttityNameSet = entry.getValue();
+                     for (String entityName : enttityNameSet) {
+                         String repositoryName = findRepositoryName(key, entityName);
+                         try(IndexManager indexManager = new IndexManager(repositoryName, db.getConfig())) {
+                             indexDescriptors.addAll(indexManager.getIndexDescriptors());
+                         }
+                     }
+                 }
+             }
+ 
+             exportData(db, collectionNames, repositoryNames, keyedRepositoryNames, indexDescriptors);
+             generator.close();
+         }
+     }
+ 
+     private void exportData(Nitrite db,
+                             Set<String> collectionNames,
+                             Set<String> repositoryNames,
+                             Map<String, Set<String>> keyedRepositoryNames,
+                             List<IndexDescriptor> indexDescriptors) throws IOException {
+         NitriteStore<?> nitriteStore = db.getStore();
+ 
+         generator.writeStartObject();
+ 
+         writeMaps(collectionNames, indexDescriptors, nitriteStore, TAG_COLLECTIONS);
+ 
+         writeMaps(repositoryNames, indexDescriptors, nitriteStore, TAG_REPOSITORIES);
+ 
+         writeKeyedMaps(keyedRepositoryNames, indexDescriptors, nitriteStore);
+ 
+         generator.writeEndObject();
+     }
+ 
+     private void writeMaps(Set<String> mapNames, List<IndexDescriptor> indexDescriptors,
+                            NitriteStore<?> nitriteStore, String tagName) throws IOException {
+         generator.writeFieldName(tagName);
+         generator.writeStartArray();
+         for (String mapName : mapNames) {
+             try(NitriteMap<NitriteId, Document> nitriteMap
+                 = nitriteStore.openMap(mapName, NitriteId.class, Document.class)) {
+                 List<IndexDescriptor> indexes = indexDescriptors.stream().filter(d ->
+                     mapName.equalsIgnoreCase(d.getCollectionName())).collect(Collectors.toList());
+                 writeNitriteMap(nitriteMap, indexes);
+             }
+         }
+         generator.writeEndArray();
+     }
+ 
+     private void writeKeyedMaps(Map<String, Set<String>> keyedMapNames, List<IndexDescriptor> indexDescriptors,
+                                 NitriteStore<?> nitriteStore) throws IOException {
+         generator.writeFieldName(TAG_KEYED_REPOSITORIES);
+         generator.writeStartArray();
+         for (Map.Entry<String, Set<String>> entry : keyedMapNames.entrySet()) {
+             String key = entry.getKey();
+             Set<String> typeNames = entry.getValue();
+             for (String typeName : typeNames) {
+                 String repoName = findRepositoryName(typeName, key);
+                 try(NitriteMap<NitriteId, Document> nitriteMap
+                         = nitriteStore.openMap(repoName, NitriteId.class, Document.class)) {
+                     List<IndexDescriptor> indexes = indexDescriptors.stream().filter(d ->
+                         repoName.equalsIgnoreCase(d.getCollectionName())).collect(Collectors.toList());
+                     writeNitriteMap(nitriteMap, indexes);
+                 }
+             }
+         }
+         generator.writeEndArray();
+     }
+ 
+     private void writeNitriteMap(NitriteMap<NitriteId, Document> nitriteMap,
+                                  List<IndexDescriptor> indexes) throws IOException {
+         generator.writeStartObject();
+         generator.writeFieldName(TAG_NAME);
+         generator.writeString(nitriteMap.getName());
+         writeIndices(indexes);
+         writeContent(nitriteMap);
+         generator.writeEndObject();
+     }
+ 
+     private void writeIndices(Collection<IndexDescriptor> indices) throws IOException {
+         generator.writeFieldName(TAG_INDICES);
+         generator.writeStartArray();
+         if (options.isExportIndices()) {
+             for (IndexDescriptor index : indices) {
+                 generator.writeStartObject();
+                 generator.writeFieldName(TAG_INDEX);
+                 generator.writeObject(writeEncodedObject(index));
+                 generator.writeEndObject();
+             }
+         }
+         generator.writeEndArray();
+     }
+ 
+     private void writeContent(NitriteMap<NitriteId, Document> nitriteMap) throws IOException {
+         generator.writeFieldName(TAG_DATA);
+         generator.writeStartArray();
+         if (options.isExportData()) {
+             for (Pair<NitriteId, Document> entry : nitriteMap.entries()) {
+                 generator.writeStartObject();
+                 generator.writeFieldName(TAG_KEY);
+                 generator.writeObject(writeEncodedObject(entry.getFirst()));
+ 
+                 generator.writeFieldName(TAG_VALUE);
+                 generator.writeObject(writeEncodedObject(entry.getSecond()));
+                 generator.writeEndObject();
+             }
+         }
+         generator.writeEndArray();
+     }
+ 
+     private String writeEncodedObject(Object object) {
+         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+             try (ObjectOutputStream oos = new ObjectOutputStream(os)) {
+                 oos.writeObject(object);
+                 byte[] data = os.toByteArray();
+                 return Hex.encodeHexString(data);
+             }
+         } catch (IOException e) {
+             throw new NitriteIOException("Failed to write object", e);
+         }
+     }
+ }
+ 

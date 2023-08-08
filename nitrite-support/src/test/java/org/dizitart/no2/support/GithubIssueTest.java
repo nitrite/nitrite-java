@@ -14,6 +14,7 @@ import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.repository.annotations.Entity;
 import org.dizitart.no2.repository.annotations.Id;
 import org.junit.Test;
 
@@ -23,6 +24,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.dizitart.no2.support.BaseExternalTest.getRandomTempDbFile;
 import static org.junit.Assert.assertNotNull;
@@ -73,13 +77,22 @@ public class GithubIssueTest {
             assertTrue(value instanceof Long);
 
             widgetRepo.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "localDateEpochDay");
-
-            // export the db
-            Exporter exporter = Exporter.of(db);
-            exporter.exportTo(exportFilePath);
         }
 
+        // export the db
+        ExportOptions exportOptions = new ExportOptions();
+        exportOptions.setNitriteFactory(() -> createDb(initialDbPath));
+        exportOptions.setRepositories(List.of("widget"));
+        Exporter exporter = Exporter.withOptions(exportOptions);
+        exporter.exportTo(exportFilePath);
+
         // import the db
+        ImportOptions importOptions = new ImportOptions();
+        importOptions.setNitriteFactory(() -> createDb(importedDbPath));
+        Importer importer = Importer.withOptions(importOptions);
+        importer.importFrom(exportFilePath);
+
+        // open the imported db
         storeModule = MVStoreModule.withConfig()
                 .filePath(importedDbPath)
                 .build();
@@ -89,8 +102,6 @@ public class GithubIssueTest {
                 .loadModule(new JacksonMapperModule())
                 .fieldSeparator(".")
                 .openOrCreate()) {
-            Importer importer = Importer.of(db);
-            importer.importFrom(exportFilePath);
 
             // retrieve the widget as a Document to check the stored type
             ObjectRepository<Widget> widgetRepo = db.getRepository(Widget.class);
@@ -120,11 +131,23 @@ public class GithubIssueTest {
         Files.deleteIfExists(path2);
     }
 
-    @Data
-    static class Widget {
-        @Id
-        NitriteId id;
-        Long localDateEpochDay;
+    private Nitrite createDb(String path) {
+        MVStoreModule storeModule = MVStoreModule.withConfig()
+                .filePath(path)
+                .build();
+
+        return Nitrite.builder()
+                .loadModule(storeModule)
+                .loadModule(new JacksonMapperModule())
+                .fieldSeparator(".")
+                .openOrCreate();
     }
 
+    @Data
+    @Entity(value = "widget")
+    static class Widget {
+        @Id
+        private NitriteId id;
+        private Long localDateEpochDay;
+    }
 }

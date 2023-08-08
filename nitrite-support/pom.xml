@@ -51,6 +51,10 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>de.undercouch</groupId>
+            <artifactId>bson4jackson</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
