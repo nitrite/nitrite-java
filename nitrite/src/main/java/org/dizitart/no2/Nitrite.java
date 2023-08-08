@@ -203,7 +203,7 @@ public interface Nitrite extends AutoCloseable {
      * Gets the map of all key to the fully qualified class names corresponding
      * to all keyed-{@link ObjectRepository}s in the store.
      *
-     * @return the set of all registered classes' names.
+     * @return the map of all registered classes' names against the keys.
      */
     Map<String, Set<String>> listKeyedRepositories();
 

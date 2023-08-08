@@ -17,11 +17,13 @@
 package org.dizitart.no2.support;
 
 import com.fasterxml.jackson.core.JsonGenerator;
+import lombok.Setter;
 import org.apache.commons.codec.binary.Hex;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.operation.IndexManager;
 import org.dizitart.no2.common.PersistentCollection;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.IndexDescriptor;
@@ -31,28 +33,62 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.dizitart.no2.common.Constants.*;
-import static org.dizitart.no2.common.util.ObjectUtils.getKeyName;
-import static org.dizitart.no2.common.util.ObjectUtils.getKeyedRepositoryType;
+import static org.dizitart.no2.common.util.ObjectUtils.*;
 
 /**
  * @author Anindya Chatterjee
  */
+@Setter
 class NitriteJsonExporter {
-    private final Nitrite db;
     private JsonGenerator generator;
     private ExportOptions options;
 
-    public NitriteJsonExporter(Nitrite db) {
-        this.db = db;
-    }
-
-    public void setGenerator(JsonGenerator generator) {
-        this.generator = generator;
-    }
-
     public void exportData() throws IOException, ClassNotFoundException {
+        Nitrite db = options.getNitriteFactory().create();
+        Set<String> collectionNames = db.listCollectionNames();
+        Set<String> repositoryNames = db.listRepositories();
+        Map<String, Set<String>> keyedRepositoryNames = db.listKeyedRepositories();
+        List<IndexDescriptor> indexDescriptors = new ArrayList<>();
+
+        if (!options.getCollections().isEmpty()) {
+            collectionNames = new HashSet<>(options.getCollections());
+        }
+
+        if (!options.getRepositories().isEmpty()) {
+            repositoryNames = new HashSet<>(options.getRepositories());
+        }
+
+        if (!options.getKeyedRepositories().isEmpty()) {
+            keyedRepositoryNames = options.getKeyedRepositories();
+        }
+
+        if (options.isExportIndices()) {
+            for (String collectionName : collectionNames) {
+                IndexManager indexManager = new IndexManager(collectionName, db.getConfig());
+                indexDescriptors.addAll(indexManager.getIndexDescriptors());
+            }
+
+            for (String repositoryName : repositoryNames) {
+                IndexManager indexManager = new IndexManager(repositoryName, db.getConfig());
+                indexDescriptors.addAll(indexManager.getIndexDescriptors());
+            }
+
+            for (Map.Entry<String, Set<String>> entry : keyedRepositoryNames.entrySet()) {
+                String key = entry.getKey();
+                Set<String> enttityNameSet = entry.getValue();
+                for (String entityName : enttityNameSet) {
+                    String repositoryName = findRepositoryName(key, entityName);
+                    IndexManager indexManager = new IndexManager(repositoryName, db.getConfig());
+                    indexDescriptors.addAll(indexManager.getIndexDescriptors());
+                }
+            }
+        }
+
+
+
         List<PersistentCollection<?>> collections = options.getCollections();
         Set<String> collectionNames;
         Set<String> repositoryNames;
@@ -206,10 +242,6 @@ class NitriteJsonExporter {
             }
         }
         generator.writeEndArray();
-    }
-
-    public void setOptions(ExportOptions options) {
-        this.options = options;
     }
 
     private String writeEncodedObject(Object object) {

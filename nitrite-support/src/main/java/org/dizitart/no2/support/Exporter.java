@@ -25,8 +25,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.exceptions.ValidationException;
 
 import java.io.*;
+
+import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 
 /**
@@ -41,8 +44,6 @@ import java.io.*;
  * @since 1.0
  */
 public class Exporter {
-    private Nitrite db;
-    private JsonFactory jsonFactory;
     private ExportOptions options;
 
     private Exporter() {
@@ -51,44 +52,34 @@ public class Exporter {
     /**
      * Creates a new {@link Exporter} instance.
      *
-     * @param db the db
+     * @param exportOptions the exportOptions
      * @return the exporter instance
      */
-    public static Exporter of(Nitrite db) {
-        return of(db, createObjectMapper());
-    }
-
-    public static Exporter of(Nitrite db, ObjectMapper objectMapper) {
+    public static Exporter withOptions(ExportOptions exportOptions) {
         Exporter exporter = new Exporter();
-        exporter.db = db;
-        exporter.jsonFactory = objectMapper.getFactory();
-        exporter.options = new ExportOptions();
+        notNull(exportOptions, "exportOptions cannot be null");
+        notNull(exportOptions.getNitriteFactory(), "nitriteFactory cannot be null");
+
+        if (exportOptions.getJsonFactory() == null) {
+            exportOptions.setJsonFactory(createObjectMapper().getFactory());
+        }
+        exporter.options = exportOptions;
+
         return exporter;
     }
 
     public static ObjectMapper createObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.setVisibility(
             objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
                 .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
-        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         return objectMapper;
-    }
-
-    /**
-     * Sets {@link ExportOptions} to customize data export.
-     *
-     * @param options the options
-     * @return the exporter
-     */
-    public Exporter withOptions(ExportOptions options) {
-        this.options = options;
-        return this;
     }
 
     /**
@@ -148,13 +139,13 @@ public class Exporter {
     public void exportTo(Writer writer) {
         JsonGenerator generator;
         try {
-            generator = jsonFactory.createGenerator(writer);
+            generator = options.getJsonFactory().createGenerator(writer);
             generator.setPrettyPrinter(new DefaultPrettyPrinter());
         } catch (IOException ioe) {
             throw new NitriteIOException("I/O error while writing data with writer", ioe);
         }
 
-        NitriteJsonExporter jsonExporter = new NitriteJsonExporter(db);
+        NitriteJsonExporter jsonExporter = new NitriteJsonExporter();
         jsonExporter.setGenerator(generator);
         jsonExporter.setOptions(options);
         try {
