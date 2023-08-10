@@ -47,10 +47,10 @@ import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
      public void exportData() throws IOException, ClassNotFoundException {
          try(Nitrite db = options.getNitriteFactory().create()) {
-             Set<String> collectionNames = options.getCollections() == null ? db.listCollectionNames() : Set.of();
-             Set<String> repositoryNames = options.getRepositories() == null ? db.listRepositories() : Set.of();
+             Set<String> collectionNames = options.getCollections() == null ? db.listCollectionNames() : new HashSet<>();
+             Set<String> repositoryNames = options.getRepositories() == null ? db.listRepositories() : new HashSet<>();
              Map<String, Set<String>> keyedRepositoryNames = options.getKeyedRepositories() == null
-                 ? db.listKeyedRepositories() : Map.of();
+                 ? db.listKeyedRepositories() : new HashMap<>();
 
              List<IndexDescriptor> indexDescriptors = new ArrayList<>();
              if (options.getCollections() != null && !options.getCollections().isEmpty()) {
