@@ -19,6 +19,7 @@ package org.dizitart.no2.support;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import lombok.Setter;
+import org.apache.commons.codec.binary.Base64;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
@@ -32,7 +33,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 
 import static org.dizitart.no2.common.Constants.*;
@@ -157,7 +157,7 @@ class NitriteJsonImporter {
 
     private <T> T readEncodedObject(String encodedString, Class<T> type) {
         try {
-            byte[] data = Base64.getDecoder().decode(encodedString);
+            byte[] data = Base64.decodeBase64(encodedString);
             try (ByteArrayInputStream is = new ByteArrayInputStream(data)) {
                 try (ObjectInputStream ois = new ObjectInputStream(is)) {
                     return type.cast(ois.readObject());

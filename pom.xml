@@ -33,6 +33,7 @@
         <rocksdb.version>8.3.2</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
+        <commons-codec.version>1.16.0</commons-codec.version>
         <commons-io.version>2.13.0</commons-io.version>
         <kotlin.version>1.9.0</kotlin.version>
         <kotlinx-serialization.version>1.5.1</kotlinx-serialization.version>
@@ -105,6 +106,13 @@
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlinx-serialization-json</artifactId>
                 <version>${kotlinx-serialization.version}</version>
+            </dependency>
+
+            <!-- Commons Dependencies -->
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
             </dependency>
 
             <dependency>

@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.common.crypto;
 
-import org.dizitart.no2.common.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 import org.dizitart.no2.common.util.CryptoUtils;
 import org.dizitart.no2.common.util.SecureString;
 import org.dizitart.no2.exceptions.NitriteSecurityException;
@@ -33,7 +33,7 @@ import java.nio.charset.StandardCharsets;
  * A password based AES string encryption utility.
  *
  * <p>
- * NOTE: This is a derivative work of https://mkyong.com/java/java-symmetric-key-cryptography-example/
+ * NOTE: This is a derivative work of <a href="https://mkyong.com/java/java-symmetric-key-cryptography-example/">...</a>
  * </p>
  *
  * @author Anindya Chatterjee
@@ -115,7 +115,7 @@ public class AESEncryptor implements Encryptor {
                 .array();
 
             // string representation, base64, send this string to other for decryption.
-            return Base64.encodeToString(cipherTextWithIvSalt, Base64.URL_SAFE);
+            return Base64.encodeBase64URLSafeString(cipherTextWithIvSalt);
         } catch (Exception e) {
             throw new NitriteSecurityException("Failed to encrypt data", e);
         }
@@ -133,7 +133,7 @@ public class AESEncryptor implements Encryptor {
     @Override
     public String decrypt(String encryptedText) {
         try {
-            byte[] decode = Base64.decode(encryptedText.getBytes(UTF_8), Base64.URL_SAFE);
+            byte[] decode = Base64.decodeBase64(encryptedText);
 
             // get back the iv and salt from the cipher text
             ByteBuffer bb = ByteBuffer.wrap(decode);
