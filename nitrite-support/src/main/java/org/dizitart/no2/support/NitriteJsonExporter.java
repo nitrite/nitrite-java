@@ -81,8 +81,8 @@ import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
                  for (Map.Entry<String, Set<String>> entry : keyedRepositoryNames.entrySet()) {
                      String key = entry.getKey();
-                     Set<String> enttityNameSet = entry.getValue();
-                     for (String entityName : enttityNameSet) {
+                     Set<String> entityNameSet = entry.getValue();
+                     for (String entityName : entityNameSet) {
                          String repositoryName = findRepositoryName(key, entityName);
                          try(IndexManager indexManager = new IndexManager(repositoryName, db.getConfig())) {
                              indexDescriptors.addAll(indexManager.getIndexDescriptors());
