@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.kno2.kotlinxserialization
+package org.dizitart.kno2.serialization
 
 import org.dizitart.no2.NitriteConfig
 import org.dizitart.no2.collection.Document
@@ -26,7 +26,7 @@ import org.dizitart.no2.exceptions.ObjectMappingException
 import java.util.Date
 
 /**
- * Mapper using kotlinx.serialization
+ * org.dizitart.no2.common.mapper.NitriteMapper implementation using using kotlinx.serialization
  *
  * @author Joris Jensen
  * @since 4.2.0

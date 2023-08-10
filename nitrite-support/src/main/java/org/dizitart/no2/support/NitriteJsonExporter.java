@@ -18,7 +18,6 @@
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import lombok.Setter;
-import org.apache.commons.codec.binary.Hex;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
@@ -195,7 +194,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
              try (ObjectOutputStream oos = new ObjectOutputStream(os)) {
                  oos.writeObject(object);
                  byte[] data = os.toByteArray();
-                 return Hex.encodeHexString(data);
+                 return Base64.getEncoder().encodeToString(data);
              }
          } catch (IOException e) {
              throw new NitriteIOException("Failed to write object", e);

@@ -1,4 +1,4 @@
-package org.dizitart.kno2.kotlinxserialization
+package org.dizitart.kno2.serialization
 
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.ExperimentalSerializationApi
