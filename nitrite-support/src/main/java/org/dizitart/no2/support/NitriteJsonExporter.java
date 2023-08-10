@@ -16,31 +16,28 @@
 
  package org.dizitart.no2.support;
 
- import com.fasterxml.jackson.core.JsonGenerator;
- import lombok.Setter;
- import org.apache.commons.codec.binary.Hex;
- import org.dizitart.no2.Nitrite;
- import org.dizitart.no2.collection.Document;
- import org.dizitart.no2.collection.DocumentCursor;
- import org.dizitart.no2.collection.NitriteCollection;
- import org.dizitart.no2.collection.NitriteId;
- import org.dizitart.no2.collection.operation.IndexManager;
- import org.dizitart.no2.common.tuples.Pair;
- import org.dizitart.no2.exceptions.NitriteIOException;
- import org.dizitart.no2.index.IndexDescriptor;
- import org.dizitart.no2.repository.ObjectRepository;
- import org.dizitart.no2.store.NitriteMap;
- import org.dizitart.no2.store.NitriteStore;
- 
- import java.io.ByteArrayOutputStream;
- import java.io.IOException;
- import java.io.ObjectOutputStream;
- import java.util.*;
- import java.util.stream.Collectors;
- 
- import static org.dizitart.no2.common.Constants.*;
- import static org.dizitart.no2.common.util.ObjectUtils.*;
- 
+import com.fasterxml.jackson.core.JsonGenerator;
+import lombok.Setter;
+import org.apache.commons.codec.binary.Hex;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.operation.IndexManager;
+import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.index.IndexDescriptor;
+import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.store.NitriteStore;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.dizitart.no2.common.Constants.*;
+import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
+
  /**
   * @author Anindya Chatterjee
   */
@@ -48,40 +45,40 @@
  class NitriteJsonExporter {
      private JsonGenerator generator;
      private ExportOptions options;
- 
+
      public void exportData() throws IOException, ClassNotFoundException {
          try(Nitrite db = options.getNitriteFactory().create()) {
              Set<String> collectionNames = options.getCollections() == null ? db.listCollectionNames() : Set.of();
              Set<String> repositoryNames = options.getRepositories() == null ? db.listRepositories() : Set.of();
              Map<String, Set<String>> keyedRepositoryNames = options.getKeyedRepositories() == null
                  ? db.listKeyedRepositories() : Map.of();
- 
+
              List<IndexDescriptor> indexDescriptors = new ArrayList<>();
              if (options.getCollections() != null && !options.getCollections().isEmpty()) {
                  collectionNames = new HashSet<>(options.getCollections());
              }
- 
+
              if (options.getRepositories() != null && !options.getRepositories().isEmpty()) {
                  repositoryNames = new HashSet<>(options.getRepositories());
              }
- 
+
              if (options.getKeyedRepositories() != null && !options.getKeyedRepositories().isEmpty()) {
                  keyedRepositoryNames = options.getKeyedRepositories();
              }
- 
+
              if (options.isExportIndices()) {
                  for (String collectionName : collectionNames) {
                      try(IndexManager indexManager = new IndexManager(collectionName, db.getConfig())) {
                          indexDescriptors.addAll(indexManager.getIndexDescriptors());
                      }
                  }
- 
+
                  for (String repositoryName : repositoryNames) {
                      try(IndexManager indexManager = new IndexManager(repositoryName, db.getConfig())) {
                          indexDescriptors.addAll(indexManager.getIndexDescriptors());
                      }
                  }
- 
+
                  for (Map.Entry<String, Set<String>> entry : keyedRepositoryNames.entrySet()) {
                      String key = entry.getKey();
                      Set<String> enttityNameSet = entry.getValue();
@@ -93,30 +90,30 @@
                      }
                  }
              }
- 
+
              exportData(db, collectionNames, repositoryNames, keyedRepositoryNames, indexDescriptors);
              generator.close();
          }
      }
- 
+
      private void exportData(Nitrite db,
                              Set<String> collectionNames,
                              Set<String> repositoryNames,
                              Map<String, Set<String>> keyedRepositoryNames,
                              List<IndexDescriptor> indexDescriptors) throws IOException {
          NitriteStore<?> nitriteStore = db.getStore();
- 
+
          generator.writeStartObject();
- 
+
          writeMaps(collectionNames, indexDescriptors, nitriteStore, TAG_COLLECTIONS);
- 
+
          writeMaps(repositoryNames, indexDescriptors, nitriteStore, TAG_REPOSITORIES);
- 
+
          writeKeyedMaps(keyedRepositoryNames, indexDescriptors, nitriteStore);
- 
+
          generator.writeEndObject();
      }
- 
+
      private void writeMaps(Set<String> mapNames, List<IndexDescriptor> indexDescriptors,
                             NitriteStore<?> nitriteStore, String tagName) throws IOException {
          generator.writeFieldName(tagName);
@@ -131,7 +128,7 @@
          }
          generator.writeEndArray();
      }
- 
+
      private void writeKeyedMaps(Map<String, Set<String>> keyedMapNames, List<IndexDescriptor> indexDescriptors,
                                  NitriteStore<?> nitriteStore) throws IOException {
          generator.writeFieldName(TAG_KEYED_REPOSITORIES);
@@ -151,7 +148,7 @@
          }
          generator.writeEndArray();
      }
- 
+
      private void writeNitriteMap(NitriteMap<NitriteId, Document> nitriteMap,
                                   List<IndexDescriptor> indexes) throws IOException {
          generator.writeStartObject();
@@ -161,7 +158,7 @@
          writeContent(nitriteMap);
          generator.writeEndObject();
      }
- 
+
      private void writeIndices(Collection<IndexDescriptor> indices) throws IOException {
          generator.writeFieldName(TAG_INDICES);
          generator.writeStartArray();
@@ -175,7 +172,7 @@
          }
          generator.writeEndArray();
      }
- 
+
      private void writeContent(NitriteMap<NitriteId, Document> nitriteMap) throws IOException {
          generator.writeFieldName(TAG_DATA);
          generator.writeStartArray();
@@ -184,7 +181,7 @@
                  generator.writeStartObject();
                  generator.writeFieldName(TAG_KEY);
                  generator.writeObject(writeEncodedObject(entry.getFirst()));
- 
+
                  generator.writeFieldName(TAG_VALUE);
                  generator.writeObject(writeEncodedObject(entry.getSecond()));
                  generator.writeEndObject();
@@ -192,7 +189,7 @@
          }
          generator.writeEndArray();
      }
- 
+
      private String writeEncodedObject(Object object) {
          try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
              try (ObjectOutputStream oos = new ObjectOutputStream(os)) {

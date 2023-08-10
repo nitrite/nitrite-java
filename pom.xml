@@ -52,7 +52,6 @@
         <javafaker.version>1.0.2</javafaker.version>
         <guava.version>32.1.1-jre</guava.version>
         <threetenbp.version>1.6.8</threetenbp.version>
-        <bson-jackson.version>2.13.1</bson-jackson.version>
 
         <error-prone.version>2.20.0</error-prone.version>
         <jacoco.version>0.8.10</jacoco.version>
@@ -151,11 +150,6 @@
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
                 <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>de.undercouch</groupId>
-                <artifactId>bson4jackson</artifactId>
-                <version>${bson-jackson.version}</version>
             </dependency>
 
             <!-- Test Dependencies -->

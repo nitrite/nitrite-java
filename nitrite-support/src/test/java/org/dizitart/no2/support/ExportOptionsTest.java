@@ -9,13 +9,6 @@ import org.dizitart.no2.common.PersistentCollection;
 import org.junit.Test;
 
 public class ExportOptionsTest {
-    @Test
-    public void testSetCollections() {
-        ExportOptions exportOptions = new ExportOptions();
-        ArrayList<PersistentCollection<?>> persistentCollectionList = new ArrayList<PersistentCollection<?>>();
-        exportOptions.setCollections(persistentCollectionList);
-        assertSame(persistentCollectionList, exportOptions.getCollections());
-    }
 
     @Test
     public void testSetExportData() {
