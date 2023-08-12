@@ -6,12 +6,12 @@
 ![Javadocs](https://javadoc.io/badge/org.dizitart/nitrite.svg)
 [![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/nitrite/nitrite-java/discussions)
 
-<p align="center">
-    <img src="assets/nitrite-logo.svg" width="256"  alt="nitrite logo">
+<p>
+    <img src="assets/nitrite-logo.svg" width="256" alt="nitrite logo" style="display: block; margin: auto;">
 </p>
 
 **NO**sql **O**bject (**NO<sub>2</sub>** a.k.a Nitrite) database is an open source nosql embedded
-document store written in Java. It supports both in-memory and file based persistent store.
+document store. It supports both in-memory and file based persistent store.
 
 Nitrite is an embedded database ideal for desktop, mobile or small web applications.
 
@@ -36,6 +36,10 @@ Visit [here](https://github.com/nitrite/nitrite-java/tree/main/potassium-nitrite
 ## Flutter Version
 
 If you are looking for Nitrite for Flutter/Dart, head over to [nitrite-flutter](https://github.com/nitrite/nitrite-flutter).
+
+## Deprecation Notice
+
+Nitrite DataGate and Nitrite Explorer is now deprecated and no longer maintained.
 
 ## Getting Started with Nitrite
 
@@ -87,6 +91,9 @@ implementation 'org.dizitart:nitrite-mvstore-adapter'
 
 ```
     
+## Examples
+
+A Todo android application is available [here](https://github.com/nitrite/nitrite-android-demo) to demonstrate the usage of Nitrite in android.
 
 ### Quick Examples
 
@@ -95,7 +102,7 @@ implementation 'org.dizitart:nitrite-mvstore-adapter'
 ```java
 // create a mvstore backed storage module
 MVStoreModule storeModule = MVStoreModule.withConfig()
-    .filePath("/tmp/test.db")  // for android - .filePath(getFilesDir().getPath() + "/test.db")
+    .filePath("/tmp/test.db") 
     .compress(true)
     .build();
 
