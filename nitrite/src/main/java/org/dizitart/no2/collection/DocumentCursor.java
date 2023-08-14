@@ -20,26 +20,16 @@ import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 
 /**
- * An interface to iterate over {@link NitriteCollection#find()} results. It provides a
- * mechanism to iterate over all {@link NitriteId}s of the result.
+ * The DocumentCursor represents a cursor to iterate over {@link NitriteCollection#find()} results.
+ * It also provides methods for projection and perform left outer join with other DocumentCursor.
+ * <p>
  * <pre>
  * {@code
- *
- * // create/open a database
- * Nitrite db = Nitrite.builder()
- *  .openOrCreate("user", "password");
- *
- * // create a collection named - test
- * NitriteCollection collection = db.getCollection("test");
- *
- * // returns all ids un-filtered
  * DocumentCursor result = collection.find();
  *
  * for (Document doc : result) {
  *  // use your logic with the retrieved doc here
  * }
- *
- * }*
  * </pre>
  *
  * @author Anindya Chatterjee

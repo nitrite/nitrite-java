@@ -26,7 +26,7 @@ import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -105,7 +105,7 @@ public class RepositoryJoinTest {
             db = nitriteBuilder.openOrCreate();
         }
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new Person.Converter());
         documentMapper.registerEntityConverter(new Address.Converter());
         documentMapper.registerEntityConverter(new PersonDetails.Converter());

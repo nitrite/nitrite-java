@@ -25,7 +25,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.integration.NitriteTest;
@@ -125,7 +125,7 @@ public class ObjectUtilsTest implements Serializable {
 
     @Test
     public void testNewInstance() {
-        SimpleDocumentMapper mapper = new SimpleDocumentMapper();
+        EntityConverterMapper mapper = new EntityConverterMapper();
         mapper.registerEntityConverter(new EnclosingType.Converter());
         mapper.registerEntityConverter(new ChildClass.Converter());
         mapper.registerEntityConverter(new FieldType.Converter());

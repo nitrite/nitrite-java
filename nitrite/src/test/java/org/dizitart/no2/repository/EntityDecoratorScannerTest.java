@@ -20,7 +20,7 @@ package org.dizitart.no2.repository;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.repository.data.ClassA;
 import org.dizitart.no2.integration.repository.data.ClassBConverter;
@@ -40,7 +40,7 @@ public class EntityDecoratorScannerTest {
 
     @Before
     public void setUp() {
-        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
+        EntityConverterMapper nitriteMapper = new EntityConverterMapper();
         nitriteMapper.registerEntityConverter(new ClassA.ClassAConverter());
         nitriteMapper.registerEntityConverter(new ClassBConverter());
         collection = Nitrite.builder().fieldSeparator(".").openOrCreate().getCollection("test");

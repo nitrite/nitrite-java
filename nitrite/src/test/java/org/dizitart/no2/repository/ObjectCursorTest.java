@@ -23,7 +23,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.common.streams.DocumentStream;
 import org.dizitart.no2.common.streams.MutatedObjectStream;
@@ -81,7 +81,7 @@ public class ObjectCursorTest {
 
     @Test
     public void testProject3() {
-        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
+        EntityConverterMapper nitriteMapper = new EntityConverterMapper();
         RecordStream<Pair<NitriteId, Document>> recordStream = (RecordStream<Pair<NitriteId, Document>>) mock(
             RecordStream.class);
         DocumentStream cursor = new DocumentStream(recordStream, new ProcessorChain());

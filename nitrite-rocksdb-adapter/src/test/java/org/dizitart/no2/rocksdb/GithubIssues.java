@@ -22,7 +22,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.Test;
 
@@ -42,7 +42,7 @@ public class GithubIssues {
             .loadModule(dbModule)
             .openOrCreate();
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TestData.Converter());
 
         // Step 1

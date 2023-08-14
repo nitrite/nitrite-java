@@ -19,7 +19,7 @@
  import org.dizitart.no2.Nitrite;
  import org.dizitart.no2.collection.Document;
  import org.dizitart.no2.collection.NitriteCollection;
- import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+ import org.dizitart.no2.common.mapper.EntityConverterMapper;
  import org.dizitart.no2.mvstore.MVStoreModule;
  import org.dizitart.no2.repository.ObjectRepository;
  import org.junit.After;
@@ -115,7 +115,7 @@
              .filePath(filePath)
              .build();
  
-         SimpleDocumentMapper documentMapper = new SimpleDocumentMapper();
+         EntityConverterMapper documentMapper = new EntityConverterMapper();
          documentMapper.registerEntityConverter(new Employee.EmployeeConverter());
          documentMapper.registerEntityConverter(new Company.CompanyConverter());
          documentMapper.registerEntityConverter(new Note.NoteConverter());

@@ -24,8 +24,8 @@ import java.security.SecureRandom;
 import java.util.UUID;
 
 /**
- * Generate unique IDs using the Twitter Snowflake algorithm (see https://github.com/twitter/snowflake). Snowflake IDs
- * are 64 bit positive longs composed of:
+ * Generate unique IDs using the Twitter Snowflake algorithm (see <a href="https://github.com/twitter/snowflake">Snowflake</a>).
+ * Snowflake IDs are 64 bit positive longs composed of:
  *
  * <ul>
  *     <li>41 bits time stamp</li>
@@ -34,7 +34,8 @@ import java.util.UUID;
  *     <li>1 unused sign bit, always set to 0</li>
  * </ul>
  * <p>
- * This is a derivative work of - https://github.com/apache/marmotta/blob/master/libraries/kiwi/kiwi-triplestore/src/main/java/org/apache/marmotta/kiwi/generator/SnowflakeIDGenerator.java
+ * This is a derivative work of -
+ * <a href="https://github.com/apache/marmotta/blob/master/libraries/kiwi/kiwi-triplestore/src/main/java/org/apache/marmotta/kiwi/generator/SnowflakeIDGenerator.java">Sebastian Schaffert</a>
  * </p>
  *
  * @author Sebastian Schaffert (sschaffert@apache.org)
@@ -46,11 +47,9 @@ public class SnowflakeIdGenerator {
     private final long nodeIdBits = 10L;
 
     private long nodeId;
-
     private volatile long lastTimestamp = -1L;
     private volatile long sequence = 0L;
     private static final long no2epoch = 1288834974657L;
-
 
     public SnowflakeIdGenerator() {
         random = new SecureRandom();
@@ -78,7 +77,6 @@ public class SnowflakeIdGenerator {
 
         return ((0x000000FF & (long) uuid[uuid.length - 1]) | (0x0000FF00 & (((long) rndByte) << 8))) >> 6;
     }
-
 
     /**
      * Return the next unique id for the type with the given name using the generator's id generation strategy.

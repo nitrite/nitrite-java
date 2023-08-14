@@ -20,7 +20,7 @@ import org.dizitart.no2.NitriteBuilderTest;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.integration.Retry;
@@ -83,13 +83,13 @@ public class DocumentUtilsTest {
     public void testSkeletonDocument2() {
         Class<?> forNameResult = Object.class;
         Class<?> forNameResult1 = Object.class;
-        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper(forNameResult, forNameResult1, Object.class);
+        EntityConverterMapper nitriteMapper = new EntityConverterMapper(forNameResult, forNameResult1, Object.class);
         assertEquals(0, DocumentUtils.skeletonDocument(nitriteMapper, Object.class).size());
     }
 
     @Test
     public void testSkeletonDocument3() {
-        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
+        EntityConverterMapper nitriteMapper = new EntityConverterMapper();
         Document document = DocumentUtils.skeletonDocument(nitriteMapper, Integer.class);
         assertNull(document);
     }
@@ -110,7 +110,7 @@ public class DocumentUtilsTest {
 
     @Test
     public void testDummyDocument() {
-        SimpleDocumentMapper nitriteMapper = new SimpleDocumentMapper();
+        EntityConverterMapper nitriteMapper = new EntityConverterMapper();
         nitriteMapper.registerEntityConverter(new DummyTest.Converter());
 
         Document document = skeletonDocument(nitriteMapper, DummyTest.class);

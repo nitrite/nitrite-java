@@ -17,7 +17,7 @@
 
 package org.dizitart.no2;
 
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.common.module.PluginManager;
@@ -115,7 +115,7 @@ public class NitriteConfigTest {
         assertEquals(3, pluginManager.getIndexerMap().size());
         NitriteStore<?> nitriteStore = nitriteConfig.getNitriteStore();
         assertSame(nitriteStore, pluginManager.getNitriteStore());
-        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleDocumentMapper);
+        assertTrue(pluginManager.getNitriteMapper() instanceof EntityConverterMapper);
         assertFalse(nitriteStore.isClosed());
         assertTrue(((InMemoryConfig) nitriteStore.getStoreConfig()).eventListeners().isEmpty());
     }

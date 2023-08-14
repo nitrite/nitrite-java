@@ -32,6 +32,9 @@ public interface NitritePlugin extends AutoCloseable {
      */
     void initialize(NitriteConfig nitriteConfig);
 
+    /**
+     * Closes the plugin instance.
+     */
     default void close() {
         // this is to make NitritePlugin a functional interface
         // and make close() not throw checked exception

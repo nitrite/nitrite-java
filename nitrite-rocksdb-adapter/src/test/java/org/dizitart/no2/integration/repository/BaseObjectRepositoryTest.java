@@ -19,7 +19,7 @@ package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.integration.repository.decorator.ManufacturerConverter;
@@ -109,7 +109,7 @@ public abstract class BaseObjectRepositoryTest {
             db = nitriteBuilder.openOrCreate();
         }
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new RepositoryJoinTest.Person.Converter());
         documentMapper.registerEntityConverter(new RepositoryJoinTest.Address.Converter());
         documentMapper.registerEntityConverter(new RepositoryJoinTest.PersonDetails.Converter());

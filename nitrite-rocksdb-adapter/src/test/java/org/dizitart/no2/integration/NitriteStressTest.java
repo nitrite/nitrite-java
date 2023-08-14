@@ -26,7 +26,7 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
@@ -67,7 +67,7 @@ public class NitriteStressTest {
     @Before
     public void before() {
         db = createDb(fileName);
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TestDto.Converter());
         documentMapper.registerEntityConverter(new PerfTest.Converter());
         documentMapper.registerEntityConverter(new PerfTestIndexed.Converter());

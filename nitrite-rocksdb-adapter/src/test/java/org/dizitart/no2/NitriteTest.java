@@ -29,7 +29,7 @@ import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -82,10 +82,10 @@ public class NitriteTest {
     public void setUp() throws ParseException {
         db = TestUtil.createDb(fileName, "test-user", "test-password");
 
-        SimpleDocumentMapper simpleDocumentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
-        simpleDocumentMapper.registerEntityConverter(new Receipt.Converter());
-        simpleDocumentMapper.registerEntityConverter(new CompatChild.Converter());
-        simpleDocumentMapper.registerEntityConverter(new EmptyClass.Converter());
+        EntityConverterMapper entityConverterMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        entityConverterMapper.registerEntityConverter(new Receipt.Converter());
+        entityConverterMapper.registerEntityConverter(new CompatChild.Converter());
+        entityConverterMapper.registerEntityConverter(new EmptyClass.Converter());
 
         simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
 

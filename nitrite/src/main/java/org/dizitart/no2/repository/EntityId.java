@@ -30,12 +30,10 @@ import java.util.List;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
 
+@Getter
 public class EntityId {
-    @Getter
-    private String fieldName;
-
-    @Getter
-    private String[] subFields;
+    private final String fieldName;
+    private final String[] subFields;
 
     private List<String> embeddedFieldNames;
 

@@ -35,12 +35,13 @@ import static org.dizitart.no2.common.util.ValidationUtils.containsNull;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * Represents a named document collection stored in nitrite database.
+ * Represents a named document collection stored in Nitrite database.
  * It persists documents into the database. Each document is associated
  * with a unique {@link NitriteId} in a collection.
  * <p>
  * A nitrite collection supports indexing. Every nitrite collection is also
- * observable.
+ * observable. It means, any change in a collection can be listened back via
+ * registering a {@link CollectionEventListener}.
  * </p>
  * <b>Create a collection</b>
  * <pre>

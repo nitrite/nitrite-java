@@ -20,7 +20,7 @@ package org.dizitart.no2.integration.repository;
 import lombok.Getter;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.SortOrder;
@@ -592,7 +592,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
             }
         }
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new Converter());
 
         TestData data1 = new TestData(new GregorianCalendar(2020, Calendar.JANUARY, 11).getTime());

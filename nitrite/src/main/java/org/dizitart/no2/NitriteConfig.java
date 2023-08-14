@@ -107,7 +107,6 @@ public class NitriteConfig implements AutoCloseable {
      * @param migration the migration
      * @return the nitrite config
      */
-    @SuppressWarnings("Java8MapApi")
     public NitriteConfig addMigration(Migration migration) {
         if (configured) {
             throw new InvalidOperationException("Cannot add migration steps after database" +
@@ -117,11 +116,7 @@ public class NitriteConfig implements AutoCloseable {
         if (migration != null) {
             final int start = migration.getFromVersion();
             final int end = migration.getToVersion();
-            TreeMap<Integer, Migration> targetMap = migrations.get(start);
-            if (targetMap == null) {
-                targetMap = new TreeMap<>();
-                migrations.put(start, targetMap);
-            }
+            TreeMap<Integer, Migration> targetMap = migrations.computeIfAbsent(start, k -> new TreeMap<>());
             Migration existing = targetMap.get(end);
             if (existing != null) {
                 log.warn("Overriding migration " + existing + " with " + migration);

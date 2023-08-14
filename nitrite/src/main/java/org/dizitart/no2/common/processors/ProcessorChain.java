@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a {@link Processor} chain. It executes a
- * list of processor on a document.
+ * Represents a {@link Processor} chain. The processors are executed in the order
+ * they are added to the chain.
  *
  * @author Anindya Chatterjee
  * @since 4.0

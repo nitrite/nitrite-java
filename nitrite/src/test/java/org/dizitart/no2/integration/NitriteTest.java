@@ -30,7 +30,7 @@ import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -76,7 +76,7 @@ public class NitriteTest {
     @Before
     public void setUp() throws ParseException {
         db = createDb("test-user", "test-password");
-        SimpleDocumentMapper nitriteMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        EntityConverterMapper nitriteMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
         nitriteMapper.registerEntityConverter(new Receipt.ReceiptConverter());
         nitriteMapper.registerEntityConverter(new CompatChild.CompatChildConverter());
         nitriteMapper.registerEntityConverter(new EmptyClass.Converter());
