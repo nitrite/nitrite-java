@@ -29,7 +29,7 @@ import static org.dizitart.no2.common.Constants.*;
 /**
  * Represents a document in Nitrite database.
  * <p>
- * A document is a collection of key-value pairs. A key is always a {@link String} and value
+ * Nitrite document are composed of key-value pairs. A key is always a {@link String} and value
  * can be anything including <code>null</code>.
  * <p>
  * Nitrite document supports nested documents as well. The key of a nested document is a {@link String}

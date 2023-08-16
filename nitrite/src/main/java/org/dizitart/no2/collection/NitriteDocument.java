@@ -38,7 +38,6 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * A default implementation of nitrite document.
  *
  * @since 4.0
  * @author Anindya Chatterjee

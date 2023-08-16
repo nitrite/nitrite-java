@@ -49,6 +49,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
  * @author Anindya Chatterjee.
+ * @since 1.0
  */
 class DefaultNitriteCollection implements NitriteCollection {
     private final String collectionName;

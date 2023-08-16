@@ -27,7 +27,6 @@ import org.dizitart.no2.index.NitriteIndexer;
 import java.util.Collection;
 
 /**
- *
  * @since 4.0
  * @author Anindya Chatterjee
  */

@@ -20,7 +20,7 @@ import org.dizitart.no2.common.Lookup;
 import org.dizitart.no2.common.RecordStream;
 
 /**
- * The DocumentCursor represents a cursor to iterate over {@link NitriteCollection#find()} results.
+ * The DocumentCursor represents a cursor as a stream of {@link Document} to iterate over {@link NitriteCollection#find()} results.
  * It also provides methods for projection and perform left outer join with other DocumentCursor.
  * <p>
  * <pre>

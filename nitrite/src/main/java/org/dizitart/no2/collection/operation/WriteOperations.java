@@ -39,6 +39,7 @@ import static org.dizitart.no2.common.Constants.*;
 
 /**
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 @Slf4j
 class WriteOperations {

@@ -17,26 +17,10 @@
 package org.dizitart.no2.collection.events;
 
 /**
- * Interface to be implemented by collections that wish to be aware
- * of any event.
- *
- * @author Anindya Chatterjee.
- * @see EventType
  * @since 4.0
+ * @author Anindya Chatterjee
  */
 public interface EventAware {
-    /**
-     * Subscribes an {@link CollectionEventListener} instance to listen to any
-     * collection events.
-     *
-     * @param listener the listener
-     */
     void subscribe(CollectionEventListener listener);
-
-    /**
-     * Unsubscribes an {@link CollectionEventListener} instance.
-     *
-     * @param listener the listener.
-     */
     void unsubscribe(CollectionEventListener listener);
 }

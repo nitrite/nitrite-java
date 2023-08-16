@@ -29,6 +29,7 @@ import static org.dizitart.no2.common.concurrent.ThreadPoolManager.runAsync;
 
 /**
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 class IndexOperations implements AutoCloseable {
     private final String collectionName;

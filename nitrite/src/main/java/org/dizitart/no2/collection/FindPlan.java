@@ -34,7 +34,7 @@ import java.util.Map;
  * A plan for finding documents in a collection.
  *
  * @author Anindya Chatterjee
- * @since 4.0.0
+ * @since 4.0
  */
 @Data
 public class FindPlan {
