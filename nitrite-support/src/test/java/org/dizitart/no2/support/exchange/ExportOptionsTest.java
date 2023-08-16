@@ -1,11 +1,9 @@
-package org.dizitart.no2.support;
+package org.dizitart.no2.support.exchange;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-
-import org.dizitart.no2.common.PersistentCollection;
+import org.dizitart.no2.support.exchange.ExportOptions;
 import org.junit.Test;
 
 public class ExportOptionsTest {

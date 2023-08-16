@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.support;
+package org.dizitart.no2.support.data;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

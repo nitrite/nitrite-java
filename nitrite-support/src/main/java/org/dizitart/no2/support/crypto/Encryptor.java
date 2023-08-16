@@ -15,7 +15,7 @@
  *
  */
 
-package org.dizitart.no2.common.crypto;
+package org.dizitart.no2.support.crypto;
 
 /**
  * Represents a symmetric key string encryptor.

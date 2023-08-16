@@ -1,4 +1,4 @@
-package org.dizitart.no2.support;
+package org.dizitart.no2.support.exchange;
 
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
@@ -25,10 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import static org.dizitart.no2.support.BaseExternalTest.getRandomTempDbFile;
+import static org.dizitart.no2.support.exchange.BaseExternalTest.getRandomTempDbFile;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 

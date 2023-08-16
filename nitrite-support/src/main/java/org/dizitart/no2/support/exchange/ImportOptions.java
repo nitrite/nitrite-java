@@ -1,4 +1,4 @@
-package org.dizitart.no2.support;
+package org.dizitart.no2.support.exchange;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import lombok.Getter;

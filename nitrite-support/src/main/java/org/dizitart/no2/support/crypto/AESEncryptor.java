@@ -15,7 +15,7 @@
  *
  */
 
-package org.dizitart.no2.common.crypto;
+package org.dizitart.no2.support.crypto;
 
 import org.apache.commons.codec.binary.Base64;
 import org.dizitart.no2.common.util.CryptoUtils;

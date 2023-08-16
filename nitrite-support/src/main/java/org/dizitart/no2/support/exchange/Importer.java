@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
- package org.dizitart.no2.support;
+ package org.dizitart.no2.support.exchange;
 
- import com.fasterxml.jackson.core.JsonFactory;
  import com.fasterxml.jackson.core.JsonParser;
- import com.fasterxml.jackson.databind.ObjectMapper;
- import org.dizitart.no2.Nitrite;
  import org.dizitart.no2.exceptions.NitriteIOException;
  
  import java.io.*;
  
  import static org.dizitart.no2.common.util.ValidationUtils.notNull;
- import static org.dizitart.no2.support.Exporter.createObjectMapper;
+ import static org.dizitart.no2.support.exchange.Exporter.createObjectMapper;
  
  
  /**

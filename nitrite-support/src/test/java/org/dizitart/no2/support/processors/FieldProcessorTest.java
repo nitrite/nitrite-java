@@ -15,18 +15,17 @@
  *
  */
 
-package org.dizitart.no2.integration.collection;
+package org.dizitart.no2.support.processors;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.WriteResult;
-import org.dizitart.no2.common.crypto.AESEncryptor;
-import org.dizitart.no2.common.crypto.Encryptor;
 import org.dizitart.no2.common.processors.Processor;
-import org.dizitart.no2.common.processors.StringFieldEncryptionProcessor;
 import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.store.NitriteMap;
+import org.dizitart.no2.support.crypto.AESEncryptor;
+import org.dizitart.no2.support.crypto.Encryptor;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,14 +45,13 @@ public class FieldProcessorTest extends BaseCollectionTest {
 
     private Encryptor encryptor;
     private NitriteCollection collection;
-    private Processor cvvProcessor;
 
     @Before
     public void setUp() {
         super.setUp();
 
         encryptor = new AESEncryptor("s3k4e8");
-        cvvProcessor = new Processor() {
+        Processor cvvProcessor = new Processor() {
             @Override
             public Document processBeforeWrite(Document document) {
                 String cvv = document.get("cvv", String.class);
@@ -94,10 +92,12 @@ public class FieldProcessorTest extends BaseCollectionTest {
 
     @Test
     public void testFieldEncryptionInNitriteMap() {
-        NitriteMap<Object, Document> nitriteMap = collection.getStore().openMap("encryption-test",
-            NitriteId.class, Document.class);
+        List<Document> documents;
+        try (NitriteMap<Object, Document> nitriteMap = collection.getStore().openMap("encryption-test",
+            NitriteId.class, Document.class)) {
 
-        List<Document> documents = toList(nitriteMap.values());
+            documents = toList(nitriteMap.values());
+        }
         for (Document document : documents) {
             if (document.get("creditCardNumber", String.class).equalsIgnoreCase("5548960345687452")) {
                 Assert.fail("unencrypted secret text found");

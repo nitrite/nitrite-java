@@ -1,4 +1,4 @@
-package org.dizitart.no2.support;
+package org.dizitart.no2.support.exchange;
 
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.databind.jsontype.impl.StdSubtypeResolver;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.dizitart.no2.support.exchange.Exporter;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

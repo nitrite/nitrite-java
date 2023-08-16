@@ -1,4 +1,4 @@
-package org.dizitart.no2.support;
+package org.dizitart.no2.support.exchange;
 
 import org.dizitart.no2.Nitrite;
 

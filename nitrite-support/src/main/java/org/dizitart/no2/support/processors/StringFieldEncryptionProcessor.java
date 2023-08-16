@@ -15,14 +15,15 @@
  *
  */
 
-package org.dizitart.no2.common.processors;
+package org.dizitart.no2.support.processors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.common.crypto.AESEncryptor;
-import org.dizitart.no2.common.crypto.Encryptor;
+import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.support.crypto.AESEncryptor;
+import org.dizitart.no2.support.crypto.Encryptor;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

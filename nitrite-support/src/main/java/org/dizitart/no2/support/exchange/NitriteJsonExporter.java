@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- package org.dizitart.no2.support;
+ package org.dizitart.no2.support.exchange;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import lombok.Setter;

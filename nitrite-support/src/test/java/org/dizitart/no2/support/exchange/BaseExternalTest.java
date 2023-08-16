@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
- package org.dizitart.no2.support;
+ package org.dizitart.no2.support.exchange;
 
  import org.dizitart.no2.Nitrite;
  import org.dizitart.no2.collection.Document;
@@ -22,6 +22,10 @@
  import org.dizitart.no2.common.mapper.EntityConverterMapper;
  import org.dizitart.no2.mvstore.MVStoreModule;
  import org.dizitart.no2.repository.ObjectRepository;
+ import org.dizitart.no2.support.Retry;
+ import org.dizitart.no2.support.data.Company;
+ import org.dizitart.no2.support.data.Employee;
+ import org.dizitart.no2.support.data.Note;
  import org.junit.After;
  import org.junit.Before;
  import org.junit.Rule;

@@ -43,8 +43,8 @@ exportOptions.setNitriteFactory(() {
         .openOrCreate();
 });
 exportOptions.setCollections(List.of("first"));
-exportOptions.setRepositories(List.of("org.dizitart.no2.support.Employee"));
-exportOptions.setKeyedRepositories(Map.of("key", Set.of("org.dizitart.no2.support.Employee")));
+exportOptions.setRepositories(List.of("org.dizitart.no2.support.data.Employee"));
+exportOptions.setKeyedRepositories(Map.of("key", Set.of("org.dizitart.no2.support.data.Employee")));
 
 Exporter exporter = Exporter.withOptions(exportOptions);
 exporter.exportTo(schemaFile);

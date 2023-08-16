@@ -15,7 +15,7 @@
  *
  */
 
-package org.dizitart.no2.common.crypto;
+package org.dizitart.no2.support.crypto;
 
 import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.junit.Test;

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
- package org.dizitart.no2.support;
+ package org.dizitart.no2.support.exchange;
 
  import org.dizitart.no2.collection.Document;
  import org.dizitart.no2.collection.NitriteCollection;
  import org.dizitart.no2.repository.ObjectRepository;
+ import org.dizitart.no2.support.data.Company;
+ import org.dizitart.no2.support.data.DataGenerator;
+ import org.dizitart.no2.support.data.Employee;
  import org.junit.Test;
  
  import java.io.File;
@@ -57,8 +60,8 @@
          ExportOptions exportOptions = new ExportOptions();
          exportOptions.setNitriteFactory(() -> createDb(sourceDbFile));
          exportOptions.setCollections(List.of("first"));
-         exportOptions.setRepositories(List.of("org.dizitart.no2.support.Employee", "org.dizitart.no2.support.Company"));
-         exportOptions.setKeyedRepositories(Map.of("key", Set.of("org.dizitart.no2.support.Employee")));
+         exportOptions.setRepositories(List.of("org.dizitart.no2.support.data.Employee", "org.dizitart.no2.support.data.Company"));
+         exportOptions.setKeyedRepositories(Map.of("key", Set.of("org.dizitart.no2.support.data.Employee")));
  
          Exporter exporter = Exporter.withOptions(exportOptions);
          exporter.exportTo(schemaFile);
