@@ -20,6 +20,7 @@ package org.dizitart.no2.integration;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlSchemaType;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
@@ -43,6 +44,7 @@ import static org.dizitart.no2.integration.TestUtil.createDb;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class NitriteStressTest {
     private static final int TEST_SET_COUNT = 15000;
     private final PodamFactory podamFactory = new PodamFactoryImpl();
@@ -66,7 +68,7 @@ public class NitriteStressTest {
                 counter++;
             }
         } catch (Throwable t) {
-            System.err.println("Crashed after " + counter + " records");
+            log.error("Error occurred at " + counter, t);
             throw t;
         }
     }

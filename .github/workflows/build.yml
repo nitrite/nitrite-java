@@ -54,7 +54,7 @@ jobs:
         run: mvn -B -ff -ntp clean install
 
       - name: Deploy Snapshot
-        if: github.ref == 'refs/heads/develop'
+        if: github.ref == 'refs/heads/develop' && matrix.java == '11'
         run: mvn -B -ff -ntp deploy -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
@@ -63,7 +63,7 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Release
-        if: github.ref == 'refs/heads/release'
+        if: github.ref == 'refs/heads/release' && matrix.java == '11'
         run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
@@ -72,7 +72,7 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Publish Code Coverage
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && matrix.java == '11'
         uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

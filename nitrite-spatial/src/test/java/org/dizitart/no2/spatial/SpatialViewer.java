@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.spatial;
 
+import lombok.extern.slf4j.Slf4j;
 import org.locationtech.jts.awt.ShapeWriter;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.WKTReader;
@@ -27,6 +28,7 @@ import java.awt.*;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class SpatialViewer {
     public static void main(String[] args) {
         JFrame f = new JFrame();
@@ -76,7 +78,7 @@ public class SpatialViewer {
                 g2d.draw(searchShape);
 
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Error while drawing", e);
             }
         }
     }

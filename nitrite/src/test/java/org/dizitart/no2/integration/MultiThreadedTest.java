@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.integration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
@@ -36,7 +37,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.dizitart.no2.integration.DbTestOperations.getRandomTempDbFile;
 import static org.dizitart.no2.integration.TestUtil.createDb;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.filters.FluentFilter.where;
@@ -47,8 +47,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Anindya Chatterjee.
  */
+@Slf4j
 public class MultiThreadedTest {
-    private static final String fileName = getRandomTempDbFile();
     private NitriteCollection collection;
     private final int threadCount = 20;
     private final CountDownLatch latch = new CountDownLatch(threadCount);
@@ -96,9 +96,7 @@ public class MultiThreadedTest {
 
                         assertTrue(collection.hasIndex("unixTime"));
                     } catch (Throwable e) {
-                        System.out.println("Exception at thread " +
-                            Thread.currentThread().getName() + " with iteration " + j);
-                        e.printStackTrace();
+                        log.error("Error while inserting document", e);
                     }
                 }
                 latch.countDown();

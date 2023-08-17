@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.integration;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
@@ -47,6 +48,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Anindya Chatterjee.
  */
+@Slf4j
 @RunWith(Parameterized.class)
 public class MultiThreadedTest {
     private static final String fileName = TestUtil.getRandomTempDbFile();
@@ -112,9 +114,7 @@ public class MultiThreadedTest {
 
                         assertTrue(collection.hasIndex("unixTime"));
                     } catch (Throwable e) {
-                        System.out.println("Exception at thread " +
-                            Thread.currentThread().getName() + " with iteration " + j);
-                        e.printStackTrace();
+                        log.error("Error while executing test", e);
                     }
                 }
                 latch.countDown();
@@ -147,7 +147,7 @@ public class MultiThreadedTest {
             File dbFile = new File(fileName);
             long fileSize = dbFile.length();
             assertTrue(fileSize > 0);
-            dbFile.delete();
+            TestUtil.deleteDb(fileName);
         }
 
         if (executor != null && !executor.isShutdown()) {

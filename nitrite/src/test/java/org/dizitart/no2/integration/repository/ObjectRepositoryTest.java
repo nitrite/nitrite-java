@@ -186,7 +186,6 @@ public class ObjectRepositoryTest {
             repository.update(where("firstName").eq(record.getFirstName()), record);
         }
         sw.stop();
-        System.out.println("Sequential Time (s) - " + sw.getTime());
     }
 
     @Test

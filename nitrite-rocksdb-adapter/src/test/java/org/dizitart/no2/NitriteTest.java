@@ -20,16 +20,16 @@ package org.dizitart.no2;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
-import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -69,6 +69,7 @@ import static org.junit.Assert.*;
 /**
  * @author Anindya Chatterjee.
  */
+@Slf4j
 public class NitriteTest {
     private Nitrite db;
     private NitriteCollection collection;
@@ -330,7 +331,7 @@ public class NitriteTest {
                     } catch (InterruptedException ignored) {
                     }
                 } catch (Throwable t) {
-                    t.printStackTrace();
+                    log.error("Error while updating", t);
                 }
             }
             latch.countDown();
@@ -364,7 +365,7 @@ public class NitriteTest {
                     receipt.setClientRef(refs[refIndex]);
                     repository.update(receipt, true);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("Error while updating", e);
                     fail("Unhandled exception in thread - " + e.getMessage());
                 } finally {
                     latch.countDown();
@@ -396,7 +397,7 @@ public class NitriteTest {
             doc, UpdateOptions.updateOptions(true));
 
         for (Document document : collection.find()) {
-            System.out.println(document);
+            assertNotNull(document);
         }
     }
 
@@ -410,14 +411,8 @@ public class NitriteTest {
                     NitriteCollection collection = db.getCollection("testIssue245");
 
                     for (int i = 0; i < 5; i++) {
-
-                        System.out.println("Thread ID = " + id + " Inserting doc " + i);
                         Document doc = Document.createDocument(UUID.randomUUID().toString(), UUID.randomUUID().toString());
-
-                        WriteResult result = collection.insert(doc);//db.commit();
-                        System.out.println("Result of insert = " + result.getAffectedCount());
-                        System.out.println("Thread id = " + id + " --> count = " + collection.size());
-
+                        collection.insert(doc);//db.commit();
                         Thread.sleep(10);
 
                     }//for closing
@@ -425,7 +420,7 @@ public class NitriteTest {
                     collection.close();
 
                 } catch (Throwable e) {
-                    e.printStackTrace();
+                    log.error("Error while running thread", e);
                 }
             }
         };
@@ -445,7 +440,6 @@ public class NitriteTest {
         t2.join();
 
         NitriteCollection collection = db.getCollection("testIssue245");
-        System.out.println("No of Documents = " + collection.size());
         collection.close();
         db.close();
     }

@@ -138,7 +138,6 @@ public class EventTest {
         employeeRepository.remove(where("empId").eq(1L));
         await().atMost(1, TimeUnit.SECONDS).until(listenerPrepared(EventType.Remove));
 
-        System.out.println("Action - " + listener.getAction());
         assertEquals(listener.getAction(), EventType.Remove);
         assertNotNull(listener.getItem());
     }

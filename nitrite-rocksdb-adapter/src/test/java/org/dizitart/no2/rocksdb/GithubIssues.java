@@ -49,7 +49,6 @@ public class GithubIssues {
 //        NitriteCollection collection = db.getCollection("test");
 //        Document document = Document.createDocument("a", 1).put("b", 2);
 //        collection.insert(document);
-//        System.out.println(collection.size());
 
         // Step 2
         ObjectRepository<TestData> repository = db.getRepository(TestData.class);
@@ -57,7 +56,6 @@ public class GithubIssues {
         testData.setId(1);
         testData.setName("test");
         repository.insert(testData);
-        System.out.println(repository.size());
     }
 
     @Data

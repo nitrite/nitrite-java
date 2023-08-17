@@ -18,6 +18,7 @@
 package org.dizitart.no2.integration.transaction;
 
 import com.github.javafaker.Faker;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.meta.Attributes;
@@ -45,6 +46,7 @@ import static org.junit.Assert.*;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
 
     @Test
@@ -588,7 +590,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
 
                         transaction.commit();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Error while inserting", e);
                         transaction.rollback();
                     } finally {
                         transaction.close();
@@ -602,7 +604,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    log.error("Error while inserting", e);
                 }
             });
 
@@ -632,7 +634,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
 
                         transaction.commit();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Error while inserting", e);
                         transaction.rollback();
                     } finally {
                         transaction.close();
@@ -646,7 +648,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    log.error("Error while inserting", e);
                 }
             });
 
@@ -679,7 +681,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
 
                         transaction.commit();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Error while updating", e);
                         transaction.rollback();
                     } finally {
                         transaction.close();
@@ -693,7 +695,7 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    log.error("Error while updating", e);
                 }
             });
 

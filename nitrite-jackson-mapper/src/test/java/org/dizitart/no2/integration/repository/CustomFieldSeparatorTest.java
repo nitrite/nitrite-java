@@ -25,21 +25,18 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.integration.repository.data.Company;
+import org.dizitart.no2.integration.repository.data.Note;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.Indices;
-import org.dizitart.no2.integration.repository.data.Company;
-import org.dizitart.no2.integration.repository.data.Note;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Date;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
@@ -68,7 +65,7 @@ public class CustomFieldSeparatorTest {
     }
 
     @After
-    public void reset() throws IOException {
+    public void reset() {
         (new NitriteConfig()).fieldSeparator(".");
         if (db != null && !db.isClosed()) {
             db.close();
@@ -79,7 +76,7 @@ public class CustomFieldSeparatorTest {
             db.close();
         }
 
-        Files.delete(Paths.get(fileName));
+        TestUtil.deleteDb(fileName);
     }
 
     @Test

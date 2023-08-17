@@ -139,26 +139,6 @@ public abstract class BaseObjectRepositoryTest {
 
     @After
     public void clear() throws Exception {
-        if (companyRepository != null && !companyRepository.isDropped()) {
-            companyRepository.remove(ALL);
-        }
-
-        if (employeeRepository != null && !employeeRepository.isDropped()) {
-            employeeRepository.remove(ALL);
-        }
-
-        if (aObjectRepository != null && !aObjectRepository.isDropped()) {
-            aObjectRepository.remove(ALL);
-        }
-
-        if (cObjectRepository != null && !cObjectRepository.isDropped()) {
-            cObjectRepository.remove(ALL);
-        }
-
-        if (bookRepository != null && !bookRepository.isDropped()) {
-            bookRepository.remove(ALL);
-        }
-
         if (db != null && !db.isClosed()) {
             db.commit();
             db.close();

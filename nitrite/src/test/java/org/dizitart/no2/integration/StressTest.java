@@ -79,46 +79,29 @@ public class StressTest {
         AtomicLong counter = new AtomicLong(System.currentTimeMillis());
         PodamFactory factory = new PodamFactoryImpl();
 
-        long start = System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) {
             Document doc = Document.createDocument();
             doc.put("number", random.nextDouble());
             doc.put("name", factory.manufacturePojo(String.class));
             doc.put("counter", counter.getAndIncrement());
             collection.insert(doc);
-            if (i % 10000 == 0) {
-                System.out.println(i + " entries written");
-            }
         }
-        System.out.println("Records inserted in " + ((System.currentTimeMillis() - start) / (1000 * 60)) + " minutes");
 
         if (db.hasUnsavedChanges()) {
             db.commit();
         }
 
-        start = System.currentTimeMillis();
         DocumentCursor cursor = collection.find();
-        System.out.println("Size ->" + cursor.size());
-        System.out.println("Records size calculated in " + ((System.currentTimeMillis() - start) / (1000)) + " seconds");
 
-        int i = 0;
-        start = System.currentTimeMillis();
         for (Document element : cursor) {
             assertNotNull(element);
-            i++;
-            if (i % 10000 == 0) {
-                System.out.println(i + " entries processed");
-            }
         }
-        System.out.println("Iteration completed in " + ((System.currentTimeMillis() - start) / (1000)) + " seconds");
     }
 
     @After
     public void clear() throws Exception {
         if (db != null && !db.isClosed()) {
-            long start = System.currentTimeMillis();
             db.close();
-            System.out.println("Time to compact and close - " + (System.currentTimeMillis() - start) / 1000 + " seconds");
         }
     }
 
@@ -136,17 +119,11 @@ public class StressTest {
 
         // actual calculation
         repo = db.getRepository(PerfTestIndexed.class);
-        long start = System.currentTimeMillis();
         for (PerfTestIndexed item : items) {
             repo.insert(item);
         }
-        long diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to insert 10000 indexed items - " + diff + "ms");
 
-        start = System.currentTimeMillis();
         repo.remove(Filter.ALL);
-        diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to remove 10000 indexed items - " + diff + "ms");
     }
 
     @Test
@@ -163,17 +140,11 @@ public class StressTest {
 
         // actual calculation
         repo = db.getRepository(PerfTest.class);
-        long start = System.currentTimeMillis();
         for (PerfTest item : items) {
             repo.insert(item);
         }
-        long diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to insert 10000 non-indexed items - " + diff + "ms");
 
-        start = System.currentTimeMillis();
         repo.remove(Filter.ALL);
-        diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to remove 10000 non-indexed items - " + diff + "ms");
     }
 
     private <T> List<T> getItems(Class<T> type) {

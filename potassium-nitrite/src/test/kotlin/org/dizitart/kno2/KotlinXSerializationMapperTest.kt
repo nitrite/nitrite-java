@@ -23,6 +23,7 @@ import org.dizitart.kno2.serialization.KotlinXSerializationMapper
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
 
@@ -31,6 +32,7 @@ import java.nio.file.Paths
  * @author Joris Jensen
  */
 class KotlinXSerializationMapperTest {
+    private val log = LoggerFactory.getLogger(KotlinXSerializationMapperTest::class.java)
     private val dbPath = getRandomTempDbFile()
 
     @Serializable
@@ -146,7 +148,11 @@ class KotlinXSerializationMapperTest {
             assertEquals(it, testData)
         }
         db.close()
-        Files.delete(Paths.get(dbPath))
+        try {
+            Files.delete(Paths.get(dbPath))
+        } catch (e: Exception) {
+            log.error("Failed to delete db file", e)
+        }
     }
 
     @Test

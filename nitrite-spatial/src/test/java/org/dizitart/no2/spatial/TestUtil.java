@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.spatial;
 
-import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
@@ -33,6 +33,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class TestUtil {
     public static String getRandomTempDbFile() {
         String dataDir = System.getProperty("java.io.tmpdir") + File.separator + "nitrite" + File.separator + "data";
@@ -56,8 +57,11 @@ public class TestUtil {
             .openOrCreate();
     }
 
-    @SneakyThrows
     public static void deleteDb(String fileName) {
-        Files.delete(Paths.get(fileName));
+        try {
+            Files.delete(Paths.get(fileName));
+        } catch (Exception e) {
+            log.error("Error while deleting db", e);
+        }
     }
 }

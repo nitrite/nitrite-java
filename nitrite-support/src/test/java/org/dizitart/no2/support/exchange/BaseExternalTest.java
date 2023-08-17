@@ -16,30 +16,29 @@
 
  package org.dizitart.no2.support.exchange;
 
- import org.dizitart.no2.Nitrite;
- import org.dizitart.no2.collection.Document;
- import org.dizitart.no2.collection.NitriteCollection;
- import org.dizitart.no2.common.mapper.EntityConverterMapper;
- import org.dizitart.no2.mvstore.MVStoreModule;
- import org.dizitart.no2.repository.ObjectRepository;
- import org.dizitart.no2.support.Retry;
- import org.dizitart.no2.support.data.Company;
- import org.dizitart.no2.support.data.Employee;
- import org.dizitart.no2.support.data.Note;
- import org.junit.After;
- import org.junit.Before;
- import org.junit.Rule;
- 
- import java.io.File;
- import java.io.IOException;
- import java.nio.file.Files;
- import java.nio.file.Paths;
- import java.util.List;
- import java.util.UUID;
- 
- import static org.dizitart.no2.common.Constants.*;
- import static org.dizitart.no2.common.module.NitriteModule.module;
- import static org.junit.Assert.assertTrue;
+import org.dizitart.no2.Nitrite;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.mvstore.MVStoreModule;
+import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.support.Retry;
+import org.dizitart.no2.support.TestUtil;
+import org.dizitart.no2.support.data.Company;
+import org.dizitart.no2.support.data.Employee;
+import org.dizitart.no2.support.data.Note;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import static org.dizitart.no2.common.Constants.*;
+import static org.dizitart.no2.common.module.NitriteModule.module;
+import static org.junit.Assert.assertTrue;
  
  /**
   * @author Anindya Chatterjee.
@@ -69,9 +68,9 @@
      @After
      public void cleanUp() throws IOException {
          closeDb();
-         Files.delete(Paths.get(sourceDbFile));
-         Files.delete(Paths.get(destDbFile));
-         Files.delete(Paths.get(schemaFile));
+         TestUtil.deleteDb(sourceDbFile);
+         TestUtil.deleteDb(destDbFile);
+         TestUtil.deleteDb(schemaFile);
      }
  
      public static String getRandomTempDbFile() {

@@ -1,5 +1,6 @@
 package org.dizitart.no2.spatial;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -7,6 +8,7 @@ import org.junit.runners.model.Statement;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class Retry implements TestRule {
     private final int retryCount;
 
@@ -31,11 +33,13 @@ public class Retry implements TestRule {
                         return;
                     } catch (Throwable t) {
                         caughtThrowable = t;
-                        System.err.println(description.getDisplayName() + ": run " + (i + 1) + " failed");
+                        log.warn(description.getDisplayName() + ": run " + (i + 1) + " failed");
                     }
                 }
-                System.err.println(description.getDisplayName() + ": giving up after " + retryCount + " failures");
-                throw caughtThrowable;
+                log.error(description.getDisplayName() + ": giving up after " + retryCount + " failures");
+                if (caughtThrowable != null) {
+                    throw caughtThrowable;
+                }
             }
         };
     }

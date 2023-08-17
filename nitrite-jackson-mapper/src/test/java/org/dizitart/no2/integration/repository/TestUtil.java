@@ -22,6 +22,9 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 /**
  * @author Anindya Chatterjee
  */
@@ -69,5 +72,13 @@ public class TestUtil {
             .loadModule(module)
             .fieldSeparator(".")
             .openOrCreate(user, password);
+    }
+
+    public static void deleteDb(String filePath) {
+        try {
+            Files.delete(Paths.get(filePath));
+        } catch (Exception e) {
+            log.error("Error while deleting db", e);
+        }
     }
 }

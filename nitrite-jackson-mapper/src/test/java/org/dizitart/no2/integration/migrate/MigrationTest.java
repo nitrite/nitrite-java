@@ -26,20 +26,18 @@ import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.integration.repository.Retry;
+import org.dizitart.no2.integration.repository.TestUtil;
 import org.dizitart.no2.migration.InstructionSet;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.migration.TypeConverter;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
-import org.dizitart.no2.integration.repository.Retry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.UUID;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
@@ -66,12 +64,12 @@ public class MigrationTest {
     }
 
     @After
-    public void cleanUp() throws IOException {
+    public void cleanUp() {
         if (!db.isClosed()) {
             db.close();
         }
 
-        Files.delete(Paths.get(dbPath));
+        TestUtil.deleteDb(dbPath);
     }
 
     @Test

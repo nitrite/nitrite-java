@@ -21,9 +21,9 @@ import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.WriteResult;
+import org.dizitart.no2.common.mapper.JacksonMapper;
 import org.dizitart.no2.common.util.Iterables;
 import org.dizitart.no2.exceptions.InvalidIdException;
-import org.dizitart.no2.common.mapper.JacksonMapper;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
@@ -31,10 +31,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.dizitart.no2.integration.repository.BaseObjectRepositoryTest.getRandomTempDbFile;
@@ -61,9 +57,9 @@ public class NitriteIdAsIdTest {
     }
 
     @After
-    public void after() throws IOException {
+    public void after() {
         db.close();
-        Files.delete(Paths.get(fileName));
+        TestUtil.deleteDb(fileName);
     }
 
     @Test
@@ -78,7 +74,6 @@ public class NitriteIdAsIdTest {
 
         Cursor<WithNitriteId> cursor = repo.find();
         for (WithNitriteId withNitriteId : cursor) {
-            System.out.println(withNitriteId.name);
             assertNotNull(withNitriteId.idField);
         }
 

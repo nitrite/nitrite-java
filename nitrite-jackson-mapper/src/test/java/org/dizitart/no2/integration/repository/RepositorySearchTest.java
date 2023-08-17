@@ -61,8 +61,8 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         assertNotNull(employeeList);
         assertNotNull(subEmployeeList);
 
-        assertTrue(employeeList.size() > 0);
-        assertTrue(subEmployeeList.size() > 0);
+        assertFalse(employeeList.isEmpty());
+        assertFalse(subEmployeeList.isEmpty());
 
         assertEquals(employeeList.size(), subEmployeeList.size());
 

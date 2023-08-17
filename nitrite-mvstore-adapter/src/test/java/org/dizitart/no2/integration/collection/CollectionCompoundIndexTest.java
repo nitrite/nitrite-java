@@ -25,6 +25,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexType;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Date;
@@ -151,7 +152,7 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
     @Test
     public void testRebuildIndexOnRunningIndex() {
         insert();
-        db.getStore().subscribe(System.out::println);
+        db.getStore().subscribe(Assert::assertNotNull);
 
         collection.createIndex("firstName", "lastName");
         collection.rebuildIndex("firstName", "lastName");

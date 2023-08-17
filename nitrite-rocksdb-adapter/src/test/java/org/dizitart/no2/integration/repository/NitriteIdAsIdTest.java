@@ -78,7 +78,6 @@ public class NitriteIdAsIdTest {
 
         Cursor<WithNitriteId> cursor = repo.find();
         for (WithNitriteId withNitriteId : cursor) {
-            System.out.println(withNitriteId.name);
             assertNotNull(withNitriteId.idField);
         }
 

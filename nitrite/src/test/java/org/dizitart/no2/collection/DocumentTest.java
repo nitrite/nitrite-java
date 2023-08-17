@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.collection;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -36,6 +37,7 @@ import static org.dizitart.no2.common.util.Iterables.listOf;
 import static org.dizitart.no2.integration.TestUtil.parse;
 import static org.junit.Assert.*;
 
+@Slf4j
 public class DocumentTest {
     private Document doc;
 
@@ -280,8 +282,6 @@ public class DocumentTest {
             try (ObjectOutputStream oos = new ObjectOutputStream(bos)) {
                 oos.writeObject(doc);
                 byte[] data = bos.toByteArray();
-
-                System.out.println(data.length);
 
                 try (ByteArrayInputStream bis = new ByteArrayInputStream(data)) {
                     try (ObjectInputStream ois = new ObjectInputStream(bis)) {

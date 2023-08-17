@@ -30,10 +30,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
 import static org.junit.Assert.*;
 
 /**
@@ -52,10 +48,10 @@ public class ObjectRepositoryNegativeTest {
     }
 
     @After
-    public void close() throws IOException {
+    public void close() {
         db.close();
         db = null;
-        Files.delete(Paths.get(dbPath));
+        TestUtil.deleteDb(dbPath);
     }
 
     @Test(expected = ObjectMappingException.class)

@@ -20,11 +20,13 @@ import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.*
 import com.fasterxml.jackson.databind.module.SimpleModule
+import lombok.extern.slf4j.Slf4j
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
+import org.slf4j.LoggerFactory
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
 import java.nio.file.Files
@@ -36,6 +38,7 @@ import java.util.*
  * @author Anindya Chatterjee
  */
 class BackportJavaTimeTest {
+    private val log = LoggerFactory.getLogger(BackportJavaTimeTest::class.java)
     private val dbPath = getRandomTempDbFile()
 
     @Index(fields = ["time"], type = IndexType.NON_UNIQUE)
@@ -79,8 +82,11 @@ class BackportJavaTimeTest {
         val repo = db.getRepository<TestData>()
         val testData = TestData(time = LocalDateTime.now())
         repo.insert(testData)
-        println(repo.find().firstOrNull())
 
-        Files.delete(Paths.get(dbPath))
+        try {
+            Files.delete(Paths.get(dbPath))
+        } catch (e: Exception) {
+            log.error("Failed to delete db file", e)
+        }
     }
 }

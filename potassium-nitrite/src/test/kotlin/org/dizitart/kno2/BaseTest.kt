@@ -47,6 +47,10 @@ abstract class BaseTest {
             db?.close()
         }
         val file = File(fileName)
-        if (file.exists()) file.delete()
+        try {
+            if (file.exists()) file.delete()
+        } catch (e: Exception) {
+            // ignore
+        }
     }
 }

@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.integration.collection;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.FindPlan;
@@ -41,6 +42,7 @@ import static org.junit.Assert.*;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class CollectionCompoundIndexTest extends BaseCollectionTest {
     @Test
     public void testCreateAndCheckIndex() {
@@ -151,7 +153,7 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
     @Test
     public void testRebuildIndexOnRunningIndex() {
         insert();
-        db.getStore().subscribe(System.out::println);
+        db.getStore().subscribe((m) -> log.info(m.getEvent().name()));
 
         collection.createIndex("firstName", "lastName");
         collection.rebuildIndex("firstName", "lastName");

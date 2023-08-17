@@ -20,6 +20,7 @@ package org.dizitart.no2.integration;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlSchemaType;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
@@ -54,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class NitriteStressTest {
     private static final int TEST_SET_COUNT = 15000;
     private final PodamFactory podamFactory = new PodamFactoryImpl();
@@ -73,7 +75,6 @@ public class NitriteStressTest {
         documentMapper.registerEntityConverter(new PerfTestIndexed.Converter());
 
         collection = db.getCollection("test");
-        System.out.println(fileName);
     }
 
     @After
@@ -81,7 +82,6 @@ public class NitriteStressTest {
         if (db != null && !db.isClosed()) {
             long start = System.currentTimeMillis();
             db.close();
-            System.out.println("Time to compact and close - " + (System.currentTimeMillis() - start) / 1000 + " seconds");
         }
 
         deleteDb(fileName);
@@ -100,7 +100,7 @@ public class NitriteStressTest {
                 counter++;
             }
         } catch (Throwable t) {
-            System.err.println("Crashed after " + counter + " records");
+            log.error("Error inserting record", t);
             throw t;
         }
 
@@ -118,38 +118,22 @@ public class NitriteStressTest {
         AtomicLong counter = new AtomicLong(System.currentTimeMillis());
         PodamFactory factory = new PodamFactoryImpl();
 
-        long start = System.currentTimeMillis();
         for (int i = 0; i < 100000; i++) {
             Document doc = Document.createDocument();
             doc.put("number", random.nextDouble());
             doc.put("name", factory.manufacturePojo(String.class));
             doc.put("counter", counter.getAndIncrement());
             collection.insert(doc);
-            if (i % 10000 == 0) {
-                System.out.println(i + " entries written");
-            }
         }
-        System.out.println("Records inserted in " + ((System.currentTimeMillis() - start) / (1000 * 60)) + " minutes");
 
         if (db.hasUnsavedChanges()) {
             db.commit();
         }
 
-        start = System.currentTimeMillis();
         DocumentCursor cursor = collection.find();
-        System.out.println("Size ->" + cursor.size());
-        System.out.println("Records size calculated in " + ((System.currentTimeMillis() - start) / (1000)) + " seconds");
-
-        int i = 0;
-        start = System.currentTimeMillis();
         for (Document element : cursor) {
             assertNotNull(element);
-            i++;
-            if (i % 10000 == 0) {
-                System.out.println(i + " entries processed");
-            }
         }
-        System.out.println("Iteration completed in " + ((System.currentTimeMillis() - start) / (1000)) + " seconds");
     }
 
     @Test
@@ -166,17 +150,11 @@ public class NitriteStressTest {
 
         // actual calculation
         repo = db.getRepository(PerfTestIndexed.class);
-        long start = System.currentTimeMillis();
         for (PerfTestIndexed item : items) {
             repo.insert(item);
         }
-        long diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to insert 10000 indexed items - " + diff + "ms");
 
-        start = System.currentTimeMillis();
         repo.remove(Filter.ALL);
-        diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to remove 10000 indexed items - " + diff + "ms");
     }
 
     @Test
@@ -193,17 +171,11 @@ public class NitriteStressTest {
 
         // actual calculation
         repo = db.getRepository(PerfTest.class);
-        long start = System.currentTimeMillis();
         for (PerfTest item : items) {
             repo.insert(item);
         }
-        long diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to insert 10000 non-indexed items - " + diff + "ms");
 
-        start = System.currentTimeMillis();
         repo.remove(Filter.ALL);
-        diff = System.currentTimeMillis() - start;
-        System.out.println("Time take to remove 10000 non-indexed items - " + diff + "ms");
     }
 
     private List<TestDto> createTestSet() {

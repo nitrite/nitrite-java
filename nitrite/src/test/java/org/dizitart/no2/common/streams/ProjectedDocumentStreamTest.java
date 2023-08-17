@@ -24,10 +24,10 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.common.tuples.Pair;
+import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
@@ -66,6 +66,7 @@ public class ProjectedDocumentStreamTest {
         verify(recordStream).iterator();
         assertTrue(projectedDocumentStream.toList().isEmpty());
     }
+
     @Test
     public void test() {
         try(Nitrite db = Nitrite.builder().openOrCreate()) {
@@ -83,7 +84,7 @@ public class ProjectedDocumentStreamTest {
             db.getCollection("users")
                 .find()
                 .project(projection)
-                .forEach(System.out::println);
+                .forEach(Assert::assertNotNull);
         }
     }
 }

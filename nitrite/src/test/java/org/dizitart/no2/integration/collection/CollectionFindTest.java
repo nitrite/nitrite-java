@@ -402,7 +402,6 @@ public class CollectionFindTest extends BaseCollectionTest {
         assertEquals(recordStream.toList().stream().skip(1).findFirst().orElse(null),
             Document.createDocument("name", "Jane").put("address", Document.createDocument("city", "New Jersey")
                 .put("state", "NJ")));
-        System.out.println(recordStream.firstOrNull());
     }
 
     @Test

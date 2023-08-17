@@ -21,8 +21,8 @@ import com.github.javafaker.Faker;
 import lombok.Data;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.repository.data.*;
@@ -36,9 +36,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -64,10 +61,10 @@ public class ObjectRepositoryTest {
     }
 
     @After
-    public void close() throws IOException {
+    public void close() {
         db.close();
         db = null;
-        Files.delete(Paths.get(dbPath));
+        TestUtil.deleteDb(dbPath);
     }
 
     @Test

@@ -11,15 +11,13 @@ import org.dizitart.no2.repository.ObjectRepository;
 import org.junit.After;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 import static org.dizitart.no2.integration.repository.BaseObjectRepositoryTest.getRandomTempDbFile;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Anindya Chatterjee
@@ -29,11 +27,11 @@ public class JacksonModuleTest {
     private final String fileName = getRandomTempDbFile();
 
     @After
-    public void cleanUp() throws IOException {
+    public void cleanUp() {
         if (db != null && !db.isClosed()) {
             db.close();
         }
-        Files.delete(Paths.get(fileName));
+        TestUtil.deleteDb(fileName);
     }
 
     @Test(expected = ObjectMappingException.class)
@@ -60,7 +58,7 @@ public class JacksonModuleTest {
 
         assertEquals(repository.find().size(), 10);
         for (TestData testData : repository.find()) {
-            System.out.println(testData.localDateTime);
+            assertNotNull(testData.localDateTime);
         }
     }
 
@@ -88,7 +86,7 @@ public class JacksonModuleTest {
 
         assertEquals(repository.find().size(), 10);
         for (TestData testData : repository.find()) {
-            System.out.println(testData.localDateTime);
+            assertNotNull(testData.localDateTime);
         }
     }
 

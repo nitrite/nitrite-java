@@ -52,15 +52,8 @@ public class MapperTest {
         emp1.setJoiningDate(new Date());
         emp1.setBoss(boss);
 
-        long start = System.currentTimeMillis();
         Document document = (Document) entityConverterMapper.tryConvert(emp1, Document.class);
-        long diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
-
-        start = System.currentTimeMillis();
         Employee employee = (Employee) entityConverterMapper.tryConvert(document, Employee.class);
-        diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
         assertEquals(emp1, employee);
     }
 
@@ -82,15 +75,9 @@ public class MapperTest {
         emp1.setJoiningDate(new Date());
         emp1.setBoss(boss);
 
-        long start = System.currentTimeMillis();
         Document document = (Document) entityConverterMapper.tryConvert(emp1, Document.class);
-        long diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
 
-        start = System.currentTimeMillis();
         MappableEmployee employee = (MappableEmployee) entityConverterMapper.tryConvert(document, MappableEmployee.class);
-        diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
         assertEquals(emp1, employee);
     }
 
@@ -119,15 +106,9 @@ public class MapperTest {
             add(emp1);
         }});
 
-        long start = System.currentTimeMillis();
         Document document = (Document) entityConverterMapper.tryConvert(department, Document.class);
-        long diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
 
-        start = System.currentTimeMillis();
         Department dept = (Department) entityConverterMapper.tryConvert(document, Department.class);
-        diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
         assertEquals(department, dept);
     }
 
@@ -151,20 +132,14 @@ public class MapperTest {
 
         MappableDepartment department = new MappableDepartment();
         department.setName("Dept");
-        department.setEmployeeList(new ArrayList<MappableEmployee>() {{
+        department.setEmployeeList(new ArrayList<>() {{
             add(boss);
             add(emp1);
         }});
 
-        long start = System.currentTimeMillis();
         Document document = (Document) entityConverterMapper.tryConvert(department, Document.class);
-        long diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
 
-        start = System.currentTimeMillis();
         MappableDepartment dept = (MappableDepartment) entityConverterMapper.tryConvert(document, MappableDepartment.class);
-        diff = System.currentTimeMillis() - start;
-        System.out.println(diff);
         assertEquals(department, dept);
     }
 
