@@ -18,7 +18,7 @@
 package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.TestUtil;
 import org.dizitart.no2.collection.NitriteId;
@@ -46,7 +46,7 @@ public class ObjectRepositoryNegativeTest {
     @Before
     public void setUp() {
         db = TestUtil.createDb();
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new WithPublicField.Converter());
         documentMapper.registerEntityConverter(new WithObjectId.Converter());
         documentMapper.registerEntityConverter(new WithOutId.Converter());

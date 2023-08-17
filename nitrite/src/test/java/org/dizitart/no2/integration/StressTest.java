@@ -24,7 +24,7 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
@@ -62,7 +62,7 @@ public class StressTest {
             .fieldSeparator(".")
             .openOrCreate();
 
-        EntityConverterMapper mapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper mapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         mapper.registerEntityConverter(new PerfTest.PerfTestConverter());
         mapper.registerEntityConverter(new PerfTestIndexed.PerfTestIndexedConverter());
 

@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.ClassA;
@@ -79,7 +79,7 @@ public class ValidationUtilsTest {
 
     @Test
     public void testValidateProjectionType() {
-        EntityConverterMapper documentMapper = new EntityConverterMapper();
+        SimpleNitriteMapper documentMapper = new SimpleNitriteMapper();
         documentMapper.registerEntityConverter(new ClassA.ClassAConverter());
         documentMapper.registerEntityConverter(new ClassBConverter());
         documentMapper.registerEntityConverter(new EmptyClass.Converter());
@@ -96,7 +96,7 @@ public class ValidationUtilsTest {
 
     @Test
     public void testValidateRepositoryType() {
-        EntityConverterMapper documentMapper = new EntityConverterMapper();
+        SimpleNitriteMapper documentMapper = new SimpleNitriteMapper();
         documentMapper.registerEntityConverter(new ClassA.ClassAConverter());
         documentMapper.registerEntityConverter(new ClassBConverter());
         documentMapper.registerEntityConverter(new EmptyClass.Converter());

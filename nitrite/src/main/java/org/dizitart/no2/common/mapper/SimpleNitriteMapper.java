@@ -32,21 +32,21 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  *
  * <p>
  * This mapper is used by default in nitrite. It uses {@link EntityConverter} to
- * convert an object of type <code>Source</code> to an object of type <code>Target</code>.
+ * convert an object and vice versa.
  *
  * @author Anindya Chatterjee.
  * @since 4.0
  */
-public class EntityConverterMapper implements NitriteMapper {
+public class SimpleNitriteMapper implements NitriteMapper {
     private final Set<Class<?>> valueTypes;
     private final Map<Class<?>, EntityConverter<?>> converterRegistry;
 
     /**
-     * Instantiates a new {@link EntityConverterMapper}.
+     * Instantiates a new {@link SimpleNitriteMapper}.
      *
      * @param valueTypes the value types
      */
-    public EntityConverterMapper(Class<?>... valueTypes) {
+    public SimpleNitriteMapper(Class<?>... valueTypes) {
         this.valueTypes = new HashSet<>();
         this.converterRegistry = new HashMap<>();
         init(listOf(valueTypes));

@@ -27,7 +27,7 @@ import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
@@ -69,7 +69,7 @@ public class NitriteStressTest {
     @Before
     public void before() {
         db = createDb(fileName);
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TestDto.Converter());
         documentMapper.registerEntityConverter(new PerfTest.Converter());
         documentMapper.registerEntityConverter(new PerfTestIndexed.Converter());
@@ -89,7 +89,7 @@ public class NitriteStressTest {
     @Test
     public void stressTest() {
         ObjectRepository<TestDto> testRepository = db.getRepository(TestDto.class);
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TestDto.Converter());
         testRepository.createIndex(IndexOptions.indexOptions(IndexType.FULL_TEXT), "lastName");
         testRepository.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "birthDate");

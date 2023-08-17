@@ -23,36 +23,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a {@link Processor} chain. The processors are executed in the order
- * they are added to the chain.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public class ProcessorChain implements Processor {
     private final List<Processor> processors;
 
-    /**
-     * Instantiates a new Processor chain.
-     */
     public ProcessorChain() {
         processors = new ArrayList<>();
     }
 
-    /**
-     * Adds a processor to the chain.
-     *
-     * @param processor the processor
-     */
     public void add(Processor processor) {
         processors.add(processor);
     }
 
-    /**
-     * Removes a processor from the chain.
-     *
-     * @param processor the processor
-     */
     public void remove(Processor processor) {
         processors.remove(processor);
     }

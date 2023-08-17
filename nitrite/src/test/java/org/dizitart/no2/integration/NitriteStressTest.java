@@ -25,7 +25,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -55,7 +55,7 @@ public class NitriteStressTest {
     @Test
     public void stressTest() {
         Nitrite database = createDb();
-        EntityConverterMapper documentMapper = (EntityConverterMapper) database.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) database.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TestDto.Converter());
         ObjectRepository<TestDto> testRepository = database.getRepository(TestDto.class);
         testRepository.createIndex(IndexOptions.indexOptions(IndexType.FULL_TEXT), "lastName");

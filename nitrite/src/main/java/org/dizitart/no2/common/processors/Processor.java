@@ -26,7 +26,8 @@ import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
 import static org.dizitart.no2.common.util.DocumentUtils.createUniqueFilter;
 
 /**
- * Represents a document processor.
+ * An interface that provides methods to process a document before
+ * writing it into database or after reading from the database.
  *
  * @author Anindya Chatterjee
  * @since 4.0
@@ -50,9 +51,11 @@ public interface Processor {
     default Document processAfterRead(Document document) { return document; }
 
     /**
-     * Processes all documents of a {@link PersistentCollection}.
-     *
-     * @param collection the collection to process
+     * Processes documents in a persistent collection, updates them,and saves the changes 
+     * back to the collection.
+     * 
+     * @param collection the collection to process. It can either be a 
+     * {@link NitriteCollection} or an {@link ObjectRepository}.
      */
     default void process(PersistentCollection<?> collection) {
         NitriteCollection nitriteCollection = null;

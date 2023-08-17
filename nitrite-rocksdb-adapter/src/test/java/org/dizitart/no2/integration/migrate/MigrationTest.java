@@ -23,7 +23,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.MigrationException;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
@@ -58,7 +58,7 @@ public class MigrationTest {
     @Before
     public void setUp() {
         db = createDb(dbPath);
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new OldClass.Converter());
         documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
         documentMapper.registerEntityConverter(new NewClass.Converter());
@@ -127,7 +127,7 @@ public class MigrationTest {
             .addMigrations(migration)
             .openOrCreate("test-user", "test-password");
 
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new OldClass.Converter());
         documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
         documentMapper.registerEntityConverter(new NewClass.Converter());

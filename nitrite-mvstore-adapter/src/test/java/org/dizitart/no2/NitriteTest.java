@@ -28,7 +28,7 @@ import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -87,7 +87,7 @@ public class NitriteTest {
     public void setUp() throws ParseException {
         db = TestUtil.createDb(fileName, "test-user", "test-password");
 
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new CompatChild.Converter());
         documentMapper.registerEntityConverter(new Receipt.Converter());
         documentMapper.registerEntityConverter(new EmptyClass.Converter());
@@ -492,7 +492,7 @@ public class NitriteTest {
 
         String oldDbFile = System.getProperty("java.io.tmpdir") + File.separator + "old.db";
         Nitrite db = TestUtil.createDb(oldDbFile, "test-user", "test-password");
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new Receipt.Converter());
 
         NitriteCollection collection = db.getCollection("test");

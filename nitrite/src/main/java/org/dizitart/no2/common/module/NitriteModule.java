@@ -21,15 +21,14 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.Iterables.setOf;
 
 /**
- * Represents a nitrite plugin modules which may contains
- * one or more nitrite plugins.
+ * Represents a module encapsulating a set of {@link NitritePlugin} objects.
  *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public interface NitriteModule {
     /**
-     * Creates a {@link NitriteModule} from a set of {@link NitritePlugin}s.
+     * Creates a {@link NitriteModule} with a set of {@link NitritePlugin}s.
      *
      * @param plugins the plugins
      * @return the nitrite module

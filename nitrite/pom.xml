@@ -146,12 +146,15 @@
                     <excludePackageNames>
                         org.dizitart.no2.collection.operation,
                         org.dizitart.no2.common.concurrent,
-                        org.dizitart.no2.common.crypto,
+                        org.dizitart.no2.common.event,
                     </excludePackageNames>
                     <sourceFileExcludes>
                         <exclude>**/*CollectionFactory.java</exclude>
                         <exclude>**/*DefaultNitriteCollection.java</exclude>
                         <exclude>**/*SnowflakeIdGenerator.java</exclude>
+                        <exclude>**/*AttributesAware.java</exclude>
+                        <exclude>**/*PluginManager.java</exclude>
+                        <exclude>**/*ProcessorChain.java</exclude>
                     </sourceFileExcludes>
                 </configuration>
             </plugin>

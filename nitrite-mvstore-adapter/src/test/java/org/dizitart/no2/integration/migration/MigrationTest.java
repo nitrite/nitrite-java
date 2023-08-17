@@ -18,7 +18,7 @@
 package org.dizitart.no2.integration.migration;
 
 import com.github.javafaker.Faker;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
@@ -58,7 +58,7 @@ public class MigrationTest {
     @Before
     public void setUp() {
         db = createDb(dbPath);
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new OldClass.Converter());
         documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
         documentMapper.registerEntityConverter(new NewClass.Converter());
@@ -128,7 +128,7 @@ public class MigrationTest {
             .addMigrations(migration)
             .openOrCreate("test-user", "test-password");
 
-        EntityConverterMapper documentMapper = (EntityConverterMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new OldClass.Converter());
         documentMapper.registerEntityConverter(new OldClass.Literature.Converter());
         documentMapper.registerEntityConverter(new NewClass.Converter());

@@ -22,7 +22,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.PluginException;
 import org.dizitart.no2.index.*;
-import org.dizitart.no2.common.mapper.EntityConverterMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryStoreModule;
@@ -31,11 +31,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The nitrite database plugin manager. It loads the nitrite plugins
- * before opening the database.
- *
- * @see NitriteModule
- * @see NitritePlugin
  * @author Anindya Chatterjee.
  * @since 4.0
  */
@@ -188,7 +183,7 @@ public class PluginManager implements AutoCloseable {
 
         if (nitriteMapper == null) {
             log.debug("Loading mappable mapper");
-            NitritePlugin plugin = new EntityConverterMapper();
+            NitritePlugin plugin = new SimpleNitriteMapper();
             loadPlugin(plugin);
         }
 

@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.modules.NitriteIdModule;
@@ -34,7 +33,6 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 /**
  * @author Anindya Chatterjee
  */
-@Slf4j
 public class JacksonMapper implements NitriteMapper {
     private ObjectMapper objectMapper;
 

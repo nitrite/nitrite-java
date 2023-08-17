@@ -23,10 +23,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
 
 /**
- * An abstract implementation of {@link EventBus}.
- *
- * @param <EventInfo>     the event information type parameter
- * @param <EventListener> the event listener type parameter
  * @author Anindya Chatterjee.
  * @since 1.0
  */
@@ -36,9 +32,6 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
     private final Set<EventListener> listeners;
     private ExecutorService eventExecutor;
 
-    /**
-     * Instantiates a new Nitrite event bus.
-     */
     public NitriteEventBus() {
         this.listeners = new CopyOnWriteArraySet<>();
     }
@@ -65,11 +58,6 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
         }
     }
 
-    /**
-     * Gets the {@link ExecutorService} that executes listeners' code.
-     *
-     * @return the {@link ExecutorService}.
-     */
     protected ExecutorService getEventExecutor() {
         if (eventExecutor == null
             || eventExecutor.isShutdown()
@@ -79,11 +67,6 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
         return eventExecutor;
     }
 
-    /**
-     * Gets a set of all event listeners.
-     *
-     * @return the event listeners
-     */
     protected Set<EventListener> getListeners() {
         return listeners;
     }
