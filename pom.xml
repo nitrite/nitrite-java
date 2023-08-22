@@ -40,7 +40,7 @@
         <lombok.version>1.18.28</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.4.0</mockito.version>
+        <mockito.version>5.5.0</mockito.version>
         <podam.version>7.2.11.RELEASE</podam.version>
         <log4j.version>2.20.0</log4j.version>
         <awaitility.version>4.2.0</awaitility.version>
