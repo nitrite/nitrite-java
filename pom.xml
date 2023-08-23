@@ -36,7 +36,7 @@
         <commons-codec.version>1.16.0</commons-codec.version>
         <commons-io.version>2.13.0</commons-io.version>
         <kotlin.version>1.9.0</kotlin.version>
-        <kotlinx-serialization.version>1.5.1</kotlinx-serialization.version>
+        <kotlinx-serialization.version>1.6.0</kotlinx-serialization.version>
         <lombok.version>1.18.28</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
