@@ -20,22 +20,12 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 /**
- * A utility class for {@link Iterable}.
- *
  * @author Anindya Chatterjee.
  * @since 1.0
  */
 public class Iterables {
     private Iterables() {}
 
-    /**
-     * Gets the first element of an {@link Iterable} or
-     * `null` if it is empty.
-     *
-     * @param <T>      the type parameter
-     * @param iterable the iterable
-     * @return the first element or `null`.
-     */
     public static <T> T firstOrNull(Iterable<T> iterable) {
         if (iterable == null) return null;
 
@@ -46,13 +36,6 @@ public class Iterables {
         return null;
     }
 
-    /**
-     * Converts an {@link Iterable} into a {@link List}.
-     *
-     * @param <T>      the type parameter
-     * @param iterable the iterable
-     * @return the list containing all elements of the `iterable`.
-     */
     public static <T> List<T> toList(Iterable<T> iterable) {
         if (iterable instanceof List) return (List<T>) iterable;
         List<T> list = new ArrayList<>();
@@ -62,13 +45,6 @@ public class Iterables {
         return list;
     }
 
-    /**
-     * Converts an {@link Iterable} into a {@link Set}.
-     *
-     * @param <T>      the type parameter
-     * @param iterable the iterable
-     * @return the list containing all elements of the `iterable`.
-     */
     public static <T> Set<T> toSet(Iterable<T> iterable) {
         if (iterable instanceof Set) return (Set<T>) iterable;
         Set<T> set = new LinkedHashSet<>();
@@ -78,14 +54,6 @@ public class Iterables {
         return set;
     }
 
-    /**
-     * Converts an {@link Iterable} of type `T` into an array of type `T`.
-     *
-     * @param <T>      the type parameter
-     * @param iterable the iterable
-     * @param type     the type
-     * @return the array of type `T`.
-     */
     @SuppressWarnings("unchecked")
     public static <T> T[] toArray(Iterable<T> iterable, Class<T> type) {
         T[] dummy = (T[]) Array.newInstance(type, 0);

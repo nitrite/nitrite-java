@@ -22,8 +22,6 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * A utility class for {@link Number}s.
- *
  * @author Anindya Chatterjee
  * @since 1.0
  */
@@ -31,15 +29,6 @@ public class Numbers {
     private Numbers() {
     }
 
-    /**
-     * Compare two numbers.
-     *
-     * @param x first number.
-     * @param y second number.
-     * @return `0` if `x` and `y` are numerically equal. A value less
-     * than `0` if `x` is numerically less than `y`. A value greater
-     * than `0` if `x` is numerically greater than `y`.
-     */
     public static int compare(Number x, Number y) {
         if (isSpecial(x) || isSpecial(y)) {
             return Double.compare(x.doubleValue(), y.doubleValue());

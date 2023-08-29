@@ -19,7 +19,7 @@ package org.dizitart.no2.exceptions;
 import lombok.Getter;
 
 /**
- * Represents a generic nitrite database runtime error.
+ * Base class for all Nitrite exceptions.
  *
  * @author Anindya Chatterjee
  * @since 1.0

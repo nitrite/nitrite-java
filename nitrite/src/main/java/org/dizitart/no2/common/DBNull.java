@@ -3,8 +3,6 @@ package org.dizitart.no2.common;
 import java.io.Serializable;
 
 /**
- * This class acts as a surrogate for null key.
- *
  * @author Anindya Chatterjee
  * @since 1.0
  */

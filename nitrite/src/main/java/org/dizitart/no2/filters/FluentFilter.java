@@ -34,10 +34,10 @@ public final class FluentFilter {
     }
 
     /**
-     * Where clause for fluent filter api.
+     * Creates a new {@link FluentFilter} instance with the specified field name.
      *
-     * @param field the field
-     * @return the fluent filter
+     * @param field the name of the field to filter on
+     * @return a new {@link FluentFilter} instance with the specified field name
      */
     public static FluentFilter where(String field) {
         FluentFilter filter = new FluentFilter();
@@ -46,123 +46,109 @@ public final class FluentFilter {
     }
 
     /**
-     * Creates an equality filter which matches documents where the value
-     * of a field equals the specified value.
+     * Creates an equality filter that matches documents where the value of a 
+     * field equals the specified value.
      *
-     *
-     * @param value the value
-     * @return the equality filter.
+     * @param value the value to match against.
+     * @return a {@link NitriteFilter} instance representing the equality filter.
      */
     public NitriteFilter eq(Object value) {
         return new EqualsFilter(field, value);
     }
 
     /**
-     * Creates an equality filter which matches documents where the value
-     * of a field not equals the specified value.
+     * Creates a filter that matches all documents where the value of 
+     * the specified field is not equal to the given value.
      *
-     * @param value the value
-     * @return the filter
+     * @param value the value to compare against.
+     * @return a {@link NitriteFilter} instance.
      */
     public NitriteFilter notEq(Object value) {
         return new NotEqualsFilter(field, value);
     }
 
     /**
-     * Creates a greater than filter which matches those documents where the value
-     * of the field is greater than (i.e. &gt;) the specified value.
+     * Creates a filter that matches all documents where the value of 
+     * the specified field is greater than the given value.
      *
-     * @param value the value
-     * @return the greater than filter
+     * @param value the value to compare against.
+     * @return the NitriteFilter instance representing the greater than filter.
      */
     public NitriteFilter gt(Comparable<?> value) {
         return new GreaterThanFilter(field, value);
     }
 
     /**
-     * Creates a greater equal filter which matches those documents where the value
-     * of the field is greater than or equals to (i.e. &ge;) the specified value.
+     * Creates a filter that matches documents where the value of the 
+     * field is greater than or equal to the specified value.
      *
-     * @param value the value
-     * @return the greater or equal filter
+     * @param value the value to compare against.
+     * @return a filter that matches documents where the value of the field is greater than or equal to the specified value.
      */
     public NitriteFilter gte(Comparable<?> value) {
         return new GreaterEqualFilter(field, value);
     }
 
     /**
-     * Creates a lesser than filter which matches those documents where the value
-     * of the field is less than (i.e. &lt;) the specified value.
+     * Creates a filter that matches documents where the value of the 
+     * field is less than the specified value.
      *
-     * @param value the value
-     * @return the lesser than filter
+     * @param value the value to compare against.
+     * @return a filter that matches documents where the value of the field is less than the specified value.
      */
     public NitriteFilter lt(Comparable<?> value) {
         return new LesserThanFilter(field, value);
     }
 
     /**
-     * Creates a lesser equal filter which matches those documents where the value
-     * of the field is lesser than or equals to (i.e. &le;) the specified value.
+     * Creates a filter that matches documents where the value of the 
+     * field is less than or equal to the specified value.
      *
-     * @param value the value
-     * @return the lesser equal filter
+     * @param value the value to compare against.
+     * @return a filter that matches documents where the value of the field is less than or equal to the specified value.
      */
     public NitriteFilter lte(Comparable<?> value) {
         return new LesserEqualFilter(field, value);
     }
 
     /**
-     * Creates a between filter which matches those documents where the value
-     * of the field is within the specified bound including the end values.
-     * <pre> {@code
-     * // matches all documents where 'age' field is between 30 and 40
-     * collection.find(where("age").between(40, 30));
-     * }*
-     * </pre>
+     * Creates a filter that matches documents where the value of the field is 
+     * between the specified lower and upper bounds.
      *
-     * @param lowerBound the lower value
-     * @param upperBound the upper value
-     * @return the between filter
+     * @param lowerBound the lower bound (inclusive) of the range to match.
+     * @param upperBound the upper bound (inclusive) of the range to match.
+     * @return a filter that matches documents where the value of the field is 
+     * between the specified lower and upper bounds.
      */
     public NitriteFilter between(Comparable<?> lowerBound, Comparable<?> upperBound) {
         return new BetweenFilter<>(field, new BetweenFilter.Bound<>(lowerBound, upperBound));
     }
 
     /**
-     * Creates a between filter which matches those documents where the value
-     * of the field is within the specified bound.
-     * <pre> {@code
-     * // matches all documents where 'age' field is
-     * // between 30 and 40, excluding 30 and 40
-     * collection.find(where("age").between(40, 30, false));
-     * }*
-     * </pre>
+     * Creates a filter that matches documents where the value of the field is 
+     * between the given lower and upper bounds.
      *
-     * @param lowerBound the lower value
-     * @param upperBound the upper value
-     * @param inclusive  indicates whether to include end values
-     * @return the between filter
+     * @param lowerBound the lower bound of the range (inclusive).
+     * @param upperBound the upper bound of the range (inclusive).
+     * @param inclusive  whether the bounds are inclusive or not.
+     * @return a filter that matches documents where the value of the field is 
+     * between the given lower and upper bounds.
      */
     public NitriteFilter between(Comparable<?> lowerBound, Comparable<?> upperBound, boolean inclusive) {
         return new BetweenFilter<>(field, new BetweenFilter.Bound<>(lowerBound, upperBound, inclusive));
     }
 
+
     /**
-     * Creates a between filter which matches those documents where the value
-     * of the field is within the specified bound.
-     * <pre> {@code
-     * // matches all documents where 'age' field is
-     * // between 30 and 40, including 40 and excluding 30
-     * collection.find(where("age").between(40, 30, true, false));
-     * }*
-     * </pre>
+     * Creates a filter that matches documents where the value of a field is 
+     * between two specified values.
      *
-     * @param lowerBound     the lower value
-     * @param upperBound     the upper value
-     * @param lowerInclusive indicates whether to include lower end value
-     * @param upperInclusive indicates whether to include upper end value
-     * @return the between filter
+     * @param lowerBound the lower bound (inclusive) of the range
+     * @param upperBound the upper bound (inclusive) of the range
+     * @param lowerInclusive true if the lower bound is inclusive, false otherwise
+     * @param upperInclusive true if the upper bound is inclusive, false otherwise
+     * @return a filter that matches documents where the value of a field is 
+     * between two specified values
      */
     public NitriteFilter between(Comparable<?> lowerBound, Comparable<?> upperBound,
                           boolean lowerInclusive, boolean upperInclusive) {
@@ -172,7 +158,7 @@ public final class FluentFilter {
     }
 
     /**
-     * Creates a text filter which performs a text search on the content of the fields
+     * Creates a filter which performs a text search on the content of the fields
      * indexed with a full-text index.
      *
      * @param value the text value

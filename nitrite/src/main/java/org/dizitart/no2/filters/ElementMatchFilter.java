@@ -33,6 +33,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 class ElementMatchFilter extends NitriteFilter {
     private final String field;

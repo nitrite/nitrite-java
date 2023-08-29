@@ -17,7 +17,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown when an object is not uniquely identifiable.
+ * Exception thrown when an object cannot be identified.
  *
  * @author Anindya Chatterjee
  * @since 1.0

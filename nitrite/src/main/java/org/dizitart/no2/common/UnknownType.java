@@ -1,8 +1,6 @@
 package org.dizitart.no2.common;
 
 /**
- * Represents an unknown type.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

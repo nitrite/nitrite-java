@@ -29,8 +29,8 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * Represents a list of document field with
- * sorting direction for find query.
+ * Represents a collection of fields that can be sorted, with each field
+ * having a specified sort order.
  *
  * @author Anindya Chatterjee
  * @since 4.0
@@ -65,7 +65,7 @@ public class SortableFields extends Fields {
     }
 
     /**
-     * Adds the sort order for a field.
+     * Adds a field and its corresponding sort order to a list of sortable fields.
      *
      * @param field     the field
      * @param sortOrder the sort order

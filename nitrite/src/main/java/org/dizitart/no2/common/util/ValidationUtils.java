@@ -29,8 +29,6 @@ import static org.dizitart.no2.common.util.ObjectUtils.*;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
- * A validation utility class.
- *
  * @author Anindya Chatterjee
  * @since 1.0
  */
@@ -38,36 +36,18 @@ public class ValidationUtils {
     private ValidationUtils() {
     }
 
-    /**
-     * Validates if a string is empty or `null`.
-     *
-     * @param value   the string value
-     * @param message the error message
-     */
     public static void notEmpty(String value, String message) {
         if (isNullOrEmpty(value)) {
             throw new ValidationException(message);
         }
     }
 
-    /**
-     * Validates if a {@link CharSequence} is empty or `null`.
-     *
-     * @param value   the value
-     * @param message the message
-     */
     public static void notEmpty(CharSequence value, String message) {
         if (isNullOrEmpty(value)) {
             throw new ValidationException(message);
         }
     }
 
-    /**
-     * Validates if a {@link CharSequence} is empty or `null`.
-     *
-     * @param value   the value
-     * @param message the message
-     */
     public static void notEmpty(Collection<?> value, String message) {
         if (value.isEmpty()) {
             throw new ValidationException(message);
@@ -80,25 +60,12 @@ public class ValidationUtils {
         }
     }
 
-    /**
-     * Validates if an object is `null`.
-     *
-     * @param value   the object
-     * @param message the message
-     */
     public static void notNull(Object value, String message) {
         if (value == null) {
             throw new ValidationException(message);
         }
     }
 
-    /**
-     * Validates if an array contains `null` item.
-     *
-     * @param <T>     the type parameter
-     * @param array   the array to check for `null` object
-     * @param message the message
-     */
     public static <T> void containsNull(T[] array, String message) {
         for (T element : array) {
             if (element == null) {

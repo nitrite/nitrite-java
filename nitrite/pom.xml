@@ -147,6 +147,8 @@
                         org.dizitart.no2.collection.operation,
                         org.dizitart.no2.common.concurrent,
                         org.dizitart.no2.common.event,
+                        org.dizitart.no2.common.streams,
+                        org.dizitart.no2.common.util,
                     </excludePackageNames>
                     <sourceFileExcludes>
                         <exclude>**/*CollectionFactory.java</exclude>
@@ -155,6 +157,15 @@
                         <exclude>**/*AttributesAware.java</exclude>
                         <exclude>**/*PluginManager.java</exclude>
                         <exclude>**/*ProcessorChain.java</exclude>
+                        <exclude>**/*Constants.java</exclude>
+                        <exclude>**/*DBNull.java</exclude>
+                        <exclude>**/*DBValue.java</exclude>
+                        <exclude>**/*UnknownType.java</exclude>
+                        <exclude>**/*AndFilter.java</exclude>
+                        <exclude>**/*BetweenFilter.java</exclude>
+                        <exclude>**/*ComparableArrayFilter.java</exclude>
+                        <exclude>**/*ElementMatchFilter.java</exclude>
+                        <exclude>**/*EqualsFilter.java</exclude>
                     </sourceFileExcludes>
                 </configuration>
             </plugin>

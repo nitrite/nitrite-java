@@ -17,7 +17,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown when a database security error occurs.
+ * Exception thrown when a security violation occurs in Nitrite.
  *
  * @author Anindya Chatterjee.
  * @since 1.0

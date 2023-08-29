@@ -29,8 +29,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Represents a filtered nitrite document stream.
- *
  * @author Anindya Chatterjee.
  * @since 4.0
  */
@@ -38,12 +36,6 @@ public class FilteredStream implements RecordStream<Pair<NitriteId, Document>> {
     private final RecordStream<Pair<NitriteId, Document>> recordStream;
     private final Filter filter;
 
-    /**
-     * Instantiates a new Filtered stream.
-     *
-     * @param recordStream the record stream
-     * @param filter       the filter
-     */
     public FilteredStream(RecordStream<Pair<NitriteId, Document>> recordStream, Filter filter) {
         this.recordStream = recordStream;
         this.filter = filter;
@@ -61,21 +53,12 @@ public class FilteredStream implements RecordStream<Pair<NitriteId, Document>> {
         return new FilteredIterator(iterator, filter);
     }
 
-    /**
-     * The type Filtered iterator.
-     */
     private static class FilteredIterator implements Iterator<Pair<NitriteId, Document>> {
         private final Iterator<Pair<NitriteId, Document>> iterator;
         private final Filter filter;
         private Pair<NitriteId, Document> nextPair;
         private boolean nextPairSet = false;
 
-        /**
-         * Instantiates a new Filtered iterator.
-         *
-         * @param iterator the iterator
-         * @param filter   the filter
-         */
         public FilteredIterator(Iterator<Pair<NitriteId, Document>> iterator, Filter filter) {
             this.iterator = iterator;
             this.filter = filter;

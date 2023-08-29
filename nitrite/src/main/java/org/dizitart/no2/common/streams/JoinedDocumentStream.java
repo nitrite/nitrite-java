@@ -34,8 +34,6 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
- * Represents a joined document stream.
- *
  * @author Anindya Chatterjee.
  * @since 1.0
  */
@@ -45,14 +43,6 @@ public class JoinedDocumentStream implements RecordStream<Document> {
     private final Lookup lookup;
     private final ProcessorChain processorChain;
 
-    /**
-     * Instantiates a new Joined document stream.
-     *
-     * @param recordStream   the record stream
-     * @param foreignCursor  the foreign cursor
-     * @param lookup         the lookup
-     * @param processorChain the processor chain
-     */
     JoinedDocumentStream(RecordStream<Pair<NitriteId, Document>> recordStream,
                          DocumentCursor foreignCursor,
                          Lookup lookup, ProcessorChain processorChain) {

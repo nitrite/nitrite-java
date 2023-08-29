@@ -1,7 +1,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown when a transaction fails.
+ * Exception thrown when an error occurs during a transaction.
  *
  * @author Anindya Chatterjee
  * @since 4.0

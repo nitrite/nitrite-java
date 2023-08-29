@@ -20,9 +20,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 
 /**
- * Exception thrown when a {@link Document}
- * does not have any {@link NitriteId} associated
- * with it or it has invalid/incompatible {@link NitriteId}.
+ * Exception thrown when an invalid ID is encountered.
  *
  * @author Anindya Chatterjee
  * @since 1.0

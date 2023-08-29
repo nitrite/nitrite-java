@@ -17,7 +17,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown while handling with nitrite database index.
+ * Exception thrown when there is an error with indexing in Nitrite.
  *
  * @author Anindya Chatterjee
  * @since 1.0

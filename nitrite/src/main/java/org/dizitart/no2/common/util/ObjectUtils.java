@@ -41,8 +41,6 @@ import static org.dizitart.no2.common.Constants.KEY_OBJ_SEPARATOR;
 import static org.dizitart.no2.common.util.Iterables.toArray;
 
 /**
- * A utility class.
- *
  * @author Anindya Chatterjee.
  * @since 1.0
  */
@@ -102,12 +100,6 @@ public class ObjectUtils {
         return findRepositoryName(entityName, key);
     }
 
-    /**
-     * Gets the key name of a keyed-{@link ObjectRepository}
-     *
-     * @param collectionName name of the collection
-     * @return the key
-     */
     public static String getKeyName(String collectionName) {
         if (collectionName.contains(KEY_OBJ_SEPARATOR)) {
             String[] split = collectionName.split("\\" + KEY_OBJ_SEPARATOR);
@@ -116,12 +108,6 @@ public class ObjectUtils {
         throw new ValidationException(collectionName + " is not a valid keyed object repository");
     }
 
-    /**
-     * Gets the type name of a keyed-{@link ObjectRepository}
-     *
-     * @param collectionName name of the collection
-     * @return the type name
-     */
     public static String getKeyedRepositoryType(String collectionName) {
         if (collectionName.contains(KEY_OBJ_SEPARATOR)) {
             String[] split = collectionName.split("\\" + KEY_OBJ_SEPARATOR);
@@ -130,13 +116,6 @@ public class ObjectUtils {
         throw new ValidationException(collectionName + " is not a valid keyed object repository");
     }
 
-    /**
-     * Computes equality of two objects.
-     *
-     * @param o1 the first object
-     * @param o2 the other object
-     * @return `true` if two objects are equal.
-     */
     @SuppressWarnings("rawtypes")
     public static boolean deepEquals(Object o1, Object o2) {
         if (o1 == null && o2 == null) {

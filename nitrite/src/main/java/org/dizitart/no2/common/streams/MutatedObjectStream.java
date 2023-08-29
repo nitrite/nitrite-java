@@ -28,6 +28,7 @@ import static org.dizitart.no2.common.Constants.DOC_ID;
 
 /**
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 public class MutatedObjectStream<T> implements RecordStream<T> {
     private final RecordStream<Document> recordIterable;

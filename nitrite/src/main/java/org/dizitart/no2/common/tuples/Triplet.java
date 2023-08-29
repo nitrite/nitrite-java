@@ -9,12 +9,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+
 /**
- * Represents a triplet.
+ * A generic class representing a tuple of three elements.
  *
- * @param <A> the type parameter
- * @param <B> the type parameter
- * @param <C> the type parameter
+ * @param <A> the type of the first element
+ * @param <B> the type of the second element
+ * @param <C> the type of the third element
  * @author Anindya Chatterjee.
  * @since 4.0
  */

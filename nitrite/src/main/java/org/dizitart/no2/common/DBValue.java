@@ -29,6 +29,7 @@ import java.io.Serializable;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Data
 public class DBValue implements Comparable<DBValue>, Serializable {

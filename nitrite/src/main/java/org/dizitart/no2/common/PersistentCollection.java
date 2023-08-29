@@ -31,10 +31,11 @@ import org.dizitart.no2.store.NitriteStore;
 
 import java.util.Collection;
 
+
 /**
- * The interface Persistent collection.
+ * A persistent collection interface that provides methods to manage and manipulate data in a Nitrite database.
  *
- * @param <T> the type parameter
+ * @param <T> the type of data stored in the collection.
  * @author Anindya Chatterjee.
  * @see NitriteCollection
  * @see ObjectRepository
@@ -66,13 +67,14 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
      * The default indexing option is -
      *
      * <ul>
-     * <li>{@code indexOptions.setIndexType(IndexType.Unique);}</li>
+     *  <li>{@code indexOptions.setIndexType(IndexType.Unique);}</li>
      * </ul>
      *
      * <p>
      *     NOTE:
      *     <ul>
-     *         <li><b>_id</b> value of the document is always indexed. But full-text indexing is not supported on <b>_id</b> value.</li>
+     *         <li><b>_id</b> field is always indexed.</li>
+     *         <li>Full-text indexing is not supported on <b>_id</b> value.</li>
      *         <li>Indexing on non-comparable value is not supported.</li>
      *     </ul>
      *

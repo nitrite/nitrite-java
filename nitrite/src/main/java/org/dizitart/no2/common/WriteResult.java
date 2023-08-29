@@ -21,17 +21,16 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.util.Iterables;
 
 /**
- * An interface to represent the result of a modification operation
- * on {@link NitriteCollection}. It provides a means to iterate over
- * all affected ids in the collection.
+ * An interface to represent the result of a write operation in Nitrite database.
+ * It is an iterable of {@link NitriteId}s of affected documents.
  *
- * @author Anindya Chatterjee.
+ * @author Anindya Chatterjee
  * @since 1.0
  */
 public interface WriteResult extends Iterable<NitriteId> {
 
     /**
-     * Gets the count of affected document in the collection.
+     * Gets the number of affected documents by the write operation.
      *
      * @return the affected document count.
      */

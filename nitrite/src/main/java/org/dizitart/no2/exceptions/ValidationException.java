@@ -17,7 +17,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown when a validation fails.
+ * Exception thrown when a validation error occurs.
  *
  * @author Anindya Chatterjee.
  * @since 1.0

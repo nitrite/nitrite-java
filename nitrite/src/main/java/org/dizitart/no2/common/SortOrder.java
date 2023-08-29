@@ -17,18 +17,18 @@
 package org.dizitart.no2.common;
 
 /**
- * An enum to specify a sort order.
+ * An enum is used to specify the sort order for sorting operations.
  *
  * @author Anindya Chatterjee
  * @since 1.0
  */
 public enum SortOrder {
     /**
-     * Ascending sort order.
+     * Represents the ascending sort order.
      */
     Ascending,
     /**
-     * Descending sort order.
+     * Represents the descending sort order.
      */
     Descending
 }

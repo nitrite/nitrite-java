@@ -28,8 +28,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * Represents a projected nitrite document stream.
- *
  * @author Anindya Chatterjee.
  * @since 1.0
  */
@@ -38,13 +36,6 @@ public class ProjectedDocumentStream implements RecordStream<Document> {
     private final Document projection;
     private final ProcessorChain processorChain;
 
-    /**
-     * Instantiates a new Projected document stream.
-     *
-     * @param recordStream   the record stream
-     * @param projection     the projection
-     * @param processorChain the processor chain
-     */
     public ProjectedDocumentStream(RecordStream<Pair<NitriteId, Document>> recordStream,
                                    Document projection, ProcessorChain processorChain) {
         this.recordStream = recordStream;
@@ -70,12 +61,6 @@ public class ProjectedDocumentStream implements RecordStream<Document> {
         private Document nextElement = null;
         private final Document projection;
 
-        /**
-         * Instantiates a new Projected document iterator.
-         *
-         * @param iterator       the iterator
-         * @param processorChain the processor chain
-         */
         ProjectedDocumentIterator(Iterator<Pair<NitriteId, Document>> iterator,
                                   ProcessorChain processorChain,
                                   Document projection) {

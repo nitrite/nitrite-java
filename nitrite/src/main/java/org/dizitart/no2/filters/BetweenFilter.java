@@ -21,6 +21,7 @@ import org.dizitart.no2.exceptions.FilterException;
 
 /**
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 class BetweenFilter<T> extends AndFilter {
 

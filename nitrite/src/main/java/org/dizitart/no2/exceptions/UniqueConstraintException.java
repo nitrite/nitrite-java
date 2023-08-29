@@ -17,8 +17,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown when any modification in a collection
- * violates unique constraint.
+ * Exception thrown when a unique constraint is violated.
  *
  * @author Anindya Chatterjee
  * @since 1.0

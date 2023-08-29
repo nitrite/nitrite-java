@@ -23,19 +23,12 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 
 /**
- * Represents an And filter.
- *
  * @author Anindya Chatterjee
  * @since 1.0
  */
 @Getter
 public class AndFilter extends LogicalFilter {
 
-    /**
-     * Instantiates a new And filter.
-     *
-     * @param filters the filters
-     */
     AndFilter(Filter... filters) {
         super(filters);
 

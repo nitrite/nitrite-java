@@ -26,8 +26,6 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
- * Represents a bounded document stream.
- *
  * @since 1.0
  * @author Anindya Chatterjee.
  */
@@ -36,13 +34,6 @@ public class BoundedStream<Key, Value> implements RecordStream<Pair<Key, Value>>
     private final long skip;
     private final long limit;
 
-    /**
-     * Instantiates a new Bounded document stream.
-     *
-     * @param skip         the skip
-     * @param limit        the limit
-     * @param recordStream the record stream
-     */
     public BoundedStream(Long skip, Long limit, RecordStream<Pair<Key, Value>> recordStream) {
         this.skip = skip;
         this.limit = limit;
@@ -70,13 +61,6 @@ public class BoundedStream<Key, Value> implements RecordStream<Pair<Key, Value>>
         private final long limit;
         private long pos;
 
-        /**
-         * Instantiates a new Bounded iterator.
-         *
-         * @param iterator the iterator
-         * @param skip     the skip
-         * @param limit    the limit
-         */
         public BoundedIterator(final Iterator<? extends T> iterator, final long skip, final long limit) {
             if (iterator == null) {
                 throw new ValidationException("Iterator must not be null");

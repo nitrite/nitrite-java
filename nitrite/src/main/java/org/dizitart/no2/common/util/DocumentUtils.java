@@ -29,21 +29,12 @@ import java.util.Objects;
 import static org.dizitart.no2.common.util.ObjectUtils.newInstance;
 
 /**
- * A utility class for {@link Document}.
- *
  * @author Anindya Chatterjee
  * @since 1.0
  */
 public class DocumentUtils {
     private DocumentUtils(){}
 
-    /**
-     * Determines whether a document has recently been updated/created than the other.
-     *
-     * @param recent the recent document
-     * @param older  the older document
-     * @return the boolean value
-     */
     public static boolean isRecent(Document recent, Document older) {
         if (Objects.deepEquals(recent.getRevision(), older.getRevision())) {
             return recent.getLastModifiedSinceEpoch() >= older.getLastModifiedSinceEpoch();
@@ -51,24 +42,10 @@ public class DocumentUtils {
         return recent.getRevision() > older.getRevision();
     }
 
-    /**
-     * Create unique filter to identify the `document`.
-     *
-     * @param document the document
-     * @return the unique filter
-     */
     public static Filter createUniqueFilter(Document document) {
         return Filter.byId(document.getId());
     }
 
-    /**
-     * Creates an empty document having all fields of a `type` set to `null`.
-     *
-     * @param <T>           the type parameter
-     * @param nitriteMapper the nitrite mapper
-     * @param type          the type
-     * @return the document
-     */
     public static <T> Document skeletonDocument(NitriteMapper nitriteMapper, Class<T> type) {
         Object dummy = newInstance(type, true, nitriteMapper);
         Document document = (Document) nitriteMapper.tryConvert(dummy, Document.class);

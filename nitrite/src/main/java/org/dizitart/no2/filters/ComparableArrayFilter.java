@@ -23,14 +23,10 @@ import static org.dizitart.no2.common.util.ValidationUtils.*;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 abstract class ComparableArrayFilter extends FieldBasedFilter {
-    /**
-     * Instantiates a new Comparable filter.
-     *
-     * @param field the field
-     * @param value the value
-     */
+    
     public ComparableArrayFilter(String field, Object value) {
         super(field, value);
     }

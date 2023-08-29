@@ -25,19 +25,12 @@ import org.dizitart.no2.common.tuples.Pair;
 import java.util.*;
 
 /**
- * Represents an concatenation of multiple distinct nitrite document stream.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public class ConcatStream implements RecordStream<Pair<NitriteId, Document>> {
     private final Collection<RecordStream<Pair<NitriteId, Document>>> streams;
 
-    /**
-     * Instantiates a new Union stream.
-     *
-     * @param streams the streams
-     */
     public ConcatStream(Collection<RecordStream<Pair<NitriteId, Document>>> streams) {
         this.streams = streams;
     }
@@ -51,18 +44,10 @@ public class ConcatStream implements RecordStream<Pair<NitriteId, Document>> {
         return new UnionStreamIterator(iteratorQueue);
     }
 
-    /**
-     * The type Union stream iterator.
-     */
     private static class UnionStreamIterator implements Iterator<Pair<NitriteId, Document>> {
         private final Queue<Iterator<Pair<NitriteId, Document>>> iteratorQueue;
         private Iterator<Pair<NitriteId, Document>> currentIterator;
 
-        /**
-         * Instantiates a new Union stream iterator.
-         *
-         * @param iteratorQueue the iterator queue
-         */
         public UnionStreamIterator(Queue<Iterator<Pair<NitriteId, Document>>> iteratorQueue) {
             this.iteratorQueue = iteratorQueue;
         }
