@@ -27,7 +27,7 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.15.2</jackson.version>
-        <slf4j.version>2.0.7</slf4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.2.222</h2.version>
         <rocksdb.version>8.3.2</rocksdb.version>
