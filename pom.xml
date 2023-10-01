@@ -29,7 +29,7 @@
         <jackson.version>2.15.2</jackson.version>
         <slf4j.version>2.0.9</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
-        <h2.version>2.2.222</h2.version>
+        <h2.version>2.2.224</h2.version>
         <rocksdb.version>8.5.3</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
@@ -37,7 +37,7 @@
         <commons-io.version>2.13.0</commons-io.version>
         <kotlin.version>1.9.0</kotlin.version>
         <kotlinx-serialization.version>1.6.0</kotlinx-serialization.version>
-        <lombok.version>1.18.28</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
         <mockito.version>5.5.0</mockito.version>
@@ -57,7 +57,7 @@
         <jacoco.version>0.8.10</jacoco.version>
         <surefire.version>3.1.2</surefire.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-javadoc-plugin.version>3.5.0</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.6.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <dokka.version>1.8.20</dokka.version>
         <animal-sniffer.version>1.23</animal-sniffer.version>
