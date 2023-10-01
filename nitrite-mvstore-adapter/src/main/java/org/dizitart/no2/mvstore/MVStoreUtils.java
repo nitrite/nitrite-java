@@ -179,7 +179,7 @@ class MVStoreUtils {
         try {
             UpgradeUtil.tryUpgrade(newBuilder, storeConfig);
         } catch (Exception e) {
-            // if the update fails, delete te new file and rethrow the exception
+            // if the update fails, delete the new file and rethrow the exception
             if (newFile.exists()) {
                 if (!newFile.delete()) {
                     throw new NitriteIOException("Could not upgrade the data file", e);

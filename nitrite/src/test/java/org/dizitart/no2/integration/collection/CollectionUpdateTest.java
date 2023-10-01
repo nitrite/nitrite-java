@@ -214,12 +214,43 @@ public class CollectionUpdateTest extends BaseCollectionTest {
         assertEquals(savedDoc1, clonedDoc1);
 
         clonedDoc1.put("group", null);
-//        clonedDoc1.remove("group");
         assertEquals(1, coll.update(clonedDoc1).getAffectedCount());
 
         Document savedDoc2 = coll.find(Filter.ALL).firstOrNull();
         assertNotNull(savedDoc2);
         assertNull(savedDoc2.get("group"));
+    }
+
+    @Test
+    public void updateNestedDocument() {
+        // github issue - 704
+        Document doc1 = createDocument("conversation",
+            createDocument("unread",
+                createDocument("me", 1).put("other", 2)));
+        Document doc2 = createDocument("conversation",
+            createDocument("unread",
+                createDocument("me", 10).put("other", 4)));
+
+        NitriteCollection coll = db.getCollection("test_updateNestedDocument");
+        coll.remove(Filter.ALL);
+        coll.insert(doc1, doc2);
+
+        DocumentCursor cursor = coll.find(where("conversation.unread.me").gt(5));
+        assertEquals(cursor.size(), 1);
+
+        Document update = createDocument("conversation",
+            createDocument("unread",
+                createDocument("me", 0)));
+        coll.update(Filter.ALL, update);
+
+        cursor = coll.find(where("conversation.unread.me").gt(5));
+        assertEquals(cursor.size(), 0);
+
+        cursor = coll.find(where("conversation.unread.other").lt(5));
+        assertEquals(cursor.size(), 2);
+
+        cursor = coll.find(where("conversation.unread.other").lt(5).not());
+        assertEquals(cursor.size(), 0);
     }
 
     @Test(expected = NotIdentifiableException.class)

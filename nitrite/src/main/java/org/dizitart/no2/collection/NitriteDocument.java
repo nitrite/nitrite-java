@@ -168,7 +168,26 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
     @Override
     public Document merge(Document document) {
         if (document instanceof NitriteDocument) {
-            super.putAll((NitriteDocument) document);
+            NitriteDocument nitriteDocument = (NitriteDocument) document;
+            for (Pair<String, Object> entry : nitriteDocument) {
+                String key = entry.getFirst();
+                Object value = entry.getSecond();
+                if (value instanceof NitriteDocument) {
+                    // if the value is a document, merge it recursively
+                    if (containsKey(key)) {
+                        // if the current document already contains the key,
+                        // then merge the embedded document
+                        get(key, Document.class).merge((Document) value);
+                    } else {
+                        // if the current document does not contain the key,
+                        // then put the embedded document as it is
+                        put(key, value);
+                    }
+                } else {
+                    // if there is no more embedded document, put the field in the document
+                    put(key, value);
+                }
+            }
         } else {
             throw new InvalidOperationException("Document merge only supports NitriteDocument");
         }
