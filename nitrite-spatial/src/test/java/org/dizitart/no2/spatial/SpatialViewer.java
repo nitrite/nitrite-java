@@ -28,7 +28,7 @@ import java.awt.*;
 /**
  * @author Anindya Chatterjee
  */
-@Slf4j
+@Slf4j(topic = "nitrite-spatial")
 public class SpatialViewer {
     public static void main(String[] args) {
         JFrame f = new JFrame();

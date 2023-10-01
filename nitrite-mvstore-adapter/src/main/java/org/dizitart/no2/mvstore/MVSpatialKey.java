@@ -23,6 +23,7 @@ import org.h2.mvstore.rtree.Spatial;
 import java.util.Arrays;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public class MVSpatialKey extends SpatialKey implements Spatial {

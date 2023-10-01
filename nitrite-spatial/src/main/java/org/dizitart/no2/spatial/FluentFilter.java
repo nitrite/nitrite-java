@@ -21,11 +21,12 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
 
+
 /**
- * Fluent filter api for spatial data
- *
+ * A fluent filter api for spatial queries.
+ * 
+ * @since 4.0
  * @author Anindya Chatterjee
- * @since 4.0.0
  */
 public class FluentFilter {
     private String field;
@@ -34,10 +35,10 @@ public class FluentFilter {
     }
 
     /**
-     * Where clause for fluent filter.
+     * Creates a new {@link FluentFilter} instance with the specified field.
      *
-     * @param field the field
-     * @return the fluent filter
+     * @param field the field to filter on
+     * @return the new {@link FluentFilter} instance
      */
     public static FluentFilter where(String field) {
         FluentFilter filter = new FluentFilter();
@@ -49,8 +50,8 @@ public class FluentFilter {
      * Creates a spatial filter which matches documents where the spatial data
      * of a field intersects the specified {@link Geometry} value.
      *
-     * @param geometry the geometry
-     * @return the filter
+     * @param geometry the geometry to intersect with
+     * @return the new {@link Filter} instance
      */
     public Filter intersects(Geometry geometry) {
         return new IntersectsFilter(field, geometry);
@@ -60,8 +61,8 @@ public class FluentFilter {
      * Creates a spatial filter which matches documents where the spatial data
      * of a field is within the specified {@link Geometry} value.
      *
-     * @param geometry the geometry
-     * @return the filter
+     * @param geometry the geometry to check for containment within
+     * @return the new {@link Filter} instance
      */
     public Filter within(Geometry geometry) {
         return new WithinFilter(field, geometry);
@@ -71,9 +72,9 @@ public class FluentFilter {
      * Creates a spatial filter which matches documents where the spatial data
      * of a field is near the specified coordinate.
      *
-     * @param point    the point
-     * @param distance the distance
-     * @return the filter
+     * @param point    the coordinate to check proximity to
+     * @param distance the maximum distance to consider
+     * @return the new {@link Filter} instance
      */
     public Filter near(Coordinate point, Double distance) {
         return new NearFilter(field, point, distance);
@@ -83,9 +84,9 @@ public class FluentFilter {
      * Creates a spatial filter which matches documents where the spatial data
      * of a field is near the specified point.
      *
-     * @param point    the point
-     * @param distance the distance
-     * @return the filter
+     * @param point    the point to check proximity to
+     * @param distance the maximum distance to consider
+     * @return the new {@link Filter} instance
      */
     public Filter near(Point point, Double distance) {
         return new NearFilter(field, point, distance);

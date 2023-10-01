@@ -35,7 +35,7 @@ import java.util.Set;
 public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin {
 
     /**
-     * Opens or creates this nitrite store.
+     * Opens the store if it exists, or creates a new one if it doesn't.
      */
     void openOrCreate();
 
@@ -47,37 +47,37 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin 
     boolean isClosed();
 
     /**
-     * Gets the set of all {@link NitriteCollection} names in store.
+     * Returns a set of all collection names in the store.
      *
-     * @return the set of names.
+     * @return a set of all collection names in the store
      */
     Set<String> getCollectionNames();
 
     /**
-     * Gets the set of all {@link ObjectRepository} details in store.
+     * Returns a set of all the repository names registered in the Nitrite store.
      *
-     * @return the details of all {@link ObjectRepository}.
+     * @return a set of all the repository names registered in the Nitrite store
      */
     Set<String> getRepositoryRegistry();
 
     /**
-     * Gets the set of all keyed-{@link ObjectRepository} details in store.
+     * Returns a set of all the keyed-repository names registered in the Nitrite store.
      *
-     * @return the details of all {@link ObjectRepository}.
+     * @return a set of all the keyed-repository names registered in the Nitrite store
      */
     Map<String, Set<String>> getKeyedRepositoryRegistry();
 
     /**
-     * Checks whether there are any unsaved changes.
+     * Checks if the store has any unsaved changes.
      *
-     * @return <code>true</code> if here are any changes; <code>false</code> otherwise.
+     * @return {@code true} if the store has unsaved changes; {@code false} otherwise.
      */
     boolean hasUnsavedChanges();
 
     /**
-     * Checks whether the store is opened in readonly mode.
+     * Checks if the store is opened in read-only mode.
      *
-     * @return <code>true</code> if he store is opened in readonly mode; <code>false</code> otherwise.
+     * @return {@code true} if the store is read-only; {@code false} otherwise.
      */
     boolean isReadOnly();
 
@@ -88,22 +88,23 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin 
     void commit();
 
     /**
-     * This method runs before store {@link #close()}, to run cleanup routines.
+     * This method is called before closing the store. Any cleanup or finalization
+     * tasks should be performed in this method.
      */
     void beforeClose();
 
     /**
-     * Checks whether a map with the name already exists in the store or not.
+     * Checks if a {@link NitriteMap} with the given name exists in the store.
      *
-     * @param mapName the map name
-     * @return true if the map exists; false otherwise
+     * @param mapName the name of the map to check
+     * @return true if the map exists, false otherwise
      */
     boolean hasMap(String mapName);
 
     /**
-     * Opens a {@link NitriteMap} with the default settings. The map is
-     * automatically created if it does not yet exist. If a map with this
-     * name is already opened, this map is returned.
+     * Opens a {@link NitriteMap}. The map is automatically created if 
+     * it does not yet exist. If a map with this name is already opened, 
+     * this map is returned.
      *
      * @param <Key>     the key type
      * @param <Value>   the value type
@@ -115,23 +116,26 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin 
     <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType);
 
     /**
-     * Closes a {@link NitriteMap} in the store.
+     * Closes a {@link NitriteMap} with the specified name in the store.
      *
      * @param mapName the map name
      */
     void closeMap(String mapName);
 
     /**
-     * Removes a {@link NitriteMap} from the store.
+     * Removes a {@link NitriteMap} with the specified name from the store.
      *
      * @param mapName the map name to remove.
      */
     void removeMap(String mapName);
 
     /**
-     * Opens a {@link NitriteRTree} with the default settings. The RTree is
-     * automatically created if it does not yet exist. If a RTree with this
-     * name is already open, this RTree is returned.
+     * Opens a {@link NitriteRTree} with the given key and value types. The key type must
+     * extend the {@link BoundingBox} class. Returns a {@link NitriteRTree} instance that
+     * can be used to perform R-Tree operations on the data. 
+     * <p>
+     * RTree is automatically created if it does not yet exist. If a 
+     * RTree with this name is already open, this RTree is returned.
      *
      * @param <Key>     the key type
      * @param <Value>   the value type
@@ -142,37 +146,36 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin 
      */
     <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String rTreeName, Class<?> keyType, Class<?> valueType);
 
-
     /**
-     * Closes a RTree in the store.
+     * Closes a {@link NitriteRTree} with the specified name in the store.
      *
      * @param rTreeName the RTree name
      */
     void closeRTree(String rTreeName);
 
     /**
-     * Removes a RTree from the store.
+     * Removes a {@link NitriteRTree} with the specified name from the store.
      *
      * @param rTreeName the RTree name to remove.
      */
     void removeRTree(String rTreeName);
 
     /**
-     * Adds a {@link StoreEventListener} to listen to all store events.
+     * Subscribes a {@link StoreEventListener} to this store. The listener will be notified of any changes made to the store.
      *
-     * @param listener the listener instances.
+     * @param listener the listener to subscribe
      */
     void subscribe(StoreEventListener listener);
 
     /**
-     * Removes a {@link StoreEventListener} to unsubscribe from all store events.
+     * Unsubscribes a {@link StoreEventListener} from this store.
      *
-     * @param listener the listener instances.
+     * @param listener the listener to unsubscribe
      */
     void unsubscribe(StoreEventListener listener);
 
     /**
-     * Gets the underlying store engine version.
+     * Gets the underlying storage engine version.
      *
      * @return the store version
      */
@@ -184,7 +187,6 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin 
      * @return the store config
      */
     Config getStoreConfig();
-
 
     /**
      * Gets the store catalog.

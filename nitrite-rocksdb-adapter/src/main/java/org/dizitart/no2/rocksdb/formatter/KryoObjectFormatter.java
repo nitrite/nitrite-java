@@ -34,9 +34,10 @@ import java.util.Map;
 import static org.dizitart.no2.rocksdb.Constants.DB_NULL;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
-@Slf4j
+@Slf4j(topic = "nitrite-rocksdb")
 public class KryoObjectFormatter implements ObjectFormatter {
     private static final Kryo kryo = new Kryo();
     private final Map<Class<?>, KryoKeySerializer<?>> keySerializerRegistry;

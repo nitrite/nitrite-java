@@ -19,11 +19,8 @@ package org.dizitart.no2.store.events;
 import org.dizitart.no2.common.event.NitriteEventBus;
 
 /**
- * The event bus for nitrite store events.
- *
- * @see StoreEvents
  * @author Anindya Chatterjee.
- * @since 4.0.0
+ * @since 4.0
  */
 public class StoreEventBus extends NitriteEventBus<EventInfo, StoreEventListener> {
     @Override

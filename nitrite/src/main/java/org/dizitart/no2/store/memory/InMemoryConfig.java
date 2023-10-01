@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The in-memory nitrite store config.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

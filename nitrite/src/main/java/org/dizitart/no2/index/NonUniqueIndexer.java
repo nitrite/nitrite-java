@@ -17,8 +17,6 @@
 package org.dizitart.no2.index;
 
 /**
- * Represents a non unique indexer.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

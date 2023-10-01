@@ -30,9 +30,26 @@ import java.util.List;
 
 import static org.dizitart.no2.filters.FluentFilter.where;
 
+/**
+ * Represents the unique identifier for an entity in an {@link ObjectRepository}.
+ * <p>
+ * An entity ID consists of a field name and optional sub-fields.
+ * If sub-fields are present, the ID is considered to be embedded.
+ * 
+ * 
+ * @author Anindya Chatterjee
+ * @since 4.0
+ */
 @Getter
 public class EntityId {
+    /**
+     * Returns the name of the id field.
+     */
     private final String fieldName;
+
+    /**
+     * Returns the sub-fields of the id field.
+     */
     private final String[] subFields;
 
     private List<String> embeddedFieldNames;
@@ -42,6 +59,11 @@ public class EntityId {
         this.subFields = subFields;
     }
 
+    /**
+     * Returns a list of embedded field names.
+     *
+     * @return a list of embedded field names.
+     */
     public List<String> getEmbeddedFieldNames() {
         if (embeddedFieldNames != null) return embeddedFieldNames;
         embeddedFieldNames = new ArrayList<>();
@@ -54,10 +76,22 @@ public class EntityId {
         return embeddedFieldNames;
     }
 
+    /**
+     * Checks if the entity id is embedded.
+     *
+     * @return true if the entity id is embedded; false otherwise.
+     */
     public boolean isEmbedded() {
         return subFields != null && subFields.length != 0;
     }
 
+    /**
+     * Creates a unique filter for the entity id.
+     *
+     * @param value        the value of the id.
+     * @param nitriteMapper the nitrite mapper.
+     * @return the unique filter.
+     */
     public Filter createUniqueFilter(Object value, NitriteMapper nitriteMapper) {
         if (isEmbedded()) {
             Document document = (Document) nitriteMapper.tryConvert(value, Document.class);

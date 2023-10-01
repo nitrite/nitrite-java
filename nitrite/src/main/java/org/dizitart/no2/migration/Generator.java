@@ -3,7 +3,7 @@ package org.dizitart.no2.migration;
 import org.dizitart.no2.collection.Document;
 
 /**
- * Represents a default value generator for the document fields during field manipulation instruction.
+ * Represents a default value generator for the document fields in field manipulation instruction.
  *
  * @param <T> the type parameter
  * @author Anindya Chatterjee

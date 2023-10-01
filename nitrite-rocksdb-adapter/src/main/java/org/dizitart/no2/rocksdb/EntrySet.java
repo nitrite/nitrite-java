@@ -6,6 +6,10 @@ import org.rocksdb.*;
 
 import java.util.Iterator;
 
+/**
+ * @since 4.0
+ * @author Anindya Chatterjee
+ */
 class EntrySet<K, V> implements Iterable<Pair<K, V>> {
     private final ObjectFormatter objectFormatter;
     private final RocksDB rocksDB;

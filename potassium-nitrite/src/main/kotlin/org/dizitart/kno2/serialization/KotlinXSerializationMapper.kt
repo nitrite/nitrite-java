@@ -26,8 +26,9 @@ import org.dizitart.no2.exceptions.ObjectMappingException
 import java.util.Date
 
 /**
- * org.dizitart.no2.common.mapper.NitriteMapper implementation using kotlinx.serialization
- *
+ * A [org.dizitart.no2.common.mapper.NitriteMapper] module that uses KotlinX Serialization 
+ * for object to [Document] covnersion and vice versa.
+ * 
  * @author Joris Jensen
  * @since 4.2.0
  */

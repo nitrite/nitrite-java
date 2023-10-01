@@ -13,7 +13,7 @@ import org.dizitart.no2.migration.Generator;
  * @author Anindya Chatterjee
  */
 @AllArgsConstructor
-public class AddField extends BaseCommand implements Command {
+public class AddField extends BaseCommand {
     private final String collectionName;
     private final String fieldName;
     private final Object defaultValue;

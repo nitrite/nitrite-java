@@ -21,9 +21,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.dizitart.no2.NitriteConfig;
 
+
 /**
- * The nitrite event details.
- *
+ * Represents an event information object that contains the event 
+ * type and Nitrite configuration.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */

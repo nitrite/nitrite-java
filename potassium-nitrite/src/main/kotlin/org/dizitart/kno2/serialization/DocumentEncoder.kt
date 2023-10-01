@@ -18,6 +18,7 @@ import org.dizitart.no2.collection.Document
 import kotlin.reflect.full.starProjectedType
 
 /**
+ * @suppress
  * @author Joris Jensen
  * @since 4.2.0
  */

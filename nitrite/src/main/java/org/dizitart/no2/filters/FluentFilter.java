@@ -170,44 +170,44 @@ public final class FluentFilter {
     }
 
     /**
-     * Creates a string filter which provides regular expression capabilities
-     * for pattern matching strings in documents.
+     * Creates a filter that matches documents where the value of the specified field matches the
+     * specified regular expression pattern.
      *
-     * @param value the regular expression
-     * @return the regex filter
+     * @param value the regular expression pattern to match against the value of the specified field
+     * @return a filter that matches documents where the value of the specified field 
+     * matches the specified regular expression pattern
      */
     public NitriteFilter regex(String value) {
         return new RegexFilter(field, value);
     }
 
     /**
-     * Creates an in filter which matches the documents where
-     * the value of a field equals any value in the specified array.
+     * Creates a filter that matches documents where the value of the field is in the specified array of values.
      *
-     * @param values the range values
-     * @return the in filter
+     * @param values the array of values to match against
+     * @return the filter object representing the filter
      */
     public NitriteFilter in(Comparable<?>... values) {
         return new InFilter(field, values);
     }
 
     /**
-     * Creates a notIn filter which matches the documents where
-     * the value of a field not equals any value in the specified array.
+     * Creates a filter that matches documents where the value of the field is not in the specified array of values.
      *
-     * @param values the range values
-     * @return the notIn filter
+     * @param values the array of values to compare against
+     * @return a filter that matches documents where the value of the field is not in the specified array of values
      */
     public NitriteFilter notIn(Comparable<?>... values) {
         return new NotInFilter(field, values);
     }
 
     /**
-     * Creates an element match filter that matches documents that contain an array
-     * value with at least one element that matches the specified filter.
+     * Creates a filter that matches documents where the value of a field contains at least one element that matches the
+     * specified filter.
      *
-     * @param filter the filter to satisfy
-     * @return the element match filter
+     * @param filter the filter to apply to the matching elements
+     * @return a filter that matches documents where the value of a field contains at least one element that matches the
+     * specified filter
      */
     public NitriteFilter elemMatch(Filter filter) {
         return new ElementMatchFilter(field, filter);

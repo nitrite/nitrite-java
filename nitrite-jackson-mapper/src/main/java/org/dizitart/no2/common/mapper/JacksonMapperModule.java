@@ -25,15 +25,30 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.Iterables.setOf;
 
 /**
+ * A Nitrite module that provides a jackson based {@link NitriteMapper}
+ * implementation for object to document conversion.
+ * 
+ * @since 4.0
+ * @see NitriteMapper
+ * @see JacksonMapper
  * @author Anindya Chatterjee
  */
 public class JacksonMapperModule implements NitriteModule {
     private final JacksonMapper jacksonMapper;
 
+    /**
+     * Instantiates a new {@link JacksonMapperModule}.
+     */
     public JacksonMapperModule() {
         jacksonMapper = new JacksonMapper();
     }
 
+    /**
+     * Instantiates a new {@link JacksonMapperModule} with custom
+     * jackson modules.
+     *
+     * @param jacksonModules the jackson modules
+     */
     public JacksonMapperModule(Module... jacksonModules) {
         jacksonMapper = new JacksonMapper();
         for (Module jacksonModule : jacksonModules) {

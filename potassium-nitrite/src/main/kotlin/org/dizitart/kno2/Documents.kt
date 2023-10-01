@@ -25,47 +25,50 @@ import org.dizitart.no2.collection.Document.createDocument
  * @author Anindya Chatterjee
  */
 
+
 /**
- * Creates an empty [Document].
+ * Returns an empty [Document].
  *
- * @return an empty [Document]
+ * @return the empty [Document].
  */
 fun emptyDocument(): Document = createDocument()
 
 /**
- * Creates an empty [Document].
+ * Returns an empty [Document].
  *
- * @return an empty [Document]
+ * @return the empty [Document].
  */
 fun documentOf() = emptyDocument()
 
 /**
- * Creates a [Document] from a [Pair].
+ * Creates a new [Document] instance with a single key-value pair.
  *
- * @return a [Document] containing the [pair]
+ * @param pair the key-value pair to add to the document.
+ * @return the newly created document instance.
  */
 fun documentOf(pair: Pair<String, Any?>): Document {
     return createDocument(pair.first, pair.second)!!
 }
 
 /**
- * Checks if a [Document] is empty.
+ * Checks if the document is empty.
  *
- * @return boolean value
+ * @return `true` if the document is empty; `false` otherwise.
  */
 fun Document.isEmpty() = this.size() == 0
 
 /**
- * Checks if a [Document] is not empty.
+ * Checks if the document is not empty.
  *
- * @return boolean value
+ * @return `true` if the document is not empty; `false` otherwise.
  */
 fun Document.isNotEmpty() = !this.isEmpty()
 
 /**
- * Creates a [Document] from a list of [Pair]s.
+ * Creates a new [Document] instance with the given key-value pairs.
  *
- * @return a [Document] containing the [pairs]
+ * @param pairs the key-value pairs to be added to the document.
+ * @return the newly created document.
  */
 fun documentOf(vararg pairs: Pair<String, Any?>): Document {
     return if (pairs.isEmpty()) {

@@ -14,13 +14,11 @@ import org.dizitart.no2.store.NitriteMap;
 import java.util.Collection;
 
 /**
- * A command to rename a {@link org.dizitart.no2.collection.NitriteCollection}.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 @AllArgsConstructor
-public class Rename extends BaseCommand implements Command {
+public class Rename extends BaseCommand {
     private final String oldName;
     private final String newName;
 

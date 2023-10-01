@@ -17,29 +17,29 @@
 package org.dizitart.no2.store.events;
 
 /**
- * Nitrite store related events.
- *
+ * An enumeration of events that can occur in a Nitrite store.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public enum StoreEvents {
     /**
-     * The store opened event.
+     * Event emitted when a Nitrite database is opened.
      */
     Opened,
 
     /**
-     * The store commit event.
+     * Event emitted when a commit is made to the database.
      */
     Commit,
 
     /**
-     * The store closing event.
+     * Event emitted when a Nitrite database is about to close.
      */
     Closing,
 
     /**
-     * The store closed event.
+     * Event emitted when a Nitrite database is closed.
      */
     Closed
 }

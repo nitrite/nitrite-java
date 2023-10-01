@@ -1,8 +1,8 @@
 package org.dizitart.no2.transaction;
 
 /**
- * The transaction state.
- *
+ * An enumeration representing the possible states of a transaction.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -28,7 +28,7 @@ public enum TransactionState {
     Closed,
 
     /**
-     * Transaction failed.
+     * Transaction failed and rolled back.
      */
     Failed,
 

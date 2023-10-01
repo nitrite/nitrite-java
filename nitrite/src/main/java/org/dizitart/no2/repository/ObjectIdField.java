@@ -31,6 +31,7 @@ import static org.dizitart.no2.filters.FluentFilter.where;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Getter
 @Setter

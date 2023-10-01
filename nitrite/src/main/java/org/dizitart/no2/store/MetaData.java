@@ -20,8 +20,6 @@ package org.dizitart.no2.store;
 import org.dizitart.no2.collection.Document;
 
 /**
- * The Metadata interface.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

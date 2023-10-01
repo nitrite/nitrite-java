@@ -33,9 +33,9 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
  * @author Anindya Chatterjee.
- * @since 4.0.0
+ * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite-mvstore")
 @SuppressWarnings("ALL")
 class MVStoreUtils {
     private MVStoreUtils() {
@@ -98,7 +98,6 @@ class MVStoreUtils {
             if (store != null) {
                 store.setRetentionTime(0);
                 store.setVersionsToKeep(0);
-//                store.setReuseSpace(true);
             }
         }
 

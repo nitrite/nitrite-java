@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public class NitriteSerializers {

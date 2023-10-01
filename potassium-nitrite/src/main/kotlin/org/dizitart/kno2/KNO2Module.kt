@@ -23,7 +23,10 @@ import org.dizitart.no2.common.module.NitritePlugin
 import org.dizitart.no2.spatial.SpatialIndexer
 
 /**
+ * A module for Nitrite database that allows registering additional extensions.
  *
+ * @param extensions the additional extensions to be registered.
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 open class KNO2Module(private vararg val extensions: Module) : NitriteModule {

@@ -28,30 +28,16 @@ import java.util.Map;
 import java.util.NavigableMap;
 
 /**
- * Represents an {@link IndexMap} scanner.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public class IndexScanner {
     private final IndexMap indexMap;
 
-    /**
-     * Instantiates a new {@link IndexScanner}.
-     *
-     * @param indexMap the index map
-     */
     public IndexScanner(IndexMap indexMap) {
         this.indexMap = indexMap;
     }
 
-    /**
-     * Scans the {@link IndexMap} and returns the {@link NitriteId}s of the matching elements.
-     *
-     * @param filters        the filters
-     * @param indexScanOrder the index scan order
-     * @return the linked hash set
-     */
     @SuppressWarnings("unchecked")
     public LinkedHashSet<NitriteId> doScan(List<ComparableFilter> filters, Map<String, Boolean> indexScanOrder) {
         // linked-hash-set to return only unique ids preserving the order in index

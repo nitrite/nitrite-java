@@ -149,6 +149,19 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <sourceFileExcludes>
+                        <exclude>**/*Serializer.java</exclude>
+                        <exclude>**/*Serializers.java</exclude>
+                        <exclude>**/*KryoObjectFormatter.java</exclude>
+                        <exclude>**/*CleaningAction.java</exclude>
+                        <exclude>**/*Constants.java</exclude>
+                        <exclude>**/*RocksDBMap.java</exclude>
+                        <exclude>**/*RocksDBReference.java</exclude>
+                        <exclude>**/*RocksDBRTree.java</exclude>
+                        <exclude>**/*RocksDBStore.java</exclude>
+                    </sourceFileExcludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

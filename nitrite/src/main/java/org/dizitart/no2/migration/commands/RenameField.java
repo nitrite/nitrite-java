@@ -18,7 +18,7 @@ import java.util.Collection;
  * @since 4.0
  */
 @AllArgsConstructor
-public class RenameField extends BaseCommand implements Command {
+public class RenameField extends BaseCommand {
     private final String collectionName;
     private final String oldName;
     private final String newName;

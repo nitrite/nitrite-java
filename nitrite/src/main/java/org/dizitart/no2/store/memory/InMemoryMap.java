@@ -16,10 +16,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * The in-memory {@link NitriteMap}.
- *
- * @param <Key>   the type parameter
- * @param <Value> the type parameter
  * @author Anindya Chatterjee
  * @since 4.0
  */

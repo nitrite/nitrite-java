@@ -35,8 +35,6 @@ import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryNameByDecor
 import static org.dizitart.no2.common.util.ValidationUtils.validateRepositoryType;
 
 /**
- * The {@link ObjectRepository} factory.
- *
  * @author Anindya Chatterjee
  * @since 1.0
  */
@@ -45,38 +43,16 @@ public class RepositoryFactory {
     private final CollectionFactory collectionFactory;
     private final ReentrantLock lock;
 
-    /**
-     * Instantiates a new {@link RepositoryFactory}.
-     *
-     * @param collectionFactory the collection factory
-     */
     public RepositoryFactory(CollectionFactory collectionFactory) {
         this.collectionFactory = collectionFactory;
         this.repositoryMap = new HashMap<>();
         this.lock = new ReentrantLock();
     }
 
-    /**
-     * Gets an {@link ObjectRepository} by type.
-     *
-     * @param <T>           the type parameter
-     * @param nitriteConfig the nitrite config
-     * @param type          the type
-     * @return the repository
-     */
     public <T> ObjectRepository<T> getRepository(NitriteConfig nitriteConfig, Class<T> type) {
         return getRepository(nitriteConfig, type, null);
     }
 
-    /**
-     * Gets an {@link ObjectRepository} by type and a key.
-     *
-     * @param <T>           the type parameter
-     * @param nitriteConfig the nitrite config
-     * @param type          the type
-     * @param key           the key
-     * @return the repository
-     */
     @SuppressWarnings("unchecked")
     public <T> ObjectRepository<T> getRepository(NitriteConfig nitriteConfig, Class<T> type, String key) {
         if (type == null) {
@@ -106,7 +82,6 @@ public class RepositoryFactory {
             lock.unlock();
         }
     }
-
 
     public <T> ObjectRepository<T> getRepository(NitriteConfig nitriteConfig, EntityDecorator<T> entityDecorator) {
         return getRepository(nitriteConfig, entityDecorator, null);
@@ -142,9 +117,6 @@ public class RepositoryFactory {
         }
     }
 
-    /**
-     * Closes all opened {@link ObjectRepository}s and clear internal data from this class.
-     */
     public void clear() {
         try {
             lock.lock();

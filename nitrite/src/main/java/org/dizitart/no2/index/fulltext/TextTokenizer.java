@@ -19,7 +19,7 @@ package org.dizitart.no2.index.fulltext;
 import java.util.Set;
 
 /**
- * A stop-word based string tokenizer.
+ * An abstract class representing a stop-word based text tokenizer.
  *
  * @author Anindya Chatterjee.
  * @see EnglishTextTokenizer

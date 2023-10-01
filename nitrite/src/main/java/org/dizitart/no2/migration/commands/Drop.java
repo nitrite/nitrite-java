@@ -10,7 +10,7 @@ import org.dizitart.no2.Nitrite;
  * @since 4.0
  */
 @AllArgsConstructor
-public class Drop extends BaseCommand implements Command {
+public class Drop extends BaseCommand {
     private final String collectionName;
 
     @Override

@@ -39,8 +39,6 @@ import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 
 /**
- * Represents a nitrite compound index.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

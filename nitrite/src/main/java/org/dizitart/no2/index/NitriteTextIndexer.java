@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents a nitrite text indexer.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

@@ -13,7 +13,7 @@ import org.dizitart.no2.index.IndexType;
  * @since 4.0
  */
 @AllArgsConstructor
-public class ChangeIdField extends BaseCommand implements Command {
+public class ChangeIdField extends BaseCommand {
     private final String collectionName;
     private final Fields oldFields;
     private final Fields newFields;

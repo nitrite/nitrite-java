@@ -33,6 +33,7 @@ import static org.dizitart.no2.index.IndexOptions.indexOptions;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public class EntityDecoratorScanner {
     private final EntityDecorator<?> entityDecorator;

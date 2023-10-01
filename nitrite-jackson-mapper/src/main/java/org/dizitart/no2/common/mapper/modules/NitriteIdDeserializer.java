@@ -24,6 +24,7 @@ import org.dizitart.no2.collection.NitriteId;
 import java.io.IOException;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 class NitriteIdDeserializer extends StdScalarDeserializer<NitriteId> {

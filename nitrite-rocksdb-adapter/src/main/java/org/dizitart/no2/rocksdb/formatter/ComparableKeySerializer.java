@@ -6,6 +6,7 @@ import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public abstract class ComparableKeySerializer<T extends Comparable<?>> extends KryoKeySerializer<T> {

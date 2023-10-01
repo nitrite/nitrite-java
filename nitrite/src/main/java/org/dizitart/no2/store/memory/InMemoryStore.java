@@ -10,13 +10,9 @@ import org.dizitart.no2.store.events.StoreEvents;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Function;
-
 import static org.dizitart.no2.common.Constants.NITRITE_VERSION;
 
 /**
- * The nitrite in-memory store.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

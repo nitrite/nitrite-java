@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A nitrite transaction session. A session is needed to
- * initiate a transaction in nitrite database.
- *
+ * A session represents a transactional context for a Nitrite database.
+ * It provides methods to create a new transaction.
+ * <p>
+ * A session should be closed after use to release any resources associated with it.
  * <p>
  * If a session is closed and the transaction is not committed,
  * all opened transactions will get rolled back and all volatile
  * data gets discarded for the session.
- * </p>
- *
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -43,7 +43,7 @@ public class Session implements AutoCloseable {
     /**
      * Begins a new transaction.
      *
-     * @return the transaction
+     * @return the new transaction.
      */
     public Transaction beginTransaction() {
         checkState();

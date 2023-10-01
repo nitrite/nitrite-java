@@ -21,7 +21,7 @@ import org.dizitart.no2.index.IndexType;
 import java.lang.annotation.*;
 
 /**
- * Specifies a field to be indexed.
+ * Annotation to mark a field as indexed.
  *
  * @author Anindya Chatterjee.
  * @since 1.0

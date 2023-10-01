@@ -17,7 +17,7 @@
 package org.dizitart.no2.index.fulltext;
 
 /**
- * All supported languages for full-text search.
+ * An enum representing the supported languages for full-text search in Nitrite.
  *
  * @author Anindya Chatterjee
  * @since 2.1.0

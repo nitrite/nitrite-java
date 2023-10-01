@@ -28,7 +28,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * Represents an index fields.
+ * Represents an index for an entity in the Nitrite database.
  *
  * @author Anindya Chatterjee
  * @since 4.0
@@ -36,9 +36,15 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 public class EntityIndex {
 
     @Getter
+    /**
+     * The type of index to be used for the entity field.
+     */
     private String indexType;
 
     @Getter
+    /**
+     * The list of field names on which index is created.
+     */
     private List<String> fieldNames;
 
     public EntityIndex(String indexType, String... fields) {

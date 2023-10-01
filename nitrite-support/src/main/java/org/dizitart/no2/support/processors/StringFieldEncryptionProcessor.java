@@ -31,13 +31,13 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A string field encryption processor. It encrypts the field value
- * of type {@link String} in a nitrite document using the provided {@link Encryptor}.
- *
+ * A processor class which is responsible for encrypting and
+ * decrypting string fields in a Nitrite database document.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite-support")
 public class StringFieldEncryptionProcessor implements Processor {
     private final Encryptor encryptor;
     private final List<String> fields;
@@ -62,14 +62,22 @@ public class StringFieldEncryptionProcessor implements Processor {
     }
 
     /**
-     * Adds fields for encryption.
+     * Adds one or more field names to the list of fields that should be encrypted.
      *
-     * @param fields the fields
+     * @param fields the names of the fields to be encrypted
      */
-    public void addFields(String... fields){
+    public void addFields(String... fields) {
         this.fields.addAll(Arrays.asList(fields));
     }
 
+    /**
+     * Processes the document before writing to the database. Encrypts the values of the specified fields
+     * using the provided encryptor.
+     *
+     * @param document the document to be processed
+     * @return a new document with encrypted values for the specified fields
+     * @throws NitriteIOException if there is an error while processing the document
+     */
     @Override
     public Document processBeforeWrite(Document document) {
         try {
@@ -93,6 +101,14 @@ public class StringFieldEncryptionProcessor implements Processor {
         }
     }
 
+    /**
+     * Processes the document after reading from the database. Decrypts the encrypted fields
+     * and returns a new document with decrypted values.
+     *
+     * @param document the document to be processed
+     * @return a new document with decrypted values
+     * @throws NitriteIOException if there is an error while processing the document
+     */
     @Override
     public Document processAfterRead(Document document) {
         try {

@@ -28,9 +28,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
-@Slf4j(topic = "no2-rocksdb")
+@Slf4j(topic = "nitrite-rocksdb")
 class StoreFactory {
     private StoreFactory() {
     }

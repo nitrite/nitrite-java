@@ -29,8 +29,6 @@ import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Represents an index map.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

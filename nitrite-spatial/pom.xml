@@ -85,6 +85,14 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>
+                        org.dizitart.no2.spatial.mapper,
+                    </excludePackageNames>
+                    <sourceFileExcludes>
+                        <exclude>**/*GeometryUtils.java</exclude>
+                    </sourceFileExcludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

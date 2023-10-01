@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public class RocksDBRTree<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {

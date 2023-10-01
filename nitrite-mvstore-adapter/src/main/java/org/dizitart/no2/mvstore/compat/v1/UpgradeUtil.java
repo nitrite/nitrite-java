@@ -44,9 +44,10 @@ import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
-@Slf4j
+@Slf4j(topic = "nitrite-mvstore")
 public class UpgradeUtil {
     private UpgradeUtil() {
     }

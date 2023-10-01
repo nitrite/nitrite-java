@@ -30,12 +30,19 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
- * A password based AES string encryption utility.
- *
+ * The {@code AESEncryptor} class provides AES encryption and decryption
+ * functionality.
  * <p>
- * NOTE: This is a derivative work of <a href="https://mkyong.com/java/java-symmetric-key-cryptography-example/">...</a>
- * </p>
- *
+ * It uses AES/GCM/NoPadding encryption algorithm with a 128-bit tag length,
+ * 12-byte IV length, and 16-byte salt length by default.
+ * <p>
+ * The class provides methods to encrypt and decrypt byte arrays and strings
+ * using the specified password and encryption parameters.
+ * <p>
+ * 
+ * NOTE: This is a derivative work of <a href=
+ * "https://mkyong.com/java/java-symmetric-key-cryptography-example/">this</a>.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -50,12 +57,12 @@ public class AESEncryptor implements Encryptor {
 
     /**
      * Instantiates a new {@link AESEncryptor} with these default values
-     *     <ul>
-     *         <li>Encryption Algo - AES/GCM/NoPadding</li>
-     *         <li>Tag Length (bit) - 128</li>
-     *         <li>IV Length (byte) - 12</li>
-     *         <li>Salt Length (byte) - 16</li>
-     *     </ul>
+     * <ul>
+     * <li>Encryption Algo - AES/GCM/NoPadding</li>
+     * <li>Tag Length (bit) - 128</li>
+     * <li>IV Length (byte) - 12</li>
+     * <li>Salt Length (byte) - 16</li>
+     * </ul>
      *
      * @param password the password
      */
@@ -73,8 +80,8 @@ public class AESEncryptor implements Encryptor {
      * @param saltLengthByte the salt length byte
      */
     public AESEncryptor(String password, String encryptionAlgo,
-                        Integer tagLengthBit, Integer ivLengthByte,
-                        Integer saltLengthByte) {
+            Integer tagLengthBit, Integer ivLengthByte,
+            Integer saltLengthByte) {
         this.password = new SecureString(password);
         this.encryptAlgo = encryptionAlgo;
         this.tagLengthBit = tagLengthBit;
@@ -109,10 +116,10 @@ public class AESEncryptor implements Encryptor {
 
             // prefix IV and Salt to cipher text
             byte[] cipherTextWithIvSalt = ByteBuffer.allocate(iv.length + salt.length + cipherText.length)
-                .put(iv)
-                .put(salt)
-                .put(cipherText)
-                .array();
+                    .put(iv)
+                    .put(salt)
+                    .put(cipherText)
+                    .array();
 
             // string representation, base64, send this string to other for decryption.
             return Base64.encodeBase64URLSafeString(cipherTextWithIvSalt);
@@ -125,8 +132,9 @@ public class AESEncryptor implements Encryptor {
      * Returns the decrypted string encoded by AES.
      *
      * <p>
-     *     NOTE: The same password, salt and iv are needed to decrypt it.
+     * NOTE: The same password, salt and iv are needed to decrypt it.
      * </p>
+     * 
      * @param encryptedText the encrypted text
      * @return the plain text decrypted string
      */

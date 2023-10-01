@@ -25,7 +25,7 @@ import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.spatial.SpatialIndexer
 
 /**
- * A builder to create a nitrite database.
+ * A builder class for creating instances of [Nitrite].
  *
  * @since 2.1.0
  * @author Anindya Chatterjee
@@ -34,15 +34,15 @@ class Builder internal constructor() {
     private val modules = mutableSetOf<NitriteModule>()
 
     /**
-     * Specifies the separator character for embedded field.
-     * Default value is `.`
-     *
-     * */
+     * The field separator used by the Nitrite database. By default, it is set to the field
+     * separator defined in the Nitrite configuration.
+     */
     var fieldSeparator: String = NitriteConfig.getFieldSeparator()
 
     /**
-     * Loads [NitriteModule] instances.
-     * */
+     * Loads a Nitrite module into the Nitrite database. The module can be used to extend the
+     * functionality of Nitrite.
+     */
     fun loadModule(module: NitriteModule) {
         modules.add(module)
     }
@@ -59,7 +59,8 @@ class Builder internal constructor() {
 
     private fun loadDefaultPlugins(builder: NitriteBuilder) {
         val mapperFound = modules.any { module -> module.plugins().any { it is NitriteMapper } }
-        val spatialIndexerFound = modules.any { module -> module.plugins().any { it is SpatialIndexer } }
+        val spatialIndexerFound =
+                modules.any { module -> module.plugins().any { it is SpatialIndexer } }
 
         if (!mapperFound && spatialIndexerFound) {
             builder.loadModule(module(KNO2JacksonMapper()))
@@ -72,17 +73,20 @@ class Builder internal constructor() {
 }
 
 /**
- * Opens or creates a new database. If it is an in-memory store, then it
- * will create a new one. If it is a file based store, and if the file does not
- * exist, then it will create a new file store and open; otherwise it will
- * open the existing file store.
+ * Opens or creates a new Nitrite database. If it is configured as in-memory database, then it will
+ * create a new database everytime. If it is configured as a file based database, and if the file
+ * does not exist, then it will create a new file store and open the database; otherwise it will
+ * open the existing database file.
  *
  * @param [userId] the user id
  * @param [password] the password
  * @return the nitrite database instance.
  */
-fun nitrite(userId: String? = null, password: String? = null,
-            op: (Builder.() -> Unit)? = null): Nitrite {
+fun nitrite(
+        userId: String? = null,
+        password: String? = null,
+        op: (Builder.() -> Unit)? = null
+): Nitrite {
     val builder = Builder()
     op?.invoke(builder)
     val nitriteBuilder = builder.createNitriteBuilder()

@@ -20,6 +20,7 @@ import org.dizitart.kno2.isEmpty
 import org.dizitart.no2.collection.Document
 
 /**
+ * @suppress
  * @author Joris Jensen
  * @since 4.2.0
  */
@@ -113,6 +114,7 @@ internal class DocumentDecoder(private val document: Document, descriptor: Seria
             }
     }
 }
+
 
 @OptIn(ExperimentalSerializationApi::class)
 private class ListDecoder(private val list: ArrayDeque<Any>) : AbstractDecoder() {

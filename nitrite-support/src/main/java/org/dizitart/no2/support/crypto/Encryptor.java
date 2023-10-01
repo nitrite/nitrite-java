@@ -18,25 +18,25 @@
 package org.dizitart.no2.support.crypto;
 
 /**
- * Represents a symmetric key string encryptor.
- *
+ * The Encryptor interface provides methods to encrypt and decrypt plain text.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public interface Encryptor {
     /**
-     * Returns a base64 encoded encrypted string.
+     * Encrypts the given plain text using the encryption algorithm.
      *
-     * @param plainText the plain text
-     * @return the encrypted string
+     * @param plainText the plain text to be encrypted
+     * @return the encrypted text
      */
     String encrypt(byte[] plainText);
 
     /**
-     * Returns the decrypted string, encoded by this encryptor.
+     * Decrypts the given encrypted text.
      *
-     * @param encryptedText the encrypted text
-     * @return the string
+     * @param encryptedText the encrypted text to decrypt
+     * @return the decrypted text
      */
     String decrypt(String encryptedText);
 }

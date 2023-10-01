@@ -20,18 +20,11 @@ package org.dizitart.no2.mvstore.compat.v1;
 import org.dizitart.no2.mvstore.compat.v1.mvstore.MVMap;
 
 /**
- * The type Mv map builder.
- *
- * @param <K> the type parameter
- * @param <V> the type parameter
- *
- * @since 4.0.0
+ * @since 4.0
  * @author Anindya Chatterjee.
  */
 class MVMapBuilder<K, V> extends MVMap.Builder<K, V> {
-    /**
-     * Instantiates a new Mv map builder.
-     */
+    
     public MVMapBuilder() {
         setKeyType(new NitriteDataType());
         setValueType(new NitriteDataType());

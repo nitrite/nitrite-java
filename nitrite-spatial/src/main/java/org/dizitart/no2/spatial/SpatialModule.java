@@ -23,15 +23,23 @@ import java.util.Set;
 
 import static org.dizitart.no2.common.util.Iterables.setOf;
 
+
 /**
- * A nitrite module to enable spatial data indexing.
- *
- * @since 4.0.0
+ * A Nitrite module for spatial indexing. This module provides a
+ * {@link SpatialIndexer} plugin for Nitrite database.
+ * 
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public class SpatialModule implements NitriteModule {
     private SpatialIndexer spatialIndexer;
 
+    /**
+     * {@inheritDoc}
+     * Returns a set of Nitrite plugins, which includes the SpatialIndexer.
+     *
+     * @return a set of Nitrite plugins, which includes the SpatialIndexer.
+     */
     @Override
     public Set<NitritePlugin> plugins() {
         if (spatialIndexer == null) {

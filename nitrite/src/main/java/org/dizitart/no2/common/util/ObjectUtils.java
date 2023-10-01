@@ -16,14 +16,12 @@
 
 package org.dizitart.no2.common.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.repository.EntityDecorator;
-import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Entity;
 
 import java.io.*;
@@ -45,7 +43,6 @@ import static org.dizitart.no2.common.util.Iterables.toArray;
  * @since 1.0
  */
 @SuppressWarnings("rawtypes")
-@Slf4j
 public class ObjectUtils {
     private static final Map<Class<?>, Class<?>> PRIMITIVE_TO_WRAPPER_TYPE;
 

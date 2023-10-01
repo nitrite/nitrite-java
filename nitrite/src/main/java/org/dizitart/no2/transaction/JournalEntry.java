@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Represents a transaction journal entry.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

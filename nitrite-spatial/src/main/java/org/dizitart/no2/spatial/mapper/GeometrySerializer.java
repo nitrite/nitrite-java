@@ -25,6 +25,7 @@ import org.locationtech.jts.geom.Geometry;
 import java.io.IOException;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 class GeometrySerializer extends StdScalarSerializer<Geometry> {

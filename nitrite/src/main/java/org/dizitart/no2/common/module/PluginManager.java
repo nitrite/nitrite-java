@@ -34,7 +34,7 @@ import java.util.Map;
  * @author Anindya Chatterjee.
  * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 @Getter
 public class PluginManager implements AutoCloseable {
     private final Map<String, NitriteIndexer> indexerMap;

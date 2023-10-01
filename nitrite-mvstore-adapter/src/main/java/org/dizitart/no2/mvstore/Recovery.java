@@ -16,13 +16,9 @@
 
 package org.dizitart.no2.mvstore;
 
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.h2.mvstore.MVStoreTool;
 import org.h2.store.fs.FilePath;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -30,12 +26,12 @@ import static org.h2.mvstore.MVStoreTool.info;
 import static org.h2.mvstore.MVStoreTool.rollback;
 
 /**
- * The nitrite database recovery utility.
+ * The Recovery class provides methods to attempt a MVStore file recovery
+ * by rolling back to the newest good version.
  *
  * @author Anindya Chatterjee
  * @since 1.0
  */
-@Slf4j
 public class Recovery {
 
     /**

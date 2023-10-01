@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutorService;
  * @since 1.0
  */
 public abstract class NitriteEventBus<EventInfo, EventListener>
-    implements EventBus<EventInfo, EventListener>, AutoCloseable {
+    implements EventBus<EventInfo, EventListener> {
 
     private final Set<EventListener> listeners;
     private ExecutorService eventExecutor;

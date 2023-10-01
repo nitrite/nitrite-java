@@ -151,6 +151,19 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>
+                        org.dizitart.no2.mvstore.compat.v1,
+                    </excludePackageNames>
+                    <sourceFileExcludes>
+                        <exclude>**/*MVSpatialKey.java</exclude>
+                        <exclude>**/*MVStoreUtils.java</exclude>
+                        <exclude>**/*NitriteMVMap.java</exclude>
+                        <exclude>**/*NitriteMVRTreeMap.java</exclude>
+                        <exclude>**/*NitriteMVStore.java</exclude>
+                        <exclude>**/*ReverseIterator.java</exclude>
+                    </sourceFileExcludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

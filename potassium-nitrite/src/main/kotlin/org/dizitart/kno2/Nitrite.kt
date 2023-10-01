@@ -28,32 +28,44 @@ import org.dizitart.no2.repository.ObjectRepository
  */
 
 /**
- * Opens a named collection from the store. If the collections does not
- * exist it will be created automatically and returned. If a collection
- * is already opened, it is returned as is. Returned collection is thread-safe
- * for concurrent use.
+ * Opens a named collection from the store. If the collections does not exist it will be created
+ * automatically and returned. If a collection is already opened, it is returned as is.
+ *
+ * Returned collection is thread-safe for concurrent use.
+ *
+ * The name cannot contain below reserved strings:
+ *
+ * - {@link Constants#INTERNAL_NAME_SEPARATOR}
+ * - {@link Constants#USER_MAP}
+ * - {@link Constants#INDEX_META_PREFIX}
+ * - {@link Constants#INDEX_PREFIX}
+ * - {@link Constants#OBJECT_STORE_NAME_SEPARATOR}
  *
  * @param [name] name of the collection
  * @param [op] collection builder block
- * @return the collection
+ * @return the collection with the given name
  */
-fun Nitrite.getCollection(name: String, op: (NitriteCollection.() -> Unit)? = null): NitriteCollection {
+fun Nitrite.getCollection(
+        name: String,
+        op: (NitriteCollection.() -> Unit)? = null
+): NitriteCollection {
     val collection = this.getCollection(name)
     op?.invoke(collection)
     return collection
 }
 
 /**
- * Opens a type-safe object repository from the store. If the repository
- * does not exist it will be created automatically and returned. If a
- * repository is already opened, it is returned as is.
+ * Opens a type-safe object repository from the store. If the repository does not exist it will be
+ * created automatically and returned. If a repository is already opened, it is returned as is.
+ *
+ * The returned repository is thread-safe for concurrent use.
  *
  * @param [T] type parameter
  * @param [op] repository builder block
- * @return the object repository of type [T]
+ * @return the repository of type [T]
  */
 inline fun <reified T : Any> Nitrite.getRepository(
-    noinline op: (ObjectRepository<T>.() -> Unit)? = null
+        noinline op: (ObjectRepository<T>.() -> Unit)? = null
 ): ObjectRepository<T> {
     val repository = this.getRepository(T::class.java)
     op?.invoke(repository)
@@ -61,18 +73,20 @@ inline fun <reified T : Any> Nitrite.getRepository(
 }
 
 /**
- * Opens a type-safe object repository with a key identifier from the store. If the repository
- * does not exist it will be created automatically and returned. If a
- * repository is already opened, it is returned as is.
+ * Opens a type-safe object repository with a key identifier from the store. If the repository does
+ * not exist it will be created automatically and returned. If a repository is already opened, it is
+ * returned as is.
+ *
+ * The returned repository is thread-safe for concurrent use.
  *
  * @param [T] type parameter
- * @param key  the key that will be appended to the repositories name
+ * @param key the key that will be appended to the repositories name
  * @param [op] repository builder block
- * @return the object repository of type [T]
+ * @return the repository of type [T]
  */
 inline fun <reified T : Any> Nitrite.getRepository(
-    key: String,
-    noinline op: (ObjectRepository<T>.() -> Unit)? = null
+        key: String,
+        noinline op: (ObjectRepository<T>.() -> Unit)? = null
 ): ObjectRepository<T> {
     val repository = this.getRepository(T::class.java, key)
     op?.invoke(repository)
@@ -80,9 +94,10 @@ inline fun <reified T : Any> Nitrite.getRepository(
 }
 
 /**
- * Creates an [IndexOptions] with the specified [indexType].
+ * Returns an [IndexOptions] object with the specified index type.
  *
- * @param [indexType] the type of index to be created.
- * @return a new [IndexOptions]
+ * @param indexType the type of index to use, defaults to [IndexType.UNIQUE].
+ * @return an [IndexOptions] object with the specified index type.
  */
-fun option(indexType: String = IndexType.UNIQUE): IndexOptions = IndexOptions.indexOptions(indexType)
+fun option(indexType: String = IndexType.UNIQUE): IndexOptions =
+        IndexOptions.indexOptions(indexType)

@@ -9,10 +9,6 @@ package org.dizitart.no2.mvstore.compat.v1.mvstore.compress;
 import java.nio.ByteBuffer;
 
 public final class CompressLZF implements Compressor {
-    private static final int HASH_SIZE = 16384;
-    private static final int MAX_LITERAL = 32;
-    private static final int MAX_OFF = 8192;
-    private static final int MAX_REF = 264;
     private int[] cachedHashTable;
 
     public CompressLZF() {

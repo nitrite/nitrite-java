@@ -20,7 +20,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
-@Slf4j
+/**
+ * @since 4.0
+ * @author Anindya Chatterjee
+ */
+@Slf4j(topic = "nitrite-rocksdb")
 public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     private final String mapName;
     private final RocksDBReference reference;

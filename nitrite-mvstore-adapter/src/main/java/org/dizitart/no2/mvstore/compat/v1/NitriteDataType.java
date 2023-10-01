@@ -37,10 +37,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 /**
- * The type Nitrite data type.
- *
- * <b>NOTE:</b> This code is a modification of h2 mvstore's {@link ObjectDataType}
- * @since 4.0.0
+ * @since 4.0
  * @author H2 Group
  * @author Anindya Chatterjee
  */

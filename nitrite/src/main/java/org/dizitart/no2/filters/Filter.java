@@ -105,7 +105,7 @@ public interface Filter {
 
     /**
      * Creates a not filter which performs a logical NOT operation on a filter and selects
-     * the documents that <strong>do not</strong> satisfy the criteria. 
+     * the documents that <b>do not</b> satisfy the criteria. 
      * <p>
      * NOTE: This also includes documents that do not contain the value.
      *

@@ -20,10 +20,10 @@ package org.dizitart.no2.repository;
 import java.util.List;
 
 /**
- * A class that implements this interface can be used to decorate
- * an entity of type T for nitrite database where using
- * {@link org.dizitart.no2.repository.annotations.Entity}
- * or its related annotations is not possible on a class.
+ * An interface that can be used to implement a decorator 
+ * for an entity class of type <code>T<code>, where annotating 
+ * the class with {@link org.dizitart.no2.repository.annotations.Entity}
+ * and its friends is not possible.
  *
  * @param <T> the type parameter
  * @see org.dizitart.no2.Nitrite#getRepository(EntityDecorator)

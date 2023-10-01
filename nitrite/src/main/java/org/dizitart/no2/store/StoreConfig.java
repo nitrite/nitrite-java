@@ -20,37 +20,38 @@ import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.store.events.StoreEventListener;
 
 /**
- * Represents a {@link NitriteStore} configuration.
+ * Represents the configuration interface of a {@link NitriteStore}.
  *
  * @author Anindya Chatterjee.
  * @since 4.0
  */
 public interface StoreConfig {
     /**
-     * Gets file path for the store.
+     * Gets the file path of the store.
      *
-     * @return the file path
+     * @return the file path of the store.
      */
     String filePath();
 
     /**
-     * Indicates if the {@link NitriteStore} is a readonly store.
+     * Returns a boolean indicating whether the store is read-only or not.
      *
-     * @return <code>true</code>, if readonly store; otherwise <code>false</code>.
+     * @return a boolean indicating whether the store is read-only or not
      */
     Boolean isReadOnly();
 
     /**
-     * Adds a {@link StoreEventListener} instance and subscribe it to store event.
+     * Adds a {@link StoreEventListener} to the store configuration. 
+     * The listener will be notified of any store events.
      *
-     * @param listener the listener
+     * @param listener the listener to add
      */
     void addStoreEventListener(StoreEventListener listener);
 
     /**
-     * Indicates if the {@link NitriteStore} is an in-memory store.
+     * Checks if the store is in-memory.
      *
-     * @return <code>true</code>, if in-memory store; otherwise <code>false</code>.
+     * @return {@code true} if the store is in-memory; {@code false} otherwise.
      */
     default boolean isInMemory() {
         return StringUtils.isNullOrEmpty(filePath());

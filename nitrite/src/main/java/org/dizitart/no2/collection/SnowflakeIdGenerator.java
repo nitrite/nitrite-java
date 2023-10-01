@@ -41,7 +41,7 @@ import java.util.UUID;
  * @author Sebastian Schaffert (sschaffert@apache.org)
  * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 public class SnowflakeIdGenerator {
     private final SecureRandom random;
     private final long nodeIdBits = 10L;

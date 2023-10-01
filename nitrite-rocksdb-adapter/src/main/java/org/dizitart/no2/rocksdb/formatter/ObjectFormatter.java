@@ -16,13 +16,50 @@
 
 package org.dizitart.no2.rocksdb.formatter;
 
+
 /**
+ * An interface to define methods for encoding and decoding objects and their
+ * keys.
+ * 
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public interface ObjectFormatter {
+    /**
+     * Encodes an object into a byte array.
+     *
+     * @param object the object to encode
+     * @param <T>    the type of the object
+     * @return the byte array representing the encoded object
+     */
     <T> byte[] encode(T object);
+
+    /**
+     * Encodes an object's key into a byte array.
+     *
+     * @param object the object whose key to encode
+     * @param <T>    the type of the object
+     * @return the byte array representing the encoded key
+     */
     <T> byte[] encodeKey(T object);
 
+    /**
+     * Decodes a byte array into an object of the specified type.
+     *
+     * @param bytes the byte array to decode
+     * @param type  the type of the object to decode
+     * @param <T>   the type of the object
+     * @return the decoded object
+     */
     <T> T decode(byte[] bytes, Class<T> type);
+
+    /**
+     * Decodes a byte array into an object's key of the specified type.
+     *
+     * @param bytes the byte array to decode
+     * @param type  the type of the object's key to decode
+     * @param <T>   the type of the object's key
+     * @return the decoded object's key
+     */
     <T> T decodeKey(byte[] bytes, Class<T> type);
 }

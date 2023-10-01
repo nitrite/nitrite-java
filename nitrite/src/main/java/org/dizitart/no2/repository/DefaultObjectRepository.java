@@ -23,7 +23,6 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.collection.events.CollectionEventListener;
 import org.dizitart.no2.common.WriteResult;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.processors.Processor;
 import org.dizitart.no2.filters.Filter;

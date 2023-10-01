@@ -94,7 +94,6 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
      */
     void rebuildIndex(String... fields);
 
-
     /**
      * Gets a set of all indices in the collection.
      *

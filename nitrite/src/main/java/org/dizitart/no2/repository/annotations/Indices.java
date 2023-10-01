@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specifies multiple indexed fields for a class.
+ * Specifies multiple indexed fields for an entity.
 
  * @author Anindya Chatterjee.
  * @see Index

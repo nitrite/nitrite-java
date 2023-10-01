@@ -15,10 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * The in-memory {@link NitriteRTree}.
- *
- * @param <Key>   the type parameter
- * @param <Value> the type parameter
  * @author Anindya Chatterjee
  * @since 4.0
  */

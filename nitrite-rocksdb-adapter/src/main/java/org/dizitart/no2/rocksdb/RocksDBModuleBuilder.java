@@ -31,17 +31,39 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * A builder class to create a RocksDBModule instance with the desired configuration.
+ * 
+ * @since 4.0
+ * @see RocksDBModule
  * @author Anindya Chatterjee
  */
 @Getter
 @Setter
 @Accessors(fluent = true)
 public class RocksDBModuleBuilder {
+    /**
+     * The file path of the RocksDB data store.
+     */
     private String filePath;
+    /**
+     * The RocksDB {@link Options} used by the module builder.
+     */
     private Options options;
+    /**
+     * The RocksDB {@link DBOptions} used by the module builder.
+     */
     private DBOptions dbOptions;
+    /**
+     * The RocksDB {@link ColumnFamilyOptions} used by the module builder.
+     */
     private ColumnFamilyOptions columnFamilyOptions;
+    /**
+     * The object formatter used to serialize and deserialize objects.
+     */
     private ObjectFormatter objectFormatter;
+    /**
+     * The RocksDB configuration for the module.
+     */
     private RocksDBConfig dbConfig;
 
     @Setter(AccessLevel.NONE)
@@ -52,6 +74,12 @@ public class RocksDBModuleBuilder {
         eventListeners = new HashSet<>();
     }
 
+    /**
+     * Sets the file path for the RocksDB data store.
+     *
+     * @param file the file path for the RocksDB data store.
+     * @return the {@link RocksDBModuleBuilder} instance.
+     */
     public RocksDBModuleBuilder filePath(File file) {
         if (file != null) {
             this.filePath = file.getPath();
@@ -59,16 +87,33 @@ public class RocksDBModuleBuilder {
         return this;
     }
 
+    /**
+     * Sets the file path for the RocksDB data store.
+     *
+     * @param path the file path for the RocksDB data store.
+     * @return the current {@link RocksDBModuleBuilder} instance.
+     */
     public RocksDBModuleBuilder filePath(String path) {
         this.filePath = path;
         return this;
     }
 
+    /**
+     * Adds a {@link StoreEventListener} to the module builder.
+     *
+     * @param listener the listener to add
+     * @return the {@link RocksDBModuleBuilder} instance
+     */
     public RocksDBModuleBuilder addStoreEventListener(StoreEventListener listener) {
         eventListeners.add(listener);
         return this;
     }
 
+    /**
+     * Builds a {@link RocksDBModule} with the specified configuration.
+     *
+     * @return the {@link RocksDBModule} instance.
+     */
     public RocksDBModule build() {
         RocksDBModule module = new RocksDBModule(filePath());
 

@@ -35,6 +35,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.validateProjectionTyp
 
 /**
  * @author Anindya Chatterjee.
+ * @since 4.0
  */
 class ObjectCursor<T> implements Cursor<T> {
     private final DocumentCursor cursor;

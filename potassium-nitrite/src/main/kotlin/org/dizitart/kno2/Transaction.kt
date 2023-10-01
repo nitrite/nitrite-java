@@ -22,8 +22,15 @@ import org.dizitart.no2.transaction.Session
 import org.dizitart.no2.transaction.Transaction
 
 /**
- *
+ * @since 4.0
  * @author Anindya Chatterjee
+ */
+
+/**
+ * Starts a new transactional session with the Nitrite database.
+ *
+ * @param op an optional lambda expression to execute within the session.
+ * @return the session object.
  */
 fun Nitrite.session(op: (Session.() -> Unit)? = null): Session {
     val session = this.createSession()
@@ -32,6 +39,12 @@ fun Nitrite.session(op: (Session.() -> Unit)? = null): Session {
     return session
 }
 
+/**
+ * Starts a transaction on the current session.
+ *
+ * @param op the operation to perform within the transaction.
+ * @return the [Transaction] object representing the transaction.
+ */
 fun Session.tx(op: (Transaction.() -> Unit)? = null): Transaction {
     val tx = this.beginTransaction()
     op?.invoke(tx)

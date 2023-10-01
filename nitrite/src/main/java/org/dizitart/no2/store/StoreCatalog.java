@@ -34,7 +34,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.getKeyedRepositoryType;
  * repositories and keyed-repositories.
  *
  * @author Anindya Chatterjee
- * @since 4.0.0
+ * @since 4.0
  */
 public class StoreCatalog {
     private final NitriteMap<String, Document> catalogMap;
@@ -49,9 +49,9 @@ public class StoreCatalog {
     }
 
     /**
-     * Writes a new collection entry to the catalog.
+     * Writes a new entry for a collection with the given name to the store catalog.
      *
-     * @param name the name
+     * @param name the name of the collection to add to the catalog
      */
     public void writeCollectionEntry(String name) {
         Document document = catalogMap.get(TAG_COLLECTIONS);
@@ -68,9 +68,9 @@ public class StoreCatalog {
     }
 
     /**
-     * Writes a repository entry to the catalog.
+     * Writes a repository entry with the given name to the store catalog.
      *
-     * @param name the name
+     * @param name the name of the repository to be added to the catalog
      */
     public void writeRepositoryEntry(String name) {
         Document document = catalogMap.get(TAG_REPOSITORIES);
@@ -87,9 +87,9 @@ public class StoreCatalog {
     }
 
     /**
-     * Writes a keyed repository entries to the catalog
+     * Writes a keyed repository entry to the store catalog.
      *
-     * @param name the name
+     * @param name the name of the keyed repository to be added
      */
     public void writeKeyedRepositoryEntry(String name) {
         Document document = catalogMap.get(TAG_KEYED_REPOSITORIES);
@@ -105,9 +105,9 @@ public class StoreCatalog {
     }
 
     /**
-     * Gets all collection names.
+     * Returns a set of all collection names in the Nitrite database.
      *
-     * @return the collection names
+     * @return a set of all collection names in the Nitrite database
      */
     public Set<String> getCollectionNames() {
         Document document = catalogMap.get(TAG_COLLECTIONS);
@@ -118,9 +118,9 @@ public class StoreCatalog {
     }
 
     /**
-     * Gets all repository names.
+     * Returns a set of all repository names in the Nitrite database.
      *
-     * @return the repository names
+     * @return a set of all repository names in the Nitrite database
      */
     public Set<String> getRepositoryNames() {
         Document document = catalogMap.get(TAG_REPOSITORIES);
@@ -131,9 +131,9 @@ public class StoreCatalog {
     }
 
     /**
-     * Gets all keyed repository names.
+     * Returns a set of all keyed-repository names in the Nitrite database.
      *
-     * @return the keyed repository names
+     * @return a set of all keyed-repository names in the Nitrite database
      */
     public Map<String, Set<String>> getKeyedRepositoryNames() {
         Document document = catalogMap.get(TAG_KEYED_REPOSITORIES);
@@ -160,7 +160,7 @@ public class StoreCatalog {
     }
 
     /**
-     * Removes the entry from the catalog specified by name.
+     * Removes the entry from the catalog specified by a name.
      *
      * @param name the name
      */

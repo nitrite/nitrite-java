@@ -19,6 +19,7 @@ package org.dizitart.no2.rocksdb;
 import java.lang.ref.Cleaner;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public class Constants {
