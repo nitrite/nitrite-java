@@ -1,5 +1,9 @@
 package org.dizitart.no2.rocksdb;
 
+/**
+ * @since 4.0
+ * @author Anindya Chatterjee
+ */
 class CleaningAction implements Runnable {
 
     private final AutoCloseable resource;

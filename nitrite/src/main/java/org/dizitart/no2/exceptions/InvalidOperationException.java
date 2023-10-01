@@ -17,8 +17,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown when a requested operation is not
- * allowed to be executed.
+ * Exception thrown when an invalid operation is performed.
  *
  * @author Anindya Chatterjee
  * @since 1.0

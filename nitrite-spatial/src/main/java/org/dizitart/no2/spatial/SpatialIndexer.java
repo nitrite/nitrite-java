@@ -30,14 +30,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents a spatial data indexer.
- *
+ * The {@code SpatialIndexer} class implements the {@link NitriteIndexer}
+ * interface and provides support for creating and managing spatial
+ * indexes in Nitrite database. It uses the {@link SpatialIndex} class to create
+ * and manage the indexes.
+ * 
+ * @since 4.0
  * @author Anindya Chatterjee
- * @since 4.0.0
  */
 public class SpatialIndexer implements NitriteIndexer {
     /**
-     * Spatial index type.
+     * The name of the spatial index type. To be used while creating a spatial
+     * index.
      */
     public static final String SPATIAL_INDEX = "Spatial";
     private final Map<IndexDescriptor, SpatialIndex> indexRegistry;
@@ -74,7 +78,8 @@ public class SpatialIndexer implements NitriteIndexer {
     }
 
     @Override
-    public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+    public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor,
+            NitriteConfig nitriteConfig) {
         SpatialIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
         spatialIndex.remove(fieldValues);
     }

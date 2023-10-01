@@ -27,8 +27,8 @@ import java.util.*;
 /**
  * @author Anindya Chatterjee
  */
+@Getter
 class InFilter extends ComparableArrayFilter {
-    @Getter
     private final Set<Comparable<?>> comparableSet;
 
     InFilter(String field, Comparable<?>... values) {

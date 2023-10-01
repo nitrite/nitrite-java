@@ -17,7 +17,7 @@
 package org.dizitart.no2.filters;
 
 /**
- * Represents a filter on string values.
+ * An abstract class representing a filter for string values.
  *
  * @author Anindya Chatterjee
  * @since 1.0

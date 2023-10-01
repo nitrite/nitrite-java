@@ -26,12 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * A specialized version of {@link ObjectInputStream} for nitrite.
- *
- * @since 4.0.0
+ * @since 4.0
  * @author Anindya Chatterjee.
  */
-@Slf4j
+@Slf4j(topic = "nitrite-mvstore")
 class NitriteObjectInputStream extends ObjectInputStream {
     private static final Map<String, Class<?>> migrationMap = new HashMap<>();
 

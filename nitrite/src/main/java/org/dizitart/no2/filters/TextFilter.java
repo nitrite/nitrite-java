@@ -31,8 +31,6 @@ import static org.dizitart.no2.common.util.StringUtils.stringTokenizer;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * Represents a nitrite full-text search filter.
- *
  * @author Anindya Chatterjee
  * @since 1.0
  */

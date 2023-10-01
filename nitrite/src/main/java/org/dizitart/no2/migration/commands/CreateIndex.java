@@ -11,7 +11,7 @@ import org.dizitart.no2.common.Fields;
  * @since 4.0
  */
 @AllArgsConstructor
-public class CreateIndex extends BaseCommand implements Command {
+public class CreateIndex extends BaseCommand {
     private final String collectionName;
     private final Fields fields;
     private final String indexType;

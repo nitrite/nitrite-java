@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that an annotated field is the id field.
+ * Annotation to mark a field as the id field of a repository.
  *
  * @author Anindya Chatterjee.
  * @since 1.0

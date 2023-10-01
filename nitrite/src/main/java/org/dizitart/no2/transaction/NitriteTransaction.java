@@ -26,7 +26,7 @@ import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryNameByDecor
  * @author Anindya Chatterjee
  * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 class NitriteTransaction implements Transaction {
     private final Nitrite nitrite;
     private final LockService lockService;

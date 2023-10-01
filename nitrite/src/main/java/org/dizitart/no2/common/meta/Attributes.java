@@ -28,7 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents metadata attributes of a collection.
+ * Represents metadata attributes of a {@link NitriteMap}.
  *
  * @author Anindya Chatterjee
  * @since 1.0
@@ -125,12 +125,16 @@ public class Attributes implements Serializable {
         set(UNIQUE_ID, UUID.randomUUID().toString());
     }
 
+
     /**
-     * Set attributes.
-     *
-     * @param key   the key
-     * @param value the value
-     * @return the attributes
+     * Adds a key-value pair to the attributes and returns the updated
+     * {@link Attributes} object.
+     * 
+     * @param key The key is a string that represents the attribute name. It is used to identify the
+     * attribute in the attributes.
+     * @param value The value parameter is a string that represents the value to be associated with the
+     * given key in the attributes.
+     * @return The method is returning an instance of the Attributes class.
      */
     public Attributes set(String key, String value) {
         attributes.put(LAST_MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
@@ -139,10 +143,11 @@ public class Attributes implements Serializable {
     }
 
     /**
-     * Get string value of an attribute.
-     *
-     * @param key the key
-     * @return the string
+     * Retrieves the value associated with a given key from a {@link Attributes}.
+     * 
+     * @param key The "key" parameter is a String that represents the key of the attribute that you
+     * want to retrieve from the attributes.
+     * @return The method is returning the value associated with the given key in the attributes.
      */
     public String get(String key) {
         return attributes.get(key);

@@ -21,9 +21,11 @@ import org.dizitart.no2.common.util.Iterables;
 import java.util.*;
 
 /**
- * Represents a record stream which can be iterated in a for loop.
+ * An interface representing a stream of records of type T.
+ * Provides methods to create, manipulate and iterate over a 
+ * stream of records.
  *
- * @param <T> the type parameter
+ * @param <T> the type parameter for the records in the stream
  * @author Anindya Chatterjee.
  * @since 1.0
  */

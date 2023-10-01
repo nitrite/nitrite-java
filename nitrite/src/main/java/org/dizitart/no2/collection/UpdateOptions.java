@@ -23,12 +23,13 @@ import lombok.ToString;
 import org.dizitart.no2.filters.Filter;
 
 /**
- * Settings to control update operation in {@link NitriteCollection}.
+ * Represents options to configure update operation.
  *
  * @author Anindya Chatterjee
  * @see NitriteCollection#update(Filter, Document, UpdateOptions)
  * @since 1.0
  */
+@Getter
 @ToString
 @EqualsAndHashCode
 public class UpdateOptions {
@@ -37,20 +38,13 @@ public class UpdateOptions {
      * Indicates if the update operation will insert a new document if it
      * does not find any existing document to update.
      *
-     * @param insertIfAbsent a value indicating, if a new document to insert in case the
-     * filter fails to find a document to update.
-     * @return `true` if a new document to insert; otherwise, `false`.
      * @see NitriteCollection#update(Filter, Document, UpdateOptions)
      */
-    @Getter
     @Setter
     private boolean insertIfAbsent;
 
     /**
      * Indicates if only one document will be updated or all of them.
-     *
-     * @param justOnce a value indicating if only one document to update or all.
-     * @return `true` if only one document to update; otherwise, `false`.
      */
     @Getter
     @Setter

@@ -29,8 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Represents a sorted nitrite document stream
- *
  * @since 4.0
  * @author Anindya Chatterjee.
  */

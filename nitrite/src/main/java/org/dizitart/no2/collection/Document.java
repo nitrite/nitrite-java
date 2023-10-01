@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.collection;
 
+import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.tuples.Pair;
 
 import java.io.Serializable;
@@ -26,7 +27,27 @@ import java.util.Set;
 import static org.dizitart.no2.common.Constants.*;
 
 /**
- * A representation of a nitrite document.
+ * Represents a document in Nitrite database.
+ * <p>
+ * Nitrite document are composed of key-value pairs. A key is always a {@link String} and value
+ * can be anything including <code>null</code>.
+ * <p>
+ * Nitrite document supports nested documents as well. The key of a nested document is a {@link String}
+ * separated by {@link NitriteConfig#getFieldSeparator()}. By default, Nitrite uses `.` as field separator.
+ * This can be changed by setting {@link NitriteConfig#fieldSeparator(String)}.
+ * <p>
+ * For example, if a document has a nested document
+ * <code>{ "a" : { "b" : 1 } }</code>, then the value of inside the nested document can be retrieved by
+ * calling {@link #get(String)} with key <code>a.b</code>.
+ * <p>
+ * Below fields are reserved and cannot be used as key in a document.
+ * <ul>
+ *     <li><b>_id</b>: The unique identifier of the document. If not provided,
+ *     Nitrite will generate a unique {@link NitriteId} for the document during insertion.</li>
+ *     <li><b>_revision</b>: The revision number of the document.</li>
+ *     <li><b>_source</b>: The source of the document.</li>
+ *     <li><b>_modified</b>: The last modified time of the document in milliseconds since epoch.</li>
+ * </ul>
  *
  * @since 1.0
  * @author Anindya Chatterjee
@@ -34,7 +55,7 @@ import static org.dizitart.no2.common.Constants.*;
 public interface Document extends Iterable<Pair<String, Object>>, Cloneable, Serializable {
 
     /**
-     * Creates a new empty document.
+     * Creates an empty document.
      *
      * @return the document
      */

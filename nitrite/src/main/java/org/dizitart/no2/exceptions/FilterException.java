@@ -18,7 +18,7 @@ package org.dizitart.no2.exceptions;
 
 /**
  * Exception thrown during find operations due to
- * invalid filter configuration.
+ * invalid filter expression.
  *
  * @author Anindya Chatterjee
  * @since 1.0

@@ -24,7 +24,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
@@ -70,7 +70,7 @@ public class ObjectRepositoryTest {
 
     @Before
     public void setUp() {
-        SimpleDocumentMapper mapper = new SimpleDocumentMapper();
+        SimpleNitriteMapper mapper = new SimpleNitriteMapper();
         mapper.registerEntityConverter(new InternalClass.Converter());
         mapper.registerEntityConverter(new EmployeeEntity.Converter());
         mapper.registerEntityConverter(new StressRecord.Converter());

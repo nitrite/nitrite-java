@@ -31,6 +31,7 @@ import org.dizitart.no2.transaction.Transaction
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.slf4j.LoggerFactory
 import java.util.concurrent.ExecutionException
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
@@ -41,6 +42,8 @@ import java.util.function.Consumer
  * @author Anindya Chatterjee
  */
 class TransactionTest: BaseTest() {
+    private val log = LoggerFactory.getLogger(javaClass);
+
     @Before
     fun before() {
         db = nitrite {
@@ -624,7 +627,7 @@ class TransactionTest: BaseTest() {
                         txCol.remove(FluentFilter.where("id").eq(2 + fi * 10))
                         transaction.commit()
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        log.error("Error in transaction", e)
                         transaction.rollback()
                     } finally {
                         transaction.close()
@@ -636,9 +639,9 @@ class TransactionTest: BaseTest() {
                 try {
                     future.get()
                 } catch (e: InterruptedException) {
-                    e.printStackTrace()
+                    log.error("Error in transaction", e)
                 } catch (e: ExecutionException) {
-                    e.printStackTrace()
+                    log.error("Error in transaction", e)
                 }
             })
             Assert.assertEquals(90, collection.size())
@@ -665,7 +668,7 @@ class TransactionTest: BaseTest() {
                         }
                         transaction.commit()
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        log.error("Error in transaction", e)
                         transaction.rollback()
                     } finally {
                         transaction.close()
@@ -677,9 +680,9 @@ class TransactionTest: BaseTest() {
                 try {
                     future.get()
                 } catch (e: InterruptedException) {
-                    e.printStackTrace()
+                    log.error("Error in transaction", e)
                 } catch (e: ExecutionException) {
-                    e.printStackTrace()
+                   log.error("Error in transaction", e)
                 }
             })
             Assert.assertEquals(100, collection.size())
@@ -715,7 +718,7 @@ class TransactionTest: BaseTest() {
                         }
                         transaction.commit()
                     } catch (e: Exception) {
-                        e.printStackTrace()
+                        log.error("Error in transaction", e)
                         transaction.rollback()
                     } finally {
                         transaction.close()
@@ -727,9 +730,9 @@ class TransactionTest: BaseTest() {
                 try {
                     future.get()
                 } catch (e: InterruptedException) {
-                    e.printStackTrace()
+                    log.error("Error in transaction", e)
                 } catch (e: ExecutionException) {
-                    e.printStackTrace()
+                    log.error("Error in transaction", e)
                 }
             })
             Assert.assertEquals(10, collection.size())

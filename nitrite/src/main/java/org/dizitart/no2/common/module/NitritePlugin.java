@@ -19,7 +19,8 @@ package org.dizitart.no2.common.module;
 import org.dizitart.no2.NitriteConfig;
 
 /**
- * Represents a nitrite database plugin component.
+ * Represents a plugin for working with Nitrite 
+ * database and provides methods for initializing and closing the plugin.
  *
  * @author Anindya Chatterjee.
  * @since 4.0
@@ -32,6 +33,9 @@ public interface NitritePlugin extends AutoCloseable {
      */
     void initialize(NitriteConfig nitriteConfig);
 
+    /**
+     * Closes the plugin instance.
+     */
     default void close() {
         // this is to make NitritePlugin a functional interface
         // and make close() not throw checked exception

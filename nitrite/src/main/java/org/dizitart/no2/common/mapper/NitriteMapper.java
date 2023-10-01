@@ -19,10 +19,10 @@ package org.dizitart.no2.common.mapper;
 import org.dizitart.no2.common.module.NitritePlugin;
 
 /**
- * Represents a mapper which will convert an object of one type to an object of another type.
+ * An interface that provides a method to try converting an object of one type to an object of another type.
  *
  * @author Anindya Chatterjee.
- * @since 4.0
+ * @since 1.0
  */
 public interface NitriteMapper extends NitritePlugin {
     /**

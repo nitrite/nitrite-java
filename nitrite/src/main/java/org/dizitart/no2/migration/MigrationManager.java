@@ -24,8 +24,6 @@ import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.ObjectUtils.findRepositoryName;
 
 /**
- * The database migration manager.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

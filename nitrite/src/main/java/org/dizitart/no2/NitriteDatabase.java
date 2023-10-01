@@ -47,7 +47,7 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  * @author Anindya Chatterjee.
  * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 class NitriteDatabase implements Nitrite {
     private final CollectionFactory collectionFactory;
     private final RepositoryFactory repositoryFactory;

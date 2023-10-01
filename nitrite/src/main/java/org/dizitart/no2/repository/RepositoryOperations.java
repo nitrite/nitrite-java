@@ -30,11 +30,6 @@ import static org.dizitart.no2.common.util.ObjectUtils.isCompatibleTypes;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
- * The {@link ObjectRepository} operations.
- * <p>
- * This class is for internal use only.
- * </p>
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -47,13 +42,6 @@ public class RepositoryOperations {
     private ObjectIdField objectIdField;
     private EntityDecoratorScanner entityDecoratorScanner;
 
-    /**
-     * Instantiates a new {@link RepositoryOperations}.
-     *
-     * @param type          the type
-     * @param nitriteConfig the nitrite config
-     * @param collection    the collection
-     */
     public RepositoryOperations(Class<?> type, NitriteCollection collection, NitriteConfig nitriteConfig) {
         this.type = type;
         this.nitriteConfig = nitriteConfig;
@@ -72,9 +60,6 @@ public class RepositoryOperations {
         validateCollection();
     }
 
-    /**
-     * Create indices.
-     */
     public void createIndices() {
         if (annotationScanner != null) {
             annotationScanner.performScan();
@@ -89,11 +74,6 @@ public class RepositoryOperations {
         }
     }
 
-    /**
-     * Serialize fields.
-     *
-     * @param document the document
-     */
     public void serializeFields(Document document) {
         if (document != null) {
             for (Pair<String, Object> pair : document) {
@@ -106,13 +86,6 @@ public class RepositoryOperations {
         }
     }
 
-    /**
-     * To documents document [ ].
-     *
-     * @param <T>    the type parameter
-     * @param others the others
-     * @return the document [ ]
-     */
     public <T> Document[] toDocuments(T[] others) {
         if (others == null || others.length == 0) return null;
         Document[] documents = new Document[others.length];
@@ -122,14 +95,6 @@ public class RepositoryOperations {
         return documents;
     }
 
-    /**
-     * To document document.
-     *
-     * @param <T>    the type parameter
-     * @param object the object
-     * @param update the update
-     * @return the document
-     */
     public <T> Document toDocument(T object, boolean update) {
         Document document = (Document) nitriteMapper.tryConvert(object, Document.class);
         if (document == null) {
@@ -167,12 +132,6 @@ public class RepositoryOperations {
         return document;
     }
 
-    /**
-     * Create unique filter filter.
-     *
-     * @param object the object
-     * @return the filter
-     */
     public Filter createUniqueFilter(Object object) {
         if (objectIdField == null) {
             throw new NotIdentifiableException("No id value found for the object");
@@ -191,11 +150,6 @@ public class RepositoryOperations {
         }
     }
 
-    /**
-     * Remove nitrite id.
-     *
-     * @param document the document
-     */
     public void removeNitriteId(Document document) {
         document.remove(DOC_ID);
         if (objectIdField != null) {
@@ -206,13 +160,6 @@ public class RepositoryOperations {
         }
     }
 
-    /**
-     * Create id filter filter.
-     *
-     * @param <I> the type parameter
-     * @param id  the id
-     * @return the filter
-     */
     public <I> Filter createIdFilter(I id) {
         if (objectIdField != null) {
             if (id == null) {
@@ -228,12 +175,6 @@ public class RepositoryOperations {
         }
     }
 
-    /**
-     * As object filter filter.
-     *
-     * @param filter the filter
-     * @return the filter
-     */
     public Filter asObjectFilter(Filter filter) {
         if (filter instanceof NitriteFilter) {
             NitriteFilter nitriteFilter = (NitriteFilter) filter;
@@ -248,15 +189,6 @@ public class RepositoryOperations {
         return filter;
     }
 
-    /**
-     * Find cursor.
-     *
-     * @param <T>         the type parameter
-     * @param filter      the filter
-     * @param findOptions the find options
-     * @param type        the type
-     * @return the cursor
-     */
     public <T> Cursor<T> find(Filter filter, FindOptions findOptions, Class<T> type) {
         DocumentCursor documentCursor = collection.find(asObjectFilter(filter), findOptions);
         return new ObjectCursor<>(nitriteMapper, documentCursor, type);

@@ -36,12 +36,12 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * A class to configure {@link Nitrite} database.
- *
+ * NitriteConfig is a configuration class for Nitrite database.
+ * 
  * @author Anindya Chatterjee.
- * @since 4.0.0
+ * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 @ToString
 public class NitriteConfig implements AutoCloseable {
     /**
@@ -56,12 +56,22 @@ public class NitriteConfig implements AutoCloseable {
     protected final PluginManager pluginManager;
 
     @Getter
+    /**
+     * The separator used to separate field names in a nested field.
+     */
     private static String fieldSeparator = ".";
 
     @Getter
+    /**
+     * A map of migrations to be applied to the database.
+     */
     private final Map<Integer, TreeMap<Integer, Migration>> migrations;
 
     @Getter
+    /**
+     * The schema version of the Nitrite database. Defaults to
+     * {@link Constants#INITIAL_SCHEMA_VERSION}.
+     */
     private Integer schemaVersion = Constants.INITIAL_SCHEMA_VERSION;
 
     /**
@@ -73,55 +83,57 @@ public class NitriteConfig implements AutoCloseable {
     }
 
     /**
-     * Sets the embedded field separator character. Default value
-     * is `.`
+     * Sets the field separator for Nitrite database.
      *
-     * @param separator the separator
+     * @param separator the field separator to be set.
+     * @throws InvalidOperationException if the separator is attempted to be changed
+     *                                   after database initialization.
      */
     public void fieldSeparator(String separator) {
         if (configured) {
             throw new InvalidOperationException("Cannot change the separator after database" +
-                " initialization");
+                    " initialization");
         }
         NitriteConfig.fieldSeparator = separator;
     }
 
     /**
-     * Loads {@link NitritePlugin} instances defined in the {@link NitriteModule}.
+     * Loads {@link NitritePlugin} instances defined in the {@link NitriteModule}
+     * into the configuration.
      *
-     * @param module the {@link NitriteModule} instances.
-     * @return the {@link NitriteConfig} instance.
+     * @param module the Nitrite module to be loaded
+     * @return the Nitrite configuration instance
+     * @throws InvalidOperationException if the database is already initialized
      */
     public NitriteConfig loadModule(NitriteModule module) {
         if (configured) {
             throw new InvalidOperationException("Cannot load module after database" +
-                " initialization");
+                    " initialization");
         }
         pluginManager.loadModule(module);
         return this;
     }
 
     /**
-     * Adds schema migration instructions.
+     * Adds a migration step to the configuration. A migration step is a process of
+     * updating the database from one version to another. If the database is already
+     * initialized, then migration steps cannot be added.
      *
-     * @param migration the migration
-     * @return the nitrite config
+     * @param migration the migration step to be added.
+     * @return the NitriteConfig instance.
+     * @throws InvalidOperationException if migration steps are added after database
+     *                                   initialization.
      */
-    @SuppressWarnings("Java8MapApi")
     public NitriteConfig addMigration(Migration migration) {
         if (configured) {
             throw new InvalidOperationException("Cannot add migration steps after database" +
-                " initialization");
+                    " initialization");
         }
 
         if (migration != null) {
             final int start = migration.getFromVersion();
             final int end = migration.getToVersion();
-            TreeMap<Integer, Migration> targetMap = migrations.get(start);
-            if (targetMap == null) {
-                targetMap = new TreeMap<>();
-                migrations.put(start, targetMap);
-            }
+            TreeMap<Integer, Migration> targetMap = migrations.computeIfAbsent(start, k -> new TreeMap<>());
             Migration existing = targetMap.get(end);
             if (existing != null) {
                 log.warn("Overriding migration " + existing + " with " + migration);
@@ -132,37 +144,42 @@ public class NitriteConfig implements AutoCloseable {
     }
 
     /**
-     * Sets the current schema version.
+     * Sets the current schema version of the Nitrite database.
      *
-     * @param version the version
-     * @return the nitrite config
+     * @param version the current schema version.
+     * @return the NitriteConfig instance.
+     * @throws InvalidOperationException if the schema version is attempted to be
+     *                                   added after database initialization.
      */
     public NitriteConfig currentSchemaVersion(Integer version) {
         if (configured) {
             throw new InvalidOperationException("Cannot add schema version info after database" +
-                " initialization");
+                    " initialization");
         }
         this.schemaVersion = version;
         return this;
     }
 
     /**
-     * Autoconfigures nitrite database with default configuration values and
-     * default built-in plugins.
+     * Automatically configures Nitrite database by finding and loading plugins.
+     * 
+     * @throws InvalidOperationException if autoconfigure is executed after database
+     *                                   initialization.
      */
     public void autoConfigure() {
         if (configured) {
             throw new InvalidOperationException("Cannot execute autoconfigure after database" +
-                " initialization");
+                    " initialization");
         }
         pluginManager.findAndLoadPlugins();
     }
 
     /**
-     * Finds a {@link NitriteIndexer} by indexType.
+     * Finds the {@link NitriteIndexer} for the given index type.
      *
-     * @param indexType the type of {@link NitriteIndexer} to find.
-     * @return the {@link NitriteIndexer}
+     * @param indexType the type of the index to find
+     * @return the {@link NitriteIndexer} for the given index type
+     * @throws IndexingException if no indexer is found for the given index type
      */
     public NitriteIndexer findIndexer(String indexType) {
         NitriteIndexer nitriteIndexer = pluginManager.getIndexerMap().get(indexType);
@@ -175,23 +192,27 @@ public class NitriteConfig implements AutoCloseable {
     }
 
     /**
-     * Gets the {@link NitriteMapper} instance.
+     * Returns the {@link NitriteMapper} instance used by Nitrite.
      *
-     * @return the {@link NitriteMapper}
+     * @return the NitriteMapper instance used by Nitrite.
      */
     public NitriteMapper nitriteMapper() {
         return pluginManager.getNitriteMapper();
     }
 
     /**
-     * Gets {@link NitriteStore} instance.
+     * Returns the {@link NitriteStore} associated with this instance.
      *
-     * @return the {@link NitriteStore}
+     * @return the {@link NitriteStore} associated with this instance.
      */
     public NitriteStore<?> getNitriteStore() {
         return pluginManager.getNitriteStore();
     }
 
+    /**
+     * Closes the NitriteConfig instance and releases any resources 
+     * associated with it.
+     */
     @Override
     public void close() {
         if (pluginManager != null) {

@@ -18,18 +18,21 @@
 package org.dizitart.no2.integration.transaction;
 
 import com.github.javafaker.Faker;
-import org.dizitart.no2.integration.collection.BaseCollectionTest;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.meta.Attributes;
-import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.integration.collection.BaseCollectionTest;
 import org.dizitart.no2.transaction.Session;
 import org.dizitart.no2.transaction.Transaction;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,6 +47,7 @@ import static org.junit.Assert.*;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class TransactionCollectionTest extends BaseCollectionTest {
 
     @Test
@@ -544,7 +548,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
                         transaction.commit();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Error in transaction", e);
                         transaction.rollback();
                     } finally {
                         transaction.close();
@@ -558,7 +562,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    log.error("Error in transaction", e);
                 }
             });
 
@@ -588,7 +592,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
                         transaction.commit();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Error in transaction", e);
                         transaction.rollback();
                     } finally {
                         transaction.close();
@@ -602,7 +606,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    log.error("Error in transaction", e);
                 }
             });
 
@@ -637,7 +641,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
 
                         transaction.commit();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        log.error("Error in transaction", e);
                         transaction.rollback();
                     } finally {
                         transaction.close();
@@ -651,7 +655,7 @@ public class TransactionCollectionTest extends BaseCollectionTest {
                 try {
                     future.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    e.printStackTrace();
+                    log.error("Error in transaction", e);
                 }
             });
 

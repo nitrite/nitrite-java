@@ -23,7 +23,7 @@ import org.dizitart.no2.NitriteConfig;
 import java.util.Objects;
 
 /**
- * Represents a nitrite filter.
+ * An abstract class representing a filter for Nitrite database.
  *
  * @author Anindya Chatterjee.
  * @since 4.0

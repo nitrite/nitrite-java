@@ -11,8 +11,6 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.Iterables.setOf;
 
 /**
- * The in-memory store module for nitrite.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

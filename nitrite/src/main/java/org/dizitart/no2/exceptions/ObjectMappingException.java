@@ -19,8 +19,8 @@ package org.dizitart.no2.exceptions;
 import org.dizitart.no2.collection.Document;
 
 /**
- * Exception thrown while mapping of {@link Document} from
- * objects fails or vice versa.
+ * Exception thrown when there is an error mapping an object to a 
+ * document or vice versa.
  *
  * @author Anindya Chatterjee.
  * @since 1.0

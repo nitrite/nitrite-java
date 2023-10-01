@@ -20,9 +20,8 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.repository.ObjectRepository;
 
 /**
- * An interface when implemented makes an object be
- * able to listen to any changes in a {@link NitriteCollection}
- * or {@link ObjectRepository}.
+ * A listener which is able to listen to any changes in a
+ * in a {@link NitriteCollection} or {@link ObjectRepository}.
  *
  * @author Anindya Chatterjee.
  * @since 4.0

@@ -37,18 +37,33 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * An in-memory, single-file based embedded nosql persistent document store. The store
- * can contains multiple named document collections.
+ * Nitrite is a lightweight, embedded, and self-contained Java NoSQL database.
+ * It provides an easy-to-use API to store and retrieve data. Nitrite stores
+ * data in the form of documents and supports indexing on fields within
+ * the documents to provide efficient search capabilities. Nitrite supports 
+ * transactions, and provides a simple and efficient way to persist data.
  *
+ * <p>
+ * Nitrite is thread-safe and can be used in a multi-threaded environment
+ * without any issues. Nitrite is designed to be embedded within the application
+ * and does not require any external setup or installation.
+ * 
+ *
+ * @see NitriteBuilder
+ * @see NitriteCollection
+ * @see ObjectRepository
+ * @see EntityDecorator
+ * 
  * @author Anindya Chatterjee
  * @since 1.0
  */
 public interface Nitrite extends AutoCloseable {
 
     /**
-     * Returns an instance of a {@link NitriteBuilder}.
+     * Returns a new instance of {@link NitriteBuilder} to build a new Nitrite
+     * database instance.
      *
-     * @return the nitrite builder
+     * @return a new instance of {@link NitriteBuilder}.
      */
     static NitriteBuilder builder() {
         return new NitriteBuilder();
@@ -74,11 +89,11 @@ public interface Nitrite extends AutoCloseable {
      * The name cannot contain below reserved strings:
      *
      * <ul>
-     *     <li>{@link Constants#INTERNAL_NAME_SEPARATOR}</li>
-     *     <li>{@link Constants#USER_MAP}</li>
-     *     <li>{@link Constants#INDEX_META_PREFIX}</li>
-     *     <li>{@link Constants#INDEX_PREFIX}</li>
-     *     <li>{@link Constants#OBJECT_STORE_NAME_SEPARATOR}</li>
+     * <li>{@link Constants#INTERNAL_NAME_SEPARATOR}</li>
+     * <li>{@link Constants#USER_MAP}</li>
+     * <li>{@link Constants#INDEX_META_PREFIX}</li>
+     * <li>{@link Constants#INDEX_PREFIX}</li>
+     * <li>{@link Constants#OBJECT_STORE_NAME_SEPARATOR}</li>
      * </ul>
      *
      * @param name the name of the collection
@@ -102,9 +117,9 @@ public interface Nitrite extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(Class<T> type);
 
     /**
-     * Opens a type-safe object repository with a key identifier from the store. If the repository
-     * does not exist it will be created automatically and returned. If a
-     * repository is already opened, it is returned as is.
+     * Opens a type-safe object repository with a key identifier from the store.
+     * If the repository does not exist it will be created automatically and
+     * returned. If a repository is already opened, it is returned as is.
      * <p>
      * The returned repository is thread-safe for concurrent use.
      *
@@ -117,28 +132,30 @@ public interface Nitrite extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(Class<T> type, String key);
 
     /**
-     * Opens a type-safe object repository using a {@link EntityDecorator}. If the repository
-     * does not exist it will be created automatically and returned. If a
-     * repository is already opened, it is returned as is.
+     * Opens a type-safe object repository using a {@link EntityDecorator}. If the
+     * repository does not exist it will be created automatically and returned.
+     * If a repository is already opened, it is returned as is.
      * <p>
      * The returned repository is thread-safe for concurrent use.
      *
-     * @param <T>       the type parameter
+     * @param <T>             the type parameter
      * @param entityDecorator the entityDecorator
      * @return the repository
      */
     <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator);
 
     /**
-     * Opens a type-safe object repository using a {@link EntityDecorator} and a key identifier
-     * from the store. If the repository does not exist it will be created automatically and
-     * returned. If a repository is already opened, it is returned as is.
+     * Opens a type-safe object repository using a {@link EntityDecorator} and a key
+     * identifier from the store. If the repository does not exist it will be
+     * created
+     * automatically and returned. If a repository is already opened, it is returned
+     * as is.
      * <p>
      * The returned repository is thread-safe for concurrent use.
      *
-     * @param <T>       the type parameter
+     * @param <T>             the type parameter
      * @param entityDecorator the entityDecorator
-     * @param key       the key
+     * @param key             the key
      * @return the repository
      */
     <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator, String key);
@@ -185,17 +202,17 @@ public interface Nitrite extends AutoCloseable {
     <T> void destroyRepository(EntityDecorator<T> type, String key);
 
     /**
-     * Gets the set of all {@link NitriteCollection}s' names saved in the store.
+     * Gets the set of all {@link NitriteCollection}s' names in the database.
      *
-     * @return the set of all collections' names.
+     * @return a set of all collection names in the database
      */
     Set<String> listCollectionNames();
 
     /**
      * Gets the set of all fully qualified class names corresponding
-     * to all {@link ObjectRepository}s in the store.
+     * to all {@link ObjectRepository}s in the database.
      *
-     * @return the set of all registered classes' names.
+     * @return a set of all the repository names in the Nitrite database.
      */
     Set<String> listRepositories();
 
@@ -203,21 +220,22 @@ public interface Nitrite extends AutoCloseable {
      * Gets the map of all key to the fully qualified class names corresponding
      * to all keyed-{@link ObjectRepository}s in the store.
      *
-     * @return the set of all registered classes' names.
+     * @return a map of all keyed-repositories keyed by their names
      */
     Map<String, Set<String>> listKeyedRepositories();
 
     /**
-     * Checks whether the store has any unsaved changes.
+     * Checks if there are any unsaved changes in the Nitrite database.
      *
-     * @return <code>true</code> if there are unsaved changes; otherwise <code>false</code>.
+     * @return {@code true} if there are unsaved changes, {@code false} otherwise.
      */
     boolean hasUnsavedChanges();
 
     /**
-     * Checks whether the store is closed.
+     * Checks if the Nitrite database instance is closed.
      *
-     * @return <code>true</code> if closed; otherwise <code>false</code>.
+     * @return {@code true} if the Nitrite database instance is closed;
+     *         {@code false} otherwise.
      */
     boolean isClosed();
 
@@ -229,16 +247,18 @@ public interface Nitrite extends AutoCloseable {
     NitriteConfig getConfig();
 
     /**
-     * Gets the {@link NitriteStore} instance powering the database.
+     * Returns the {@link NitriteStore} instance associated with this Nitrite
+     * database.
      *
-     * @return the {@link NitriteStore} instance of the database.
+     * @return the {@link NitriteStore} instance associated with this Nitrite
+     *         database.
      */
     NitriteStore<?> getStore();
 
     /**
-     * Gets database meta data.
+     * Returns the metadata of the database store.
      *
-     * @return the database meta data
+     * @return the metadata of the database store.
      */
     StoreMetaData getDatabaseMetaData();
 
@@ -247,18 +267,25 @@ public interface Nitrite extends AutoCloseable {
      *
      * @return the session
      */
+    /**
+     * Creates a new session for the Nitrite database. A session is a lightweight
+     * container that holds transactions. Multiple sessions can be created for a
+     * single Nitrite database instance.
+     *
+     * @return a new session for the Nitrite database.
+     */
     Session createSession();
 
     /**
      * Closes the database.
-     * */
+     */
     void close();
 
     /**
-     * Checks whether a particular {@link NitriteCollection} exists in the store.
+     * Checks if a collection with the given name exists in the database.
      *
-     * @param name the name of the collection.
-     * @return <code>true</code> if the collection exists; otherwise <code>false</code>.
+     * @param name the name of the collection to check
+     * @return true if a collection with the given name exists, false otherwise
      */
     default boolean hasCollection(String name) {
         checkOpened();
@@ -266,11 +293,11 @@ public interface Nitrite extends AutoCloseable {
     }
 
     /**
-     * Checks whether a particular {@link ObjectRepository} exists in the store.
+     * Checks if a repository of the specified type exists in the database.
      *
-     * @param <T>  the type parameter
-     * @param type the type of the object
-     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
+     * @param type the type of the repository to check for
+     * @param <T>  the type of the repository
+     * @return true if a repository of the specified type exists, false otherwise
      */
     default <T> boolean hasRepository(Class<T> type) {
         checkOpened();
@@ -279,26 +306,29 @@ public interface Nitrite extends AutoCloseable {
     }
 
     /**
-     * Checks whether a particular keyed-{@link ObjectRepository} exists in the store.
+     * Checks if a repository of the specified type and the given key exists in
+     * the database.
      *
-     * @param <T>  the type parameter.
-     * @param type the type of the object.
-     * @param key  the key, which will be appended to the repositories name.
-     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
+     * @param type the entity type of the repository
+     * @param key  the key of the repository
+     * @param <T>  the type of the entity
+     * @return true if a repository with the given key exists for the specified
+     *         entity type; false otherwise
      */
     default <T> boolean hasRepository(Class<T> type, String key) {
         checkOpened();
         String entityName = ObjectUtils.getEntityName(type);
         return listKeyedRepositories().containsKey(key)
-            && listKeyedRepositories().get(key).contains(entityName);
+                && listKeyedRepositories().get(key).contains(entityName);
     }
 
     /**
-     * Checks whether a particular {@link ObjectRepository} exists in the store.
+     * Checks if a repository of the specified type described by the
+     * {@link EntityDecorator} exists in the database.
      *
-     * @param <T>  the type parameter
+     * @param <T>             the type parameter
      * @param entityDecorator entityDecorator
-     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
+     * @return true if the repository exists; false otherwise.
      */
     default <T> boolean hasRepository(EntityDecorator<T> entityDecorator) {
         checkOpened();
@@ -307,23 +337,27 @@ public interface Nitrite extends AutoCloseable {
     }
 
     /**
-     * Checks whether a particular keyed-{@link ObjectRepository} exists in the store.
+     * Checks if a keyed-repository of the specified type described by the
+     * {@link EntityDecorator} exists in the database.
      *
-     * @param <T>  the type parameter.
+     * @param <T>             the type parameter.
      * @param entityDecorator entityDecorator.
-     * @param key  the key, which will be appended to the repositories name.
-     * @return <code>true</code> if the repository exists; otherwise <code>false</code>.
+     * @param key             the key, which will be appended to the repositories
+     *                        name.
+     * @return true if the repository exists; false otherwise.
      */
     default <T> boolean hasRepository(EntityDecorator<T> entityDecorator, String key) {
         checkOpened();
         return listKeyedRepositories().containsKey(key)
-            && listKeyedRepositories().get(key).contains(entityDecorator.getEntityName());
+                && listKeyedRepositories().get(key).contains(entityDecorator.getEntityName());
     }
 
     /**
-     * Validate the collection name.
+     * Validates the given collection name.
      *
-     * @param name the name
+     * @param name the name of the collection to validate
+     * @throws ValidationException if the name is null, empty, or contains any
+     *                             reserved names
      */
     default void validateCollectionName(String name) {
         notNull(name, "name cannot be null");
@@ -337,7 +371,8 @@ public interface Nitrite extends AutoCloseable {
     }
 
     /**
-     * Checks if the store is opened.
+     * Checks if the Nitrite database is opened or not. Throws a
+     * {@link NitriteIOException} if the database is closed.
      */
     default void checkOpened() {
         if (getStore() == null || getStore().isClosed()) {

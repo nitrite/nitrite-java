@@ -25,19 +25,12 @@ import org.dizitart.no2.common.tuples.Pair;
 import java.util.*;
 
 /**
- * Represents a document stream of distinct elements
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public class DistinctStream implements RecordStream<Pair<NitriteId, Document>> {
     private final RecordStream<Pair<NitriteId, Document>> rawStream;
 
-    /**
-     * Instantiates a new DistinctStream.
-     *
-     * @param rawStream the raw stream
-     */
     public DistinctStream(RecordStream<Pair<NitriteId, Document>> rawStream) {
         this.rawStream = rawStream;
     }
@@ -55,11 +48,6 @@ public class DistinctStream implements RecordStream<Pair<NitriteId, Document>> {
         private Pair<NitriteId, Document> nextPair;
         private boolean nextPairSet = false;
 
-        /**
-         * Instantiates a new DistinctStreamIterator.
-         *
-         * @param iterator the iterator
-         */
         public DistinctStreamIterator(Iterator<Pair<NitriteId, Document>> iterator) {
             this.iterator = iterator;
             this.scannedIds = new HashSet<>(); // fastest lookup for ids - O(1)

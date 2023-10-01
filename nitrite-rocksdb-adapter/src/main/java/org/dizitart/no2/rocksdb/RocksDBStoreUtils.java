@@ -1,11 +1,13 @@
 package org.dizitart.no2.rocksdb;
 
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
-@Slf4j
+/**
+ * @since 4.0
+ * @author Anindya Chatterjee
+ */
 class RocksDBStoreUtils {
     private RocksDBStoreUtils() {
     }

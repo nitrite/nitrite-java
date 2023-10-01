@@ -153,7 +153,6 @@ class NitriteTest : BaseTest() {
         }
         latch.await()
         val cursor = repository.find()
-        println(cursor.toList())
         assertEquals(cursor.size(), 1)
     }
 

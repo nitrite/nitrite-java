@@ -31,8 +31,9 @@ import static org.dizitart.no2.common.util.ValidationUtils.validateArrayIndexFie
 import static org.dizitart.no2.common.util.ValidationUtils.validateIterableIndexField;
 
 /**
- * Represents a nitrite index.
- *
+ * The NitriteIndex interface represents an index in Nitrite database. It provides methods to write, remove and find
+ * NitriteIds from the index. It also provides methods to drop the index and validate the index field. 
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -45,26 +46,26 @@ public interface NitriteIndex {
     IndexDescriptor getIndexDescriptor();
 
     /**
-     * Writes a {@link FieldValues} in the index.
+     * Writes the given field values to the index.
      *
-     * @param fieldValues the field values
+     * @param fieldValues the field values to write.
      */
     void write(FieldValues fieldValues);
 
     /**
-     * Removes a {@link FieldValues} from the index.
+     * Removes the index entry for the specified field values.
      *
-     * @param fieldValues the field values
+     * @param fieldValues the field values to remove the index entry for.
      */
     void remove(FieldValues fieldValues);
 
     /**
-     * Drops this index.
+     * Drops the index.
      */
     void drop();
 
     /**
-     * Finds a set of {@link NitriteId}s from the index after executing the {@link FindPlan}.
+     * Finds the NitriteIds from the index for the given find plan.
      *
      * @param findPlan the find plan
      * @return the linked hash set
@@ -72,9 +73,9 @@ public interface NitriteIndex {
     LinkedHashSet<NitriteId> findNitriteIds(FindPlan findPlan);
 
     /**
-     * Indicates if this is an unique index.
+     * Checks if the index is unique.
      *
-     * @return the boolean
+     * @return true if the index is unique, false otherwise.
      */
     default boolean isUnique() {
         return getIndexDescriptor().getIndexType().equalsIgnoreCase(IndexType.UNIQUE);
@@ -83,8 +84,9 @@ public interface NitriteIndex {
     /**
      * Validates the index field.
      *
-     * @param value the value
-     * @param field the field
+     * @param value the value to be validated.
+     * @param field the name of the field to be validated.
+     * @throws ValidationException if the index field is not a comparable type.
      */
     default void validateIndexField(Object value, String field) {
         if (value == null) return;
@@ -98,11 +100,12 @@ public interface NitriteIndex {
     }
 
     /**
-     * Adds a {@link NitriteId} of the {@link FieldValues} to the existing indexed list of {@link NitriteId}s.
+     * Adds the {@link NitriteId} of the {@link FieldValues} into the existing indexed list of {@link NitriteId}s.
      *
-     * @param nitriteIds  the nitrite ids
-     * @param fieldValues the field values
-     * @return the list
+     * @param nitriteIds the list of NitriteIds
+     * @param fieldValues the field values to index
+     * @return the updated list of NitriteIds
+     * @throws UniqueConstraintException if the index is unique and the key already exists
      */
     default List<NitriteId> addNitriteIds(List<NitriteId> nitriteIds, FieldValues fieldValues) {
         if (nitriteIds == null) {
@@ -120,10 +123,10 @@ public interface NitriteIndex {
     }
 
     /**
-     * Removes a {@link NitriteId} of the {@link FieldValues} from the existing indexed list of {@link NitriteId}s.
+     * Removes the {@link NitriteId} of the {@link FieldValues} from the existing indexed list of {@link NitriteId}s.
      *
-     * @param nitriteIds  the nitrite ids
-     * @param fieldValues the field values
+     * @param nitriteIds  the list of NitriteIds
+     * @param fieldValues the field values to remove from index
      * @return the list
      */
     default List<NitriteId> removeNitriteIds(List<NitriteId> nitriteIds, FieldValues fieldValues) {

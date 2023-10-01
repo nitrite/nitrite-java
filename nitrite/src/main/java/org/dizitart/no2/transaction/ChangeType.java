@@ -18,59 +18,18 @@
 package org.dizitart.no2.transaction;
 
 /**
- * Represents a change type in a transaction.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
 enum ChangeType {
-    /**
-     * Insert
-     */
     Insert,
-
-    /**
-     * Update.
-     */
     Update,
-
-    /**
-     * Remove.
-     */
     Remove,
-
-    /**
-     * Clear. Commit only operation, cannot be rolled back.
-     */
     Clear,
-
-    /**
-     * Create index.
-     */
     CreateIndex,
-
-    /**
-     * Rebuild index.
-     */
     RebuildIndex,
-
-    /**
-     * Drop index.
-     */
     DropIndex,
-
-    /**
-     * Drop all indices.
-     */
     DropAllIndexes,
-
-    /**
-     * Drop collection. Commit only operation, cannot be rolled back.
-     */
     DropCollection,
-
-    /**
-     * Set attribute.
-     */
     SetAttributes,
 }

@@ -22,13 +22,11 @@ import com.esotericsoftware.kryo.kryo5.io.ByteBufferOutput;
 import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.github.javafaker.Faker;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.store.NitriteMap;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.rocksdb.*;
 
 import java.io.ByteArrayInputStream;
@@ -45,6 +43,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class RocksDBTest {
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
@@ -105,24 +104,19 @@ public class RocksDBTest {
         referenceMap.put(date3, 3L); // today + 5
         referenceMap.put(date4, 4L); // today
 
-        testLevelDBMap.entries().forEach(System.out::println);
-        System.out.println("*****************");
-        referenceMap.entrySet().forEach(System.out::println);
+        testLevelDBMap.entries().forEach(Assert::assertNotNull);
+        referenceMap.entrySet().forEach(Assert::assertNotNull);
 
         cal = Calendar.getInstance();
         cal.add(Calendar.DATE, 6);
         Date date5 = cal.getTime();
 
-        System.out.println("Floor Key " + referenceMap.floorKey(date5));
         assertEquals(testLevelDBMap.floorKey(date5), referenceMap.floorKey(date5));     // x <= date5 : date3
 
-        System.out.println("Lower Key " + referenceMap.lowerKey(date5));
         assertEquals(testLevelDBMap.lowerKey(date5), referenceMap.lowerKey(date5));     // x < date5 : date4
 
-        System.out.println("Higher Key " + referenceMap.higherKey(date5));
         assertEquals(testLevelDBMap.higherKey(date5), referenceMap.higherKey(date5));   // date5 >= x :
 
-        System.out.println("Ceiling Key " + referenceMap.ceilingKey(date5));
         assertEquals(testLevelDBMap.ceilingKey(date5), referenceMap.ceilingKey(date5));
     }
 
@@ -141,18 +135,14 @@ public class RocksDBTest {
         referenceMap.put(3, 3); // today + 5
         referenceMap.put(4, 4); // today
 
-        testLevelDBMap.entries().forEach(System.out::println);
+        testLevelDBMap.entries().forEach(Assert::assertNotNull);
 
-        System.out.println("Floor Key " + referenceMap.floorKey(3));
         assertEquals(testLevelDBMap.floorKey(3), referenceMap.floorKey(3));     // x <= date5 : date3
 
-        System.out.println("Lower Key " + referenceMap.lowerKey(3));
         assertEquals(testLevelDBMap.lowerKey(3), referenceMap.lowerKey(3));     // x < date5 : date4
 
-        System.out.println("Higher Key " + referenceMap.higherKey(3));
         assertEquals(testLevelDBMap.higherKey(3), referenceMap.higherKey(3));   // date5 >= x :
 
-        System.out.println("Ceiling Key " + referenceMap.ceilingKey(3));
         assertEquals(testLevelDBMap.ceilingKey(3), referenceMap.ceilingKey(3));
     }
 
@@ -167,25 +157,13 @@ public class RocksDBTest {
         map.put("A", 12);
         map.put("1", 11);
 
-        map.entries().forEach(System.out::println);
+        map.entries().forEach(Assert::assertNotNull);
 
         treeMap.put("z", 10);
         treeMap.put("Z", 14);
         treeMap.put("w", 13);
         treeMap.put("A", 12);
         treeMap.put("1", 11);
-
-        System.out.println(map.floorKey("w"));
-        System.out.println(map.higherKey("w"));
-        System.out.println(map.ceilingKey("w"));
-        System.out.println(map.lowerKey("w"));
-
-        System.out.println("***************");
-
-        System.out.println(treeMap.floorKey("w"));
-        System.out.println(treeMap.higherKey("w"));
-        System.out.println(treeMap.ceilingKey("w"));
-        System.out.println(treeMap.lowerKey("w"));
     }
 
     @Test
@@ -275,7 +253,6 @@ public class RocksDBTest {
                             byte[] key = iterator.key();
                             byte[] value = iterator.value();
 
-                            System.out.println("Key: Value = " + new String(key) + ": " + new String(value));
                             iterator.prev();
                         }
                     }
@@ -290,7 +267,7 @@ public class RocksDBTest {
                     }
                 } // frees the db and the db options
             } catch (RocksDBException e) {
-                e.printStackTrace();
+                log.error("Error while opening rocksdb", e);
             }
         } // frees the column family options
     }
@@ -306,7 +283,6 @@ public class RocksDBTest {
 
         Long floorKey = testLevelDBMap.floorKey(10L);
         while (floorKey != null) {
-            System.out.println("Key: Value = " + floorKey + ": " + testLevelDBMap.get(floorKey));
             floorKey = testLevelDBMap.lowerKey(floorKey);
         }
     }

@@ -26,8 +26,9 @@ import org.dizitart.no2.common.mapper.JacksonMapper
 import org.dizitart.no2.spatial.mapper.GeometryModule
 
 /**
- * Default [JacksonMapper] for potassium nitrite.
- *
+ * A custom Jackson mapper for Potassium Nitrite (KNO2) library that extends [JacksonMapper] class.
+ * 
+ * @param modules a vararg of Jackson modules to be registered with the mapper. 
  * @author Anindya Chatterjee
  * @author Stefan Mandel
  * @since 2.1.0

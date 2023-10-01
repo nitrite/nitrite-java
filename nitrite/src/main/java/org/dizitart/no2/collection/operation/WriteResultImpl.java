@@ -24,6 +24,7 @@ import java.util.*;
 
 /**
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 @ToString
 class WriteResultImpl implements WriteResult {

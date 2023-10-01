@@ -19,7 +19,8 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * Represents a list of document fields.
+ * Represents a collection of document field names and provides methods for
+ * manipulating and comparing them.
  *
  * @author Anindya Chatterjee
  * @since 4.0
@@ -29,7 +30,7 @@ public class Fields implements Comparable<Fields>, Serializable {
     private static final long serialVersionUID = 1601646404L;
 
     /**
-     * The Field names.
+     * The names of the fields.
      */
     @Setter(AccessLevel.PACKAGE)
     protected List<String> fieldNames;
@@ -56,9 +57,8 @@ public class Fields implements Comparable<Fields>, Serializable {
         return f;
     }
 
-
     /**
-     * Adds a new field name.
+     * Adds a field name to a list of field names and returns the updated list.
      *
      * @param field the field
      * @return the fields
@@ -72,7 +72,7 @@ public class Fields implements Comparable<Fields>, Serializable {
     }
 
     /**
-     * Gets the field names.
+     * Gets an unmodifiable list of field names.
      *
      * @return the field names
      */
@@ -92,7 +92,8 @@ public class Fields implements Comparable<Fields>, Serializable {
         int length = Math.min(fieldNames.size(), other.fieldNames.size());
 
         // if other is greater than it is not a prefix of this field
-        if (other.fieldNames.size() > length) return false;
+        if (other.fieldNames.size() > length)
+            return false;
 
         for (int i = 0; i < length; i++) {
             String thisField = fieldNames.get(i);
@@ -120,7 +121,8 @@ public class Fields implements Comparable<Fields>, Serializable {
 
     @Override
     public int compareTo(Fields other) {
-        if (other == null) return 1;
+        if (other == null)
+            return 1;
         int fieldsSize = getFieldNames().size();
         int otherFieldsSize = other.getFieldNames().size();
         int result = Integer.compare(fieldsSize, otherFieldsSize);

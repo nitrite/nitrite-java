@@ -23,48 +23,25 @@ import java.util.LinkedHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Nitrite v3 compatible classes used in data migration.
- *
  * @author Anindya Chatterjee
- * @since 4.0.0
+ * @since 4.0
  */
 class Compat {
-    /**
-     * The enum Index type.
-     */
     enum IndexType {
-        /**
-         * Unique index type.
-         */
         Unique,
-        /**
-         * Non unique index type.
-         */
         NonUnique,
-        /**
-         * Fulltext index type.
-         */
         Fulltext
     }
 
-    /**
-     * The type User credential.
-     */
     @Data
     static class UserCredential implements Serializable {
         private byte[] passwordHash;
         private byte[] passwordSalt;
     }
 
-    /**
-     * The type Document.
-     */
-    static class Document extends LinkedHashMap<String, Object> implements Serializable {
+    static class Document extends LinkedHashMap<String, Object> {
     }
 
-    /**
-     * The type Index.
-     */
     @Data
     static class Index implements Serializable {
         private IndexType indexType;
@@ -72,9 +49,6 @@ class Compat {
         private String collectionName;
     }
 
-    /**
-     * The type Index meta.
-     */
     @Data
     static class IndexMeta implements Serializable {
         private Index index;
@@ -82,9 +56,6 @@ class Compat {
         private AtomicBoolean isDirty;
     }
 
-    /**
-     * The type Attributes.
-     */
     @Data
     static class Attributes implements Serializable {
         private long createdTime;
@@ -96,9 +67,6 @@ class Compat {
         private String uuid;
     }
 
-    /**
-     * The type Nitrite id.
-     */
     @Data
     static class NitriteId implements Serializable, Comparable<NitriteId> {
         private Long idValue;

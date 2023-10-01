@@ -18,7 +18,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Slf4j
+/**
+ * @since 4.0
+ * @author Anindya Chatterjee
+ */
+@Slf4j(topic = "nitrite-rocksdb")
 public class RocksDBStore extends AbstractNitriteStore<RocksDBConfig> {
     private final AtomicBoolean closed;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;

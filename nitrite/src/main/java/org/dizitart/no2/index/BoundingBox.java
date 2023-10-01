@@ -25,30 +25,30 @@ import java.io.Serializable;
  */
 public interface BoundingBox extends Serializable {
     /**
-     * Gets min x.
+     * Returns the minimum x-coordinate of the bounding box.
      *
-     * @return the min x
+     * @return the minimum x-coordinate of the bounding box.
      */
     float getMinX();
 
     /**
-     * Gets max x.
+     * Returns the maximum x-coordinate of the bounding box.
      *
-     * @return the max x
+     * @return the maximum x-coordinate of the bounding box
      */
     float getMaxX();
 
     /**
-     * Gets min y.
+     * Returns the minimum y-coordinate of the bounding box.
      *
-     * @return the min y
+     * @return the minimum y-coordinate of the bounding box
      */
     float getMinY();
 
     /**
-     * Gets max y.
+     * Returns the maximum Y coordinate of the bounding box.
      *
-     * @return the max y
+     * @return the maximum Y coordinate of the bounding box.
      */
     float getMaxY();
 }

@@ -17,6 +17,7 @@
 package org.dizitart.no2.collection;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.dizitart.no2.exceptions.InvalidIdException;
 
 import java.io.IOException;
@@ -33,18 +34,24 @@ import static org.dizitart.no2.common.Constants.ID_SUFFIX;
  * <p>
  * During insertion if a unique object is supplied in the '_id' field
  * of the document, then the value of the '_id' field will be used to
- * create a new {@link NitriteId}. If that is not supplied, then nitrite
- * will auto generate one and supply it in the '_id' field of the document.
+ * create a new {@link NitriteId}. If the '_id' field is not supplied, then
+ * nitrite will generate a new [NitriteId] and will add it to the document.
  *
  * @author Anindya Chatterjee
  * @see NitriteCollection#getById(NitriteId)
  * @since 1.0
  */
+@Getter
 @EqualsAndHashCode
 public final class NitriteId implements Comparable<NitriteId>, Serializable {
     private static final long serialVersionUID = 1477462375L;
     private static final SnowflakeIdGenerator generator = new SnowflakeIdGenerator();
 
+    /**
+     *  Gets the underlying value of the NitriteId.
+     *  <p>
+     *  The value is a string representation of a 64bit integer number.
+     */
     private String idValue;
 
     private NitriteId() {
@@ -56,7 +63,7 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
     }
 
     /**
-     * Gets a new auto-generated {@link NitriteId}.
+     * Creates a new auto-generated {@link NitriteId}.
      *
      * @return a new auto-generated {@link NitriteId}.
      */
@@ -65,7 +72,9 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
     }
 
     /**
-     * Creates a {@link NitriteId} from a long value.
+     * Creates a {@link NitriteId} from a value.
+     * <p>
+     * The value must be a string representation of a 64bit integer number.
      *
      * @param value the value
      * @return the {@link NitriteId}
@@ -75,6 +84,14 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
         return new NitriteId(value);
     }
 
+    /**
+     * Validates a value to be used as {@link NitriteId}.
+     * <p>
+     * The value must be a string representation of a 64bit integer number.
+     *
+     * @param value the value
+     * @return `true` if the value is valid; otherwise `false`.
+     * */
     public static boolean validId(Object value) {
         if (value == null) {
             throw new InvalidIdException("id cannot be null");
@@ -102,15 +119,6 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
             return ID_PREFIX + idValue + ID_SUFFIX;
         }
         return "";
-    }
-
-    /**
-     * Gets the underlying id object.
-     *
-     * @return the underlying id object.
-     */
-    public String getIdValue() {
-        return idValue;
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {

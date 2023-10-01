@@ -9,13 +9,6 @@ package org.dizitart.no2.common.util;
 public class Comparables {
     private Comparables() {}
 
-    /**
-     * Compares two comparable objects.
-     *
-     * @param first  the first
-     * @param second the second
-     * @return the int
-     */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static int compare(Comparable first, Comparable second) {
         if (first instanceof Number && second instanceof Number) {

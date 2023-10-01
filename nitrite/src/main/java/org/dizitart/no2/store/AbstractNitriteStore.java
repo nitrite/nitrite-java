@@ -2,7 +2,6 @@ package org.dizitart.no2.store;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.event.NitriteEventBus;
 import org.dizitart.no2.store.events.EventInfo;
@@ -14,30 +13,37 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An abstract {@link NitriteStore} implementation.
+ * An abstract implementation of the {@link NitriteStore} interface
+ * that provides common functionality for Nitrite data stores.
  *
- * @param <Config> the type parameter
+ * @param <Config> the type of the store configuration object
  * @author Anindya Chatterjee
  * @since 4.0
  */
 @Getter
-@Slf4j
 public abstract class AbstractNitriteStore<Config extends StoreConfig>
-    implements NitriteStore<Config> {
+        implements NitriteStore<Config> {
 
     @Setter
+    /**
+     * The configuration object for the Nitrite store.
+     */
     private Config storeConfig;
 
     /**
-     * The {@link NitriteEventBus} for the database.
+     * The event bus used to publish and subscribe to store events.
      */
     protected final NitriteEventBus<EventInfo, StoreEventListener> eventBus;
 
     /**
-     * The {@link NitriteConfig} for this store.
+     * The NitriteConfig object that holds the configuration for the Nitrite
+     * database.
      */
     protected NitriteConfig nitriteConfig;
 
+    /**
+     * The catalog of all the collections and repositories in the Nitrite database.
+     */
     private StoreCatalog storeCatalog;
 
     /**
@@ -48,9 +54,9 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
     }
 
     /**
-     * Alerts about a {@link StoreEvents} to all subscribed {@link StoreEventListener}s.
+     * Sends an alert to the event bus for the specified event type.
      *
-     * @param eventType the event type
+     * @param eventType the type of event to send an alert for
      */
     protected void alert(StoreEvents eventType) {
         EventInfo event = new EventInfo(eventType, nitriteConfig);

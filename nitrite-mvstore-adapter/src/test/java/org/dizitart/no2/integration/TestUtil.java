@@ -22,7 +22,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
@@ -52,9 +51,12 @@ public class TestUtil {
         return file.getPath() + File.separator + UUID.randomUUID() + ".db";
     }
 
-    @SneakyThrows
     public static void deleteDb(String filePath) {
-        Files.delete(Paths.get(filePath));
+        try {
+            Files.delete(Paths.get(filePath));
+        } catch (Exception e) {
+            log.error("Error while deleting db", e);
+        }
     }
 
     public static <T extends Comparable<? super T>> boolean isSorted(Iterable<T> iterable, boolean ascending) {

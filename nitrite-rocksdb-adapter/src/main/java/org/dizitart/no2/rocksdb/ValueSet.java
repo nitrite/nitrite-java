@@ -10,6 +10,10 @@ import java.util.Iterator;
 
 import static org.dizitart.no2.rocksdb.Constants.CLEANER;
 
+/**
+ * @since 4.0
+ * @author Anindya Chatterjee
+ */
 class ValueSet<V> implements Iterable<V> {
     private final ObjectFormatter objectFormatter;
     private final RocksDB rocksDB;

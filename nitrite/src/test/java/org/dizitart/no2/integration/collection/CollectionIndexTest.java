@@ -216,7 +216,6 @@ public class CollectionIndexTest extends BaseCollectionTest {
                     break;
             }
             assertTrue(eventInfo.getItem() instanceof String);
-            System.out.println(eventInfo.getEventType() + " for field " + eventInfo.getItem());
         });
 
         collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "first");

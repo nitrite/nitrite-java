@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadFactory;
  * @author Anindya Chatterjee.
  * @since 1.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 public abstract class ErrorAwareThreadFactory implements ThreadFactory {
     /**
      * Creates a new {@link Thread}.

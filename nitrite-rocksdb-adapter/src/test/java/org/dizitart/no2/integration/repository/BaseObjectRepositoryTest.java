@@ -19,7 +19,7 @@ package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.integration.repository.decorator.ManufacturerConverter;
@@ -38,7 +38,6 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.integration.TestUtil.deleteDb;
 import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
 
@@ -109,7 +108,7 @@ public abstract class BaseObjectRepositoryTest {
             db = nitriteBuilder.openOrCreate();
         }
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new RepositoryJoinTest.Person.Converter());
         documentMapper.registerEntityConverter(new RepositoryJoinTest.Address.Converter());
         documentMapper.registerEntityConverter(new RepositoryJoinTest.PersonDetails.Converter());
@@ -139,26 +138,6 @@ public abstract class BaseObjectRepositoryTest {
 
     @After
     public void clear() throws Exception {
-        if (companyRepository != null && !companyRepository.isDropped()) {
-            companyRepository.remove(ALL);
-        }
-
-        if (employeeRepository != null && !employeeRepository.isDropped()) {
-            employeeRepository.remove(ALL);
-        }
-
-        if (aObjectRepository != null && !aObjectRepository.isDropped()) {
-            aObjectRepository.remove(ALL);
-        }
-
-        if (cObjectRepository != null && !cObjectRepository.isDropped()) {
-            cObjectRepository.remove(ALL);
-        }
-
-        if (bookRepository != null && !bookRepository.isDropped()) {
-            bookRepository.remove(ALL);
-        }
-
         if (db != null && !db.isClosed()) {
             db.commit();
             db.close();

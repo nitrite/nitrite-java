@@ -32,10 +32,8 @@ import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMetaMapName;
 
 /**
- * Represents the index manager for a collection.
- *
- * @author Anindya Chatterjee
  * @since 4.0
+ * @author Anindya Chatterjee
  */
 public class IndexManager implements AutoCloseable {
     private final NitriteConfig nitriteConfig;
@@ -44,12 +42,6 @@ public class IndexManager implements AutoCloseable {
     private final NitriteMap<Fields, IndexMeta> indexMetaMap;
     private Collection<IndexDescriptor> indexDescriptorCache;
 
-    /**
-     * Instantiates a new {@link IndexManager}.
-     *
-     * @param collectionName the collection name
-     * @param nitriteConfig  the nitrite config
-     */
     public IndexManager(String collectionName, NitriteConfig nitriteConfig) {
         this.collectionName = collectionName;
         this.nitriteConfig = nitriteConfig;
@@ -58,21 +50,10 @@ public class IndexManager implements AutoCloseable {
         initialize();
     }
 
-    /**
-     * Checks if an index descriptor already exists on the fields.
-     *
-     * @param fields the fields
-     * @return the boolean
-     */
     public boolean hasIndexDescriptor(Fields fields) {
         return !findMatchingIndexDescriptors(fields).isEmpty();
     }
 
-    /**
-     * Gets all defined index descriptors for the collection.
-     *
-     * @return the index descriptors
-     */
     public Collection<IndexDescriptor> getIndexDescriptors() {
         if (indexDescriptorCache == null) {
             indexDescriptorCache = listIndexDescriptors();
@@ -98,6 +79,11 @@ public class IndexManager implements AutoCloseable {
             return meta.getIndexDescriptor();
         }
         return null;
+    }
+
+    public void markIndexDirty(IndexDescriptor indexDescriptor) {
+        Fields fields = indexDescriptor.getFields();
+        markDirty(fields, true);
     }
 
     @Override

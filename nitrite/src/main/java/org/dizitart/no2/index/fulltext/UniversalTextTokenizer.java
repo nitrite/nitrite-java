@@ -24,7 +24,7 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.Iterables.arrayContains;
 
 /**
- * A {@link TextTokenizer} implementation for various languages.
+ * A {@link TextTokenizer} implementation that tokenizes text using a universal approach.
  *
  * @author Anindya Chatterjee
  * @see Languages

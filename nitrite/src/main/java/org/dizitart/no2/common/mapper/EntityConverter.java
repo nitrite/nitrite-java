@@ -20,8 +20,9 @@ package org.dizitart.no2.common.mapper;
 import org.dizitart.no2.collection.Document;
 
 /**
- * A class that implements this interface can be used to convert
- * entity into a database {@link Document} and back again.
+ * The {@link EntityConverter} interface is used to convert 
+ * an entity of type {@link T} into a database {@link Document}
+ * and vice versa.
  *
  * @since 4.0
  * @author Anindya Chatterjee

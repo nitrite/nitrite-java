@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a {@link Fields} and their corresponding values from a document.
- *
+ * Represents a collection of field-value pairs, with methods to retrieve
+ * values by field name.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -20,18 +21,15 @@ public class FieldValues {
     private Fields fields;
     private List<Pair<String, Object>> values;
 
-    /**
-     * Instantiates a new Field values.
-     */
     public FieldValues() {
         values = new ArrayList<>();
     }
 
     /**
-     * Get the value of the field.
-     *
-     * @param field the field
-     * @return the value
+     * Retrieves the value associated with a given field name.
+     * 
+     * @param field the name of a field.
+     * @return the value.
      */
     public Object get(String field) {
         if (fields.getFieldNames().contains(field)) {
@@ -45,9 +43,9 @@ public class FieldValues {
     }
 
     /**
-     * Gets the {@link Fields}.
-     *
-     * @return the fields
+     * Returns the {@link Fields} object associated with this instance.
+     * 
+     * @return an instance of the Fields class.
      */
     public Fields getFields() {
         if (fields != null) {

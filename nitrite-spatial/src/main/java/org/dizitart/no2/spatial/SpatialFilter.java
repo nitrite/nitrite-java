@@ -23,9 +23,14 @@ import org.dizitart.no2.filters.IndexOnlyFilter;
 import org.locationtech.jts.geom.Geometry;
 
 /**
- * Represents a spatial filter.
- *
- * @since 4.0.0
+ * The abstract base class for all spatial filters in Nitrite.
+ * <p>
+ * A spatial filter is used to query Nitrite database for documents that have a specific spatial relationship
+ * with a given geometry. It extends {@link IndexOnlyFilter} and provides an implementation for the
+ * {@link #supportedIndexType()} method.
+ * </p>
+ * 
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public abstract class SpatialFilter extends IndexOnlyFilter {
@@ -42,6 +47,11 @@ public abstract class SpatialFilter extends IndexOnlyFilter {
         this.geometry = geometry;
     }
 
+    /**
+     * Returns the geometry value of this filter.
+     *
+     * @return the geometry value of this filter.
+     */
     @Override
     public Geometry getValue() {
         return geometry;

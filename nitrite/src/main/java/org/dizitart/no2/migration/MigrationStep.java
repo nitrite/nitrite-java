@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Represents a migration step.
- *
+ * A class representing a migration step in Nitrite database.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -15,6 +15,13 @@ import lombok.Setter;
 @Setter(AccessLevel.PACKAGE)
 @NoArgsConstructor(access = AccessLevel.PACKAGE)
 public final class MigrationStep {
+    /**
+     * Returns the instruction type of the migration instruction.
+     */
     private InstructionType instructionType;
+
+    /**
+     * Returns the arguments passed to the migration function.
+     */    
     private Object arguments;
 }

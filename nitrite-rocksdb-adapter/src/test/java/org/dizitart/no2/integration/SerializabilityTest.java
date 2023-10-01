@@ -18,6 +18,7 @@
 package org.dizitart.no2.integration;
 
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
@@ -33,6 +34,7 @@ import java.io.Serializable;
 /**
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class SerializabilityTest {
     private NitriteCollection collection;
     private File dbFile;
@@ -69,9 +71,8 @@ public class SerializabilityTest {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("Error while sleeping", e);
             }
-            System.out.println("Write " + i + " completed");
         }
     }
 
@@ -85,9 +86,8 @@ public class SerializabilityTest {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error("Error while sleeping", e);
             }
-            System.out.println("Write " + i + " completed");
         }
     }
 

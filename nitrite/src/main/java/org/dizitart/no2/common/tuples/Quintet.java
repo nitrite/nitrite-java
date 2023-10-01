@@ -9,14 +9,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+
 /**
- * Represents a quintet.
+ * A tuple of five elements.
  *
- * @param <A> the type parameter
- * @param <B> the type parameter
- * @param <C> the type parameter
- * @param <D> the type parameter
- * @param <E> the type parameter
+ * @param <A> the type of the first element
+ * @param <B> the type of the second element
+ * @param <C> the type of the third element
+ * @param <D> the type of the fourth element
+ * @param <E> the type of the fifth element
  * @author Anindya Chatterjee
  * @since 4.0
  */

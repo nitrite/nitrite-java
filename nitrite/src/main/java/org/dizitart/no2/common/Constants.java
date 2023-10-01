@@ -234,7 +234,7 @@ public class Constants {
     public static final String SYNC_THREAD_NAME = "Sync." + NO2;
 
     /**
-     * The constant INITIAL_REVISION.
+     * The initial schema version of Nitrite database.
      */
     public static final Integer INITIAL_SCHEMA_VERSION = 1;
 }

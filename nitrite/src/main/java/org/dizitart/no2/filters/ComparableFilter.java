@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.NavigableMap;
 
 /**
- * Represents a filter based on document field holding {@link Comparable} values.
+ * An abstract class representing a filter that compares fields.
  *
  * @author Anindya Chatterjee
  * @since 4.0

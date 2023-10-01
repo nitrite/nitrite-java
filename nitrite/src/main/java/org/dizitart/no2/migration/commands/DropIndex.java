@@ -11,7 +11,7 @@ import org.dizitart.no2.common.Fields;
  * @since 4.0
  */
 @AllArgsConstructor
-public class DropIndex extends BaseCommand implements Command {
+public class DropIndex extends BaseCommand {
     private final String collectionName;
     private final Fields fields;
 

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public class ReverseIterator<Key, Value> implements Iterator<Pair<Key, Value>> {

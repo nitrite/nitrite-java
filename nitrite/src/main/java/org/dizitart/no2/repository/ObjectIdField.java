@@ -31,24 +31,21 @@ import static org.dizitart.no2.filters.FluentFilter.where;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 @Getter
+@Setter
 class ObjectIdField {
-    @Setter
+    // top level field name
+    private String idFieldName;
+    // child level field names
     private String[] fieldNames;
-
-    @Getter
-    @Setter
+    // the id field of the entity class
     private Field field;
-
-    @Getter
-    @Setter
+    // indicates if the id field is embedded
     private boolean isEmbedded;
 
-    @Getter
-    @Setter
-    private String idFieldName;
-
+    // fully qualified field name with embedded field separator
     public String[] getEmbeddedFieldNames() {
         if (!isEmbedded) {
             return new String[]{ idFieldName };
@@ -63,6 +60,7 @@ class ObjectIdField {
         return fieldNames;
     }
 
+    // creates a filter for the id field
     public Filter createUniqueFilter(Object value, NitriteMapper nitriteMapper) {
         if (getEmbeddedFieldNames().length == 1) {
             return where(idFieldName).eq(value);

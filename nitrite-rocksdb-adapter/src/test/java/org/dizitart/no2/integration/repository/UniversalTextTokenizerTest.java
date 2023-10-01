@@ -22,7 +22,7 @@ import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.index.NitriteTextIndexer;
 import org.dizitart.no2.index.fulltext.Languages;
@@ -55,7 +55,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
     @Override
     public void setUp() {
         openDb();
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TextData.Converter());
 
         textRepository = db.getRepository(TextData.class);
@@ -128,7 +128,6 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
         Cursor<TextData> cursor = textRepository.find(where("text").text("Lorem"));
         assertEquals(cursor.size(), 2);
         for (TextData data : cursor) {
-            System.out.println("Id for English text -> " + data.id);
             if (data.id % 2 == 0 || data.id % 3 == 0 || data.id % 5 == 0) {
                 fail();
             }
@@ -137,7 +136,6 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
         cursor = textRepository.find(where("text").text("শহর"));
         assertEquals(cursor.size(), 5);
         for (TextData data : cursor) {
-            System.out.println("Id for Bengali text -> " + data.id);
             if (data.id % 2 != 0) {
                 fail();
             }
@@ -148,7 +146,6 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
         cursor = textRepository.find(where("text").text("*転閉*"));
         assertEquals(cursor.size(), 2);
         for (TextData data : cursor) {
-            System.out.println("Id for Chinese text -> " + data.id);
             if (data.id % 3 != 0) {
                 fail();
             }
@@ -158,7 +155,6 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
         if (isProtected) {
             assertEquals(cursor.size(), 1);
             for (TextData data : cursor) {
-                System.out.println("Id for Arabic text -> " + data.id);
                 if (data.id % 5 != 0) {
                     fail();
                 }

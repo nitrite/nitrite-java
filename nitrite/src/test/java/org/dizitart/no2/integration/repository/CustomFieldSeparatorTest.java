@@ -26,7 +26,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.Company;
@@ -62,7 +62,7 @@ public class CustomFieldSeparatorTest {
             .fieldSeparator(":")
             .openOrCreate();
 
-        SimpleDocumentMapper mapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper mapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         mapper.registerEntityConverter(new Company.CompanyConverter());
         mapper.registerEntityConverter(new EmployeeForCustomSeparator.EmployeeForCustomSeparatorConverter());
         mapper.registerEntityConverter(new Note.NoteConverter());

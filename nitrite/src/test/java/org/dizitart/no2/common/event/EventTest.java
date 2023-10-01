@@ -19,7 +19,7 @@ package org.dizitart.no2.common.event;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.collection.UpdateOptions;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.collection.events.EventType;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -76,7 +76,7 @@ public class EventTest {
             db = nitriteBuilder.openOrCreate();
         }
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new Employee.EmployeeConverter());
 
         employeeRepository = db.getRepository(Employee.class);
@@ -138,7 +138,6 @@ public class EventTest {
         employeeRepository.remove(where("empId").eq(1L));
         await().atMost(1, TimeUnit.SECONDS).until(listenerPrepared(EventType.Remove));
 
-        System.out.println("Action - " + listener.getAction());
         assertEquals(listener.getAction(), EventType.Remove);
         assertNotNull(listener.getItem());
     }

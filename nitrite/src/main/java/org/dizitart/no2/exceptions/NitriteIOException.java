@@ -17,7 +17,8 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Represents a generic database I/O error.
+ * Exception thrown when there is an IO error while performing an operation 
+ * in Nitrite database.
  *
  * @author Anindya Chatterjee.
  * @since 1.0

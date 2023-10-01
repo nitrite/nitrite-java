@@ -26,8 +26,6 @@ import java.io.Serializable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Represents index metadata.
- *
  * @since 1.0
  * @author Anindya Chatterjee
  */

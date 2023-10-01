@@ -22,7 +22,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Represents an entity for an {@link org.dizitart.no2.repository.ObjectRepository}.
+ * Annotation to mark a class as an entity. An entity is a persistent 
+ * class which can be stored in an {@link org.dizitart.no2.repository.ObjectRepository}.
  *
  * @author Anindya Chatterjee
  * @since 4.0
@@ -39,7 +40,7 @@ public @interface Entity {
     String value() default "";
 
     /**
-     * Index definitions of the entity.
+     * A list of indices for the repository.
      *
      * @return the index definitions
      */

@@ -28,7 +28,7 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NitriteSecurityException;
@@ -80,7 +80,7 @@ public class NitriteBuilderTest {
     }
 
     @After
-    public void cleanup() throws IOException {
+    public void cleanup() {
         (new NitriteConfig()).fieldSeparator(".");
 
         if (db != null && !db.isClosed()) {
@@ -88,7 +88,7 @@ public class NitriteBuilderTest {
         }
 
         if (Files.exists(Paths.get(filePath))) {
-            Files.delete(Paths.get(filePath));
+            TestUtil.deleteDb(filePath);
         }
 
         if (fakeDb != null && !fakeDb.isClosed()){
@@ -96,7 +96,7 @@ public class NitriteBuilderTest {
         }
 
         if (Files.exists(Paths.get(fakeFile))) {
-            Files.delete(Paths.get(fakeFile));
+            TestUtil.deleteDb(fakeFile);
         }
     }
 
@@ -137,7 +137,7 @@ public class NitriteBuilderTest {
         assertTrue(storeConfig.isReadOnly());
         db.close();
 
-        Files.delete(Paths.get(filePath));
+        TestUtil.deleteDb(filePath);
     }
 
     @Test
@@ -162,7 +162,7 @@ public class NitriteBuilderTest {
         db.commit();
         db.close();
 
-        assertTrue(file.delete());
+        TestUtil.deleteDb(filePath);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class NitriteBuilderTest {
             .loadModule(module)
             .openOrCreate();
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new TestObject.Converter());
         documentMapper.registerEntityConverter(new TestObject2.Converter());
 

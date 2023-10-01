@@ -36,8 +36,6 @@ import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 
 /**
- * Represents a nitrite index on a single field.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

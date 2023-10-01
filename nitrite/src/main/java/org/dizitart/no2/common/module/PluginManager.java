@@ -22,7 +22,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.PluginException;
 import org.dizitart.no2.index.*;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryStoreModule;
@@ -31,15 +31,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The nitrite database plugin manager. It loads the nitrite plugins
- * before opening the database.
- *
- * @see NitriteModule
- * @see NitritePlugin
  * @author Anindya Chatterjee.
  * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 @Getter
 public class PluginManager implements AutoCloseable {
     private final Map<String, NitriteIndexer> indexerMap;
@@ -188,7 +183,7 @@ public class PluginManager implements AutoCloseable {
 
         if (nitriteMapper == null) {
             log.debug("Loading mappable mapper");
-            NitritePlugin plugin = new SimpleDocumentMapper();
+            NitritePlugin plugin = new SimpleNitriteMapper();
             loadPlugin(plugin);
         }
 

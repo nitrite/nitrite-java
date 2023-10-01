@@ -18,7 +18,7 @@ import org.dizitart.no2.migration.TypeConverter;
  */
 @AllArgsConstructor
 @SuppressWarnings({"unchecked", "rawtypes"})
-public class ChangeDataType extends BaseCommand implements Command {
+public class ChangeDataType extends BaseCommand {
     private final String collectionName;
     private final String fieldName;
     private final TypeConverter typeConverter;

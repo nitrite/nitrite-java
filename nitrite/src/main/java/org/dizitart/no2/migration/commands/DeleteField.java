@@ -16,7 +16,7 @@ import org.dizitart.no2.index.IndexDescriptor;
  * @since 4.0
  */
 @AllArgsConstructor
-public class DeleteField extends BaseCommand implements Command {
+public class DeleteField extends BaseCommand {
     private final String collectionName;
     private final String fieldName;
 

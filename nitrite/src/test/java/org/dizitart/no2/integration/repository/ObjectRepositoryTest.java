@@ -26,7 +26,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -65,7 +65,7 @@ public class ObjectRepositoryTest {
 
     @Before
     public void setUp() {
-        SimpleDocumentMapper mapper = new SimpleDocumentMapper();
+        SimpleNitriteMapper mapper = new SimpleNitriteMapper();
         mapper.registerEntityConverter(new InternalClass.Converter());
         mapper.registerEntityConverter(new EmployeeEntity.Converter());
         mapper.registerEntityConverter(new StressRecord.Converter());
@@ -186,7 +186,6 @@ public class ObjectRepositoryTest {
             repository.update(where("firstName").eq(record.getFirstName()), record);
         }
         sw.stop();
-        System.out.println("Sequential Time (s) - " + sw.getTime());
     }
 
     @Test

@@ -25,11 +25,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+
 /**
- * Represents a pair.
+ * A simple generic class representing a pair of values.
  *
- * @param <A> the type parameter
- * @param <B> the type parameter
+ * @param <A> the type of the first value in the pair
+ * @param <B> the type of the second value in the pair
  * @author Anindya Chatterjee.
  * @since 4.0
  */

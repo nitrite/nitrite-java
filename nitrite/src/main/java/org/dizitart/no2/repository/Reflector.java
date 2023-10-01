@@ -34,6 +34,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 class Reflector {
     @SuppressWarnings("rawtypes")

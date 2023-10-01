@@ -17,9 +17,9 @@
 package org.dizitart.no2.store.events;
 
 /**
- * Represents an event listener for store events.
- *
- * @see StoreEvents
+ * An interface for listening to events fired by a 
+ * {@link org.dizitart.no2.store.NitriteStore}.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */

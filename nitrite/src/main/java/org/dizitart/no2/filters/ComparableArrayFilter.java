@@ -22,15 +22,13 @@ import org.dizitart.no2.common.mapper.NitriteMapper;
 import static org.dizitart.no2.common.util.ValidationUtils.*;
 
 /**
+ * An abstract class representing a filter that operates on a field with a comparable array value.
+ * 
  * @author Anindya Chatterjee
+ * @since 4.0
  */
-abstract class ComparableArrayFilter extends FieldBasedFilter {
-    /**
-     * Instantiates a new Comparable filter.
-     *
-     * @param field the field
-     * @param value the value
-     */
+public abstract class ComparableArrayFilter extends FieldBasedFilter {
+    
     public ComparableArrayFilter(String field, Object value) {
         super(field, value);
     }

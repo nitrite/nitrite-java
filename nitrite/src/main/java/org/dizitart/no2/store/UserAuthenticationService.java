@@ -32,8 +32,6 @@ import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
- * User authentication service for nitrite.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -42,22 +40,11 @@ public class UserAuthenticationService {
     private final SecureRandom random;
     private final NitriteStore<?> store;
 
-    /**
-     * Instantiates a new {@link UserAuthenticationService}.
-     *
-     * @param store the store
-     */
     public UserAuthenticationService(NitriteStore<?> store) {
         this.store = store;
         this.random = new SecureRandom();
     }
 
-    /**
-     * Authenticates a user if the authentication data already exists in the database.
-     *
-     * @param username the username
-     * @param password the password
-     */
     public void authenticate(String username, String password) {
         boolean existing = store.hasMap(USER_MAP);
         if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
@@ -90,14 +77,6 @@ public class UserAuthenticationService {
         }
     }
 
-    /**
-     * Adds or updates the password for a user in the authentication data.
-     *
-     * @param update      the update
-     * @param username    the username
-     * @param oldPassword the old password
-     * @param newPassword the new password
-     */
     public void addOrUpdatePassword(boolean update, String username, SecureString oldPassword, SecureString newPassword) {
         NitriteMap<String, UserCredential> userMap = null;
 
@@ -131,7 +110,6 @@ public class UserAuthenticationService {
         userCredential.setPasswordSalt(salt);
         userMap.put(username, userCredential);
     }
-
 
     private byte[] getNextSalt() {
         byte[] salt = new byte[16];

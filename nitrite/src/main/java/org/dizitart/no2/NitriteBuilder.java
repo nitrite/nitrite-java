@@ -17,22 +17,24 @@
 package org.dizitart.no2;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.common.module.NitriteModule;
 
 /**
- * A builder utility to create a {@link Nitrite} database instance.
- *
+ * The NitriteBuilder class provides a fluent API to configure and create a
+ * Nitrite database instance.
+ * 
  * @author Anindya Chatterjee
  * @see Nitrite
  * @since 1.0
  */
-@Slf4j
 public class NitriteBuilder {
     @Getter
+    /**
+     * The Nitrite configuration object.
+     */
     private final NitriteConfig nitriteConfig;
 
     /**
@@ -43,11 +45,15 @@ public class NitriteBuilder {
     }
 
     /**
-     * Sets the embedded field separator character. Default value
-     * is `.`
+     * Sets the field separator character for Nitrite. It is used to separate field
+     * names in a nested document. For example, if a document has a field
+     * <b>address</b> which is a nested document, then the field <b>street</b>
+     * of the nested document can be accessed using <b>address.street</b> syntax.
+     * <p>
+     * The default value is [<b>.</b>].
      *
-     * @param separator the separator
-     * @return the {@link NitriteBuilder} instance.
+     * @param separator the field separator character to use
+     * @return the NitriteBuilder instance
      */
     public NitriteBuilder fieldSeparator(String separator) {
         this.nitriteConfig.fieldSeparator(separator);
@@ -55,10 +61,11 @@ public class NitriteBuilder {
     }
 
     /**
-     * Loads {@link NitriteModule} instance.
+     * Loads a Nitrite module into the Nitrite database. The module can be used to
+     * extend the functionality of Nitrite.
      *
-     * @param module the {@link NitriteModule} instance.
-     * @return the {@link NitriteBuilder} instance.
+     * @param module the {@link NitriteModule} to be loaded
+     * @return the {@link NitriteBuilder} instance
      */
     public NitriteBuilder loadModule(NitriteModule module) {
         this.nitriteConfig.loadModule(module);
@@ -66,10 +73,11 @@ public class NitriteBuilder {
     }
 
     /**
-     * Adds instructions to perform during schema migration.
+     * Adds one or more migrations to the Nitrite database. Migrations are used to
+     * upgrade the database schema when the application version changes.
      *
-     * @param migrations the migrations
-     * @return the nitrite builder
+     * @param migrations one or more migrations to add to the Nitrite database.
+     * @return the NitriteBuilder instance.
      */
     public NitriteBuilder addMigrations(Migration... migrations) {
         for (Migration migration : migrations) {
@@ -79,10 +87,10 @@ public class NitriteBuilder {
     }
 
     /**
-     * Sets the current schema version.
+     * Sets the schema version for the Nitrite database.
      *
-     * @param version the version
-     * @return the nitrite builder
+     * @param version the schema version to set
+     * @return the NitriteBuilder instance
      */
     public NitriteBuilder schemaVersion(Integer version) {
         this.nitriteConfig.currentSchemaVersion(version);
@@ -90,15 +98,21 @@ public class NitriteBuilder {
     }
 
     /**
-     * Opens or creates a new nitrite database. If it is an in-memory store,
-     * then it will create a new one. If it is a file based store, and if the file does not
-     * exist, then it will create a new file store and open; otherwise it will
-     * open the existing file store.
+     * Opens or creates a new Nitrite database. If it is configured as in-memory
+     * database, then it will create a new database everytime. If it is configured
+     * as a file based database, and if the file does not exist, then it will create
+     * a new file store and open the database; otherwise it will open the existing
+     * database file.
      *
      * @return the nitrite database instance.
-     * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a new in-memory database.
-     * @throws org.dizitart.no2.exceptions.NitriteIOException if the database is corrupt and recovery fails.
-     * @throws IllegalArgumentException                       if the directory does not exist.
+     * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a
+     *                                                        new in-memory
+     *                                                        database.
+     * @throws org.dizitart.no2.exceptions.NitriteIOException if the database is
+     *                                                        corrupt and recovery
+     *                                                        fails.
+     * @throws IllegalArgumentException                       if the directory does
+     *                                                        not exist.
      */
     public Nitrite openOrCreate() {
         this.nitriteConfig.autoConfigure();
@@ -109,23 +123,30 @@ public class NitriteBuilder {
     }
 
     /**
-     * Opens or creates a new nitrite database. If it is an in-memory store,
-     * then it will create a new one. If it is a file based store, and if the file does not
-     * exist, then it will create a new file store and open; otherwise it will
-     * open the existing file store.
+     * Opens or creates a new Nitrite database with the given username and password.
+     * If it is configured as in-memory database, then it will create a new database
+     * everytime. If it is configured as a file based database, and if the file
+     * does not exist, then it will create a new file store and open the database;
+     * otherwise it will open the existing database file.
+     * 
      * <p>
-     * While creating a new database, it will use the specified user credentials.
-     * While opening an existing database, it will use the specified credentials
-     * to open it.
-     * </p>
+     * NOTE: Both username and password must be provided or both must be null.
      *
      * @param username the username
      * @param password the password
      * @return the nitrite database instance.
-     * @throws NitriteSecurityException                       if the user credentials are wrong or one of them is empty string.
-     * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a new in-memory database.
-     * @throws org.dizitart.no2.exceptions.NitriteIOException if the database is corrupt and recovery fails.
-     * @throws org.dizitart.no2.exceptions.NitriteIOException if the directory does not exist.
+     * @throws NitriteSecurityException                       if the user
+     *                                                        credentials are wrong
+     *                                                        or one of them is
+     *                                                        empty string.
+     * @throws org.dizitart.no2.exceptions.NitriteIOException if unable to create a
+     *                                                        new in-memory
+     *                                                        database.
+     * @throws org.dizitart.no2.exceptions.NitriteIOException if the database is
+     *                                                        corrupt and recovery
+     *                                                        fails.
+     * @throws org.dizitart.no2.exceptions.NitriteIOException if the directory does
+     *                                                        not exist.
      */
     public Nitrite openOrCreate(String username, String password) {
         this.nitriteConfig.autoConfigure();

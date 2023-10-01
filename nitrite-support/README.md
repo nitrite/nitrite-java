@@ -31,7 +31,22 @@ implementation 'org.dizitart:nitrite-support'
 
 ```java
 // export data to a json file
-Exporter exporter = Exporter.of(sourceDb);
+ExportOptions exportOptions = new ExportOptions();
+exportOptions.setNitriteFactory(() {
+    MVStoreModule storeModule = MVStoreModule.withConfig()
+        .filePath('/tmp/test-old.db')
+        .build();
+    
+    return Nitrite.builder()
+        .compressed()
+        .loadModule(storeModule)
+        .openOrCreate();
+});
+exportOptions.setCollections(List.of("first"));
+exportOptions.setRepositories(List.of("org.dizitart.no2.support.data.Employee"));
+exportOptions.setKeyedRepositories(Map.of("key", Set.of("org.dizitart.no2.support.data.Employee")));
+
+Exporter exporter = Exporter.withOptions(exportOptions);
 exporter.exportTo(schemaFile);
 ```
 
@@ -39,6 +54,18 @@ exporter.exportTo(schemaFile);
 
 ```java
 // import data from a json file
-Importer importer = Importer.of(destDb);
+ImportOptions importOptions = new ImportOptions();
+importOptions.setNitriteFactory(() {
+    MVStoreModule storeModule = MVStoreModule.withConfig()
+        .filePath('/tmp/test-old.db')
+        .build();
+
+    return Nitrite.builder()
+        .compressed()
+        .loadModule(storeModule)
+        .openOrCreate();
+});
+
+Importer importer = Importer.withOptions(importOptions);
 importer.importFrom(schemaFile);
 ```

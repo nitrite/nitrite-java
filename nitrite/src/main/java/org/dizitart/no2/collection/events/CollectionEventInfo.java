@@ -59,7 +59,7 @@ public class CollectionEventInfo<T> {
      *
      * @param originator name of originator of the event.
      * @return name of the originator.
-     * @since 4.0.0
+     * @since 4.0
      */
     private String originator;
 

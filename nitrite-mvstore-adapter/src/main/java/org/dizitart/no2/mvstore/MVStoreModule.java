@@ -18,7 +18,6 @@ package org.dizitart.no2.mvstore;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.StoreModule;
@@ -28,15 +27,24 @@ import java.util.Set;
 import static org.dizitart.no2.common.util.Iterables.setOf;
 
 /**
- * A {@link NitriteModule} which provides h2's mvstore as a storage engine.
- *
- * @since 4.0.0
+ * A Nitrite module that provides a Nitrite store implementation using H2 MVStore.
+ * 
+ * @since 4.0
+ * @see NitriteStore
  * @author Anindya Chatterjee
  */
 public class MVStoreModule implements StoreModule {
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The configuration object for the MVStore.
+     */
     private MVStoreConfig storeConfig;
 
+    /**
+     * Constructs a new instance of {@link MVStoreModule} with the specified file path.
+     * 
+     * @param path the file path for the MVStore database.
+     */
     public MVStoreModule(String path) {
         this.storeConfig = new MVStoreConfig();
         this.storeConfig.filePath(path);
@@ -47,10 +55,20 @@ public class MVStoreModule implements StoreModule {
         return setOf(getStore());
     }
 
+    /**
+     * Returns a new instance of {@link MVStoreModuleBuilder} to configure the MVStore module.
+     *
+     * @return a new instance of {@link MVStoreModuleBuilder}.
+     */
     public static MVStoreModuleBuilder withConfig() {
         return new MVStoreModuleBuilder();
     }
 
+    /**
+     * Returns a new instance of {@link NitriteStore} with the configured {@link StoreConfig}.
+     *
+     * @return a new instance of {@link NitriteStore}.
+     */
     public NitriteStore<?> getStore() {
         NitriteMVStore store = new NitriteMVStore();
         store.setStoreConfig(storeConfig);

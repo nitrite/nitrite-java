@@ -20,11 +20,11 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.*;
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.modules.NitriteIdModule;
 import org.dizitart.no2.exceptions.ObjectMappingException;
+import org.dizitart.no2.exceptions.ValidationException;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,20 +32,29 @@ import java.util.*;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
+ * A {@link NitriteMapper} implementation that uses Jackson ObjectMapper to
+ * convert objects to and from Nitrite document.
+ * 
+ * @since 4.0
+ * @see NitriteMapper
  * @author Anindya Chatterjee
  */
-@Slf4j
 public class JacksonMapper implements NitriteMapper {
     private ObjectMapper objectMapper;
 
+    /**
+     * Returns the object mapper instance used for document conversion.
+     *
+     * @return the object mapper instance used for document conversion
+     */
     protected ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
             objectMapper = new ObjectMapper();
             objectMapper.setVisibility(
-                objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
-                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                    .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
+                    objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
+                            .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                            .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
             objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
             objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
@@ -55,11 +64,34 @@ public class JacksonMapper implements NitriteMapper {
         return objectMapper;
     }
 
+    /**
+     * Registers a Jackson module with the object mapper.
+     *
+     * @param module the Jackson module to register
+     * @throws ValidationException if the module is null
+     */
     public void registerJacksonModule(Module module) {
         notNull(module, "module cannot be null");
         getObjectMapper().registerModule(module);
     }
 
+    /**
+     * Tries to convert the given source object to the target type using Jackson
+     * ObjectMapper.
+     * <p>
+     * If the source object is null, returns null. If the source
+     * object is a value node, returns the node value. If the target type is
+     * Document, converts the source object to a Document. If the source object is
+     * already a Document, converts it to the target type. If the conversion fails,
+     * throws an ObjectMappingException.
+     *
+     * @param source   the source object to convert
+     * @param type     the target type to convert to
+     * @param <Source> the type of the source object
+     * @param <Target> the type of the target object
+     * @return the converted object of the target type
+     * @throws ObjectMappingException if the conversion fails
+     */
     @Override
     public <Source, Target> Object tryConvert(Source source, Class<Target> type) {
         if (source == null) {
@@ -68,7 +100,8 @@ public class JacksonMapper implements NitriteMapper {
 
         try {
             JsonNode node = getObjectMapper().convertValue(source, JsonNode.class);
-            if (node == null) return null;
+            if (node == null)
+                return null;
 
             if (node.isValueNode()) {
                 return getNodeValue(node);
@@ -81,18 +114,28 @@ public class JacksonMapper implements NitriteMapper {
             }
         } catch (Exception e) {
             throw new ObjectMappingException("Failed to convert object of type "
-                + source.getClass() + " to type " + type, e);
+                    + source.getClass() + " to type " + type, e);
         }
 
         throw new ObjectMappingException("Can't convert object to type " + type
-            + ", try registering a jackson Module for it.");
+                + ", try registering a jackson Module for it.");
     }
-
 
     @Override
     public void initialize(NitriteConfig nitriteConfig) {
     }
 
+    /**
+     * Converts a Nitrite Document to an object of the specified class type using
+     * Jackson ObjectMapper.
+     *
+     * @param source   the Nitrite Document to be converted
+     * @param type     the class type of the object to be converted to
+     * @param <Target> the type of the object to be converted to
+     * @return the converted object of the specified class type
+     * @throws ObjectMappingException if there is an error in the object mapping
+     *                                process
+     */
     protected <Target> Target convertFromDocument(Document source, Class<Target> type) {
         try {
             return getObjectMapper().convertValue(source, type);
@@ -107,6 +150,14 @@ public class JacksonMapper implements NitriteMapper {
         }
     }
 
+    /**
+     * Converts the given source object to a Nitrite {@link Document} using
+     * Jackson's {@link ObjectMapper}.
+     *
+     * @param source   the source object to convert
+     * @param <Source> the type of the source object
+     * @return the converted Nitrite {@link Document}
+     */
     protected <Source> Document convertToDocument(Source source) {
         JsonNode node = getObjectMapper().convertValue(source, JsonNode.class);
         return readDocument(node);
@@ -168,7 +219,7 @@ public class JacksonMapper implements NitriteMapper {
         return null;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private List readArray(JsonNode array) {
         if (array.isArray()) {
             List list = new ArrayList();

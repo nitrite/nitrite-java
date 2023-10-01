@@ -18,7 +18,7 @@
 package org.dizitart.no2.common.module;
 
 import org.dizitart.no2.NitriteConfig;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.PluginException;
 import org.dizitart.no2.store.NitriteStore;
 import org.junit.Test;
@@ -63,7 +63,7 @@ public class PluginManagerTest {
         NitriteStore<?> nitriteStore = pluginManager.getNitriteStore();
         assertTrue(nitriteStore instanceof org.dizitart.no2.store.memory.InMemoryStore);
         assertEquals(3, pluginManager.getIndexerMap().size());
-        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleDocumentMapper);
+        assertTrue(pluginManager.getNitriteMapper() instanceof SimpleNitriteMapper);
         assertFalse(nitriteStore.isClosed());
     }
 }

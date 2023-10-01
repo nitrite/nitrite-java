@@ -34,8 +34,6 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * Represents a nitrite document stream.
- *
  * @since 4.0
  * @author Anindya Chatterjee.
  */
@@ -46,12 +44,6 @@ public class DocumentStream implements DocumentCursor {
     @Getter @Setter
     private FindPlan findPlan;
 
-    /**
-     * Instantiates a new Document stream.
-     *
-     * @param recordStream   the record stream
-     * @param processorChain the processor chain
-     */
     public DocumentStream(RecordStream<Pair<NitriteId, Document>> recordStream,
                           ProcessorChain processorChain) {
         this.recordStream = recordStream;
@@ -96,12 +88,6 @@ public class DocumentStream implements DocumentCursor {
         private final Iterator<Pair<NitriteId, Document>> iterator;
         private final ProcessorChain processorChain;
 
-        /**
-         * Instantiates a new Document cursor iterator.
-         *
-         * @param iterator       the iterator
-         * @param processorChain the processor chain
-         */
         DocumentCursorIterator(Iterator<Pair<NitriteId, Document>> iterator,
                                ProcessorChain processorChain) {
             this.iterator = iterator;

@@ -22,7 +22,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.Company;
 import org.dizitart.no2.integration.repository.data.Note;
@@ -72,7 +72,7 @@ public class CustomFieldSeparatorTest {
             .fieldSeparator(":")
             .openOrCreate();
 
-        SimpleDocumentMapper mapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper mapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         mapper.registerEntityConverter(new Company.CompanyConverter());
         mapper.registerEntityConverter(new EmployeeForCustomSeparator.EmployeeForCustomSeparatorConverter());
         mapper.registerEntityConverter(new Note.NoteConverter());

@@ -28,8 +28,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents an indexer for {@link Comparable} values.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

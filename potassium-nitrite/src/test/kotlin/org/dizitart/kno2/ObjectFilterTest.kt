@@ -29,6 +29,7 @@ import org.junit.Test
 import org.locationtech.jts.geom.Geometry
 import org.locationtech.jts.geom.Point
 import org.locationtech.jts.io.WKTReader
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
@@ -38,6 +39,7 @@ import java.util.concurrent.Executors
  * @author Anindya Chatterjee
  */
 class ObjectFilterTest : BaseTest() {
+    private val log = LoggerFactory.getLogger(ObjectFilterTest::class.java)
 
     @Before
     fun before() {
@@ -221,7 +223,7 @@ class ObjectFilterTest : BaseTest() {
                 val simpleObject = try {
                     repository.find(SimpleObject::id.name eq uuid).first()
                 } catch (t: Throwable) {
-                    t.printStackTrace()
+                    log.error("Error in test", t);
                     latch.countDown()
                     return@submit
                 }
@@ -236,7 +238,7 @@ class ObjectFilterTest : BaseTest() {
                             .find(SimpleObject::id.name eq uuid)
                         assertEquals(result.size(), 1)
                     } catch (t: Throwable) {
-                        t.printStackTrace()
+                        log.error("Error in test", t);
                     } finally {
                         latch.countDown()
                     }

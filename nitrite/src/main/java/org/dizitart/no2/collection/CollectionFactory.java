@@ -33,9 +33,8 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * A factory class to create {@link NitriteCollection}.
- * <p>NOTE: Internal API</p>
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public class CollectionFactory {
     private final Map<String, NitriteCollection> collectionMap;

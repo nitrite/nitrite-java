@@ -21,6 +21,7 @@ import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.integration.repository.data.Employee;
 import org.dizitart.no2.repository.Cursor;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.AbstractCollection;
@@ -59,6 +60,6 @@ public class ObjectCursorTest extends BaseObjectRepositoryTest {
     public void testProjectForValueType() {
         Cursor<Employee> cursor = employeeRepository.find();
         RecordStream<Date> project = cursor.project(Date.class);
-        project.forEach(System.out::println);
+        project.forEach(Assert::assertNotNull);
     }
 }

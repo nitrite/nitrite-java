@@ -18,8 +18,9 @@
 package org.dizitart.no2.filters;
 
 /**
- * Represents an index-only filter. This filter does not support
- * collection scan.
+ * An abstract class representing a filter that can be applied to an index.
+ * <p>
+ * NOTE: This filter does not support collection scan.
  *
  * @since 4.0
  * @author Anindya Chatterjee

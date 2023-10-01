@@ -26,7 +26,11 @@ import org.dizitart.no2.common.module.NitritePlugin;
 import java.util.LinkedHashSet;
 
 /**
- * Represents an indexer for creating a nitrite index.
+ * An abstract class representing a Nitrite indexer plugin.
+ * <p>
+ * NitriteIndexer extends NitritePlugin and provides a base class for all Nitrite
+ * indexer plugins. It defines the basic structure and functionality of an indexer
+ * plugin that can be used to index Nitrite collections.
  *
  * @author Anindya Chatterjee.
  * @since 4.0
@@ -40,44 +44,44 @@ public interface NitriteIndexer extends NitritePlugin {
     String getIndexType();
 
     /**
-     * Validates an index on the fields.
+     * Validates the given fields for indexing.
      *
-     * @param fields the fields
+     * @param fields the fields to be validated
      */
     void validateIndex(Fields fields);
 
     /**
-     * Drops the index specified by the index descriptor.
+     * Drops the index from the collection.
      *
-     * @param indexDescriptor the index descriptor
-     * @param nitriteConfig   the nitrite config
+     * @param indexDescriptor the descriptor of the index to be dropped.
+     * @param nitriteConfig   the Nitrite configuration object.
      */
     void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig);
 
     /**
-     * Writes an index entry.
+     * Writes an index entry for the given field values and index descriptor.
      *
-     * @param fieldValues     the field values
-     * @param indexDescriptor the index descriptor
-     * @param nitriteConfig   the nitrite config
+     * @param fieldValues     the field values to be indexed
+     * @param indexDescriptor the descriptor of the index
+     * @param nitriteConfig   the NitriteConfig to use for indexing
      */
     void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig);
 
     /**
-     * Removes an index entry.
+     * Removes an index entry for the given field values and index descriptor from the Nitrite database.
      *
-     * @param fieldValues     the field values
-     * @param indexDescriptor the index descriptor
-     * @param nitriteConfig   the nitrite config
+     * @param fieldValues     the field values to remove the index entry for
+     * @param indexDescriptor the index descriptor for the index entry to remove
+     * @param nitriteConfig   the Nitrite configuration object
      */
     void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig);
 
     /**
-     * Finds a list of {@link NitriteId} after executing the {@link FindPlan} on the index.
+     * Finds the NitriteIds of the documents that match the given filter in the specified collection.
      *
-     * @param findPlan      the find plan
-     * @param nitriteConfig the nitrite config
-     * @return the linked hash set
+     * @param findPlan the plan for finding the documents.
+     * @param nitriteConfig the Nitrite configuration.
+     * @return a set of NitriteIds of the documents that match the given filter.
      */
     LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig);
 }

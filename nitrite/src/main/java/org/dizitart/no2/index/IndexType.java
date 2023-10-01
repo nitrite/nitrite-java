@@ -17,24 +17,24 @@
 package org.dizitart.no2.index;
 
 /**
- * Represents a type of nitrite index.
- *
+ * An interface representing the types of indexes supported by Nitrite.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public interface IndexType {
     /**
-     * A unique index.
+     * Represents a unique index type.
      */
     String UNIQUE = "Unique";
 
     /**
-     * A non-unique index.
+     * Represents a non-unique index type.
      */
     String NON_UNIQUE = "NonUnique";
 
     /**
-     * A nitrite full-text index.
+     * Represents a full text index type.
      */
     String FULL_TEXT = "Fulltext";
 }

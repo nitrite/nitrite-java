@@ -100,7 +100,6 @@ public class CollectionJoinTest extends BaseCollectionTest {
             } else if (document.get("firstName") == "fn3") {
                 assertNull(document.get("personalDetails"));
             }
-            System.out.println(document);
         }
     }
 }

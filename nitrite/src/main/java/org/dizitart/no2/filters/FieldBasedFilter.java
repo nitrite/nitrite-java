@@ -30,8 +30,8 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * Represents a filter based on value of a nitrite document field.
- *
+ * The base class for all field-based filters in Nitrite.
+ * Provides common functionality for filters that operate on a specific field.
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -79,6 +79,14 @@ public abstract class FieldBasedFilter extends NitriteFilter {
         return value;
     }
 
+    /**
+     * Validates the search term for a given field and value.
+     *
+     * @param nitriteMapper the NitriteMapper instance to use for mapping objects
+     * @param field the field to validate
+     * @param value the value to validate
+     * @throws ValidationException if the field is null or empty
+     */
     protected void validateSearchTerm(NitriteMapper nitriteMapper, String field, Object value) {
         notNull(field, "field cannot be null");
         notEmpty(field, "field cannot be empty");

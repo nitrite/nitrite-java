@@ -29,7 +29,7 @@ import static org.dizitart.no2.common.Constants.DAEMON_THREAD_NAME;
  * @author Anindya Chatterjee.
  * @since 4.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 public class ThreadPoolManager {
     private final static List<ExecutorService> threadPools;
     private final static ExecutorService commonPool;

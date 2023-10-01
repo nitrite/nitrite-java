@@ -36,16 +36,28 @@ import java.text.Collator;
 @Accessors(fluent = true, chain = true)
 @Setter(AccessLevel.PACKAGE)
 public class FindOptions {
+    /**
+     * Gets the {@link SortableFields} for sorting the find results.
+     * */
     private SortableFields orderBy;
+
+    /**
+     * Gets the skip count.
+     * */
     private Long skip;
+
+    /**
+     * Gets the limit count.
+     * */
     private Long limit;
+
+    /**
+     * Indicates if the find operation should return distinct results.
+     * */
     private boolean distinct = false;
 
     /**
      * Specifies the {@link Collator}.
-     *
-     * @param collator the collator
-     * @return the collator.
      */
     @Setter(AccessLevel.PUBLIC)
     private Collator collator;

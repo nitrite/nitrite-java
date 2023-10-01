@@ -27,8 +27,6 @@ import java.util.Set;
 import static org.dizitart.no2.common.Constants.TAG_MAP_METADATA;
 
 /**
- * The Map metadata.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

@@ -23,7 +23,6 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.SortOrder;
-import org.dizitart.no2.common.processors.StringFieldEncryptionProcessor;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -392,11 +391,6 @@ public class CollectionFindTest extends BaseCollectionTest {
         NitriteCollection collection = db.getCollection("person");
         collection.insert(doc1, doc2);
 
-        StringFieldEncryptionProcessor processor = new StringFieldEncryptionProcessor("pass");
-        processor.addFields("name");
-        processor.process(collection);
-        collection.addProcessor(processor);
-
         Document projection = Document.createDocument("name", null)
             .put("address.city", null)
             .put("address.state", null);
@@ -408,7 +402,6 @@ public class CollectionFindTest extends BaseCollectionTest {
         assertEquals(recordStream.toList().stream().skip(1).findFirst().orElse(null),
             Document.createDocument("name", "Jane").put("address", Document.createDocument("city", "New Jersey")
                 .put("state", "NJ")));
-        System.out.println(recordStream.firstOrNull());
     }
 
     @Test

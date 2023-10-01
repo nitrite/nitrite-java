@@ -36,6 +36,7 @@ import static org.dizitart.no2.common.tuples.Pair.pair;
 
 /**
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 class ReadOperations {
     private final String collectionName;

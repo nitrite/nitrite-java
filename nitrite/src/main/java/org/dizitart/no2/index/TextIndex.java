@@ -42,8 +42,6 @@ import static org.dizitart.no2.common.util.ValidationUtils.validateStringArrayIn
 import static org.dizitart.no2.common.util.ValidationUtils.validateStringIterableIndexField;
 
 /**
- * Represents a nitrite full-text index.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

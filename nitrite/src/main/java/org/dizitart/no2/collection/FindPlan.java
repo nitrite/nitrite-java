@@ -31,27 +31,66 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents an execution plan of a find operation after optimization.
+ * A plan for finding documents in a collection.
  *
  * @author Anindya Chatterjee
- * @since 4.0.0
+ * @since 4.0
  */
 @Data
 public class FindPlan {
+    /**
+     * Gets the {@link FieldBasedFilter} for byId search if any.
+     * */
     private FieldBasedFilter byIdFilter;
+
+    /**
+     * Gets the {@link IndexScanFilter} for index scan if any.
+     * */
     private IndexScanFilter indexScanFilter;
+
+    /**
+     * Gets the {@link Filter} for collection scan if any.
+     * */
     private Filter collectionScanFilter;
 
+    /**
+     * Gets the {@link IndexDescriptor} for index scan if any.
+     * */
     private IndexDescriptor indexDescriptor;
+
+    /**
+     * Gets the index scan order.
+     * */
     private Map<String, Boolean> indexScanOrder;
+
+    /**
+     * Gets the blocking sort order.
+     * */
     private List<Pair<String, SortOrder>> blockingSortOrder;
 
+    /**
+     * Gets the skip count.
+     * */
     private Long skip;
+
+    /**
+     * Gets the limit count.
+     * */
     private Long limit;
+
+    /**
+     * Gets the distinct flag.
+     * */
     private boolean distinct;
 
+    /**
+     * Gets the {@link Collator}.
+     * */
     private Collator collator;
 
+    /**
+     * Gets the sub plans.
+     * */
     private List<FindPlan> subPlans;
 
     /**

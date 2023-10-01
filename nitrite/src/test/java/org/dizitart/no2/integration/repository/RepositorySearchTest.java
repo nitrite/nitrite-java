@@ -23,7 +23,7 @@ import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleDocumentMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
@@ -65,8 +65,8 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
         assertNotNull(employeeList);
         assertNotNull(subEmployeeList);
 
-        assertTrue(employeeList.size() > 0);
-        assertTrue(subEmployeeList.size() > 0);
+        assertFalse(employeeList.isEmpty());
+        assertFalse(subEmployeeList.isEmpty());
 
         assertEquals(employeeList.size(), subEmployeeList.size());
 
@@ -592,7 +592,7 @@ public class RepositorySearchTest extends BaseObjectRepositoryTest {
             }
         }
 
-        SimpleDocumentMapper documentMapper = (SimpleDocumentMapper) db.getConfig().nitriteMapper();
+        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
         documentMapper.registerEntityConverter(new Converter());
 
         TestData data1 = new TestData(new GregorianCalendar(2020, Calendar.JANUARY, 11).getTime());

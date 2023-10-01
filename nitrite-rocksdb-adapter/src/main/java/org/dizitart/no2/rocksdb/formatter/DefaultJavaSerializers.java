@@ -8,6 +8,7 @@ import com.esotericsoftware.kryo.kryo5.io.Output;
 import java.util.UUID;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 public class DefaultJavaSerializers {

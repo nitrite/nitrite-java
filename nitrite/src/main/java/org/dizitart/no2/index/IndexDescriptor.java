@@ -31,7 +31,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- * Represents a nitrite database index.
+ * A class representing the descriptor of a Nitrite index.
  *
  * @author Anindya Chatterjee
  * @since 1.0

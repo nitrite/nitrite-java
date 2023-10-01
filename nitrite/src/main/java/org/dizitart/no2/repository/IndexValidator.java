@@ -28,16 +28,10 @@ import java.lang.reflect.Modifier;
 
 /**
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 public class IndexValidator {
 
-    /**
-     * Validate an index field of an {@link org.dizitart.no2.repository.annotations.Entity} object.
-     *
-     * @param fieldType     the field type
-     * @param field         the field
-     * @param nitriteMapper the nitrite mapper
-     */
     public void validate(Class<?> fieldType, String field, NitriteMapper nitriteMapper) {
         if (fieldType.isPrimitive()
             || fieldType == NitriteId.class

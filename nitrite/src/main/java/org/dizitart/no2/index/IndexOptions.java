@@ -21,7 +21,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Represents options to apply while creating an index.
+ * Options for configuring an index.
  *
  * @author Anindya Chatterjee
  * @since 1.0

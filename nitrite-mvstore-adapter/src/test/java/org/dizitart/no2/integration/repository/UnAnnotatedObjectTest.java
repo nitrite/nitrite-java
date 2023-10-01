@@ -26,8 +26,7 @@ import org.junit.Test;
 
 import static org.dizitart.no2.collection.FindOptions.orderBy;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -45,33 +44,25 @@ public class UnAnnotatedObjectTest extends BaseObjectRepositoryTest {
         cursor = aObjectRepository.find(where("b.number").eq(160).not(),
             orderBy("b.number", SortOrder.Ascending).skip(0).limit(10));
 
-        System.out.println("Available - " + !cursor.isEmpty());
-        System.out.println("Total Size - " + cursor.size());
-
         Iterable<ClassA> findRecord = cursor.project(ClassA.class);
         for (ClassA classA : findRecord) {
-            System.out.println(classA);
+            assertNotNull(classA);
         }
 
         cursor = aObjectRepository.find(where("b.number").eq(160).not(),
             orderBy("b.number", SortOrder.Descending).skip(2).limit(7));
 
-        System.out.println("Available - " + !cursor.isEmpty());
-        System.out.println("Total Size - " + cursor.size());
-
         findRecord = cursor.project(ClassA.class);
         for (ClassA classA : findRecord) {
-            System.out.println(classA);
+            assertNotNull(classA);
         }
 
         cursor = cObjectRepository.find(where("id").gt(900),
             orderBy("id", SortOrder.Descending).skip(2).limit(7));
-        System.out.println("Available - " + !cursor.isEmpty());
-        System.out.println("Total Size - " + cursor.size());
 
         Iterable<ClassC> findRecordC = cursor.project(ClassC.class);
         for (ClassC classC : findRecordC) {
-            System.out.println(classC);
+            assertNotNull(classC);
         }
     }
 }

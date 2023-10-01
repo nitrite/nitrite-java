@@ -48,8 +48,12 @@ public interface Filter {
     Filter ALL = element -> true;
 
     /**
-     * Filter by id.
-     *
+     * Returns a filter that matches documents with the specified NitriteId.
+     * <p>
+     * The returned filter matches documents where the value of the <b>_id</b> field 
+     * is equal to the specified NitriteId's idValue.
+     * 
+     * 
      * @param nitriteId the nitrite id
      * @return the filter
      */
@@ -58,10 +62,12 @@ public interface Filter {
     }
 
     /**
-     * And filter.
-     *
-     * @param filters the filters
-     * @return the filter
+     * Creates a filter that performs a logical AND operation on two or more filters.
+     * The returned filter accepts a document if all filters in the list accept the document.
+     * 
+     * @param filters the filters to AND together
+     * @return the new filter
+     * @throws FilterException if less than two filters are specified
      */
     static Filter and(Filter... filters) {
         notEmpty(filters, "At least two filters must be specified");
@@ -73,10 +79,12 @@ public interface Filter {
     }
 
     /**
-     * Or filter.
-     *
-     * @param filters the filters
-     * @return the filter
+     * Creates a filter that performs a logical OR operation on two or more filters.
+     * The returned filter selects all documents that satisfy at least one of the filters in the list.
+     * 
+     * @param filters the filters to be combined using the OR operation
+     * @return the filter that performs the OR operation on the specified filters
+     * @throws FilterException if less than two filters are specified
      */
     static Filter or(Filter... filters) {
         notEmpty(filters, "At least two filters must be specified");
@@ -88,18 +96,18 @@ public interface Filter {
     }
 
     /**
-     * Filters a document map and returns <code>true</code> if the criteria matches.
+     * Applies the filter to the given element.
      *
-     * @param element the entry to check.
-     * @return boolean value to indicate if the filtering criteria matches the document.
+     * @param element the element to apply the filter to.
+     * @return {@code true} if the element matches the filter, {@code false} otherwise.
      */
     boolean apply(Pair<NitriteId, Document> element);
 
     /**
      * Creates a not filter which performs a logical NOT operation on a filter and selects
-     * the documents that <strong>do not</strong> satisfy the criteria. This also includes documents
-     * that do not contain the value.
+     * the documents that <b>do not</b> satisfy the criteria. 
      * <p>
+     * NOTE: This also includes documents that do not contain the value.
      *
      * @return the not filter
      */

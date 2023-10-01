@@ -30,9 +30,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
-@Slf4j
+@Slf4j(topic = "nitrite-rocksdb")
 @Getter
 @Setter
 public class RocksDBReference implements AutoCloseable {

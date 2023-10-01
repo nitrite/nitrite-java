@@ -6,8 +6,6 @@ import lombok.Getter;
 import java.util.Queue;
 
 /**
- * Default implementation of {@link InstructionSet}.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

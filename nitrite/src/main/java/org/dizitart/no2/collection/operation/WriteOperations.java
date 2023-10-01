@@ -39,8 +39,9 @@ import static org.dizitart.no2.common.Constants.*;
 
 /**
  * @author Anindya Chatterjee
+ * @since 1.0
  */
-@Slf4j
+@Slf4j(topic = "nitrite")
 class WriteOperations {
     private final DocumentIndexWriter documentIndexWriter;
     private final ReadOperations readOperations;

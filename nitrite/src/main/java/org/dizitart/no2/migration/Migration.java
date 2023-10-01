@@ -5,18 +5,28 @@ import lombok.Getter;
 import java.util.LinkedList;
 import java.util.Queue;
 
+
 /**
- * Represents the database migration operation.
- *
+ * Represents the database migration operation. A migration is a way to modify the structure of a database
+ * from one version to another. It contains a queue of {@link MigrationStep}s that need to be executed
+ * in order to migrate the database from the start version to the end version.
+ * 
  * @author Anindya Chatterjee
  * @since 4.0
  */
 public abstract class Migration {
     private final Queue<MigrationStep> migrationSteps;
 
+    /**
+     * Returns the version number from which the migration is being performed.
+     * 
+    */
     @Getter
     private final Integer fromVersion;
 
+    /**
+     * Returns the version number to which the migration is being performed.
+     */
     @Getter
     private final Integer toVersion;
 
@@ -42,7 +52,7 @@ public abstract class Migration {
     public abstract void migrate(InstructionSet instructionSet);
 
     /**
-     * Returns the {@link MigrationStep}s as a queue for execution.
+     * Returns the queue of {@link MigrationStep}s to be executed for the migration.
      *
      * @return the queue
      */

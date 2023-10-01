@@ -29,12 +29,6 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Sorts documents based on the sort order provided.
- *
- * <p>
- * By default null is considered the lowest value.
- * </p>
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -42,12 +36,6 @@ public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
     private final Collator collator;
     private final List<Pair<String, SortOrder>> sortOrder;
 
-    /**
-     * Instantiates a new Document sorter.
-     *
-     * @param collator  the collator
-     * @param sortOrder the sort order
-     */
     public DocumentSorter(Collator collator, List<Pair<String, SortOrder>> sortOrder) {
         this.collator = collator;
         this.sortOrder = sortOrder;

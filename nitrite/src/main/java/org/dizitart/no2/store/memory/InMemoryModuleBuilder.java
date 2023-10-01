@@ -8,8 +8,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * The in-memory store module builder.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */

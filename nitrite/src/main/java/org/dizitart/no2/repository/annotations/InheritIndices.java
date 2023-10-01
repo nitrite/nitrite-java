@@ -19,7 +19,7 @@ package org.dizitart.no2.repository.annotations;
 import java.lang.annotation.*;
 
 /**
- * Indicates that a class should consider all index related
+ * Annotation to mark a class that should consider all index related
  * annotations - <code>@Id</code>, <code>@Index</code>,
  * <code>@Indices</code> from its superclass.
  *

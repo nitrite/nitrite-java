@@ -1,7 +1,7 @@
 package org.dizitart.no2.exceptions;
 
 /**
- * Exception thrown when a migration step fails.
+ * Exception thrown when there is an error during database migration.
  *
  * @author Anindya Chatterjee
  * @since 4.0

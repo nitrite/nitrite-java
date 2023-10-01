@@ -43,6 +43,10 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>junit</groupId>
@@ -134,10 +138,65 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/index/fulltext/languages/*</exclude>
+                    </excludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>
+                        org.dizitart.no2.collection.operation,
+                        org.dizitart.no2.common.concurrent,
+                        org.dizitart.no2.common.event,
+                        org.dizitart.no2.common.streams,
+                        org.dizitart.no2.common.util,
+                        org.dizitart.no2.index.fulltext.languages,
+                        org.dizitart.no2.migration.commands,
+                        org.dizitart.no2.store.memory,
+                    </excludePackageNames>
+                    <sourceFileExcludes>
+                        <exclude>**/*Factory.java</exclude>
+                        <exclude>**/*DefaultNitriteCollection.java</exclude>
+                        <exclude>**/*SnowflakeIdGenerator.java</exclude>
+                        <exclude>**/*AttributesAware.java</exclude>
+                        <exclude>**/*PluginManager.java</exclude>
+                        <exclude>**/*ProcessorChain.java</exclude>
+                        <exclude>**/*Constants.java</exclude>
+                        <exclude>**/*DBNull.java</exclude>
+                        <exclude>**/*DBValue.java</exclude>
+                        <exclude>**/*UnknownType.java</exclude>
+                        <exclude>**/*AndFilter.java</exclude>
+                        <exclude>**/*OrFilter.java</exclude>
+                        <exclude>**/*BetweenFilter.java</exclude>
+                        <exclude>**/*ComparableArrayFilter.java</exclude>
+                        <exclude>**/*ElementMatchFilter.java</exclude>
+                        <exclude>**/*EqualsFilter.java</exclude>
+                        <exclude>**/*TextFilter.java</exclude>
+                        <exclude>**/*ComparableIndexer.java</exclude>
+                        <exclude>**/*CompoundIndex.java</exclude>
+                        <exclude>**/*IndexMap.java</exclude>
+                        <exclude>**/*IndexMeta.java</exclude>
+                        <exclude>**/*IndexScanner.java</exclude>
+                        <exclude>**/*NitriteTextIndexer.java</exclude>
+                        <exclude>**/*NonUniqueIndexer.java</exclude>
+                        <exclude>**/*SingleFieldIndex.java</exclude>
+                        <exclude>**/*TextIndex.java</exclude>
+                        <exclude>**/*UniqueIndexer.java</exclude>
+                        <exclude>**/*MigrationManager.java</exclude>
+                        <exclude>**/*EntityDecoratorScanner.java</exclude>
+                        <exclude>**/*IndexValidator.java</exclude>
+                        <exclude>**/*ObjectCursor.java</exclude>
+                        <exclude>**/*RepositoryOperations.java</exclude>
+                        <exclude>**/*EventBus.java</exclude>
+                        <exclude>**/*MetaData.java</exclude>
+                        <exclude>**/*UserAuthenticationService.java</exclude>
+                        <exclude>**/*UserCredential.java</exclude>
+                    </sourceFileExcludes>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

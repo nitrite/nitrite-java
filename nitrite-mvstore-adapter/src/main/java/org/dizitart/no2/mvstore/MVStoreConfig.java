@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.mvstore;
 
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,54 +28,97 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents MV store configuration
- *
- * @since 4.0.0
+ * Configuration class for MVStore.
+ * 
+ * @since 4.0
  * @author Anindya Chatterjee
  */
 @Getter
 @Accessors(fluent = true)
 public class MVStoreConfig implements StoreConfig {
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The set of event listeners for the MVStore.
+     */
     private Set<StoreEventListener> eventListeners;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The file path of the MVStore file.
+     */
     private String filePath;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The size of the buffer used for auto-commit operations.
+     */
     private int autoCommitBufferSize;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The encryption key to be used for encrypting and decrypting the data.
+     */
     private char[] encryptionKey;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * A flag indicating whether the MVStore should be opened in read-only mode.
+     */
     private Boolean isReadOnly = false;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * Indicates whether the MVStore should compress data or not.
+     */
     private boolean compress;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * Indicates whether to use high compression for data blocks.
+     */
     private boolean compressHigh;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * Indicates whether auto-commit mode is enabled for the MVStore.
+     */
     private boolean autoCommit;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * Sets a value indicating whether the MVStore should automatically compact
+     * itself when it is closed.
+     */
     private boolean autoCompact;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * Indicates whether the MVStore should be opened in recovery mode or not.
+     */
     private boolean recoveryMode;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The size of the cache (in KB) used by the MVStore.
+     */
     private int cacheSize;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The number of threads that can concurrently access the MVStore cache.
+     */
     private int cacheConcurrency;
 
+    /**
+     * Sets the page split size for the MVStore.
+     */
     @Setter(AccessLevel.PACKAGE)
     private int pageSplitSize;
 
     @Setter(AccessLevel.PACKAGE)
+    /**
+     * The file store used by the MVStore.
+     */
     private FileStore<?> fileStore;
 
     MVStoreConfig() {
@@ -88,6 +130,11 @@ public class MVStoreConfig implements StoreConfig {
         eventListeners.add(listener);
     }
 
+    /**
+     * Creates and returns a copy of this object.
+     *
+     * @return a clone of this instance.
+     */
     public MVStoreConfig clone() {
         MVStoreConfig config = new MVStoreConfig();
         config.eventListeners(new HashSet<>(eventListeners));

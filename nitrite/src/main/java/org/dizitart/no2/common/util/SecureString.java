@@ -20,11 +20,6 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 
 /**
- * This is not a string but a CharSequence that can be cleared of its memory.
- * Important for handling passwords. Represents text that should be kept
- * confidential, such as by deleting it from computer memory when no longer
- * needed or garbage collected.
- *
  * @since 4.0
  * @author Anindya Chatterjee
  */
@@ -59,12 +54,6 @@ public class SecureString implements CharSequence {
         return new SecureString(start, end, this);
     }
 
-    /**
-     * Convert array back to String but not using toString(). See toString() docs
-     * below.
-     *
-     * @return the string
-     */
     public String asString() {
         final char[] value = new char[chars.length];
         for (int i = 0; i < value.length; i++) {
@@ -73,31 +62,16 @@ public class SecureString implements CharSequence {
         return new String(value);
     }
 
-    /**
-     * Manually clear the underlying array holding the characters
-     */
     public void clear() {
         Arrays.fill(chars, '0');
         Arrays.fill(pad, 0);
     }
 
-    /**
-     * Protect against using this class in log statements.
-     * <p>
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return "Secure:XXXXX";
     }
 
-    /**
-     * Randomly pad the characters to not store the real character in memory.
-     *
-     * @param start start of the {@code CharSequence}
-     * @param length length of the {@code CharSequence}
-     * @param characters the {@code CharSequence} to scramble
-     */
     private void scramble(final int start, final int length, final CharSequence characters) {
         final SecureRandom random = new SecureRandom();
         for (int i = start; i < length; i++) {

@@ -19,16 +19,15 @@ package org.dizitart.no2.spatial.mapper;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
-import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.spatial.GeometryUtils;
 import org.locationtech.jts.geom.Geometry;
 
 import java.io.IOException;
 
 /**
+ * @since 4.0
  * @author Anindya Chatterjee
  */
-@Slf4j
 class GeometryDeserializer extends StdScalarDeserializer<Geometry> {
 
     protected GeometryDeserializer() {

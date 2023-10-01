@@ -27,8 +27,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
- * Represents a nitrite stream backed by an index.
- *
  * @author Anindya Chatterjee
  * @since 4.0
  */
@@ -36,12 +34,6 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
     private final NitriteMap<NitriteId, Document> nitriteMap;
     private final Set<NitriteId> nitriteIds;
 
-    /**
-     * Instantiates a new Indexed stream.
-     *
-     * @param nitriteIds the nitrite ids
-     * @param nitriteMap the nitrite map
-     */
     public IndexedStream(Set<NitriteId> nitriteIds,
                   NitriteMap<NitriteId, Document> nitriteMap) {
         this.nitriteIds = nitriteIds;
@@ -53,19 +45,10 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
         return new IndexedStreamIterator(nitriteIds.iterator(), nitriteMap);
     }
 
-    /**
-     * The type Indexed stream iterator.
-     */
     private static class IndexedStreamIterator implements Iterator<Pair<NitriteId, Document>> {
         private final Iterator<NitriteId> iterator;
         private final NitriteMap<NitriteId, Document> nitriteMap;
 
-        /**
-         * Instantiates a new Indexed stream iterator.
-         *
-         * @param iterator   the iterator
-         * @param nitriteMap the nitrite map
-         */
         IndexedStreamIterator(Iterator<NitriteId> iterator,
                               NitriteMap<NitriteId, Document> nitriteMap) {
             this.iterator = iterator;
