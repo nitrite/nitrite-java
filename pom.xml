@@ -27,20 +27,20 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.15.2</jackson.version>
-        <slf4j.version>2.0.7</slf4j.version>
+        <slf4j.version>2.0.9</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
-        <h2.version>2.2.220</h2.version>
-        <rocksdb.version>8.3.2</rocksdb.version>
+        <h2.version>2.2.222</h2.version>
+        <rocksdb.version>8.5.3</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
         <commons-codec.version>1.16.0</commons-codec.version>
         <commons-io.version>2.13.0</commons-io.version>
         <kotlin.version>1.9.0</kotlin.version>
-        <kotlinx-serialization.version>1.5.1</kotlinx-serialization.version>
+        <kotlinx-serialization.version>1.6.0</kotlinx-serialization.version>
         <lombok.version>1.18.28</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.4.0</mockito.version>
+        <mockito.version>5.5.0</mockito.version>
         <podam.version>7.2.11.RELEASE</podam.version>
         <log4j.version>2.20.0</log4j.version>
         <awaitility.version>4.2.0</awaitility.version>
