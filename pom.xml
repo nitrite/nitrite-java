@@ -309,7 +309,6 @@
                         <compilerArgs>
                             <arg>-XDcompilePolicy=simple</arg>
                             <arg>-Xlint:-options</arg>
-<!--                            <arg>-Xplugin:ErrorProne</arg>-->
                         </compilerArgs>
                         <annotationProcessorPaths>
                             <path>
