@@ -147,7 +147,7 @@ public class NitriteStressTest {
             assertNotNull(item);
             repo.insert(item);
         }
-        repo.remove(Filter.ALL);
+        assertEquals(repo.size(), 10000);
         repo.drop();
 
         // actual calculation
@@ -157,6 +157,7 @@ public class NitriteStressTest {
         }
 
         repo.remove(Filter.ALL);
+        assertEquals(repo.size(), 0);
     }
 
     @Test
@@ -168,7 +169,6 @@ public class NitriteStressTest {
             assertNotNull(item);
             repo.insert(item);
         }
-        repo.remove(Filter.ALL);
         repo.drop();
 
         // actual calculation
@@ -178,6 +178,7 @@ public class NitriteStressTest {
         }
 
         repo.remove(Filter.ALL);
+        assertEquals(repo.size(), 0);
     }
 
     private List<TestDto> createTestSet() {
