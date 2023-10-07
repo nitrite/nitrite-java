@@ -50,7 +50,7 @@ public class UserAuthenticationService {
         if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
             if (!existing) {
                 byte[] salt = getNextSalt();
-                byte[] hash = hash(password.toCharArray(), salt);
+                byte[] hash = hash(password.toCharArray(), salt, "PBKDF2WithHmacSHA256");
                 UserCredential userCredential = new UserCredential();
                 userCredential.setPasswordHash(hash);
                 userCredential.setPasswordSalt(salt);
@@ -65,8 +65,11 @@ public class UserAuthenticationService {
                     byte[] salt = userCredential.getPasswordSalt();
                     byte[] expectedHash = userCredential.getPasswordHash();
 
-                    if (notExpectedPassword(password.toCharArray(), salt, expectedHash)) {
-                        throw new NitriteSecurityException("Username or password is invalid");
+                    if (notExpectedPassword(password.toCharArray(), salt, expectedHash, "PBKDF2WithHmacSHA256")) {
+                        // try to authenticate with old algorithm
+                        if (notExpectedPassword(password.toCharArray(), salt, expectedHash, "PBKDF2WithHmacSHA1")) {
+                            throw new NitriteSecurityException("Username or password is invalid");
+                        }
                     }
                 } else {
                     throw new NitriteSecurityException("Username or password is invalid");
@@ -88,7 +91,7 @@ public class UserAuthenticationService {
                 byte[] salt = credential.getPasswordSalt();
                 byte[] expectedHash = credential.getPasswordHash();
 
-                if (notExpectedPassword(oldPassword.asString().toCharArray(), salt, expectedHash)) {
+                if (notExpectedPassword(oldPassword.asString().toCharArray(), salt, expectedHash, "PBKDF2WithHmacSHA256")) {
                     throw new NitriteSecurityException("Username or password is invalid");
                 }
             }
@@ -103,7 +106,7 @@ public class UserAuthenticationService {
         }
 
         byte[] salt = getNextSalt();
-        byte[] hash = hash(newPassword.asString().toCharArray(), salt);
+        byte[] hash = hash(newPassword.asString().toCharArray(), salt, "PBKDF2WithHmacSHA256");
 
         UserCredential userCredential = new UserCredential();
         userCredential.setPasswordHash(hash);
@@ -117,11 +120,11 @@ public class UserAuthenticationService {
         return salt;
     }
 
-    private byte[] hash(char[] password, byte[] salt) {
+    private byte[] hash(char[] password, byte[] salt, String algorithm) {
         PBEKeySpec spec = new PBEKeySpec(password, salt, HASH_ITERATIONS, HASH_KEY_LENGTH);
         Arrays.fill(password, Character.MIN_VALUE);
         try {
-            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            SecretKeyFactory skf = SecretKeyFactory.getInstance(algorithm);
             return skf.generateSecret(spec).getEncoded();
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
             log.error("Error while hashing password", e);
@@ -131,8 +134,8 @@ public class UserAuthenticationService {
         }
     }
 
-    private boolean notExpectedPassword(char[] password, byte[] salt, byte[] expectedHash) {
-        byte[] pwdHash = hash(password, salt);
+    private boolean notExpectedPassword(char[] password, byte[] salt, byte[] expectedHash, String algorithm) {
+        byte[] pwdHash = hash(password, salt, algorithm);
         Arrays.fill(password, Character.MIN_VALUE);
         if (pwdHash.length != expectedHash.length) return true;
         for (int i = 0; i < pwdHash.length; i++) {
