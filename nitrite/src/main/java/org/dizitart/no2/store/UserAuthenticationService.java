@@ -37,6 +37,8 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
  */
 @Slf4j
 public class UserAuthenticationService {
+    private static final String HASH_ALGORITHM = "PBKDF2WithHmacSHA256";
+    private static final String OLD_HASH_ALGORITHM = "PBKDF2WithHmacSHA1";
     private final SecureRandom random;
     private final NitriteStore<?> store;
 
@@ -50,7 +52,7 @@ public class UserAuthenticationService {
         if (!isNullOrEmpty(password) && !isNullOrEmpty(username)) {
             if (!existing) {
                 byte[] salt = getNextSalt();
-                byte[] hash = hash(password.toCharArray(), salt, "PBKDF2WithHmacSHA256");
+                byte[] hash = hash(password.toCharArray(), salt, HASH_ALGORITHM);
                 UserCredential userCredential = new UserCredential();
                 userCredential.setPasswordHash(hash);
                 userCredential.setPasswordSalt(salt);
@@ -65,9 +67,9 @@ public class UserAuthenticationService {
                     byte[] salt = userCredential.getPasswordSalt();
                     byte[] expectedHash = userCredential.getPasswordHash();
 
-                    if (notExpectedPassword(password.toCharArray(), salt, expectedHash, "PBKDF2WithHmacSHA256")) {
+                    if (notExpectedPassword(password.toCharArray(), salt, expectedHash, HASH_ALGORITHM)) {
                         // try to authenticate with old algorithm
-                        if (notExpectedPassword(password.toCharArray(), salt, expectedHash, "PBKDF2WithHmacSHA1")) {
+                        if (notExpectedPassword(password.toCharArray(), salt, expectedHash, OLD_HASH_ALGORITHM)) {
                             throw new NitriteSecurityException("Username or password is invalid");
                         }
                     }
@@ -91,7 +93,7 @@ public class UserAuthenticationService {
                 byte[] salt = credential.getPasswordSalt();
                 byte[] expectedHash = credential.getPasswordHash();
 
-                if (notExpectedPassword(oldPassword.asString().toCharArray(), salt, expectedHash, "PBKDF2WithHmacSHA256")) {
+                if (notExpectedPassword(oldPassword.asString().toCharArray(), salt, expectedHash, HASH_ALGORITHM)) {
                     throw new NitriteSecurityException("Username or password is invalid");
                 }
             }
@@ -106,7 +108,7 @@ public class UserAuthenticationService {
         }
 
         byte[] salt = getNextSalt();
-        byte[] hash = hash(newPassword.asString().toCharArray(), salt, "PBKDF2WithHmacSHA256");
+        byte[] hash = hash(newPassword.asString().toCharArray(), salt, HASH_ALGORITHM);
 
         UserCredential userCredential = new UserCredential();
         userCredential.setPasswordHash(hash);
