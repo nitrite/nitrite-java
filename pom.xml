@@ -30,7 +30,7 @@
         <slf4j.version>2.0.9</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.2.224</h2.version>
-        <rocksdb.version>8.5.4</rocksdb.version>
+        <rocksdb.version>8.6.7</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
         <commons-codec.version>1.16.0</commons-codec.version>
