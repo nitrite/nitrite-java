@@ -48,41 +48,41 @@ public class EntityId {
     private final String fieldName;
 
     /**
-     * Returns the sub-fields of the id field.
+     * Returns the embedded field names of the id field.
      */
-    private final String[] subFields;
+    private final String[] embeddedFields;
 
-    private List<String> embeddedFieldNames;
+    private List<String> encodedFieldNames;
 
     public EntityId(String fieldName, String... subFields) {
         this.fieldName = fieldName;
-        this.subFields = subFields;
+        this.embeddedFields = subFields;
     }
 
     /**
-     * Returns a list of embedded field names.
+     * Returns a list of encoded field names.
      *
-     * @return a list of embedded field names.
+     * @return a list of encoded field names.
      */
-    public List<String> getEmbeddedFieldNames() {
-        if (embeddedFieldNames != null) return embeddedFieldNames;
-        embeddedFieldNames = new ArrayList<>();
+    public List<String> getEncodedFieldNames() {
+        if (encodedFieldNames != null) return encodedFieldNames;
+        encodedFieldNames = new ArrayList<>();
 
-        if (subFields != null) {
-            for (String subField : subFields) {
-                embeddedFieldNames.add(fieldName + NitriteConfig.getFieldSeparator() + subField);
+        if (embeddedFields != null) {
+            for (String subField : embeddedFields) {
+                encodedFieldNames.add(fieldName + NitriteConfig.getFieldSeparator() + subField);
             }
         }
-        return embeddedFieldNames;
+        return encodedFieldNames;
     }
 
     /**
-     * Checks if the entity id is embedded.
+     * Checks if the entity id is an embedded id.
      *
      * @return true if the entity id is embedded; false otherwise.
      */
     public boolean isEmbedded() {
-        return subFields != null && subFields.length != 0;
+        return embeddedFields != null && embeddedFields.length != 0;
     }
 
     /**
@@ -100,7 +100,7 @@ public class EntityId {
             }
 
             List<Filter> filters = new ArrayList<>();
-            for (String subField : subFields) {
+            for (String subField : embeddedFields) {
                 String filterField = fieldName + NitriteConfig.getFieldSeparator() + subField;
                 Object fieldValue = document.get(subField);
                 filters.add(where(filterField).eq(fieldValue));

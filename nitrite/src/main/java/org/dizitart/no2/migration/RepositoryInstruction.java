@@ -134,7 +134,7 @@ public interface RepositoryInstruction extends Instruction {
      * @param converter the converter
      * @return the repository instruction
      */
-    default RepositoryInstruction changeDataType(String fieldName, TypeConverter converter) {
+    default RepositoryInstruction changeDataType(String fieldName, TypeConverter<?, ?> converter) {
         MigrationStep migrationStep = new MigrationStep();
         migrationStep.setInstructionType(InstructionType.RepositoryChangeDataType);
         migrationStep.setArguments(new Quartet<>(entityName(), key(), fieldName, converter));
@@ -171,8 +171,6 @@ public interface RepositoryInstruction extends Instruction {
         addStep(migrationStep);
         return this;
     }
-
-
 
     /**
      * Adds an instruction to drop an index from the {@link org.dizitart.no2.repository.ObjectRepository}.

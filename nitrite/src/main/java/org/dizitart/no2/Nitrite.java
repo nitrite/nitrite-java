@@ -80,7 +80,7 @@ public interface Nitrite extends AutoCloseable {
     void commit();
 
     /**
-     * Opens a named collection from the store. If the collections does not
+     * Opens a named collection from the store. If the collection does not
      * exist it will be created automatically and returned. If a collection
      * is already opened, it is returned as is. Returned collection is thread-safe
      * for concurrent use.
@@ -262,11 +262,6 @@ public interface Nitrite extends AutoCloseable {
      */
     StoreMetaData getDatabaseMetaData();
 
-    /**
-     * Creates a {@link Session} for transaction.
-     *
-     * @return the session
-     */
     /**
      * Creates a new session for the Nitrite database. A session is a lightweight
      * container that holds transactions. Multiple sessions can be created for a

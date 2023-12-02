@@ -28,20 +28,20 @@ import org.locationtech.jts.geom.Point;
  * @since 4.0
  * @author Anindya Chatterjee
  */
-public class FluentFilter {
+public class SpatialFluentFilter {
     private String field;
 
-    private FluentFilter() {
+    private SpatialFluentFilter() {
     }
 
     /**
-     * Creates a new {@link FluentFilter} instance with the specified field.
+     * Creates a new {@link SpatialFluentFilter} instance with the specified field.
      *
      * @param field the field to filter on
-     * @return the new {@link FluentFilter} instance
+     * @return the new {@link SpatialFluentFilter} instance
      */
-    public static FluentFilter where(String field) {
-        FluentFilter filter = new FluentFilter();
+    public static SpatialFluentFilter where(String field) {
+        SpatialFluentFilter filter = new SpatialFluentFilter();
         filter.field = field;
         return filter;
     }

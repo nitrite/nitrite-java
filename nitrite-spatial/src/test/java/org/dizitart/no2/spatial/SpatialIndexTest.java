@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.index.IndexType.UNIQUE;
-import static org.dizitart.no2.spatial.FluentFilter.where;
+import static org.dizitart.no2.spatial.SpatialFluentFilter.where;
 import static org.dizitart.no2.spatial.SpatialIndexer.SPATIAL_INDEX;
 import static org.junit.Assert.*;
 

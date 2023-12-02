@@ -47,16 +47,16 @@ public class CollectionJoinTest extends BaseCollectionTest {
             foreignCollection.remove(ALL);
 
             Document fdoc1 = createDocument("fName", "fn1")
-                .put("address", "ABCD Street")
-                .put("telephone", "123456789");
+                    .put("address", "ABCD Street")
+                    .put("telephone", "123456789");
 
             Document fdoc2 = createDocument("fName", "fn2")
-                .put("address", "XYZ Street")
-                .put("telephone", "000000000");
+                    .put("address", "XYZ Street")
+                    .put("telephone", "000000000");
 
             Document fdoc3 = createDocument("fName", "fn2")
-                .put("address", "Some other Street")
-                .put("telephone", "7893141321");
+                    .put("address", "Some other Street")
+                    .put("telephone", "7893141321");
 
             foreignCollection.insert(fdoc1, fdoc2, fdoc3);
         } catch (Throwable t) {
@@ -101,5 +101,82 @@ public class CollectionJoinTest extends BaseCollectionTest {
                 assertNull(document.get("personalDetails"));
             }
         }
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testJoinUserOrders() {
+        Document user1 = createDocument("firstName", "John")
+                .put("lastName", "Doe")
+                .put("userId", 1);
+
+        Document user2 = createDocument("firstName", "Jane")
+                .put("lastName", "Doe")
+                .put("userId", 2);
+
+        NitriteCollection userCollection = db.getCollection("user");
+        userCollection.insert(user1, user2);
+
+        Document order1 = createDocument("userId", 1)
+                .put("orderId", 1)
+                .put("item", "book");
+
+        Document order2 = createDocument("userId", 1)
+                .put("orderId", 2)
+                .put("item", "pen");
+
+        Document order3 = createDocument("userId", 2)
+                .put("orderId", 3)
+                .put("item", "pencil");
+
+        Document order4 = createDocument("userId", 2)
+                .put("orderId", 4)
+                .put("item", "eraser");
+
+        NitriteCollection orderCollection = db.getCollection("order");
+        orderCollection.insert(order1, order2, order3, order4);
+
+        Lookup lookup = new Lookup();
+        lookup.setLocalField("userId");
+        lookup.setForeignField("userId");
+        lookup.setTargetField("orders");
+
+        RecordStream<Document> result = userCollection.find().join(orderCollection.find(), lookup);
+        assertEquals(result.size(), 2);
+
+        for (Document document : result) {
+            if (document.get("userId", Integer.class) == 1) {
+                assertEquals(document.get("firstName"), "John");
+                assertEquals(document.get("lastName"), "Doe");
+                Collection<Document> orders = (Collection<Document>) document.get("orders");
+                assertNotNull(orders);
+                assertEquals(orders.size(), 2);
+                Object[] details = orders.toArray();
+                for (Object o : details) {
+                    Document d = (Document) o;
+                    if (d.get("orderId").equals(1)) {
+                        assertEquals(d.get("item"), "book");
+                    } else {
+                        assertEquals(d.get("item"), "pen");
+                    }
+                }
+            } else if (document.get("userId", Integer.class) == 2) {
+                assertEquals(document.get("firstName"), "Jane");
+                assertEquals(document.get("lastName"), "Doe");
+                Collection<Document> orders = (Collection<Document>) document.get("orders");
+                assertNotNull(orders);
+                assertEquals(orders.size(), 2);
+                Object[] details = orders.toArray();
+                for (Object o : details) {
+                    Document d = (Document) o;
+                    if (d.get("orderId").equals(3)) {
+                        assertEquals(d.get("item"), "pencil");
+                    } else {
+                        assertEquals(d.get("item"), "eraser");
+                    }
+                }
+            }
+        }
+
     }
 }

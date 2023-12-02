@@ -141,7 +141,7 @@ public interface PersistentCollection<T> extends EventAware, AttributesAware, Au
      * then nitrite will generate a new {@link NitriteId} and will add it to the <b>_id</b>
      * field.
      * <p>
-     * If any of the value is already indexed in the collection, then after insertion the
+     * If any of the field is already indexed in the collection, then after insertion the
      * index will also be updated.
      * <p>
      * NOTE: This operations will notify all {@link CollectionEventListener}

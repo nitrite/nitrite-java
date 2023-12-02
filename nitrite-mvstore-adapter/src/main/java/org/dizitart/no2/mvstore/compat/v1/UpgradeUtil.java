@@ -174,9 +174,6 @@ public class UpgradeUtil {
         Attributes attributes = new Attributes();
         attributes.set(Attributes.CREATED_TIME, Long.toString(value.getCreatedTime()));
         attributes.set(Attributes.LAST_MODIFIED_TIME, Long.toString(value.getLastModifiedTime()));
-        attributes.set(Attributes.LOCAL_COLLECTION_MARKER, Long.toString(value.getLastSynced()));
-        attributes.set(Attributes.SYNC_LOCK, Long.toString(value.getSyncLock()));
-        attributes.set(Attributes.EXPIRY_WAIT, Long.toString(value.getExpiryWait()));
         if (value.getCollection() != null) {
             attributes.set(Attributes.OWNER, value.getCollection());
         }

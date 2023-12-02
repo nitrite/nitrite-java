@@ -12,7 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * A session represents a transactional context for a Nitrite database.
  * It provides methods to create a new transaction.
  * <p>
- * A session should be closed after use to release any resources associated with it.
+ * A session should be closed after use to release any resources 
+ * associated with it.
  * <p>
  * If a session is closed and the transaction is not committed,
  * all opened transactions will get rolled back and all volatile

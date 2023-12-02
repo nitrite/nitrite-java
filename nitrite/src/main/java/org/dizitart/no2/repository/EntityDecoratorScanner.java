@@ -118,7 +118,7 @@ public class EntityDecoratorScanner {
                     objectIdField.setField(field);
                     objectIdField.setIdFieldName(idFieldName);
                     objectIdField.setEmbedded(entityId.isEmbedded());
-                    objectIdField.setFieldNames(entityId.getSubFields());
+                    objectIdField.setFieldNames(entityId.getEmbeddedFields());
                 }
             }
         }
