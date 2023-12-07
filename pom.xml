@@ -34,7 +34,7 @@
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
         <commons-codec.version>1.16.0</commons-codec.version>
-        <commons-io.version>2.15.0</commons-io.version>
+        <commons-io.version>2.15.1</commons-io.version>
         <kotlin.version>1.9.0</kotlin.version>
         <kotlinx-serialization.version>1.6.1</kotlinx-serialization.version>
         <lombok.version>1.18.30</lombok.version>
