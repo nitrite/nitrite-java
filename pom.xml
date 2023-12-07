@@ -57,7 +57,7 @@
         <jacoco.version>0.8.10</jacoco.version>
         <surefire.version>3.2.2</surefire.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-javadoc-plugin.version>3.6.2</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <dokka.version>1.8.20</dokka.version>
         <animal-sniffer.version>1.23</animal-sniffer.version>
