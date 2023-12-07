@@ -37,7 +37,7 @@ import kotlin.reflect.KProperty
 inline infix fun <reified T> String.eq(value: T?): Filter = FluentFilter.where(this).eq(value)
 
 /**
- * Creates an not equality filter which does not matches documents where the value
+ * Creates a not equality filter which does not match documents where the value
  * of a field equals the specified [value].
  */
 inline infix fun <reified T> String.notEq(value: T?): Filter =
@@ -131,28 +131,28 @@ infix fun String.regex(value: String?): Filter = FluentFilter.where(this).regex(
  * of a field is within the specified Geometry value.
  */
 inline infix fun <reified T : Geometry> String.within(value: T?): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this).within(value)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this).within(value)
 
 /**
- * Creates an spatial filter which matches documents where the spatial data
+ * Creates a spatial filter which matches documents where the spatial data
  * of a field intersects the specified Geometry value.
  */
 inline infix fun <reified T : Geometry> String.intersects(value: T?): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this).intersects(value)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this).intersects(value)
 
 /**
  * Creates a spatial filter which matches documents where the spatial data
  * of a field is near the specified coordinate.
  */
 inline fun <reified T : Coordinate> String.near(value: T?, distance: Double): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this).near(value, distance)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this).near(value, distance)
 
 /**
  * Creates a spatial filter which matches documents where the spatial data
  * of a field is near the specified point.
  */
 inline fun <reified T : Point> String.near(value: T?, distance: Double): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this).near(value, distance)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this).near(value, distance)
 
 /**
  * Creates an and filter which performs a logical AND operation on two filters and selects
@@ -246,25 +246,25 @@ infix fun KProperty<String?>.regex(value: String?): Filter = FluentFilter.where(
  * of a field is within the specified Geometry value.
  */
 inline infix fun <reified T : Geometry> KProperty<T?>.within(value: T?): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this.name).within(value)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this.name).within(value)
 
 /**
- * Creates an spatial filter which matches documents where the spatial data
+ * Creates a spatial filter which matches documents where the spatial data
  * of a field intersects the specified Geometry value.
  */
 inline infix fun <reified T : Geometry> KProperty<T?>.intersects(value: T?): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this.name).intersects(value)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this.name).intersects(value)
 
 /**
  * Creates a spatial filter which matches documents where the spatial data
  * of a field is near the specified coordinate.
  */
 inline fun <reified T : Geometry> KProperty<T?>.near(value: Point, distance: Double): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this.name).near(value, distance)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this.name).near(value, distance)
 
 /**
  * Creates a spatial filter which matches documents where the spatial data
  * of a field is near the specified point.
  */
 inline fun <reified T : Geometry> KProperty<T?>.near(value: Coordinate, distance: Double): Filter =
-    org.dizitart.no2.spatial.FluentFilter.where(this.name).near(value, distance)
+    org.dizitart.no2.spatial.SpatialFluentFilter.where(this.name).near(value, distance)
