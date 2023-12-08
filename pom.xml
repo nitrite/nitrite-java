@@ -48,7 +48,7 @@
         <meanbean.version>2.0.3</meanbean.version>
         <snakeyaml.version>2.0</snakeyaml.version>
         <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
-        <jaxb-impl.version>4.0.0</jaxb-impl.version>
+        <jaxb-impl.version>4.0.4</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
         <guava.version>32.1.1-jre</guava.version>
         <threetenbp.version>1.6.8</threetenbp.version>
