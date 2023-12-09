@@ -46,7 +46,7 @@
         <awaitility.version>4.2.0</awaitility.version>
         <joda-time.version>2.12.5</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
+        <snakeyaml.version>2.2</snakeyaml.version>
         <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.4</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
