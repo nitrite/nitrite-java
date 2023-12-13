@@ -25,7 +25,7 @@ public class InstructionTypeTest {
 
     @Test
     public void testValueOf() {
-        assertEquals(InstructionType.AddPassword, InstructionType.valueOf("AddPassword"));
+        assertEquals(InstructionType.AddUser, InstructionType.valueOf("AddPassword"));
     }
 
     @Test

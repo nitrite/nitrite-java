@@ -96,6 +96,9 @@ public class UserAuthenticationService {
                 if (notExpectedPassword(oldPassword.asString().toCharArray(), salt, expectedHash, HASH_ALGORITHM)) {
                     throw new NitriteSecurityException("Username or password is invalid");
                 }
+            } else {
+                // if credential is null, it means the user is not present, so we cannot update
+                throw new NitriteSecurityException("Username or password is invalid");
             }
         } else {
             if (store.hasMap(USER_MAP)) {

@@ -50,7 +50,6 @@ public class SpatialIndex implements NitriteIndex {
     @Getter
     private final IndexDescriptor indexDescriptor;
     private final NitriteStore<?> nitriteStore;
-    private final NitriteConfig nitriteConfig;
 
     /**
      * Instantiates a new {@link SpatialIndex}.
@@ -60,7 +59,6 @@ public class SpatialIndex implements NitriteIndex {
      */
     public SpatialIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
         this.indexDescriptor = indexDescriptor;
-        this.nitriteConfig = nitriteConfig;
         this.nitriteStore = nitriteConfig.getNitriteStore();
     }
 

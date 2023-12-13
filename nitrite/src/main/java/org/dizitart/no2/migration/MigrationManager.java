@@ -158,7 +158,7 @@ public class MigrationManager {
         if (step != null) {
             Command command = null;
             switch (step.getInstructionType()) {
-                case AddPassword:
+                case AddUser:
                     Pair<String, SecureString> arg1 =
                         (Pair<String, SecureString>) step.getArguments();
                     command = nitrite -> {
