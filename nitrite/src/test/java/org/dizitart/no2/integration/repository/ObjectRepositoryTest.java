@@ -19,14 +19,12 @@ package org.dizitart.no2.integration.repository;
 
 import com.github.javafaker.Faker;
 import lombok.Data;
-
 import org.apache.commons.lang3.time.StopWatch;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -50,7 +48,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
-import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.*;
 
@@ -65,29 +62,26 @@ public class ObjectRepositoryTest {
 
     @Before
     public void setUp() {
-        SimpleNitriteMapper mapper = new SimpleNitriteMapper();
-        mapper.registerEntityConverter(new InternalClass.Converter());
-        mapper.registerEntityConverter(new EmployeeEntity.Converter());
-        mapper.registerEntityConverter(new StressRecord.Converter());
-        mapper.registerEntityConverter(new WithClassField.Converter());
-        mapper.registerEntityConverter(new WithDateId.Converter());
-        mapper.registerEntityConverter(new WithTransientField.Converter());
-        mapper.registerEntityConverter(new WithOutId.Converter());
-        mapper.registerEntityConverter(new ChildClass.Converter());
-        mapper.registerEntityConverter(new WithOutGetterSetter.Converter());
-        mapper.registerEntityConverter(new WithPrivateConstructor.Converter());
-        mapper.registerEntityConverter(new WithPublicField.Converter());
-        mapper.registerEntityConverter(new Employee.EmployeeConverter());
-        mapper.registerEntityConverter(new Company.CompanyConverter());
-        mapper.registerEntityConverter(new ProductConverter());
-        mapper.registerEntityConverter(new ProductIdConverter());
-        mapper.registerEntityConverter(new ManufacturerConverter());
-        mapper.registerEntityConverter(new MiniProduct.Converter());
-
         db = Nitrite.builder()
-                .loadModule(module(mapper))
-                .fieldSeparator(".")
-                .openOrCreate();
+            .registerEntityConverter(new InternalClass.Converter())
+            .registerEntityConverter(new EmployeeEntity.Converter())
+            .registerEntityConverter(new StressRecord.Converter())
+            .registerEntityConverter(new WithClassField.Converter())
+            .registerEntityConverter(new WithDateId.Converter())
+            .registerEntityConverter(new WithTransientField.Converter())
+            .registerEntityConverter(new WithOutId.Converter())
+            .registerEntityConverter(new ChildClass.Converter())
+            .registerEntityConverter(new WithOutGetterSetter.Converter())
+            .registerEntityConverter(new WithPrivateConstructor.Converter())
+            .registerEntityConverter(new WithPublicField.Converter())
+            .registerEntityConverter(new Employee.EmployeeConverter())
+            .registerEntityConverter(new Company.CompanyConverter())
+            .registerEntityConverter(new ProductConverter())
+            .registerEntityConverter(new ProductIdConverter())
+            .registerEntityConverter(new ManufacturerConverter())
+            .registerEntityConverter(new MiniProduct.Converter())
+            .fieldSeparator(".")
+            .openOrCreate();
     }
 
     @After
@@ -227,9 +221,9 @@ public class ObjectRepositoryTest {
         repository.insert(object2);
 
         assertEquals(repository.find(where("id").eq(new Date(1482773634L)))
-                .firstOrNull(), object1);
+            .firstOrNull(), object1);
         assertEquals(repository.find(where("id").eq(new Date(1482773720L)))
-                .firstOrNull(), object2);
+            .firstOrNull(), object2);
     }
 
     @Test
@@ -367,7 +361,7 @@ public class ObjectRepositoryTest {
 
         assertEquals(productRepository.getDocumentCollection().getName(), "product");
         assertEquals(upcomingProductRepository.getDocumentCollection().getName(),
-                "product+upcoming");
+            "product+upcoming");
         assertEquals(manufacturerRepository.getDocumentCollection().getName(), Manufacturer.class.getName());
         assertEquals(exManufacturerRepository.getDocumentCollection().getName(), Manufacturer.class.getName() + "+ex");
         assertEquals(employeeRepository.getDocumentCollection().getName(), Employee.class.getName());
@@ -523,8 +517,8 @@ public class ObjectRepositoryTest {
 
     @Data
     @Entity(value = "entity.employee", indices = {
-            @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
-            @Index(fields = "lastName", type = IndexType.NON_UNIQUE),
+        @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
+        @Index(fields = "lastName", type = IndexType.NON_UNIQUE),
     })
     private static class EmployeeEntity {
         private static final Faker faker = new Faker();
@@ -550,8 +544,8 @@ public class ObjectRepositoryTest {
             @Override
             public Document toDocument(EmployeeEntity entity, NitriteMapper nitriteMapper) {
                 return Document.createDocument("id", entity.id)
-                        .put("firstName", entity.firstName)
-                        .put("lastName", entity.lastName);
+                    .put("firstName", entity.firstName)
+                    .put("lastName", entity.lastName);
             }
 
             @Override

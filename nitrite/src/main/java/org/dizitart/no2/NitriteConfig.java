@@ -21,19 +21,19 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.Constants;
-import org.dizitart.no2.exceptions.IndexingException;
-import org.dizitart.no2.exceptions.InvalidOperationException;
-import org.dizitart.no2.index.NitriteIndexer;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.migration.Migration;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.common.module.PluginManager;
+import org.dizitart.no2.exceptions.IndexingException;
+import org.dizitart.no2.exceptions.InvalidOperationException;
+import org.dizitart.no2.index.NitriteIndexer;
+import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.store.NitriteStore;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * NitriteConfig is a configuration class for Nitrite database.
@@ -61,6 +61,8 @@ public class NitriteConfig implements AutoCloseable {
      */
     private static String fieldSeparator = ".";
 
+    private final List<EntityConverter<?>> entityConverters;
+
     @Getter
     /**
      * A map of migrations to be applied to the database.
@@ -80,6 +82,7 @@ public class NitriteConfig implements AutoCloseable {
     public NitriteConfig() {
         this.pluginManager = new PluginManager(this);
         this.migrations = new HashMap<>();
+        this.entityConverters = new ArrayList<>();
     }
 
     /**
@@ -95,6 +98,21 @@ public class NitriteConfig implements AutoCloseable {
                     " initialization");
         }
         NitriteConfig.fieldSeparator = separator;
+    }
+
+    /**
+     * Registers an {@link EntityConverter} with the Nitrite database.
+     *
+     * @param entityConverter the {@link EntityConverter} to register
+     * @throws InvalidOperationException if the converter is attempted to be registered
+     *                                   after database initialization.
+     */
+    public void registerEntityConverter(EntityConverter<?> entityConverter) {
+        if (configured) {
+            throw new InvalidOperationException("Cannot register entity converter after database" +
+                    " initialization");
+        }
+        entityConverters.add(entityConverter);
     }
 
     /**
@@ -171,6 +189,15 @@ public class NitriteConfig implements AutoCloseable {
             throw new InvalidOperationException("Cannot execute autoconfigure after database" +
                     " initialization");
         }
+
+        if (!entityConverters.isEmpty()) {
+            SimpleNitriteMapper mapper = new SimpleNitriteMapper();
+            for (EntityConverter<?> entityConverter : entityConverters) {
+                mapper.registerEntityConverter(entityConverter);
+            }
+            pluginManager.loadModule(NitriteModule.module(mapper));
+        }
+
         pluginManager.findAndLoadPlugins();
     }
 

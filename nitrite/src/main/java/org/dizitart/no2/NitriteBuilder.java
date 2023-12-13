@@ -18,6 +18,7 @@ package org.dizitart.no2;
 
 import lombok.Getter;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.migration.Migration;
 import org.dizitart.no2.common.module.NitriteModule;
@@ -57,6 +58,20 @@ public class NitriteBuilder {
      */
     public NitriteBuilder fieldSeparator(String separator) {
         this.nitriteConfig.fieldSeparator(separator);
+        return this;
+    }
+
+    /**
+     * Registers an {@link EntityConverter} with the Nitrite database.
+     * An {@link EntityConverter} is used to convert between an entity and a
+     * {@link org.dizitart.no2.collection.Document}.
+     * This method allows you to provide a custom converter for a specific class.
+     *
+     * @param entityConverter the {@link EntityConverter} to register
+     * @return the NitriteBuilder instance
+     */
+    public NitriteBuilder registerEntityConverter(EntityConverter<?> entityConverter) {
+        this.nitriteConfig.registerEntityConverter(entityConverter);
         return this;
     }
 
