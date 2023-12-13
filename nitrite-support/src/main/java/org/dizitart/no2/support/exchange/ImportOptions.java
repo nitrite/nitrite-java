@@ -35,7 +35,7 @@ public class ImportOptions {
 
     /**
      * Specifies a {@link JsonFactory} to create a
-     * {@link com.fasterxml.jackson.core.JsonGenerator} instance.
+     * {@link com.fasterxml.jackson.core.JsonParser} instance.
      * This instance will be used to read the exported data from a file.
      * <p>
      * This is an optional field. If not specified, a default one will be created.
