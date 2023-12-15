@@ -19,6 +19,7 @@ package org.dizitart.kno2
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
 import kotlinx.serialization.Serializable
+import org.dizitart.kno2.filters.eq
 import org.dizitart.kno2.serialization.KotlinXSerializationMapper
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.mvstore.MVStoreModule

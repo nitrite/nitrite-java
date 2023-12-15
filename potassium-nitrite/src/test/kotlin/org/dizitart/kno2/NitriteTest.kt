@@ -16,6 +16,8 @@
 
 package org.dizitart.kno2
 
+import junit.framework.TestCase
+import org.dizitart.kno2.filters.eq
 import org.dizitart.kno2.filters.text
 import org.dizitart.no2.collection.FindOptions.orderBy
 import org.dizitart.no2.collection.FindOptions.skipBy
@@ -181,6 +183,16 @@ class NitriteTest : BaseTest() {
 
         found = repository.find("ob1" text "value1")
         assertTrue(found.isEmpty)
+    }
+
+    @Test
+    fun testInMemory() {
+        val db2 = nitrite()
+        val collection = db2.getCollection("test");
+        collection.insert(documentOf("a" to 1))
+
+        val cursor = collection.find("a" eq 1)
+        assertEquals(cursor.size(), 1)
     }
 }
 

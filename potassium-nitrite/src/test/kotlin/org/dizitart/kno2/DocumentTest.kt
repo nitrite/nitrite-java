@@ -57,10 +57,11 @@ class DocumentTest : BaseTest() {
 
     @Test
     fun testDocumentOf3() {
-        val doc = documentOf("a" to 1, "b" to 2, "c" to 3)
+        val doc = documentOf("a" to 1, "b" to 2, "c" to documentOf("d" to 3))
         assertTrue(doc.isNotEmpty())
         assertEquals(doc.size(), 3)
-        doc.source
+        assertEquals(doc["a"], 1)
+        assertEquals(doc["c.d"], 3)
     }
 
     @Test

@@ -19,9 +19,12 @@ package org.dizitart.kno2
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.NitriteBuilder
 import org.dizitart.no2.NitriteConfig
+import org.dizitart.no2.common.Constants
+import org.dizitart.no2.common.mapper.EntityConverter
 import org.dizitart.no2.common.mapper.NitriteMapper
 import org.dizitart.no2.common.module.NitriteModule
 import org.dizitart.no2.common.module.NitriteModule.module
+import org.dizitart.no2.migration.Migration
 import org.dizitart.no2.spatial.SpatialIndexer
 
 /**
@@ -32,6 +35,13 @@ import org.dizitart.no2.spatial.SpatialIndexer
  */
 class Builder internal constructor() {
     private val modules = mutableSetOf<NitriteModule>()
+    private val entityConverters = mutableSetOf<EntityConverter<*>>()
+    private val migrations = mutableSetOf<Migration>()
+
+    /**
+     * Sets the schema version for the Nitrite database.
+     * */
+    var schemaVersion: Int = 0
 
     /**
      * The field separator used by the Nitrite database. By default, it is set to the field
@@ -40,15 +50,51 @@ class Builder internal constructor() {
     var fieldSeparator: String = NitriteConfig.getFieldSeparator()
 
     /**
-     * Loads a Nitrite module into the Nitrite database. The module can be used to extend the
+     * Loads a [NitriteModule] into the Nitrite database. The module can be used to extend the
      * functionality of Nitrite.
+     *
+     * @param module the module to load.
      */
     fun loadModule(module: NitriteModule) {
         modules.add(module)
     }
 
+    /**
+     * Registers an [EntityConverter] with the Nitrite database.
+     * An [EntityConverter] is used to convert between an entity and a
+     * [org.dizitart.no2.collection.Document].
+     * This method allows you to provide a custom converter for a specific class.
+     *
+     * @param converter the converter to register.
+     */
+    fun registerEntityConverter(converter: EntityConverter<*>) {
+        entityConverters.add(converter)
+    }
+
+    /**
+     * Registers a [Migration] with the Nitrite database.
+     * A [Migration] is used to migrate the database from one version to another.
+     *
+     * @param migrations the migrations to register.
+     */
+    fun addMigration(vararg migrations: Migration) {
+        this.migrations.addAll(migrations)
+    }
+
     internal fun createNitriteBuilder(): NitriteBuilder {
         val builder = Nitrite.builder()
+
+        if (schemaVersion > 0) {
+            builder.schemaVersion(schemaVersion)
+        }
+
+        if (entityConverters.isNotEmpty()) {
+            entityConverters.forEach { builder.registerEntityConverter(it) }
+        }
+
+        if (migrations.isNotEmpty()) {
+            migrations.forEach { builder.addMigrations(it) }
+        }
 
         modules.forEach { builder.loadModule(it) }
         loadDefaultPlugins(builder)
@@ -58,15 +104,16 @@ class Builder internal constructor() {
     }
 
     private fun loadDefaultPlugins(builder: NitriteBuilder) {
-        val mapperFound = modules.any { module -> module.plugins().any { it is NitriteMapper } }
+        val mapperFound =
+            entityConverters.isNotEmpty() || modules.any { module -> module.plugins().any { it is NitriteMapper } }
         val spatialIndexerFound =
-                modules.any { module -> module.plugins().any { it is SpatialIndexer } }
+            modules.any { module -> module.plugins().any { it is SpatialIndexer } }
 
         if (!mapperFound && spatialIndexerFound) {
             builder.loadModule(module(KNO2JacksonMapper()))
         } else if (!spatialIndexerFound && mapperFound) {
             builder.loadModule(module(SpatialIndexer()))
-        } else if (!mapperFound && !spatialIndexerFound) {
+        } else if (!mapperFound) {
             builder.loadModule(KNO2Module())
         }
     }
@@ -83,9 +130,9 @@ class Builder internal constructor() {
  * @return the nitrite database instance.
  */
 fun nitrite(
-        userId: String? = null,
-        password: String? = null,
-        op: (Builder.() -> Unit)? = null
+    userId: String? = null,
+    password: String? = null,
+    op: (Builder.() -> Unit)? = null
 ): Nitrite {
     val builder = Builder()
     op?.invoke(builder)
