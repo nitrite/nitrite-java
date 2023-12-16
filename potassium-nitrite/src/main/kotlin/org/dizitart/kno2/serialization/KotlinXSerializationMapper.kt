@@ -20,19 +20,17 @@ import org.dizitart.no2.NitriteConfig
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.collection.NitriteId
 import org.dizitart.no2.common.mapper.NitriteMapper
-import org.dizitart.no2.common.module.NitriteModule
-import org.dizitart.no2.common.module.NitritePlugin
 import org.dizitart.no2.exceptions.ObjectMappingException
-import java.util.Date
+import java.util.*
 
 /**
  * A [org.dizitart.no2.common.mapper.NitriteMapper] module that uses KotlinX Serialization 
- * for object to [Document] covnersion and vice versa.
+ * for object to [Document] conversion and vice versa.
  * 
  * @author Joris Jensen
  * @since 4.2.0
  */
-object KotlinXSerializationMapper : NitriteMapper, NitriteModule {
+class KotlinXSerializationMapper : NitriteMapper {
     private fun <Target : Any> convertFromDocument(source: Document?, type: Class<Target>): Target? =
         source?.let { DocumentDecoder.decodeFromDocument(source, type) }
 
@@ -72,6 +70,5 @@ object KotlinXSerializationMapper : NitriteMapper, NitriteModule {
         Date::class.java,
     )
 
-    override fun plugins(): MutableSet<NitritePlugin> = mutableSetOf(KotlinXSerializationMapper)
     override fun initialize(nitriteConfig: NitriteConfig) {}
 }

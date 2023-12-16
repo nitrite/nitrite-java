@@ -97,25 +97,9 @@ class Builder internal constructor() {
         }
 
         modules.forEach { builder.loadModule(it) }
-        loadDefaultPlugins(builder)
 
         builder.fieldSeparator(fieldSeparator)
         return builder
-    }
-
-    private fun loadDefaultPlugins(builder: NitriteBuilder) {
-        val mapperFound =
-            entityConverters.isNotEmpty() || modules.any { module -> module.plugins().any { it is NitriteMapper } }
-        val spatialIndexerFound =
-            modules.any { module -> module.plugins().any { it is SpatialIndexer } }
-
-        if (!mapperFound && spatialIndexerFound) {
-            builder.loadModule(module(KNO2JacksonMapper()))
-        } else if (!spatialIndexerFound && mapperFound) {
-            builder.loadModule(module(SpatialIndexer()))
-        } else if (!mapperFound) {
-            builder.loadModule(KNO2Module())
-        }
     }
 }
 

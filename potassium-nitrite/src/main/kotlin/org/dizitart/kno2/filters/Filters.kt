@@ -109,6 +109,20 @@ inline infix fun <reified T : Comparable<T>> String.within(values: Iterable<T>):
     FluentFilter.where(this).`in`(*(values.toList().toTypedArray()))
 
 /**
+ * Creates a notIn filter which matches the documents where
+ * the value of a field is not equals any value in the specified array of [values].
+ */
+inline infix fun <reified T : Comparable<T>> String.notWithin(values: Array<out T>): Filter =
+    FluentFilter.where(this).notIn(*values)
+
+/**
+ * Creates notIn filter which matches the documents where
+ * the value of a field is not equals any value in the specified array of [values].
+ */
+inline infix fun <reified T : Comparable<T>> String.notWithin(values: Iterable<T>): Filter =
+    FluentFilter.where(this).notIn(*(values.toList().toTypedArray()))
+
+/**
  * Creates an element match filter that matches documents that contain an array
  * value with at least one element that matches the specified [filter].
  */
@@ -174,7 +188,7 @@ inline infix fun <reified T> KProperty<T?>.eq(value: T?): Filter =
     FluentFilter.where(this.name).eq(value)
 
 /**
- * Creates an not equality filter which does not matches objects where the value
+ * Creates a not equality filter which does not match objects where the value
  * of a property equals the specified [value].
  */
 inline infix fun <reified T> KProperty<T?>.notEq(value: T?): Filter =
@@ -221,6 +235,20 @@ inline infix fun <reified T : Comparable<T>> KProperty<T?>.within(values: Array<
  */
 inline infix fun <reified T : Comparable<T>> KProperty<T?>.within(values: Iterable<T>): Filter =
     FluentFilter.where(this.name).`in`(*(values.toList().toTypedArray()))
+
+/**
+ * Creates a notIn filter which matches the objects where
+ * the value of a property is not equals any value in the specified array of [values].
+ */
+inline infix fun <reified T : Comparable<T>> KProperty<T?>.notWithin(values: Array<T>): Filter =
+    FluentFilter.where(this.name).notIn(*values)
+
+/**
+ * Creates a notIn filter which matches the objects where
+ * the value of a property is not equals any value in the specified list of [values].
+ */
+inline infix fun <reified T : Comparable<T>> KProperty<T?>.notWithin(values: Iterable<T>): Filter =
+    FluentFilter.where(this.name).notIn(*(values.toList().toTypedArray()))
 
 /**
  * Creates an element match filter that matches objects that contain an array

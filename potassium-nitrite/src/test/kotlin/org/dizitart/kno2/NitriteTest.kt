@@ -26,6 +26,9 @@ import org.dizitart.no2.exceptions.UniqueConstraintException
 import org.dizitart.no2.index.IndexOptions.indexOptions
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.mvstore.MVStoreModule
+import org.dizitart.no2.repository.EntityDecorator
+import org.dizitart.no2.repository.EntityId
+import org.dizitart.no2.repository.EntityIndex
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
 import org.dizitart.no2.repository.annotations.Indices
@@ -47,6 +50,7 @@ class NitriteTest : BaseTest() {
     fun before() {
         db = nitrite {
             loadModule(MVStoreModule(fileName))
+            loadModule(KNO2Module())
         }
     }
 
@@ -71,6 +75,24 @@ class NitriteTest : BaseTest() {
     @Test
     fun testGetRepositoryWithKey() {
         db?.getRepository<TestData>("tag") {
+            assertTrue(isOpen)
+            close()
+            assertFalse(isOpen)
+        }
+    }
+
+    @Test
+    fun testGetRepositoryWithEntityDecorator() {
+        db?.getRepository(TestDataClassDecorator()) {
+            assertTrue(isOpen)
+            close()
+            assertFalse(isOpen)
+        }
+    }
+
+    @Test
+    fun testGetRepositoryWithEntityDecoratorAndKey() {
+        db?.getRepository(TestDataClassDecorator(), "tag") {
             assertTrue(isOpen)
             close()
             assertFalse(isOpen)
@@ -236,3 +258,24 @@ data class ClassWithLocalDateTime(
 data class NestedObjects(var ob1: String = "", @Id val id: String = "", val list: List<TempObject> = listOf())
 data class TempObject(val name: String = "", val aga: Int = 0, val add: LevelUnder = LevelUnder())
 data class LevelUnder(val street: String = "", val number: Int = 0)
+
+data class TestDataClass(
+    val id: String = "",
+    val name: String = "",
+    val age: Int = 0
+)
+
+class TestDataClassDecorator : EntityDecorator<TestDataClass> {
+    override fun getEntityType(): Class<TestDataClass> {
+        return TestDataClass::class.java
+    }
+
+    override fun getIdField(): EntityId {
+        return EntityId("id")
+    }
+
+    override fun getIndexFields(): MutableList<EntityIndex> {
+        return mutableListOf(EntityIndex(IndexType.NON_UNIQUE, "name"))
+    }
+}
+

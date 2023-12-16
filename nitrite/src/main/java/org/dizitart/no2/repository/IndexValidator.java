@@ -71,7 +71,7 @@ public class IndexValidator {
         Object dummyValue = ObjectUtils.newInstance(fieldType, true, nitriteMapper);
         Document dummyDocument = (Document) nitriteMapper.tryConvert(dummyValue, Document.class);
 
-        if (dummyDocument.size() != 0 && entityId.getEncodedFieldNames().isEmpty()) {
+        if (dummyDocument != null && dummyDocument.size() != 0 && entityId.getEncodedFieldNames().isEmpty()) {
             throw new IndexingException("Invalid Id field " + field);
         }
     }

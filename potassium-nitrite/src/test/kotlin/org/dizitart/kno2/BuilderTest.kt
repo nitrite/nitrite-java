@@ -42,6 +42,7 @@ class BuilderTest : BaseTest() {
     fun testBuilder1() {
         db = nitrite {
             loadModule(MVStoreModule(fileName))
+            loadModule(KNO2Module())
         }
 
         val context = db?.config!!
@@ -59,7 +60,7 @@ class BuilderTest : BaseTest() {
     fun testBuilder2() {
         db = nitrite {
             loadModule(MVStoreModule(fileName))
-
+            loadModule(KNO2Module())
             loadModule(module(NitriteTextIndexer(UniversalTextTokenizer())))
         }
 
