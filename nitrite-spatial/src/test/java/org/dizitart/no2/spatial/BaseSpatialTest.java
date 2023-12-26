@@ -40,7 +40,7 @@ public abstract class BaseSpatialTest {
     protected NitriteCollection collection;
     protected ObjectRepository<SpatialData> repository;
     protected SpatialData object1, object2, object3;
-    protected Document doc1, doc2, doc3;
+    protected Document doc1, doc2, doc3, doc4;
 
     @Rule
     public Retry retry = new Retry(3);
@@ -89,6 +89,9 @@ public abstract class BaseSpatialTest {
         doc3 = createDocument("key", 3L)
             .put("location", reader.read("POLYGON ((550 521, 580 540, 570 564, 512 566, 550 521))"));
         collection.insert(doc3);
+
+        doc4 = createDocument("key", 4L);
+        collection.insert(doc4);
     }
 
     @After

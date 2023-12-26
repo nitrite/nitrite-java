@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.common.module.PluginManager;
@@ -61,6 +60,10 @@ public class NitriteConfig implements AutoCloseable {
      */
     private static String fieldSeparator = ".";
 
+    @Getter
+    /**
+     * A list of {@link EntityConverter} instances registered with the Nitrite database.
+     */
     private final List<EntityConverter<?>> entityConverters;
 
     @Getter
@@ -80,9 +83,9 @@ public class NitriteConfig implements AutoCloseable {
      * Instantiates a new {@link NitriteConfig}.
      */
     public NitriteConfig() {
-        this.pluginManager = new PluginManager(this);
         this.migrations = new HashMap<>();
         this.entityConverters = new ArrayList<>();
+        this.pluginManager = new PluginManager(this);
     }
 
     /**
@@ -188,14 +191,6 @@ public class NitriteConfig implements AutoCloseable {
         if (configured) {
             throw new InvalidOperationException("Cannot execute autoconfigure after database" +
                     " initialization");
-        }
-
-        if (!entityConverters.isEmpty()) {
-            SimpleNitriteMapper mapper = new SimpleNitriteMapper();
-            for (EntityConverter<?> entityConverter : entityConverters) {
-                mapper.registerEntityConverter(entityConverter);
-            }
-            pluginManager.loadModule(NitriteModule.module(mapper));
         }
 
         pluginManager.findAndLoadPlugins();

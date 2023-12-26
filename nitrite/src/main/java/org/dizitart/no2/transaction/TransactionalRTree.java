@@ -100,6 +100,9 @@ class TransactionalRTree<Key extends BoundingBox, Value> implements NitriteRTree
     }
 
     private SpatialKey getKey(Key key, long id) {
+        if (key == null || key.equals(BoundingBox.EMPTY)) {
+            return new SpatialKey(id);
+        }
         return new SpatialKey(id, key.getMinX(),
             key.getMaxX(), key.getMinY(), key.getMaxY());
     }

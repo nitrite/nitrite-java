@@ -13,6 +13,8 @@ import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.common.util.SpatialKey;
+import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
@@ -186,6 +188,40 @@ public class NitriteSerializers {
         }
     }
 
+    private static class BoundingBoxSerializer extends Serializer<BoundingBox> {
+        @Override
+        public void write(Kryo kryo, Output output, BoundingBox object) {
+            output.writeFloat(object.getMinX());
+            output.writeFloat(object.getMaxX());
+            output.writeFloat(object.getMinY());
+            output.writeFloat(object.getMaxY());
+        }
+
+        @Override
+        public BoundingBox read(Kryo kryo, Input input, Class<? extends BoundingBox> type) {
+            float minX = input.readFloat();
+            float maxX = input.readFloat();
+            float minY = input.readFloat();
+            float maxY = input.readFloat();
+            return new BoundingBox(minX, maxX, minY, maxY);
+        }
+    }
+
+    private static class SpatialKeySerializer extends Serializer<SpatialKey> {
+        @Override
+        public void write(Kryo kryo, Output output, SpatialKey spatialKey) {
+            output.writeLong(spatialKey.getId());
+            kryo.writeObject(output, spatialKey.getMinMax());
+        }
+
+        @Override
+        public SpatialKey read(Kryo kryo, Input input, Class<? extends SpatialKey> aClass) {
+            long id = input.readLong();
+            float[] minMax = kryo.readObject(input, float[].class);
+            return new SpatialKey(id, minMax);
+        }
+    }
+
     public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
@@ -196,5 +232,7 @@ public class NitriteSerializers {
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
         kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
         kryoObjectFormatter.registerSerializer(DBValue.class, new JavaSerializer());
+        kryoObjectFormatter.registerSerializer(BoundingBox.class, new BoundingBoxSerializer());
+        kryoObjectFormatter.registerSerializer(SpatialKey.class, new SpatialKeySerializer());
     }
 }

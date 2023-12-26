@@ -69,20 +69,13 @@ public class SimpleNitriteMapper implements NitriteMapper {
                 }
             } else if (source instanceof Document) {
                 return convertFromDocument((Document) source, type);
+            } else if (source.getClass().isAssignableFrom(type) || type.isAssignableFrom(source.getClass())) {
+                return source;
             }
         }
 
         throw new ObjectMappingException("Can't convert object to type " + type
             + ", try registering a EntityConverter for it.");
-    }
-
-    /**
-     * Adds a value type to ignore during mapping.
-     *
-     * @param valueType the value type
-     */
-    public void addValueType(Class<?> valueType) {
-        this.valueTypes.add(valueType);
     }
 
     /**
@@ -113,9 +106,10 @@ public class SimpleNitriteMapper implements NitriteMapper {
             return null;
         }
 
-        if (converterRegistry.containsKey(type)) {
-            EntityConverter<Target> serializer = (EntityConverter<Target>) converterRegistry.get(type);
-            return serializer.fromDocument(source, this);
+        try (EntityConverter<Target> converter = (EntityConverter<Target>) findConverter(type)) {
+            if (converter != null) {
+                return converter.fromDocument(source, this);
+            }
         }
 
         throw new ObjectMappingException("Can't convert Document to type " + type
@@ -131,13 +125,27 @@ public class SimpleNitriteMapper implements NitriteMapper {
      */
     @SuppressWarnings("unchecked")
     protected <Source> Document convertToDocument(Source source) {
-        if (converterRegistry.containsKey(source.getClass())) {
-            EntityConverter<Source> serializer = (EntityConverter<Source>) converterRegistry.get(source.getClass());
-            return serializer.toDocument(source, this);
+        try (EntityConverter<Source> converter = (EntityConverter<Source>) findConverter(source.getClass())) {
+            if (converter != null) {
+                return converter.toDocument(source, this);
+            }
         }
 
         throw new ObjectMappingException("Can't convert object of type " + source.getClass().getName() +
             " to Document, try registering a EntityConverter for it.");
+    }
+
+    private EntityConverter<?> findConverter(Class<?> type) {
+        if (converterRegistry.containsKey(type)) {
+            return converterRegistry.get(type);
+        }
+
+        for (EntityConverter<?> value : converterRegistry.values()) {
+            if (value.getEntityType().isAssignableFrom(type)) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private boolean isValueType(Class<?> type) {

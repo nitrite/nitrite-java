@@ -16,6 +16,13 @@
 
 package org.dizitart.no2.index;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -23,32 +30,56 @@ import java.io.Serializable;
  *
  * @author Anindya Chatterjee
  */
-public interface BoundingBox extends Serializable {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class BoundingBox implements Serializable {
+    private static final long serialVersionUID = 1703439026L;
+
+    /**
+     * An empty bounding box.
+     */
+    public static final BoundingBox EMPTY = new BoundingBox(0, 0, 0, 0);
+
     /**
      * Returns the minimum x-coordinate of the bounding box.
      *
      * @return the minimum x-coordinate of the bounding box.
      */
-    float getMinX();
+    private float minX;
 
     /**
      * Returns the maximum x-coordinate of the bounding box.
      *
      * @return the maximum x-coordinate of the bounding box
      */
-    float getMaxX();
+    private float maxX;
 
     /**
      * Returns the minimum y-coordinate of the bounding box.
      *
      * @return the minimum y-coordinate of the bounding box
      */
-    float getMinY();
+    private float minY;
 
     /**
      * Returns the maximum Y coordinate of the bounding box.
      *
      * @return the maximum Y coordinate of the bounding box.
      */
-    float getMaxY();
+    private float maxY;
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        stream.writeFloat(minX);
+        stream.writeFloat(maxX);
+        stream.writeFloat(minY);
+        stream.writeFloat(maxY);
+    }
+
+    private void readObject(ObjectInputStream stream) throws IOException {
+        this.minX = stream.readFloat();
+        this.maxX = stream.readFloat();
+        this.minY = stream.readFloat();
+        this.maxY = stream.readFloat();
+    }
 }
