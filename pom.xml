@@ -7,8 +7,32 @@
     <version>4.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>nitrite-java</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite Database</name>
+    <description>Nitrite is an open source embedded NoSQL database for Java.</description>
+
+    <url>https://nitrite.dizitart.com</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Anindya Chatterjee</name>
+            <email>anidotnet@gmail.com</email>
+            <organization>Dizitart</organization>
+            <organizationUrl>https://nitrite.dizitart.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:nitrite/nitrite-java.git</connection>
+        <developerConnection>scm:git:git@github.com:nitrite/nitrite-java.git</developerConnection>
+        <url>https://github.com/nitrite/nitrite-java</url>
+    </scm>
 
     <modules>
         <module>nitrite</module>

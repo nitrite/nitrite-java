@@ -10,8 +10,8 @@
     <artifactId>nitrite-spatial</artifactId>
     <packaging>jar</packaging>
 
-    <name>nitrite-spatial</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite Spatial</name>
+    <description>Spatial indexing support for Nitrite</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

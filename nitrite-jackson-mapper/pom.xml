@@ -10,8 +10,8 @@
     <artifactId>nitrite-jackson-mapper</artifactId>
     <packaging>jar</packaging>
 
-    <name>nitrite-jackson-mapper</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite Jackson Mapper</name>
+    <description>A NitriteMapper implementation based on Jackson</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -10,8 +10,8 @@
     <artifactId>nitrite-mvstore-adapter</artifactId>
     <packaging>jar</packaging>
 
-    <name>nitrite-mvstore-adapter</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite MVStore Adapter</name>
+    <description>Nitrite storage adapter for MVStore</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

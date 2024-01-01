@@ -10,8 +10,8 @@
     <artifactId>nitrite-support</artifactId>
     <packaging>jar</packaging>
 
-    <name>nitrite-support</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite Support</name>
+    <description>A utility library for Nitrite</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
