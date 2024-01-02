@@ -17,16 +17,18 @@ Nitrite is an embedded database ideal for desktop, mobile or small web applicati
 
 **It features**:
 
--   Schemaless document collection and object repository
--   In-memory / file-based store
--   Pluggable storage engines - mvstore, rocksdb
--   Transaction support
--   Schema migration
--   Simple Index
--   Compound Index
--   Full text search
--   Very fast, lightweight and fluent API 
--   Android compatibility (API Level 24)
+- Embedded, serverless
+- Simple API
+- Document-oriented
+- Schemaless document collection and object repository
+- Extensible storage engines - mvstore, rocksdb
+- Indexing and full-text search
+- Simple query api
+- In-memory and file-based store
+- Transaction support
+- Schema migration support
+- Encryption support
+- Android compatibility (API Level 24)
 
 ## Kotlin Extension
 
@@ -43,13 +45,11 @@ Nitrite DataGate and Nitrite Explorer is now deprecated and no longer maintained
 
 ## Getting Started with Nitrite
 
-**NOTE:** There are breaking api changes in version 4.x. So please exercise caution when upgrading from 3.x.x  
-especially for **package name changes**.
+**NOTE:** There are breaking api changes in version 4.x. So please read the [guide](https://nitrite.dizitart.com/java-sdk/getting-started/index.html) before upgrading from 3.x.x.
 
 ### How To Install
 
-To use Nitrite in any Java application, first add the nitrite bill of materials, 
-then add required dependencies:
+To use Nitrite in any Java application, first add the nitrite bill of materials, then add required dependencies:
 
 **Maven**
 
@@ -78,7 +78,6 @@ then add required dependencies:
     </dependency>
 </dependencies>
 ```
-    
     
 **Gradle**
 
@@ -137,9 +136,9 @@ ObjectRepository<Employee> repository = db.getRepository(Employee.class);
 
 @Entity(value = "retired-employee",     // entity name (optional), 
     indices = {
-        @Index(value = "firstName", type = IndexType.NonUnique),
-        @Index(value = "lastName", type = IndexType.NonUnique),
-        @Index(value = "note", type = IndexType.Fulltext),
+        @Index(value = "firstName", type = IndexType.NON_UNIQUE),
+        @Index(value = "lastName", type = IndexType.NON_UNIQUE),
+        @Index(value = "note", type = IndexType.FULL_TEXT),
 })
 public class Employee implements Serializable {
     // provides id field to uniquely identify an object inside an ObjectRepository
@@ -161,7 +160,7 @@ public class Employee implements Serializable {
 ```java
 
 // create a document to populate data
-Document doc = createDocument("firstName", "John")
+Document doc = Document.createDocument("firstName", "John")
      .put("lastName", "Doe")
      .put("birthDay", new Date())
      .put("data", new byte[] {1, 2, 3})
@@ -195,11 +194,11 @@ repository.insert(emp);
 ```java
 
 // create document index
-collection.createIndex(indexOptions(IndexType.NonUnique), "firstName", "lastName"); // compound index
-collection.createIndex(indexOptions(IndexType.Fulltext), "note"); // full-text index
+collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "firstName", "lastName"); // compound index
+collection.createIndex(indexOptions(IndexType.FULL_TEXT), "note"); // full-text index
 
 // create object index. It can also be provided via annotation
-repository.createIndex(indexOptions(IndexType.NonUnique), "firstName");
+repository.createIndex(indexOptions(IndexType.NON_UNIQUE), "firstName");
 
 ```
 
@@ -234,8 +233,7 @@ Employee employee = cursor.firstOrNull();
 
 ```java
 try (Session session = db.createSession()) {
-    Transaction transaction = session.beginTransaction();
-    try {
+    try (Transaction transaction = session.beginTransaction()) {
         NitriteCollection txCol = transaction.getCollection("test");
 
         Document document = createDocument("firstName", "John");
@@ -259,10 +257,10 @@ Migration migration1 = new Migration(Constants.INITIAL_SCHEMA_VERSION, 2) {
     public void migrate(InstructionSet instructions) {
         instructions.forDatabase()
             // make a non-secure db to secure db
-            .addPassword("test-user", "test-password");
+            .addUser("test-user", "test-password");
 
         // create instructions for existing repository
-        instructions.forRepository(OldClass.class, null)
+        instructions.forRepository(OldClass.class, "demo1")
 
             // rename the repository (in case of entity name changes)
             .renameRepository("migrated", null)
@@ -322,17 +320,35 @@ db = Nitrite.builder()
 **Import/Export Data**
 
 ```java
-// Export data to a file
-Exporter exporter = Exporter.of(db);
-exporter.exportTo(schemaFile);
+// Export data to json file
 
-//Import data from the file
-Importer importer = Importer.of(db);
-importer.importFrom(schemaFile);
+// create export options
+ExportOptions exportOptions = new ExportOptions();
+// set the nitrite factory
+exportOptions.setNitriteFactory(() -> openDb("test.db"));
+// set the collections to export
+exportOptions.setCollections(List.of("first"));
+// set the repositories to export
+exportOptions.setRepositories(List.of("org.dizitart.no2.support.data.Employee", "org.dizitart.no2.support.data.Company"));
+// set the keyed repositories to export
+exportOptions.setKeyedRepositories(Map.of("key", Set.of("org.dizitart.no2.support.data.Employee")));
+// create an exporter with export options
+Exporter exporter = Exporter.withOptions(exportOptions);
+exporter.exportTo("test.json");
+
+// Import data from the file
+
+// create import options
+ImportOptions importOptions = new ImportOptions();
+// set the nitrite factory
+importOptions.setNitriteFactory(() -> openDb("new-test.db"));
+// create an importer with import options
+Importer importer = Importer.withOptions(importOptions);
+importer.importFrom("test.json");
 
 ```
 
-More details are available in the reference document.
+More details are available in the [guide](https://nitrite.dizitart.com/java-sdk/getting-started/index.html).
 
 ## Release Notes
 
@@ -353,7 +369,7 @@ Release notes are available [here](https://github.com/nitrite/nitrite-java/relea
 </thead>
 <tbody>
 <tr class="odd">
-<td><p><a href="https://www.dizitart.org/nitrite-database">Document</a></p></td>
+<td><p><a href="https://nitrite.dizitart.com/java-sdk/getting-started/index.html">Document</a></p></td>
 <td><p><a href="https://javadoc.io/doc/org.dizitart/nitrite">JavaDoc</a></p></td>
 </tr>
 </tbody>
@@ -373,7 +389,7 @@ mvn clean install
 
 ## Support / Feedback
 
-For issues with, questions about, or feedback create a [discussion](https://github.com/nitrite/nitrite-java/discussions).
+For issues with, questions about, or feedback create a [discussion](https://github.com/orgs/nitrite/discussions).
 
 ## Bugs / Feature Requests
 

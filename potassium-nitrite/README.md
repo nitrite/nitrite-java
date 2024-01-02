@@ -33,6 +33,7 @@ implementation 'org.dizitart:potassium-nitrite'
 ```kotlin
 val db = nitrite("user", "password") {
     loadModule(MVStoreModule(fileName))
+    loadModule(module(KNO2JacksonMapper()))
     loadModule(module(NitriteTextIndexer(UniversalTextTokenizer())))
 }
 ```
