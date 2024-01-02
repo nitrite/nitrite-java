@@ -15,7 +15,6 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nitrite.version>${project.version}</nitrite.version>
     </properties>
 
     <dependencyManagement>
@@ -24,37 +23,37 @@
             <dependency>
                 <groupId>org.dizitart</groupId>
                 <artifactId>nitrite</artifactId>
-                <version>${nitrite.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dizitart</groupId>
                 <artifactId>nitrite-jackson-mapper</artifactId>
-                <version>${nitrite.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dizitart</groupId>
                 <artifactId>nitrite-mvstore-adapter</artifactId>
-                <version>${nitrite.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dizitart</groupId>
                 <artifactId>nitrite-rocksdb-adapter</artifactId>
-                <version>${nitrite.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dizitart</groupId>
                 <artifactId>nitrite-spatial</artifactId>
-                <version>${nitrite.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dizitart</groupId>
                 <artifactId>nitrite-support</artifactId>
-                <version>${nitrite.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dizitart</groupId>
                 <artifactId>potassium-nitrite</artifactId>
-                <version>${nitrite.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
