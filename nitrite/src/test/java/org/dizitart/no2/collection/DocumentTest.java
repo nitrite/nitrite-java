@@ -189,6 +189,7 @@ public class DocumentTest {
         assertEquals(((Document)doc.get("location:address")).size(), 2);
         config.fieldSeparator(".");
     }
+    
     @Test
     public void testRemoveFromArray() {
         NitriteConfig config = new NitriteConfig();
@@ -309,6 +310,15 @@ public class DocumentTest {
         doc.remove("location.address.line2");
         doc.remove("location.address.house");
         assertNull(doc.get("location.address"));
+    }
+
+    @Test
+    public void testContainsField() {
+        assertTrue(doc.containsField("location.address.line1"));
+        assertFalse(doc.containsField("location.address.line3"));
+
+        assertTrue(doc.containsField("objArray"));
+        System.out.println(doc.getId());
     }
 }
 

@@ -17,6 +17,8 @@
 
 package org.dizitart.no2.common.util;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 
 /*
@@ -24,6 +26,7 @@ import java.util.Arrays;
  * and the EPL 1.0 (https://h2database.com/html/license.html).
  * Initial Developer: H2 Group
  */
+@Getter
 public class SpatialKey {
     private final long id;
     private final float[] minMax;
@@ -49,12 +52,8 @@ public class SpatialKey {
         minMax[dim + dim + 1] = x;
     }
 
-    public long getId() {
-        return id;
-    }
-
     public boolean isNull() {
-        return minMax.length == 0;
+        return minMax == null || minMax.length == 0;
     }
 
     @Override

@@ -23,9 +23,8 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.meta.Attributes;
-import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.Retry;
@@ -52,7 +51,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.awaitility.Awaitility.await;
-import static org.dizitart.no2.common.module.NitriteModule.module;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.integration.TestUtil.deleteDb;
 import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
@@ -70,31 +68,28 @@ public class ObjectRepositoryTest {
 
     @Before
     public void setUp() {
-        SimpleNitriteMapper mapper = new SimpleNitriteMapper();
-        mapper.registerEntityConverter(new InternalClass.Converter());
-        mapper.registerEntityConverter(new EmployeeEntity.Converter());
-        mapper.registerEntityConverter(new StressRecord.Converter());
-        mapper.registerEntityConverter(new WithClassField.Converter());
-        mapper.registerEntityConverter(new WithDateId.Converter());
-        mapper.registerEntityConverter(new WithTransientField.Converter());
-        mapper.registerEntityConverter(new WithOutId.Converter());
-        mapper.registerEntityConverter(new ChildClass.Converter());
-        mapper.registerEntityConverter(new WithOutGetterSetter.Converter());
-        mapper.registerEntityConverter(new WithPrivateConstructor.Converter());
-        mapper.registerEntityConverter(new WithPublicField.Converter());
-        mapper.registerEntityConverter(new Employee.EmployeeConverter());
-        mapper.registerEntityConverter(new Company.CompanyConverter());
-        mapper.registerEntityConverter(new ProductConverter());
-        mapper.registerEntityConverter(new ProductIdConverter());
-        mapper.registerEntityConverter(new ManufacturerConverter());
-        mapper.registerEntityConverter(new MiniProduct.Converter());
-
         RocksDBModule storeModule = RocksDBModule.withConfig()
             .filePath(dbPath)
             .build();
 
         db = Nitrite.builder()
-            .loadModule(module(mapper))
+            .registerEntityConverter(new InternalClass.Converter())
+            .registerEntityConverter(new EmployeeEntity.Converter())
+            .registerEntityConverter(new StressRecord.Converter())
+            .registerEntityConverter(new WithClassField.Converter())
+            .registerEntityConverter(new WithDateId.Converter())
+            .registerEntityConverter(new WithTransientField.Converter())
+            .registerEntityConverter(new WithOutId.Converter())
+            .registerEntityConverter(new ChildClass.Converter())
+            .registerEntityConverter(new WithOutGetterSetter.Converter())
+            .registerEntityConverter(new WithPrivateConstructor.Converter())
+            .registerEntityConverter(new WithPublicField.Converter())
+            .registerEntityConverter(new Employee.EmployeeConverter())
+            .registerEntityConverter(new Company.CompanyConverter())
+            .registerEntityConverter(new ProductConverter())
+            .registerEntityConverter(new ProductIdConverter())
+            .registerEntityConverter(new ManufacturerConverter())
+            .registerEntityConverter(new MiniProduct.Converter())
             .loadModule(storeModule)
             .fieldSeparator(".")
             .openOrCreate();

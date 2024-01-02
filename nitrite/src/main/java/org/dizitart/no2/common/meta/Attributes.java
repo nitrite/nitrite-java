@@ -57,50 +57,6 @@ public class Attributes implements Serializable {
      */
     public static final String UNIQUE_ID = "uuid";
 
-    /**
-     * The constant SYNC_LOCK.
-     */
-    public static final String SYNC_LOCK = "sync_lock";
-
-    /**
-     * The constant EXPIRY_WAIT.
-     */
-    public static final String EXPIRY_WAIT = "expiry_wait";
-
-    /**
-     * The constant TOMBSTONE.
-     */
-    public static final String TOMBSTONE = "tombstone";
-
-    /**
-     * The constant FEED_LEDGER.
-     */
-    public static final String FEED_LEDGER = "feed_ledger";
-
-    /**
-     * The constant LOCAL_COLLECTION_MARKER.
-     */
-    public static final String LOCAL_COLLECTION_MARKER = "local_collection_marker";
-
-    /**
-     * The constant REMOTE_COLLECTION_MARKER.
-     */
-    public static final String REMOTE_COLLECTION_MARKER = "remote_collection_marker";
-
-    /**
-     * The constant LOCAL_TOMBSTONE_MARKER.
-     */
-    public static final String LOCAL_TOMBSTONE_MARKER = "local_tombstone_marker";
-
-    /**
-     * The constant REMOTE_TOMBSTONE_MARKER.
-     */
-    public static final String REMOTE_TOMBSTONE_MARKER = "remote_tombstone_marker";
-
-    /**
-     * The constant REPLICA.
-     */
-    public static final String REPLICA = "replica";
 
     private Map<String, String> attributes;
 

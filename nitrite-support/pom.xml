@@ -10,8 +10,8 @@
     <artifactId>nitrite-support</artifactId>
     <packaging>jar</packaging>
 
-    <name>nitrite-support</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite Support</name>
+    <description>A utility library for Nitrite</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -56,6 +56,11 @@
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-mvstore-adapter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-jackson-mapper</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

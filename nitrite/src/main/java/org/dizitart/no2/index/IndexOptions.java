@@ -26,17 +26,17 @@ import lombok.Setter;
  * @author Anindya Chatterjee
  * @since 1.0
  */
+@Setter
+@Getter
 @EqualsAndHashCode
 public class IndexOptions {
 
     /**
-     * Specifies the type of an index to create.
+     * Specifies the type of index to create.
      *
-     * @param indexType type of an index.
-     * @return type of an index to create.
+     * @param indexType type of index.
+     * @return type of index to create.
      */
-    @Getter
-    @Setter
     private String indexType;
 
     /**

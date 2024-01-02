@@ -10,8 +10,7 @@
     <artifactId>nitrite</artifactId>
     <packaging>jar</packaging>
 
-    <name>nitrite</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

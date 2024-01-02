@@ -87,7 +87,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
     }
 
     private MVSpatialKey getKey(Key key, long id) {
-        if (key == null) {
+        if (key == null || key.equals(BoundingBox.EMPTY)) {
             return new MVSpatialKey(id);
         } else {
             return new MVSpatialKey(id, key.getMinX(),
@@ -96,6 +96,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
     }
 
     private RecordStream<NitriteId> getRecordStream(MVRTreeMap.RTreeCursor<Key> treeCursor) {
+        //noinspection Convert2Diamond
         return RecordStream.fromIterable(() -> new Iterator<NitriteId>() {
             @Override
             public boolean hasNext() {

@@ -43,7 +43,7 @@ Spatial index can be created on a field of type `Geometry` using annotation.
 
 ```java
 @Data
-@Index(fields = "geometry", type = SPATIAL_INDEX)
+@Index(fields = "geometry", type = SpatialIndexer.SPATIAL_INDEX)
 public class SpatialData {
     @Id
     private Long id;
@@ -54,7 +54,7 @@ public class SpatialData {
 It can also be created programmatically.
 
 ```java
-collection.createIndex(IndexOptions.indexOptions(SPATIAL_INDEX), "location");
+collection.createIndex(IndexOptions.indexOptions(SpatialIndexer.SPATIAL_INDEX), "location");
 ```
 
 ### Query Spatial Data

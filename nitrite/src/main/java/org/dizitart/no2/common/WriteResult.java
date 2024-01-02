@@ -16,7 +16,6 @@
 
 package org.dizitart.no2.common;
 
-import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.util.Iterables;
 

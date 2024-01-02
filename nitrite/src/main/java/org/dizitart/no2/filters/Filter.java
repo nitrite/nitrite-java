@@ -30,9 +30,9 @@ import static org.dizitart.no2.common.util.ValidationUtils.notEmpty;
  * a filter is applied to a collection, based on the criteria it returns
  * a set of matching records.
  * <p>
- * Each filtering criteria is based on a value of a document. If the value
+ * Each filtering criteria is based on a field of a document. If the field
  * is indexed, the find operation takes the advantage of it and only scans
- * the index map for that value. But if the value is not indexed, it scans
+ * the index map for that field. But if the field is not indexed, it scans
  * the whole collection.
  * </p>
  *

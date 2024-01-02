@@ -19,8 +19,10 @@ package org.dizitart.kno2
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
 import kotlinx.serialization.Serializable
+import org.dizitart.kno2.filters.eq
 import org.dizitart.kno2.serialization.KotlinXSerializationMapper
 import org.dizitart.no2.collection.Document
+import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
 import org.slf4j.LoggerFactory
@@ -66,7 +68,7 @@ class KotlinXSerializationMapperTest {
         @Serializable
         sealed class SomePolymorphType(val value: String) {
             @Serializable
-            object SomeTypeA : SomePolymorphType("Type A")
+            data object SomeTypeA : SomePolymorphType("Type A")
 
             @Serializable
             data class SomeTypeB(val someValue: String) : SomePolymorphType("Type B")
@@ -139,7 +141,7 @@ class KotlinXSerializationMapperTest {
     fun testModule() {
         val db = nitrite {
             loadModule(MVStoreModule(dbPath))
-            loadModule(KotlinXSerializationMapper)
+            loadModule(module(KotlinXSerializationMapper()))
         }
 
         val repo = db.getRepository<TestData>()
@@ -157,8 +159,9 @@ class KotlinXSerializationMapperTest {
 
     @Test
     fun testMapping() {
-        val document = KotlinXSerializationMapper.tryConvert(testData, Document::class.java)
-        val decodedObject = KotlinXSerializationMapper.tryConvert(document, TestData::class.java) as TestData
+        val mapper = KotlinXSerializationMapper()
+        val document = mapper.tryConvert(testData, Document::class.java)
+        val decodedObject = mapper.tryConvert(document, TestData::class.java) as TestData
         assertSame(testData.someArray.size, decodedObject.someArray.size)
         testData.someArray.forEachIndexed { index, s -> assertEquals(decodedObject.someArray[index], s) }
         assertEquals(testData, decodedObject.copy(someArray = testData.someArray))

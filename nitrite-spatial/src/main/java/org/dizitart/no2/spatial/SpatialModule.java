@@ -18,6 +18,7 @@ package org.dizitart.no2.spatial;
 
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
+import org.dizitart.no2.spatial.converter.GeometryConverter;
 
 import java.util.Set;
 
@@ -32,8 +33,6 @@ import static org.dizitart.no2.common.util.Iterables.setOf;
  * @author Anindya Chatterjee
  */
 public class SpatialModule implements NitriteModule {
-    private SpatialIndexer spatialIndexer;
-
     /**
      * {@inheritDoc}
      * Returns a set of Nitrite plugins, which includes the SpatialIndexer.
@@ -42,9 +41,6 @@ public class SpatialModule implements NitriteModule {
      */
     @Override
     public Set<NitritePlugin> plugins() {
-        if (spatialIndexer == null) {
-            spatialIndexer = new SpatialIndexer();
-        }
-        return setOf(spatialIndexer);
+        return setOf(new SpatialIndexer(), new GeometryConverter());
     }
 }

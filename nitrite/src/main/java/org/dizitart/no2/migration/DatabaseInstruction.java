@@ -22,9 +22,9 @@ public interface DatabaseInstruction extends Instruction {
      * @param password the password
      * @return the database instruction
      */
-    default DatabaseInstruction addPassword(String username, String password) {
+    default DatabaseInstruction addUser(String username, String password) {
         MigrationStep migrationStep = new MigrationStep();
-        migrationStep.setInstructionType(InstructionType.AddPassword);
+        migrationStep.setInstructionType(InstructionType.AddUser);
         migrationStep.setArguments(new Pair<>(username, new SecureString(password)));
         addStep(migrationStep);
         return this;

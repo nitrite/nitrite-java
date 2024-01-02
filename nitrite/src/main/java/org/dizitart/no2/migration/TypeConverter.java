@@ -8,6 +8,7 @@ package org.dizitart.no2.migration;
  * @author Anindya Chatterjee
  * @since 4.0
  */
+@FunctionalInterface
 public interface TypeConverter<S, T> {
     /**
      * Converts an object of type <code>S</code> to an object of type <code>T</code>.

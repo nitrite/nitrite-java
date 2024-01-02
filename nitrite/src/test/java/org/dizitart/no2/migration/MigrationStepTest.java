@@ -26,8 +26,8 @@ public class MigrationStepTest {
     public void testConstructor() {
         MigrationStep actualMigrationStep = new MigrationStep();
         actualMigrationStep.setArguments("Arguments");
-        actualMigrationStep.setInstructionType(InstructionType.AddPassword);
-        assertEquals(InstructionType.AddPassword, actualMigrationStep.getInstructionType());
+        actualMigrationStep.setInstructionType(InstructionType.AddUser);
+        assertEquals(InstructionType.AddUser, actualMigrationStep.getInstructionType());
     }
 }
 

@@ -19,9 +19,7 @@ package org.dizitart.no2.spatial;
 
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.mvstore.MVStoreModule;
-import org.dizitart.no2.spatial.mapper.GeometryModule;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -45,14 +43,14 @@ public class TestUtil {
     }
 
     public static Nitrite createDb(String fileName) {
-        MVStoreModule module = MVStoreModule.withConfig()
+        MVStoreModule storeModule = MVStoreModule.withConfig()
             .filePath(fileName)
             .build();
 
         return Nitrite.builder()
-            .loadModule(module)
-            .loadModule(new JacksonMapperModule(new GeometryModule()))
+            .loadModule(storeModule)
             .loadModule(new SpatialModule())
+            .registerEntityConverter(new SpatialData.SpatialDataConverter())
             .fieldSeparator(".")
             .openOrCreate();
     }

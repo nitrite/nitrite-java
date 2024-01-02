@@ -9,9 +9,9 @@ package org.dizitart.no2.migration;
 public enum InstructionType {
     // db related statements
     /**
-     * The add password instruction.
+     * The add user instruction.
      */
-    AddPassword,
+    AddUser,
     /**
      * The change password instruction.
      */

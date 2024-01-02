@@ -100,7 +100,7 @@ public class MigrationTest {
             @Override
             public void migrate(InstructionSet instruction) {
                 instruction.forDatabase()
-                    .addPassword("test-user", "test-password");
+                    .addUser("test-user", "test-password");
 
                 instruction.forRepository(OldClass.class, "demo1")
                     .renameRepository("new", null)
@@ -163,7 +163,7 @@ public class MigrationTest {
             @Override
             public void migrate(InstructionSet instruction) {
                 instruction.forDatabase()
-                    .addPassword("test-user", "test-password");
+                    .addUser("test-user", "test-password");
 
                 instruction.forCollection("test")
                     .rename("testCollectionMigrate")

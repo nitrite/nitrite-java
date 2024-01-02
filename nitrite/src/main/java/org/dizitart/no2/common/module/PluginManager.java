@@ -19,15 +19,18 @@ package org.dizitart.no2.common.module;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.PluginException;
 import org.dizitart.no2.index.*;
-import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryStoreModule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,6 +40,7 @@ import java.util.Map;
 @Slf4j(topic = "nitrite")
 @Getter
 public class PluginManager implements AutoCloseable {
+    private final List<EntityConverter<?>> entityConverters;
     private final Map<String, NitriteIndexer> indexerMap;
     private final NitriteConfig nitriteConfig;
     private NitriteMapper nitriteMapper;
@@ -50,6 +54,7 @@ public class PluginManager implements AutoCloseable {
     public PluginManager(NitriteConfig nitriteConfig) {
         this.indexerMap = new HashMap<>();
         this.nitriteConfig = nitriteConfig;
+        this.entityConverters = new ArrayList<>();
     }
 
     /**
@@ -130,6 +135,8 @@ public class PluginManager implements AutoCloseable {
                 loadNitriteMapper((NitriteMapper) plugin);
             } else if (plugin instanceof NitriteStore) {
                 loadNitriteStore((NitriteStore<?>) plugin);
+            } else if (plugin instanceof EntityConverter) {
+                loadEntityConverter((EntityConverter<?>) plugin);
             } else {
                 plugin.close();
                 throw new PluginException("Unknown plugin type: " + plugin.getClass().getName());
@@ -151,6 +158,12 @@ public class PluginManager implements AutoCloseable {
             throw new PluginException("Multiple nitrite mapper plugins found");
         }
         this.nitriteMapper = nitriteMapper;
+    }
+
+    private void loadEntityConverter(EntityConverter<?> entityConverter) {
+        if (entityConverter != null) {
+            entityConverters.add(entityConverter);
+        }
     }
 
     private synchronized void loadIndexer(NitriteIndexer nitriteIndexer) {
@@ -185,6 +198,20 @@ public class PluginManager implements AutoCloseable {
             log.debug("Loading mappable mapper");
             NitritePlugin plugin = new SimpleNitriteMapper();
             loadPlugin(plugin);
+        }
+
+        if (nitriteMapper != null && nitriteMapper instanceof SimpleNitriteMapper) {
+            SimpleNitriteMapper mapper = (SimpleNitriteMapper) nitriteMapper;
+            log.debug("Loading entity converters");
+            if (!nitriteConfig.getEntityConverters().isEmpty()) {
+                for (EntityConverter<?> entityConverter : nitriteConfig.getEntityConverters()) {
+                    mapper.registerEntityConverter(entityConverter);
+                }
+            }
+
+            for (EntityConverter<?> entityConverter : entityConverters) {
+                mapper.registerEntityConverter(entityConverter);
+            }
         }
 
         if (nitriteStore == null) {

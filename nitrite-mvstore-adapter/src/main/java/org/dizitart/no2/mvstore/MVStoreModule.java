@@ -65,7 +65,7 @@ public class MVStoreModule implements StoreModule {
     }
 
     /**
-     * Returns a new instance of {@link NitriteStore} with the configured {@link StoreConfig}.
+     * Returns a new instance of {@link NitriteStore} with the configured {@link org.dizitart.no2.store.StoreConfig}.
      *
      * @return a new instance of {@link NitriteStore}.
      */

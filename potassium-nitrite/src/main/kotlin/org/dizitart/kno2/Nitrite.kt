@@ -20,6 +20,7 @@ import org.dizitart.no2.Nitrite
 import org.dizitart.no2.collection.NitriteCollection
 import org.dizitart.no2.index.IndexOptions
 import org.dizitart.no2.index.IndexType
+import org.dizitart.no2.repository.EntityDecorator
 import org.dizitart.no2.repository.ObjectRepository
 
 /**
@@ -28,7 +29,7 @@ import org.dizitart.no2.repository.ObjectRepository
  */
 
 /**
- * Opens a named collection from the store. If the collections does not exist it will be created
+ * Opens a named collection from the store. If the collection does not exist it will be created
  * automatically and returned. If a collection is already opened, it is returned as is.
  *
  * Returned collection is thread-safe for concurrent use.
@@ -89,6 +90,50 @@ inline fun <reified T : Any> Nitrite.getRepository(
         noinline op: (ObjectRepository<T>.() -> Unit)? = null
 ): ObjectRepository<T> {
     val repository = this.getRepository(T::class.java, key)
+    op?.invoke(repository)
+    return repository
+}
+
+/**
+ * Opens a type-safe object repository using a {@link EntityDecorator}. If the
+ * repository does not exist it will be created automatically and returned.
+ * If a repository is already opened, it is returned as is.
+ * <p>
+ * The returned repository is thread-safe for concurrent use.
+ *
+ * @param [T] type parameter
+ * @param [entityDecorator] the entityDecorator
+ * @return the repository of type [T]
+ */
+inline fun <reified T : Any> Nitrite.getRepository(
+        entityDecorator: EntityDecorator<T>,
+        noinline op: (ObjectRepository<T>.() -> Unit)? = null
+): ObjectRepository<T> {
+    val repository = this.getRepository(entityDecorator)
+    op?.invoke(repository)
+    return repository
+}
+
+/**
+ * Opens a type-safe object repository using a {@link EntityDecorator} and a key
+ * identifier from the store. If the repository does not exist it will be
+ * created
+ * automatically and returned. If a repository is already opened, it is returned
+ * as is.
+ * <p>
+ * The returned repository is thread-safe for concurrent use.
+ *
+ * @param [T] type parameter
+ * @param [entityDecorator] the entityDecorator
+ * @param [key]             the key
+ * @return the repository of type [T]
+ */
+inline fun <reified T : Any> Nitrite.getRepository(
+    entityDecorator: EntityDecorator<T>,
+    key: String,
+    noinline op: (ObjectRepository<T>.() -> Unit)? = null
+): ObjectRepository<T> {
+    val repository = this.getRepository(entityDecorator, key)
     op?.invoke(repository)
     return repository
 }

@@ -7,20 +7,17 @@ import org.dizitart.no2.index.IndexOptions;
 
 /**
  * Represents a transaction in Nitrite database. It provides methods to perform
- * ACID operations
- * on Nitrite database collections and repositories.
+ * transactional operations on Nitrite database collections and repositories.
  * <p>
  * A transaction can be committed or rolled back. Once a transaction is
- * committed, all changes
- * made during the transaction are persisted to the underlying store. If a
- * transaction is
- * rolled back, all changes made during the transaction are discarded.
+ * committed, all changes made during the transaction are persisted to the
+ * underlying store. If a transaction is rolled back, all changes made during
+ * the transaction are discarded.
  * <p>
  * 
  * NOTE: Certain operations are auto-committed in Nitrite database. Those
- * operations are not
- * part of a transaction and cannot be rolled back. The following operations are
- * auto-committed:
+ * operations are not part of a transaction and cannot be rolled back. The
+ * following operations are auto-committed:
  * 
  * <ul>
  * <li>{@link NitriteCollection#createIndex(String...)}</li>
@@ -61,7 +58,7 @@ public interface Transaction extends AutoCloseable {
     TransactionState getState();
 
     /**
-     * Gets a {@link NitriteCollection} to perform ACID operations on it.
+     * Gets a {@link NitriteCollection} to perform transactional operations on it.
      *
      * @param name the name
      * @return the collection
@@ -69,7 +66,7 @@ public interface Transaction extends AutoCloseable {
     NitriteCollection getCollection(String name);
 
     /**
-     * Gets an {@link ObjectRepository} to perform ACID operations on it.
+     * Gets an {@link ObjectRepository} to perform transactional operations on it.
      *
      * @param <T>  the type parameter
      * @param type the type
@@ -78,7 +75,7 @@ public interface Transaction extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(Class<T> type);
 
     /**
-     * Gets an {@link ObjectRepository} to perform ACID operations on it.
+     * Gets an {@link ObjectRepository} to perform transactional operations on it.
      *
      * @param <T>  the type parameter
      * @param type the type
@@ -88,7 +85,7 @@ public interface Transaction extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(Class<T> type, String key);
 
     /**
-     * Gets an {@link ObjectRepository} to perform ACID operations on it.
+     * Gets an {@link ObjectRepository} to perform transactional operations on it.
      *
      * @param <T>             the type parameter
      * @param entityDecorator the entityDecorator
@@ -97,7 +94,7 @@ public interface Transaction extends AutoCloseable {
     <T> ObjectRepository<T> getRepository(EntityDecorator<T> entityDecorator);
 
     /**
-     * Gets an {@link ObjectRepository} to perform ACID operations on it.
+     * Gets an {@link ObjectRepository} to perform transactional operations on it.
      *
      * @param <T>             the type parameter
      * @param entityDecorator the entityDecorator
@@ -112,7 +109,8 @@ public interface Transaction extends AutoCloseable {
     void commit();
 
     /**
-     * Rolls back the transaction, discarding any changes made during the transaction.
+     * Rolls back the transaction, discarding any changes made during the
+     * transaction.
      */
     void rollback();
 

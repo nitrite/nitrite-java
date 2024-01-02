@@ -7,8 +7,32 @@
     <version>4.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>nitrite-java</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite Database</name>
+    <description>Nitrite is an open source embedded NoSQL database for Java.</description>
+
+    <url>https://nitrite.dizitart.com</url>
+
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Anindya Chatterjee</name>
+            <email>anidotnet@gmail.com</email>
+            <organization>Dizitart</organization>
+            <organizationUrl>https://nitrite.dizitart.com</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:nitrite/nitrite-java.git</connection>
+        <developerConnection>scm:git:git@github.com:nitrite/nitrite-java.git</developerConnection>
+        <url>https://github.com/nitrite/nitrite-java</url>
+    </scm>
 
     <modules>
         <module>nitrite</module>
@@ -26,40 +50,40 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.15.2</jackson.version>
-        <slf4j.version>2.0.9</slf4j.version>
+        <jackson.version>2.16.1</jackson.version>
+        <slf4j.version>2.0.10</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.2.224</h2.version>
-        <rocksdb.version>8.5.4</rocksdb.version>
+        <rocksdb.version>8.9.1</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
         <commons-codec.version>1.16.0</commons-codec.version>
-        <commons-io.version>2.13.0</commons-io.version>
-        <kotlin.version>1.9.0</kotlin.version>
-        <kotlinx-serialization.version>1.6.0</kotlinx-serialization.version>
+        <commons-io.version>2.15.1</commons-io.version>
+        <kotlin.version>1.9.22</kotlin.version>
+        <kotlinx-serialization.version>1.6.2</kotlinx-serialization.version>
         <lombok.version>1.18.30</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.5.0</mockito.version>
-        <podam.version>7.2.11.RELEASE</podam.version>
-        <log4j.version>2.20.0</log4j.version>
+        <mockito.version>5.8.0</mockito.version>
+        <podam.version>8.0.0.RELEASE</podam.version>
+        <log4j.version>2.22.1</log4j.version>
         <awaitility.version>4.2.0</awaitility.version>
         <joda-time.version>2.12.5</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
-        <snakeyaml.version>2.0</snakeyaml.version>
-        <jakarta.xml.bind-api.version>4.0.0</jakarta.xml.bind-api.version>
-        <jaxb-impl.version>4.0.0</jaxb-impl.version>
+        <snakeyaml.version>2.2</snakeyaml.version>
+        <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
+        <jaxb-impl.version>4.0.4</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>32.1.1-jre</guava.version>
+        <guava.version>33.0.0-jre</guava.version>
         <threetenbp.version>1.6.8</threetenbp.version>
 
-        <error-prone.version>2.20.0</error-prone.version>
-        <jacoco.version>0.8.10</jacoco.version>
-        <surefire.version>3.1.2</surefire.version>
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <maven-javadoc-plugin.version>3.6.0</maven-javadoc-plugin.version>
+        <error-prone.version>2.24.0</error-prone.version>
+        <jacoco.version>0.8.11</jacoco.version>
+        <surefire.version>3.2.3</surefire.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
-        <dokka.version>1.8.20</dokka.version>
+        <dokka.version>1.9.10</dokka.version>
         <animal-sniffer.version>1.23</animal-sniffer.version>
         <api-level-24.version>7.0_r2</api-level-24.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>

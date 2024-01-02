@@ -22,6 +22,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.exceptions.ValidationException;
 
 import java.util.List;
 import java.util.NavigableMap;

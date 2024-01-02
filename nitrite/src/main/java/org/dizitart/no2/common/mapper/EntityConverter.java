@@ -17,7 +17,9 @@
 
 package org.dizitart.no2.common.mapper;
 
+import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.module.NitritePlugin;
 
 /**
  * The {@link EntityConverter} interface is used to convert 
@@ -28,7 +30,7 @@ import org.dizitart.no2.collection.Document;
  * @author Anindya Chatterjee
  * @param <T> the type parameter
  */
-public interface EntityConverter<T> {
+public interface EntityConverter<T> extends NitritePlugin {
     /**
      * Gets the entity type.
      *
@@ -53,4 +55,7 @@ public interface EntityConverter<T> {
      * @return the t
      */
     T fromDocument(Document document, NitriteMapper nitriteMapper);
+
+    @Override
+    default void initialize(NitriteConfig nitriteConfig) {}
 }

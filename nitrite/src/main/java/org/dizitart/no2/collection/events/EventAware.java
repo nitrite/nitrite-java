@@ -17,10 +17,24 @@
 package org.dizitart.no2.collection.events;
 
 /**
+ * An interface to make a {@link NitriteCollection} or {@link ObjectRepository}
+ * event aware.
+ * 
  * @since 4.0
  * @author Anindya Chatterjee
  */
 public interface EventAware {
+    /**
+     * Subscribes a listener to the collection event.
+     *
+     * @param listener the listener to subscribe
+     */
     void subscribe(CollectionEventListener listener);
+
+    /**
+     * Unsubscribes a listener from the collection event.
+     *
+     * @param listener the listener to unsubscribe
+     */
     void unsubscribe(CollectionEventListener listener);
 }

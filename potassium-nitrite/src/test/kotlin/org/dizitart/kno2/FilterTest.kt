@@ -42,6 +42,7 @@ class FilterTest : BaseTest() {
     fun before() {
         db = nitrite {
             loadModule(MVStoreModule(fileName))
+            loadModule(KNO2Module())
         }
     }
 
@@ -138,6 +139,23 @@ class FilterTest : BaseTest() {
             assertEquals(cursor.size(), 2)
         }
     }
+
+    @Test
+    fun testNotWithin() {
+        db?.getCollection("test") {
+            insert(documentOf("a" to 1), documentOf("a" to 5))
+
+            var cursor = find("a" notWithin arrayOf(10, 2, 50))
+            assertEquals(cursor.size(), 2)
+
+            cursor = find("a" notWithin 1..5)
+            assertEquals(cursor.size(), 0)
+
+            cursor = find("a" notWithin listOf(1, 2, 3, 4, 5))
+            assertEquals(cursor.size(), 0)
+        }
+    }
+
 
     @Test
     fun testElemMatch() {

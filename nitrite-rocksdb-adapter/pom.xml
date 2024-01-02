@@ -10,8 +10,8 @@
     <artifactId>nitrite-rocksdb-adapter</artifactId>
     <packaging>jar</packaging>
 
-    <name>nitrite-rocksdb-adapter</name>
-    <url>https://maven.apache.org</url>
+    <name>Nitrite RocksDB Adapter</name>
+    <description>Nitrite storage adapter for RocksDB</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

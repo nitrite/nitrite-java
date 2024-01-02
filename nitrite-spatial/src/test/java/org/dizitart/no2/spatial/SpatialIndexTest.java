@@ -17,10 +17,8 @@
 package org.dizitart.no2.spatial;
 
 import org.dizitart.no2.Nitrite;
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.FindPlan;
-import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.*;
+import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.EqualsFilter;
 import org.dizitart.no2.filters.FluentFilter;
@@ -39,9 +37,10 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.collection.FindOptions.orderBy;
 import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.index.IndexType.UNIQUE;
-import static org.dizitart.no2.spatial.FluentFilter.where;
+import static org.dizitart.no2.spatial.SpatialFluentFilter.where;
 import static org.dizitart.no2.spatial.SpatialIndexer.SPATIAL_INDEX;
 import static org.junit.Assert.*;
 
@@ -60,7 +59,7 @@ public class SpatialIndexTest extends BaseSpatialTest {
         assertEquals(cursor.toList(), Arrays.asList(object1, object2));
 
         collection.createIndex(IndexOptions.indexOptions(SPATIAL_INDEX), "location");
-        DocumentCursor cursor1 = collection.find(where("location").intersects(search));
+        DocumentCursor cursor1 = collection.find(where("location").intersects(search), orderBy("key", SortOrder.Ascending));
         assertEquals(cursor1.size(), 2);
         assertEquals(cursor1.toList().stream().map(this::trimMeta).collect(Collectors.toList()), Arrays.asList(doc1, doc2));
     }
@@ -75,7 +74,7 @@ public class SpatialIndexTest extends BaseSpatialTest {
         assertEquals(cursor.toList(), Collections.singletonList(object1));
 
         collection.createIndex(IndexOptions.indexOptions(SPATIAL_INDEX), "location");
-        DocumentCursor cursor1 = collection.find(where("location").within(search));
+        DocumentCursor cursor1 = collection.find(where("location").within(search), orderBy("key", SortOrder.Ascending));
         assertEquals(cursor1.size(), 1);
         assertEquals(cursor1.toList().stream().map(this::trimMeta).collect(Collectors.toList()), Collections.singletonList(doc1));
     }
@@ -199,7 +198,8 @@ public class SpatialIndexTest extends BaseSpatialTest {
             and(
                 where("location").intersects(search),
                 where("location").within(search)
-            )
+            ),
+            orderBy("key", SortOrder.Ascending)
         );
 
         assertEquals(cursor.size(), 2);

@@ -112,6 +112,9 @@ public interface Document extends Iterable<Pair<String, Object>>, Cloneable, Ser
      * Returns the value of type {@code <T>} to which the specified
      * key is associated, or null if this document contains no mapping
      * for the key.
+     * <p>
+     * NOTE: This method may not work for fields containing primitive types.
+     * Use {@link #get(String)} instead.
      *
      * @param <T>  the type parameter
      * @param key  the key

@@ -45,6 +45,7 @@ class ObjectFilterTest : BaseTest() {
     fun before() {
         db = nitrite {
             loadModule(MVStoreModule(fileName))
+            loadModule(KNO2Module())
         }
     }
 
@@ -122,6 +123,19 @@ class ObjectFilterTest : BaseTest() {
             assertEquals(cursor.size(), 2)
 
             cursor = find(TestData::id within arrayOf(2, 3))
+            assertEquals(cursor.size(), 1)
+        }
+    }
+
+    @Test
+    fun testNotWithin() {
+        db?.getRepository<TestData> {
+            insert(TestData(1, "red"), TestData(2, "yellow"))
+
+            var cursor = find(TestData::id notWithin 1..2)
+            assertEquals(cursor.size(), 0)
+
+            cursor = find(TestData::id notWithin arrayOf(2, 3))
             assertEquals(cursor.size(), 1)
         }
     }

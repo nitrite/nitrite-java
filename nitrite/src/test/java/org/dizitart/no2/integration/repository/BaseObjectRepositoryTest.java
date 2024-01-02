@@ -19,7 +19,6 @@ package org.dizitart.no2.integration.repository;
 
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
-import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.integration.repository.data.*;
 import org.dizitart.no2.integration.repository.decorator.*;
@@ -99,6 +98,28 @@ public abstract class BaseObjectRepositoryTest {
 
     private void openDb() {
         NitriteBuilder nitriteBuilder = Nitrite.builder()
+            .registerEntityConverter(new Company.CompanyConverter())
+            .registerEntityConverter(new Employee.EmployeeConverter())
+            .registerEntityConverter(new Note.NoteConverter())
+            .registerEntityConverter(new Book.BookConverter())
+            .registerEntityConverter(new BookId.BookIdConverter())
+            .registerEntityConverter(new ClassA.ClassAConverter())
+            .registerEntityConverter(new ClassBConverter())
+            .registerEntityConverter(new ClassC.ClassCConverter())
+            .registerEntityConverter(new ElemMatch.Converter())
+            .registerEntityConverter(new InternalClass.Converter())
+            .registerEntityConverter(new UniversalTextTokenizerTest.TextData.Converter())
+            .registerEntityConverter(new SubEmployee.Converter())
+            .registerEntityConverter(new ProductScore.Converter())
+            .registerEntityConverter(new PersonEntity.Converter())
+            .registerEntityConverter(new RepeatableIndexTest.Converter())
+            .registerEntityConverter(new EncryptedPerson.Converter())
+            .registerEntityConverter(new TxData.Converter())
+            .registerEntityConverter(new WithNitriteId.WithNitriteIdConverter())
+            .registerEntityConverter(new ProductConverter())
+            .registerEntityConverter(new ProductIdConverter())
+            .registerEntityConverter(new ManufacturerConverter())
+            .registerEntityConverter(new MiniProduct.Converter())
             .fieldSeparator(".");
 
         if (isProtected) {
@@ -106,30 +127,6 @@ public abstract class BaseObjectRepositoryTest {
         } else {
             db = nitriteBuilder.openOrCreate();
         }
-
-        SimpleNitriteMapper mapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
-        mapper.registerEntityConverter(new Company.CompanyConverter());
-        mapper.registerEntityConverter(new Employee.EmployeeConverter());
-        mapper.registerEntityConverter(new Note.NoteConverter());
-        mapper.registerEntityConverter(new Book.BookConverter());
-        mapper.registerEntityConverter(new BookId.BookIdConverter());
-        mapper.registerEntityConverter(new ClassA.ClassAConverter());
-        mapper.registerEntityConverter(new ClassBConverter());
-        mapper.registerEntityConverter(new ClassC.ClassCConverter());
-        mapper.registerEntityConverter(new ElemMatch.Converter());
-        mapper.registerEntityConverter(new InternalClass.Converter());
-        mapper.registerEntityConverter(new UniversalTextTokenizerTest.TextData.Converter());
-        mapper.registerEntityConverter(new SubEmployee.Converter());
-        mapper.registerEntityConverter(new ProductScore.Converter());
-        mapper.registerEntityConverter(new PersonEntity.Converter());
-        mapper.registerEntityConverter(new RepeatableIndexTest.Converter());
-        mapper.registerEntityConverter(new EncryptedPerson.Converter());
-        mapper.registerEntityConverter(new TxData.Converter());
-        mapper.registerEntityConverter(new WithNitriteId.WithNitriteIdConverter());
-        mapper.registerEntityConverter(new ProductConverter());
-        mapper.registerEntityConverter(new ProductIdConverter());
-        mapper.registerEntityConverter(new ManufacturerConverter());
-        mapper.registerEntityConverter(new MiniProduct.Converter());
     }
 
     @After

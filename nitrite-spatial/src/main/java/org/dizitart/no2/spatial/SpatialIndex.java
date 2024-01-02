@@ -19,6 +19,7 @@ package org.dizitart.no2.spatial;
 
 import lombok.Getter;
 import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.FieldValues;
@@ -33,6 +34,7 @@ import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndex;
 import org.dizitart.no2.store.NitriteRTree;
 import org.dizitart.no2.store.NitriteStore;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.LinkedHashSet;
@@ -50,7 +52,6 @@ public class SpatialIndex implements NitriteIndex {
     @Getter
     private final IndexDescriptor indexDescriptor;
     private final NitriteStore<?> nitriteStore;
-    private final NitriteConfig nitriteConfig;
 
     /**
      * Instantiates a new {@link SpatialIndex}.
@@ -60,7 +61,6 @@ public class SpatialIndex implements NitriteIndex {
      */
     public SpatialIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
         this.indexDescriptor = indexDescriptor;
-        this.nitriteConfig = nitriteConfig;
         this.nitriteStore = nitriteConfig.getNitriteStore();
     }
 
@@ -74,11 +74,15 @@ public class SpatialIndex implements NitriteIndex {
 
         NitriteRTree<BoundingBox, Geometry> indexMap = findIndexMap();
         if (element == null) {
-            indexMap.add(null, fieldValues.getNitriteId());
+            indexMap.add(BoundingBox.EMPTY, fieldValues.getNitriteId());
         } else {
             Geometry geometry = parseGeometry(firstField, element);
-            BoundingBox boundingBox = new NitriteBoundingBox(geometry);
-            indexMap.add(boundingBox, fieldValues.getNitriteId());
+            if (geometry == null) {
+                indexMap.add(BoundingBox.EMPTY, fieldValues.getNitriteId());
+            } else {
+                BoundingBox boundingBox = fromGeometry(geometry);
+                indexMap.add(boundingBox, fieldValues.getNitriteId());
+            }
         }
     }
 
@@ -92,11 +96,15 @@ public class SpatialIndex implements NitriteIndex {
 
         NitriteRTree<BoundingBox, Geometry> indexMap = findIndexMap();
         if (element == null) {
-            indexMap.remove(null, fieldValues.getNitriteId());
+            indexMap.remove(BoundingBox.EMPTY, fieldValues.getNitriteId());
         } else {
             Geometry geometry = parseGeometry(firstField, element);
-            BoundingBox boundingBox = new NitriteBoundingBox(geometry);
-            indexMap.remove(boundingBox, fieldValues.getNitriteId());
+            if (geometry == null) {
+                indexMap.remove(BoundingBox.EMPTY, fieldValues.getNitriteId());
+            } else {
+                BoundingBox boundingBox = fromGeometry(geometry);
+                indexMap.remove(boundingBox, fieldValues.getNitriteId());
+            }
         }
     }
 
@@ -123,17 +131,19 @@ public class SpatialIndex implements NitriteIndex {
             throw new FilterException("Spatial filter must be the first filter for index scan");
         }
 
-        RecordStream<NitriteId> keys = null;
+        RecordStream<NitriteId> keys;
         NitriteRTree<BoundingBox, Geometry> indexMap = findIndexMap();
 
         SpatialFilter spatialFilter = (SpatialFilter) filter;
         Geometry geometry = spatialFilter.getValue();
-        BoundingBox boundingBox = new NitriteBoundingBox(geometry);
+        BoundingBox boundingBox = fromGeometry(geometry);
 
         if (filter instanceof WithinFilter) {
             keys = indexMap.findContainedKeys(boundingBox);
         } else if (filter instanceof IntersectsFilter) {
             keys = indexMap.findIntersectingKeys(boundingBox);
+        } else {
+            throw new FilterException("Unsupported spatial filter " + filter);
         }
 
         LinkedHashSet<NitriteId> nitriteIds = new LinkedHashSet<>();
@@ -157,7 +167,25 @@ public class SpatialIndex implements NitriteIndex {
             return GeometryUtils.fromString((String) fieldValue);
         } else if (fieldValue instanceof Geometry) {
             return (Geometry) fieldValue;
+        } else if (fieldValue instanceof Document) {
+            // in case of document, check if it contains geometry field
+            // GeometryConverter convert a geometry to document with geometry field
+            Document document = (Document) fieldValue;
+            if (document.containsField("geometry")) {
+                return GeometryUtils.fromString(document.get("geometry", String.class));
+            }
         }
         throw new IndexingException("Field " + field + " does not contain Geometry data");
+    }
+
+    private BoundingBox fromGeometry(Geometry geometry) {
+        if (geometry == null) return null;
+        Envelope env = geometry.getEnvelopeInternal();
+        BoundingBox boundingBox = new BoundingBox();
+        boundingBox.setMinX((float) env.getMinX());
+        boundingBox.setMaxX((float) env.getMaxX());
+        boundingBox.setMinY((float) env.getMinY());
+        boundingBox.setMaxY((float) env.getMaxY());
+        return boundingBox;
     }
 }

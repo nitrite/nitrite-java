@@ -17,6 +17,9 @@
 package org.dizitart.no2.spatial;
 
 import lombok.Data;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
 import org.locationtech.jts.geom.Geometry;
@@ -32,4 +35,26 @@ public class SpatialData {
     @Id
     private Long id;
     private Geometry geometry;
+
+    public static class SpatialDataConverter implements EntityConverter<SpatialData> {
+
+        @Override
+        public Class<SpatialData> getEntityType() {
+            return SpatialData.class;
+        }
+
+        @Override
+        public Document toDocument(SpatialData entity, NitriteMapper nitriteMapper) {
+            return Document.createDocument("id", entity.getId())
+                .put("geometry", nitriteMapper.tryConvert(entity.getGeometry(), Document.class));
+        }
+
+        @Override
+        public SpatialData fromDocument(Document document, NitriteMapper nitriteMapper) {
+            SpatialData data = new SpatialData();
+            data.setId(document.get("id", Long.class));
+            data.setGeometry((Geometry) nitriteMapper.tryConvert(document.get("geometry"), Geometry.class));
+            return data;
+        }
+    }
 }

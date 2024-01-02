@@ -10,8 +10,8 @@
     <artifactId>potassium-nitrite</artifactId>
     <packaging>jar</packaging>
 
-    <name>potassium-nitrite</name>
-    <url>https://maven.apache.org</url>
+    <name>Potassium Nitrite</name>
+    <description>Kotlin extension for Nitrite</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -39,6 +39,10 @@
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-spatial</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-jackson-mapper</artifactId>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
