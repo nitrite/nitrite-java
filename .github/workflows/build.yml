@@ -32,6 +32,7 @@ jobs:
     name: Build with Java ${{ matrix.java }} in Ubuntu
     steps:
       - uses: actions/checkout@v4
+      - uses: fregante/setup-git-user@v2
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
@@ -64,19 +65,12 @@ jobs:
 
       - name: Deploy Release
         if: github.ref == 'refs/heads/release' && matrix.java == '11' && !contains(github.event.head_commit.message, '[ci skip]')
-        uses: qcastel/github-actions-maven-release@master
-        with:
-          git-release-bot-name: "nitrite-bot"
-          git-release-bot-email: "bot@dizitart.com"
-          maven-args: "-DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip -Dmaven.deploy.skip=true"
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-          release-branch-name: "release"
+        run: mvn -B -ff -ntp deploy -DskipTests -DskipITs
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
-          JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '11'
