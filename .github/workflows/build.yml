@@ -65,7 +65,7 @@ jobs:
 
       - name: Deploy Release
         if: github.ref == 'refs/heads/release' && matrix.java == '11' && !contains(github.event.head_commit.message, '[ci skip]')
-        run: mvn -B -ff -ntp deploy -DskipTests -DskipITs
+        run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests -DskipITs
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
