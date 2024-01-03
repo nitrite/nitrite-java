@@ -1,4 +1,4 @@
-## Release 4.2.0 - Jan 2, 2024
+## Release 4.2.0 - Jan 3, 2024
 
 ### New Changes
 
@@ -11,6 +11,7 @@
 - Nitrite now supports transaction.
 - Nitrite now supports schema migration.
 - Nitrite now supports spatial indexing and search
+- Nitrite now supports compound indexes.
 - Nitrite now support import/export of data in JSON format.
 - Build system has been migrated to Maven.
 - Nitrite DataGate has been deprecated.

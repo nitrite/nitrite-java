@@ -31,7 +31,8 @@
     <scm>
         <connection>scm:git:git@github.com:nitrite/nitrite-java.git</connection>
         <developerConnection>scm:git:git@github.com:nitrite/nitrite-java.git</developerConnection>
-        <url>https://github.com/nitrite/nitrite-java</url>
+        <url>git@github.com:nitrite/nitrite-java.git</url>
+        <tag>HEAD</tag>
     </scm>
 
     <modules>
@@ -498,6 +499,7 @@
                     <version>${maven-release-plugin.version}</version>
                     <configuration>
                         <tagNameFormat>v@{project.version}</tagNameFormat>
+                        <scmCommentPrefix>[ci skip]</scmCommentPrefix>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <releaseProfiles>release</releaseProfiles>
                     </configuration>

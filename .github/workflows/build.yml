@@ -63,13 +63,20 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Release
-        if: github.ref == 'refs/heads/release' && matrix.java == '11'
-        run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests
+        if: github.ref == 'refs/heads/release' && matrix.java == '11' && "!contains(github.event.head_commit.message, '[ci skip]')"
+        uses: qcastel/github-actions-maven-release@master
+        with:
+          git-release-bot-name: "nitrite-bot"
+          git-release-bot-email: "bot@dizitart.com"
+          maven-args: "-DskipTests -DskipITs -Ddockerfile.skip -DdockerCompose.skip -Dmaven.deploy.skip=true"
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          release-branch-name: "release"
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+          JAVA_HOME: /usr/lib/jvm/java-11-openjdk/
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '11'
