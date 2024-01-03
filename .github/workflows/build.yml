@@ -63,7 +63,7 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Release
-        if: github.ref == 'refs/heads/release' && matrix.java == '11' && "!contains(github.event.head_commit.message, '[ci skip]')"
+        if: github.ref == 'refs/heads/release' && matrix.java == '11' && !contains(github.event.head_commit.message, '[ci skip]')
         uses: qcastel/github-actions-maven-release@master
         with:
           git-release-bot-name: "nitrite-bot"
