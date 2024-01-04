@@ -43,13 +43,13 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Prepare PGP Keys
-        if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/release'
+#        if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/release'
         run: openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out $GITHUB_WORKSPACE/secring.gpg -d -md md5
         env:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Release
-        if: github.ref == 'refs/heads/release'
+#        if: github.ref == 'refs/heads/release'
         run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests -DdryRun=true -Darguments=-DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
