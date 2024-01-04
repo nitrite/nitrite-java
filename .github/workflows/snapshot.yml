@@ -37,7 +37,6 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Prepare PGP Keys
-        if: github.ref == 'refs/heads/develop'
         run: |
           chmod +x ./.ci/prepare-keys.sh
           ./.ci/prepare-keys.sh
@@ -46,7 +45,6 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Snapshot
-        if: github.ref == 'refs/heads/develop'
         run: mvn -B -ff -ntp deploy -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
