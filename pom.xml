@@ -499,11 +499,12 @@
                     <version>${maven-release-plugin.version}</version>
                     <configuration>
                         <tagNameFormat>v@{project.version}</tagNameFormat>
-                        <scmCommentPrefix>[ci skip]</scmCommentPrefix>
+                        <scmCommentPrefix>[ci release]</scmCommentPrefix>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <releaseProfiles>release</releaseProfiles>
                         <pushChanges>false</pushChanges>
                         <developmentVersion>${project.version}</developmentVersion>
+                        <goals>deploy</goals>
                     </configuration>
                 </plugin>
                 <plugin>

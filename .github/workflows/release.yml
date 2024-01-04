@@ -38,13 +38,16 @@ jobs:
 
       - name: Prepare PGP Keys
         if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/release'
-        run: openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out $GITHUB_WORKSPACE/secring.gpg -d -md md5
+        run: |
+          chmod +x ./.ci/prepare-keys.sh
+          ./.ci/prepare-keys.sh
+        shell: bash
         env:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Release
-        if: github.ref == 'refs/heads/release'
-        run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests -DdryRun=true
+        if: github.ref == 'refs/heads/release' && !contains(github.event.head_commit.message, '[ci release]')
+        run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}

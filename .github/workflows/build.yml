@@ -17,9 +17,11 @@ on:
       - "README.md"
 
 jobs:
-  release:
-    name: Release
+  build_linux:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: ['11', '17']
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
       MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
@@ -27,13 +29,13 @@ jobs:
       PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
       PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
+    name: Build with Java ${{ matrix.java }} in Ubuntu
     steps:
       - uses: actions/checkout@v4
-      - uses: fregante/setup-git-user@v2
-      - name: Set up JDK 11
+      - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v4
         with:
-          java-version: 11
+          java-version: ${{ matrix.java }}
           distribution: 'zulu'
           java-package: jdk
           architecture: x64
@@ -42,100 +44,59 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
-      - name: Prepare PGP Keys
-#        if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/release'
-        run: openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out $GITHUB_WORKSPACE/secring.gpg -d -md md5
-        env:
-          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+      - name: Build with Maven
+        run: mvn -B -ff -ntp clean install
 
-      - name: Deploy Release
-#        if: github.ref == 'refs/heads/release'
-        run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests -DdryRun=true -Darguments=-DskipTests
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
-          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
-#  build_linux:
-#    runs-on: ubuntu-latest
-#    strategy:
-#      matrix:
-#        java: ['11', '17']
-#    env:
-#      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-#      MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
-#      MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-#      PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
-#      PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
-#
-#    name: Build with Java ${{ matrix.java }} in Ubuntu
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Set up JDK ${{ matrix.java }}
-#        uses: actions/setup-java@v4
-#        with:
-#          java-version: ${{ matrix.java }}
-#          distribution: 'zulu'
-#          java-package: jdk
-#          architecture: x64
-#          cache: 'maven'
-#          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
-#          server-username: MAVEN_USERNAME
-#          server-password: MAVEN_PASSWORD
-#
-#      - name: Build with Maven
-#        run: mvn -B -ff -ntp clean install
-#
-#      - name: Publish Code Coverage
-#        if: github.ref == 'refs/heads/main' && matrix.java == '11'
-#        uses: codecov/codecov-action@v3
-#        with:
-#          token: ${{ secrets.CODECOV_TOKEN }}
-#          flags: unittests
-#          name: codecov-umbrella
-#
-#  build_macos:
-#    runs-on: macos-latest
-#    strategy:
-#      matrix:
-#        java: [ '11', '17' ]
-#    env:
-#      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-#
-#    name: Build with Java ${{ matrix.java }} in MacOS
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Set up JDK ${{ matrix.java }}
-#        uses: actions/setup-java@v4
-#        with:
-#          java-version: ${{ matrix.java }}
-#          distribution: 'zulu'
-#          java-package: jdk
-#          architecture: x64
-#          cache: 'maven'
-#
-#      - name: Build with Maven
-#        run: mvn -B -ff -ntp clean install
-#
-#  build_windows:
-#    runs-on: windows-latest
-#    strategy:
-#      matrix:
-#        java: [ '11', '17' ]
-#    env:
-#      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-#
-#    name: Build with Java ${{ matrix.java }} in Windows
-#    steps:
-#      - uses: actions/checkout@v4
-#      - name: Set up JDK ${{ matrix.java }}
-#        uses: actions/setup-java@v4
-#        with:
-#          java-version: ${{ matrix.java }}
-#          distribution: 'zulu'
-#          java-package: jdk
-#          architecture: x64
-#          cache: 'maven'
-#
-#      - name: Build with Maven
-#        run: mvn -B -ff -ntp clean install
+      - name: Publish Code Coverage
+        if: github.ref == 'refs/heads/main' && matrix.java == '11'
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unittests
+          name: codecov-umbrella
+
+  build_macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        java: [ '11', '17' ]
+    env:
+      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+
+    name: Build with Java ${{ matrix.java }} in MacOS
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+          java-package: jdk
+          architecture: x64
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn -B -ff -ntp clean install
+
+  build_windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        java: [ '11', '17' ]
+    env:
+      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+
+    name: Build with Java ${{ matrix.java }} in Windows
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'zulu'
+          java-package: jdk
+          architecture: x64
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn -B -ff -ntp clean install
