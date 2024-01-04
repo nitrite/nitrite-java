@@ -43,7 +43,7 @@ jobs:
         shell: bash
         env:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
-          
+
       - name: Deploy Release
         if: "!contains(github.event.head_commit.message, '[ci release]')"
         run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests
