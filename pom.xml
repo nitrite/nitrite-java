@@ -502,7 +502,7 @@
                         <scmCommentPrefix>[ci release]</scmCommentPrefix>
                         <autoVersionSubmodules>true</autoVersionSubmodules>
                         <releaseProfiles>release</releaseProfiles>
-                        <pushChanges>false</pushChanges>
+                        <pushChanges>true</pushChanges>
                         <developmentVersion>${project.version}</developmentVersion>
                         <goals>deploy</goals>
                     </configuration>
