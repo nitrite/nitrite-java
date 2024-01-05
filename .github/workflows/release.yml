@@ -47,7 +47,7 @@ jobs:
 
       - name: Deploy Release
         run: |
-          export GPG_TTY=$(tty)
+          export GPG_TTY=`tty`
           mvn -B -ff -ntp deploy -DskipTests
         shell: bash
         env:
