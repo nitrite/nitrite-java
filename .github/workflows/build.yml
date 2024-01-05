@@ -45,7 +45,7 @@ jobs:
           server-password: MAVEN_PASSWORD
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install
+        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '11'
@@ -76,7 +76,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install
+        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
 
   build_windows:
     runs-on: windows-latest
@@ -99,4 +99,4 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install
+        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
