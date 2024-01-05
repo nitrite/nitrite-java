@@ -17,7 +17,7 @@
 package org.dizitart.no2.collection.events;
 
 /**
- * An interface to make a {@link NitriteCollection} or {@link ObjectRepository}
+ * An interface to make a {@link org.dizitart.no2.collection.NitriteCollection} or {@link org.dizitart.no2.repository.ObjectRepository}
  * event aware.
  * 
  * @since 4.0

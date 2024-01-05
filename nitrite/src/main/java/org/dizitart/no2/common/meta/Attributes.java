@@ -28,7 +28,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Represents metadata attributes of a {@link NitriteMap}.
+ * Represents metadata attributes of a {@link org.dizitart.no2.store.NitriteMap}.
  *
  * @author Anindya Chatterjee
  * @since 1.0

@@ -30,6 +30,7 @@ import org.dizitart.no2.common.RecordStream;
  * for (Document doc : result) {
  *  // use your logic with the retrieved doc here
  * }
+ * }
  * </pre>
  *
  * @author Anindya Chatterjee
