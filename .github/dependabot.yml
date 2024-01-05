@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: daily
     target-branch: main
+    ignore:
+      - dependency-name: "org.apache.maven.plugins:maven-gpg-plugin"
 
   - package-ecosystem: "github-actions"
     directory: "/"

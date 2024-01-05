@@ -46,7 +46,10 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Release
-        run: mvn -B -ff -ntp deploy -DskipTests
+        run: |
+          export GPG_TTY=$(tty)
+          mvn -B -ff -ntp deploy -DskipTests
+        shell: bash
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
