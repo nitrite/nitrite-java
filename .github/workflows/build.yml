@@ -99,4 +99,4 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
+        run: mvn -B -ff -ntp clean install --% -Dgpg.skip=true
