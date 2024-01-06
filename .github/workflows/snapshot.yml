@@ -41,14 +41,17 @@ jobs:
           openssl aes-256-cbc -pass pass:"$PGP_KEY_PASSWORD" -in "$GITHUB_WORKSPACE"/.ci/secring.gpg.enc -out "$GITHUB_WORKSPACE"/secring.gpg -d -md md5
           mkdir -p "$HOME"/.gnupg
           cp "$GITHUB_WORKSPACE"/secring.gpg "$HOME"/.gnupg/secring.gpg
+          echo "allow-loopback-pinentry" >> "$HOME"/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> "$HOME"/.gnupg/gpg.conf
+          gpgconf --reload gpg-agent
         shell: bash
         env:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Snapshot
-        run: mvn -B -ff -ntp deploy -DskipTests
+        run: mvn -B -ff -ntp deploy -DskipTests -Dgpg.passphrase="$PGP_KEY_PASSWORD"
+        shell: bash
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}

@@ -1,4 +1,4 @@
-## Release 4.2.0 - Jan 5, 2024
+## Release 4.2.0 - Jan 6, 2024
 
 ### New Changes
 
