@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows:
+      - Build
+    branches:
+      - release
+    types:
+      - completed
+
+jobs:
+  release:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Release
+    runs-on: ubuntu-latest
+    env:
+      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
+      MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
+      MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+      PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
+      PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: fregante/setup-git-user@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: 11
+          distribution: 'zulu'
+          java-package: jdk
+          architecture: x64
+          cache: 'maven'
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+
+      - name: Prepare PGP Keys
+        run: |
+          openssl aes-256-cbc -pass pass:"$PGP_KEY_PASSWORD" -in "$GITHUB_WORKSPACE"/.ci/secring.gpg.enc -out "$GITHUB_WORKSPACE"/secring.gpg -d -md md5
+          mkdir -p "$HOME"/.gnupg
+          cp "$GITHUB_WORKSPACE"/secring.gpg "$HOME"/.gnupg/secring.gpg
+          echo "allow-loopback-pinentry" >> "$HOME"/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> "$HOME"/.gnupg/gpg.conf
+          gpgconf --reload gpg-agent
+        shell: bash
+        env:
+          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+
+      - name: Deploy Release
+        run: mvn -B -ff -ntp deploy -DskipTests -Dgpg.passphrase="$PGP_KEY_PASSWORD"
+        shell: bash
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}

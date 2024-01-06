@@ -24,10 +24,6 @@ jobs:
         java: ['11', '17']
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
-      MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
-      MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-      PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
-      PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
     name: Build with Java ${{ matrix.java }} in Ubuntu
     steps:
@@ -40,36 +36,9 @@ jobs:
           java-package: jdk
           architecture: x64
           cache: 'maven'
-          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-
-      - name: Prepare PGP Keys
-        if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/release'
-        run: openssl aes-256-cbc -pass pass:$PGP_KEY_PASSWORD -in ./.ci/secring.gpg.enc -out $GITHUB_WORKSPACE/secring.gpg -d -md md5
-        env:
-          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install
-
-      - name: Deploy Snapshot
-        if: github.ref == 'refs/heads/develop' && matrix.java == '11'
-        run: mvn -B -ff -ntp deploy -DskipTests
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
-          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
-
-      - name: Deploy Release
-        if: github.ref == 'refs/heads/release' && matrix.java == '11'
-        run: mvn -B -ff -ntp release:clean release:prepare release:perform -DskipTests
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-          PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
-          PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
+        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '11'
@@ -100,7 +69,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install
+        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
 
   build_windows:
     runs-on: windows-latest
@@ -123,4 +92,4 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install
+        run: mvn -B -ff -ntp clean install --% -Dgpg.skip=true

@@ -453,3 +453,4 @@ test.log
 !no2-old.db
 .diffblue
 infer-out
+secring.gpg
