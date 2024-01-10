@@ -80,7 +80,7 @@
 
         <error-prone.version>2.24.1</error-prone.version>
         <jacoco.version>0.8.11</jacoco.version>
-        <surefire.version>3.2.3</surefire.version>
+        <surefire.version>3.2.5</surefire.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
