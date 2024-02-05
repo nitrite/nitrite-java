@@ -196,10 +196,7 @@ class NitriteDatabase implements Nitrite {
         checkOpened();
         if (store != null) {
             try {
-                StoreConfig storeConfig = store.getStoreConfig();
-                if (!storeConfig.isReadOnly()) {
-                    store.commit();
-                }
+                store.commit();
             } catch (Exception e) {
                 throw new NitriteIOException("Error occurred while committing the database", e);
             }
