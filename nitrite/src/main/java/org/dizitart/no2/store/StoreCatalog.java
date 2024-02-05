@@ -49,6 +49,23 @@ public class StoreCatalog {
     }
 
     /**
+     * Checks if the store catalog contains an entry with the given name.
+     *
+     * @param name the name
+     * @return `true` if the store catalog contains an entry with the given name; `false` otherwise
+     */
+    public boolean hasEntry(String name) {
+        for (Pair<String, Document> entry : catalogMap.entries()) {
+            Document document = entry.getSecond();
+            MapMetaData metaData = new MapMetaData(document);
+            if (metaData.getMapNames().contains(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Writes a new entry for a collection with the given name to the store catalog.
      *
      * @param name the name of the collection to add to the catalog
