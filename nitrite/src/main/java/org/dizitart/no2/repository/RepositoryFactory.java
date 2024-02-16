@@ -175,10 +175,12 @@ public class RepositoryFactory {
 
     private void writeCatalog(NitriteStore<?> store, String name, String key) {
         StoreCatalog storeCatalog = store.getCatalog();
-        if (StringUtils.isNullOrEmpty(key)) {
-            storeCatalog.writeRepositoryEntry(name);
-        } else {
-            storeCatalog.writeKeyedRepositoryEntry(name);
+        if (!storeCatalog.hasEntry(name)) {
+            if (StringUtils.isNullOrEmpty(key)) {
+                storeCatalog.writeRepositoryEntry(name);
+            } else {
+                storeCatalog.writeKeyedRepositoryEntry(name);
+            }
         }
     }
 }

@@ -28,10 +28,7 @@ import org.dizitart.no2.migration.MigrationManager;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.RepositoryFactory;
 import org.dizitart.no2.repository.EntityDecorator;
-import org.dizitart.no2.store.NitriteMap;
-import org.dizitart.no2.store.NitriteStore;
-import org.dizitart.no2.store.StoreMetaData;
-import org.dizitart.no2.store.UserAuthenticationService;
+import org.dizitart.no2.store.*;
 import org.dizitart.no2.transaction.Session;
 
 import java.util.Map;

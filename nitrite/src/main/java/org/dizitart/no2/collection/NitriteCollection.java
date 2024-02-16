@@ -82,14 +82,13 @@ public interface NitriteCollection extends PersistentCollection<Document> {
      * @param documents other documents to insert in a batch.
      * @return the result of write operation.
      * @throws ValidationException       if {@code document} is {@code null}.
-     * @throws InvalidIdException        if the {@code _id} value contains non
-     *                                   comparable type, i.e.
+     * @throws InvalidIdException        if the {@code _id} value contains non-comparable type, i.e.
      *                                   type that does not implement
      *                                   {@link Comparable}.
      * @throws UniqueConstraintException if the value of {@code _id} value clashes
      *                                   with the id
      *                                   of another document in the collection.
-     * @throws UniqueConstraintException if a field of the document is indexed and
+     * @throws UniqueConstraintException if a field of the document is indexed, and
      *                                   it violates the unique constraint in the
      *                                   collection(if any).
      * @see NitriteId

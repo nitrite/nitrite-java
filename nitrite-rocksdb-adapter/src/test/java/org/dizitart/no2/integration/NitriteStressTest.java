@@ -21,6 +21,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlSchemaType;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
@@ -35,18 +36,18 @@ import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
 import org.dizitart.no2.repository.annotations.Indices;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.dizitart.no2.collection.UpdateOptions.updateOptions;
+import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.integration.TestUtil.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -106,6 +107,57 @@ public class NitriteStressTest {
 
         int size = testRepository.find().toList().size();
         assertEquals(counter, size);
+    }
+
+    @Test
+    @Ignore
+    public void testIssue902() {
+        NitriteCollection nitriteCollection = db.getCollection("testIssue902");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "name");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "age");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "address");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "email");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "phone");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "dateOfBirth");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "company");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "balance");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "isActive");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "guid");
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "index");
+
+        for (int i = 0; i < 10; i++) {
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+            for (int j = 0; j < 3000; j++) {
+                Document document = Document.createDocument();
+                document.put("name", "name" + j);
+                document.put("age", j);
+                document.put("address", "address" + j);
+                document.put("email", "email" + j);
+                document.put("phone", "phone" + j);
+                document.put("dateOfBirth", "dateOfBirth" + j);
+                document.put("company", "company" + j);
+                document.put("balance", j);
+                document.put("isActive", true);
+                document.put("guid", UUID.randomUUID().toString());
+                document.put("index", j);
+                nitriteCollection.insert(document);
+            }
+            stopWatch.stop();
+            log.error("Time taken to insert 30000 records: " + stopWatch.getTime());
+        }
+
+        if (db.hasUnsavedChanges()) {
+            db.commit();
+        }
+
+        Document updatedDocument = Document.createDocument("unrelatedField", "unrelatedValue");
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        nitriteCollection.update(where("balance").eq(200000), updatedDocument, updateOptions(false));
+        stopWatch.stop();
+
+        log.error("Time taken to update 1 record: " + stopWatch.getTime());
     }
 
     @Test

@@ -64,15 +64,21 @@ class DocumentIndexWriter {
         }
     }
 
-    void updateIndexEntry(Document oldDocument, Document newDocument) {
+    void updateIndexEntry(Document oldDocument, Document newDocument, Document updatedFields) {
         Collection<IndexDescriptor> indexEntries = indexOperations.listIndexes();
+        // filter out the index which is not affected by the update
         if (indexEntries != null) {
             for (IndexDescriptor indexDescriptor : indexEntries) {
-                String indexType = indexDescriptor.getIndexType();
-                NitriteIndexer nitriteIndexer = nitriteConfig.findIndexer(indexType);
+                Fields fields = indexDescriptor.getFields();
 
-                removeIndexEntryInternal(indexDescriptor, oldDocument, nitriteIndexer);
-                writeIndexEntryInternal(indexDescriptor, newDocument, nitriteIndexer);
+                // if the index is affected by the update
+                if (DocumentUtils.isAffectedByUpdate(fields, updatedFields)) {
+                    String indexType = indexDescriptor.getIndexType();
+                    NitriteIndexer nitriteIndexer = nitriteConfig.findIndexer(indexType);
+
+                    removeIndexEntryInternal(indexDescriptor, oldDocument, nitriteIndexer);
+                    writeIndexEntryInternal(indexDescriptor, newDocument, nitriteIndexer);
+                }
             }
         }
     }

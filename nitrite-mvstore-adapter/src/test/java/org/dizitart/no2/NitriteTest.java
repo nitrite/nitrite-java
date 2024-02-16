@@ -586,6 +586,45 @@ public class NitriteTest {
         db.close();
     }
 
+    @Test
+    public void testReadOnlyMode() {
+        NitriteCollection nitriteCollection = db.getCollection("readonly-test");
+        nitriteCollection.insert(createDocument("a", "b"));
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "a");
+
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
+        Receipt receipt = new Receipt();
+        receipt.clientRef = "111-11111";
+        receipt.status = Receipt.Status.PREPARING;
+        repository.insert(receipt);
+
+        db.close();
+
+        MVStoreModule storeModule = MVStoreModule.withConfig()
+            .filePath(fileName)
+            .readOnly(true)
+            .build();
+
+        db = Nitrite.builder()
+            .loadModule(storeModule)
+            .registerEntityConverter(new Receipt.Converter())
+            .openOrCreate("test-user", "test-password");
+
+        assertFalse(db.hasUnsavedChanges());
+
+        nitriteCollection = db.getCollection("readonly-test");
+        assertEquals(nitriteCollection.find().size(), 1);
+        assertTrue(nitriteCollection.hasIndex("a"));
+
+        repository = db.getRepository(Receipt.class);
+        assertEquals(repository.find().size(), 1);
+        assertTrue(repository.hasIndex("synced"));
+
+        assertFalse(db.hasUnsavedChanges());
+        db.close();
+        deleteDb(fileName);
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

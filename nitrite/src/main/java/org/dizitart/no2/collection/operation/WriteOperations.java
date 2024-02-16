@@ -175,7 +175,7 @@ class WriteOperations {
                 log.debug("Updated document with id {} in {}", nitriteId, nitriteMap.getName());
 
                 try {
-                    documentIndexWriter.updateIndexEntry(oldDocument, processed);
+                    documentIndexWriter.updateIndexEntry(oldDocument, processed, document);
 
                     // if 'update' only contains id value, affected count = 0
                     if (document.size() > 0) {
@@ -185,7 +185,7 @@ class WriteOperations {
                     log.error("Error while writing index entry for document with id : {} in {}",
                         nitriteId, nitriteMap.getName(), e);
                     nitriteMap.put(nitriteId, oldDocument);
-                    documentIndexWriter.updateIndexEntry(processed, oldDocument);
+                    documentIndexWriter.updateIndexEntry(processed, oldDocument, document);
                     throw e;
                 }
 
