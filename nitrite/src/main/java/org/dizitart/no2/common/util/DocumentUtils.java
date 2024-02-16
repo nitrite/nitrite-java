@@ -78,6 +78,15 @@ public class DocumentUtils {
         return fieldValues;
     }
 
+    public static boolean isAffectedByUpdate(Fields fields, Document updatedFields) {
+        for (String field : fields.getFieldNames()) {
+            if (updatedFields.containsKey(field)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static Document removeValues(Document document) {
         if (document == null) return null;
         Document newDoc = Document.createDocument();

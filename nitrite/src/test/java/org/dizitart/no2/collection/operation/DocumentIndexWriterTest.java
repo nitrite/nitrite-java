@@ -69,7 +69,7 @@ public class DocumentIndexWriterTest {
         doReturn(new UniqueIndexer()).when(nitriteConfig).findIndexer(IndexType.UNIQUE);
         doReturn(new InMemoryStore()).when(nitriteConfig).getNitriteStore();
 
-        (new DocumentIndexWriter(nitriteConfig, indexOperations)).updateIndexEntry(createDocument("a", 1), createDocument("a", 2));
+        (new DocumentIndexWriter(nitriteConfig, indexOperations)).updateIndexEntry(createDocument("a", 1), createDocument("a", 2), createDocument("a", 3));
         verify(indexOperations).listIndexes();
     }
 }
