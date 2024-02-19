@@ -1,3 +1,11 @@
+## Release 4.2.1 - Feb 19, 2024
+
+### Issue Fixes
+
+- Fix for #901
+- Fix for #902
+- Version upgrade for several dependencies
+
 ## Release 4.2.0 - Jan 6, 2024
 
 ### New Changes
