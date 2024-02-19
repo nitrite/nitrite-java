@@ -102,7 +102,9 @@ public class CollectionFactory {
         if (writeCatalog) {
             collectionMap.put(name, collection);
             StoreCatalog storeCatalog = store.getCatalog();
-            storeCatalog.writeCollectionEntry(name);
+            if (!storeCatalog.hasEntry(name)) {
+                storeCatalog.writeCollectionEntry(name);
+            }
         }
 
         return collection;

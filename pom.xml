@@ -4,7 +4,7 @@
 
     <groupId>org.dizitart</groupId>
     <artifactId>nitrite-java</artifactId>
-    <version>4.2.0</version>
+    <version>4.2.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Nitrite Database</name>
@@ -52,24 +52,24 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.16.1</jackson.version>
-        <slf4j.version>2.0.10</slf4j.version>
+        <slf4j.version>2.0.12</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.2.224</h2.version>
-        <rocksdb.version>8.9.1</rocksdb.version>
+        <rocksdb.version>8.10.0</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
-        <commons-codec.version>1.16.0</commons-codec.version>
+        <commons-codec.version>1.16.1</commons-codec.version>
         <commons-io.version>2.15.1</commons-io.version>
         <kotlin.version>1.9.22</kotlin.version>
         <kotlinx-serialization.version>1.6.2</kotlinx-serialization.version>
         <lombok.version>1.18.30</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.8.0</mockito.version>
-        <podam.version>8.0.0.RELEASE</podam.version>
+        <mockito.version>5.10.0</mockito.version>
+        <podam.version>8.0.1.RELEASE</podam.version>
         <log4j.version>2.22.1</log4j.version>
         <awaitility.version>4.2.0</awaitility.version>
-        <joda-time.version>2.12.5</joda-time.version>
+        <joda-time.version>2.12.7</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
         <snakeyaml.version>2.2</snakeyaml.version>
         <jakarta.xml.bind-api.version>4.0.1</jakarta.xml.bind-api.version>
@@ -80,7 +80,7 @@
 
         <error-prone.version>2.24.1</error-prone.version>
         <jacoco.version>0.8.11</jacoco.version>
-        <surefire.version>3.2.3</surefire.version>
+        <surefire.version>3.2.5</surefire.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
@@ -209,7 +209,13 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-slf4j-impl</artifactId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-slf4j2-impl</artifactId>
                 <version>${log4j.version}</version>
                 <scope>test</scope>
             </dependency>
@@ -333,7 +339,6 @@
                         <compilerArgs>
                             <arg>-XDcompilePolicy=simple</arg>
                             <arg>-Xlint:-options</arg>
-<!--                            <arg>-Xplugin:ErrorProne</arg>-->
                         </compilerArgs>
                         <annotationProcessorPaths>
                             <path>
@@ -506,6 +511,17 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 
     <distributionManagement>

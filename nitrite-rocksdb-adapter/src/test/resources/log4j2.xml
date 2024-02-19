@@ -14,17 +14,17 @@
   ~ limitations under the License.
   -->
 
-<Configuration status="ERROR" name="nitrite" monitorInterval="5">
+<Configuration status="OFF" name="nitrite" monitorInterval="5">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d %p %c{1.} [%t] %m%n"/>
         </Console>
     </Appenders>
     <Loggers>
-        <Root level="ERROR">
+        <Root level="OFF">
             <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="org.dizitart" level="ERROR" additivity="false">
+        <Logger name="org.dizitart" level="OFF" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
     </Loggers>
