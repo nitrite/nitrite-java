@@ -119,13 +119,14 @@ internal class DocumentDecoder(private val document: Document, descriptor: Seria
 @OptIn(ExperimentalSerializationApi::class)
 private class ListDecoder(private val list: ArrayDeque<Any>) : AbstractDecoder() {
     private var elementIndex = 0
+    private val initialSize = list.size
 
     override val serializersModule: SerializersModule = EmptySerializersModule()
 
     override fun decodeValue(): Any = list.removeFirst()
 
     override fun decodeElementIndex(descriptor: SerialDescriptor): Int {
-        if (list.isEmpty() || elementIndex == descriptor.elementsCount) return CompositeDecoder.DECODE_DONE
+        if (list.isEmpty() || elementIndex == initialSize) return CompositeDecoder.DECODE_DONE
         return elementIndex++
     }
 
