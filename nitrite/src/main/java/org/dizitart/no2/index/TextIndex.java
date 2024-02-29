@@ -152,7 +152,7 @@ public class TextIndex implements NitriteIndex {
             textFilter.setTextTokenizer(textTokenizer);
             return textFilter.applyOnTextIndex(indexMap);
         }
-        throw new FilterException("Text index only supports a single TextFilter");
+        throw new FilterException("TextFilter can only be applied on text index.");
     }
 
     private NitriteMap<String, List<?>> findIndexMap() {

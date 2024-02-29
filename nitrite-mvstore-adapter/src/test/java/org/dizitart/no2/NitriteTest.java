@@ -63,6 +63,7 @@ import java.util.concurrent.ExecutorService;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
+import static org.dizitart.no2.common.util.Iterables.listOf;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.filters.FluentFilter.where;
@@ -186,22 +187,27 @@ public class NitriteTest {
         NitriteCollection testCollection = db.getCollection("test");
         assertNotNull(testCollection);
         long prevSize = testCollection.find().size();
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
+        assertNotNull(repository);
+        long prevRepoSize = repository.size();
 
         db.close();
-
         db = null;
 
-        db = TestUtil.createDb(fileName, "test-user", "test-password");
-
+        db = TestUtil.createDb(fileName, "test-user", "test-password", listOf(new Receipt.Converter()));
         assertNotNull(db);
         testCollection = db.getCollection("test");
         assertNotNull(testCollection);
         long sizeNow = testCollection.find().size();
         assertEquals(prevSize, sizeNow);
+        repository = db.getRepository(Receipt.class);
+        assertNotNull(repository);
+        long repoSizeNow = repository.size();
+        assertEquals(prevRepoSize, repoSizeNow);
 
         db.close();
         db = null;
-        db = TestUtil.createDb(fileName, "test-user", "test-password");
+        db = TestUtil.createDb(fileName, "test-user", "test-password", listOf(new Receipt.Converter()));
 
         testCollection = db.getCollection("test");
         testCollection.insert(createDocument("firstName", "fn12")
@@ -209,15 +215,25 @@ public class NitriteTest {
             .put("birthDay", simpleDateFormat.parse("2010-07-01T16:02:48.440Z"))
             .put("data", new byte[]{10, 20, 30})
             .put("body", "a quick brown fox jump over the lazy dog"));
+        repository = db.getRepository(Receipt.class);
+        Receipt r = new Receipt();
+        r.status = Receipt.Status.COMPLETED;
+        r.clientRef = "10";
+        r.synced = false;
+        repository.insert(r);
 
         db.close();
         db = null;
-        db = TestUtil.createDb(fileName, "test-user", "test-password");
+        db = TestUtil.createDb(fileName, "test-user", "test-password", listOf(new Receipt.Converter()));
 
         testCollection = db.getCollection("test");
         assertNotNull(testCollection);
         sizeNow = testCollection.find().size();
         assertEquals(prevSize + 1, sizeNow);
+        repository = db.getRepository(Receipt.class);
+        assertNotNull(repository);
+        repoSizeNow = repository.size();
+        assertEquals(prevRepoSize + 1, repoSizeNow);
     }
 
     @Test
@@ -491,9 +507,7 @@ public class NitriteTest {
         Files.copy(stream, Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "old.db"));
 
         String oldDbFile = System.getProperty("java.io.tmpdir") + File.separator + "old.db";
-        Nitrite db = TestUtil.createDb(oldDbFile, "test-user", "test-password");
-        SimpleNitriteMapper documentMapper = (SimpleNitriteMapper) db.getConfig().nitriteMapper();
-        documentMapper.registerEntityConverter(new Receipt.Converter());
+        Nitrite db = TestUtil.createDb(oldDbFile, "test-user", "test-password", listOf(new Receipt.Converter()));
 
         NitriteCollection collection = db.getCollection("test");
 
@@ -517,6 +531,8 @@ public class NitriteTest {
         assertNotNull(repository.getAttributes());
 
         db.close();
+
+        //TODO: CHeck reopen with repo. That should also fails too.
     }
 
     @Test

@@ -59,18 +59,23 @@ public class RepositoryOperations {
         this.entityDecoratorScanner = new EntityDecoratorScanner(entityDecorator, collection, nitriteMapper);
         validateCollection();
     }
-
-    public void createIndices() {
+    public void scanIndexes() {
         if (annotationScanner != null) {
             annotationScanner.performScan();
-            annotationScanner.createIndices();
-            annotationScanner.createIdIndex();
             objectIdField = annotationScanner.getObjectIdField();
         } else if (entityDecoratorScanner != null) {
             entityDecoratorScanner.readEntity();
+            objectIdField = entityDecoratorScanner.getObjectIdField();
+        }
+    }
+
+    public void createIndexes() {
+        if (annotationScanner != null) {
+            annotationScanner.createIndices();
+            annotationScanner.createIdIndex();
+        } else if (entityDecoratorScanner != null) {
             entityDecoratorScanner.createIndices();
             entityDecoratorScanner.createIdIndex();
-            objectIdField = entityDecoratorScanner.getObjectIdField();
         }
     }
 
