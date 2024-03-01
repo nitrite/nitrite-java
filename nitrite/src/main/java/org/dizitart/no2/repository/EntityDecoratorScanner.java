@@ -68,18 +68,14 @@ public class EntityDecoratorScanner {
     public void createIndices() {
         for (EntityIndex index : indices) {
             String[] fields = index.getFieldNames().toArray(new String[0]);
-            if (!collection.hasIndex(fields)) {
-                collection.createIndex(indexOptions(index.getIndexType()), fields);
-            }
+            collection.createIndex(indexOptions(index.getIndexType()), fields);
         }
     }
 
     public void createIdIndex() {
         if (objectIdField != null) {
             String[] fieldNames = objectIdField.getEmbeddedFieldNames();
-            if (!collection.hasIndex(fieldNames)) {
-                collection.createIndex(fieldNames);
-            }
+            collection.createIndex(fieldNames);
         }
     }
 

@@ -236,6 +236,7 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
         } else {
             operations = new RepositoryOperations(type, collection, nitriteConfig);
         }
-        operations.createIndices();
+        operations.scanIndexes();
+        operations.createIndexes();
     }
 }

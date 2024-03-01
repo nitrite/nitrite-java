@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.mvstore.MVStoreModule;
 
@@ -121,6 +122,20 @@ public class TestUtil {
 
         return Nitrite.builder()
             .loadModule(storeModule)
+            .fieldSeparator(".")
+            .openOrCreate(user, password);
+    }
+
+    public static Nitrite createDb(String filePath, String user, String password,
+                                   List<EntityConverter<?>> entityConverters) {
+        MVStoreModule storeModule = MVStoreModule.withConfig()
+            .filePath(filePath)
+            .compress(true)
+            .build();
+
+        return Nitrite.builder()
+            .loadModule(storeModule)
+            .loadModule(() -> new HashSet<>(entityConverters))
             .fieldSeparator(".")
             .openOrCreate(user, password);
     }

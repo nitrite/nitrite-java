@@ -24,6 +24,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
+import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -241,6 +242,24 @@ public class NitriteTest {
         db.getCollection(META_MAP_NAME);
     }
 
+    @Test(expected = IndexingException.class)
+    public void testUniqueAndTextIndex() {
+        try (final Nitrite nitrite = Nitrite.builder()
+            .loadModule(new JacksonMapperModule())
+            .openOrCreate()) {
+            nitrite.getRepository(EntityUniqueFullText.class);
+        }
+    }
+
+    @Test(expected = IndexingException.class)
+    public void testNoUniqueAndTextIndex() {
+        try (final Nitrite nitrite = Nitrite.builder()
+            .loadModule(new JacksonMapperModule())
+            .openOrCreate()) {
+            nitrite.getRepository(EntityNoUniqueFullText.class);
+        }
+    }
+
 
     @Data
     @NoArgsConstructor
@@ -262,5 +281,27 @@ public class NitriteTest {
     }
 
     public static class EmptyClass {
+    }
+
+    @Indices({
+        @Index(fields = "value", type = IndexType.FULL_TEXT),
+        @Index(fields = "value")
+    })
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EntityUniqueFullText {
+        private String value;
+    }
+
+    @Indices({
+        @Index(fields = "value", type = IndexType.FULL_TEXT),
+        @Index(fields = "value", type = IndexType.NON_UNIQUE)
+    })
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class EntityNoUniqueFullText {
+        private String value;
     }
 }

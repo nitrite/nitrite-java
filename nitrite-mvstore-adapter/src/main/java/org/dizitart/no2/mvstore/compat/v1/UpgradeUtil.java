@@ -38,8 +38,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static org.dizitart.no2.common.Constants.INDEX_PREFIX;
-import static org.dizitart.no2.common.Constants.STORE_INFO;
+import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
@@ -91,9 +90,12 @@ public class UpgradeUtil {
 
                 if (key instanceof Compat.NitriteId) {
                     newKey = nitriteId((Compat.NitriteId) key);
+                } else if (oldMap.getName().contains(INDEX_META_PREFIX)) {
+                    // index meta map, wrap with Field
+                    newKey = key == null ? Fields.withNames() : Fields.withNames((String) key);
                 } else if (oldMap.getName().contains(INDEX_PREFIX)) {
                     // index map, wrap with DBValue
-                    newKey = newKey == null ? DBNull.getInstance() : new DBValue((Comparable<?>) newKey);
+                    newKey = key == null ? DBNull.getInstance() : new DBValue((Comparable<?>) key);
                 }
 
                 Object newValue = migrateValue(entry.getValue());

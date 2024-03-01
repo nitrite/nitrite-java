@@ -22,6 +22,7 @@ import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.filters.FluentFilter;
 import org.dizitart.no2.index.IndexOptions;
+import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.Cursor;
 import org.junit.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -55,7 +56,7 @@ public class SpatialIndexNegativeTest extends BaseSpatialTest {
     @Test(expected = IndexingException.class)
     public void testIndexExists() {
         collection.createIndex(IndexOptions.indexOptions(SPATIAL_INDEX), "location");
-        collection.createIndex(IndexOptions.indexOptions(SPATIAL_INDEX), "location");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "location");
     }
 
     @Test(expected = FilterException.class)
