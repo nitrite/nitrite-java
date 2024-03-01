@@ -59,6 +59,7 @@ public class RepositoryOperations {
         this.entityDecoratorScanner = new EntityDecoratorScanner(entityDecorator, collection, nitriteMapper);
         validateCollection();
     }
+
     public void scanIndexes() {
         if (annotationScanner != null) {
             annotationScanner.performScan();
