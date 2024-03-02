@@ -305,14 +305,13 @@ public class FilePathDisk extends FilePath {
     }
 
     static void freeMemoryAndFinalize() {
-        IOUtils.trace("freeMemoryAndFinalize", (String)null, (Object)null);
+        IOUtils.trace("freeMemoryAndFinalize", null, null);
         Runtime var0 = Runtime.getRuntime();
         long var1 = var0.freeMemory();
 
         for(int var3 = 0; var3 < 16; ++var3) {
             var0.gc();
             long var4 = var0.freeMemory();
-            var0.runFinalization();
             if (var4 == var1) {
                 break;
             }

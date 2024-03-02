@@ -55,18 +55,14 @@ class AnnotationScanner {
     public void createIndices() {
         for (Index index : indices) {
             String[] fields = index.fields();
-            if (!collection.hasIndex(fields)) {
-                collection.createIndex(indexOptions(index.type()), fields);
-            }
+            collection.createIndex(indexOptions(index.type()), fields);
         }
     }
 
     public void createIdIndex() {
         if (objectIdField != null) {
             String[] fieldNames = objectIdField.getEmbeddedFieldNames();
-            if (!collection.hasIndex(fieldNames)) {
-                collection.createIndex(fieldNames);
-            }
+            collection.createIndex(fieldNames);
         }
     }
 
