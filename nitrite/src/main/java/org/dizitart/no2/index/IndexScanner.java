@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.ComparableFilter;
+import org.dizitart.no2.filters.SortingAwareFilter;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -54,6 +55,11 @@ public class IndexScanner {
                     ? indexScanOrder.get(comparableFilter.getField())
                     : false;
                 indexMap.setReverseScan(reverseScan);
+
+                if (comparableFilter instanceof SortingAwareFilter) {
+                    // if the filter is sorting aware, set the scan order
+                    ((SortingAwareFilter) comparableFilter).setReverseScan(reverseScan);
+                }
 
                 // apply the filter on the index map
                 // result can be list of nitrite ids or list of navigable maps

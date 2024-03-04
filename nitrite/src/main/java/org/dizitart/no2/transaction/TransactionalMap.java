@@ -9,6 +9,7 @@ import org.dizitart.no2.store.memory.InMemoryMap;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 import static org.dizitart.no2.common.util.ObjectUtils.deepCopy;
 
@@ -82,7 +83,6 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     @Override
     public void clear() {
         backingMap.clear();
-//        primary.clear();
         cleared = true;
         getStore().closeMap(mapName);
     }
@@ -175,6 +175,29 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
+    public K firstKey() {
+        if (cleared) {
+            return null;
+        }
+
+        K primaryKey = primary.firstKey();
+        K backingKey = backingMap.firstKey();
+
+        return computeKey(primaryKey, backingKey, SortedSet::first);
+    }
+
+    public K lastKey() {
+        if (cleared) {
+            return null;
+        }
+
+        K primaryKey = primary.lastKey();
+        K backingKey = backingMap.lastKey();
+
+        return computeKey(primaryKey, backingKey, SortedSet::last);
+    }
+
+    @Override
     public K higherKey(K k) {
         if (cleared) {
             return null;
@@ -183,19 +206,7 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         K primaryKey = primary.higherKey(k);
         K backingKey = backingMap.higherKey(k);
 
-        if (primaryKey == null) {
-            return backingKey;
-        }
-
-        if (backingKey == null) {
-            return primaryKey;
-        }
-
-        NavigableSet<K> keySet = new TreeSet<>();
-        keySet.add(backingKey);
-        keySet.add(primaryKey);
-
-        return keySet.higher(k);
+        return computeKey(primaryKey, backingKey, keySet -> keySet.higher(k));
     }
 
     @Override
@@ -207,19 +218,7 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         K primaryKey = primary.ceilingKey(k);
         K backingKey = backingMap.ceilingKey(k);
 
-        if (primaryKey == null) {
-            return backingKey;
-        }
-
-        if (backingKey == null) {
-            return primaryKey;
-        }
-
-        NavigableSet<K> keySet = new TreeSet<>();
-        keySet.add(backingKey);
-        keySet.add(primaryKey);
-
-        return keySet.ceiling(k);
+        return computeKey(primaryKey, backingKey, keySet -> keySet.ceiling(k));
     }
 
     @Override
@@ -231,19 +230,7 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         K primaryKey = primary.lowerKey(k);
         K backingKey = backingMap.lowerKey(k);
 
-        if (primaryKey == null) {
-            return backingKey;
-        }
-
-        if (backingKey == null) {
-            return primaryKey;
-        }
-
-        NavigableSet<K> keySet = new TreeSet<>();
-        keySet.add(backingKey);
-        keySet.add(primaryKey);
-
-        return keySet.lower(k);
+        return computeKey(primaryKey, backingKey, keySet -> keySet.lower(k));
     }
 
     @Override
@@ -255,19 +242,7 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         K primaryKey = primary.floorKey(k);
         K backingKey = backingMap.floorKey(k);
 
-        if (primaryKey == null) {
-            return backingKey;
-        }
-
-        if (backingKey == null) {
-            return primaryKey;
-        }
-
-        NavigableSet<K> keySet = new TreeSet<>();
-        keySet.add(backingKey);
-        keySet.add(primaryKey);
-
-        return keySet.floor(k);
+        return computeKey(primaryKey, backingKey, keySet -> keySet.floor(k));
     }
 
     @Override
@@ -315,13 +290,28 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         return closedFlag.get();
     }
 
+    private K computeKey(K primaryKey, K backingKey, Function<NavigableSet<K>, K> computeFunction) {
+        if (primaryKey == null) {
+            return backingKey;
+        }
+
+        if (backingKey == null) {
+            return primaryKey;
+        }
+
+        NavigableSet<K> keySet = new TreeSet<>();
+        keySet.add(backingKey);
+        keySet.add(primaryKey);
+        return computeFunction.apply(keySet);
+    }
+
     private RecordStream<Pair<K, V>> getStream(RecordStream<Pair<K, V>> primaryStream,
                                                RecordStream<Pair<K, V>> backingStream) {
         if (cleared) {
             return RecordStream.empty();
         }
 
-        return () -> new Iterator<Pair<K, V>>() {
+        return () -> new Iterator<>() {
             private final Iterator<Pair<K, V>> primaryIterator = primaryStream.iterator();
             private final Iterator<Pair<K, V>> iterator = backingStream.iterator();
             private Pair<K, V> nextPair;
