@@ -59,6 +59,32 @@ public class IndexMap {
         this.navigableMap = navigableMap;
     }
 
+    public <T extends Comparable<T>> T firstKey() {
+        DBValue dbKey;
+        if (nitriteMap != null) {
+            dbKey = nitriteMap.firstKey();
+        } else if (navigableMap != null) {
+            dbKey = navigableMap.firstKey();
+        } else {
+            return null;
+        }
+
+        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+    }
+
+    public <T extends Comparable<T>> T lastKey() {
+        DBValue dbKey;
+        if (nitriteMap != null) {
+            dbKey = nitriteMap.lastKey();
+        } else if (navigableMap != null) {
+            dbKey = navigableMap.lastKey();
+        } else {
+            return null;
+        }
+
+        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+    }
+
     /**
      * Get the largest key that is smaller than the given key, or null if no
      * such key exists.
@@ -69,18 +95,10 @@ public class IndexMap {
      */
     public <T extends Comparable<T>> T lowerKey(T key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.lowerKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.lowerKey(dbKey);
-            }
-        } else {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.higherKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.higherKey(dbKey);
-            }
+        if (nitriteMap != null) {
+            dbKey = nitriteMap.lowerKey(dbKey);
+        } else if (navigableMap != null) {
+            dbKey = navigableMap.lowerKey(dbKey);
         }
 
         return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
@@ -96,18 +114,10 @@ public class IndexMap {
      */
     public <T extends Comparable<T>> T higherKey(T key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.higherKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.higherKey(dbKey);
-            }
-        } else {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.lowerKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.lowerKey(dbKey);
-            }
+        if (nitriteMap != null) {
+            dbKey = nitriteMap.higherKey(dbKey);
+        } else if (navigableMap != null) {
+            dbKey = navigableMap.higherKey(dbKey);
         }
 
         return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
@@ -122,18 +132,10 @@ public class IndexMap {
      */
     public <T extends Comparable<T>> T ceilingKey(T key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.ceilingKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.ceilingKey(dbKey);
-            }
-        } else {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.floorKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.floorKey(dbKey);
-            }
+        if (nitriteMap != null) {
+            dbKey = nitriteMap.ceilingKey(dbKey);
+        } else if (navigableMap != null) {
+            dbKey = navigableMap.ceilingKey(dbKey);
         }
 
         return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
@@ -148,18 +150,10 @@ public class IndexMap {
      */
     public <T extends Comparable<T>> T floorKey(T key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
-        if (!reverseScan) {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.floorKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.floorKey(dbKey);
-            }
-        } else {
-            if (nitriteMap != null) {
-                dbKey = nitriteMap.ceilingKey(dbKey);
-            } else if (navigableMap != null) {
-                dbKey = navigableMap.ceilingKey(dbKey);
-            }
+        if (nitriteMap != null) {
+            dbKey = nitriteMap.floorKey(dbKey);
+        } else if (navigableMap != null) {
+            dbKey = navigableMap.floorKey(dbKey);
         }
 
         return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
@@ -195,7 +189,7 @@ public class IndexMap {
                 entryIterator = nitriteMap.reversedEntries().iterator();
             }
 
-            return (Iterable<Pair<Comparable<?>, ?>>) () -> new Iterator<Pair<Comparable<?>, ?>>() {
+            return (Iterable<Pair<Comparable<?>, ?>>) () -> new Iterator<>() {
                 @Override
                 public boolean hasNext() {
                     return entryIterator.hasNext();

@@ -2,6 +2,7 @@
 
 ### Issue Fixes
 
+- Fix for #917
 - Fix for #916
 - Fix for #911
 - Version upgrade for several dependencies

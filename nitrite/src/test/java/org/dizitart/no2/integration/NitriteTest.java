@@ -23,14 +23,13 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -57,6 +56,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 
 import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.collection.FindOptions.orderBy;
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.filters.Filter.ALL;
@@ -291,7 +291,7 @@ public class NitriteTest {
 
         for (int i = 0; i < 1000; ++i) {
             repository.find(where("status").eq(Receipt.Status.COMPLETED).not(),
-                FindOptions.orderBy("createdTimestamp", SortOrder.Descending)).toList();
+                orderBy("createdTimestamp", SortOrder.Descending)).toList();
             try {
                 Thread.sleep(5);
             } catch (InterruptedException ignored) {

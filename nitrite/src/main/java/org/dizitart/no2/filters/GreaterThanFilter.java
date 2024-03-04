@@ -19,6 +19,7 @@ package org.dizitart.no2.filters;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.common.util.Comparables;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.IndexMap;
 
@@ -31,7 +32,7 @@ import static org.dizitart.no2.common.util.Numbers.compare;
 /**
  * @author Anindya Chatterjee
  */
-class GreaterThanFilter extends ComparableFilter {
+class GreaterThanFilter extends SortingAwareFilter {
     protected GreaterThanFilter(String field, Comparable<?> value) {
         super(field, value);
     }
@@ -64,14 +65,24 @@ class GreaterThanFilter extends ComparableFilter {
         List<NavigableMap<Comparable<?>, Object>> subMaps = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        Comparable ceilingKey = indexMap.higherKey(comparable);
-        while (ceilingKey != null) {
-            // get the starting value, it can be a navigable-map (compound index)
-            // or list (single field index)
-            Object value = indexMap.get(ceilingKey);
-            processIndexValue(value, subMaps, nitriteIds);
-
-            ceilingKey = indexMap.higherKey(ceilingKey);
+        if (isReverseScan()) {
+            Comparable lastKey = indexMap.lastKey();
+            while (lastKey != null && Comparables.compare(lastKey, comparable) > 0) {
+                // get the starting value, it can be a navigable-map (compound index)
+                // or list (single field index)
+                Object value = indexMap.get(lastKey);
+                processIndexValue(value, subMaps, nitriteIds);
+                lastKey = indexMap.lowerKey(lastKey);
+            }
+        } else {
+            Comparable higherKey = indexMap.higherKey(comparable);
+            while (higherKey != null) {
+                // get the starting value, it can be a navigable-map (compound index)
+                // or list (single field index)
+                Object value = indexMap.get(higherKey);
+                processIndexValue(value, subMaps, nitriteIds);
+                higherKey = indexMap.higherKey(higherKey);
+            }
         }
 
         if (!subMaps.isEmpty()) {

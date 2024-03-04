@@ -16,12 +16,10 @@
 
 package org.dizitart.no2.filters;
 
-import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.IndexMap;
 
 import java.util.List;
-import java.util.NavigableMap;
 
 /**
  * An abstract class representing a filter that compares fields.
