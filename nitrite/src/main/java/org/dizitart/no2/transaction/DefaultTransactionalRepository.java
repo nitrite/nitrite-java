@@ -236,6 +236,6 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
         } else {
             this.operations = new RepositoryOperations(type, backingCollection, nitriteConfig);
         }
-        this.operations.createIndices();
+        this.operations.scanIndexes();
     }
 }

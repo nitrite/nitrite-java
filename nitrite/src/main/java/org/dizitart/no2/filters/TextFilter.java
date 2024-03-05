@@ -34,8 +34,8 @@ import static org.dizitart.no2.common.util.ValidationUtils.notNull;
  * @author Anindya Chatterjee
  * @since 1.0
  */
+@Setter
 public class TextFilter extends StringFilter {
-    @Setter
     private TextTokenizer textTokenizer;
 
     /**
@@ -100,12 +100,7 @@ public class TextFilter extends StringFilter {
             List<NitriteId> nitriteIds = (List<NitriteId>) indexMap.get(word);
             if (nitriteIds != null) {
                 for (NitriteId id : nitriteIds) {
-                    Integer score = scoreMap.get(id);
-                    if (score == null) {
-                        scoreMap.put(id, 1);
-                    } else {
-                        scoreMap.put(id, score + 1);
-                    }
+                    scoreMap.merge(id, 1, Integer::sum);
                 }
             }
         }
@@ -185,7 +180,7 @@ public class TextFilter extends StringFilter {
 
     private LinkedHashSet<NitriteId> sortedIdsByScore(Map<NitriteId, Integer> unsortedMap) {
         List<Map.Entry<NitriteId, Integer>> list = new LinkedList<>(unsortedMap.entrySet());
-        Collections.sort(list, (e1, e2) -> (e2.getValue()).compareTo(e1.getValue()));
+        list.sort((e1, e2) -> (e2.getValue()).compareTo(e1.getValue()));
 
         LinkedHashSet<NitriteId> result = new LinkedHashSet<>();
         for (Map.Entry<NitriteId, Integer> entry : list) {

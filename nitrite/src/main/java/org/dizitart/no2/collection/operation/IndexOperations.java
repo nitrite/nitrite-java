@@ -61,8 +61,14 @@ class IndexOperations implements AutoCloseable {
             // if no index create index
             indexDescriptor = indexManager.createIndexDescriptor(fields, indexType);
         } else {
-            // if index already there throw
-            throw new IndexingException("Index already exists on fields: " + fields);
+            // if index already there check if it is of same type, if not throw exception
+            if (!indexDescriptor.getIndexType().equals(indexType)) {
+                throw new IndexingException("Index already exists on fields: " + fields
+                    + " with type " + indexDescriptor.getIndexType());
+            } else {
+                // if index is of same type, return
+                return;
+            }
         }
 
         buildIndex(indexDescriptor, false);

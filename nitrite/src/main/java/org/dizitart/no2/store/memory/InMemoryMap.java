@@ -124,6 +124,18 @@ public class InMemoryMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
+    public Key firstKey() {
+        checkOpened();
+        return backingMap.firstKey();
+    }
+
+    @Override
+    public Key lastKey() {
+        checkOpened();
+        return backingMap.lastKey();
+    }
+
+    @Override
     public Key higherKey(Key key) {
         checkOpened();
         if (key == null) {

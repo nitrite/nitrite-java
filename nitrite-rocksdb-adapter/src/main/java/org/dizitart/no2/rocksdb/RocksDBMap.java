@@ -225,6 +225,32 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     }
 
     @Override
+    @SuppressWarnings({"unchecked"})
+    public K firstKey() {
+        try (RocksIterator iterator = rocksDB.newIterator(columnFamilyHandle)) {
+            iterator.seekToFirst();
+            if (iterator.isValid()) {
+                byte[] key = iterator.key();
+                return (K) objectFormatter.decodeKey(key, getKeyType());
+            }
+        }
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings({"unchecked"})
+    public K lastKey() {
+        try (RocksIterator iterator = rocksDB.newIterator(columnFamilyHandle)) {
+            iterator.seekToLast();
+            if (iterator.isValid()) {
+                byte[] key = iterator.key();
+                return (K) objectFormatter.decodeKey(key, getKeyType());
+            }
+        }
+        return null;
+    }
+
+    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public K higherKey(K k) {
         try (RocksIterator iterator = rocksDB.newIterator(columnFamilyHandle)) {
