@@ -119,6 +119,20 @@ public interface NitriteMap<Key, Value> extends AttributesAware, AutoCloseable {
     Value putIfAbsent(Key key, Value value);
 
     /**
+     * Get the first key in the map, or null if the map is empty.
+     *
+     * @return the result.
+     */
+    Key firstKey();
+
+    /**
+     * Get the last key in the map, or null if the map is empty.
+     *
+     * @return the result.
+     */
+    Key lastKey();
+
+    /**
      * Get the lest key that is greater than the given key, or null if no
      * such key exists.
      *

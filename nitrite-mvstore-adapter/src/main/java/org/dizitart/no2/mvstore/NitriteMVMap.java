@@ -133,7 +133,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Pair<Key, Value>> entries() {
-        return () -> new Iterator<Pair<Key, Value>>() {
+        return () -> new Iterator<>() {
             final Iterator<Map.Entry<Key, Value>> entryIterator = mvMap.entrySet().iterator();
 
             @Override
@@ -152,6 +152,16 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     @Override
     public RecordStream<Pair<Key, Value>> reversedEntries() {
         return () -> new ReverseIterator<>(mvMap);
+    }
+
+    @Override
+    public Key firstKey() {
+        return mvMap.firstKey();
+    }
+
+    @Override
+    public Key lastKey() {
+        return mvMap.lastKey();
     }
 
     @Override

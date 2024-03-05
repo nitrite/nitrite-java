@@ -38,8 +38,7 @@ import static org.dizitart.no2.collection.FindOptions.orderBy;
 import static org.dizitart.no2.filters.Filter.and;
 import static org.dizitart.no2.filters.Filter.or;
 import static org.dizitart.no2.filters.FluentFilter.where;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -419,5 +418,213 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
 
         cursor = collection.find(where("notes").text("lazy"));
         assertEquals(cursor.size(), 3);
+    }
+
+    @Test
+    public void testSortByIndexDescendingLessThenEqual() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexDescendingLessThenEqual");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").lte(3),
+            orderBy("name", SortOrder.Descending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").lte(3),
+            orderBy("name", SortOrder.Descending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testSortByIndexAscendingLessThenEqual() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexAscendingLessThenEqual");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").lte(3),
+            orderBy("name", SortOrder.Ascending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").lte(3),
+            orderBy("name", SortOrder.Ascending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testSortByIndexDescendingGreaterThanEqual() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexDescendingGreaterThanEqual");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").gte(3),
+            orderBy("name", SortOrder.Descending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").gte(3),
+            orderBy("name", SortOrder.Descending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testSortByIndexAscendingGreaterThanEqual() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexAscendingGreaterThanEqual");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").gte(3),
+            orderBy("name", SortOrder.Ascending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").gte(3),
+            orderBy("name", SortOrder.Ascending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testSortByIndexDescendingGreaterThan() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexDescendingGreaterThan");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").gt(3),
+            orderBy("name", SortOrder.Descending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").gt(3),
+            orderBy("name", SortOrder.Descending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testSortByIndexAscendingGreaterThan() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexAscendingGreaterThan");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").gt(3),
+            orderBy("name", SortOrder.Ascending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").gt(3),
+            orderBy("name", SortOrder.Ascending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testSortByIndexDescendingLessThan() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexDescendingLessThan");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").lt(3),
+            orderBy("name", SortOrder.Descending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").lt(3),
+            orderBy("name", SortOrder.Descending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testSortByIndexAscendingLessThan() {
+        NitriteCollection nitriteCollection = db.getCollection("testSortByIndexAscendingLessThan");
+        List<Integer> integerList = Arrays.asList(1, 2, 3, 4, 5);
+        integerList.forEach(i -> {
+            Document doc = Document.createDocument();
+            doc.put("name", i);
+            nitriteCollection.insert(doc);
+        });
+
+        DocumentCursor cursor = nitriteCollection.find(where("name").lt(3),
+            orderBy("name", SortOrder.Ascending));
+
+        List<Document> docIter = cursor.toList();
+        Integer[] nonIndexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        nitriteCollection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "name");
+
+        cursor = nitriteCollection.find(where("name").lt(3),
+            orderBy("name", SortOrder.Ascending));
+        docIter = cursor.toList();
+        Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
+
+        assertArrayEquals(nonIndexedResult, indexedResult);
     }
 }
