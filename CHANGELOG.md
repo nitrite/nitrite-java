@@ -1,4 +1,4 @@
-## Release 4.2.2
+## Release 4.2.2 - Mar 5, 2024
 
 ### Issue Fixes
 
