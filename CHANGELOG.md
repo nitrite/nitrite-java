@@ -1,3 +1,9 @@
+## Release 4.3.0
+
+### New Changes
+
+- Nitrite now supports JPMS. It is now modular and can be used in Java 9 or above.
+
 ## Release 4.2.2 - Mar 5, 2024
 
 ### Issue Fixes

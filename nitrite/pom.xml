@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite-java</artifactId>
-        <version>4.2.2-SNAPSHOT</version>
+        <version>4.3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>nitrite</artifactId>
@@ -217,6 +217,17 @@
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive combine.children="append">
+                        <manifestEntries>
+                            <Automatic-Module-Name>org.dizitart.no2</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
         </plugins>
     </build>
