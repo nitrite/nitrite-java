@@ -26,7 +26,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * @author Anindya Chatterjee
+ * @author Anindya ChatterjeeA
  */
 public class CollectionFactoryTest {
 
