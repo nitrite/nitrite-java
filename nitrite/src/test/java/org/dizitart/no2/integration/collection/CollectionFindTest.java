@@ -852,4 +852,32 @@ public class CollectionFindTest extends BaseCollectionTest {
         result = collection.find(or(byId(nitriteId), where("tag").eq(document.get("tag")))).firstOrNull();
         assertEquals(document, result);
     }
+
+    @Test
+    public void testByNonExistingId() {
+        Document doc1 = createDocument("age", 31).put("tag", "one");
+        Document doc2 = createDocument("age", 32).put("tag", "two");
+        Document doc3 = createDocument("age", 33).put("tag", "three");
+        Document doc4 = createDocument("age", 34).put("tag", "four");
+        Document doc5 = createDocument("age", 35).put("tag", "five");
+
+        NitriteCollection collection = db.getCollection("tag");
+        collection.insert(doc1, doc2, doc3, doc4, doc5);
+
+        NitriteId nitriteId = NitriteId.newId();
+        Document result = collection.find(byId(nitriteId)).firstOrNull();
+        assertNull(result);
+
+        result = collection.find(and(byId(nitriteId), where("age").notEq(null))).firstOrNull();
+        assertNull(result);
+
+        result = collection.find(or(byId(nitriteId), where("tag").eq("one"))).firstOrNull();
+        assertNotNull(result);
+        assertEquals(result.get("tag"), "one");
+
+        DocumentCursor cursor = collection.find(where("_id").eq(nitriteId.getIdValue()));
+        Iterator<Document> idIter = cursor.iterator();
+        assertFalse(idIter.hasNext());
+        assertEquals(cursor.size(), 0);
+    }
 }
