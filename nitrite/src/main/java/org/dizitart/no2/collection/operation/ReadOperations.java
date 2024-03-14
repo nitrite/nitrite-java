@@ -136,8 +136,12 @@ class ReadOperations {
             if (findPlan.getByIdFilter() != null) {
                 FieldBasedFilter byIdFilter = findPlan.getByIdFilter();
                 NitriteId nitriteId = NitriteId.createId((String) byIdFilter.getValue());
-                Document document = nitriteMap.get(nitriteId);
-                rawStream = RecordStream.single(pair(nitriteId, document));
+                if (nitriteMap.containsKey(nitriteId)) {
+                    Document document = nitriteMap.get(nitriteId);
+                    rawStream = RecordStream.single(pair(nitriteId, document));
+                } else {
+                    rawStream = RecordStream.empty();
+                }
             } else {
                 IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
                 if (indexDescriptor != null) {
