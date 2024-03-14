@@ -31,7 +31,6 @@ import org.junit.Before;
 import org.junit.Rule;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,7 +63,7 @@ public abstract class BaseExternalTest {
     }
 
     @After
-    public void cleanUp() throws IOException {
+    public void cleanUp() {
         closeDb();
         TestUtil.deleteDb(sourceDbFile);
         TestUtil.deleteDb(destDbFile);
