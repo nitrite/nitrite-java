@@ -51,7 +51,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.16.2</jackson.version>
+        <jackson.version>2.17.0</jackson.version>
         <slf4j.version>2.0.12</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.2.224</h2.version>
@@ -68,14 +68,14 @@
         <mockito.version>5.11.0</mockito.version>
         <podam.version>8.0.1.RELEASE</podam.version>
         <log4j.version>2.23.1</log4j.version>
-        <awaitility.version>4.2.0</awaitility.version>
+        <awaitility.version>4.2.1</awaitility.version>
         <joda-time.version>2.12.7</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
         <snakeyaml.version>2.2</snakeyaml.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>33.0.0-jre</guava.version>
+        <guava.version>33.1.0-jre</guava.version>
         <threetenbp.version>1.6.8</threetenbp.version>
 
         <error-prone.version>2.26.1</error-prone.version>
