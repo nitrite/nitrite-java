@@ -62,7 +62,7 @@
         <commons-io.version>2.15.1</commons-io.version>
         <kotlin.version>1.9.23</kotlin.version>
         <kotlinx-serialization.version>1.6.3</kotlinx-serialization.version>
-        <lombok.version>1.18.30</lombok.version>
+        <lombok.version>1.18.32</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
         <mockito.version>5.11.0</mockito.version>
