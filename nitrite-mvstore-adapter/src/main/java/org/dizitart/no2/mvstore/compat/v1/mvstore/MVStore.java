@@ -28,9 +28,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import static org.dizitart.no2.mvstore.compat.v1.mvstore.MVMap.INITIAL_VERSION;
 
 /*
-
-TODO:
-
 Documentation
 - rolling docs review: at "Metadata Map"
 - better document that writes are in background thread
@@ -1371,17 +1368,7 @@ public class MVStore implements AutoCloseable
                 panic(e);
             }
         }
-        Chunk c = new Chunk(newChunkId);
-        c.pageCount = 0;
-        c.pageCountLive = 0;
-        c.maxLen = 0;
-        c.maxLenLive = 0;
-        c.metaRootPos = Long.MAX_VALUE;
-        c.block = Long.MAX_VALUE;
-        c.len = Integer.MAX_VALUE;
-        c.time = time;
-        c.version = version;
-        c.next = Long.MAX_VALUE;
+        Chunk c = this.getNewChunkWithInitialValues(newChunkId,time,version);
         chunks.put(c.id, c);
         ArrayList<Page> changed = new ArrayList<>();
         for (Iterator<MVMap<?, ?>> iter = maps.values().iterator(); iter.hasNext(); ) {
@@ -1524,6 +1511,28 @@ public class MVStore implements AutoCloseable
         saveNeeded = false;
         unsavedMemory = Math.max(0, unsavedMemory - currentUnsavedPageCount);
         lastStoredVersion = storeVersion;
+    }
+
+    /**
+     * Creates new chunk object with chunkid, time, versdion
+     * @param chunkId id of chunk
+     * @param time Time to set in chunk object
+     * @param version Version to set in chunk object
+     * @return Chunk object
+     */
+    private Chunk getNewChunkWithInitialValues(int chunkId,long time,long version){
+        Chunk c=new Chunk(chunkId);
+        c.pageCount = 0;
+        c.pageCountLive = 0;
+        c.maxLen = 0;
+        c.maxLenLive = 0;
+        c.metaRootPos = Long.MAX_VALUE;
+        c.block = Long.MAX_VALUE;
+        c.len = Integer.MAX_VALUE;
+        c.time = time;
+        c.version = version;
+        c.next = Long.MAX_VALUE;
+        return c;
     }
 
     /**
