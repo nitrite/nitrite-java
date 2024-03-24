@@ -45,14 +45,20 @@ public class PluginManagerTest {
     }
 
     @Test(expected = PluginException.class)
-    public void testLoadModule2() {
-        PluginManager pluginManager = new PluginManager(new NitriteConfig());
-
+    public void testLoadModuleWhenPluginSetNotEmptyThenThrowException() {
+        //Arrange
         HashSet<NitritePlugin> nitritePluginSet = new HashSet<>();
         nitritePluginSet.add(mock(NitritePlugin.class));
+
         NitriteModule nitriteModule = mock(NitriteModule.class);
         when(nitriteModule.plugins()).thenReturn(nitritePluginSet);
+
+        PluginManager pluginManager = new PluginManager(new NitriteConfig());
+
+        //Action
         pluginManager.loadModule(nitriteModule);
+
+        //Assert or verify
         verify(nitriteModule, times(2)).plugins();
     }
 
