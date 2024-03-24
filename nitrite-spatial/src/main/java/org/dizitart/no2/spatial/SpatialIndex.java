@@ -118,9 +118,13 @@ public class SpatialIndex implements NitriteIndex {
     @Override
     public LinkedHashSet<NitriteId> findNitriteIds(FindPlan findPlan) {
         IndexScanFilter indexScanFilter = findPlan.getIndexScanFilter();
-        if (indexScanFilter == null
+
+        boolean isIndexScanFilterEmpty=
+            indexScanFilter == null
             || indexScanFilter.getFilters() == null
-            || indexScanFilter.getFilters().isEmpty()) {
+            || indexScanFilter.getFilters().isEmpty();
+
+        if (isIndexScanFilterEmpty) {
             throw new FilterException("No spatial filter found");
         }
 
