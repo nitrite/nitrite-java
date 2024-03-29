@@ -76,7 +76,7 @@
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
         <guava.version>33.1.0-jre</guava.version>
-        <threetenbp.version>1.6.8</threetenbp.version>
+        <threetenbp.version>1.6.9</threetenbp.version>
 
         <error-prone.version>2.26.1</error-prone.version>
         <jacoco.version>0.8.11</jacoco.version>
@@ -88,7 +88,7 @@
         <animal-sniffer.version>1.23</animal-sniffer.version>
         <api-level-24.version>7.0_r2</api-level-24.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
-        <maven-gpg-plugin.version>3.2.1</maven-gpg-plugin.version>
+        <maven-gpg-plugin.version>3.2.2</maven-gpg-plugin.version>
     </properties>
 
     <dependencyManagement>
