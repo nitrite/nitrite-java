@@ -39,21 +39,14 @@ import java.nio.charset.StandardCharsets;
  * The class provides methods to encrypt and decrypt byte arrays and strings
  * using the specified password and encryption parameters.
  * <p>
- * 
+ *
  * NOTE: This is a derivative work of <a href=
  * "https://mkyong.com/java/java-symmetric-key-cryptography-example/">this</a>.
- * 
+ *
  * @author Anindya Chatterjee
  * @since 4.0
  */
-public class AESEncryptor implements Encryptor {
-    private final String encryptAlgo;
-    private final int tagLengthBit;
-    private final int ivLengthByte;
-    private final int saltLengthByte;
-    private final Charset UTF_8 = StandardCharsets.UTF_8;
-
-    private final SecureString password;
+public class AESEncryptor extends EncryptionProperties implements Encryptor {
 
     /**
      * Instantiates a new {@link AESEncryptor} with these default values
@@ -67,7 +60,7 @@ public class AESEncryptor implements Encryptor {
      * @param password the password
      */
     public AESEncryptor(String password) {
-        this(password, "AES/GCM/NoPadding", 128, 12, 16);
+        super(password);
     }
 
     /**
@@ -80,13 +73,9 @@ public class AESEncryptor implements Encryptor {
      * @param saltLengthByte the salt length byte
      */
     public AESEncryptor(String password, String encryptionAlgo,
-            Integer tagLengthBit, Integer ivLengthByte,
-            Integer saltLengthByte) {
-        this.password = new SecureString(password);
-        this.encryptAlgo = encryptionAlgo;
-        this.tagLengthBit = tagLengthBit;
-        this.ivLengthByte = ivLengthByte;
-        this.saltLengthByte = saltLengthByte;
+                        Integer tagLengthBit, Integer ivLengthByte,
+                        Integer saltLengthByte) {
+        super(password,encryptionAlgo,tagLengthBit,ivLengthByte,saltLengthByte);
     }
 
     /**
@@ -116,10 +105,10 @@ public class AESEncryptor implements Encryptor {
 
             // prefix IV and Salt to cipher text
             byte[] cipherTextWithIvSalt = ByteBuffer.allocate(iv.length + salt.length + cipherText.length)
-                    .put(iv)
-                    .put(salt)
-                    .put(cipherText)
-                    .array();
+                .put(iv)
+                .put(salt)
+                .put(cipherText)
+                .array();
 
             // string representation, base64, send this string to other for decryption.
             return Base64.encodeBase64URLSafeString(cipherTextWithIvSalt);
@@ -134,7 +123,7 @@ public class AESEncryptor implements Encryptor {
      * <p>
      * NOTE: The same password, salt and iv are needed to decrypt it.
      * </p>
-     * 
+     *
      * @param encryptedText the encrypted text
      * @return the plain text decrypted string
      */
