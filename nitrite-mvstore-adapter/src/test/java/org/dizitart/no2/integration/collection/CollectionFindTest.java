@@ -34,12 +34,13 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.dizitart.no2.filters.NitriteCommonFilters.*;
 import static org.dizitart.no2.integration.TestUtil.isSorted;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.collection.FindOptions.*;
 import static org.dizitart.no2.common.Constants.*;
 import static org.dizitart.no2.common.util.DocumentUtils.isSimilar;
-import static org.dizitart.no2.filters.Filter.*;
+import static org.dizitart.no2.filters.NitriteCommonFilters.*;
 import static org.dizitart.no2.filters.FluentFilter.$;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.hamcrest.CoreMatchers.is;

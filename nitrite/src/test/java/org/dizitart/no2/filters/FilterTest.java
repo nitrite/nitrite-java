@@ -25,9 +25,9 @@ import static org.junit.Assert.*;
 public class FilterTest {
     @Test
     public void testById() {
-        assertTrue(((EqualsFilter) Filter.byId(NitriteId.newId())).getValue() instanceof String);
-        assertFalse(((EqualsFilter) Filter.byId(NitriteId.newId())).getObjectFilter());
-        assertEquals("_id", ((EqualsFilter) Filter.byId(NitriteId.newId())).getField());
+        assertTrue(((EqualsFilter) NitriteCommonFilters.byId(NitriteId.newId())).getValue() instanceof String);
+        assertFalse(((EqualsFilter) NitriteCommonFilters.byId(NitriteId.newId())).getObjectFilter());
+        assertEquals("_id", ((EqualsFilter) NitriteCommonFilters.byId(NitriteId.newId())).getField());
     }
 }
 

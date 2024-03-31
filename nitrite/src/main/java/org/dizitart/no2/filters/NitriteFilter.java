@@ -30,7 +30,7 @@ import java.util.Objects;
  */
 @Getter
 @Setter
-public abstract class NitriteFilter implements Filter {
+public abstract class NitriteFilter implements NitriteCommonFilters {
     private NitriteConfig nitriteConfig;
     private String collectionName;
     private Boolean objectFilter = false;

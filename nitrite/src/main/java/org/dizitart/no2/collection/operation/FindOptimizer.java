@@ -29,8 +29,8 @@ import java.util.*;
 
 import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.Iterables.firstOrNull;
-import static org.dizitart.no2.filters.Filter.and;
-import static org.dizitart.no2.filters.Filter.or;
+import static org.dizitart.no2.filters.NitriteCommonFilters.and;
+import static org.dizitart.no2.filters.NitriteCommonFilters.or;
 
 /**
  * @since 4.0

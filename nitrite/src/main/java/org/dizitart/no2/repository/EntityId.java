@@ -23,6 +23,7 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.filters.Filter;
+import org.dizitart.no2.filters.NitriteCommonFilters;
 import org.dizitart.no2.filters.NitriteFilter;
 
 import java.util.ArrayList;
@@ -106,7 +107,7 @@ public class EntityId {
                 filters.add(where(filterField).eq(fieldValue));
             }
 
-            NitriteFilter nitriteFilter = (NitriteFilter) Filter.and(filters.toArray(new Filter[] {}));
+            NitriteFilter nitriteFilter = (NitriteFilter) NitriteCommonFilters.and(filters.toArray(new Filter[] {}));
             nitriteFilter.setObjectFilter(true);
             return nitriteFilter;
         } else {

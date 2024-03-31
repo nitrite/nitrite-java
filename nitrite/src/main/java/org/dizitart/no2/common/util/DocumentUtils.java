@@ -22,6 +22,7 @@ import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.filters.NitriteCommonFilters;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -43,7 +44,7 @@ public class DocumentUtils {
     }
 
     public static Filter createUniqueFilter(Document document) {
-        return Filter.byId(document.getId());
+        return NitriteCommonFilters.byId(document.getId());
     }
 
     public static <T> Document skeletonDocument(NitriteMapper nitriteMapper, Class<T> type) {

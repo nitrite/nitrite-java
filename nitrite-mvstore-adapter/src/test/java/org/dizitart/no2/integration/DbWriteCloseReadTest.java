@@ -36,8 +36,10 @@ import java.util.Locale;
 
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.collection.FindOptions.orderBy;
-import static org.dizitart.no2.filters.Filter.*;
+import static org.dizitart.no2.filters.NitriteCommonFilters.*;
 import static org.dizitart.no2.filters.FluentFilter.where;
+import static org.dizitart.no2.filters.NitriteCommonFilters.and;
+import static org.dizitart.no2.filters.NitriteCommonFilters.or;
 import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.junit.Assert.*;
 

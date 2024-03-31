@@ -32,7 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
-import static org.dizitart.no2.filters.Filter.and;
+import static org.dizitart.no2.filters.NitriteCommonFilters.and;
 import static org.dizitart.no2.spatial.SpatialFluentFilter.where;
 import static org.dizitart.no2.spatial.SpatialIndexer.SPATIAL_INDEX;
 import static org.junit.Assert.assertEquals;

@@ -35,8 +35,8 @@ import java.util.List;
 
 import static org.dizitart.no2.integration.TestUtil.isSorted;
 import static org.dizitart.no2.collection.FindOptions.orderBy;
-import static org.dizitart.no2.filters.Filter.and;
-import static org.dizitart.no2.filters.Filter.or;
+import static org.dizitart.no2.filters.NitriteCommonFilters.and;
+import static org.dizitart.no2.filters.NitriteCommonFilters.or;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -64,7 +64,7 @@ import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.common.Constants.INTERNAL_NAME_SEPARATOR;
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.filters.Filter.ALL;
-import static org.dizitart.no2.filters.Filter.and;
+import static org.dizitart.no2.filters.NitriteCommonFilters.and;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.integration.TestUtil.deleteDb;
 import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
