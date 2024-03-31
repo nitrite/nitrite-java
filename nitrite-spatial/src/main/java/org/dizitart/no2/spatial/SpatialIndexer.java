@@ -23,6 +23,7 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.IndexingException;
 import org.dizitart.no2.index.IndexDescriptor;
+import org.dizitart.no2.index.NitriteIndex;
 import org.dizitart.no2.index.NitriteIndexer;
 
 import java.util.LinkedHashSet;
@@ -44,7 +45,7 @@ public class SpatialIndexer implements NitriteIndexer {
      * index.
      */
     public static final String SPATIAL_INDEX = "Spatial";
-    private final Map<IndexDescriptor, SpatialIndex> indexRegistry;
+    private final Map<IndexDescriptor, NitriteIndex> indexRegistry;
 
     /**
      * Instantiates a new {@link SpatialIndexer}.
@@ -67,26 +68,26 @@ public class SpatialIndexer implements NitriteIndexer {
 
     @Override
     public void dropIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
-        SpatialIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
+        NitriteIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
         spatialIndex.drop();
     }
 
     @Override
     public void writeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
-        SpatialIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
+        NitriteIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
         spatialIndex.write(fieldValues);
     }
 
     @Override
     public void removeIndexEntry(FieldValues fieldValues, IndexDescriptor indexDescriptor,
             NitriteConfig nitriteConfig) {
-        SpatialIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
+        NitriteIndex spatialIndex = findSpatialIndex(indexDescriptor, nitriteConfig);
         spatialIndex.remove(fieldValues);
     }
 
     @Override
     public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
-        SpatialIndex spatialIndex = findSpatialIndex(findPlan.getIndexDescriptor(), nitriteConfig);
+        NitriteIndex spatialIndex = findSpatialIndex(findPlan.getIndexDescriptor(), nitriteConfig);
         return spatialIndex.findNitriteIds(findPlan);
     }
 
@@ -94,7 +95,7 @@ public class SpatialIndexer implements NitriteIndexer {
     public void initialize(NitriteConfig nitriteConfig) {
     }
 
-    private SpatialIndex findSpatialIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
+    private NitriteIndex findSpatialIndex(IndexDescriptor indexDescriptor, NitriteConfig nitriteConfig) {
         if (indexRegistry.containsKey(indexDescriptor)) {
             return indexRegistry.get(indexDescriptor);
         }

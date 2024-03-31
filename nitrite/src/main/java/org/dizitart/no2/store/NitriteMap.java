@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.store;
 
+import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.meta.AttributesAware;
 import org.dizitart.no2.common.RecordStream;
