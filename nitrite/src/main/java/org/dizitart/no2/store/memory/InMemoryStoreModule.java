@@ -31,9 +31,9 @@ public class InMemoryStoreModule implements StoreModule {
      *
      * @return the in memory module builder
      */
-    public static InMemoryModuleBuilder withConfig() {
+  /*  public static InMemoryModuleBuilder withConfig() {
         return new InMemoryModuleBuilder();
-    }
+    }*/
 
     @Override
     public NitriteStore<?> getStore() {

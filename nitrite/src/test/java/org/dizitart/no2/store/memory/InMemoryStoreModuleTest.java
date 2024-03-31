@@ -30,12 +30,12 @@ public class InMemoryStoreModuleTest {
         assertTrue(((InMemoryConfig) store.getStoreConfig()).eventListeners().isEmpty());
     }
 
-    @Test
+/*    @Test
     public void testWithConfig() {
         InMemoryModuleBuilder actualWithConfigResult = InMemoryStoreModule.withConfig();
         assertTrue(actualWithConfigResult.eventListeners().isEmpty());
         assertTrue(actualWithConfigResult.dbConfig().eventListeners().isEmpty());
-    }
+    }*/
 
     @Test
     public void testGetStore() {
