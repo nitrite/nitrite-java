@@ -79,7 +79,7 @@
         <threetenbp.version>1.6.9</threetenbp.version>
 
         <error-prone.version>2.26.1</error-prone.version>
-        <jacoco.version>0.8.11</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <surefire.version>3.2.5</surefire.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
