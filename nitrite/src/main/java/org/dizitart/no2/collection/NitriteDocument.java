@@ -176,8 +176,14 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                     // if the value is a document, merge it recursively
                     if (containsKey(key)) {
                         // if the current document already contains the key,
-                        // then merge the embedded document
-                        get(key, Document.class).merge((Document) value);
+                        // and the value is not null, merge it
+                        Document pairs = get(key, Document.class);
+                        if (pairs != null) {
+                            pairs.merge((Document) value);
+                        } else {
+                            //otherwise, just set the value to whatever was provided
+                            put(key, value);
+                        }
                     } else {
                         // if the current document does not contain the key,
                         // then put the embedded document as it is
