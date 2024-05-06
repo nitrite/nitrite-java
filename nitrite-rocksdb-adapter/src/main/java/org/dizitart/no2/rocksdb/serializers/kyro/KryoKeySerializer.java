@@ -1,4 +1,4 @@
-package org.dizitart.no2.rocksdb.formatter;
+package org.dizitart.no2.rocksdb.serializers.kyro;
 
 
 import com.esotericsoftware.kryo.kryo5.Kryo;

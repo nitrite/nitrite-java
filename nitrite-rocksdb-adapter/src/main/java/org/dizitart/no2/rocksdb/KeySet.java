@@ -1,6 +1,6 @@
 package org.dizitart.no2.rocksdb;
 
-import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.ObjectSerializer;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
@@ -15,15 +15,15 @@ import static org.dizitart.no2.rocksdb.Constants.CLEANER;
  * @author Anindya Chatterjee
  */
 class KeySet<K> implements Iterable<K> {
-    private final ObjectFormatter objectFormatter;
+    private final ObjectSerializer objectSerializer;
     private final RocksDB rocksDB;
     private final ColumnFamilyHandle columnFamilyHandle;
     private final Class<?> keyType;
 
-    public KeySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, ObjectFormatter objectFormatter, Class<?> keyType) {
+    public KeySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle, ObjectSerializer objectSerializer, Class<?> keyType) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
-        this.objectFormatter = objectFormatter;
+        this.objectSerializer = objectSerializer;
         this.keyType = keyType;
     }
 
@@ -58,7 +58,7 @@ class KeySet<K> implements Iterable<K> {
         @Override
         @SuppressWarnings("unchecked")
         public K next() {
-            K key = (K) objectFormatter.decodeKey(rawEntryIterator.key(), keyType);
+            K key = (K) objectSerializer.decodeKey(rawEntryIterator.key(), keyType);
             rawEntryIterator.next();
             return key;
         }

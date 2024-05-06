@@ -1,6 +1,6 @@
 package org.dizitart.no2.rocksdb;
 
-import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.ObjectSerializer;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
@@ -15,16 +15,16 @@ import static org.dizitart.no2.rocksdb.Constants.CLEANER;
  * @author Anindya Chatterjee
  */
 class ValueSet<V> implements Iterable<V> {
-    private final ObjectFormatter objectFormatter;
+    private final ObjectSerializer objectSerializer;
     private final RocksDB rocksDB;
     private final ColumnFamilyHandle columnFamilyHandle;
     private final Class<?> valueType;
 
     public ValueSet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle,
-                    ObjectFormatter objectFormatter, Class<?> valueType) {
+                    ObjectSerializer objectSerializer, Class<?> valueType) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
-        this.objectFormatter = objectFormatter;
+        this.objectSerializer = objectSerializer;
         this.valueType = valueType;
     }
 
@@ -61,7 +61,7 @@ class ValueSet<V> implements Iterable<V> {
         public V next() {
             byte[] value = rawEntryIterator.value();
             rawEntryIterator.next();
-            return (V) objectFormatter.decode(value, valueType);
+            return (V) objectSerializer.decode(value, valueType);
         }
 
         @Override

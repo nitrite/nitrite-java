@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.rocksdb.serializers.kyro.KryoObjectSerializer;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -32,7 +33,7 @@ public class RocksDBModuleTest {
         RocksDBModuleBuilder actualWithConfigResult = RocksDBModule.withConfig();
         assertTrue(actualWithConfigResult.eventListeners().isEmpty());
         RocksDBConfig dbConfigResult = actualWithConfigResult.dbConfig();
-        assertTrue(dbConfigResult.objectFormatter() instanceof org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter);
+        assertTrue(dbConfigResult.objectSerializer() instanceof KryoObjectSerializer);
         assertTrue(dbConfigResult.eventListeners().isEmpty());
     }
 }

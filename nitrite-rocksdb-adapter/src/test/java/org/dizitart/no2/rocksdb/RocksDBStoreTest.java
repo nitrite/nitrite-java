@@ -41,25 +41,25 @@ public class RocksDBStoreTest {
     @Test(expected = NitriteException.class)
     public void testOpenMap() {
         RocksDBConfig rocksDBConfig = mock(RocksDBConfig.class);
-        when(rocksDBConfig.objectFormatter()).thenThrow(new NitriteException("An error occurred"));
+        when(rocksDBConfig.objectSerializer()).thenThrow(new NitriteException("An error occurred"));
 
         RocksDBStore rocksDBStore = new RocksDBStore();
         rocksDBStore.setStoreConfig(rocksDBConfig);
         Class<?> keyType = Object.class;
         rocksDBStore.openMap("MapName", keyType, Object.class);
-        verify(rocksDBConfig).objectFormatter();
+        verify(rocksDBConfig).objectSerializer();
     }
 
     @Test(expected = NitriteException.class)
     public void testOpenRTree() {
         RocksDBConfig rocksDBConfig = mock(RocksDBConfig.class);
-        when(rocksDBConfig.objectFormatter()).thenThrow(new NitriteException("An error occurred"));
+        when(rocksDBConfig.objectSerializer()).thenThrow(new NitriteException("An error occurred"));
 
         RocksDBStore rocksDBStore = new RocksDBStore();
         rocksDBStore.setStoreConfig(rocksDBConfig);
         Class<?> keyType = Object.class;
         rocksDBStore.openRTree("Rtree", keyType, Object.class);
-        verify(rocksDBConfig).objectFormatter();
+        verify(rocksDBConfig).objectSerializer();
     }
 }
 

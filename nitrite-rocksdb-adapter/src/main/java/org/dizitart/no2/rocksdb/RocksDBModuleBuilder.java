@@ -20,7 +20,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.ObjectSerializer;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.rocksdb.ColumnFamilyOptions;
 import org.rocksdb.DBOptions;
@@ -60,7 +60,7 @@ public class RocksDBModuleBuilder {
     /**
      * The object formatter used to serialize and deserialize objects.
      */
-    private ObjectFormatter objectFormatter;
+    private ObjectSerializer objectSerializer;
     /**
      * The RocksDB configuration for the module.
      */
@@ -122,8 +122,8 @@ public class RocksDBModuleBuilder {
         dbConfig.columnFamilyOptions(columnFamilyOptions());
         dbConfig.filePath(filePath());
 
-        if (objectFormatter() != null) {
-            dbConfig.objectFormatter(objectFormatter());
+        if (objectSerializer() != null) {
+            dbConfig.objectSerializer(objectSerializer());
         }
         dbConfig.eventListeners(eventListeners());
 

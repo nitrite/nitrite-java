@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.rocksdb.serializers.kyro.KryoObjectSerializer;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
@@ -39,7 +40,7 @@ public class RocksDBConfigTest {
     @Test
     public void testConstructor3() {
         RocksDBConfig actualRocksDBConfig = new RocksDBConfig();
-        assertTrue(actualRocksDBConfig.objectFormatter() instanceof org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter);
+        assertTrue(actualRocksDBConfig.objectSerializer() instanceof KryoObjectSerializer);
         assertTrue(actualRocksDBConfig.eventListeners().isEmpty());
     }
 }

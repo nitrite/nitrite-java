@@ -1,7 +1,7 @@
 package org.dizitart.no2.rocksdb;
 
 import org.dizitart.no2.common.tuples.Pair;
-import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.ObjectSerializer;
 import org.rocksdb.*;
 
 import java.util.Iterator;
@@ -11,7 +11,7 @@ import java.util.Iterator;
  * @author Anindya Chatterjee
  */
 class EntrySet<K, V> implements Iterable<Pair<K, V>> {
-    private final ObjectFormatter objectFormatter;
+    private final ObjectSerializer objectSerializer;
     private final RocksDB rocksDB;
     private final ColumnFamilyHandle columnFamilyHandle;
     private final Class<?> keyType;
@@ -19,11 +19,11 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
     private final boolean reverse;
 
     public EntrySet(RocksDB rocksDB, ColumnFamilyHandle columnFamilyHandle,
-                    ObjectFormatter objectFormatter, Class<?> keyType,
+                    ObjectSerializer objectSerializer, Class<?> keyType,
                     Class<?> valueType, boolean reverse) {
         this.rocksDB = rocksDB;
         this.columnFamilyHandle = columnFamilyHandle;
-        this.objectFormatter = objectFormatter;
+        this.objectSerializer = objectSerializer;
         this.keyType = keyType;
         this.valueType = valueType;
         this.reverse = reverse;
@@ -62,8 +62,8 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
         @Override
         @SuppressWarnings("unchecked")
         public Pair<K, V> next() {
-            K key = (K) objectFormatter.decodeKey(rawEntryIterator.key(), keyType);
-            V value = (V) objectFormatter.decode(rawEntryIterator.value(), valueType);
+            K key = (K) objectSerializer.decodeKey(rawEntryIterator.key(), keyType);
+            V value = (V) objectSerializer.decode(rawEntryIterator.value(), valueType);
             if (reverse) {
                 rawEntryIterator.prev();
             } else {

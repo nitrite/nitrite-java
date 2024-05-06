@@ -4,8 +4,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
-import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.kyro.KryoObjectSerializer;
+import org.dizitart.no2.rocksdb.serializers.ObjectSerializer;
 import org.dizitart.no2.store.StoreConfig;
 import org.dizitart.no2.store.events.StoreEventListener;
 import org.rocksdb.ColumnFamilyOptions;
@@ -67,11 +67,11 @@ public class RocksDBConfig implements StoreConfig {
     /**
      * The object formatter used to serialize and deserialize objects.
      */
-    private ObjectFormatter objectFormatter;
+    private ObjectSerializer objectSerializer;
 
     RocksDBConfig() {
         eventListeners = new HashSet<>();
-        objectFormatter = new KryoObjectFormatter();
+        objectSerializer = new KryoObjectSerializer();
     }
 
     /**

@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.rocksdb.serializers.kyro.KryoObjectSerializer;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -37,14 +38,14 @@ public class RocksDBModuleBuilderTest {
         RocksDBModuleBuilder actualFilePathResult = actualRocksDBModuleBuilder.filePath("Path");
         assertNull(actualRocksDBModuleBuilder.columnFamilyOptions());
         assertNull(actualRocksDBModuleBuilder.options());
-        assertNull(actualRocksDBModuleBuilder.objectFormatter());
+        assertNull(actualRocksDBModuleBuilder.objectSerializer());
         assertEquals("Path", actualRocksDBModuleBuilder.filePath());
         assertTrue(actualRocksDBModuleBuilder.eventListeners().isEmpty());
         assertNull(actualRocksDBModuleBuilder.dbOptions());
         RocksDBConfig dbConfigResult = actualRocksDBModuleBuilder.dbConfig();
         assertNull(dbConfigResult.columnFamilyOptions());
         assertNull(dbConfigResult.options());
-        assertTrue(dbConfigResult.objectFormatter() instanceof org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter);
+        assertTrue(dbConfigResult.objectSerializer() instanceof KryoObjectSerializer);
         assertFalse(dbConfigResult.isInMemory());
         assertNull(dbConfigResult.filePath());
         assertTrue(dbConfigResult.eventListeners().isEmpty());
@@ -57,7 +58,7 @@ public class RocksDBModuleBuilderTest {
         RocksDBModuleBuilder actualRocksDBModuleBuilder = new RocksDBModuleBuilder();
         assertTrue(actualRocksDBModuleBuilder.eventListeners().isEmpty());
         RocksDBConfig dbConfigResult = actualRocksDBModuleBuilder.dbConfig();
-        assertTrue(dbConfigResult.objectFormatter() instanceof org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter);
+        assertTrue(dbConfigResult.objectSerializer() instanceof KryoObjectSerializer);
         assertTrue(dbConfigResult.eventListeners().isEmpty());
     }
 }

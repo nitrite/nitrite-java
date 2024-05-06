@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.rocksdb.formatter;
+package org.dizitart.no2.rocksdb.serializers.kyro;
 
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
@@ -23,6 +23,7 @@ import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.rocksdb.serializers.ObjectSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,11 +39,11 @@ import static org.dizitart.no2.rocksdb.Constants.DB_NULL;
  * @author Anindya Chatterjee
  */
 @Slf4j(topic = "nitrite-rocksdb")
-public class KryoObjectFormatter implements ObjectFormatter {
+public class KryoObjectSerializer implements ObjectSerializer {
     private static final Kryo kryo = new Kryo();
     private final Map<Class<?>, KryoKeySerializer<?>> keySerializerRegistry;
 
-    public KryoObjectFormatter() {
+    public KryoObjectSerializer() {
         this.keySerializerRegistry = new HashMap<>();
         kryo.setRegistrationRequired(false);
         registerInternalSerializers();

@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.rocksdb;
 
-import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.kyro.KryoObjectSerializer;
 import org.junit.Test;
 import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
@@ -30,7 +30,7 @@ public class EntrySetTest {
     public void testIterator() {
         RocksDB rocksDB = mock(RocksDB.class);
         when(rocksDB.newIterator((ColumnFamilyHandle) any())).thenReturn(mock(RocksIterator.class));
-        KryoObjectFormatter objectFormatter = new KryoObjectFormatter();
+        KryoObjectSerializer objectFormatter = new KryoObjectSerializer();
         Class<?> keyType = Object.class;
         (new EntrySet<>(rocksDB, null, objectFormatter, keyType, Object.class, true)).iterator();
         verify(rocksDB).newIterator((ColumnFamilyHandle) any());
@@ -40,7 +40,7 @@ public class EntrySetTest {
     public void testIterator2() {
         RocksDB rocksDB = mock(RocksDB.class);
         when(rocksDB.newIterator((ColumnFamilyHandle) any())).thenReturn(mock(RocksIterator.class));
-        KryoObjectFormatter objectFormatter = new KryoObjectFormatter();
+        KryoObjectSerializer objectFormatter = new KryoObjectSerializer();
         Class<?> keyType = Object.class;
         (new EntrySet<>(rocksDB, null, objectFormatter, keyType, Object.class, false)).iterator();
         verify(rocksDB).newIterator((ColumnFamilyHandle) any());

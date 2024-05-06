@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.NitriteIOException;
-import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
+import org.dizitart.no2.rocksdb.serializers.ObjectSerializer;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.rocksdb.ColumnFamilyHandle;
@@ -35,7 +35,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     private AtomicBoolean closedFlag;
 
     private RocksDB rocksDB;
-    private ObjectFormatter objectFormatter;
+    private ObjectSerializer objectSerializer;
     private ColumnFamilyHandle columnFamilyHandle;
     private BytewiseComparator bytewiseComparator;
 
@@ -58,7 +58,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public boolean containsKey(K k) {
-        byte[] key = objectFormatter.encodeKey(k);
+        byte[] key = objectSerializer.encodeKey(k);
         try {
             // check if key definitely does not exist, then return false
             boolean result = rocksDB.keyMayExist(columnFamilyHandle, key, null);
@@ -76,13 +76,13 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @SuppressWarnings("unchecked")
     public V get(K k) {
         try {
-            byte[] key = objectFormatter.encodeKey(k);
+            byte[] key = objectSerializer.encodeKey(k);
             byte[] value = rocksDB.get(columnFamilyHandle, key);
             if (value == null) {
                 return null;
             }
 
-            return (V) objectFormatter.decode(value, getValueType());
+            return (V) objectSerializer.decode(value, getValueType());
         } catch (Exception e) {
             log.error("Error while querying by key", e);
             throw new NitriteIOException("Failed to query by key", e);
@@ -110,14 +110,14 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public RecordStream<V> values() {
-        return RecordStream.fromIterable(new ValueSet<>(rocksDB, columnFamilyHandle, objectFormatter, getValueType()));
+        return RecordStream.fromIterable(new ValueSet<>(rocksDB, columnFamilyHandle, objectSerializer, getValueType()));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public V remove(K k) {
         try {
-            byte[] key = objectFormatter.encodeKey(k);
+            byte[] key = objectSerializer.encodeKey(k);
 
             // if the definitely does not exist return null
             if (!rocksDB.keyMayExist(columnFamilyHandle, key, null)) {
@@ -135,7 +135,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             size.decrementAndGet();
             updateLastModifiedTime();
 
-            return (V) objectFormatter.decode(value, getValueType());
+            return (V) objectSerializer.decode(value, getValueType());
         } catch (Exception e) {
             log.error("Error while removing key", e);
             throw new NitriteIOException("Failed to remove key", e);
@@ -144,15 +144,15 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
 
     @Override
     public RecordStream<K> keys() {
-        return RecordStream.fromIterable(new KeySet<>(rocksDB, columnFamilyHandle, objectFormatter, getKeyType()));
+        return RecordStream.fromIterable(new KeySet<>(rocksDB, columnFamilyHandle, objectSerializer, getKeyType()));
     }
 
     @Override
     public void put(K k, V v) {
         notNull(v, "value cannot be null");
         try {
-            byte[] key = objectFormatter.encodeKey(k);
-            byte[] value = objectFormatter.encode(v);
+            byte[] key = objectSerializer.encodeKey(k);
+            byte[] value = objectSerializer.encode(v);
 
             // check if this is update or insert
             boolean result = rocksDB.keyMayExist(columnFamilyHandle, key, null);
@@ -194,18 +194,18 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
         notNull(v, "value cannot be null");
 
         try {
-            byte[] key = objectFormatter.encodeKey(k);
+            byte[] key = objectSerializer.encodeKey(k);
             byte[] oldValue = rocksDB.get(columnFamilyHandle, key);
 
             if (oldValue == null) {
-                byte[] value = objectFormatter.encode(v);
+                byte[] value = objectSerializer.encode(v);
                 rocksDB.put(columnFamilyHandle, key, value);
                 size.incrementAndGet();
                 updateLastModifiedTime();
                 return null;
             }
 
-            return (V) objectFormatter.decode(oldValue, getValueType());
+            return (V) objectSerializer.decode(oldValue, getValueType());
         } catch (Exception e) {
             log.error("Error while writing key and value", e);
             throw new NitriteIOException("Failed to write key and value", e);
@@ -215,13 +215,13 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @Override
     public RecordStream<Pair<K, V>> entries() {
         return RecordStream.fromIterable(new EntrySet<>(rocksDB, columnFamilyHandle,
-            objectFormatter, getKeyType(), getValueType(), false));
+            objectSerializer, getKeyType(), getValueType(), false));
     }
 
     @Override
     public RecordStream<Pair<K, V>> reversedEntries() {
         return RecordStream.fromIterable(new EntrySet<>(rocksDB, columnFamilyHandle,
-            objectFormatter, getKeyType(), getValueType(), true));
+            objectSerializer, getKeyType(), getValueType(), true));
     }
 
     @Override
@@ -231,7 +231,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             iterator.seekToFirst();
             if (iterator.isValid()) {
                 byte[] key = iterator.key();
-                return (K) objectFormatter.decodeKey(key, getKeyType());
+                return (K) objectSerializer.decodeKey(key, getKeyType());
             }
         }
         return null;
@@ -244,7 +244,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
             iterator.seekToLast();
             if (iterator.isValid()) {
                 byte[] key = iterator.key();
-                return (K) objectFormatter.decodeKey(key, getKeyType());
+                return (K) objectSerializer.decodeKey(key, getKeyType());
             }
         }
         return null;
@@ -254,7 +254,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public K higherKey(K k) {
         try (RocksIterator iterator = rocksDB.newIterator(columnFamilyHandle)) {
-            byte[] key = objectFormatter.encodeKey(k);
+            byte[] key = objectSerializer.encodeKey(k);
 
             iterator.seek(key);
             if (!iterator.isValid()) {
@@ -267,7 +267,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) > 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    Comparable k2 = (Comparable) objectSerializer.decodeKey(nextKey, k.getClass());
                     return (K) k2;
                 }
                 iterator.next();
@@ -280,7 +280,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public K ceilingKey(K k) {
         try (RocksIterator iterator = rocksDB.newIterator(columnFamilyHandle)) {
-            byte[] key = objectFormatter.encodeKey(k);
+            byte[] key = objectSerializer.encodeKey(k);
 
             iterator.seek(key);
             if (!iterator.isValid()) {
@@ -293,7 +293,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) >= 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    Comparable k2 = (Comparable) objectSerializer.decodeKey(nextKey, k.getClass());
                     return (K) k2;
                 }
                 iterator.next();
@@ -306,7 +306,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public K lowerKey(K k) {
         try (RocksIterator iterator = rocksDB.newIterator(columnFamilyHandle)) {
-            byte[] key = objectFormatter.encodeKey(k);
+            byte[] key = objectSerializer.encodeKey(k);
 
             iterator.seekForPrev(key);
             if (!iterator.isValid()) {
@@ -319,7 +319,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) < 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    Comparable k2 = (Comparable) objectSerializer.decodeKey(nextKey, k.getClass());
                     return (K) k2;
                 }
 
@@ -334,7 +334,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public K floorKey(K k) {
         try (RocksIterator iterator = rocksDB.newIterator(columnFamilyHandle)) {
-            byte[] key = objectFormatter.encodeKey(k);
+            byte[] key = objectSerializer.encodeKey(k);
 
             iterator.seekForPrev(key);
             if (!iterator.isValid()) {
@@ -347,7 +347,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) <= 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    Comparable k2 = (Comparable) objectSerializer.decodeKey(nextKey, k.getClass());
                     return (K) k2;
                 }
 
@@ -396,7 +396,7 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
         this.size = new AtomicLong(0); // just initialized
         this.closedFlag = new AtomicBoolean(false);
         this.droppedFlag = new AtomicBoolean(false);
-        this.objectFormatter = store.getStoreConfig().objectFormatter();
+        this.objectSerializer = store.getStoreConfig().objectSerializer();
         this.columnFamilyHandle = reference.getOrCreateColumnFamily(getName());
         this.rocksDB = reference.getRocksDB();
         this.bytewiseComparator = this.reference.getDbComparator();

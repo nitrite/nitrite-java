@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.dizitart.no2.rocksdb.formatter;
+package org.dizitart.no2.rocksdb.serializers;
 
 
 /**
@@ -24,7 +24,7 @@ package org.dizitart.no2.rocksdb.formatter;
  * @since 4.0
  * @author Anindya Chatterjee
  */
-public interface ObjectFormatter {
+public interface ObjectSerializer {
     /**
      * Encodes an object into a byte array.
      *

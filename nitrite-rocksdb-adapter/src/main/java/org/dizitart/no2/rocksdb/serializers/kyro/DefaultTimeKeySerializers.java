@@ -1,4 +1,4 @@
-package org.dizitart.no2.rocksdb.formatter;
+package org.dizitart.no2.rocksdb.serializers.kyro;
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
 import com.esotericsoftware.kryo.kryo5.io.Output;
@@ -109,7 +109,7 @@ class DefaultTimeKeySerializers {
     private static class GregorianCalendarSerializer extends CalendarSerializer {
     }
 
-    public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
+    public static void registerAll(KryoObjectSerializer kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(Date.class, new DateSerializer());
         kryoObjectFormatter.registerSerializer(Timestamp.class, new TimestampSerializer());
         kryoObjectFormatter.registerSerializer(java.sql.Date.class, new SqlDateSerializer());

@@ -1,4 +1,4 @@
-package org.dizitart.no2.rocksdb.formatter;
+package org.dizitart.no2.rocksdb.serializers.kyro;
 
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
@@ -222,7 +222,7 @@ public class NitriteSerializers {
         }
     }
 
-    public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
+    public static void registerAll(KryoObjectSerializer kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
         kryoObjectFormatter.registerSerializer(Document.class, new DocumentSerializer());

@@ -1,4 +1,4 @@
-package org.dizitart.no2.rocksdb.formatter;
+package org.dizitart.no2.rocksdb.serializers.kyro;
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
 import com.esotericsoftware.kryo.kryo5.Serializer;
@@ -26,7 +26,7 @@ public class DefaultJavaSerializers {
         }
     }
 
-    public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
+    public static void registerAll(KryoObjectSerializer kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(UUID.class, new UUIDSerializer());
     }
 }

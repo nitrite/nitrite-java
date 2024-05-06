@@ -24,8 +24,8 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.integration.Retry;
 import org.dizitart.no2.rocksdb.RocksDBModule;
-import org.dizitart.no2.rocksdb.formatter.KryoObjectFormatter;
-import org.dizitart.no2.rocksdb.serializers.JodaTimeKryoKeySerializer;
+import org.dizitart.no2.rocksdb.serializers.kyro.KryoObjectSerializer;
+import org.dizitart.no2.rocksdb.serializers.kyro.JodaTimeKryoKeySerializer;
 import org.joda.time.DateTime;
 import org.junit.After;
 import org.junit.Before;
@@ -54,7 +54,7 @@ public abstract class BaseCollectionTest {
     protected Document doc1, doc2, doc3;
     protected SimpleDateFormat simpleDateFormat;
     private final String fileName = getRandomTempDbFile();
-    protected final KryoObjectFormatter fstMarshaller = new KryoObjectFormatter();
+    protected final KryoObjectSerializer fstMarshaller = new KryoObjectSerializer();
 	
 	@Rule
     public Retry retry = new Retry(3);
@@ -119,7 +119,7 @@ public abstract class BaseCollectionTest {
 
         RocksDBModule storeModule = RocksDBModule.withConfig()
                 .filePath(fileName)
-                .objectFormatter(fstMarshaller)
+                .objectSerializer(fstMarshaller)
                 .build();
 
         if (isSecured) {

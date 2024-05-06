@@ -1,16 +1,16 @@
-package org.dizitart.no2.rocksdb.serializers;
+package org.dizitart.no2.rocksdb.serializers.fury;
 
 
 import com.esotericsoftware.kryo.kryo5.Kryo;
 import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
-import org.dizitart.no2.rocksdb.formatter.ComparableKeySerializer;
+import org.dizitart.no2.rocksdb.serializers.kyro.ComparableKeySerializer;
 import org.joda.time.DateTime;
 
 /**
  * @author Anindya Chatterjee
  */
-public class JodaTimeKryoKeySerializer extends ComparableKeySerializer<DateTime> {
+public class JodaTimeFuryKeySerializer extends ComparableKeySerializer<DateTime> {
 
     @Override
     public void write(Kryo kryo, Output output, DateTime object) {
