@@ -78,7 +78,7 @@ public class RocksDBConfig implements StoreConfig {
      * </pre></blockquote>
      *
      */
-    @Deprecated(since = "4.3.1", forRemoval = true)
+    @Deprecated(since = "4.3.0", forRemoval = true)
     private void objectFormatter(ObjectSerializer objectSerializer) {
         this.objectSerializer = objectSerializer;
     }

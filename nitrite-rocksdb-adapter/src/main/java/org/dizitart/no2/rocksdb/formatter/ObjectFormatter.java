@@ -25,7 +25,7 @@ package org.dizitart.no2.rocksdb.formatter;
  * @author Anindya Chatterjee
  * @deprecated This interface is deprecated in favor of {@link org.dizitart.no2.rocksdb.serializers.ObjectSerializer}.
  */
-@Deprecated(since = "4.3.1", forRemoval = true)
+@Deprecated(since = "4.3.0", forRemoval = true)
 public interface ObjectFormatter {
     /**
      * Encodes an object into a byte array.
