@@ -31,7 +31,6 @@ import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,11 +112,9 @@ public class CustomFieldSeparatorTest {
 
     @ToString
     @EqualsAndHashCode
-    @Indices({
-        @Index(fields = "joinDate", type = IndexType.NON_UNIQUE),
-        @Index(fields = "address", type = IndexType.FULL_TEXT),
-        @Index(fields = "employeeNote:text", type = IndexType.FULL_TEXT)
-    })
+    @Index(fields = "joinDate", type = IndexType.NON_UNIQUE)
+    @Index(fields = "address", type = IndexType.FULL_TEXT)
+    @Index(fields = "employeeNote:text", type = IndexType.FULL_TEXT)
     public static class EmployeeForCustomSeparator implements Serializable {
         @Id
         @Getter
