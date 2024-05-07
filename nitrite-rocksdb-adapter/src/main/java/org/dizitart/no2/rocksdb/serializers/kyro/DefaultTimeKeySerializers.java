@@ -109,11 +109,11 @@ class DefaultTimeKeySerializers {
     private static class GregorianCalendarSerializer extends CalendarSerializer {
     }
 
-    public static void registerAll(KryoObjectSerializer kryoObjectFormatter) {
-        kryoObjectFormatter.registerSerializer(Date.class, new DateSerializer());
-        kryoObjectFormatter.registerSerializer(Timestamp.class, new TimestampSerializer());
-        kryoObjectFormatter.registerSerializer(java.sql.Date.class, new SqlDateSerializer());
-        kryoObjectFormatter.registerSerializer(Time.class, new TimeSerializer());
-        kryoObjectFormatter.registerSerializer(GregorianCalendar.class, new GregorianCalendarSerializer());
+    public static void registerAll(KryoObjectSerializer kryoObjectSerializer) {
+        kryoObjectSerializer.registerSerializer(Date.class, new DateSerializer());
+        kryoObjectSerializer.registerSerializer(Timestamp.class, new TimestampSerializer());
+        kryoObjectSerializer.registerSerializer(java.sql.Date.class, new SqlDateSerializer());
+        kryoObjectSerializer.registerSerializer(Time.class, new TimeSerializer());
+        kryoObjectSerializer.registerSerializer(GregorianCalendar.class, new GregorianCalendarSerializer());
     }
 }

@@ -26,7 +26,7 @@ public class DefaultJavaSerializers {
         }
     }
 
-    public static void registerAll(KryoObjectSerializer kryoObjectFormatter) {
-        kryoObjectFormatter.registerSerializer(UUID.class, new UUIDSerializer());
+    public static void registerAll(KryoObjectSerializer kryoObjectSerializer) {
+        kryoObjectSerializer.registerSerializer(UUID.class, new UUIDSerializer());
     }
 }

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @since 4.0
  * @author Anindya Chatterjee
  */
-public class NitriteSerializers {
+public class KyroNitriteSerializers {
     private static class NitriteIdSerializer extends ComparableKeySerializer<NitriteId> {
 
         @Override
@@ -222,17 +222,17 @@ public class NitriteSerializers {
         }
     }
 
-    public static void registerAll(KryoObjectSerializer kryoObjectFormatter) {
-        kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
-        kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
-        kryoObjectFormatter.registerSerializer(Document.class, new DocumentSerializer());
-        kryoObjectFormatter.registerSerializer(IndexMeta.class, new IndexMetaSerializer());
-        kryoObjectFormatter.registerSerializer(IndexDescriptor.class, new IndexDescriptorSerializer());
-        kryoObjectFormatter.registerSerializer(UserCredential.class, new UserCredentialSerializer());
-        kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
-        kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
-        kryoObjectFormatter.registerSerializer(DBValue.class, new JavaSerializer());
-        kryoObjectFormatter.registerSerializer(BoundingBox.class, new BoundingBoxSerializer());
-        kryoObjectFormatter.registerSerializer(SpatialKey.class, new SpatialKeySerializer());
+    public static void registerAll(KryoObjectSerializer kryoObjectSerializer) {
+        kryoObjectSerializer.registerSerializer(NitriteId.class, new NitriteIdSerializer());
+        kryoObjectSerializer.registerSerializer(Pair.class, new PairSerializer());
+        kryoObjectSerializer.registerSerializer(Document.class, new DocumentSerializer());
+        kryoObjectSerializer.registerSerializer(IndexMeta.class, new IndexMetaSerializer());
+        kryoObjectSerializer.registerSerializer(IndexDescriptor.class, new IndexDescriptorSerializer());
+        kryoObjectSerializer.registerSerializer(UserCredential.class, new UserCredentialSerializer());
+        kryoObjectSerializer.registerSerializer(Attributes.class, new AttributesSerializer());
+        kryoObjectSerializer.registerSerializer(Fields.class, new FieldsSerializer());
+        kryoObjectSerializer.registerSerializer(DBValue.class, new JavaSerializer());
+        kryoObjectSerializer.registerSerializer(BoundingBox.class, new BoundingBoxSerializer());
+        kryoObjectSerializer.registerSerializer(SpatialKey.class, new SpatialKeySerializer());
     }
 }

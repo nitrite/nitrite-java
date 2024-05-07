@@ -30,8 +30,8 @@ public class ValueSetTest {
     public void testIterator() {
         RocksDB rocksDB = mock(RocksDB.class);
         when(rocksDB.newIterator((ColumnFamilyHandle) any())).thenReturn(mock(RocksIterator.class));
-        KryoObjectSerializer objectFormatter = new KryoObjectSerializer();
-        (new ValueSet<>(rocksDB, null, objectFormatter, Object.class)).iterator();
+        KryoObjectSerializer objectSerializer = new KryoObjectSerializer();
+        (new ValueSet<>(rocksDB, null, objectSerializer, Object.class)).iterator();
         verify(rocksDB).newIterator((ColumnFamilyHandle) any());
     }
 }

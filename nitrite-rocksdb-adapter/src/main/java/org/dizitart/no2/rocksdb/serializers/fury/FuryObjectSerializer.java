@@ -1,5 +1,6 @@
 package org.dizitart.no2.rocksdb.serializers.fury;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.fury.Fury;
 import org.apache.fury.ThreadLocalFury;
 import org.apache.fury.ThreadSafeFury;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 
 import static org.dizitart.no2.rocksdb.Constants.DB_NULL;
 
+@Slf4j(topic = "nitrite-rocksdb")
 public class FuryObjectSerializer implements ObjectSerializer {
 
     private final ThreadSafeFury fury = new ThreadLocalFury(classLoader -> {
@@ -18,7 +20,7 @@ public class FuryObjectSerializer implements ObjectSerializer {
                 .withClassLoader(classLoader)
                 .requireClassRegistration(false)
                 .build();
-        RegisterNitriteSerializers.now(f);
+        FuryNitriteSerializers.registerAll(f);
         return f;
     });
 

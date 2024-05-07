@@ -30,9 +30,9 @@ public class EntrySetTest {
     public void testIterator() {
         RocksDB rocksDB = mock(RocksDB.class);
         when(rocksDB.newIterator((ColumnFamilyHandle) any())).thenReturn(mock(RocksIterator.class));
-        KryoObjectSerializer objectFormatter = new KryoObjectSerializer();
+        KryoObjectSerializer objectSerializer = new KryoObjectSerializer();
         Class<?> keyType = Object.class;
-        (new EntrySet<>(rocksDB, null, objectFormatter, keyType, Object.class, true)).iterator();
+        (new EntrySet<>(rocksDB, null, objectSerializer, keyType, Object.class, true)).iterator();
         verify(rocksDB).newIterator((ColumnFamilyHandle) any());
     }
 
@@ -40,9 +40,9 @@ public class EntrySetTest {
     public void testIterator2() {
         RocksDB rocksDB = mock(RocksDB.class);
         when(rocksDB.newIterator((ColumnFamilyHandle) any())).thenReturn(mock(RocksIterator.class));
-        KryoObjectSerializer objectFormatter = new KryoObjectSerializer();
+        KryoObjectSerializer objectSerializer = new KryoObjectSerializer();
         Class<?> keyType = Object.class;
-        (new EntrySet<>(rocksDB, null, objectFormatter, keyType, Object.class, false)).iterator();
+        (new EntrySet<>(rocksDB, null, objectSerializer, keyType, Object.class, false)).iterator();
         verify(rocksDB).newIterator((ColumnFamilyHandle) any());
     }
 }

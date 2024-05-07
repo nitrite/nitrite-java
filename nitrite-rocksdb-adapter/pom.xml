@@ -47,16 +47,16 @@
             <artifactId>kryo5</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.fury</groupId>
-            <artifactId>fury-core</artifactId>
-            <version>0.5.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.fury</groupId>
+            <artifactId>fury-core</artifactId>
+            <version>0.5.0</version>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -161,9 +161,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
                     <sourceFileExcludes>
-                        <exclude>**/*Serializer.java</exclude>
-                        <exclude>**/*Serializers.java</exclude>
-                        <exclude>**/*KryoObjectFormatter.java</exclude>
+                        <exclude>**/serializers/*.java</exclude>
                         <exclude>**/*CleaningAction.java</exclude>
                         <exclude>**/*Constants.java</exclude>
                         <exclude>**/*RocksDBMap.java</exclude>

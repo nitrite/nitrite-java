@@ -130,7 +130,7 @@ public class KryoObjectSerializer implements ObjectSerializer {
 
     private void registerInternalSerializers() {
         try {
-            NitriteSerializers.registerAll(this);
+            KyroNitriteSerializers.registerAll(this);
             DefaultJavaSerializers.registerAll(this);
             DefaultTimeKeySerializers.registerAll(this);
         } catch (Exception e) {

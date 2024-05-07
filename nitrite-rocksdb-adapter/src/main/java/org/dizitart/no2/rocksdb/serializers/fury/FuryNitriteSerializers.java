@@ -2,7 +2,6 @@ package org.dizitart.no2.rocksdb.serializers.fury;
 
 import org.apache.fury.Fury;
 import org.apache.fury.memory.MemoryBuffer;
-import org.apache.fury.serializer.ObjectSerializer;
 import org.apache.fury.serializer.Serializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
@@ -21,9 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class RegisterNitriteSerializers {
+public class FuryNitriteSerializers {
 
-    public static void now(Fury fury) {
+    public static void registerAll(Fury fury) {
         fury.registerSerializer(Document.class, new DocumentSerializer(fury));
         fury.registerSerializer(Pair.class, new PairSerializer(fury));
         fury.registerSerializer(IndexMeta.class, new IndexMetaSerializer(fury));
@@ -240,21 +239,26 @@ public class RegisterNitriteSerializers {
 
     @SuppressWarnings("unchecked")
     private static class PairSerializer extends Serializer<Pair<?, ?>> {
-        private final ObjectSerializer<Pair<?, ?>> javaSerializer;
+        //private final ObjectSerializer<Pair<?, ?>> javaSerializer;
 
         private PairSerializer(Fury fury) {
             super(fury, (Class<Pair<?, ?>>) (Class<?>) Pair.class, true);
-            this.javaSerializer = new ObjectSerializer<>(fury, (Class<Pair<?, ?>>) (Class<?>) Pair.class);
+            //this.javaSerializer = new ObjectSerializer<>(fury, (Class<Pair<?, ?>>) (Class<?>) Pair.class);
         }
 
         @Override
         public void write(MemoryBuffer memoryBuffer, Pair<?, ?> pair) {
-            javaSerializer.write(memoryBuffer, pair);
+            fury.writeRef(memoryBuffer, pair.getFirst());
+            fury.writeRef(memoryBuffer, pair.getSecond());
+            //javaSerializer.write(memoryBuffer, pair);
         }
 
         @Override
         public Pair<?, ?> read(MemoryBuffer memoryBuffer) {
-            return javaSerializer.read(memoryBuffer);
+            Object first = fury.readRef(memoryBuffer);
+            Object second = fury.readRef(memoryBuffer);
+            return new Pair<>(first, second);
+            //return javaSerializer.read(memoryBuffer);
         }
     }
 
