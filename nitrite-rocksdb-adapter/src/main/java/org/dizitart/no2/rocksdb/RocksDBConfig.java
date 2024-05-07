@@ -62,6 +62,28 @@ public class RocksDBConfig implements StoreConfig {
      */
     private String filePath;
 
+    /**
+     * @param objectSerializer
+     *
+     * @deprecated  reason this method is deprecated <br/>
+     *              {will be removed in next version} <br/>
+     *              use {@link #objectSerializer()} ()} instead like this:
+     *
+     *
+     * <blockquote><pre>
+     * RocksDBModule rocksDBStorageModule = RocksDBModule.withConfig()
+     *                 .filePath(newDirectory)
+     *                 .objectSerializer(new FuryObjectSerializer())
+     *                 .build();
+     * </pre></blockquote>
+     *
+     */
+    @Deprecated(since = "4.3.1", forRemoval = true)
+    private void objectFormatter(ObjectSerializer objectSerializer) {
+        this.objectSerializer = objectSerializer;
+    }
+
+
     @Getter
     @Setter(AccessLevel.PACKAGE)
     /**
