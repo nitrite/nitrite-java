@@ -35,7 +35,6 @@ import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.*;
 import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -368,11 +367,9 @@ public class NitriteStressTest {
         }
     }
 
-    @Indices({
-        @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
-        @Index(fields = "age", type = IndexType.NON_UNIQUE),
-        @Index(fields = "text", type = IndexType.FULL_TEXT),
-    })
+    @Index(fields = "firstName", type = IndexType.NON_UNIQUE)
+    @Index(fields = "age", type = IndexType.NON_UNIQUE)
+    @Index(fields = "text", type = IndexType.FULL_TEXT)
     private static class PerfTestIndexed extends PerfTest {
         public static class Converter implements EntityConverter<PerfTestIndexed> {
 

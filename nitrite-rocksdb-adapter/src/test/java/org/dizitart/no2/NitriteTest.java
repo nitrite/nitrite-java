@@ -28,8 +28,8 @@ import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
 import org.dizitart.no2.common.mapper.EntityConverter;
-import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.index.IndexOptions;
@@ -40,7 +40,6 @@ import org.dizitart.no2.integration.repository.data.EmptyClass;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -477,9 +476,7 @@ public class NitriteTest {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Indices({
-        @Index(fields = "synced", type = IndexType.NON_UNIQUE)
-    })
+    @Index(fields = "synced", type = IndexType.NON_UNIQUE)
     public static class Receipt {
         @Id
         private String clientRef;

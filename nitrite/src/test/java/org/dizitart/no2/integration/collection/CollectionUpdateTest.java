@@ -17,10 +17,7 @@
 
 package org.dizitart.no2.integration.collection;
 
-import org.dizitart.no2.collection.Document;
-import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.collection.UpdateOptions;
+import org.dizitart.no2.collection.*;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.NotIdentifiableException;
@@ -298,5 +295,19 @@ public class CollectionUpdateTest extends BaseCollectionTest {
         coll.update(doc3);
 
         assertEquals(coll.find(where("fruit").eq("Apple")).size(), 1);
+    }
+
+    @Test
+    public void testUpdatePreviouslyNullObject() {
+        Document doc1 = createDocument().put("fruitType", null);
+        NitriteCollection coll = db.getCollection("test");
+
+        WriteResult insert = coll.insert(doc1);
+        NitriteId next = insert.iterator().next();
+        Document doc2 = createDocument().put("_id", next.getIdValue()).put("fruitType", createDocument().put("family", "citric"));
+        coll.update(doc2);
+
+        assertEquals(coll.find(where("_id").eq(next.getIdValue())).size(), 1);
+        assertNotNull(coll.find(where("_id").eq(next.getIdValue())).firstOrNull().get("fruitType"));
     }
 }

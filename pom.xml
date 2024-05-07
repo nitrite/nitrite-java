@@ -51,15 +51,15 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.17.0</jackson.version>
-        <slf4j.version>2.0.12</slf4j.version>
+        <jackson.version>2.17.1</jackson.version>
+        <slf4j.version>2.0.13</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.2.224</h2.version>
-        <rocksdb.version>9.0.0</rocksdb.version>
+        <rocksdb.version>9.1.1</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
-        <commons-codec.version>1.16.1</commons-codec.version>
-        <commons-io.version>2.15.1</commons-io.version>
+        <commons-codec.version>1.17.0</commons-codec.version>
+        <commons-io.version>2.16.1</commons-io.version>
         <kotlin.version>1.9.23</kotlin.version>
         <kotlinx-serialization.version>1.6.3</kotlinx-serialization.version>
         <lombok.version>1.18.32</lombok.version>
@@ -75,20 +75,20 @@
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>33.1.0-jre</guava.version>
+        <guava.version>33.2.0-jre</guava.version>
         <threetenbp.version>1.6.9</threetenbp.version>
 
-        <error-prone.version>2.26.1</error-prone.version>
-        <jacoco.version>0.8.11</jacoco.version>
+        <error-prone.version>2.27.1</error-prone.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <surefire.version>3.2.5</surefire.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
-        <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <dokka.version>1.9.20</dokka.version>
         <animal-sniffer.version>1.23</animal-sniffer.version>
         <api-level-24.version>7.0_r2</api-level-24.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
-        <maven-gpg-plugin.version>3.2.2</maven-gpg-plugin.version>
+        <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
     </properties>
 
     <dependencyManagement>

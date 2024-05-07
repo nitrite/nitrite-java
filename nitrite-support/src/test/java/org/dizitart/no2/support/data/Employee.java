@@ -22,11 +22,10 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
+import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -36,11 +35,9 @@ import java.util.Date;
  */
 @ToString
 @EqualsAndHashCode
-@Indices({
-    @Index(fields = "joinDate", type = IndexType.NON_UNIQUE),
-    @Index(fields = "address", type = IndexType.FULL_TEXT),
-    @Index(fields = "employeeNote.text", type = IndexType.FULL_TEXT)
-})
+@Index(fields = "joinDate", type = IndexType.NON_UNIQUE)
+@Index(fields = "address", type = IndexType.FULL_TEXT)
+@Index(fields = "employeeNote.text", type = IndexType.FULL_TEXT)
 public class Employee implements Serializable {
     @Id
     @Getter

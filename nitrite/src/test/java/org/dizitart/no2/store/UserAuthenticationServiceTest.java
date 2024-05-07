@@ -17,8 +17,13 @@
 
 package org.dizitart.no2.store;
 
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
+import org.mockito.Mockito;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class UserAuthenticationServiceTest {
     @Test
@@ -44,6 +49,39 @@ public class UserAuthenticationServiceTest {
     @Test
     public void testAuthenticate5() {
         (new UserAuthenticationService(new InMemoryStore())).authenticate("", "iloveyou");
+    }
+
+    @Test(expected = NitriteSecurityException.class)
+    public void testAuthenticateIfUsernamePasswordAreNull() {
+        //region ARRANGE
+        NitriteStore<?> storeMock = mock(NitriteStore.class);
+        when(storeMock.hasMap(Mockito.anyString())).thenReturn(true);
+
+        UserAuthenticationService userAuthenticationService = new UserAuthenticationService(storeMock);
+        //endregion
+
+        //region ACTION
+        userAuthenticationService.authenticate(null, null);
+        //endregion
+    }
+
+    @Test(expected = NitriteSecurityException.class)
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public void testAuthenticateIfHasMapIsTrueAndUserCredentialIsNull() {
+        //region ARRANGE
+        NitriteMap nitriteMapMock = mock(NitriteMap.class);
+        when(nitriteMapMock.get(Mockito.anyString())).thenReturn(null);
+
+        NitriteStore<?> storeMock = mock(NitriteStore.class);
+        when(storeMock.hasMap(Mockito.anyString())).thenReturn(true);
+        when(storeMock.openMap(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(nitriteMapMock);
+
+        UserAuthenticationService userAuthenticationService = new UserAuthenticationService(storeMock);
+        //endregion
+
+        //region ACTION
+        userAuthenticationService.authenticate("usernameString", "passwordString");
+        //endregion
     }
 }
 
