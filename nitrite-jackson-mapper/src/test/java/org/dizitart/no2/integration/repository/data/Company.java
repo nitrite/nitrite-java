@@ -24,7 +24,6 @@ import lombok.Setter;
 import lombok.ToString;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -38,9 +37,7 @@ import java.util.Map;
 @Setter
 @ToString
 @EqualsAndHashCode
-@Indices({
-    @Index(fields = "companyName")
-})
+@Index(fields = "companyName")
 public class Company implements Serializable {
     @Id(fieldName = "company_id")
     @JsonProperty("company_id")

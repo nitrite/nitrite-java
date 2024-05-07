@@ -22,7 +22,6 @@ import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -33,9 +32,7 @@ import java.util.Map;
  * @author Anindya Chatterjee.
  */
 @Data
-@Indices({
-    @Index(fields = "companyName")
-})
+@Index(fields = "companyName")
 public class Company implements Serializable {
     @Id(fieldName = "company_id")
     private Long companyId;

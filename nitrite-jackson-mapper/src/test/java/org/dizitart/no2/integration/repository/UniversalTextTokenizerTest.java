@@ -29,7 +29,6 @@ import org.dizitart.no2.mvstore.MVStoreModuleBuilder;
 import org.dizitart.no2.repository.Cursor;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -173,9 +172,7 @@ public class UniversalTextTokenizerTest extends BaseObjectRepositoryTest {
         }
     }
 
-    @Indices(
-        @Index(fields = "text", type = IndexType.FULL_TEXT)
-    )
+    @Index(fields = "text", type = IndexType.FULL_TEXT)
     public static class TextData {
         public int id;
         public String text;

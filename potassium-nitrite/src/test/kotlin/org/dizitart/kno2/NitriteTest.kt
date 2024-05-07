@@ -31,7 +31,6 @@ import org.dizitart.no2.repository.EntityId
 import org.dizitart.no2.repository.EntityIndex
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
-import org.dizitart.no2.repository.annotations.Indices
 import org.dizitart.no2.repository.annotations.InheritIndices
 import org.junit.Assert.*
 import org.junit.Before
@@ -222,7 +221,7 @@ interface MyInterface {
     val id: UUID
 }
 
-@Indices(value = [(Index(fields = ["name"], type = IndexType.NON_UNIQUE))])
+@Index(fields = ["name"], type = IndexType.NON_UNIQUE)
 abstract class SomeAbsClass(
         @Id override val id: UUID = UUID.randomUUID(),
         open val name: String = "abcd"
@@ -249,7 +248,7 @@ data class CaObject(
         val name: String = ""
 )
 
-@Indices(value = [(Index(fields = ["time"], type = IndexType.UNIQUE))])
+@Index(fields = ["time"], type = IndexType.UNIQUE)
 data class ClassWithLocalDateTime(
     val name: String = "",
     val time: LocalDateTime = LocalDateTime.now()

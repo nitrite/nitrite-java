@@ -101,9 +101,8 @@ class AnnotationScanner {
         if (type.isAnnotationPresent(InheritIndices.class)) {
             indexList = reflector.findInheritedAnnotations(Index.class, type);
         } else {
-            indexList = new ArrayList<>();
-            Index index = type.getAnnotation(Index.class);
-            if (index != null) indexList.add(index);
+            Index[] indexes = type.getAnnotationsByType(Index.class);
+            indexList = new ArrayList<>(Arrays.asList(indexes));
         }
         populateIndex(indexList);
     }

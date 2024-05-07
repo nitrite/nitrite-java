@@ -17,12 +17,18 @@
 
 package org.dizitart.no2.filters;
 
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.index.fulltext.EnglishTextTokenizer;
 import org.dizitart.no2.store.memory.InMemoryMap;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class TextFilterTest {
     @Test
@@ -61,7 +67,23 @@ public class TextFilterTest {
         TextFilter textFilter = new TextFilter("Field", "*");
         textFilter.setTextTokenizer(new EnglishTextTokenizer());
         assertThrows(FilterException.class,
-                () -> textFilter.applyOnTextIndex(new InMemoryMap<>("Map Name", null)));
+            () -> textFilter.applyOnTextIndex(new InMemoryMap<>("Map Name", null)));
+    }
+
+    @Test
+    public void applyTestWhenDocStringContainsSearchString() {
+        //Arrange
+        TextFilter textFilter = new TextFilter("fieldString", "string");
+        Document docMock = mock(Document.class);
+        Pair<NitriteId, Document> pairElementMock = mock(Pair.class);
+        when(pairElementMock.getSecond()).thenReturn(docMock);
+        when(docMock.get(Mockito.anyString())).thenReturn("parent doc string");
+
+        //Action
+        var result = textFilter.apply(pairElementMock);
+        //Assert
+        assertTrue(result);
+
     }
 }
 
