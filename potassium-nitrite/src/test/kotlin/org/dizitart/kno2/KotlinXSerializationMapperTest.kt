@@ -23,6 +23,7 @@ import org.dizitart.kno2.filters.eq
 import org.dizitart.kno2.serialization.KotlinXSerializationMapper
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.common.module.NitriteModule.module
+import org.dizitart.no2.exceptions.ValidationException
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
 import org.slf4j.LoggerFactory
@@ -180,4 +181,51 @@ class KotlinXSerializationMapperTest {
         testData.someArray.forEachIndexed { index, s -> assertEquals(decodedObject.someArray[index], s) }
         assertEquals(testData, decodedObject.copy(someArray = testData.someArray))
     }
+
+    @Test(expected = ValidationException::class)
+    fun testRepositoryValidationEnabled() {
+        val db = nitrite {
+            loadModule(MVStoreModule(dbPath))
+            loadModule(module(KotlinXSerializationMapper()))
+        }
+
+        val repo = db.getRepository<CacheEntry>()
+        repo.insert(CacheEntry("sha256", kotlinx.datetime.Clock.System.now()))
+        repo.find(CacheEntry::sha256 eq "sha256").firstOrNull().also {
+            assertEquals(it?.sha256, "sha256")
+        }
+        db.close()
+        try {
+            Files.delete(Paths.get(dbPath))
+        } catch (e: Exception) {
+            log.error("Failed to delete db file", e)
+        }
+    }
+
+    @Test
+    fun testRepositoryValidationDisabled() {
+        val db = nitrite {
+            disableRepositoryTypeValidation()
+            loadModule(MVStoreModule(dbPath))
+            loadModule(module(KotlinXSerializationMapper()))
+        }
+
+        val repo = db.getRepository<CacheEntry>()
+        repo.insert(CacheEntry("sha256", kotlinx.datetime.Clock.System.now()))
+        repo.find(CacheEntry::sha256 eq "sha256").firstOrNull().also {
+            assertEquals(it?.sha256, "sha256")
+        }
+        db.close()
+        try {
+            Files.delete(Paths.get(dbPath))
+        } catch (e: Exception) {
+            log.error("Failed to delete db file", e)
+        }
+    }
 }
+
+@Serializable
+data class CacheEntry(
+    val sha256: String,
+    val lastUpdated: kotlinx.datetime.Instant
+)

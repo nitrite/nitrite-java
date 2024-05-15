@@ -19,7 +19,6 @@ package org.dizitart.no2.repository;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.CollectionFactory;
 import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -133,10 +132,9 @@ public class RepositoryFactory {
 
     private <T> ObjectRepository<T> createRepository(NitriteConfig nitriteConfig, Class<T> type,
                                                      String collectionName, String key) {
-        NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
 
-        validateRepositoryType(type, nitriteMapper);
+        validateRepositoryType(type, nitriteConfig);
 
         if (store.getCollectionNames().contains(collectionName)) {
             throw new ValidationException("A collection with same entity name already exists");
@@ -154,14 +152,13 @@ public class RepositoryFactory {
     private <T> ObjectRepository<T> createRepositoryByDecorator(NitriteConfig nitriteConfig,
                                                                 EntityDecorator<T> entityDecorator,
                                                                 String collectionName, String key) {
-        NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
         NitriteStore<?> store = nitriteConfig.getNitriteStore();
 
         if (store.getCollectionNames().contains(collectionName)) {
             throw new ValidationException("A collection with same entity name already exists");
         }
 
-        validateRepositoryType(entityDecorator.getEntityType(), nitriteMapper);
+        validateRepositoryType(entityDecorator.getEntityType(), nitriteConfig);
 
         NitriteCollection nitriteCollection = collectionFactory.getCollection(collectionName,
             nitriteConfig, false);
