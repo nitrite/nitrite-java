@@ -19,13 +19,9 @@ package org.dizitart.kno2
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.NitriteBuilder
 import org.dizitart.no2.NitriteConfig
-import org.dizitart.no2.common.Constants
 import org.dizitart.no2.common.mapper.EntityConverter
-import org.dizitart.no2.common.mapper.NitriteMapper
 import org.dizitart.no2.common.module.NitriteModule
-import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.migration.Migration
-import org.dizitart.no2.spatial.SpatialIndexer
 
 /**
  * A builder class for creating instances of [Nitrite].
@@ -44,8 +40,7 @@ class Builder internal constructor() {
     var schemaVersion: Int = 0
 
     /**
-     * The field separator used by the Nitrite database. By default, it is set to the field
-     * separator defined in the Nitrite configuration.
+     * The field separator used by the Nitrite database. By default, it is set to `.`.
      */
     var fieldSeparator: String = NitriteConfig.getFieldSeparator()
 

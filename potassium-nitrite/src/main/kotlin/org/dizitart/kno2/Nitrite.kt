@@ -18,6 +18,9 @@ package org.dizitart.kno2
 
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.collection.NitriteCollection
+import org.dizitart.no2.common.module.NitriteModule.module
+import org.dizitart.no2.common.module.NitritePlugin
+import org.dizitart.no2.common.tuples.Pair
 import org.dizitart.no2.index.IndexOptions
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.repository.EntityDecorator
@@ -146,3 +149,12 @@ inline fun <reified T : Any> Nitrite.getRepository(
  */
 fun option(indexType: String = IndexType.UNIQUE): IndexOptions =
         IndexOptions.indexOptions(indexType)
+
+inline fun <reified T : Any> ObjectRepository<T>.insert(items: Iterable<T>) =
+    insert(items.toList().toTypedArray())
+
+fun Builder.loadModule(plugin: NitritePlugin) =
+    loadModule(module(plugin))
+
+operator fun <A, B> Pair<A, B>.component1(): A = first
+operator fun <A, B> Pair<A, B>.component2(): B = second

@@ -18,16 +18,18 @@ package org.dizitart.kno2
 
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertSame
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import org.dizitart.kno2.filters.eq
+import org.dizitart.kno2.serialization.DocumentFormat
 import org.dizitart.kno2.serialization.KotlinXSerializationMapper
-import org.dizitart.no2.collection.Document
-import org.dizitart.no2.common.module.NitriteModule.module
+import org.dizitart.kno2.serialization.decodeFromDocument
+import org.dizitart.kno2.serialization.encodeToDocument
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.junit.Test
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.random.Random
 
 /**
  *
@@ -43,7 +45,7 @@ class KotlinXSerializationMapperTest {
         val someMap: Map<String, String>,
         val someSerializableObjectMap: Map<InnerObject, SomePolymorphType>,
         val innerObject: InnerObject,
-        val id: String,
+        @SerialName("_id") val id: String? = null,
         val valueClass: SomeValueClass,
         val someInt: Int,
         val someDouble: Double,
@@ -108,59 +110,62 @@ class KotlinXSerializationMapperTest {
     }
 
     private val testData = TestData(
-        TestData.SomePolymorphType.SomeTypeA,
-        someList = listOf(
-            TestData(
-                TestData.SomePolymorphType.SomeTypeB("someValue"),
-                emptyMap(),
-                emptyMap(),
-                TestData.InnerObject(""),
-                "",
-                TestData.SomeValueClass("someString"),
-                1,
-                1.0,
-                "test",
-                TestData.SomeEnum.SomeValue,
-                emptyList(),
-                emptyArray(),
-            ),
-            TestData(
-                TestData.SomePolymorphType.SomeTypeB("someValue"),
-                emptyMap(),
-                emptyMap(),
-                TestData.InnerObject(""),
-                "",
-                TestData.SomeValueClass("someString"),
-                1,
-                1.0,
-                "test",
-                TestData.SomeEnum.SomeValue,
-                emptyList(),
-                emptyArray(),
-            ),
-        ),
+        polymorphType = TestData.SomePolymorphType.SomeTypeA,
+        someMap = mapOf("testkey" to "testvalue", "test1" to "test2"),
+        someSerializableObjectMap = mapOf(TestData.InnerObject("test") to TestData.SomePolymorphType.SomeTypeA),
+        innerObject = TestData.InnerObject("someValue"),
+        id = Random.nextLong().toString(),
         valueClass = TestData.SomeValueClass("someString"),
-        someArray = arrayOf("someArrayData"),
-        id = "testId",
         someInt = 1,
         someDouble = 1.0,
-        innerObject = TestData.InnerObject("someValue"),
         nullable = null,
         enum = TestData.SomeEnum.SomeValue,
-        someMap = mapOf("testkey" to "testvalue", "test1" to "test2"),
-        someSerializableObjectMap = mapOf(TestData.InnerObject("test") to TestData.SomePolymorphType.SomeTypeA)
+        someList = listOf(
+            TestData(
+                polymorphType = TestData.SomePolymorphType.SomeTypeB("someValue"),
+                someMap = emptyMap(),
+                someSerializableObjectMap = emptyMap(),
+                innerObject = TestData.InnerObject(""),
+                id = null,
+                valueClass = TestData.SomeValueClass("someString"),
+                someInt = 1,
+                someDouble = 1.0,
+                nullable = "test",
+                enum = TestData.SomeEnum.SomeValue,
+                someList = emptyList(),
+                someArray = emptyArray(),
+            ),
+            TestData(
+                polymorphType = TestData.SomePolymorphType.SomeTypeB("someValue"),
+                someMap = emptyMap(),
+                someSerializableObjectMap = emptyMap(),
+                innerObject = TestData.InnerObject(""),
+                id = null,
+                valueClass = TestData.SomeValueClass("someString"),
+                someInt = 1,
+                someDouble = 1.0,
+                nullable = "test",
+                enum = TestData.SomeEnum.SomeValue,
+                someList = emptyList(),
+                someArray = emptyArray(),
+            ),
+        ),
+        someArray = arrayOf("someArrayData")
     )
 
     @Test
     fun testModule() {
+        val documentFormat = DocumentFormat {
+            allowStructuredMapKeys = true
+        }
         val db = nitrite {
             loadModule(MVStoreModule(dbPath))
-            loadModule(module(KotlinXSerializationMapper()))
+            loadModule(KotlinXSerializationMapper(documentFormat))
         }
 
         val repo = db.getRepository<TestData>()
         repo.insert(testData)
-        repo.find { a -> a.second.get("id") == testData.id }.firstOrNull().also {
+        repo.find { a -> a.second.get("_id") == testData.id }.firstOrNull().also {
             assertEquals(it, testData)
         }
         db.close()
@@ -173,9 +178,9 @@ class KotlinXSerializationMapperTest {
 
     @Test
     fun testMapping() {
-        val mapper = KotlinXSerializationMapper()
-        val document = mapper.tryConvert(testData, Document::class.java)
-        val decodedObject = mapper.tryConvert(document, TestData::class.java) as TestData
+        val documentFormat = DocumentFormat { allowStructuredMapKeys = true }
+        val document = documentFormat.encodeToDocument(testData)
+        val decodedObject = documentFormat.decodeFromDocument<TestData>(document)
         assertSame(testData.someArray.size, decodedObject.someArray.size)
         testData.someArray.forEachIndexed { index, s -> assertEquals(decodedObject.someArray[index], s) }
         assertEquals(testData, decodedObject.copy(someArray = testData.someArray))

@@ -16,39 +16,52 @@
 
 package org.dizitart.kno2.serialization
 
+import java.util.*
+import kotlinx.serialization.serializer
 import org.dizitart.no2.NitriteConfig
 import org.dizitart.no2.collection.Document
 import org.dizitart.no2.collection.NitriteId
 import org.dizitart.no2.common.mapper.NitriteMapper
 import org.dizitart.no2.exceptions.ObjectMappingException
-import java.util.*
 
 /**
- * A [org.dizitart.no2.common.mapper.NitriteMapper] module that uses KotlinX Serialization 
+ * A [org.dizitart.no2.common.mapper.NitriteMapper] module that uses KotlinX Serialization
  * for object to [Document] conversion and vice versa.
- * 
+ *
  * @author Joris Jensen
  * @since 4.2.0
  */
-class KotlinXSerializationMapper : NitriteMapper {
-    private fun <Target : Any> convertFromDocument(source: Document?, type: Class<Target>): Target? =
-        source?.let { DocumentDecoder.decodeFromDocument(source, type) }
+sealed class KotlinXSerializationMapper : NitriteMapper {
 
-    private fun <Source : Any> convertToDocument(source: Source): Document = DocumentEncoder.encodeToDocument(source)
+    abstract val documentFormat: DocumentFormat
+
+    companion object Default : KotlinXSerializationMapper() {
+        override val documentFormat: DocumentFormat
+            get() = DocumentFormat.Default
+    }
+
+    internal class Custom(
+        override val documentFormat: DocumentFormat = DocumentFormat.Default,
+    ) : KotlinXSerializationMapper()
+
+    private fun <Source : Any> convertToDocument(source: Source): Document =
+        documentFormat.encodeToDocument(documentFormat.serializersModule.serializer(source::class.java), source)
 
     override fun <Source, Target : Any> tryConvert(source: Source, type: Class<Target>): Any? {
         val nonNullSource = source ?: return null
+        @Suppress("UNCHECKED_CAST")
         return when {
             isValueType(nonNullSource::class.java) -> source as Target
-            Document::class.java.isAssignableFrom(type) -> {
-                if (source is Document) {
-                    source
-                } else {
-                    convertToDocument(source)
-                }
+            Document::class.java.isAssignableFrom(type) -> when (source) {
+                is Document -> source
+                else -> convertToDocument(source)
             }
 
-            source is Document -> convertFromDocument(source, type)
+            source is Document -> documentFormat.decodeFromDocument(
+                serializer = documentFormat.serializersModule.serializer(type),
+                document = source
+            )
+
             else -> throw ObjectMappingException("Can't convert object of type " + nonNullSource::class.java + " to type " + type)
         }
     }
@@ -72,3 +85,8 @@ class KotlinXSerializationMapper : NitriteMapper {
 
     override fun initialize(nitriteConfig: NitriteConfig) {}
 }
+
+fun KotlinXSerializationMapper(
+    documentFormat: DocumentFormat = DocumentFormat.Default,
+): KotlinXSerializationMapper = KotlinXSerializationMapper.Custom(documentFormat)
+
