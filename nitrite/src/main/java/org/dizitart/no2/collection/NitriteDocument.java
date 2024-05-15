@@ -38,9 +38,8 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 /**
- *
- * @since 4.0
  * @author Anindya Chatterjee
+ * @since 4.0
  */
 class NitriteDocument extends LinkedHashMap<String, Object> implements Document {
     private static final long serialVersionUID = 1477462374L;
@@ -54,8 +53,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
         super(objectMap);
     }
 
-    @Override
-    public Document put(String field, Object value) {
+    private static void validateField(String field, Object value) {
         // field name cannot be empty or null
         if (isNullOrEmpty(field)) {
             throw new InvalidOperationException("Document does not support empty or null key");
@@ -71,6 +69,21 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             throw new ValidationException("Type " + value.getClass().getName()
                 + " does not implement java.io.Serializable");
         }
+    }
+
+    @Override
+    public Document put(String key, Object value, boolean ignoreFieldSeparator) {
+        if (ignoreFieldSeparator) {
+            super.put(key, value);
+            return this;
+        } else {
+            return put(key, value);
+        }
+    }
+
+    @Override
+    public Document put(String field, Object value) {
+        validateField(field, value);
 
         // if field name contains field separator, split the fields, and put the value
         // accordingly associated with th embedded field.

@@ -100,6 +100,19 @@ public interface Document extends Iterable<Pair<String, Object>>, Cloneable, Ser
     Document put(final String key, final Object value);
 
     /**
+     * Associates the specified value with the specified key in this document.
+     * <p>
+     * NOTE: An embedded field is also supported.
+     * </p>
+     *
+     * @param key                  the key
+     * @param value                the value
+     * @param ignoreFieldSeparator if set to {@code true}, it will ignore the field separator
+     * @return the document
+     */
+    Document put(final String key, final Object value, boolean ignoreFieldSeparator);
+
+    /**
      * Returns the value to which the specified key is associated with,
      * or null if this document contains no mapping for the key.
      *
