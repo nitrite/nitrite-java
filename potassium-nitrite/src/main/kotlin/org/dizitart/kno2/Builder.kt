@@ -37,7 +37,6 @@ class Builder internal constructor() {
     private val modules = mutableSetOf<NitriteModule>()
     private val entityConverters = mutableSetOf<EntityConverter<*>>()
     private val migrations = mutableSetOf<Migration>()
-    private var repositoryTypeValidationDisabled: Boolean = false
 
     /**
      * Sets the schema version for the Nitrite database.
@@ -51,7 +50,7 @@ class Builder internal constructor() {
     var fieldSeparator: String = NitriteConfig.getFieldSeparator()
 
     /**
-     * Disables the repository type validation for the Nitrite database.
+     * Enables/disables the repository type validation for the Nitrite database.
      * <p>
      * Repository type validation is a feature in Nitrite that ensures the type of the objects
      * stored in the repository can be converted to and from [org.dizitart.no2.collection.Document].
@@ -65,9 +64,7 @@ class Builder internal constructor() {
      * @see org.dizitart.no2.common.mapper.EntityConverter
      * @since 4.3.0
      */
-    fun disableRepositoryTypeValidation() {
-        repositoryTypeValidationDisabled = true
-    }
+    var enableRepositoryValidation = true
 
     /**
      * Loads a [NitriteModule] into the Nitrite database. The module can be used to extend the
@@ -108,7 +105,7 @@ class Builder internal constructor() {
             builder.schemaVersion(schemaVersion)
         }
 
-        if (repositoryTypeValidationDisabled) {
+        if (!enableRepositoryValidation) {
             builder.disableRepositoryTypeValidation()
         }
 

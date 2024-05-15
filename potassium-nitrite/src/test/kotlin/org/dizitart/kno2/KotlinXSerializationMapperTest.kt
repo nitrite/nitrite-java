@@ -205,7 +205,7 @@ class KotlinXSerializationMapperTest {
     @Test
     fun testRepositoryValidationDisabled() {
         val db = nitrite {
-            disableRepositoryTypeValidation()
+            enableRepositoryValidation = false
             loadModule(MVStoreModule(dbPath))
             loadModule(module(KotlinXSerializationMapper()))
         }
