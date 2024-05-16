@@ -31,8 +31,8 @@ import org.dizitart.no2.common.module.NitriteModule;
  * @see Nitrite
  * @since 1.0
  */
+@Getter
 public class NitriteBuilder {
-    @Getter
     /**
      * The Nitrite configuration object.
      */
@@ -58,6 +58,27 @@ public class NitriteBuilder {
      */
     public NitriteBuilder fieldSeparator(String separator) {
         this.nitriteConfig.fieldSeparator(separator);
+        return this;
+    }
+
+    /**
+     * Disables the repository type validation for the Nitrite database.
+     * <p>
+     * Repository type validation is a feature in Nitrite that ensures the type of the objects
+     * stored in the repository can be converted to and from {@link org.dizitart.no2.collection.Document}.
+     * <p>
+     * By default, the repository type validation is enabled. If you disable it, and if you try to
+     * store an object that cannot be converted to a {@link org.dizitart.no2.collection.Document},
+     * then Nitrite will throw an exception during the operation.
+     *
+     * @return the NitriteBuilder instance with repository type validation disabled
+     * @see org.dizitart.no2.collection.Document
+     * @see org.dizitart.no2.repository.ObjectRepository
+     * @see org.dizitart.no2.common.mapper.EntityConverter
+     * @since 4.3.0
+     */
+    public NitriteBuilder disableRepositoryTypeValidation() {
+        this.nitriteConfig.disableRepositoryTypeValidation();
         return this;
     }
 
