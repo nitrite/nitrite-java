@@ -5,18 +5,14 @@ package org.dizitart.kno2.serialization
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialFormat
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonNull
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
 import org.dizitart.kno2.component1
 import org.dizitart.kno2.component2
 import org.dizitart.no2.collection.Document
+import org.dizitart.no2.collection.NitriteId
 import org.dizitart.no2.exceptions.ObjectMappingException
 
 
@@ -80,7 +76,7 @@ sealed class DocumentFormat(
      */
     fun <T : Any> encodeToDocument(serializer: KSerializer<T>, value: T): Document =
         when (val jsonElement = json.encodeToJsonElement(serializer, value)) {
-            is JsonObject -> jsonElement.toDocument()
+            is JsonObject -> jsonElement.toDocument(configuration.allowDeepPut)
             else -> throw ObjectMappingException("Can't convert object of type `${value::class.qualifiedName}` to Document")
         }
 
@@ -133,6 +129,7 @@ private fun Any?.toJsonElement(): JsonElement = when (this) {
     is Number -> JsonPrimitive(this)
     is Boolean -> JsonPrimitive(this)
     is Document -> toJsonObject()
+    is NitriteId -> JsonPrimitive(this.idValue)
     is List<*> -> JsonArray(map { it.toJsonElement() })
     is Map<*, *> -> JsonObject(checkKeysAreString().mapValues { (_, value) -> value.toJsonElement() })
     is Enum<*> -> JsonPrimitive(this.name)
@@ -147,25 +144,25 @@ private fun <K, V> Map<out K, V>.checkKeysAreString(): Map<String, V> = mapKeys 
     }
 }
 
-private fun JsonElement.toDocument(): Any? = when (this) {
-    is JsonObject -> toDocument()
-    is JsonArray -> toDocument()
+private fun JsonElement.toDocument(allowDeepPut: Boolean): Any? = when (this) {
+    is JsonObject -> toDocument(allowDeepPut)
+    is JsonArray -> toDocument(allowDeepPut)
     is JsonNull -> null
     is JsonPrimitive -> toDocument()
 }
 
-private fun JsonObject.toDocument(): Document {
+private fun JsonObject.toDocument(allowDeepPut: Boolean): Document {
     val document = Document.createDocument()
     for ((key, value) in entries) {
-        document.put(key, value.toDocument(), true)
+        document.put(key, value.toDocument(allowDeepPut), allowDeepPut)
     }
     return document
 }
 
-private fun JsonArray.toDocument(): List<Any?> {
+private fun JsonArray.toDocument(allowDeepPut: Boolean): List<Any?> {
     val list = mutableListOf<Any?>()
     for (element in this) {
-        list.add(element.toDocument())
+        list.add(element.toDocument(allowDeepPut))
     }
     return list
 }

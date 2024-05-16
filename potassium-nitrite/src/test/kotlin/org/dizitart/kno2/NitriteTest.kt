@@ -16,7 +16,6 @@
 
 package org.dizitart.kno2
 
-import junit.framework.TestCase
 import org.dizitart.kno2.filters.eq
 import org.dizitart.kno2.filters.text
 import org.dizitart.no2.collection.FindOptions.orderBy

@@ -35,6 +35,7 @@ class DocumentFormatConfiguration(
     val useAlternativeNames: Boolean = true,
     val namingStrategy: JsonNamingStrategy? = null,
     val decodeEnumsCaseInsensitive: Boolean = false,
+    val allowDeepPut: Boolean = false,
 ) {
     companion object {
         val Default = DocumentFormatConfiguration()

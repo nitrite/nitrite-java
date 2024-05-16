@@ -16,8 +16,14 @@
 
 package org.dizitart.kno2
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import org.dizitart.no2.Nitrite
 import org.dizitart.no2.collection.NitriteCollection
+import org.dizitart.no2.collection.NitriteId
 import org.dizitart.no2.common.module.NitriteModule.module
 import org.dizitart.no2.common.module.NitritePlugin
 import org.dizitart.no2.common.tuples.Pair
@@ -181,3 +187,16 @@ operator fun <A, B> Pair<A, B>.component1(): A = first
  * @return The second component of this pair.
  */
 operator fun <A, B> Pair<A, B>.component2(): B = second
+
+object NitriteIdSerializer : KSerializer<NitriteId> {
+    override val descriptor = String.serializer().descriptor
+
+    override fun deserialize(decoder: Decoder): NitriteId =
+        NitriteId.createId(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: NitriteId) {
+        encoder.encodeString(value.idValue)
+    }
+}
+
+typealias SerializableNitriteId = @Serializable(with = NitriteIdSerializer::class) NitriteId

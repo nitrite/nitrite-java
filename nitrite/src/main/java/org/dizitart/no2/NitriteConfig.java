@@ -118,7 +118,7 @@ public class NitriteConfig implements AutoCloseable {
     public void disableRepositoryTypeValidation() {
         if (configured) {
             throw new InvalidOperationException("Cannot change repository type validation after database" +
-                    " initialization");
+                " initialization");
         }
         this.repositoryTypeValidationDisabled = true;
     }

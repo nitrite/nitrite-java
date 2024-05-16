@@ -38,6 +38,7 @@ class DocumentFormatBuilder internal constructor(from: DocumentFormatConfigurati
     var namingStrategy: JsonNamingStrategy? = from.namingStrategy
     var decodeEnumsCaseInsensitive: Boolean = from.decodeEnumsCaseInsensitive
     var serializersModule: SerializersModule = EmptySerializersModule()
+    var allowDeepPut: Boolean = from.allowDeepPut
 
     /**
      * Represents a built object with the specified configuration settings and serializers module.
