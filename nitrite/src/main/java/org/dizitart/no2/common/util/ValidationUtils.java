@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.IndexingException;
@@ -149,7 +150,7 @@ public class ValidationUtils {
         }
     }
 
-    public static void validateRepositoryType(Class<?> type, NitriteMapper nitriteMapper) {
+    public static void validateRepositoryType(Class<?> type, NitriteConfig nitriteConfig) {
         Object value;
         try {
             if (type.isInterface() || (Modifier.isAbstract(type.getModifiers()) && !isBuiltInValueType(type))) {
@@ -157,14 +158,17 @@ public class ValidationUtils {
                 return;
             }
 
-            value = newInstance(type, false, nitriteMapper);
-            if (value == null) {
-                throw new ValidationException("Cannot create new instance of type " + type);
-            }
+            if (!nitriteConfig.isRepositoryTypeValidationDisabled()) {
+                NitriteMapper nitriteMapper = nitriteConfig.nitriteMapper();
+                value = newInstance(type, false, nitriteMapper);
+                if (value == null) {
+                    throw new ValidationException("Cannot create new instance of type " + type);
+                }
 
-            Document document = (Document) nitriteMapper.tryConvert(value, Document.class);
-            if (document == null || document.size() == 0) {
-                throw new ValidationException("Cannot convert to document from type " + type);
+                Document document = (Document) nitriteMapper.tryConvert(value, Document.class);
+                if (document == null || document.size() == 0) {
+                    throw new ValidationException("Cannot convert to document from type " + type);
+                }
             }
         } catch (Exception e) {
             throw new ValidationException("Invalid repository type", e);

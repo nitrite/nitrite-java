@@ -60,12 +60,13 @@
         <jts.version>1.19.0</jts.version>
         <commons-codec.version>1.17.0</commons-codec.version>
         <commons-io.version>2.16.1</commons-io.version>
-        <kotlin.version>1.9.23</kotlin.version>
+        <kotlin.version>1.9.24</kotlin.version>
         <kotlinx-serialization.version>1.6.3</kotlinx-serialization.version>
+        <kotlinx-datetime.version>0.6.0-RC.2</kotlinx-datetime.version>
         <lombok.version>1.18.32</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.11.0</mockito.version>
+        <mockito.version>5.12.0</mockito.version>
         <podam.version>8.0.1.RELEASE</podam.version>
         <log4j.version>2.23.1</log4j.version>
         <awaitility.version>4.2.1</awaitility.version>
@@ -289,6 +290,12 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-test-junit</artifactId>
                 <version>${kotlin.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlinx-datetime-jvm</artifactId>
+                <version>${kotlinx-datetime.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
