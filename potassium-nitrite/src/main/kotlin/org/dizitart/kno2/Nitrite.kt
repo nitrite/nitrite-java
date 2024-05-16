@@ -150,11 +150,34 @@ inline fun <reified T : Any> Nitrite.getRepository(
 fun option(indexType: String = IndexType.UNIQUE): IndexOptions =
         IndexOptions.indexOptions(indexType)
 
+/**
+ * Inserts multiple items into the object repository.
+ *
+ * @param items the iterable collection of items to be inserted
+ * @throws UnsupportedOperationException if the operation is not supported by the object repository
+ * @throws IllegalArgumentException if any of the items is null
+ */
 inline fun <reified T : Any> ObjectRepository<T>.insert(items: Iterable<T>) =
     insert(items.toList().toTypedArray())
 
+/**
+ * Loads the specified module for the given plugin.
+ *
+ * @param plugin The NitritePlugin instance for which the module needs to be loaded.
+ * @throws SomeException If there is an error while loading the module.
+ */
 fun Builder.loadModule(plugin: NitritePlugin) =
     loadModule(module(plugin))
 
+/**
+ * Returns the first component of the Pair.
+ *
+ * @return the value of the first component.
+ */
 operator fun <A, B> Pair<A, B>.component1(): A = first
+/**
+ * Returns the second component of this pair.
+ *
+ * @return The second component of this pair.
+ */
 operator fun <A, B> Pair<A, B>.component2(): B = second

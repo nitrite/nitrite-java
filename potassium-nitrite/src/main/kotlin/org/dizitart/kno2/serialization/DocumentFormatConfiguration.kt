@@ -6,6 +6,22 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonNamingStrategy
 
+/**
+ * Configuration for document format.
+ *
+ * @property encodeDefaults    Indicates whether to encode default property values.
+ * @property ignoreUnknownKeys Indicates whether to ignore unknown keys when decoding.
+ * @property isLenient         Indicates whether to apply a lenient parsing strategy.
+ * @property allowStructuredMapKeys    Indicates whether to allow structured map keys.
+ * @property explicitNulls     Indicates whether to encode explicit nulls.
+ * @property coerceInputValues Indicates whether to coerce input values.
+ * @property useArrayPolymorphism  Indicates whether to enable array polymorphism.
+ * @property classDiscriminator    The class discriminator key.
+ * @property allowSpecialFloatingPointValues  Indicates whether to allow special floating point values.
+ * @property useAlternativeNames  Indicates whether to use alternative names.
+ * @property namingStrategy     The naming strategy for properties.
+ * @property decodeEnumsCaseInsensitive    Indicates whether to decode enums case insensitive.
+ */
 class DocumentFormatConfiguration(
     val encodeDefaults: Boolean = false,
     val ignoreUnknownKeys: Boolean = true,

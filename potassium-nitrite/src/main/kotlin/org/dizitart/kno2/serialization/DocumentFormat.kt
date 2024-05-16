@@ -60,6 +60,17 @@ sealed class DocumentFormat(
 
     private val json = configuration.toJson()
 
+    /**
+     * Represents a default implementation of the DocumentFormat class.
+     *
+     * This class is a companion object of the DocumentFormat class. It provides a default configuration and empty serializers
+     * module for creating DocumentFormat instances.
+     *
+     * @constructor Creates a new Default instance of the DocumentFormat class.
+     *
+     * @property configuration The default configuration for the DocumentFormat instance.
+     * @property serializersModule The empty serializers module for the DocumentFormat instance.
+     */
     companion object Default : DocumentFormat(DocumentFormatConfiguration.Default, EmptySerializersModule())
 
     /**

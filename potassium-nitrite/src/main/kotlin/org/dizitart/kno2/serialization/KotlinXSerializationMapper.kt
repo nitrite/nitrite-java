@@ -35,6 +35,12 @@ sealed class KotlinXSerializationMapper : NitriteMapper {
 
     abstract val documentFormat: DocumentFormat
 
+    /**
+     * It provides a default implementation for the documentFormat property, which returns the DocumentFormat.Default value.
+     *
+     * @property documentFormat The document format to be used.
+     * @see KotlinXSerializationMapper
+     */
     companion object Default : KotlinXSerializationMapper() {
         override val documentFormat: DocumentFormat
             get() = DocumentFormat.Default
@@ -86,6 +92,12 @@ sealed class KotlinXSerializationMapper : NitriteMapper {
     override fun initialize(nitriteConfig: NitriteConfig) {}
 }
 
+/**
+ * Creates a [KotlinXSerializationMapper] with the specified [documentFormat].
+ *
+ * @param documentFormat the document format to be used for object to [Document] conversion and vice versa.
+ * @return the created [KotlinXSerializationMapper] instance.
+ */
 fun KotlinXSerializationMapper(
     documentFormat: DocumentFormat = DocumentFormat.Default,
 ): KotlinXSerializationMapper = KotlinXSerializationMapper.Custom(documentFormat)
