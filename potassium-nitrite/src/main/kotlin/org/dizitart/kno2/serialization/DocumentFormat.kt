@@ -1,19 +1,23 @@
+@file:OptIn(ExperimentalSerializationApi::class)
+
 package org.dizitart.kno2.serialization
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialFormat
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonBuilder
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.modules.EmptySerializersModule
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.serializer
-import org.dizitart.no2.collection.Document
-import org.dizitart.no2.exceptions.ObjectMappingException
 import org.dizitart.kno2.component1
 import org.dizitart.kno2.component2
+import org.dizitart.no2.collection.Document
+import org.dizitart.no2.exceptions.ObjectMappingException
 
 
 /**
@@ -49,16 +53,14 @@ import org.dizitart.kno2.component2
  *
  * The `DocumentFormat` instance also exposes its `serializersModule`, which can be used in custom serializers.
  */
-sealed class DocumentFormat {
+sealed class DocumentFormat(
+    val configuration: DocumentFormatConfiguration,
+    override val serializersModule: SerializersModule,
+) : SerialFormat {
 
-    abstract val json: Json
+    private val json = configuration.toJson()
 
-    companion object Default : DocumentFormat() {
-        override val json: Json = Json {
-            ignoreUnknownKeys = true
-        }
-    }
-
+    companion object Default : DocumentFormat(DocumentFormatConfiguration.Default, EmptySerializersModule())
 
     /**
      * Encodes the given [value] into an equivalent Nitrite [Document] using the specified [serializer].
@@ -77,14 +79,12 @@ sealed class DocumentFormat {
     fun <T : Any> decodeFromDocument(serializer: KSerializer<T>, document: Document): T =
         json.decodeFromJsonElement(serializer, document.toJsonObject())
 
-    internal class Custom(override val json: Json) : DocumentFormat()
+    internal class Custom(
+        configuration: DocumentFormatConfiguration,
+        serializersModule: SerializersModule,
+    ) : DocumentFormat(configuration, serializersModule)
 
 }
-
-/**
- * Type alias for the builder used to configure a [DocumentFormat] instance.
- */
-typealias DocumentFormatBuilder = JsonBuilder
 
 /**
  * Builder function to create a [DocumentFormat] instance with a custom configuration.
@@ -97,27 +97,22 @@ fun DocumentFormat(
     from: DocumentFormat = DocumentFormat.Default,
     configure: DocumentFormatBuilder.() -> Unit,
 ): DocumentFormat {
-    val jsonConfig = Json(from.json) {
-        configure()
-        ignoreUnknownKeys = true
-    }
-    return DocumentFormat.Custom(jsonConfig)
+    val (configuration, serializersModule) =
+        DocumentFormatBuilder(from.configuration).apply(configure).build()
+    return DocumentFormat.Custom(configuration, serializersModule)
 }
-
-val DocumentFormat.serializersModule: SerializersModule
-    get() = json.serializersModule
 
 /**
  * Encodes the given [value] of type [T] into a Nitrite [Document] using the serializer registered in the [serializersModule].
  */
 inline fun <reified T : Any> DocumentFormat.encodeToDocument(value: T): Document =
-    encodeToDocument(json.serializersModule.serializer<T>(), value)
+    encodeToDocument(serializersModule.serializer<T>(), value)
 
 /**
  * Decodes the given Nitrite [document] into a value of type [T] using the serializer registered in the [serializersModule].
  */
 inline fun <reified T> DocumentFormat.decodeFromDocument(document: Document): T =
-    decodeFromDocument(json.serializersModule.serializer(), document)
+    decodeFromDocument(serializersModule.serializer(), document)
 
 private fun Document.toJsonObject() =
     JsonObject(associate { (key, value) -> key to value.toJsonElement() })
