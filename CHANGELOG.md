@@ -4,10 +4,14 @@
 
 - Nitrite now supports JPMS. It is now modular and can be used in Java 9 or above.
 - Version upgrade for several dependencies
+- Repository type validation can be disabled in `NitriteBuilder` as a fix for #966
 
 ### Issue Fixes
 
 - Fix for #935
+- Fix for #948
+- Fix for #961
+- Fix for #966
 
 ## Release 4.2.2 - Mar 5, 2024
 

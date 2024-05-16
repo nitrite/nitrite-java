@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
+import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.mapper.SimpleNitriteMapper;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.integration.Retry;
@@ -96,18 +97,19 @@ public class ValidationUtilsTest {
 
     @Test
     public void testValidateRepositoryType() {
-        SimpleNitriteMapper documentMapper = new SimpleNitriteMapper();
-        documentMapper.registerEntityConverter(new ClassA.ClassAConverter());
-        documentMapper.registerEntityConverter(new ClassBConverter());
-        documentMapper.registerEntityConverter(new EmptyClass.Converter());
+        NitriteConfig nitriteConfig = new NitriteConfig();
+        nitriteConfig.registerEntityConverter(new ClassA.ClassAConverter());
+        nitriteConfig.registerEntityConverter(new ClassBConverter());
+        nitriteConfig.registerEntityConverter(new EmptyClass.Converter());
+        nitriteConfig.autoConfigure();
 
-        validateRepositoryType(ClassA.class, documentMapper);
+        validateRepositoryType(ClassA.class, nitriteConfig);
 
-        assertThrows(ValidationException.class, () -> validateRepositoryType(EmptyClass.class, documentMapper));
-        assertThrows(ValidationException.class, () -> validateRepositoryType(ClassC.class, documentMapper));
-        assertThrows(ValidationException.class, () -> validateRepositoryType(String.class, documentMapper));
-        assertThrows(ValidationException.class, () -> validateRepositoryType(Number.class, documentMapper));
-        assertThrows(ValidationException.class, () -> validateRepositoryType(Integer.class, documentMapper));
-        assertThrows(ValidationException.class, () -> validateRepositoryType(Object.class, documentMapper));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(EmptyClass.class, nitriteConfig));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(ClassC.class, nitriteConfig));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(String.class, nitriteConfig));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(Number.class, nitriteConfig));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(Integer.class, nitriteConfig));
+        assertThrows(ValidationException.class, () -> validateRepositoryType(Object.class, nitriteConfig));
     }
 }
