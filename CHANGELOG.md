@@ -12,6 +12,7 @@
 - Fix for #948
 - Fix for #961
 - Fix for #966
+- Fix for #977
 
 ## Release 4.2.2 - Mar 5, 2024
 
