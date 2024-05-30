@@ -88,7 +88,7 @@
         <dokka.version>1.9.20</dokka.version>
         <animal-sniffer.version>1.23</animal-sniffer.version>
         <api-level-24.version>7.0_r2</api-level-24.version>
-        <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+        <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
         <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
     </properties>
 
