@@ -34,6 +34,8 @@ import org.h2.mvstore.rtree.MVRTreeMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.h2.mvstore.DataUtils.*;
+
 /**
  * @since 1.0
  * @author Anindya Chatterjee
@@ -192,9 +194,15 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
                     }
 
                     log.warn("Error opening map {} with version {}, retrying with previous version", mapName, version, me);
-                    // open map with earlier version
-                    mvStore.rollbackTo(version - 1);
-                    version = mvStore.getCurrentVersion();
+                    if (me.getErrorCode() == ERROR_READING_FAILED || me.getErrorCode() == ERROR_WRITING_FAILED
+                        || me.getErrorCode() == ERROR_FILE_CORRUPT || me.getErrorCode() == ERROR_SERIALIZATION
+                        || me.getErrorCode() == ERROR_CHUNK_NOT_FOUND || me.getErrorCode() == ERROR_BLOCK_NOT_FOUND) {
+                        // open map with earlier version
+                        mvStore.rollbackTo(version - 1);
+                        version = mvStore.getCurrentVersion();
+                    } else {
+                        throw me;
+                    }
                     exception = me;
                 }
             }
