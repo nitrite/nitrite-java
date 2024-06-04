@@ -55,14 +55,14 @@
         <slf4j.version>2.0.13</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.2.224</h2.version>
-        <rocksdb.version>9.1.1</rocksdb.version>
+        <rocksdb.version>9.2.1</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
         <commons-codec.version>1.17.0</commons-codec.version>
         <commons-io.version>2.16.1</commons-io.version>
-        <kotlin.version>1.9.24</kotlin.version>
+        <kotlin.version>2.0.0</kotlin.version>
         <kotlinx-serialization.version>1.6.3</kotlinx-serialization.version>
-        <kotlinx-datetime.version>0.6.0-RC.2</kotlinx-datetime.version>
+        <kotlinx-datetime.version>0.6.0</kotlinx-datetime.version>
         <lombok.version>1.18.32</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
@@ -76,19 +76,19 @@
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>33.2.0-jre</guava.version>
+        <guava.version>33.2.1-jre</guava.version>
         <threetenbp.version>1.6.9</threetenbp.version>
 
-        <error-prone.version>2.27.1</error-prone.version>
+        <error-prone.version>2.28.0</error-prone.version>
         <jacoco.version>0.8.12</jacoco.version>
         <surefire.version>3.2.5</surefire.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.7.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <dokka.version>1.9.20</dokka.version>
         <animal-sniffer.version>1.23</animal-sniffer.version>
         <api-level-24.version>7.0_r2</api-level-24.version>
-        <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
+        <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
         <maven-gpg-plugin.version>3.2.4</maven-gpg-plugin.version>
     </properties>
 
