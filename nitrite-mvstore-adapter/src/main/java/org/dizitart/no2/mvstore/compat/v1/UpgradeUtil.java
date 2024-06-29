@@ -190,7 +190,12 @@ public class UpgradeUtil {
         Document document = Document.createDocument();
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             Object val = entry.getValue();
-            Object migratedVal = migrateValue(val);
+            Object migratedVal;
+            if (entry.getKey().equals(DOC_ID)) {
+                migratedVal = String.valueOf(val);
+            } else {
+                migratedVal = migrateValue(val);
+            }
             document.put(entry.getKey(), migratedVal);
         }
         return document;
