@@ -456,7 +456,15 @@ public class NitriteTest {
         Document document = testCollection.find().firstOrNull();
         document.put("name", "new-name");
 
-        testCollection.update(document);
+        boolean exception = false;
+        try {
+            testCollection.update(document);
+        } catch (Exception e) {
+            exception = true;
+            log.error("Error while updating document", e);
+        }
+        assertFalse(exception);
+
         db.close();
 
         try {

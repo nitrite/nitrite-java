@@ -191,7 +191,7 @@ public class UpgradeUtil {
         for (Map.Entry<String, Object> entry : value.entrySet()) {
             Object val = entry.getValue();
             Object migratedVal;
-            if (entry.getKey().equals(DOC_ID)) {
+            if (DOC_ID.equals(entry.getKey())) {
                 migratedVal = String.valueOf(val);
             } else {
                 migratedVal = migrateValue(val);
