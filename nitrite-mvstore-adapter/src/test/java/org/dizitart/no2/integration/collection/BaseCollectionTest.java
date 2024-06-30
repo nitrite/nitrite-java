@@ -64,7 +64,7 @@ public abstract class BaseCollectionTest {
     public Retry retry = new Retry(3);
 
     @Parameterized.Parameters(name = "InMemory = {0}, Secured = {1}, " +
-            "Compressed = {2}, AutoCommit = {3}, AutoCompact = {4}")
+            "Compressed = {2}, AutoCommit = {3}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {false, false, false, false},

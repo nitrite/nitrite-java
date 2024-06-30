@@ -57,7 +57,7 @@ public class CollectionCompoundIndexNegativeTest extends BaseCollectionTest {
     public void testCreateOnInvalidField() {
         insert();
         // multiple null value will be created
-        collection.createIndex( "my-value", "lastName");
+        collection.createIndex("my-value", "lastName");
     }
 
     @Test(expected = IndexingException.class)
