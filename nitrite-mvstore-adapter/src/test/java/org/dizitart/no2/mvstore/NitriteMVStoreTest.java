@@ -38,7 +38,7 @@ public class NitriteMVStoreTest {
         nitriteMVStore.openOrCreate();
         assertFalse(nitriteMVStore.isReadOnly());
         assertFalse(nitriteMVStore.isClosed());
-        assertTrue(nitriteMVStore.hasUnsavedChanges());
+        assertFalse(nitriteMVStore.hasUnsavedChanges());
     }
 
     @Test
