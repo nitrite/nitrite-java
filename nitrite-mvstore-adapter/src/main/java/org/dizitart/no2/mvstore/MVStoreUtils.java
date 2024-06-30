@@ -49,7 +49,10 @@ class MVStoreUtils {
         File dbFile = !isNullOrEmpty(storeConfig.filePath()) ? new File(storeConfig.filePath()) : null;
         try {
             store = builder.open();
-            testForMigration(store);
+            if (dbFile != null) {
+                // if the store is file based, test for migration
+                testForMigration(store);
+            }
         } catch (MVStoreException me) {
             if (me.getMessage().contains("file is locked")) {
                 throw new NitriteIOException("Database is already opened in other process");
