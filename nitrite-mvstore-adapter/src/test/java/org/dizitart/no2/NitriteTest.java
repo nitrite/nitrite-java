@@ -437,6 +437,44 @@ public class NitriteTest {
     }
 
     @Test
+    public void testUpdateDocumentsFromVersion3() throws IOException {
+        if (Files.exists(Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "no2-v3.db"))) {
+            Files.delete(Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "no2-v3.db"));
+        }
+
+        InputStream stream = ClassLoader.getSystemResourceAsStream("no2-v3.db");
+        if (stream == null) {
+            stream = ClassLoader.getSystemClassLoader().getResourceAsStream("no2-v3.db");
+        }
+        assert stream != null;
+
+        Files.copy(stream, Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "no2-v3.db"));
+
+        String oldDbFile = System.getProperty("java.io.tmpdir") + File.separator + "no2-v3.db";
+        Nitrite db = TestUtil.createDb(oldDbFile);
+        NitriteCollection testCollection = db.getCollection("test");
+        Document document = testCollection.find().firstOrNull();
+        document.put("name", "new-name");
+
+        boolean exception = false;
+        try {
+            testCollection.update(document);
+        } catch (Exception e) {
+            exception = true;
+            log.error("Error while updating document", e);
+        }
+        assertFalse(exception);
+
+        db.close();
+
+        try {
+            Files.deleteIfExists(Paths.get(oldDbFile));
+        } catch (IOException e) {
+            log.error("Error while deleting db", e);
+        }
+    }
+
+    @Test
     public void testReadCompatibility() throws IOException {
 //      ******* Old DB Creation Code Start *********
 //
@@ -531,7 +569,11 @@ public class NitriteTest {
 
         db.close();
 
-        //TODO: CHeck reopen with repo. That should also fails too.
+        try {
+            Files.deleteIfExists(Paths.get(oldDbFile));
+        } catch (IOException e) {
+            log.error("Error while deleting db", e);
+        }
     }
 
     @Test
