@@ -266,6 +266,8 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             // ignore the reserved fields
             if (reservedFields.contains(entry.getFirst())) continue;
 
+            if (isNullOrEmpty(entry.getFirst())) continue;
+
             Object value = entry.getSecond();
             if (value instanceof NitriteDocument) {
                 // if the value is a document, traverse its fields recursively,
@@ -278,7 +280,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                     fields.addAll(((NitriteDocument) value).getFieldsInternal(prefix
                         + NitriteConfig.getFieldSeparator() + entry.getFirst()));
                 }
-            } else if (!(value instanceof Iterable)) {
+            } else {
                 // if there is no more embedded document, add the field to the list
                 // and if this is an embedded document then prefix its name by parent fields,
                 // separated by field separator

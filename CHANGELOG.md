@@ -1,5 +1,8 @@
 ## Release 4.3.1
 
+### Issue Fixes
+
+- Fix for `Document.getFields()` not returning iterable fields
 
 ## Release 4.3.0 - Jul 1, 2024
 
