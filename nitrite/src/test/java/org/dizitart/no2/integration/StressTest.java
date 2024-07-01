@@ -30,7 +30,6 @@ import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -193,11 +192,9 @@ public class StressTest {
         }
     }
 
-    @Indices({
-        @Index(fields = "firstName", type = IndexType.NON_UNIQUE),
-        @Index(fields = "age", type = IndexType.NON_UNIQUE),
-        @Index(fields = "text", type = IndexType.FULL_TEXT),
-    })
+    @Index(fields = "firstName", type = IndexType.NON_UNIQUE)
+    @Index(fields = "age", type = IndexType.NON_UNIQUE)
+    @Index(fields = "text", type = IndexType.FULL_TEXT)
     private static class PerfTestIndexed extends PerfTest {
         public static class PerfTestIndexedConverter implements EntityConverter<PerfTestIndexed> {
 

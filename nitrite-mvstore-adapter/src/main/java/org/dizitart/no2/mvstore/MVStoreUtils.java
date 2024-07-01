@@ -17,18 +17,15 @@
 package org.dizitart.no2.mvstore;
 
 import lombok.extern.slf4j.Slf4j;
-import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.mvstore.compat.v1.UpgradeUtil;
-import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.MVStoreException;
 
 import java.io.File;
+import java.util.Map;
 
-import static org.dizitart.no2.common.Constants.META_MAP_NAME;
-import static org.dizitart.no2.common.Constants.STORE_INFO;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 
 /**
@@ -38,6 +35,10 @@ import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
 @Slf4j(topic = "nitrite-mvstore")
 @SuppressWarnings("ALL")
 class MVStoreUtils {
+    private static final String OLD_DATABASE_FORMAT = "Old database format detected.";
+    private static final String OLD_STORE_FORMAT = "The write format 1 is smaller than the supported format";
+    private static final Integer OLD_DATABASE_FORMAT_VERSION = 29062024;
+
     private MVStoreUtils() {
     }
 
@@ -48,7 +49,10 @@ class MVStoreUtils {
         File dbFile = !isNullOrEmpty(storeConfig.filePath()) ? new File(storeConfig.filePath()) : null;
         try {
             store = builder.open();
-            testForMigration(store);
+            if (dbFile != null) {
+                // if the store is file based, test for migration
+                testForMigration(store);
+            }
         } catch (MVStoreException me) {
             if (me.getMessage().contains("file is locked")) {
                 throw new NitriteIOException("Database is already opened in other process");
@@ -105,7 +109,7 @@ class MVStoreUtils {
     }
 
     private static boolean isCompatibilityError(Exception e) {
-        return e.getMessage().contains("The write format 1 is smaller than the supported format");
+        return e.getMessage().contains(OLD_DATABASE_FORMAT) || e.getMessage().contains(OLD_STORE_FORMAT);
     }
 
     private static MVStore.Builder createBuilder(MVStoreConfig mvStoreConfig) {
@@ -210,22 +214,23 @@ class MVStoreUtils {
 
     private static void testForMigration(MVStore store) {
         if (store != null) {
-            if (store.hasMap(STORE_INFO)) {
-                return;
+            Map<String, Object> storeHeader = store.getStoreHeader();
+            if (storeHeader == null || storeHeader.isEmpty()) {
+                throw new MVStoreException(OLD_DATABASE_FORMAT_VERSION, OLD_DATABASE_FORMAT);
             }
 
-            MVStore.TxCounter txCounter = store.registerVersionUsage();
-            MVMap<String, Attributes> metaMap = store.openMap(META_MAP_NAME);
-            try {
-                // fire one operation to trigger compatibility issue
-                // if no exception thrown, then the database is compatible
-                metaMap.remove("MigrationTest");
-            } catch (IllegalStateException e) {
-                store.close();
-                throw e;
-            } finally {
-                if (!store.isClosed()) {
-                    store.deregisterVersionUsage(txCounter);
+            if (storeHeader.containsKey("format")) {
+                Object rawFormatValue = storeHeader.get("format");
+                if (rawFormatValue instanceof Integer) {
+                    int format = (int) rawFormatValue;
+                    if (format < 3) {
+                        throw new MVStoreException(OLD_DATABASE_FORMAT_VERSION, OLD_DATABASE_FORMAT);
+                    }
+                } else {
+                    int format = Integer.parseInt((String) storeHeader.get("format"));
+                    if (format < 3) {
+                        throw new MVStoreException(OLD_DATABASE_FORMAT_VERSION, OLD_DATABASE_FORMAT);
+                    }
                 }
             }
         }

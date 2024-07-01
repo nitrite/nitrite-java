@@ -33,9 +33,9 @@ public class MVStoreUtilsTest {
         assertEquals(0, actualOpenOrCreateResult.getUnsavedMemory());
         assertEquals(0, actualOpenOrCreateResult.getStoreVersion());
         assertEquals(0, actualOpenOrCreateResult.getRetentionTime());
-        assertEquals(2, actualOpenOrCreateResult.getMetaMap().size());
+        assertEquals(0, actualOpenOrCreateResult.getMetaMap().size());
         assertEquals(Long.MAX_VALUE, actualOpenOrCreateResult.getMaxPageSize());
-        assertEquals(1, actualOpenOrCreateResult.getMapNames().size());
+        assertEquals(0, actualOpenOrCreateResult.getMapNames().size());
         assertEquals(48, actualOpenOrCreateResult.getKeysPerPage());
         assertEquals(0, actualOpenOrCreateResult.getAutoCommitMemory());
     }
@@ -50,9 +50,9 @@ public class MVStoreUtilsTest {
         assertEquals(0, actualOpenOrCreateResult.getUnsavedMemory());
         assertEquals(0, actualOpenOrCreateResult.getStoreVersion());
         assertEquals(0, actualOpenOrCreateResult.getRetentionTime());
-        assertEquals(2, actualOpenOrCreateResult.getMetaMap().size());
+        assertEquals(0, actualOpenOrCreateResult.getMetaMap().size());
         assertEquals(Long.MAX_VALUE, actualOpenOrCreateResult.getMaxPageSize());
-        assertEquals(1, actualOpenOrCreateResult.getMapNames().size());
+        assertEquals(0, actualOpenOrCreateResult.getMapNames().size());
         assertEquals(48, actualOpenOrCreateResult.getKeysPerPage());
         assertEquals(0, actualOpenOrCreateResult.getAutoCommitMemory());
     }

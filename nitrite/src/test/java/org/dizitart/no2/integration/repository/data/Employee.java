@@ -34,6 +34,8 @@ import java.util.Date;
 /**
  * @author Anindya Chatterjee.
  */
+@Setter
+@Getter
 @ToString
 @EqualsAndHashCode
 @Index(fields = "joinDate", type = IndexType.NON_UNIQUE)
@@ -41,32 +43,18 @@ import java.util.Date;
 @Index(fields = "employeeNote.text", type = IndexType.FULL_TEXT)
 public class Employee implements Serializable {
     @Id
-    @Getter
-    @Setter
     private Long empId;
 
-    @Getter
-    @Setter
     private Date joinDate;
 
-    @Getter
-    @Setter
     private String address;
 
-    @Getter
-    @Setter
     private String emailAddress;
 
-    @Getter
-    @Setter
     private transient Company company;
 
-    @Getter
-    @Setter
     private byte[] blob;
 
-    @Getter
-    @Setter
     private Note employeeNote;
 
     public Employee() {

@@ -17,7 +17,9 @@
 package org.dizitart.no2.mvstore;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.common.util.StringUtils;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
@@ -26,15 +28,19 @@ import org.dizitart.no2.store.events.StoreEventListener;
 import org.dizitart.no2.store.events.StoreEvents;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
+import org.h2.mvstore.MVStoreException;
 import org.h2.mvstore.rtree.MVRTreeMap;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.h2.mvstore.DataUtils.*;
+
 /**
  * @since 1.0
  * @author Anindya Chatterjee
  */
+@Slf4j
 public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     private MVStore mvStore;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
@@ -109,7 +115,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
             return (NitriteMVMap<Key, Value>) nitriteMapRegistry.get(mapName);
         }
 
-        MVMap<Key, Value> mvMap = mvStore.openMap(mapName);
+        MVMap<Key, Value> mvMap = openMVMap(mapName, null);
         NitriteMVMap<Key, Value> nitriteMVMap = new NitriteMVMap<>(mvMap, this);
         nitriteMapRegistry.put(mapName, nitriteMVMap);
         return nitriteMVMap;
@@ -131,7 +137,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     public void removeMap(String name) {
-        MVMap<?, ?> mvMap = mvStore.openMap(name);
+        MVMap<?, ?> mvMap = openMVMap(name, null);
         mvStore.removeMap(mvMap);
         getCatalog().remove(name);
         nitriteMapRegistry.remove(name);
@@ -140,7 +146,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     @Override
     @SuppressWarnings({"rawtypes"})
     public void removeRTree(String rTreeName) {
-        MVMap mvMap = mvStore.openMap(rTreeName, new MVRTreeMap.Builder<>());
+        MVMap mvMap = openMVMap(rTreeName, new MVRTreeMap.Builder<>());
         mvStore.removeMap(mvMap);
         getCatalog().remove(rTreeName);
         nitriteRTreeMapRegistry.remove(rTreeName);
@@ -153,7 +159,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
             return (NitriteMVRTreeMap) nitriteRTreeMapRegistry.get(mapName);
         }
 
-        MVRTreeMap<Value> map = mvStore.openMap(mapName, new MVRTreeMap.Builder<>());
+        MVRTreeMap<Value> map = (MVRTreeMap<Value>) openMVMap(mapName, new MVRTreeMap.Builder<>());
         NitriteMVRTreeMap<Key, Value> nitriteMVRTreeMap = new NitriteMVRTreeMap(map, this);
         nitriteRTreeMapRegistry.put(mapName, nitriteMVRTreeMap);
         return nitriteMVRTreeMap;
@@ -170,5 +176,40 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
                 eventBus.register(eventListener);
             }
         }
+    }
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private MVMap openMVMap(String mapName, MVMap.MapBuilder builder) {
+        Exception exception = null;
+        try {
+            MVMap.MapBuilder mapBuilder = builder == null ? new MVMap.Builder<>() : builder;
+            long version = mvStore.getCurrentVersion();
+
+            while (version >= 0) {
+                try {
+                    return mvStore.openMap(mapName, mapBuilder);
+                } catch (MVStoreException me) {
+                    if (version == 0) {
+                        throw me;
+                    }
+
+                    log.warn("Error opening map {} with version {}, retrying with previous version", mapName, version, me);
+                    if (me.getErrorCode() == ERROR_READING_FAILED || me.getErrorCode() == ERROR_WRITING_FAILED
+                        || me.getErrorCode() == ERROR_FILE_CORRUPT || me.getErrorCode() == ERROR_SERIALIZATION
+                        || me.getErrorCode() == ERROR_CHUNK_NOT_FOUND || me.getErrorCode() == ERROR_BLOCK_NOT_FOUND) {
+                        // open map with earlier version
+                        mvStore.rollbackTo(version - 1);
+                        version = mvStore.getCurrentVersion();
+                    } else {
+                        throw me;
+                    }
+                    exception = me;
+                }
+            }
+        } catch (Exception e) {
+            exception = e;
+        }
+
+        throw new NitriteIOException("Unable to open map " + mapName, exception);
     }
 }

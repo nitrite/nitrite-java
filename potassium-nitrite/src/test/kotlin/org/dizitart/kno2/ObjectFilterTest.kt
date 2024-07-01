@@ -21,7 +21,6 @@ import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.mvstore.MVStoreModule
 import org.dizitart.no2.repository.annotations.Id
 import org.dizitart.no2.repository.annotations.Index
-import org.dizitart.no2.repository.annotations.Indices
 import org.dizitart.no2.spatial.SpatialIndexer
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -337,7 +336,7 @@ class ObjectFilterTest : BaseTest() {
     }
 }
 
-@Indices(Index(fields = ["text"], type = IndexType.FULL_TEXT))
+@Index(fields = ["text"], type = IndexType.FULL_TEXT)
 data class TestData(@Id val id: Int = 0, val text: String = "", val list: List<ListData> = listOf())
 
 class ListData(val name: String = "", val score: Int = 0)

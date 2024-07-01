@@ -38,7 +38,6 @@ import org.dizitart.no2.integration.repository.data.EmptyClass;
 import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.repository.annotations.Id;
 import org.dizitart.no2.repository.annotations.Index;
-import org.dizitart.no2.repository.annotations.Indices;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -428,9 +427,7 @@ public class NitriteTest {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Indices({
-        @Index(fields = "synced", type = IndexType.NON_UNIQUE)
-    })
+    @Index(fields = "synced", type = IndexType.NON_UNIQUE)
     public static class Receipt {
         @Id
         private String clientRef;

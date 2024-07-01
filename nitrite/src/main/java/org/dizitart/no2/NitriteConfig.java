@@ -79,6 +79,12 @@ public class NitriteConfig implements AutoCloseable {
      */
     private Integer schemaVersion = Constants.INITIAL_SCHEMA_VERSION;
 
+    @Getter
+    /**
+     * Indicates if repository type validation is disabled.
+     */
+    private boolean repositoryTypeValidationDisabled = false;
+
     /**
      * Instantiates a new {@link NitriteConfig}.
      */
@@ -101,6 +107,20 @@ public class NitriteConfig implements AutoCloseable {
                     " initialization");
         }
         NitriteConfig.fieldSeparator = separator;
+    }
+
+    /**
+     * Disables repository type validation.
+     *
+     * @throws InvalidOperationException if the repository type validation is attempted to be
+     *                                   changed after database initialization.
+     */
+    public void disableRepositoryTypeValidation() {
+        if (configured) {
+            throw new InvalidOperationException("Cannot change repository type validation after database" +
+                    " initialization");
+        }
+        this.repositoryTypeValidationDisabled = true;
     }
 
     /**
@@ -157,7 +177,7 @@ public class NitriteConfig implements AutoCloseable {
             TreeMap<Integer, Migration> targetMap = migrations.computeIfAbsent(start, k -> new TreeMap<>());
             Migration existing = targetMap.get(end);
             if (existing != null) {
-                log.warn("Overriding migration " + existing + " with " + migration);
+                log.warn("Overriding migration {} with {}", existing, migration);
             }
             targetMap.put(end, migration);
         }
