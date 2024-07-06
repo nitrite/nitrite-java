@@ -40,6 +40,7 @@
         <module>nitrite-bom</module>
         <module>nitrite-jackson-mapper</module>
         <module>nitrite-mvstore-adapter</module>
+        <module>nitrite-native-tests</module>
         <module>nitrite-rocksdb-adapter</module>
         <module>nitrite-spatial</module>
         <module>nitrite-support</module>
