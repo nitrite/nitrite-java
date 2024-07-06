@@ -96,7 +96,7 @@ jobs:
         run: mvn -B -ff -ntp clean install --% -Dgpg.skip=true
 
   verify-native:
-    name: Verify GraalVM compatibility on ${{ matrix.os }}
+    name: Verify GraalVM ${{ matrix.java }} compatibility on ${{ matrix.os }}
     strategy:
       matrix:
         os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
