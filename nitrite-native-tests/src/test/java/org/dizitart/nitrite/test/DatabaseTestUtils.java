@@ -20,7 +20,7 @@ public class DatabaseTestUtils {
 
     public static Nitrite setupDatabase(final Path template) throws IOException {
 
-        final Path databasePath = Files.createTempFile("v-rising-bot", ".db");
+        final Path databasePath = Files.createTempFile("nitrite-native", ".db");
         logger.info("Test Db location: " + databasePath.toAbsolutePath());
 
         if (template != null) {
