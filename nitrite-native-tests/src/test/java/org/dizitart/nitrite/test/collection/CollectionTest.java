@@ -1,17 +1,16 @@
 package org.dizitart.nitrite.test.collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.math.BigDecimal;
-
 import org.dizitart.nitrite.test.DatabaseTestUtils;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.junit.jupiter.api.Test;
 
-public class NitriteCollectionDemoTest {
+import java.io.IOException;
+import java.math.BigDecimal;
+
+public class CollectionTest {
 
     @Test
     void readAndWriteOperationsShouldSucceed() throws IOException {

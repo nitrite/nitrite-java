@@ -1,11 +1,6 @@
 package org.dizitart.nitrite.test.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.io.IOException;
-import java.util.Set;
-import java.util.UUID;
-
 import org.dizitart.nitrite.test.DatabaseTestUtils;
 import org.dizitart.nitrite.test.repository.model.Person;
 import org.dizitart.nitrite.test.repository.model.Title;
@@ -13,7 +8,11 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.filters.FluentFilter;
 import org.junit.jupiter.api.Test;
 
-public class NitriteRepositoryDemoTest {
+import java.io.IOException;
+import java.util.Set;
+import java.util.UUID;
+
+public class RepositoryTest {
 
     @Test
     void readAndWriteOperationsShouldSucceed() throws IOException {

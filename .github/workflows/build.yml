@@ -111,7 +111,7 @@ jobs:
           distribution: 'graalvm-community'
 
       - name: Install nitrite
-        run: mvn -B -ff -ntp clean install -Dgpg.skip=true -DskipTests
+        run: mvn -B -ff -ntp clean install "-Dgpg.skip=true" -DskipTests
 
       - name: Run native tests
         working-directory: ./nitrite-native-tests
