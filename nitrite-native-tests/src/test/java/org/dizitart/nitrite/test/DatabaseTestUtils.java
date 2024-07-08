@@ -14,17 +14,22 @@ public class DatabaseTestUtils {
 
     private static final Logger logger = Logger.getLogger(DatabaseTestUtils.class.getSimpleName());
 
+    public static Path getRandomDatabasePath() throws IOException {
+        final Path databasePath = Files.createTempFile("nitrite-native", ".db");
+        logger.finest("Test Db location: " + databasePath.toAbsolutePath());
+        return databasePath;
+    }
+
     public static Nitrite setupDatabase() throws IOException {
         return setupDatabase(null);
     }
 
     public static Nitrite setupDatabase(final Path template) throws IOException {
 
-        final Path databasePath = Files.createTempFile("nitrite-native", ".db");
-        logger.info("Test Db location: " + databasePath.toAbsolutePath());
+        final Path databasePath = getRandomDatabasePath();
 
         if (template != null) {
-            logger.info("Loading template from '" + template.toAbsolutePath() + "'.");
+            logger.finest("Loading template from '" + template.toAbsolutePath() + "'.");
             Files.copy(template, databasePath, StandardCopyOption.REPLACE_EXISTING);
         }
 
