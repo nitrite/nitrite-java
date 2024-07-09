@@ -1,0 +1,80 @@
+[
+    {
+        "name": "java.lang.Integer"
+    },
+    {
+        "name": "java.lang.Long"
+    },
+    {
+        "name": "java.lang.Number"
+    },
+    {
+        "name": "java.lang.String"
+    },
+    {
+        "name": "java.util.ArrayList"
+    },
+    {
+        "name": "java.util.concurrent.atomic.AtomicBoolean"
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentHashMap"
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentHashMap$Segment"
+    },
+    {
+        "name": "java.util.concurrent.CopyOnWriteArrayList"
+    },
+    {
+        "name": "java.util.concurrent.locks.AbstractOwnableSynchronizer"
+    },
+    {
+        "name": "java.util.concurrent.locks.AbstractQueuedSynchronizer"
+    },
+    {
+        "name": "java.util.concurrent.locks.ReentrantLock"
+    },
+    {
+        "name": "java.util.concurrent.locks.ReentrantLock$NonfairSync"
+    },
+    {
+        "name": "java.util.concurrent.locks.ReentrantLock$Sync"
+    },
+    {
+        "name": "java.util.HashMap"
+    },
+    {
+        "name": "java.util.HashSet"
+    },
+    {
+        "name": "java.util.LinkedHashMap"
+    },
+    {
+        "name": "org.dizitart.no2.collection.NitriteDocument"
+    },
+    {
+        "name": "org.dizitart.no2.collection.NitriteId"
+    },
+    {
+        "name": "org.dizitart.no2.common.DBValue"
+    },
+    {
+        "name": "org.dizitart.no2.common.Fields"
+    },
+    {
+        "name": "org.dizitart.no2.common.meta.Attributes"
+    },
+    {
+        "name": "org.dizitart.no2.common.tuples.Pair"
+    },
+    {
+        "name": "org.dizitart.no2.index.IndexDescriptor"
+    },
+    {
+        "name": "org.dizitart.no2.index.IndexMeta"
+    },
+    {
+        "name": "org.dizitart.no2.store.UserCredential"
+    }
+]
