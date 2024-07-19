@@ -59,7 +59,7 @@
         <rocksdb.version>9.4.0</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
-        <commons-codec.version>1.17.0</commons-codec.version>
+        <commons-codec.version>1.17.1</commons-codec.version>
         <commons-io.version>2.16.1</commons-io.version>
         <kotlin.version>2.0.0</kotlin.version>
         <kotlinx-serialization.version>1.7.1</kotlinx-serialization.version>
