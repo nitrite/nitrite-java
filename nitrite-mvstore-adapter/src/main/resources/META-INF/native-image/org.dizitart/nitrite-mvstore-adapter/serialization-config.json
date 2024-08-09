@@ -76,5 +76,29 @@
     },
     {
         "name": "org.dizitart.no2.store.UserCredential"
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.Compat$UserCredential"
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.Compat$Document"
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.Compat$Index"
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.Compat$IndexMeta"
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.Compat$Attributes"
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.Compat$NitriteId"
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentSkipListMap"
+    },
+    {
+        "name": "java.util.concurrent.ConcurrentSkipListSet"
     }
 ]
