@@ -1,0 +1,50 @@
+[
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.mvstore.fs.FilePathDisk",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.mvstore.fs.FilePathNio",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.dizitart.no2.mvstore.compat.v1.mvstore.fs.FilePathEncrypt",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathMem",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathMemLZF",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathNioMem",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathNioMemLZF",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathSplit",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathNioMapped",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathAsync",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathZip",
+        "allDeclaredConstructors": true
+    },
+    {
+        "name": "org.h2.store.fs.FilePathRetryOnInterrupt",
+        "allDeclaredConstructors": true
+    }
+]
