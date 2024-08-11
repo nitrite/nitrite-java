@@ -1,4 +1,11 @@
-## Release 4.3.0
+## Release 4.3.1
+
+### Issue Fixes
+
+- Fix for `Document.getFields()` not returning iterable fields
+- Fix for failing tests on systems with non-ENGLISH locale #994
+
+## Release 4.3.0 - Jul 1, 2024
 
 ### New Changes
 
