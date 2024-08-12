@@ -55,7 +55,7 @@
         <jackson.version>2.17.2</jackson.version>
         <slf4j.version>2.0.15</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
-        <h2.version>2.3.230</h2.version>
+        <h2.version>2.3.232</h2.version>
         <rocksdb.version>9.4.0</rocksdb.version>
         <kryo5.version>5.5.0</kryo5.version>
         <jts.version>1.19.0</jts.version>
