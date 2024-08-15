@@ -228,7 +228,7 @@ public class RepositoryFactoryTest {
 
         @Override
         public void unsubscribe(String subscription) {
-
+            // do nothing
         }
 
         @Override

@@ -16,7 +16,7 @@ public class EventAwareTest {
 
             @Override
             public void unsubscribe(String listener) {
-
+                // do nothing
             }
         };
         eventAware.subscribe(null);
