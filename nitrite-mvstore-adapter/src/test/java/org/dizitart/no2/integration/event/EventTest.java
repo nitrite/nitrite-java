@@ -66,6 +66,7 @@ public class EventTest {
     private Nitrite db;
     private ObjectRepository<Employee> employeeRepository;
     private SampleListenerCollection listener;
+    private String subscription;
 
     @Rule
     public Retry retry = new Retry(3);
@@ -125,7 +126,7 @@ public class EventTest {
 
         employeeRepository = db.getRepository(Employee.class);
         listener = new SampleListenerCollection();
-        employeeRepository.subscribe(listener);
+        subscription = employeeRepository.subscribe(listener);
     }
 
     @Test
@@ -202,7 +203,7 @@ public class EventTest {
 
     @Test
     public void testDeregister() {
-        employeeRepository.unsubscribe(listener);
+        employeeRepository.unsubscribe(subscription);
         Employee e = new Employee();
         e.setEmpId(1L);
         e.setAddress("abcd");
@@ -249,7 +250,7 @@ public class EventTest {
             if (!employeeRepository.isDropped()
                     && employeeRepository.isOpen()) {
                 employeeRepository.remove(ALL);
-                employeeRepository.unsubscribe(listener);
+                employeeRepository.unsubscribe(subscription);
                 employeeRepository.close();
             }
         }

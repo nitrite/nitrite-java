@@ -114,7 +114,7 @@ public class TransactionStoreTest {
         actualTransactionStore.initialize(new NitriteConfig());
         actualTransactionStore.openOrCreate();
         actualTransactionStore.subscribe(mock(StoreEventListener.class));
-        actualTransactionStore.unsubscribe(mock(StoreEventListener.class));
+        actualTransactionStore.unsubscribe("Subscription");
         assertTrue(transactionStore.hasUnsavedChanges());
         assertTrue(actualTransactionStore.hasUnsavedChanges());
         assertFalse(transactionStore.isClosed());

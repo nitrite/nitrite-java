@@ -66,7 +66,7 @@ public class RepositoryFactoryTest {
     @Test(expected = ValidationException.class)
     public void testNullType() {
         RepositoryFactory factory = new RepositoryFactory(new CollectionFactory(new LockService()));
-        factory.getRepository(db.getConfig(), (Class<? extends Object>) null, "dummy");
+        factory.getRepository(db.getConfig(), (Class<?>) null, "dummy");
     }
 
     @Test(expected = ValidationException.class)
@@ -222,12 +222,12 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public void subscribe(CollectionEventListener listener) {
-
+        public String subscribe(CollectionEventListener listener) {
+            return null;
         }
 
         @Override
-        public void unsubscribe(CollectionEventListener listener) {
+        public void unsubscribe(String subscription) {
 
         }
 

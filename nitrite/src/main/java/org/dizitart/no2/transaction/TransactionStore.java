@@ -146,13 +146,13 @@ class TransactionStore<T extends StoreConfig> extends AbstractNitriteStore<T> {
     }
 
     @Override
-    public void subscribe(StoreEventListener listener) {
-
+    public String subscribe(StoreEventListener listener) {
+        return null;
     }
 
     @Override
-    public void unsubscribe(StoreEventListener listener) {
-
+    public void unsubscribe(String subscription) {
+        // nothing to do
     }
 
     @Override

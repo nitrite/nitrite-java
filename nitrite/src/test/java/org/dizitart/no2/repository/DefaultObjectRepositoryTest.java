@@ -276,7 +276,7 @@ public class DefaultObjectRepositoryTest {
     @Test
     public void testSubscribe() {
         NitriteCollection nitriteCollection = mock(NitriteCollection.class);
-        doNothing().when(nitriteCollection).subscribe(any());
+        when(nitriteCollection.subscribe(any())).thenReturn("Subscription");
         Class<Object> type = Object.class;
         DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
             nitriteCollection, new NitriteConfig());
@@ -292,7 +292,7 @@ public class DefaultObjectRepositoryTest {
         Class<Object> type = Object.class;
         DefaultObjectRepository<Object> defaultObjectRepository = new DefaultObjectRepository<>(type,
             nitriteCollection, new NitriteConfig());
-        defaultObjectRepository.unsubscribe(mock(CollectionEventListener.class));
+        defaultObjectRepository.unsubscribe("Subscription");
         verify(nitriteCollection).unsubscribe(any());
         assertNull(defaultObjectRepository.getAttributes());
     }

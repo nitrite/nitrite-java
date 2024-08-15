@@ -1,5 +1,10 @@
 ## Release 4.3.1
 
+### New Changes
+
+- GraalVM support for nitrite-mvstore-adapter #995
+- Event subscription api changes
+
 ### Issue Fixes
 
 - Fix for `Document.getFields()` not returning iterable fields
