@@ -153,7 +153,7 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
 
     @Override
     public Cursor<T> find(Filter filter, FindOptions findOptions) {
-        return operations.find(filter, findOptions, type);
+        return operations.find(filter, findOptions, getType());
     }
 
     @Override
