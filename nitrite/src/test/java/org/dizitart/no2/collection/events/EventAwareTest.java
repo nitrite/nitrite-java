@@ -9,13 +9,14 @@ public class EventAwareTest {
     public void testSubscribe() {
         EventAware eventAware = new EventAware() {
             @Override
-            public void subscribe(CollectionEventListener listener) {
+            public String subscribe(CollectionEventListener listener) {
                 assertNull(listener);
+                return null;
             }
 
             @Override
-            public void unsubscribe(CollectionEventListener listener) {
-
+            public void unsubscribe(String listener) {
+                // do nothing
             }
         };
         eventAware.subscribe(null);
@@ -25,11 +26,12 @@ public class EventAwareTest {
     public void testUnsubscribe() {
         EventAware eventAware = new EventAware() {
             @Override
-            public void subscribe(CollectionEventListener listener) {
+            public String subscribe(CollectionEventListener listener) {
+                return null;
             }
 
             @Override
-            public void unsubscribe(CollectionEventListener listener) {
+            public void unsubscribe(String listener) {
                 assertNull(listener);
             }
         };

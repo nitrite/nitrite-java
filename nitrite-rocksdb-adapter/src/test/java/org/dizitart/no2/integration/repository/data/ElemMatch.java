@@ -57,6 +57,7 @@ public class ElemMatch {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public ElemMatch fromDocument(Document document, NitriteMapper nitriteMapper) {
             ElemMatch entity = new ElemMatch();
             entity.id = document.get("id", Long.class);

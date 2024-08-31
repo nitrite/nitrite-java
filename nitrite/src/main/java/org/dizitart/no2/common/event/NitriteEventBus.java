@@ -17,9 +17,14 @@
 package org.dizitart.no2.common.event;
 
 import org.dizitart.no2.common.concurrent.ThreadPoolManager;
+import org.dizitart.no2.common.util.StringUtils;
+import org.dizitart.no2.exceptions.InvalidOperationException;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -29,24 +34,27 @@ import java.util.concurrent.ExecutorService;
 public abstract class NitriteEventBus<EventInfo, EventListener>
     implements EventBus<EventInfo, EventListener> {
 
-    private final Set<EventListener> listeners;
+    private final Map<String, EventListener> listeners;
     private ExecutorService eventExecutor;
 
     public NitriteEventBus() {
-        this.listeners = new CopyOnWriteArraySet<>();
+        this.listeners = new ConcurrentHashMap<>();
     }
 
     @Override
-    public void register(EventListener eventListener) {
+    public String register(EventListener eventListener) {
         if (eventListener != null) {
-            listeners.add(eventListener);
+            String subscriptionId = UUID.randomUUID().toString();
+            listeners.put(subscriptionId, eventListener);
+            return subscriptionId;
         }
+        throw new InvalidOperationException("event listener cannot be null");
     }
 
     @Override
-    public void deregister(EventListener eventListener) {
-        if (eventListener != null) {
-            listeners.remove(eventListener);
+    public void deregister(String subscription) {
+        if (!StringUtils.isNullOrEmpty(subscription)) {
+            listeners.remove(subscription);
         }
     }
 
@@ -68,6 +76,6 @@ public abstract class NitriteEventBus<EventInfo, EventListener>
     }
 
     protected Set<EventListener> getListeners() {
-        return listeners;
+        return new HashSet<>(listeners.values());
     }
 }

@@ -71,6 +71,7 @@ public class TextFilterTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void applyTestWhenDocStringContainsSearchString() {
         //Arrange
         TextFilter textFilter = new TextFilter("fieldString", "string");

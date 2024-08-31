@@ -100,8 +100,6 @@ public class NitriteStoreEventTest  {
         assertTrue(listener.committed);
         assertTrue(listener.closing);
         assertTrue(listener.closed);
-
-        db.getStore().unsubscribe(listener);
     }
 
     @Data
