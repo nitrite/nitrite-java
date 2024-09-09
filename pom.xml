@@ -69,7 +69,7 @@
         <junit.version>4.13.2</junit.version>
         <mockito.version>5.13.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
-        <log4j.version>2.23.1</log4j.version>
+        <log4j.version>2.24.0</log4j.version>
         <awaitility.version>4.2.2</awaitility.version>
         <joda-time.version>2.12.7</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
