@@ -201,8 +201,8 @@ public class DocumentTest {
 
         assertEquals(((List<?>) doc.get("objArray")).size(), 2);
         doc.remove("objArray:0:value");
-        assertEquals(((List<?>) doc.get("objArray")).size(), 2);
-        assertEquals(((Document) doc.get("objArray:0")).size(), 0);
+        assertEquals(((List<?>) doc.get("objArray")).size(), 1);
+        assertEquals(((Document) doc.get("objArray:0")).size(), 1);
     }
 
     @Test

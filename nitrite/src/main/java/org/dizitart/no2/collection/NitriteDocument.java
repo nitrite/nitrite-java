@@ -367,6 +367,12 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                     // if there are more splits, then this is an embedded document
                     // so remove the element at the next level
                     ((NitriteDocument) item).deepRemove(Arrays.copyOfRange(splits, 2, splits.length));
+                    if (((NitriteDocument) item).size() == 0) {
+                        // if the next level document is an empty one
+                        // remove the element at the current level
+                        list.remove(index);
+                        this.put(key, list);
+                    }
                 } else {
                     // if there are no more splits, then this is a primitive value
                     // so remove the element at the next level
