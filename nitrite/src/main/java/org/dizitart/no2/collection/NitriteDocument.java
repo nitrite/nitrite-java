@@ -308,6 +308,10 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             throw new ValidationException("Invalid key provided");
         }
         String key = splits[0];
+        if (isNullOrEmpty(key)) {
+            throw new ValidationException("Invalid key provided");
+        }
+
         if (splits.length == 1) {
             // if last key, simply put in the current document
             put(key, value);
