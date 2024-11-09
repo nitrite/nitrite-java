@@ -80,7 +80,7 @@
         <guava.version>33.3.1-jre</guava.version>
         <threetenbp.version>1.7.0</threetenbp.version>
 
-        <error-prone.version>2.33.0</error-prone.version>
+        <error-prone.version>2.35.1</error-prone.version>
         <jacoco.version>0.8.12</jacoco.version>
         <surefire.version>3.5.1</surefire.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
