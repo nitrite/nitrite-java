@@ -43,7 +43,7 @@ jobs:
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '11'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
