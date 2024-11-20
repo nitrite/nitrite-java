@@ -80,6 +80,31 @@ public class SpatialIndexTest extends BaseSpatialTest {
     }
 
     @Test
+    public void testWithinTriangleNotJustTestingBoundingBox() throws ParseException {
+
+        /*
+          (490, 530) * ┄┄┄┄┄.
+                     │\     ┆
+                     │ \  x<---(520, 520)
+                     │  \   ┆
+                     │   \  ┆
+                     │ x<-\---(500, 505)
+                     │     \┆
+          (490, 490) *──────* (530, 490)
+         */
+
+        WKTReader reader = new WKTReader();
+        Geometry search = reader.read("POLYGON((490 490, 530 490 , 490 530, 490 490))");
+
+        SpatialData outsidePoint = new SpatialData(7L, reader.read("POINT(520 520)"));
+        repository.insert(outsidePoint);
+
+        Cursor<SpatialData> cursor = repository.find(where("geometry").within(search));
+        assertEquals(cursor.size(), 1);
+        assertFalse(cursor.toList().contains(outsidePoint));
+    }
+
+    @Test
     public void testNearPoint() throws ParseException {
         WKTReader reader = new WKTReader();
         Point search = (Point) reader.read("POINT (490 490)");
