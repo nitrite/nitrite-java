@@ -522,18 +522,30 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+            <activation>
+                <!-- "true" to maintain existing behavior until CI jobs, etc. add "-P release" to the mvn args -->
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+
+    </profiles>
 
     <distributionManagement>
         <!-- Repository for snapshots -->
