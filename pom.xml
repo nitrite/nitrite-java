@@ -80,7 +80,9 @@
         <guava.version>33.3.1-jre</guava.version>
         <threetenbp.version>1.7.0</threetenbp.version>
 
-        <error-prone.version>2.36.0</error-prone.version>
+        <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
+        <error-prone.version>2.31.0</error-prone.version>
+
         <jacoco.version>0.8.12</jacoco.version>
         <surefire.version>3.5.2</surefire.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
