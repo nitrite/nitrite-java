@@ -39,7 +39,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
+        run: mvn -B -ff -ntp clean install
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '11'
@@ -70,7 +70,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
+        run: mvn -B -ff -ntp clean install
 
   build_windows:
     runs-on: windows-latest
@@ -93,7 +93,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install --% -Dgpg.skip=true
+        run: mvn -B -ff -ntp clean install --%
 
   verify-native:
     name: Verify GraalVM ${{ matrix.java }} compatibility on ${{ matrix.os }}
@@ -111,7 +111,7 @@ jobs:
           distribution: 'graalvm-community'
 
       - name: Install nitrite
-        run: mvn -B -ff -ntp clean install "-Dgpg.skip=true" -DskipTests
+        run: mvn -B -ff -ntp clean install -DskipTests
 
       - name: Run native tests
         working-directory: ./nitrite-native-tests

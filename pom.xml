@@ -528,7 +528,7 @@
 
     <profiles>
         <profile>
-            <id>release</id>
+            <id>deploy</id>
             <build>
                 <plugins>
                     <plugin>
@@ -541,10 +541,6 @@
                     </plugin>
                 </plugins>
             </build>
-            <activation>
-                <!-- "true" to maintain existing behavior until CI jobs, etc. add "-P release" to the mvn args -->
-                <activeByDefault>true</activeByDefault>
-            </activation>
         </profile>
 
     </profiles>
