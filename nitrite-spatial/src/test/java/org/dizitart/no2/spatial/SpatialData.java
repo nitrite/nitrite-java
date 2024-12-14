@@ -16,7 +16,9 @@
 
 package org.dizitart.no2.spatial;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.EntityConverter;
 import org.dizitart.no2.common.mapper.NitriteMapper;
@@ -30,6 +32,8 @@ import static org.dizitart.no2.spatial.SpatialIndexer.SPATIAL_INDEX;
  * @author Anindya Chatterjee
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Index(fields = "geometry", type = SPATIAL_INDEX)
 public class SpatialData {
     @Id

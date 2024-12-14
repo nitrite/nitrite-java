@@ -19,7 +19,6 @@ package org.dizitart.no2.spatial;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.util.GeometricShapeFactory;
 
 /**
  * @since 4.0
@@ -35,7 +34,7 @@ class NearFilter extends WithinFilter {
     }
 
     private static Geometry createCircle(Coordinate center, double radius) {
-        GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
+        GeometricShapeFactoryExt shapeFactory = new GeometricShapeFactoryExt();
         shapeFactory.setNumPoints(64);
         shapeFactory.setCentre(center);
         shapeFactory.setSize(radius * 2);
