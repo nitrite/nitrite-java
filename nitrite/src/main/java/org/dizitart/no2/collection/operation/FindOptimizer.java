@@ -160,8 +160,8 @@ class FindOptimizer {
                 // handle byId filter specially
                 if (equalsFilter.getField().equals(DOC_ID)) {
                     findPlan.setByIdFilter(equalsFilter);
+                    break;
                 }
-                break;
             }
         }
     }
