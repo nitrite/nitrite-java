@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package org.locationtech.jts.util;
+package org.dizitart.no2.spatial;
 
 import net.sf.geographiclib.Geodesic;
 import net.sf.geographiclib.GeodesicData;
@@ -23,6 +23,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.LinearRing;
 import org.locationtech.jts.geom.Polygon;
+import org.locationtech.jts.util.GeometricShapeFactory;
 
 /** Extends the JTS GeometricShapeFactory to add geodetic "small circle" geometry. */
 public class GeometricShapeFactoryExt extends GeometricShapeFactory {
