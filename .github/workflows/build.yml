@@ -93,7 +93,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install --%
+        run: mvn -B -ff -ntp clean install
 
   verify-native:
     name: Verify GraalVM ${{ matrix.java }} compatibility on ${{ matrix.os }}
