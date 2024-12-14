@@ -83,14 +83,13 @@ public class SpatialIndexTest extends BaseSpatialTest {
     public void testWithinTriangleNotJustTestingBoundingBox() throws ParseException {
 
         /*
-          (490, 530) * ┄┄┄┄┄.
-                     │\     ┆
-                     │ \  x<---(520, 520)
-                     │  \   ┆
-                     │   \  ┆
-                     │ x<-\---(500, 505)
-                     │     \┆
-          (490, 490) *──────* (530, 490)
+          (490, 530) * - - -
+                     │\    -
+                     │ \ x <── (520, 520); outside triangle but within triangle's bounding box
+                     │  \  -
+                     │ x <── (500, 505); inside triangle
+                     │    \-
+          (490, 490) *─────* (530, 490)
          */
 
         WKTReader reader = new WKTReader();
