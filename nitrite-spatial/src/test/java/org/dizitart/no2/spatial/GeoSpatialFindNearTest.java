@@ -169,12 +169,12 @@ public class GeoSpatialFindNearTest extends GeoSpatialTestBase {
         // All of these distances should be within 10 metres of what was estimated on Google Earth.
 
         GeodesicData s12 = WGS84.Inverse(centerPt.getX(), centerPt.getY(), pt2_950m_ESE.getX(), pt2_950m_ESE.getY());
-        assertEquals(s12.s12, 950.0, EPSILON_10M);
+        assertEquals(950.0, s12.s12, EPSILON_10M);
 
         GeodesicData s13 = WGS84.Inverse(centerPt.getX(), centerPt.getY(), pt3_930m_W.getX(), pt3_930m_W.getY());
-        assertEquals(s13.s12, 930.0, EPSILON_10M);
+        assertEquals(930.0, s13.s12, EPSILON_10M);
 
         GeodesicData s14 = WGS84.Inverse(centerPt.getX(), centerPt.getY(), pt4_2750m_WSW.getX(), pt4_2750m_WSW.getY());
-        assertEquals(s14.s12, 2750.0, EPSILON_10M);
+        assertEquals(2750.0, s14.s12, EPSILON_10M);
     }
 }

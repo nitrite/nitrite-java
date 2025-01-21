@@ -89,6 +89,7 @@ public class SpatialFluentFilter {
      * @return the new {@link Filter} instance
      */
     public Filter near(Point point, Double distance) {
+//        return new NearFilter(field, point, distance);
         return new NearFilter(field, point, distance);
     }
 }

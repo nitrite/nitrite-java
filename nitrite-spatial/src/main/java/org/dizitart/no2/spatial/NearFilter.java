@@ -16,21 +16,45 @@
 
 package org.dizitart.no2.spatial;
 
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
+import net.sf.geographiclib.Geodesic;
+import net.sf.geographiclib.GeodesicData;
+import net.sf.geographiclib.GeodesicMask;
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.filters.FlattenableFilter;
+import org.dizitart.no2.filters.FieldBasedFilter;
+import org.dizitart.no2.filters.Filter;
+import org.locationtech.jts.geom.*;
+
+import java.util.List;
+
+import static org.locationtech.jts.geom.PrecisionModel.FLOATING;
 
 /**
  * @since 4.0
  * @author Anindya Chatterjee
  */
-class NearFilter extends WithinFilter {
-    NearFilter(String field, Coordinate point, Double distance) {
-        super(field, createCircle(point, distance));
+class NearFilter extends IntersectsFilter implements FlattenableFilter {
+    private Point center;
+    private Double distance;
+
+    /** Uses full "double" floating-point precision, and <a href="https://epsg.io/4326">SRID 4326</a> */
+    private static GeometryFactory geometryFactory =
+        new GeometryFactory(new PrecisionModel(FLOATING), 4326);
+
+
+    NearFilter(String field, Coordinate center, Double distance) {
+        super(field, createCircle(center, distance));
+        this.center = geometryFactory.createPoint(center);
+        this.distance = distance;
     }
 
-    NearFilter(String field, Point point, Double distance) {
-        super(field, createCircle(point.getCoordinate(), distance));
+    NearFilter(String field, Point center, Double distance) {
+        super(field, createCircle(center.getCoordinate(), distance));
+        this.center = center;
+        this.distance = distance;
     }
 
     private static Geometry createCircle(Coordinate center, double radius) {
@@ -45,4 +69,48 @@ class NearFilter extends WithinFilter {
     public String toString() {
         return "(" + getField() + " nears " + getValue() + ")";
     }
+
+    @Override
+    public List<Filter> getFilters() {
+        return List.of(
+            new IntersectsFilter(getField(), getValue()),
+            new NonIndexNearFilter(getField(), getValue()));
+    }
+
+    public class NonIndexNearFilter extends FieldBasedFilter {
+
+        protected NonIndexNearFilter(String field, Geometry circle) {
+            super(field, circle);
+        }
+
+        @Override
+        public boolean apply(Pair<NitriteId, Document> element) {
+            Document document = element.getSecond();
+            Object fieldValue = document.get(getField());
+
+            if (fieldValue == null) {
+                return false;
+            } else if (fieldValue instanceof Geometry) {
+                if (fieldValue instanceof Point) {
+                    Point pointValue = (Point) fieldValue;
+                    Point centerPoint = NearFilter.this.center;
+                    GeodesicData inverseResult =
+                        Geodesic.WGS84.Inverse(
+                            centerPoint.getX(), centerPoint.getY(),
+                            pointValue.getX(), pointValue.getY(),
+                            GeodesicMask.DISTANCE);
+                    return inverseResult.s12 <= NearFilter.this.distance;
+            } else {
+                    // TODO this doesn't seem to work??
+                    Geometry elemGeo = (Geometry) fieldValue;
+                    Geometry filterGeo = (Geometry) getValue();
+                    return filterGeo.intersects(elemGeo);
+                }
+            } else {
+                throw new FilterException(getField() + " does not contain Geometry value");
+            }
+        }
+
+    }
+
 }

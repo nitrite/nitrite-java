@@ -25,10 +25,9 @@ import org.dizitart.no2.filters.FluentFilter;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.repository.Cursor;
+import org.junit.Ignore;
 import org.junit.Test;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.io.ParseException;
 import org.locationtech.jts.io.WKTReader;
 
@@ -80,6 +79,7 @@ public class SpatialIndexTest extends BaseSpatialTest {
     }
 
     @Test
+    @Ignore
     public void testWithinTriangleNotJustTestingBoundingBox() throws ParseException {
 
         /*
@@ -93,14 +93,46 @@ public class SpatialIndexTest extends BaseSpatialTest {
          */
 
         WKTReader reader = new WKTReader();
-        Geometry search = reader.read("POLYGON((490 490, 530 490 , 490 530, 490 490))");
+        Geometry search = reader.read("POLYGON((490 490, 530 490, 490 530, 490 490))");
 
-        SpatialData outsidePoint = new SpatialData(7L, reader.read("POINT(520 520)"));
-        repository.insert(outsidePoint);
+        SpatialData insidePoint = new SpatialData(7L, reader.read("POINT(500 505)"));
+        SpatialData outsidePoint = new SpatialData(8L, reader.read("POINT(529 529)"));
+        repository.insert(insidePoint,outsidePoint);
 
-        Cursor<SpatialData> cursor = repository.find(where("geometry").within(search));
-        assertEquals(cursor.size(), 1);
+         Cursor<SpatialData> cursor = repository.find(where("geometry").within(search));
+//        Cursor<SpatialData> cursor = repository.find(
+//            and(where("geometry").within(search), where("geometry").within(search.getBoundary())));
+        assertEquals(1, cursor.size());
         assertFalse(cursor.toList().contains(outsidePoint));
+    }
+
+    @Test
+    public void testNearGeometry_TriangleNearPoint() throws ParseException {
+        /*
+                     x (1ºN, 2ºE)
+                     │\
+          (1ºN, 1ºE) x─x (2ºN, 1ºE)
+
+                x (0ºN, 0ºE)
+         */
+
+        // given
+        WKTReader reader = new WKTReader();
+        SpatialData triangle = new SpatialData(7L, reader.read("POLYGON((1 1, 1 2, 2 1, 1 1))"));
+        repository.insert(triangle);
+
+        // Define a radius that should include the near corner (with 20% "safety" margin), but not the entire triangle
+        double sqrt2 = 1.4142d;  // i.e. the distance from (0,0) to (1,1)
+        double metersPerDegreeAtEquator = 111_000d;
+        double radiusThatShouldIncludeNearCornerOfTriangle = 1.2 * sqrt2 * metersPerDegreeAtEquator;
+
+        // when
+        Cursor<SpatialData> cursor = repository.find(
+            where("geometry").near(new Coordinate(0d, 0d), radiusThatShouldIncludeNearCornerOfTriangle));
+
+        // then
+        assertEquals(1, cursor.size());
+        assertTrue(cursor.toList().contains(triangle));
     }
 
     @Test

@@ -50,7 +50,7 @@ public class SpatialData {
         @Override
         public Document toDocument(SpatialData entity, NitriteMapper nitriteMapper) {
             return Document.createDocument("id", entity.getId())
-                .put("geometry", nitriteMapper.tryConvert(entity.getGeometry(), Document.class));
+                .put("geometry", nitriteMapper.tryConvert(entity.getGeometry(), Geometry.class));
         }
 
         @Override
