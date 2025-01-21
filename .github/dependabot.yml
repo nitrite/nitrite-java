@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: daily
     target-branch: main
+    ignore:
+      # Ignore minor version updates for dependencies with group ID "com.google.errorprone"
+      - dependency-name: "com.google.errorprone:*"
+        update-types: [ "version-update:semver-minor" ]
 
   - package-ecosystem: "github-actions"
     directory: "/"

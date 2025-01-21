@@ -81,7 +81,7 @@
         <threetenbp.version>1.7.0</threetenbp.version>
 
         <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
-        <error-prone.version>2.36.0</error-prone.version>
+        <error-prone.version>2.31.0</error-prone.version>
 
         <jacoco.version>0.8.12</jacoco.version>
         <surefire.version>3.5.2</surefire.version>
