@@ -73,10 +73,18 @@ class NearFilter extends IntersectsFilter implements FlattenableFilter {
     @Override
     public List<Filter> getFilters() {
         return List.of(
+            // [PR note] Use of "IntersectsFilter" was an arbitrary choice. Any of the misbehaving filters that
+            //   are really just doing a bounding box test within the spatial index would have worked.
+            //   The important thing for now was to not accidentally produce *recursive* flattening, and at the
+            //   time I wrote this line, I was still planning to edit WithinFilter to have it also implement
+            //   the FlattenableFilter interface
             new IntersectsFilter(getField(), getValue()),
             new NonIndexNearFilter(getField(), getValue()));
     }
 
+    // [PR note] This is probably the first time in years I've used a non-static inner class. I think we
+    //    should prefer to avoid the pattern in the final code, but it saved some boiler-plate here for the
+    //    proof-of-concept.
     public class NonIndexNearFilter extends FieldBasedFilter {
 
         protected NonIndexNearFilter(String field, Geometry circle) {
