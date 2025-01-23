@@ -5,14 +5,13 @@ import com.esotericsoftware.kryo.kryo5.Kryo;
 import com.esotericsoftware.kryo.kryo5.Serializer;
 import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
-import com.esotericsoftware.kryo.kryo5.serializers.JavaSerializer;
 import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.meta.Attributes;
-import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.SpatialKey;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.index.IndexDescriptor;
@@ -207,6 +206,19 @@ public class NitriteSerializers {
         }
     }
 
+    private static class DBValueSerializer extends Serializer<DBValue> {
+        @Override
+        public void write(Kryo kryo, Output output, DBValue object) {
+            kryo.writeObject(output, object.getValue());
+        }
+
+        @Override
+        public DBValue read(Kryo kryo, Input input, Class<? extends DBValue> type) {
+            Object value = kryo.readObject(input, Object.class);
+            return new DBValue((Comparable<?>) value);
+        }
+    }
+
     private static class SpatialKeySerializer extends Serializer<SpatialKey> {
         @Override
         public void write(Kryo kryo, Output output, SpatialKey spatialKey) {
@@ -231,7 +243,7 @@ public class NitriteSerializers {
         kryoObjectFormatter.registerSerializer(UserCredential.class, new UserCredentialSerializer());
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
         kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
-        kryoObjectFormatter.registerSerializer(DBValue.class, new JavaSerializer());
+        kryoObjectFormatter.registerSerializer(DBValue.class, new DBValueSerializer());
         kryoObjectFormatter.registerSerializer(BoundingBox.class, new BoundingBoxSerializer());
         kryoObjectFormatter.registerSerializer(SpatialKey.class, new SpatialKeySerializer());
     }
