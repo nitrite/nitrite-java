@@ -443,6 +443,31 @@ public class NitriteTest {
         db.close();
     }
 
+    @Test
+    public void testIssue1093() {
+        ObjectRepository<Receipt> repository = db.getRepository(Receipt.class);
+        repository.clear();
+
+        Receipt receipt1 = new Receipt();
+        receipt1.clientRef = "111-11111";
+        receipt1.status = Receipt.Status.PREPARING;
+
+        Receipt receipt2 = new Receipt();
+        receipt2.clientRef = "222-22222";
+        receipt2.status = Receipt.Status.PREPARING;
+
+        repository = db.getRepository(Receipt.class);
+        repository.update(receipt1, true);
+        repository.update(receipt2, true);
+
+        assertEquals(repository.find().size(), 2);
+        Receipt found1 = repository.getById("111-11111");
+        assertNotNull(found1);
+
+        Receipt found2 = repository.getById("222-22222");
+        assertNotNull(found2);
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
