@@ -459,6 +459,13 @@ public class NitriteTest {
         repository = db.getRepository(Receipt.class);
         repository.update(receipt1, true);
         repository.update(receipt2, true);
+
+        assertEquals(repository.find().size(), 2);
+        Receipt found1 = repository.getById("111-11111");
+        assertNotNull(found1);
+
+        Receipt found2 = repository.getById("222-22222");
+        assertNotNull(found2);
     }
 
     @Data
