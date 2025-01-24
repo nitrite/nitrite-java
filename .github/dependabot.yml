@@ -3,11 +3,33 @@ updates:
   - package-ecosystem: maven
     directory: "/"
     schedule:
-      interval: daily
+      interval: weekly
     target-branch: main
+    ignore:
+      # Ignore minor version updates for dependencies with group ID "com.google.errorprone"
+      - dependency-name: "com.google.errorprone:*"
+        update-types: [ "version-update:semver-minor" ]
+    groups:
+      security:
+        # Group security updates into a single pull request
+        applies-to: security-updates
+        patterns:
+          - "*"
+      production-dependencies:
+        # Group version updates for "production" dependencies into a single pull request
+        applies-to: version-updates
+        dependency-type: production
+        patterns:
+          - "*"
+      development-dependencies:
+        # Group version updates for "development" dependencies into a single pull request
+        applies-to: version-updates
+        dependency-type: development
+        patterns:
+          - "*"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     target-branch: main
