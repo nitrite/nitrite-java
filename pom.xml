@@ -52,45 +52,47 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.17.2</jackson.version>
+        <jackson.version>2.18.2</jackson.version>
         <slf4j.version>2.0.16</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.3.232</h2.version>
-        <rocksdb.version>9.5.2</rocksdb.version>
-        <kryo5.version>5.5.0</kryo5.version>
+        <rocksdb.version>9.10.0</rocksdb.version>
+        <kryo5.version>5.6.2</kryo5.version>
         <jts.version>1.20.0</jts.version>
-        <commons-codec.version>1.17.1</commons-codec.version>
-        <commons-io.version>2.16.1</commons-io.version>
-        <kotlin.version>2.0.20</kotlin.version>
-        <kotlinx-serialization.version>1.7.2</kotlinx-serialization.version>
+        <commons-codec.version>1.17.2</commons-codec.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <kotlin.version>2.1.0</kotlin.version>
+        <kotlinx-serialization.version>1.8.0</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.6.1</kotlinx-datetime.version>
-        <lombok.version>1.18.34</lombok.version>
+        <lombok.version>1.18.36</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.13.0</mockito.version>
+        <mockito.version>5.15.2</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
-        <log4j.version>2.23.1</log4j.version>
+        <log4j.version>2.24.3</log4j.version>
         <awaitility.version>4.2.2</awaitility.version>
-        <joda-time.version>2.12.7</joda-time.version>
+        <joda-time.version>2.13.0</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
         <snakeyaml.version>2.3</snakeyaml.version>
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>33.3.0-jre</guava.version>
-        <threetenbp.version>1.6.9</threetenbp.version>
+        <guava.version>33.4.0-jre</guava.version>
+        <threetenbp.version>1.7.0</threetenbp.version>
 
+        <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
         <error-prone.version>2.31.0</error-prone.version>
+
         <jacoco.version>0.8.12</jacoco.version>
-        <surefire.version>3.5.0</surefire.version>
+        <surefire.version>3.5.2</surefire.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-javadoc-plugin.version>3.10.0</maven-javadoc-plugin.version>
+        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <dokka.version>1.9.20</dokka.version>
+        <dokka.version>2.0.0</dokka.version>
         <animal-sniffer.version>1.24</animal-sniffer.version>
         <api-level-24.version>7.0_r2</api-level-24.version>
         <nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
-        <maven-gpg-plugin.version>3.2.5</maven-gpg-plugin.version>
+        <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -522,18 +524,26 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>deploy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
 
     <distributionManagement>
         <!-- Repository for snapshots -->
