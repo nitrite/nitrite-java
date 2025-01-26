@@ -11,6 +11,7 @@
 - Fix for failing tests on systems with non-ENGLISH locale #994
 - Fix for NPE in `DefaultTransactionalRepository` #1032
 - Fix for JPMS issue #1035
+- Fix for RocksDB adapter issue #1093
 
 ## Release 4.3.0 - Jul 1, 2024
 
