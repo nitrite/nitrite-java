@@ -70,7 +70,7 @@
         <mockito.version>5.15.2</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
         <log4j.version>2.24.3</log4j.version>
-        <awaitility.version>4.2.2</awaitility.version>
+        <awaitility.version>4.3.0</awaitility.version>
         <joda-time.version>2.13.1</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
         <snakeyaml.version>2.4</snakeyaml.version>
@@ -85,7 +85,7 @@
 
         <jacoco.version>0.8.12</jacoco.version>
         <surefire.version>3.5.2</surefire.version>
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <dokka.version>2.0.0</dokka.version>
