@@ -135,7 +135,7 @@ class ReadOperations {
             // and or single filter
             if (findPlan.getByIdFilter() != null) {
                 FieldBasedFilter byIdFilter = findPlan.getByIdFilter();
-                NitriteId nitriteId = NitriteId.createId((String) byIdFilter.getValue());
+                NitriteId nitriteId = NitriteId.createId((long) byIdFilter.getValue());
                 if (nitriteMap.containsKey(nitriteId)) {
                     Document document = nitriteMap.get(nitriteId);
                     rawStream = RecordStream.single(pair(nitriteId, document));
