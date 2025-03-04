@@ -34,7 +34,7 @@ public class NitriteSerializers {
 
         @Override
         protected void writeKeyInternal(Kryo kryo, Output output, NitriteId object) {
-            output.writeString(object.getIdValue());
+            output.writeString(Long.toString(object.getIdValue()));
         }
 
         @Override
