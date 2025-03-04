@@ -53,8 +53,8 @@ class FindOptimizer {
     }
 
     private FindPlan createFilterPlan(Collection<IndexDescriptor> indexDescriptors, Filter filter) {
-        if (filter instanceof AndFilter) {
-            List<Filter> filters = flattenAndFilter((AndFilter) filter);
+        if (filter instanceof FlattenableFilter) {
+            List<Filter> filters = flattenFilter((FlattenableFilter) filter);
             return createAndPlan(indexDescriptors, filters);
         } else if (filter instanceof OrFilter) {
             return createOrPlan(indexDescriptors, ((OrFilter) filter).getFilters());
@@ -64,12 +64,12 @@ class FindOptimizer {
         }
     }
 
-    private List<Filter> flattenAndFilter(AndFilter andFilter) {
+    private List<Filter> flattenFilter(FlattenableFilter flattenableFilter) {
         List<Filter> flattenedFilters = new ArrayList<>();
-        if (andFilter != null) {
-            for (Filter filter : andFilter.getFilters()) {
-                if (filter instanceof AndFilter) {
-                    List<Filter> filters = flattenAndFilter((AndFilter) filter);
+        if (flattenableFilter != null) {
+            for (Filter filter : flattenableFilter.getFilters()) {
+                if (filter instanceof FlattenableFilter) {
+                    List<Filter> filters = flattenFilter((FlattenableFilter) filter);
                     flattenedFilters.addAll(filters);
                 } else {
                     flattenedFilters.add(filter);
@@ -174,7 +174,7 @@ class FindOptimizer {
             if (filter instanceof IndexOnlyFilter) {
                 IndexOnlyFilter indexScanFilter = (IndexOnlyFilter) filter;
                 if (isCompatibleFilter(indexOnlyFilters, indexScanFilter)) {
-                    // if filter is compatible with already identified index only filter then add
+                    // if filter is compatible with already identified index-only filter then add
                     indexOnlyFilters.add(indexScanFilter);
                 } else {
                     throw new FilterException("A query can not have multiple index only filters");
