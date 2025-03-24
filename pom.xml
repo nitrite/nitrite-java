@@ -61,7 +61,7 @@
         <jts.version>1.20.0</jts.version>
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-io.version>2.18.0</commons-io.version>
-        <kotlin.version>2.1.10</kotlin.version>
+        <kotlin.version>2.1.20</kotlin.version>
         <kotlinx-serialization.version>1.8.0</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.6.2</kotlinx-datetime.version>
         <lombok.version>1.18.36</lombok.version>
