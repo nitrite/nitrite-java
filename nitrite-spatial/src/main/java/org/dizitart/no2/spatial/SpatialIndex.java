@@ -138,6 +138,19 @@ public class SpatialIndex implements NitriteIndex {
         Geometry geometry = spatialFilter.getValue();
         BoundingBox boundingBox = fromGeometry(geometry);
 
+        // NOTE: It looks like we are painted into something of a corner here! The index only knows the bounding boxes,
+        //    because that's how an R-Tree is meant to work. And that's fine until we have to deal with the reality
+        //    of the fact that these are actually arbitrary geometries and the users are crafting queries that are
+        //    meant to test whether they are within each other or not.
+        //
+        //    The query *cannot* be satisfied by simply checking bounding boxes and calling it a day.
+        //
+        //    The closest thing I see so far to a solution is for us to *split the filter into two steps* and either:
+        //    (a) plumb the Map<NitriteId,Document> from ReadOperations down to here, so that we can look at the actual
+        //    geometry values; or (b) treat this as an initial "fast filtering" step and then plan to have something
+        //    in ReadOperations (or even further up the call stack) take the next step and perform the more
+        //    computationally intensive geometry check.
+
         if (filter instanceof WithinFilter) {
             keys = indexMap.findContainedKeys(boundingBox);
         } else if (filter instanceof IntersectsFilter) {

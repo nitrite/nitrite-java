@@ -27,7 +27,7 @@ import org.dizitart.no2.exceptions.FilterException;
  * @since 1.0
  */
 @Getter
-public class AndFilter extends LogicalFilter {
+public class AndFilter extends LogicalFilter implements FlattenableFilter {
 
     AndFilter(Filter... filters) {
         super(filters);
