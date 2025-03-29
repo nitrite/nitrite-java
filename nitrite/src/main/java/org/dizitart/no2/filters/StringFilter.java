@@ -23,6 +23,8 @@ package org.dizitart.no2.filters;
  * @since 1.0
  */
 public abstract class StringFilter extends ComparableFilter {
+    private final StringFilterHelper helper = new StringFilterHelper();
+
     /**
      * Instantiates a new String filter.
      *
@@ -48,6 +50,6 @@ public abstract class StringFilter extends ComparableFilter {
      * @return the string representation, or empty if null
      */
     protected String toStringValue(Object obj) {
-        return obj != null ? obj.toString() : "";
+        return helper.toStringValue(obj);
     }
 }
