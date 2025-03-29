@@ -52,4 +52,6 @@ public abstract class StringFilter extends ComparableFilter {
     protected String toStringValue(Object obj) {
         return helper.toStringValue(obj);
     }
+
+    public abstract boolean applyOnString(String value);
 }

@@ -49,10 +49,25 @@ public class TextFilter extends StringFilter {
     }
 
     @Override
+    public boolean applyOnString(String value) {
+        String searchString = (String) this.getValue();
+        if (searchString.startsWith("*") || searchString.endsWith("*")) {
+            searchString = searchString.replace("*", "");
+        }
+        return value.toLowerCase().contains(searchString.toLowerCase());
+    }
+
+    /**
+     * Applies this filter to a document, checking if the specified field contains the search string.
+     *
+     * @param element the document pair to filter
+     * @return true if the field value contains the search string (case-insensitive), false otherwise
+     * @throws FilterException if the field is not a string
+     */
+    @Override
     public boolean apply(Pair<NitriteId, Document> element) {
         notNull(getField(), "field cannot be null");
         notNull(getStringValue(), "search term cannot be null");
-        String searchString = getStringValue();
         Object docValue = element.getSecond().get(getField());
 
         if (!(docValue instanceof String)) {
@@ -60,12 +75,7 @@ public class TextFilter extends StringFilter {
         }
 
         String docString = (String) docValue;
-
-        if (searchString.startsWith("*") || searchString.endsWith("*")) {
-            searchString = searchString.replace("*", "");
-        }
-
-        return docString.toLowerCase().contains(searchString.toLowerCase());
+        return applyOnString(docString);
     }
 
     @Override
@@ -194,4 +204,5 @@ public class TextFilter extends StringFilter {
     public List<?> applyOnIndex(IndexMap indexMap) {
         return null;
     }
+
 }
