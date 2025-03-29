@@ -41,4 +41,13 @@ public abstract class StringFilter extends ComparableFilter {
     public String getStringValue() {
         return (String) getValue();
     }
+
+    /**
+     * Converts an object to a string safely.
+     * @param obj the object to convert
+     * @return the string representation, or empty if null
+     */
+    protected String toStringValue(Object obj) {
+        return obj != null ? obj.toString() : "";
+    }
 }
