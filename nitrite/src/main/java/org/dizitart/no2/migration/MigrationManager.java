@@ -48,29 +48,37 @@ public class MigrationManager {
      */
     public void doMigrate() {
         if (isMigrationNeeded()) {
-            Integer existingVersion = storeMetadata.getSchemaVersion();
-            Integer incomingVersion = nitriteConfig.getSchemaVersion();
+            Integer currentVersion = storeMetadata.getSchemaVersion();
+            Integer targetVersion = nitriteConfig.getSchemaVersion();
 
-            Queue<Migration> migrationPath = findMigrationPath(existingVersion, incomingVersion);
-            if (migrationPath == null || migrationPath.isEmpty()) {
-                // close the database
-                try {
-                    database.close();
-                } catch (Exception e) {
-                    throw new NitriteIOException("Failed to close the database", e);
-                }
+            Queue<Migration> migrationPath = findMigrationPath(currentVersion, targetVersion);
+            boolean hasValidPath = migrationPath != null && !migrationPath.isEmpty();
 
-                throw new MigrationException("Schema version mismatch, no migration path found from version "
-                    + storeMetadata.getSchemaVersion() + " to " + nitriteConfig.getSchemaVersion());
+            if (!hasValidPath) {
+                closeDatabaseAndThrowException( currentVersion, targetVersion);
             }
+            executeMigrationPath(migrationPath);
+        }
+    }
 
-            int length = migrationPath.size();
-            for (int i = 0; i < length; i++) {
-                Migration migration = migrationPath.poll();
-                if (migration != null) {
-                    Queue<MigrationStep> migrationSteps = migration.steps();
-                    executeMigrationSteps(migrationSteps);
-                }
+    private void closeDatabaseAndThrowException(Integer currentVersion, Integer targetVersion) {
+        // close the database
+        try {
+            database.close();
+        } catch (Exception e) {
+            throw new NitriteIOException("Failed to close the database", e);
+        }
+        throw new MigrationException("Schema version mismatch, no migration path found from version "
+            + currentVersion + " to " + targetVersion);
+    }
+
+    private void executeMigrationPath(Queue<Migration> migrationPath) {
+        int pathLength = migrationPath.size();
+        for (int i = 0; i < pathLength; i++) {
+            Migration migration = migrationPath.poll();
+            if (migration != null) {
+                Queue<MigrationStep> migrationSteps = migration.steps();
+                executeMigrationSteps(migrationSteps);
             }
         }
     }
