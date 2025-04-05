@@ -16,10 +16,18 @@
 
 package org.dizitart.no2.spatial;
 
+import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.filters.FieldBasedFilter;
 import org.dizitart.no2.index.IndexMap;
 import org.locationtech.jts.geom.Geometry;
 
 import java.util.List;
+import java.util.regex.Matcher;
+
+import static org.dizitart.no2.common.util.Numbers.compare;
 
 /**
  * @since 4.0
@@ -40,4 +48,5 @@ class WithinFilter extends SpatialFilter {
     public String toString() {
         return "(" + getField() + " within " + getValue() + ")";
     }
+
 }
