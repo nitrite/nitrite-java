@@ -62,12 +62,12 @@
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-io.version>2.18.0</commons-io.version>
         <kotlin.version>2.1.20</kotlin.version>
-        <kotlinx-serialization.version>1.8.0</kotlinx-serialization.version>
+        <kotlinx-serialization.version>1.8.1</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.6.2</kotlinx-datetime.version>
         <lombok.version>1.18.38</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.16.1</mockito.version>
+        <mockito.version>5.17.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
         <log4j.version>2.24.3</log4j.version>
         <awaitility.version>4.3.0</awaitility.version>
@@ -83,7 +83,7 @@
         <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
         <error-prone.version>2.31.0</error-prone.version>
 
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <surefire.version>3.5.3</surefire.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
