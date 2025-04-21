@@ -56,18 +56,18 @@
         <slf4j.version>2.0.17</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.3.232</h2.version>
-        <rocksdb.version>9.10.0</rocksdb.version>
+        <rocksdb.version>10.0.1</rocksdb.version>
         <kryo5.version>5.6.2</kryo5.version>
         <jts.version>1.20.0</jts.version>
         <commons-codec.version>1.18.0</commons-codec.version>
-        <commons-io.version>2.18.0</commons-io.version>
+        <commons-io.version>2.19.0</commons-io.version>
         <kotlin.version>2.1.20</kotlin.version>
-        <kotlinx-serialization.version>1.8.0</kotlinx-serialization.version>
+        <kotlinx-serialization.version>1.8.1</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.6.2</kotlinx-datetime.version>
         <lombok.version>1.18.38</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.16.1</mockito.version>
+        <mockito.version>5.17.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
         <log4j.version>2.24.3</log4j.version>
         <awaitility.version>4.3.0</awaitility.version>
@@ -77,13 +77,13 @@
         <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.5</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>33.4.6-jre</guava.version>
+        <guava.version>33.4.8-jre</guava.version>
         <threetenbp.version>1.7.1</threetenbp.version>
 
         <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
         <error-prone.version>2.31.0</error-prone.version>
 
-        <jacoco.version>0.8.12</jacoco.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <surefire.version>3.5.3</surefire.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
