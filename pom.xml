@@ -56,12 +56,12 @@
         <slf4j.version>2.0.17</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.3.232</h2.version>
-        <rocksdb.version>10.0.1</rocksdb.version>
+        <rocksdb.version>10.2.1</rocksdb.version>
         <kryo5.version>5.6.2</kryo5.version>
         <jts.version>1.20.0</jts.version>
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-io.version>2.19.0</commons-io.version>
-        <kotlin.version>2.1.20</kotlin.version>
+        <kotlin.version>2.1.21</kotlin.version>
         <kotlinx-serialization.version>1.8.1</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.6.2</kotlinx-datetime.version>
         <lombok.version>1.18.38</lombok.version>
