@@ -52,24 +52,24 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.19.0</jackson.version>
+        <jackson.version>2.19.1</jackson.version>
         <slf4j.version>2.0.17</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.3.232</h2.version>
-        <rocksdb.version>10.0.1</rocksdb.version>
+        <rocksdb.version>10.2.1</rocksdb.version>
         <kryo5.version>5.6.2</kryo5.version>
         <jts.version>1.20.0</jts.version>
         <commons-codec.version>1.18.0</commons-codec.version>
         <commons-io.version>2.19.0</commons-io.version>
-        <kotlin.version>2.1.20</kotlin.version>
+        <kotlin.version>2.2.0</kotlin.version>
         <kotlinx-serialization.version>1.8.1</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.6.2</kotlinx-datetime.version>
         <lombok.version>1.18.38</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.17.0</mockito.version>
+        <mockito.version>5.18.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
-        <log4j.version>2.24.3</log4j.version>
+        <log4j.version>2.25.0</log4j.version>
         <awaitility.version>4.3.0</awaitility.version>
         <joda-time.version>2.14.0</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
