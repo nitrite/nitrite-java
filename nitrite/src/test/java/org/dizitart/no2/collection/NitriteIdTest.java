@@ -60,7 +60,7 @@ public class NitriteIdTest {
 
     @Test
     public void testCreateId() {
-        assertEquals("42", NitriteId.createId("42").getIdValue());
+        assertEquals(42L, NitriteId.createId("42").getIdValue());
         assertThrows(InvalidIdException.class, () -> NitriteId.createId(null));
         assertThrows(InvalidIdException.class, () -> NitriteId.createId("Value"));
     }

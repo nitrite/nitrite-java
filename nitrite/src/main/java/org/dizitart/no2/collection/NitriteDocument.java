@@ -103,7 +103,8 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     @Override
     public NitriteId getId() {
-        String id;
+        long id;
+        Object retrievedId = null;
         try {
             // if _id field is not populated already, create a new id
             // and set, otherwise return the existing id
@@ -111,12 +112,20 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                 id = newId().getIdValue();
                 super.put(DOC_ID, id);
             } else {
-                id = (String) get(DOC_ID);
+               retrievedId = get(DOC_ID);
+               id = (long) get(DOC_ID);
             }
 
             // create a nitrite id instance from the string value
             return createId(id);
         } catch (ClassCastException cce) {
+            if (retrievedId != null && retrievedId instanceof String) {
+                try {
+                    return createId((String) retrievedId);
+                } catch (InvalidIdException ide) {
+                    // fall through to throw InvalidIdException below
+                }
+            }
             throw new InvalidIdException("Invalid _id found " + get(DOC_ID));
         }
     }

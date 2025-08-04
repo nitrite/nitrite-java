@@ -47,18 +47,18 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
     private static final long serialVersionUID = 1477462375L;
     private static final SnowflakeIdGenerator generator = new SnowflakeIdGenerator();
 
-    /**
-     *  Gets the underlying value of the NitriteId.
-     *  <p>
-     *  The value is a string representation of a 64bit integer number.
-     */
-    private String idValue;
+    /** The underlying value of the NitriteId. */
+    private long idValue;
 
     private NitriteId() {
-        this.idValue = Long.toString(generator.getId());
+        this.idValue = generator.getId();
     }
 
     private NitriteId(String value) {
+        this.idValue = Long.parseLong(value);
+    }
+
+    private NitriteId(long value) {
         this.idValue = value;
     }
 
@@ -85,6 +85,17 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
     }
 
     /**
+     * Creates a {@link NitriteId} from a {@code long} value.
+     *
+     * @param value the value
+     * @return the {@link NitriteId}
+     */
+    public static NitriteId createId(long value) {
+        validId(value);
+        return new NitriteId(value);
+    }
+
+    /**
      * Validates a value to be used as {@link NitriteId}.
      * <p>
      * The value must be a string representation of a 64bit integer number.
@@ -106,26 +117,19 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
 
     @Override
     public int compareTo(NitriteId other) {
-        if (other.idValue == null) {
-            throw new InvalidIdException("Cannot compare with null id");
-        }
-
-        return Long.compare(Long.parseLong(idValue), Long.parseLong(other.idValue));
+        return Long.compare(idValue, other.idValue);
     }
 
     @Override
     public String toString() {
-        if (idValue != null) {
-            return ID_PREFIX + idValue + ID_SUFFIX;
-        }
-        return "";
+        return ID_PREFIX + idValue + ID_SUFFIX;
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeUTF(idValue);
+        stream.writeUTF(Long.toString(idValue));
     }
 
     private void readObject(ObjectInputStream stream) throws IOException {
-        idValue = stream.readUTF();
+        idValue = Long.parseLong(stream.readUTF());
     }
 }

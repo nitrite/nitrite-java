@@ -56,8 +56,8 @@ public class NitriteDocumentTest {
     @Test
     public void testGetId() {
         NitriteDocument nitriteDocument = new NitriteDocument();
-        nitriteDocument.putIfAbsent("_id", "42");
-        assertEquals("42", nitriteDocument.getId().getIdValue());
+        nitriteDocument.putIfAbsent("_id", 42L);
+        assertEquals(42L, nitriteDocument.getId().getIdValue());
     }
 
     @Test
