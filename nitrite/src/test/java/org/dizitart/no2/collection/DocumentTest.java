@@ -201,19 +201,22 @@ public class DocumentTest {
 
         assertEquals(((List<?>) doc.get("objArray")).size(), 2);
         doc.remove("objArray:0:value");
-        assertEquals(((List<?>) doc.get("objArray")).size(), 2);
-        assertEquals(((Document) doc.get("objArray:0")).size(), 0);
+        assertEquals(((List<?>) doc.get("objArray")).size(), 1);
+        assertEquals(((Document) doc.get("objArray:0")).size(), 1);
     }
 
     @Test
     public void getFields() {
         Set<String> fields = doc.getFields();
-        assertEquals(fields.size(), 5);
+        assertEquals(fields.size(), 8);
         assertTrue(fields.contains("location.address.line1"));
         assertTrue(fields.contains("location.address.line2"));
+        assertTrue(fields.contains("location.address.house"));
         assertTrue(fields.contains("location.city"));
         assertTrue(fields.contains("location.state"));
         assertTrue(fields.contains("score"));
+        assertTrue(fields.contains("objArray"));
+        assertTrue(fields.contains("category"));
     }
 
     @Test

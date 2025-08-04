@@ -197,13 +197,13 @@ class DefaultObjectRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void subscribe(CollectionEventListener listener) {
-        collection.subscribe(listener);
+    public String subscribe(CollectionEventListener listener) {
+        return collection.subscribe(listener);
     }
 
     @Override
-    public void unsubscribe(CollectionEventListener listener) {
-        collection.unsubscribe(listener);
+    public void unsubscribe(String subscription) {
+        collection.unsubscribe(subscription);
     }
 
     @Override

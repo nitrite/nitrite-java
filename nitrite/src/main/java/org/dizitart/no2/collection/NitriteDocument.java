@@ -103,7 +103,8 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
     @Override
     public NitriteId getId() {
-        String id;
+        long id;
+        Object retrievedId = null;
         try {
             // if _id field is not populated already, create a new id
             // and set, otherwise return the existing id
@@ -111,12 +112,20 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                 id = newId().getIdValue();
                 super.put(DOC_ID, id);
             } else {
-                id = (String) get(DOC_ID);
+               retrievedId = get(DOC_ID);
+               id = (long) get(DOC_ID);
             }
 
             // create a nitrite id instance from the string value
             return createId(id);
         } catch (ClassCastException cce) {
+            if (retrievedId != null && retrievedId instanceof String) {
+                try {
+                    return createId((String) retrievedId);
+                } catch (InvalidIdException ide) {
+                    // fall through to throw InvalidIdException below
+                }
+            }
             throw new InvalidIdException("Invalid _id found " + get(DOC_ID));
         }
     }
@@ -266,6 +275,8 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             // ignore the reserved fields
             if (reservedFields.contains(entry.getFirst())) continue;
 
+            if (isNullOrEmpty(entry.getFirst())) continue;
+
             Object value = entry.getSecond();
             if (value instanceof NitriteDocument) {
                 // if the value is a document, traverse its fields recursively,
@@ -278,7 +289,7 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                     fields.addAll(((NitriteDocument) value).getFieldsInternal(prefix
                         + NitriteConfig.getFieldSeparator() + entry.getFirst()));
                 }
-            } else if (!(value instanceof Iterable)) {
+            } else {
                 // if there is no more embedded document, add the field to the list
                 // and if this is an embedded document then prefix its name by parent fields,
                 // separated by field separator
@@ -306,6 +317,10 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             throw new ValidationException("Invalid key provided");
         }
         String key = splits[0];
+        if (isNullOrEmpty(key)) {
+            throw new ValidationException("Invalid key provided");
+        }
+
         if (splits.length == 1) {
             // if last key, simply put in the current document
             put(key, value);
@@ -336,6 +351,10 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             throw new ValidationException("Invalid key provided");
         }
         String key = splits[0];
+        if (isNullOrEmpty(key)) {
+            throw new ValidationException("Invalid key provided");
+        }
+
         if (splits.length == 1) {
             // if last key, simply remove the current document
             remove(key);
@@ -365,6 +384,12 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                     // if there are more splits, then this is an embedded document
                     // so remove the element at the next level
                     ((NitriteDocument) item).deepRemove(Arrays.copyOfRange(splits, 2, splits.length));
+                    if (((NitriteDocument) item).size() == 0) {
+                        // if the next level document is an empty one
+                        // remove the element at the current level
+                        list.remove(index);
+                        this.put(key, list);
+                    }
                 } else {
                     // if there are no more splits, then this is a primitive value
                     // so remove the element at the next level
@@ -405,8 +430,13 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
             return null;
         }
 
+        String key = path[0];
+        if (isNullOrEmpty(key)) {
+            throw new ValidationException("Invalid key provided");
+        }
+
         // get current level value and scan to next level using remaining keys
-        return recursiveGet(get(path[0]), Arrays.copyOfRange(path, 1, path.length));
+        return recursiveGet(get(key), Arrays.copyOfRange(path, 1, path.length));
     }
 
     @SuppressWarnings("unchecked")
@@ -421,7 +451,12 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
         if (object instanceof Document) {
             // if the current level value is document, scan to the next level with remaining keys
-            return recursiveGet(((Document) object).get(remainingPath[0]),
+            String key = remainingPath[0];
+            if (isNullOrEmpty(key)) {
+                throw new ValidationException("Invalid key provided");
+            }
+
+            return recursiveGet(((Document) object).get(key),
                 Arrays.copyOfRange(remainingPath, 1, remainingPath.length));
         }
 
@@ -430,6 +465,9 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
 
             // get the first key
             String accessor = remainingPath[0];
+            if (isNullOrEmpty(accessor)) {
+                throw new ValidationException("Invalid key provided");
+            }
 
             // convert current value to object array
             Object[] array = convertToObjectArray(object);

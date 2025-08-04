@@ -1,0 +1,11 @@
+[
+    {
+        "name": "java.lang.Boolean"
+    },
+    {
+        "name": "java.math.BigDecimal"
+    },
+    {
+        "name": "java.math.BigInteger"
+    }
+]

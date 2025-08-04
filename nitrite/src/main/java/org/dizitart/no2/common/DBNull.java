@@ -1,11 +1,14 @@
 package org.dizitart.no2.common;
 
+import lombok.Getter;
+
 /**
  * @author Anindya Chatterjee
  * @since 1.0
  */
 public class DBNull extends DBValue {
     private static final long serialVersionUID = 1598819770L;
+    @Getter
     private static final DBNull instance = new DBNull();
 
     private DBNull() {
@@ -20,10 +23,6 @@ public class DBNull extends DBValue {
 
         // null value always comes first
         return -1;
-    }
-
-    public static DBNull getInstance() {
-        return instance;
     }
 
     @Override

@@ -9,10 +9,10 @@ import com.esotericsoftware.kryo.kryo5.serializers.JavaSerializer;
 import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
-import org.dizitart.no2.common.meta.Attributes;
-import org.dizitart.no2.common.Fields;
-import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.meta.Attributes;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.SpatialKey;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.index.IndexDescriptor;
@@ -34,7 +34,7 @@ public class NitriteSerializers {
 
         @Override
         protected void writeKeyInternal(Kryo kryo, Output output, NitriteId object) {
-            output.writeString(object.getIdValue());
+            output.writeString(Long.toString(object.getIdValue()));
         }
 
         @Override

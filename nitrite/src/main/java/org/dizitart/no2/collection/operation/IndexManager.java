@@ -113,6 +113,7 @@ public class IndexManager implements AutoCloseable {
                     String indexMapName = indexMeta.getIndexMap();
                     NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
                     indexMap.clear();
+                    indexMap.close();
                 }
             }
         }

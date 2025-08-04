@@ -25,7 +25,7 @@ import static org.junit.Assert.*;
 public class FilterTest {
     @Test
     public void testById() {
-        assertTrue(((EqualsFilter) Filter.byId(NitriteId.newId())).getValue() instanceof String);
+        assertTrue(((EqualsFilter) Filter.byId(NitriteId.newId())).getValue() instanceof Long);
         assertFalse(((EqualsFilter) Filter.byId(NitriteId.newId())).getObjectFilter());
         assertEquals("_id", ((EqualsFilter) Filter.byId(NitriteId.newId())).getField());
     }

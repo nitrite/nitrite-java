@@ -31,7 +31,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.Callable;
@@ -59,6 +58,7 @@ public class EventTest {
     private Nitrite db;
     private ObjectRepository<Employee> employeeRepository;
     private SampleListenerCollection listener;
+    private String subscription;
 
 	@Rule
     public Retry retry = new Retry(3);
@@ -93,7 +93,7 @@ public class EventTest {
 
         employeeRepository = db.getRepository(Employee.class);
         listener = new SampleListenerCollection();
-        employeeRepository.subscribe(listener);
+        subscription = employeeRepository.subscribe(listener);
     }
 
     @Test
@@ -170,7 +170,7 @@ public class EventTest {
 
     @Test
     public void testDeregister() {
-        employeeRepository.unsubscribe(listener);
+        employeeRepository.unsubscribe(subscription);
         Employee e = new Employee();
         e.setEmpId(1L);
         e.setAddress("abcd");
@@ -212,12 +212,12 @@ public class EventTest {
     }
 
     @After
-    public void clear() throws IOException {
+    public void clear() {
         if (employeeRepository != null) {
             if (!employeeRepository.isDropped()
                     && employeeRepository.isOpen()) {
                 employeeRepository.remove(ALL);
-                employeeRepository.unsubscribe(listener);
+                employeeRepository.unsubscribe(subscription);
                 employeeRepository.close();
             }
         }

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.dizitart.no2.common.mapper.JacksonMapper
+import org.dizitart.no2.mapper.jackson.JacksonMapper
 import org.dizitart.no2.spatial.jackson.GeometryModule
 
 /**

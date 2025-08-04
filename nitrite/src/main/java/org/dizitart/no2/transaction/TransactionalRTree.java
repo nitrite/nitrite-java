@@ -26,16 +26,16 @@ class TransactionalRTree<Key extends BoundingBox, Value> implements NitriteRTree
 
     @Override
     public void add(Key key, NitriteId nitriteId) {
-        if (nitriteId != null && nitriteId.getIdValue() != null) {
-            SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+        if (nitriteId != null) {
+            SpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
             map.put(spatialKey, key);
         }
     }
 
     @Override
     public void remove(Key key, NitriteId nitriteId) {
-        if (nitriteId != null && nitriteId.getIdValue() != null) {
-            SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+        if (nitriteId != null) {
+            SpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
             map.remove(spatialKey);
         }
     }

@@ -21,9 +21,9 @@ package org.dizitart.no2.common.event;
  * @since 1.0
  */
 public interface EventBus<EventInfo, EventListener> extends AutoCloseable {
-    void register(EventListener listener);
+    String register(EventListener listener);
 
-    void deregister(EventListener listener);
+    void deregister(String subscription);
 
     void post(EventInfo eventInfo);
 

@@ -222,13 +222,13 @@ public class RepositoryFactoryTest {
         }
 
         @Override
-        public void subscribe(CollectionEventListener listener) {
-
+        public String subscribe(CollectionEventListener listener) {
+            return null;
         }
 
         @Override
-        public void unsubscribe(CollectionEventListener listener) {
-
+        public void unsubscribe(String subscription) {
+            // do nothing
         }
 
         @Override

@@ -51,7 +51,7 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: Deploy Release
-        run: mvn -B -ff -ntp deploy -DskipTests -Dgpg.passphrase="$PGP_KEY_PASSWORD"
+        run: mvn -P deploy -B -ff -ntp deploy -DskipTests -Dgpg.passphrase="$PGP_KEY_PASSWORD"
         shell: bash
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}

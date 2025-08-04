@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite-java</artifactId>
-        <version>4.3.0</version>
+        <version>4.3.1</version>
     </parent>
 
     <artifactId>nitrite-jackson-mapper</artifactId>
@@ -133,16 +133,8 @@
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

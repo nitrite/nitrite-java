@@ -46,8 +46,8 @@ public class RocksDBRTree<Key extends BoundingBox, Value> implements NitriteRTre
     @Override
     public void add(Key key, NitriteId nitriteId) {
         checkOpened();
-        if (nitriteId != null && nitriteId.getIdValue() != null) {
-            SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+        if (nitriteId != null) {
+            SpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
             backingMap.put(spatialKey, key);
         }
     }
@@ -55,8 +55,8 @@ public class RocksDBRTree<Key extends BoundingBox, Value> implements NitriteRTre
     @Override
     public void remove(Key key, NitriteId nitriteId) {
         checkOpened();
-        if (nitriteId != null && nitriteId.getIdValue() != null) {
-            SpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+        if (nitriteId != null) {
+            SpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
             backingMap.remove(spatialKey);
         }
     }

@@ -16,10 +16,8 @@
 
 package org.dizitart.no2.store;
 
-import org.dizitart.no2.collection.NitriteCollection;
-import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.common.module.NitritePlugin;
-import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.events.StoreEventListener;
 
 import java.util.Map;
@@ -165,14 +163,14 @@ public interface NitriteStore<Config extends StoreConfig> extends NitritePlugin 
      *
      * @param listener the listener to subscribe
      */
-    void subscribe(StoreEventListener listener);
+    String subscribe(StoreEventListener listener);
 
     /**
      * Unsubscribes a {@link StoreEventListener} from this store.
      *
-     * @param listener the listener to unsubscribe
+     * @param subscription the subscription to unsubscribe
      */
-    void unsubscribe(StoreEventListener listener);
+    void unsubscribe(String subscription);
 
     /**
      * Gets the underlying storage engine version.

@@ -8,7 +8,7 @@ import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.WriteResult;
-import org.dizitart.no2.common.mapper.JacksonMapperModule;
+import org.dizitart.no2.mapper.jackson.JacksonMapperModule;
 import org.dizitart.no2.index.IndexOptions;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.mvstore.MVStoreModule;

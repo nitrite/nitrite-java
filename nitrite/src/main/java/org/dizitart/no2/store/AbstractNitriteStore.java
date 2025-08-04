@@ -84,13 +84,13 @@ public abstract class AbstractNitriteStore<Config extends StoreConfig>
     }
 
     @Override
-    public void subscribe(StoreEventListener listener) {
-        eventBus.register(listener);
+    public String subscribe(StoreEventListener listener) {
+        return eventBus.register(listener);
     }
 
     @Override
-    public void unsubscribe(StoreEventListener listener) {
-        eventBus.deregister(listener);
+    public void unsubscribe(String subscription) {
+        eventBus.deregister(subscription);
     }
 
     @Override

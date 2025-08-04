@@ -245,7 +245,7 @@ public class DefaultTransactionalRepositoryTest {
     public void testSubscribe() {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
-        doNothing().when(defaultTransactionalRepository).subscribe(any());
+        when(defaultTransactionalRepository.subscribe(any())).thenReturn("Subscription");
         defaultTransactionalRepository.subscribe(mock(CollectionEventListener.class));
         verify(defaultTransactionalRepository).subscribe(any());
     }
@@ -255,7 +255,7 @@ public class DefaultTransactionalRepositoryTest {
         DefaultTransactionalRepository<Object> defaultTransactionalRepository = (DefaultTransactionalRepository<Object>) mock(
             DefaultTransactionalRepository.class);
         doNothing().when(defaultTransactionalRepository).unsubscribe(any());
-        defaultTransactionalRepository.unsubscribe(mock(CollectionEventListener.class));
+        defaultTransactionalRepository.unsubscribe("Subscription");
         verify(defaultTransactionalRepository).unsubscribe(any());
     }
 

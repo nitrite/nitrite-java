@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: ['11', '17']
+        java: [ '11', '17' ]
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
@@ -39,11 +39,11 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
+        run: mvn -B -ff -ntp clean install
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '11'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
@@ -70,7 +70,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install -Dgpg.skip=true
+        run: mvn -B -ff -ntp clean install
 
   build_windows:
     runs-on: windows-latest
@@ -93,4 +93,26 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn -B -ff -ntp clean install --% -Dgpg.skip=true
+        run: mvn -B -ff -ntp clean install
+
+  verify-native:
+    name: Verify GraalVM ${{ matrix.java }} compatibility on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'windows-latest', 'macos-latest' ]
+        java: [ '17', '21' ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: graalvm/setup-graalvm@v1.3.5
+        with:
+          java-version: ${{ matrix.java }}
+          distribution: 'graalvm-community'
+
+      - name: Install nitrite
+        run: mvn -B -ff -ntp clean install -DskipTests
+
+      - name: Run native tests
+        working-directory: ./nitrite-native-tests
+        run: mvn -B -ff -ntp -PnativeTest verify

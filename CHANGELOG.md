@@ -1,4 +1,19 @@
-## Release 4.3.0
+## Release 4.3.1
+
+### New Changes
+
+- GraalVM support for nitrite-mvstore-adapter #995
+- Event subscription api changes
+
+### Issue Fixes
+
+- Fix for `Document.getFields()` not returning iterable fields
+- Fix for failing tests on systems with non-ENGLISH locale #994
+- Fix for NPE in `DefaultTransactionalRepository` #1032
+- Fix for JPMS issue #1035
+- Fix for RocksDB adapter issue #1093
+
+## Release 4.3.0 - Jul 1, 2024
 
 ### New Changes
 

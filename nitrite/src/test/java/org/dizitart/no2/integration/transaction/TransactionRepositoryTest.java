@@ -20,19 +20,26 @@ package org.dizitart.no2.integration.transaction;
 import com.github.javafaker.Faker;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.collection.Document;
+import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.exceptions.TransactionException;
 import org.dizitart.no2.index.IndexType;
 import org.dizitart.no2.integration.repository.BaseObjectRepositoryTest;
-import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.integration.repository.data.SubEmployee;
+import org.dizitart.no2.integration.repository.decorator.Manufacturer;
+import org.dizitart.no2.integration.repository.decorator.ManufacturerDecorator;
+import org.dizitart.no2.repository.Cursor;
+import org.dizitart.no2.repository.ObjectRepository;
 import org.dizitart.no2.transaction.Session;
 import org.dizitart.no2.transaction.Transaction;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -823,5 +830,29 @@ public class TransactionRepositoryTest extends BaseObjectRepositoryTest {
             txRepo.insert(new TxData(2L, "Jane"));
             fail();
         }
+    }
+
+    @Test
+    public void testWithEntityDecorator() {
+        ObjectRepository<Manufacturer> repo = db.getRepository(new ManufacturerDecorator());
+        try (Session session = db.createSession()) {
+            try (Transaction transaction = session.beginTransaction()) {
+                ObjectRepository<Manufacturer> txRepo = transaction.getRepository(new ManufacturerDecorator());
+                Manufacturer manufacturer = new Manufacturer();
+                manufacturer.setName("John");
+                manufacturer.setAddress("1234");
+                manufacturer.setUniqueId(1);
+                txRepo.insert(manufacturer);
+
+                Cursor<Manufacturer> cursor = txRepo.find(where("name").eq("John"), FindOptions.limitBy(1));
+                for (Manufacturer item : cursor) {
+                    assertEquals(item.getName(), "John");
+                }
+
+                transaction.commit();
+            }
+        }
+        Cursor<Manufacturer> cursor = repo.find(where("name").eq("John"), FindOptions.limitBy(1));
+        assertEquals(cursor.size(), 1);
     }
 }

@@ -205,27 +205,7 @@ class DefaultTransactionalCollection implements NitriteCollection {
             writeLock.unlock();
         }
 
-        List<Document> documentList = new ArrayList<>();
-
-        JournalEntry journalEntry = new JournalEntry();
-        journalEntry.setChangeType(ChangeType.Remove);
-        journalEntry.setCommit(() -> {
-            DocumentCursor cursor = primary.find(filter);
-
-            if (!cursor.isEmpty()) {
-                if (justOne) {
-                    documentList.add(cursor.firstOrNull());
-                } else {
-                    documentList.addAll(cursor.toList());
-                }
-            }
-            primary.remove(filter, justOne);
-        });
-        journalEntry.setRollback(() -> {
-            for (Document document : documentList) {
-                primary.insert(document);
-            }
-        });
+        JournalEntry journalEntry = getJournalEntry(filter, justOne);
         transactionContext.getJournal().add(journalEntry);
 
         return result;
@@ -411,25 +391,25 @@ class DefaultTransactionalCollection implements NitriteCollection {
     }
 
     @Override
-    public void subscribe(CollectionEventListener listener) {
+    public String subscribe(CollectionEventListener listener) {
         notNull(listener, "listener cannot be null");
         try {
             writeLock.lock();
             checkOpened();
-            eventBus.register(listener);
+            return eventBus.register(listener);
         } finally {
             writeLock.unlock();
         }
     }
 
     @Override
-    public void unsubscribe(CollectionEventListener listener) {
-        notNull(listener, "listener cannot be null");
+    public void unsubscribe(String subscription) {
+        notNull(subscription, "subscription cannot be null");
         try {
             writeLock.lock();
             checkOpened();
             if (eventBus != null) {
-                eventBus.deregister(listener);
+                eventBus.deregister(subscription);
             }
         } finally {
             writeLock.unlock();
@@ -492,6 +472,31 @@ class DefaultTransactionalCollection implements NitriteCollection {
         NitriteConfig nitriteConfig = transactionContext.getConfig();
         this.nitriteStore = nitriteConfig.getNitriteStore();
         this.collectionOperations = new CollectionOperations(collectionName, nitriteMap, nitriteConfig, eventBus);
+    }
+
+    private JournalEntry getJournalEntry(Filter filter, boolean justOne) {
+        List<Document> documentList = new ArrayList<>();
+
+        JournalEntry journalEntry = new JournalEntry();
+        journalEntry.setChangeType(ChangeType.Remove);
+        journalEntry.setCommit(() -> {
+            DocumentCursor cursor = primary.find(filter);
+
+            if (!cursor.isEmpty()) {
+                if (justOne) {
+                    documentList.add(cursor.firstOrNull());
+                } else {
+                    documentList.addAll(cursor.toList());
+                }
+            }
+            primary.remove(filter, justOne);
+        });
+        journalEntry.setRollback(() -> {
+            for (Document document : documentList) {
+                primary.insert(document);
+            }
+        });
+        return journalEntry;
     }
 
     private static class CollectionEventBus extends NitriteEventBus<CollectionEventInfo<?>, CollectionEventListener> {

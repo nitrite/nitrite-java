@@ -28,13 +28,14 @@ public interface EventAware {
      * Subscribes a listener to the collection event.
      *
      * @param listener the listener to subscribe
+     * @return the subscription id
      */
-    void subscribe(CollectionEventListener listener);
+    String subscribe(CollectionEventListener listener);
 
     /**
      * Unsubscribes a listener from the collection event.
      *
-     * @param listener the listener to unsubscribe
+     * @param subscription the subscription id to unsubscribe
      */
-    void unsubscribe(CollectionEventListener listener);
+    void unsubscribe(String subscription);
 }

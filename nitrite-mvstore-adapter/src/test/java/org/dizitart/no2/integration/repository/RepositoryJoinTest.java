@@ -232,6 +232,7 @@ public class RepositoryJoinTest extends BaseObjectRepositoryTest {
             }
 
             @Override
+            @SuppressWarnings("unchecked")
             public PersonDetails fromDocument(Document document, NitriteMapper nitriteMapper) {
                 PersonDetails entity = new PersonDetails();
 

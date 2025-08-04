@@ -43,8 +43,8 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
 
     @Override
     public void add(Key key, NitriteId nitriteId) {
-        if (nitriteId != null && nitriteId.getIdValue() != null) {
-            MVSpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+        if (nitriteId != null) {
+            MVSpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
             MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
                 mvMap.add(spatialKey, key);
@@ -56,8 +56,8 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
 
     @Override
     public void remove(Key key, NitriteId nitriteId) {
-        if (nitriteId != null && nitriteId.getIdValue() != null) {
-            MVSpatialKey spatialKey = getKey(key, Long.parseLong(nitriteId.getIdValue()));
+        if (nitriteId != null) {
+            MVSpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
             MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
                 mvMap.remove(spatialKey);

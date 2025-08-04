@@ -153,7 +153,7 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
 
     @Override
     public Cursor<T> find(Filter filter, FindOptions findOptions) {
-        return operations.find(filter, findOptions, type);
+        return operations.find(filter, findOptions, getType());
     }
 
     @Override
@@ -197,13 +197,13 @@ class DefaultTransactionalRepository<T> implements ObjectRepository<T> {
     }
 
     @Override
-    public void subscribe(CollectionEventListener listener) {
-        backingCollection.subscribe(listener);
+    public String subscribe(CollectionEventListener listener) {
+        return backingCollection.subscribe(listener);
     }
 
     @Override
-    public void unsubscribe(CollectionEventListener listener) {
-        backingCollection.unsubscribe(listener);
+    public void unsubscribe(String subscription) {
+        backingCollection.unsubscribe(subscription);
     }
 
     @Override

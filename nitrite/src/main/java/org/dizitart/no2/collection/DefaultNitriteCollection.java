@@ -382,25 +382,25 @@ class DefaultNitriteCollection implements NitriteCollection {
         }
     }
 
-    public void subscribe(CollectionEventListener listener) {
+    public String subscribe(CollectionEventListener listener) {
         notNull(listener, "listener cannot be null");
         try {
             writeLock.lock();
             checkOpened();
-            eventBus.register(listener);
+            return eventBus.register(listener);
         } finally {
             writeLock.unlock();
         }
     }
 
-    public void unsubscribe(CollectionEventListener listener) {
-        notNull(listener, "listener cannot be null");
+    public void unsubscribe(String subscription) {
+        notNull(subscription, "subscription cannot be null");
         try {
             writeLock.lock();
             checkOpened();
 
             if (eventBus != null) {
-                eventBus.deregister(listener);
+                eventBus.deregister(subscription);
             }
         } finally {
             writeLock.unlock();
