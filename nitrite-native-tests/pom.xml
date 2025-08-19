@@ -21,8 +21,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <assertj.version>3.27.3</assertj.version>
-        <junit.version>5.12.2</junit.version>
-        <native-build-tools-plugin.version>0.10.6</native-build-tools-plugin.version>
+        <junit.version>5.13.4</junit.version>
+        <native-build-tools-plugin.version>0.11.0</native-build-tools-plugin.version>
     </properties>
 
     <dependencyManagement>
