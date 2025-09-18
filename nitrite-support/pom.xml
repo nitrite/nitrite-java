@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite-java</artifactId>
-        <version>4.3.1-SNAPSHOT</version>
+        <version>4.3.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>nitrite-support</artifactId>
@@ -141,11 +141,15 @@
 
     <repositories>
         <repository>
-            <id>sonatype-nexus-snapshots</id>
-            <name>Sonatype Nexus Snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases><enabled>false</enabled></releases>
-            <snapshots><enabled>true</enabled></snapshots>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 </project>

@@ -34,7 +34,7 @@ jobs:
           java-package: jdk
           architecture: x64
           cache: 'maven'
-          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          server-id: central # Value of the distributionManagement/repository/id field of the pom.xml
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
 
@@ -50,10 +50,16 @@ jobs:
         env:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
+      - name: maven-settings-action
+        uses: s4u/maven-settings-action@v3.1.0
+        with:
+          servers: |
+            [
+              { "id": "central", "username": "${{ secrets.MAVEN_USERNAME }}", "password": "${{ secrets.MAVEN_PASSWORD }}" }
+            ]
+
       - name: Deploy Snapshot
-        run: mvn -P deploy -B -ff -ntp  deploy -DskipTests -Dgpg.passphrase="$PGP_KEY_PASSWORD"
+        run: mvn -P deploy -B -ff -ntp deploy -DskipTests -Dgpg.passphrase="$PGP_KEY_PASSWORD"
         shell: bash
         env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
