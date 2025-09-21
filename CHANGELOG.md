@@ -1,11 +1,4 @@
-## Release 4.3.2
-
-### New Changes
-
-
-### Issue Fixes
-
-## Release 4.3.1 - Sep 19, 2025
+## Release 4.3.1 - Sep 21, 2025
 
 ### New Changes
 

@@ -510,42 +510,20 @@
                         </execution>
                     </executions>
                 </plugin>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.8.0</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <publishingServerId>central</publishingServerId>
+                        <autoPublish>true</autoPublish>
+                        <waitUntil>published</waitUntil>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
-
-    <profiles>
-        <profile>
-            <id>deploy</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.central</groupId>
-                        <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.0</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <publishingServerId>central</publishingServerId>
-                            <autoPublish>true</autoPublish>
-                            <waitUntil>published</waitUntil>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
-    <distributionManagement>
-        <!-- Repository for snapshots -->
-        <snapshotRepository>
-            <id>central</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
 
     <repositories>
         <repository>
