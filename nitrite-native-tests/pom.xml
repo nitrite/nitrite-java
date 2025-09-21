@@ -77,14 +77,6 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <!-- skip deploying this test module -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
             <!-- skip generating javadoc for this test module -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
