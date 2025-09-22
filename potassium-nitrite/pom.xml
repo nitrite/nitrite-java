@@ -34,14 +34,17 @@
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-spatial</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-jackson-mapper</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -95,6 +98,7 @@
         <dependency>
             <groupId>org.dizitart</groupId>
             <artifactId>nitrite-mvstore-adapter</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
