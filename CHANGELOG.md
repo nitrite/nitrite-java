@@ -1,4 +1,4 @@
-## Release 4.3.1 - Sep 22, 2025
+## Release 4.3.1 - Sep 23, 2025
 
 ### New Changes
 
