@@ -455,3 +455,4 @@ test.log
 .diffblue
 infer-out
 secring.gpg
+.flattened-pom.xml
