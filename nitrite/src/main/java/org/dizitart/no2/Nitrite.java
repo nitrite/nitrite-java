@@ -312,9 +312,11 @@ public interface Nitrite extends AutoCloseable {
      */
     default <T> boolean hasRepository(Class<T> type, String key) {
         checkOpened();
+        Map<String, Set<String>> keyed = listKeyedRepositories();
+        Set<String> entities = keyed.get(key);
+        if (entities == null) return false;
         String entityName = ObjectUtils.getEntityName(type);
-        return listKeyedRepositories().containsKey(key)
-                && listKeyedRepositories().get(key).contains(entityName);
+        return entities.contains(entityName);
     }
 
     /**
@@ -343,8 +345,10 @@ public interface Nitrite extends AutoCloseable {
      */
     default <T> boolean hasRepository(EntityDecorator<T> entityDecorator, String key) {
         checkOpened();
-        return listKeyedRepositories().containsKey(key)
-                && listKeyedRepositories().get(key).contains(entityDecorator.getEntityName());
+        Map<String, Set<String>> keyed = listKeyedRepositories();
+        Set<String> entities = keyed.get(key);
+        if (entities == null) return false;
+        return entities.contains(entityDecorator.getEntityName());
     }
 
     /**
@@ -355,11 +359,12 @@ public interface Nitrite extends AutoCloseable {
      *                             reserved names
      */
     default void validateCollectionName(String name) {
-        notNull(name, "name cannot be null");
-        notEmpty(name, "name cannot be empty");
+       notNull(name, "name cannot be null");
+       String normalized = name.trim();
+       notEmpty(normalized, "name cannot be empty");
 
         for (String reservedName : RESERVED_NAMES) {
-            if (name.contains(reservedName)) {
+            if (normalized.contains(reservedName)) {
                 throw new ValidationException("Name cannot contain " + reservedName);
             }
         }
