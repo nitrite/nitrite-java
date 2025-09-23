@@ -19,8 +19,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-        <assertj.version>3.27.4</assertj.version>
+        <assertj.version>3.27.5</assertj.version>
         <junit.version>5.13.4</junit.version>
         <native-build-tools-plugin.version>0.11.0</native-build-tools-plugin.version>
     </properties>
@@ -91,14 +90,6 @@
                 <artifactId>maven-source-plugin</artifactId>
                 <configuration>
                     <skipSource>true</skipSource>
-                </configuration>
-            </plugin>
-            <!-- skip signing this test module -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-gpg-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
                 </configuration>
             </plugin>
             <plugin>
