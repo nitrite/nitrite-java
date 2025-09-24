@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -622,7 +623,7 @@ public class NitriteTest {
                     log.error("Error in thread", e);
                 }
             }
-        };
+        }
 
         Thread t0 = new Thread(new ThreadRunner());
         Thread t1 = new Thread(new ThreadRunner());
@@ -680,6 +681,32 @@ public class NitriteTest {
         assertFalse(db.hasUnsavedChanges());
         db.close();
         deleteDb(fileName);
+    }
+
+    @Test
+    public void testIssue1162() throws IOException {
+
+        // setup no2-v4.3.0.db as a temp file
+        var databasePath = Files.createTempFile("temp-no2-v4.3.0", ".db");
+        var templateDb = Objects.requireNonNull(NitriteTest.class.getResourceAsStream("/no2-v4.3.0.db"));
+        Files.copy(templateDb, databasePath, StandardCopyOption.REPLACE_EXISTING);
+
+        var module = MVStoreModule.withConfig()
+            .filePath(databasePath.toAbsolutePath().toFile())
+            .build();
+
+        var database = Nitrite.builder()
+            .loadModule(module)
+            .openOrCreate();
+
+        try (database) {
+            var collection = database.getCollection("myCollection");
+            assertEquals(1, collection.size());
+
+            var firstPerson = collection.find().firstOrNull();
+            assertNotNull(firstPerson);
+            assertEquals(1970829645337976832L, firstPerson.getId().getIdValue());
+        }
     }
 
     @Data
