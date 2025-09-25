@@ -18,6 +18,7 @@ package org.dizitart.no2.collection;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+
 import org.dizitart.no2.exceptions.InvalidIdException;
 
 import java.io.IOException;
@@ -48,18 +49,20 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
     private static final SnowflakeIdGenerator generator = new SnowflakeIdGenerator();
 
     /** The underlying value of the NitriteId. */
-    private long idValue;
+    /* WARNING(gh-1162): naming it idValue breaks java serialization for databases created with earlier version of nitrite
+     *                   and marking it transient introduces side effects for @EqualsAndHashCode */
+    private long _idValue;
 
     private NitriteId() {
-        this.idValue = generator.getId();
+        this._idValue = generator.getId();
     }
 
     private NitriteId(String value) {
-        this.idValue = Long.parseLong(value);
+        this._idValue = Long.parseLong(value);
     }
 
     private NitriteId(long value) {
-        this.idValue = value;
+        this._idValue = value;
     }
 
     /**
@@ -115,21 +118,25 @@ public final class NitriteId implements Comparable<NitriteId>, Serializable {
         }
     }
 
+    public long getIdValue() {
+        return _idValue;
+    }
+
     @Override
     public int compareTo(NitriteId other) {
-        return Long.compare(idValue, other.idValue);
+        return Long.compare(_idValue, other._idValue);
     }
 
     @Override
     public String toString() {
-        return ID_PREFIX + idValue + ID_SUFFIX;
+        return ID_PREFIX + _idValue + ID_SUFFIX;
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        stream.writeUTF(Long.toString(idValue));
+        stream.writeUTF(Long.toString(_idValue));
     }
 
     private void readObject(ObjectInputStream stream) throws IOException {
-        idValue = Long.parseLong(stream.readUTF());
+        _idValue = Long.parseLong(stream.readUTF());
     }
 }
