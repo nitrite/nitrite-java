@@ -1,3 +1,10 @@
+## Release 4.3.2
+
+### Issue Fixes
+
+- Fix for small safety/cleanup in Nitrite interface (map lookups, closed check, name trim) #1161
+- Fix for updating to 4.3.1 causes existing databases to not open correctly #1162
+
 ## Release 4.3.1 - Sep 23, 2025
 
 ### New Changes
