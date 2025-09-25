@@ -452,6 +452,7 @@ test.log
 /build
 !no2-old.db
 !no2-v3.db
+!no2-v4.3.0.db
 .diffblue
 infer-out
 secring.gpg
