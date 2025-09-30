@@ -105,7 +105,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: graalvm/setup-graalvm@v1.3.7
+      - uses: graalvm/setup-graalvm@v1.4.0
         with:
           java-version: ${{ matrix.java }}
           distribution: 'graalvm-community'
