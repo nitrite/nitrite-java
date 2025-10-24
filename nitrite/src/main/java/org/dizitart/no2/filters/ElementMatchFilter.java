@@ -24,6 +24,7 @@ import org.dizitart.no2.index.IndexMap;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -40,8 +41,15 @@ class ElementMatchFilter extends ComparableFilter {
     private final Filter elementFilter;
 
     ElementMatchFilter(String field, Filter elementFilter) {
-        super(field, null);
+        super(field, elementFilter);
         this.elementFilter = elementFilter;
+    }
+    
+    @Override
+    public Comparable<?> getComparable() {
+        // ElementMatchFilter doesn't use the comparable value directly
+        // It delegates to the inner filter for index operations
+        return null;
     }
 
     @Override
@@ -128,29 +136,28 @@ class ElementMatchFilter extends ComparableFilter {
     private List<?> applyOrFilterOnIndex(OrFilter orFilter, IndexMap indexMap) {
         // For OR filters, we union the results from each comparable filter
         List<Filter> filters = orFilter.getFilters();
-        List<Object> result = new ArrayList<>();
+        Set<Object> resultSet = new HashSet<>();
         
         for (Filter filter : filters) {
             if (filter instanceof ComparableFilter) {
                 List<?> filterResult = ((ComparableFilter) filter).applyOnIndex(indexMap);
-                for (Object item : filterResult) {
-                    if (!result.contains(item)) {
-                        result.add(item);
-                    }
-                }
+                resultSet.addAll(filterResult);
             } else {
                 // If any filter is not comparable, we can't use index
                 return new ArrayList<>();
             }
         }
         
-        return result;
+        return new ArrayList<>(resultSet);
     }
 
     private List<?> intersect(List<?> list1, List<?> list2) {
+        // Convert the second list to a set for O(1) lookup
+        Set<Object> set2 = new HashSet<>(list2);
         List<Object> result = new ArrayList<>();
+        
         for (Object item : list1) {
-            if (list2.contains(item)) {
+            if (set2.contains(item)) {
                 result.add(item);
             }
         }
