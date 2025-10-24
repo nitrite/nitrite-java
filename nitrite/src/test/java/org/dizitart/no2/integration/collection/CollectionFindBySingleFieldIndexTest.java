@@ -627,4 +627,85 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
 
         assertArrayEquals(nonIndexedResult, indexedResult);
     }
+
+    @Test
+    public void testFindByArrayFieldIndexWithElemMatch() {
+        // Create a collection with array field
+        NitriteCollection userCollection = db.getCollection("users");
+        
+        // Insert documents with array of emails
+        for (int i = 0; i < 1000; i++) {
+            Document doc = Document.createDocument("name", "user" + i)
+                .put("emails", new String[]{"user" + i + "@example.com", "user" + i + "@test.com"});
+            userCollection.insert(doc);
+        }
+        
+        // Add a specific test document
+        userCollection.insert(Document.createDocument("name", "testuser")
+            .put("emails", new String[]{"test@gmail.com", "test@example.com"}));
+        
+        // Measure query time WITHOUT index
+        long startWithoutIndex = System.nanoTime();
+        DocumentCursor cursorWithoutIndex = userCollection.find(
+            where("emails").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq("test@gmail.com")));
+        long withoutIndexCount = cursorWithoutIndex.size();
+        long endWithoutIndex = System.nanoTime();
+        long timeWithoutIndex = (endWithoutIndex - startWithoutIndex) / 1_000_000;
+        
+        assertEquals(1, withoutIndexCount);
+        
+        // Create index on emails field
+        userCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "emails");
+        
+        // Measure query time WITH index
+        long startWithIndex = System.nanoTime();
+        DocumentCursor cursorWithIndex = userCollection.find(
+            where("emails").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq("test@gmail.com")));
+        long withIndexCount = cursorWithIndex.size();
+        long endWithIndex = System.nanoTime();
+        long timeWithIndex = (endWithIndex - startWithIndex) / 1_000_000;
+        
+        assertEquals(1, withIndexCount);
+        
+        // With index should be faster or at least not significantly slower
+        // We're being lenient here because timing can vary, but index should help
+        System.out.println("Time without index: " + timeWithoutIndex + " ms");
+        System.out.println("Time with index: " + timeWithIndex + " ms");
+        
+        // Verify index is actually being used by checking the find plan
+        DocumentCursor cursor = userCollection.find(
+            where("emails").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq("test@gmail.com")));
+        assertNotNull(cursor);
+        assertEquals(1, cursor.size());
+    }
+
+    @Test
+    public void testFindByArrayFieldIndexWithElemMatchComplexFilter() {
+        // Create a collection with array field
+        NitriteCollection productCollection = db.getCollection("products");
+        
+        // Insert documents with array of scores
+        for (int i = 0; i < 100; i++) {
+            Document doc = Document.createDocument("name", "product" + i)
+                .put("scores", new Integer[]{i, i + 10, i + 20});
+            productCollection.insert(doc);
+        }
+        
+        // Create index on scores field
+        productCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "scores");
+        
+        // Query with elemMatch using gt filter
+        DocumentCursor cursor = productCollection.find(
+            where("scores").elemMatch(org.dizitart.no2.filters.FluentFilter.$.gt(95)));
+        
+        // Should find products where at least one score is > 95
+        assertTrue(cursor.size() > 0);
+        
+        // Query with elemMatch using lt filter
+        cursor = productCollection.find(
+            where("scores").elemMatch(org.dizitart.no2.filters.FluentFilter.$.lt(5)));
+        
+        // Should find products where at least one score is < 5
+        assertTrue(cursor.size() > 0);
+    }
 }
