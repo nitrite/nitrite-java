@@ -141,7 +141,9 @@ class ElementMatchFilter extends ComparableFilter {
         for (Filter filter : filters) {
             if (filter instanceof ComparableFilter) {
                 List<?> filterResult = ((ComparableFilter) filter).applyOnIndex(indexMap);
-                resultSet.addAll(filterResult);
+                if (filterResult != null && !filterResult.isEmpty()) {
+                    resultSet.addAll(filterResult);
+                }
             } else {
                 // If any filter is not comparable, we can't use index
                 return new ArrayList<>();
@@ -152,12 +154,16 @@ class ElementMatchFilter extends ComparableFilter {
     }
 
     private List<?> intersect(List<?> list1, List<?> list2) {
+        if (list1 == null || list1.isEmpty() || list2 == null || list2.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
         // Convert the second list to a set for O(1) lookup
         Set<Object> set2 = new HashSet<>(list2);
         List<Object> result = new ArrayList<>();
         
         for (Object item : list1) {
-            if (set2.contains(item)) {
+            if (item != null && set2.contains(item)) {
                 result.add(item);
             }
         }
