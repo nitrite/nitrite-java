@@ -41,7 +41,7 @@ class ElementMatchFilter extends ComparableFilter {
     private final Filter elementFilter;
 
     ElementMatchFilter(String field, Filter elementFilter) {
-        super(field);
+        super(field, null);
         this.elementFilter = elementFilter;
     }
     
