@@ -48,9 +48,9 @@
     </modules>
 
     <properties>
-        <maven.compiler.release>11</maven.compiler.release>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>2.20.0</jackson.version>
         <slf4j.version>2.0.17</slf4j.version>
@@ -80,7 +80,6 @@
         <guava.version>33.4.8-jre</guava.version>
         <threetenbp.version>1.7.1</threetenbp.version>
 
-        <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
         <error-prone.version>2.31.0</error-prone.version>
 
         <jacoco.version>0.8.13</jacoco.version>
