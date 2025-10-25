@@ -18,6 +18,8 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexMap;
 
@@ -43,30 +45,9 @@ public class EqualsFilter extends ComparableFilter {
 
     @Override
     public List<?> applyOnIndex(IndexMap indexMap) {
-        // If value is a Number, we need to check for numeric equivalents across types
-        // Otherwise, use fast direct lookup
-        if (getValue() instanceof Number) {
-            // Scan for all numerically equivalent values
-            List<java.util.NavigableMap<Comparable<?>, Object>> subMaps = new ArrayList<>();
-            List<NitriteId> nitriteIds = new ArrayList<>();
-            
-            for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
-                if (deepEquals(getValue(), entry.getFirst())) {
-                    Object entryValue = entry.getSecond();
-                    // Handle both single-field indexes (List) and compound indexes (NavigableMap)
-                    processIndexValue(entryValue, subMaps, nitriteIds);
-                }
-            }
-            
-            // Return sub-maps for compound indexes, or nitrite IDs for single-field indexes
-            if (!subMaps.isEmpty()) {
-                return subMaps;
-            }
-            return nitriteIds;
-        }
-        
-        // Fast path for non-numeric values: direct lookup
-        Object value = indexMap.get((Comparable<?>) getValue());
+        Object fieldValue = getValue();
+        DBValue dbValue = fieldValue == null ? DBNull.getInstance() : new DBValue((Comparable<?>) fieldValue);
+        Object value = indexMap.get(dbValue);
         if (value == null) {
             return new ArrayList<>();
         }

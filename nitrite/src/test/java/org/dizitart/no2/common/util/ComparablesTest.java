@@ -29,7 +29,7 @@ public class ComparablesTest {
     @Test
     public void testCompare4() {
         MutableByte first = new MutableByte();
-        assertEquals(-1, Comparables.compare(first, new MutableDouble()));
+        assertEquals(0, Comparables.compare(first, new MutableDouble()));
     }
 }
 

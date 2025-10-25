@@ -244,12 +244,12 @@ public class CollectionIndexTest extends BaseCollectionTest {
         collection.insert(doc1, doc2, doc3, doc4, doc5);
 
         DocumentCursor cursor = collection.find(where("field").eq(5));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
 
         collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "field");
 
         cursor = collection.find(where("field").eq(5));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
     }
 
     @Test

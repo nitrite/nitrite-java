@@ -18,6 +18,8 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Comparables;
 import org.dizitart.no2.exceptions.FilterException;
@@ -59,58 +61,30 @@ class GreaterThanFilter extends SortingAwareFilter {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public List<?> applyOnIndex(IndexMap indexMap) {
         Comparable comparable = getComparable();
-        List<NavigableMap<Comparable<?>, Object>> subMaps = new ArrayList<>();
+        DBValue dbValue = comparable == null ? DBNull.getInstance() : new DBValue(comparable);
+        List<NavigableMap<DBValue, Object>> subMaps = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        // Check if this is a compound index by looking at the first value
-        Comparable firstKey = indexMap.firstKey();
-        boolean isCompoundIndex = firstKey != null && indexMap.get(firstKey) instanceof NavigableMap;
-        
-        // For compound indexes or non-numeric comparisons, use the efficient range approach
-        // For single-field numeric indexes, scan all entries to handle cross-type comparisons
-        boolean useFullScan = !isCompoundIndex && comparable instanceof Number && firstKey instanceof Number;
-
         if (isReverseScan()) {
-            Comparable lastKey = indexMap.lastKey();
-            if (useFullScan) {
-                // Full scan with numeric comparison for single-field numeric indexes
-                while (lastKey != null) {
-                    if (compare((Number) lastKey, (Number) comparable) > 0) {
-                        Object value = indexMap.get(lastKey);
-                        processIndexValue(value, subMaps, nitriteIds);
-                    }
-                    lastKey = indexMap.lowerKey(lastKey);
-                }
-            } else {
-                // Efficient range scan for compound indexes or non-numeric comparisons
-                while (lastKey != null && Comparables.compare(lastKey, comparable) > 0) {
-                    Object value = indexMap.get(lastKey);
-                    processIndexValue(value, subMaps, nitriteIds);
-                    lastKey = indexMap.lowerKey(lastKey);
-                }
+            DBValue lastKey = indexMap.lastKey();
+            while (lastKey != DBNull.getInstance() && Comparables.compare(lastKey, dbValue) > 0) {
+                // get the starting value, it can be a navigable-map (compound index)
+                // or list (single field index)
+                Object value = indexMap.get(lastKey);
+                processIndexValue(value, subMaps, nitriteIds);
+                lastKey = indexMap.lowerKey(lastKey);
             }
         } else {
-            Comparable key = indexMap.firstKey();
-            if (useFullScan) {
-                // Full scan with numeric comparison for single-field numeric indexes
-                while (key != null) {
-                    if (compare((Number) key, (Number) comparable) > 0) {
-                        Object value = indexMap.get(key);
-                        processIndexValue(value, subMaps, nitriteIds);
-                    }
-                    key = indexMap.higherKey(key);
-                }
-            } else {
-                // Efficient range scan for compound indexes or non-numeric comparisons
-                Comparable higherKey = indexMap.higherKey(comparable);
-                while (higherKey != null) {
-                    Object value = indexMap.get(higherKey);
-                    processIndexValue(value, subMaps, nitriteIds);
-                    higherKey = indexMap.higherKey(higherKey);
-                }
+            DBValue higherKey = indexMap.higherKey(dbValue);
+            while (higherKey != DBNull.getInstance()) {
+                // get the starting value, it can be a navigable-map (compound index)
+                // or list (single field index)
+                Object value = indexMap.get(higherKey);
+                processIndexValue(value, subMaps, nitriteIds);
+                higherKey = indexMap.higherKey(higherKey);
             }
         }
 

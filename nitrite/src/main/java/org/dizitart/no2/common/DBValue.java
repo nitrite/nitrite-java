@@ -38,6 +38,9 @@ public class DBValue implements Comparable<DBValue>, Serializable {
     @Setter(AccessLevel.PRIVATE)
     private Comparable<?> value;
 
+    private DBValue() {
+    }
+
     public DBValue(Comparable<?> value) {
         this.value = value;
     }
