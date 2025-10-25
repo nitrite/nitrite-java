@@ -18,6 +18,8 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Comparables;
 import org.dizitart.no2.exceptions.FilterException;
@@ -58,15 +60,16 @@ class LesserThanFilter extends SortingAwareFilter {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public List<?> applyOnIndex(IndexMap indexMap) {
         Comparable comparable = getComparable();
-        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
+        DBValue dbValue = comparable == null ? DBNull.getInstance() : new DBValue(comparable);
+        List<NavigableMap<DBValue, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
         if (isReverseScan()) {
-            Comparable lowerKey = indexMap.lowerKey(comparable);
-            while (lowerKey != null) {
+            DBValue lowerKey = indexMap.lowerKey(dbValue);
+            while (lowerKey != DBNull.getInstance()) {
                 // get the starting value, it can be a navigable-map (compound index)
                 // or list (single field index)
                 Object value = indexMap.get(lowerKey);
@@ -74,8 +77,8 @@ class LesserThanFilter extends SortingAwareFilter {
                 lowerKey = indexMap.lowerKey(lowerKey);
             }
         } else {
-            Comparable firstKey = indexMap.firstKey();
-            while (firstKey != null && Comparables.compare(firstKey, comparable) < 0) {
+            DBValue firstKey = indexMap.firstKey();
+            while (firstKey != DBNull.getInstance() && Comparables.compare(firstKey, dbValue) < 0) {
                 // get the starting value, it can be a navigable-map (compound index)
                 // or list (single field index)
                 Object value = indexMap.get(firstKey);
