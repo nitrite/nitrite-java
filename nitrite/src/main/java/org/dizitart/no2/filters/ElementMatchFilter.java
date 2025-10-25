@@ -20,9 +20,11 @@ import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.index.IndexMap;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -35,13 +37,19 @@ import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
  * @author Anindya Chatterjee
  * @since 1.0
  */
-class ElementMatchFilter extends NitriteFilter {
-    private final String field;
+class ElementMatchFilter extends ComparableFilter {
     private final Filter elementFilter;
 
     ElementMatchFilter(String field, Filter elementFilter) {
+        super(field, null);
         this.elementFilter = elementFilter;
-        this.field = field;
+    }
+    
+    @Override
+    public Comparable<?> getComparable() {
+        // ElementMatchFilter doesn't use the comparable value directly
+        // It delegates to the inner filter for index operations
+        return null;
     }
 
     @Override
@@ -56,7 +64,7 @@ class ElementMatchFilter extends NitriteFilter {
         }
 
         Document document = element.getSecond();
-        Object fieldValue = document.get(field);
+        Object fieldValue = document.get(getField());
         if (fieldValue == null) {
             return false;
         }
@@ -78,8 +86,97 @@ class ElementMatchFilter extends NitriteFilter {
     }
 
     @Override
+    public List<?> applyOnIndex(IndexMap indexMap) {
+        // If the element filter is a ComparableFilter, we can use the index
+        // Since arrays are indexed by individual elements, we can directly
+        // apply the inner filter on the index
+        if (elementFilter instanceof ComparableFilter) {
+            return ((ComparableFilter) elementFilter).applyOnIndex(indexMap);
+        }
+        
+        // For other filter types (AND, OR, NOT with comparable filters),
+        // we need to handle them differently
+        if (elementFilter instanceof AndFilter) {
+            return applyAndFilterOnIndex((AndFilter) elementFilter, indexMap);
+        } else if (elementFilter instanceof OrFilter) {
+            return applyOrFilterOnIndex((OrFilter) elementFilter, indexMap);
+        }
+        
+        // If we can't use index, return empty list to trigger collection scan
+        return new ArrayList<>();
+    }
+
+    private List<?> applyAndFilterOnIndex(AndFilter andFilter, IndexMap indexMap) {
+        // For AND filters, we need to check if all filters are comparable
+        // and if so, apply them sequentially (intersection)
+        List<Filter> filters = andFilter.getFilters();
+        List<?> result = null;
+        
+        for (Filter filter : filters) {
+            if (filter instanceof ComparableFilter) {
+                List<?> filterResult = ((ComparableFilter) filter).applyOnIndex(indexMap);
+                if (result == null) {
+                    result = filterResult;
+                } else {
+                    // Intersection of results
+                    result = intersect(result, filterResult);
+                }
+                if (result.isEmpty()) {
+                    return result; // Short-circuit if no matches
+                }
+            } else {
+                // If any filter is not comparable, we can't use index
+                return new ArrayList<>();
+            }
+        }
+        
+        return result != null ? result : new ArrayList<>();
+    }
+
+    private List<?> applyOrFilterOnIndex(OrFilter orFilter, IndexMap indexMap) {
+        // For OR filters, we union the results from each comparable filter
+        List<Filter> filters = orFilter.getFilters();
+        Set<Object> resultSet = new HashSet<>();
+        
+        for (Filter filter : filters) {
+            if (filter instanceof ComparableFilter) {
+                List<?> filterResult = ((ComparableFilter) filter).applyOnIndex(indexMap);
+                if (filterResult != null && !filterResult.isEmpty()) {
+                    resultSet.addAll(filterResult);
+                }
+            } else {
+                // If any filter is not comparable, we can't use index
+                return new ArrayList<>();
+            }
+        }
+        
+        return new ArrayList<>(resultSet);
+    }
+
+    private List<?> intersect(List<?> list1, List<?> list2) {
+        if (list1 == null || list1.isEmpty() || list2 == null || list2.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // Convert the second list to a set for O(1) lookup
+        Set<Object> set2 = new HashSet<>(list2);
+        List<Object> result = new ArrayList<>();
+        
+        for (Object item : list1) {
+            if (item != null && set2.contains(item)) {
+                result.add(item);
+            }
+        }
+        // Explicitly handle intersection of null values
+        if (list1.contains(null) && list2.contains(null)) {
+            result.add(null);
+        }
+        return result;
+    }
+
+    @Override
     public String toString() {
-        return "elemMatch(" + field + " : " + elementFilter.toString() + ")";
+        return "elemMatch(" + getField() + " : " + elementFilter.toString() + ")";
     }
 
     @SuppressWarnings("rawtypes")
