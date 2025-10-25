@@ -45,20 +45,36 @@ public class EqualsFilter extends ComparableFilter {
     public List<?> applyOnIndex(IndexMap indexMap) {
         List<NitriteId> nitriteIds = new ArrayList<>();
         
-        // Iterate through all index entries and use deepEquals for comparison
-        // This allows numeric types to be compared properly (e.g., int vs long)
-        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
-            if (deepEquals(getValue(), entry.getFirst())) {
-                Object value = entry.getSecond();
-                if (value instanceof List) {
-                    @SuppressWarnings("unchecked")
-                    List<NitriteId> result = (List<NitriteId>) value;
-                    nitriteIds.addAll(result);
+        // If value is a Number, we need to check for numeric equivalents across types
+        // Otherwise, use fast direct lookup
+        if (getValue() instanceof Number) {
+            // Scan for all numerically equivalent values
+            for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
+                if (deepEquals(getValue(), entry.getFirst())) {
+                    Object entryValue = entry.getSecond();
+                    if (entryValue instanceof List) {
+                        @SuppressWarnings("unchecked")
+                        List<NitriteId> result = (List<NitriteId>) entryValue;
+                        nitriteIds.addAll(result);
+                    }
                 }
             }
+            return nitriteIds;
+        }
+        
+        // Fast path for non-numeric values: direct lookup
+        Object value = indexMap.get((Comparable<?>) getValue());
+        if (value == null) {
+            return new ArrayList<>();
         }
 
-        return nitriteIds;
+        if (value instanceof List) {
+            return ((List<?>) value);
+        }
+
+        List<Object> result = new ArrayList<>();
+        result.add(value);
+        return result;
     }
 
     @Override
