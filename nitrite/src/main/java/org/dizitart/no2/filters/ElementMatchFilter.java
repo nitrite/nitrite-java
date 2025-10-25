@@ -167,6 +167,10 @@ class ElementMatchFilter extends ComparableFilter {
                 result.add(item);
             }
         }
+        // Explicitly handle intersection of null values
+        if (list1.contains(null) && list2.contains(null)) {
+            result.add(null);
+        }
         return result;
     }
 
