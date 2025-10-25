@@ -29,7 +29,7 @@ This is a multi-module Maven project with the following modules:
 ## Development Environment
 
 ### Java Versions
-- **Minimum supported:** Java 8
+- **Minimum supported:** Java 11 (as configured in pom.xml)
 - **Primary testing:** Java 11 and 17
 - **Native image testing:** Java 17 and 21 with GraalVM
 
@@ -53,7 +53,7 @@ mvn -pl nitrite clean install
 ## Code Guidelines
 
 ### Java Standards
-1. **Minimum compatibility:** Code must compile and run on Java 8
+1. **Minimum compatibility:** Code must compile and run on Java 11 (as per maven.compiler.source=11 in pom.xml)
 2. **Code style:** Follow existing code formatting in the repository (see `.editorconfig`)
 3. **Dependencies:** Check `pom.xml` files before adding new dependencies
 4. **API changes:** Be cautious with public API changes - this is a library used by others
