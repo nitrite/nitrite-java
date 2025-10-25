@@ -66,24 +66,53 @@ class GreaterEqualFilter extends SortingAwareFilter {
         // maintain the find sorting order
         List<NitriteId> nitriteIds = new ArrayList<>();
 
+        // Check if this is a compound index by looking at the first value
+        Comparable firstKey = indexMap.firstKey();
+        boolean isCompoundIndex = firstKey != null && indexMap.get(firstKey) instanceof NavigableMap;
+        
+        // For compound indexes or non-numeric comparisons, use the efficient range approach
+        // For single-field numeric indexes, scan all entries to handle cross-type comparisons
+        boolean useFullScan = !isCompoundIndex && comparable instanceof Number && firstKey instanceof Number;
+
         if (isReverseScan()) {
             // if reverse scan is required, then start from the last key
             Comparable lastKey = indexMap.lastKey();
-            while(lastKey != null && Comparables.compare(lastKey, comparable) >= 0) {
-                // get the starting value, it can be a navigable-map (compound index)
-                // or list (single field index)
-                Object value = indexMap.get(lastKey);
-                processIndexValue(value, subMaps, nitriteIds);
-                lastKey = indexMap.lowerKey(lastKey);
+            if (useFullScan) {
+                // Full scan with numeric comparison for single-field numeric indexes
+                while(lastKey != null) {
+                    if (compare((Number) lastKey, (Number) comparable) >= 0) {
+                        Object value = indexMap.get(lastKey);
+                        processIndexValue(value, subMaps, nitriteIds);
+                    }
+                    lastKey = indexMap.lowerKey(lastKey);
+                }
+            } else {
+                // Efficient range scan for compound indexes or non-numeric comparisons
+                while(lastKey != null && Comparables.compare(lastKey, comparable) >= 0) {
+                    Object value = indexMap.get(lastKey);
+                    processIndexValue(value, subMaps, nitriteIds);
+                    lastKey = indexMap.lowerKey(lastKey);
+                }
             }
         } else {
-            Comparable ceilingKey = indexMap.ceilingKey(comparable);
-            while (ceilingKey != null) {
-                // get the starting value, it can be a navigable-map (compound index)
-                // or list (single field index)
-                Object value = indexMap.get(ceilingKey);
-                processIndexValue(value, subMaps, nitriteIds);
-                ceilingKey = indexMap.higherKey(ceilingKey);
+            if (useFullScan) {
+                // Full scan with numeric comparison for single-field numeric indexes
+                Comparable key = indexMap.firstKey();
+                while (key != null) {
+                    if (compare((Number) key, (Number) comparable) >= 0) {
+                        Object value = indexMap.get(key);
+                        processIndexValue(value, subMaps, nitriteIds);
+                    }
+                    key = indexMap.higherKey(key);
+                }
+            } else {
+                // Efficient range scan for compound indexes or non-numeric comparisons
+                Comparable ceilingKey = indexMap.ceilingKey(comparable);
+                while (ceilingKey != null) {
+                    Object value = indexMap.get(ceilingKey);
+                    processIndexValue(value, subMaps, nitriteIds);
+                    ceilingKey = indexMap.higherKey(ceilingKey);
+                }
             }
         }
 
