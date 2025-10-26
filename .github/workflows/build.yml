@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ '11', '17' ]
+        java: [ '17' ]
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
@@ -42,7 +42,7 @@ jobs:
         run: mvn -B -ff -ntp clean install
 
       - name: Publish Code Coverage
-        if: github.ref == 'refs/heads/main' && matrix.java == '11'
+        if: github.ref == 'refs/heads/main' && matrix.java == '17'
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -53,7 +53,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        java: [ '11', '17' ]
+        java: [ '17' ]
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
@@ -76,7 +76,7 @@ jobs:
     runs-on: windows-latest
     strategy:
       matrix:
-        java: [ '11', '17' ]
+        java: [ '17' ]
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
 
