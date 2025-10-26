@@ -87,6 +87,8 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
         );
 
         // With the fix, OR filters no longer return duplicates
+        // doc2 = {firstName: "fn2", lastName: "ln2"}
+        // doc3 = {firstName: "fn3", lastName: "ln2"}
         // First AND: lastName=ln2 AND firstName!=fn1 → matches doc2 and doc3
         // Second AND: firstName=fn3 AND lastName=ln2 → matches doc3
         // Union without duplicates: doc2 and doc3 (2 total)
@@ -236,6 +238,9 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
         );
 
         // With the fix, OR filters no longer return duplicates
+        // doc1 = {firstName: "fn1", lastName: "ln1", birthDay: "2012-07-01"}
+        // doc2 = {firstName: "fn2", lastName: "ln2", birthDay: "2010-06-12"}
+        // doc3 = {firstName: "fn3", lastName: "ln2", birthDay: "2014-04-17"}
         // Flattened OR conditions:
         // 1. lastName=ln2 → doc2, doc3
         // 2. firstName!=fn1 → doc2, doc3
