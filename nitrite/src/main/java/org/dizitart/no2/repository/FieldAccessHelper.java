@@ -74,6 +74,10 @@ class FieldAccessHelper {
      * Gets a property value from an object, trying both field access and getter method.
      */
     private static Object getPropertyValue(Object obj, String propertyName) throws IllegalAccessException {
+        if (propertyName == null || propertyName.isEmpty()) {
+            throw new IllegalAccessException("Property name cannot be null or empty");
+        }
+        
         // Try to find the field in the object's class
         Field realField = findFieldInHierarchy(obj.getClass(), propertyName);
         if (realField != null) {
@@ -81,17 +85,16 @@ class FieldAccessHelper {
             return realField.get(obj);
         }
 
-        // Fall back to getter method
+        // Fall back to getter method - try both 'get' and 'is' prefixes
         try {
-            String getterName = "get" + Character.toUpperCase(propertyName.charAt(0));
-            if (propertyName.length() > 1) {
-                getterName += propertyName.substring(1);
+            Method getter = findGetterMethod(obj.getClass(), propertyName);
+            if (getter != null) {
+                getter.setAccessible(true);
+                return getter.invoke(obj);
             }
-            Method getter = obj.getClass().getMethod(getterName);
-            getter.setAccessible(true);
-            return getter.invoke(obj);
+            throw new IllegalAccessException("No getter method found for property '" + propertyName + "'");
         } catch (Exception e) {
-            throw new IllegalAccessException("Cannot access property '" + propertyName + "' on " + obj.getClass().getName());
+            throw new IllegalAccessException("Cannot access property '" + propertyName + "' on " + obj.getClass().getName() + ": " + e.getMessage());
         }
     }
 
@@ -99,6 +102,10 @@ class FieldAccessHelper {
      * Sets a property value on an object, trying both field access and setter method.
      */
     private static void setPropertyValue(Object obj, String propertyName, Object value) throws IllegalAccessException {
+        if (propertyName == null || propertyName.isEmpty()) {
+            throw new IllegalAccessException("Property name cannot be null or empty");
+        }
+        
         // Try to find the field in the object's class
         Field realField = findFieldInHierarchy(obj.getClass(), propertyName);
         if (realField != null) {
@@ -109,10 +116,7 @@ class FieldAccessHelper {
 
         // Fall back to setter method
         try {
-            String setterName = "set" + Character.toUpperCase(propertyName.charAt(0));
-            if (propertyName.length() > 1) {
-                setterName += propertyName.substring(1);
-            }
+            String setterName = "set" + capitalizePropertyName(propertyName);
             Method setter = findSetterMethod(obj.getClass(), setterName, value);
             if (setter != null) {
                 setter.setAccessible(true);
@@ -123,6 +127,38 @@ class FieldAccessHelper {
         } catch (Exception e) {
             throw new IllegalAccessException("Cannot set property '" + propertyName + "' on " + obj.getClass().getName() + ": " + e.getMessage());
         }
+    }
+    
+    /**
+     * Finds a getter method for a property (tries both 'get' and 'is' prefixes).
+     */
+    private static Method findGetterMethod(Class<?> clazz, String propertyName) {
+        String capitalizedName = capitalizePropertyName(propertyName);
+        String getterName = "get" + capitalizedName;
+        String isGetterName = "is" + capitalizedName;
+        
+        Method[] methods = clazz.getMethods();
+        for (Method method : methods) {
+            if ((method.getName().equals(getterName) || method.getName().equals(isGetterName)) 
+                && method.getParameterTypes().length == 0) {
+                return method;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Capitalizes a property name following JavaBeans conventions.
+     */
+    private static String capitalizePropertyName(String propertyName) {
+        if (propertyName == null || propertyName.isEmpty()) {
+            return propertyName;
+        }
+        // Follow JavaBeans convention: if first two chars are uppercase, don't change
+        if (propertyName.length() > 1 && Character.isUpperCase(propertyName.charAt(0)) && Character.isUpperCase(propertyName.charAt(1))) {
+            return propertyName;
+        }
+        return Character.toUpperCase(propertyName.charAt(0)) + propertyName.substring(1);
     }
 
     /**
