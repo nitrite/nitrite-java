@@ -9,6 +9,9 @@ updates:
       # Ignore minor version updates for dependencies with group ID "com.google.errorprone"
       - dependency-name: "com.google.errorprone:*"
         update-types: [ "version-update:semver-minor" ]
+      # Pin RocksDB to version 10.2.1
+      - dependency-name: "org.rocksdb:rocksdbjni"
+        update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]
     groups:
       security:
         # Group security updates into a single pull request
