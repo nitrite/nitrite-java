@@ -181,13 +181,15 @@ public class CollectionIndexTest extends BaseCollectionTest {
 
         collection.insert(doc1, doc2, doc3, doc4, doc5);
 
+        // With cross-type numeric equality, both 5 (Integer) and 5.0 (Double) match
         DocumentCursor cursor = collection.find(where("field").eq(5));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
 
         collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "field");
 
+        // Same behavior with index
         cursor = collection.find(where("field").eq(5));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
     }
 
     @Test

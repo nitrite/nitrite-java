@@ -18,6 +18,8 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexMap;
 
@@ -43,7 +45,9 @@ public class EqualsFilter extends ComparableFilter {
 
     @Override
     public List<?> applyOnIndex(IndexMap indexMap) {
-        Object value = indexMap.get((Comparable<?>) getValue());
+        Object fieldValue = getValue();
+        DBValue dbValue = fieldValue == null ? DBNull.getInstance() : new DBValue((Comparable<?>) fieldValue);
+        Object value = indexMap.get(dbValue);
         if (value == null) {
             return new ArrayList<>();
         }

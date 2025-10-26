@@ -19,6 +19,7 @@ package org.dizitart.no2.filters;
 import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexMap;
 
@@ -50,10 +51,10 @@ class NotInFilter extends ComparableArrayFilter {
     }
 
     public List<?> applyOnIndex(IndexMap indexMap) {
-        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
+        List<NavigableMap<DBValue, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
+        for (Pair<DBValue, ?> entry : indexMap.entries()) {
             if (!comparableSet.contains(entry.getFirst())) {
                 processIndexValue(entry.getSecond(), subMap, nitriteIds);
             }
