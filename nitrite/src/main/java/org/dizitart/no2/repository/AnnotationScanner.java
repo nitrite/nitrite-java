@@ -156,7 +156,10 @@ class AnnotationScanner {
                 Field field = reflector.getField(type, name);
                 if (field != null) {
                     entityFields.add(field);
-                    indexValidator.validate(field.getType(), field.getName(), nitriteMapper);
+                    // Use InterfacePropertyHolder to get correct name and type for interface properties
+                    String fieldName = InterfacePropertyHolder.getPropertyName(field);
+                    Class<?> fieldType = InterfacePropertyHolder.getPropertyType(field);
+                    indexValidator.validate(fieldType, fieldName, nitriteMapper);
                 }
             }
 
