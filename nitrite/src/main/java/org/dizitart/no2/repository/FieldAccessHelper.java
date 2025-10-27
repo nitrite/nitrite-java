@@ -32,6 +32,7 @@ class FieldAccessHelper {
 
     /**
      * Gets the value of a field from an object, handling both regular and interface property fields.
+     * Uses reflection with appropriate access control.
      * 
      * @param field the field to access
      * @param obj the object to get the value from
@@ -45,13 +46,13 @@ class FieldAccessHelper {
             String propertyName = InterfacePropertyHolder.getPropertyName(field);
             return getPropertyValue(obj, propertyName);
         } else {
-            field.setAccessible(true);
-            return field.get(obj);
+            return getFieldValue(field, obj);
         }
     }
 
     /**
      * Sets the value of a field on an object, handling both regular and interface property fields.
+     * Uses reflection with appropriate access control.
      * 
      * @param field the field to set
      * @param obj the object to set the value on
@@ -65,9 +66,28 @@ class FieldAccessHelper {
             String propertyName = InterfacePropertyHolder.getPropertyName(field);
             setPropertyValue(obj, propertyName, value);
         } else {
-            field.setAccessible(true);
-            field.set(obj, value);
+            setFieldValue(field, obj, value);
         }
+    }
+    
+    /**
+     * Gets the value of a field, handling access control appropriately.
+     */
+    private static Object getFieldValue(Field field, Object obj) throws IllegalAccessException {
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
+        return field.get(obj);
+    }
+    
+    /**
+     * Sets the value of a field, handling access control appropriately.
+     */
+    private static void setFieldValue(Field field, Object obj, Object value) throws IllegalAccessException {
+        if (!field.isAccessible()) {
+            field.setAccessible(true);
+        }
+        field.set(obj, value);
     }
 
     /**
@@ -81,16 +101,14 @@ class FieldAccessHelper {
         // Try to find the field in the object's class
         Field realField = findFieldInHierarchy(obj.getClass(), propertyName);
         if (realField != null) {
-            realField.setAccessible(true);
-            return realField.get(obj);
+            return getFieldValue(realField, obj);
         }
 
         // Fall back to getter method - try both 'get' and 'is' prefixes
         try {
             Method getter = findGetterMethod(obj.getClass(), propertyName);
             if (getter != null) {
-                getter.setAccessible(true);
-                return getter.invoke(obj);
+                return invokeMethod(getter, obj);
             }
             throw new IllegalAccessException("No getter method found for property '" + propertyName + "'");
         } catch (Exception e) {
@@ -109,8 +127,7 @@ class FieldAccessHelper {
         // Try to find the field in the object's class
         Field realField = findFieldInHierarchy(obj.getClass(), propertyName);
         if (realField != null) {
-            realField.setAccessible(true);
-            realField.set(obj, value);
+            setFieldValue(realField, obj, value);
             return;
         }
 
@@ -119,13 +136,28 @@ class FieldAccessHelper {
             String setterName = "set" + capitalizePropertyName(propertyName);
             Method setter = findSetterMethod(obj.getClass(), setterName, value);
             if (setter != null) {
-                setter.setAccessible(true);
-                setter.invoke(obj, value);
+                invokeMethod(setter, obj, value);
             } else {
                 throw new IllegalAccessException("No setter method found for property '" + propertyName + "'");
             }
         } catch (Exception e) {
             throw new IllegalAccessException("Cannot set property '" + propertyName + "' on " + obj.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Invokes a method, handling access control appropriately.
+     */
+    private static Object invokeMethod(Method method, Object obj, Object... args) throws IllegalAccessException {
+        try {
+            if (!method.isAccessible()) {
+                method.setAccessible(true);
+            }
+            return method.invoke(obj, args);
+        } catch (IllegalAccessException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalAccessException("Cannot invoke method " + method.getName() + ": " + e.getMessage());
         }
     }
     
@@ -197,14 +229,14 @@ class FieldAccessHelper {
      * Checks if a value class is compatible with a primitive parameter type.
      */
     private static boolean isCompatiblePrimitive(Class<?> primitiveType, Class<?> valueClass) {
-        if (primitiveType == int.class) return valueClass == Integer.class;
-        if (primitiveType == long.class) return valueClass == Long.class;
-        if (primitiveType == double.class) return valueClass == Double.class;
-        if (primitiveType == float.class) return valueClass == Float.class;
-        if (primitiveType == boolean.class) return valueClass == Boolean.class;
-        if (primitiveType == byte.class) return valueClass == Byte.class;
-        if (primitiveType == short.class) return valueClass == Short.class;
-        if (primitiveType == char.class) return valueClass == Character.class;
-        return false;
+        // Use a more efficient lookup instead of cascading if statements
+        return (primitiveType == int.class && valueClass == Integer.class)
+            || (primitiveType == long.class && valueClass == Long.class)
+            || (primitiveType == double.class && valueClass == Double.class)
+            || (primitiveType == float.class && valueClass == Float.class)
+            || (primitiveType == boolean.class && valueClass == Boolean.class)
+            || (primitiveType == byte.class && valueClass == Byte.class)
+            || (primitiveType == short.class && valueClass == Short.class)
+            || (primitiveType == char.class && valueClass == Character.class);
     }
 }

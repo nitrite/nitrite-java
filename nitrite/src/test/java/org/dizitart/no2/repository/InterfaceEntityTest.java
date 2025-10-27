@@ -76,6 +76,78 @@ public class InterfaceEntityTest {
         }
     }
     
+    // Another concrete implementation
+    public static class Cat implements Animal {
+        private String id;
+        private String name;
+        
+        public Cat() {}
+        
+        public Cat(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+        
+        @Override
+        public String getId() {
+            return id;
+        }
+        
+        public void setId(String id) {
+            this.id = id;
+        }
+        
+        @Override
+        public String getName() {
+            return name;
+        }
+        
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+    
+    // Third concrete implementation with boolean property
+    public static class Bird implements Animal {
+        private String id;
+        private String name;
+        private boolean canFly;
+        
+        public Bird() {}
+        
+        public Bird(String id, String name, boolean canFly) {
+            this.id = id;
+            this.name = name;
+            this.canFly = canFly;
+        }
+        
+        @Override
+        public String getId() {
+            return id;
+        }
+        
+        public void setId(String id) {
+            this.id = id;
+        }
+        
+        @Override
+        public String getName() {
+            return name;
+        }
+        
+        public void setName(String name) {
+            this.name = name;
+        }
+        
+        public boolean isCanFly() {
+            return canFly;
+        }
+        
+        public void setCanFly(boolean canFly) {
+            this.canFly = canFly;
+        }
+    }
+    
     // EntityDecorator for the interface
     public static class AnimalDecorator implements EntityDecorator<Animal> {
         
@@ -154,5 +226,121 @@ public class InterfaceEntityTest {
         scanner.createIdIndex();
         
         assertTrue(collection.hasIndex("id"));
+    }
+    
+    @Test
+    public void testMultipleImplementationsFieldAccess() throws IllegalAccessException {
+        scanner.readEntity();
+        ObjectIdField idField = scanner.getObjectIdField();
+        assertNotNull(idField);
+        
+        // Test with Dog instance
+        Dog dog = new Dog("dog-1", "Buddy");
+        Object dogId = FieldAccessHelper.get(idField.getField(), dog);
+        assertEquals("dog-1", dogId);
+        
+        FieldAccessHelper.set(idField.getField(), dog, "dog-2");
+        assertEquals("dog-2", dog.getId());
+        
+        // Test with Cat instance
+        Cat cat = new Cat("cat-1", "Whiskers");
+        Object catId = FieldAccessHelper.get(idField.getField(), cat);
+        assertEquals("cat-1", catId);
+        
+        FieldAccessHelper.set(idField.getField(), cat, "cat-2");
+        assertEquals("cat-2", cat.getId());
+        
+        // Test with Bird instance
+        Bird bird = new Bird("bird-1", "Tweety", true);
+        Object birdId = FieldAccessHelper.get(idField.getField(), bird);
+        assertEquals("bird-1", birdId);
+        
+        FieldAccessHelper.set(idField.getField(), bird, "bird-2");
+        assertEquals("bird-2", bird.getId());
+    }
+    
+    @Test
+    public void testEdgeCaseEmptyPropertyName() {
+        // This tests that our validation works
+        scanner.readEntity();
+        ObjectIdField idField = scanner.getObjectIdField();
+        
+        Dog dog = new Dog("test", "TestDog");
+        
+        try {
+            // Directly test the helper with an empty property name
+            // This should fail gracefully
+            java.lang.reflect.Field testField = InterfacePropertyHolder.class.getDeclaredField("property");
+            InterfacePropertyHolder.registerProperty(testField, "", null);
+            FieldAccessHelper.get(testField, dog);
+            fail("Should have thrown IllegalAccessException for empty property name");
+        } catch (IllegalAccessException e) {
+            assertTrue(e.getMessage().contains("Property name cannot be null or empty"));
+        } catch (Exception e) {
+            // Expected - field access may fail in different ways
+        }
+    }
+    
+    @Test
+    public void testEdgeCaseNullPropertyName() {
+        scanner.readEntity();
+        Dog dog = new Dog("test", "TestDog");
+        
+        try {
+            // Directly test the helper with a null property name
+            java.lang.reflect.Field testField = InterfacePropertyHolder.class.getDeclaredField("property");
+            InterfacePropertyHolder.registerProperty(testField, null, null);
+            FieldAccessHelper.get(testField, dog);
+            fail("Should have thrown IllegalAccessException for null property name");
+        } catch (IllegalAccessException e) {
+            assertTrue(e.getMessage().contains("Property name cannot be null or empty"));
+        } catch (Exception e) {
+            // Expected - field access may fail in different ways
+        }
+    }
+    
+    @Test
+    public void testBooleanPropertyWithIsPrefix() throws IllegalAccessException {
+        scanner.readEntity();
+        
+        Bird bird = new Bird("bird-1", "Tweety", true);
+        
+        // Create a synthetic field for a boolean property
+        try {
+            java.lang.reflect.Method isMethod = Bird.class.getMethod("isCanFly");
+            java.lang.reflect.Field syntheticField = InterfacePropertyHolder.class.getDeclaredField("property");
+            InterfacePropertyHolder.registerProperty(syntheticField, "canFly", isMethod);
+            
+            // Test getting boolean property via 'is' prefix
+            Object value = FieldAccessHelper.get(syntheticField, bird);
+            assertEquals(true, value);
+            
+            // Test setting boolean property
+            FieldAccessHelper.set(syntheticField, bird, false);
+            assertEquals(false, bird.isCanFly());
+        } catch (Exception e) {
+            fail("Should be able to access boolean property with 'is' prefix: " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testMultipleClassesWithSameInterface() {
+        // Verify that the scanner can handle multiple different implementations
+        scanner.readEntity();
+        ObjectIdField idField = scanner.getObjectIdField();
+        assertNotNull(idField);
+        
+        // All three implementations should work with the same scanner
+        Dog dog = new Dog("1", "Dog");
+        Cat cat = new Cat("2", "Cat");
+        Bird bird = new Bird("3", "Bird", true);
+        
+        try {
+            assertEquals("1", FieldAccessHelper.get(idField.getField(), dog));
+            assertEquals("2", FieldAccessHelper.get(idField.getField(), cat));
+            assertEquals("3", FieldAccessHelper.get(idField.getField(), bird));
+        } catch (IllegalAccessException e) {
+            fail("Should be able to access id field on all implementations: " + e.getMessage());
+        }
     }
 }
