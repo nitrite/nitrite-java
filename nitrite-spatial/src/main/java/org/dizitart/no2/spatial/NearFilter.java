@@ -34,12 +34,34 @@ class NearFilter extends WithinFilter {
         super(field, createCircle(point.getCoordinate(), distance));
     }
 
-    private static Geometry createCircle(Coordinate center, double radius) {
+    private static Geometry createCircle(Coordinate center, double radiusMeters) {
         GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
         shapeFactory.setNumPoints(64);
         shapeFactory.setCentre(center);
-        shapeFactory.setSize(radius * 2);
-        return shapeFactory.createCircle();
+        
+        // Determine if we're dealing with geographic coordinates (lat/long)
+        // or simple Cartesian coordinates
+        double radiusInDegrees;
+        if (GeodesicUtils.isGeographic(center)) {
+            // Convert meters to degrees accounting for Earth's curvature
+            radiusInDegrees = GeodesicUtils.metersToDegreesRadius(center, radiusMeters);
+            System.err.println("DEBUG NearFilter: Geographic coords detected");
+            System.err.println("  Center: (" + center.getX() + ", " + center.getY() + ")");
+            System.err.println("  Radius (meters): " + radiusMeters);
+            System.err.println("  Radius (degrees): " + radiusInDegrees);
+        } else {
+            // For non-geographic coordinates, use the radius as-is
+            // This maintains backward compatibility with existing tests
+            radiusInDegrees = radiusMeters;
+            System.err.println("DEBUG NearFilter: Cartesian coords detected");
+            System.err.println("  Center: (" + center.getX() + ", " + center.getY() + ")");
+            System.err.println("  Radius: " + radiusMeters);
+        }
+        
+        shapeFactory.setSize(radiusInDegrees * 2);
+        Geometry circle = shapeFactory.createCircle();
+        System.err.println("  Circle envelope: " + circle.getEnvelopeInternal());
+        return circle;
     }
 
     @Override
