@@ -263,8 +263,6 @@ public class InterfaceEntityTest {
     public void testEdgeCaseEmptyPropertyName() {
         // This tests that our validation works
         scanner.readEntity();
-        ObjectIdField idField = scanner.getObjectIdField();
-        
         Dog dog = new Dog("test", "TestDog");
         
         try {
