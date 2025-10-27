@@ -127,10 +127,9 @@ class ReadOperations {
             // concat all suitable stream of all sub plans
             rawStream = new ConcatStream(subStreams);
 
-            if (findPlan.isDistinct()) {
-                // return only distinct items
-                rawStream = new DistinctStream(rawStream);
-            }
+            // Always apply distinct stream for OR filters to avoid duplicates
+            // when the same document matches multiple sub-plans (different indexes)
+            rawStream = new DistinctStream(rawStream);
         } else {
             // and or single filter
             if (findPlan.getByIdFilter() != null) {
