@@ -18,6 +18,7 @@ package org.dizitart.no2.spatial;
 
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
+import org.dizitart.no2.spatial.converter.GeoPointConverter;
 import org.dizitart.no2.spatial.converter.GeometryConverter;
 
 import java.util.Set;
@@ -41,6 +42,6 @@ public class SpatialModule implements NitriteModule {
      */
     @Override
     public Set<NitritePlugin> plugins() {
-        return setOf(new SpatialIndexer(), new GeometryConverter());
+        return setOf(new SpatialIndexer(), new GeometryConverter(), new GeoPointConverter());
     }
 }
