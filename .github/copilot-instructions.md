@@ -10,7 +10,7 @@ Nitrite Database is an open source embedded NoSQL database for Java. It's a mult
 - Extensible storage engines (MVStore, RocksDB)
 - Full-text search and indexing
 - Transaction support
-- Android compatibility (API Level 24+)
+- Android compatibility (API Level 30+)
 
 ## Repository Structure
 

@@ -28,7 +28,7 @@ Nitrite is an embedded database ideal for desktop, mobile or small web applicati
 - Transaction support
 - Schema migration support
 - Encryption support
-- Android compatibility (API Level 24)
+- Android compatibility (API Level 30)
 
 ## Kotlin Extension
 
