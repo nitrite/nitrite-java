@@ -165,14 +165,25 @@ public class SpatialIndex implements NitriteIndex {
         if (fieldValue == null) return null;
         if (fieldValue instanceof String) {
             return GeometryUtils.fromString((String) fieldValue);
+        } else if (fieldValue instanceof GeoPoint) {
+            // Handle GeoPoint - get its underlying Point geometry
+            return ((GeoPoint) fieldValue).getPoint();
         } else if (fieldValue instanceof Geometry) {
             return (Geometry) fieldValue;
         } else if (fieldValue instanceof Document) {
-            // in case of document, check if it contains geometry field
+            // in case of document, check if it contains geometry field or lat/lon fields
             // GeometryConverter convert a geometry to document with geometry field
+            // GeoPointConverter converts to document with latitude/longitude fields
             Document document = (Document) fieldValue;
             if (document.containsField("geometry")) {
                 return GeometryUtils.fromString(document.get("geometry", String.class));
+            } else if (document.containsField("latitude") && document.containsField("longitude")) {
+                // Reconstruct GeoPoint from lat/lon
+                Double lat = document.get("latitude", Double.class);
+                Double lon = document.get("longitude", Double.class);
+                if (lat != null && lon != null) {
+                    return new GeoPoint(lat, lon).getPoint();
+                }
             }
         }
         throw new IndexingException("Field " + field + " does not contain Geometry data");
