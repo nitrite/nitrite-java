@@ -82,6 +82,7 @@ class FieldAccessHelper {
         try {
             // Use MethodHandles.lookup().unreflect which is available since Android API 26
             // This is more secure than setAccessible but requires the field to be accessible
+            // while MethodHandles provide a more modern API, setAccessible is still required to bypass access checks.
             field.setAccessible(true);
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             MethodHandle getter = lookup.unreflectGetter(field);
@@ -99,6 +100,7 @@ class FieldAccessHelper {
         try {
             // Use MethodHandles.lookup().unreflect which is available since Android API 26
             // This is more secure than direct setAccessible + set
+            // while MethodHandles provide a more modern API, setAccessible is still required to bypass access checks.
             field.setAccessible(true);
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             MethodHandle setter = lookup.unreflectSetter(field);
