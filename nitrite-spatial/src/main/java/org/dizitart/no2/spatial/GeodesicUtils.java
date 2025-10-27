@@ -24,6 +24,11 @@ import org.locationtech.jts.geom.Coordinate;
  * Utility class for geodesic distance calculations on Earth's surface.
  * This class handles the conversion between meters and degrees of latitude/longitude,
  * accounting for the curvature of the Earth using the WGS84 ellipsoid model.
+ * 
+ * <p><strong>Note:</strong> This is an interim implementation. A future enhancement 
+ * (see <a href="https://github.com/nitrite/nitrite-java/issues/1126">issue #1126</a>) 
+ * will introduce explicit GeoPoint types and separate GeoNearFilter to provide better 
+ * type safety and avoid the ambiguity of auto-detection.</p>
  *
  * @since 4.0
  * @author Anindya Chatterjee
@@ -36,6 +41,17 @@ class GeodesicUtils {
      * This is a heuristic check based on valid lat/long ranges:
      * - Latitude: -90 to 90
      * - Longitude: -180 to 180
+     * 
+     * <p><strong>Limitation:</strong> This heuristic may incorrectly classify:</p>
+     * <ul>
+     *   <li>Cartesian coordinates that happen to fall within ±90°/±180° range 
+     *       (e.g., game world or CAD coordinates)</li>
+     *   <li>Invalid geographic coordinates (e.g., lat=0, lon=200 would pass the check 
+     *       but lon=200, lat=0 would fail)</li>
+     * </ul>
+     * 
+     * <p>A future enhancement will use explicit GeoPoint types to avoid this ambiguity.
+     * See <a href="https://github.com/nitrite/nitrite-java/issues/1126">issue #1126</a>.</p>
      *
      * @param center the coordinate to check
      * @return true if the coordinate appears to be geographic, false otherwise
@@ -53,6 +69,14 @@ class GeodesicUtils {
      * Calculates the approximate radius in degrees for a given distance in meters
      * at a specific geographic coordinate. This accounts for the fact that one degree
      * of longitude varies with latitude.
+     * 
+     * <p><strong>Accuracy Note:</strong> This method returns the maximum of the 
+     * latitude and longitude degree differences to ensure circular coverage. This 
+     * means the resulting bounding box may be slightly larger than necessary, 
+     * potentially including some points outside the actual geodesic circle.</p>
+     * 
+     * <p>A future enhancement (see <a href="https://github.com/nitrite/nitrite-java/issues/1126">issue #1126</a>, 
+     * Task 4) will implement two-pass query execution to eliminate these false positives.</p>
      *
      * @param center the center coordinate (longitude, latitude)
      * @param radiusMeters the radius in meters
@@ -75,6 +99,7 @@ class GeodesicUtils {
         
         // Use the maximum of the two to ensure we cover the full circle
         // This creates a slightly larger search area but ensures we don't miss points
+        // TODO: Consider two-pass filtering to eliminate false positives (see issue #1126, Task 4)
         return Math.max(lonDiff, latDiff);
     }
 }

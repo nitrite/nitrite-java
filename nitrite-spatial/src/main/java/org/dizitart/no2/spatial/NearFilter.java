@@ -22,6 +22,29 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.util.GeometricShapeFactory;
 
 /**
+ * A spatial filter that finds geometries near a point within a specified distance.
+ * 
+ * <p>This filter automatically detects whether the coordinates are geographic (latitude/longitude)
+ * or Cartesian, and applies the appropriate distance calculation:</p>
+ * <ul>
+ *   <li><strong>Geographic coordinates</strong> (within ±90° lat, ±180° lon): Uses geodesic distance
+ *       on Earth's WGS84 ellipsoid, with distance specified in meters.</li>
+ *   <li><strong>Cartesian coordinates</strong> (outside those bounds): Uses simple Euclidean distance,
+ *       with distance in the same units as the coordinates.</li>
+ * </ul>
+ * 
+ * <p><strong>Future Enhancement:</strong> A future version will introduce explicit 
+ * {@code GeoNearFilter} and {@code GeoPoint} types for better type safety and to avoid 
+ * auto-detection ambiguity. See <a href="https://github.com/nitrite/nitrite-java/issues/1126">issue #1126</a>
+ * (Tasks 1-2) for details.</p>
+ * 
+ * <p><strong>Known Limitations:</strong></p>
+ * <ul>
+ *   <li>Auto-detection may misclassify Cartesian coordinates in the range ±90/±180</li>
+ *   <li>May return some false positives (points slightly outside the geodesic circle but 
+ *       within its bounding box) - see issue #1126, Task 4</li>
+ * </ul>
+ * 
  * @since 4.0
  * @author Anindya Chatterjee
  */
