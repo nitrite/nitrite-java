@@ -26,8 +26,8 @@ import java.lang.reflect.Method;
  * Helper class to access field values, handling both regular fields and interface properties.
  * For interface properties (synthetic fields from InterfacePropertyHolder), this class
  * finds and accesses the actual field on the concrete implementation object.
- * 
- * Uses MethodHandles for improved security and performance (Android API 26+, available in API 30).
+ * <p>
+ * Uses MethodHandles for improved security and performance (Android API 26+).
  *
  * @author Anindya Chatterjee
  * @since 4.3.2

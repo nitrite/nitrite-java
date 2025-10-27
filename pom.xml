@@ -90,7 +90,7 @@
         <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
         <dokka.version>2.1.0</dokka.version>
         <animal-sniffer.version>1.26</animal-sniffer.version>
-        <api-level-30.version>11_r3</api-level-30.version>
+        <api-level-26.version>8.0.0_r2</api-level-26.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     </properties>
 
@@ -446,8 +446,8 @@
                             <configuration>
                                 <signature>
                                     <groupId>net.sf.androidscents.signature</groupId>
-                                    <artifactId>android-api-level-30</artifactId>
-                                    <version>${api-level-30.version}</version>
+                                    <artifactId>android-api-level-26</artifactId>
+                                    <version>${api-level-26.version}</version>
                                 </signature>
                             </configuration>
                         </execution>
