@@ -36,10 +36,9 @@ import org.locationtech.jts.util.GeometricShapeFactory;
  * 
  * <p><strong>Distance Units:</strong> The distance parameter must be in meters.</p>
  * 
- * <p><strong>Accuracy Note:</strong> This filter uses a bounding box approximation
- * for the R-tree index search, which may return some false positives (points
- * slightly outside the geodesic circle but within its bounding box). A future
- * enhancement will add two-pass filtering for exact results.</p>
+ * <p><strong>Accuracy:</strong> This filter uses two-pass query execution for accurate results:
+ * Phase 1 performs a fast R-tree bounding box search, and Phase 2 refines results using
+ * precise JTS geometric operations to eliminate false positives.</p>
  * 
  * @since 4.3.3
  * @author Anindya Chatterjee
