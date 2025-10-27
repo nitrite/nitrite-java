@@ -193,8 +193,6 @@ class Reflector {
             
             if (propertyName.equals(extractedPropertyName)) {
                 // Found matching getter - create a wrapper field
-                // For now, we return null and will handle this case specially
-                // Actually, let's throw a more helpful error with a workaround suggestion
                 return createSyntheticFieldForProperty(propertyName, method);
             }
         }
