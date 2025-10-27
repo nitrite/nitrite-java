@@ -207,8 +207,12 @@ class Reflector {
      */
     private Field createSyntheticFieldForProperty(String propertyName, Method getterMethod) {
         try {
-            // Use a generic Object field as a template
-            // The name won't match but the infrastructure can work around it
+            // Use a generic Object field as a template.
+            // The field name ("property") does not match the actual property name,
+            // but InterfacePropertyHolder.registerProperty stores the mapping between
+            // the template field, the actual property name, and the getter method.
+            // This allows the infrastructure to later retrieve the correct property
+            // information for interface-based repositories, even though the field name is generic.
             Field templateField = InterfacePropertyHolder.class.getDeclaredField("property");
             // Store metadata about this field for later use
             InterfacePropertyHolder.registerProperty(templateField, propertyName, getterMethod);
