@@ -110,12 +110,12 @@ public class RepositoryOperations {
         if (objectIdField != null) {
             Field idField = objectIdField.getField();
 
-            if (idField.getType() == NitriteId.class) {
+            Class<?> fieldType = InterfacePropertyHolder.getPropertyType(idField);
+            if (fieldType == NitriteId.class) {
                 try {
-                    idField.setAccessible(true);
-                    if (idField.get(object) == null) {
+                    if (FieldAccessHelper.get(idField, object) == null) {
                         NitriteId id = document.getId();
-                        idField.set(object, id);
+                        FieldAccessHelper.set(idField, object, id);
                         document.put(objectIdField.getIdFieldName(), nitriteMapper.tryConvert(id, Comparable.class));
                     } else if (!update) {
                         // if it is an insert, then we should not allow to insert the document with user
@@ -144,9 +144,8 @@ public class RepositoryOperations {
         }
 
         Field idField = objectIdField.getField();
-        idField.setAccessible(true);
         try {
-            Object value = idField.get(object);
+            Object value = FieldAccessHelper.get(idField, object);
             if (value == null) {
                 throw new InvalidIdException("Id value cannot be null");
             }
@@ -160,8 +159,10 @@ public class RepositoryOperations {
         document.remove(DOC_ID);
         if (objectIdField != null) {
             Field idField = objectIdField.getField();
-            if (idField != null && !objectIdField.isEmbedded() && idField.getType() == NitriteId.class) {
-                document.remove(idField.getName());
+            Class<?> fieldType = InterfacePropertyHolder.getPropertyType(idField);
+            String fieldName = InterfacePropertyHolder.getPropertyName(idField);
+            if (idField != null && !objectIdField.isEmbedded() && fieldType == NitriteId.class) {
+                document.remove(fieldName);
             }
         }
     }
@@ -171,7 +172,9 @@ public class RepositoryOperations {
             if (id == null) {
                 throw new InvalidIdException("Id cannot be null");
             }
-            if (!isCompatibleTypes(id.getClass(), objectIdField.getField().getType())) {
+            Field idField = objectIdField.getField();
+            Class<?> fieldType = InterfacePropertyHolder.getPropertyType(idField);
+            if (!isCompatibleTypes(id.getClass(), fieldType)) {
                 throw new InvalidIdException("A value of invalid type is provided as id");
             }
 
