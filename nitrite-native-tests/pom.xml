@@ -123,7 +123,14 @@
                         <configuration>
                             <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                             <buildArgs>
-                                <buildArg>--initialize-at-run-time=org.junit.jupiter.engine.discovery.MethodSegmentResolver</buildArg>
+                                <!-- push entire engine/platform to runtime to avoid partial early init -->
+                                <buildArg>--initialize-at-run-time=org.junit.jupiter.engine,org.junit.platform</buildArg>
+
+                                <!-- tracing to see who triggers initialization -->
+                                <buildArg>--trace-class-initialization=org.junit.jupiter.engine.discovery.MethodSegmentResolver</buildArg>
+
+                                <!-- print underlying exception stacktraces -->
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
                             </buildArgs>
                         </configuration>
                         <executions>
