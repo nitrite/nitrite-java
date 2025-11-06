@@ -122,6 +122,9 @@
                         <extensions>true</extensions>
                         <configuration>
                             <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                            <buildArgs>
+                                <buildArg>--initialize-at-run-time=org.junit.jupiter.engine.discovery.MethodSegmentResolver</buildArg>
+                            </buildArgs>
                         </configuration>
                         <executions>
                             <execution>
