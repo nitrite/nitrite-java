@@ -124,7 +124,6 @@
                             <classesDirectory>${project.build.outputDirectory}</classesDirectory>
                             <buildArgs>
                                 <buildArg>--initialize-at-run-time=org.junit.jupiter.engine.discovery.MethodSegmentResolver</buildArg>
-                                <buildArg>--initialize-at-run-time=org.junit.jupiter.engine.discovery.MethodSelectorResolver</buildArg>
 
                                 <!-- tracing to see who triggers initialization -->
                                 <buildArg>--trace-class-initialization=org.junit.jupiter.engine.discovery.MethodSegmentResolver</buildArg>
