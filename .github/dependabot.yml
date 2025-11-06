@@ -12,6 +12,9 @@ updates:
       # Pin RocksDB to version 10.2.1
       - dependency-name: "org.rocksdb:rocksdbjni"
         update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]
+      # Pin JUnit BOM to version 6.0.0
+      - dependency-name: "org.junit:junit-bom"
+        update-types: [ "version-update:semver-major", "version-update:semver-minor", "version-update:semver-patch" ]
     groups:
       security:
         # Group security updates into a single pull request
