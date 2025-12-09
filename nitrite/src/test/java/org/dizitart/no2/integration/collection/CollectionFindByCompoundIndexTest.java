@@ -86,7 +86,13 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
             )
         );
 
-        assertEquals(3, cursor.size());
+        // With the fix, OR filters no longer return duplicates
+        // doc2 = {firstName: "fn2", lastName: "ln2"}
+        // doc3 = {firstName: "fn3", lastName: "ln2"}
+        // First AND: lastName=ln2 AND firstName!=fn1 → matches doc2 and doc3
+        // Second AND: firstName=fn3 AND lastName=ln2 → matches doc3
+        // Union without duplicates: doc2 and doc3 (2 total)
+        assertEquals(2, cursor.size());
 
         FindPlan findPlan = cursor.getFindPlan();
         assertNull(findPlan.getIndexScanFilter());
@@ -101,11 +107,11 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
             d.get("firstName", String.class).equals("fn2")
                 && d.get("lastName", String.class).equals("ln2")).count());
 
-        assertEquals(2, cursor.toList().stream().filter(d ->
+        assertEquals(1, cursor.toList().stream().filter(d ->
             d.get("firstName", String.class).equals("fn3")
                 && d.get("lastName", String.class).equals("ln2")).count());
 
-        // distinct test
+        // distinct test - should still return the same results since we're already deduplicating
         cursor = collection.find(
             or(
                 and(
@@ -231,11 +237,21 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
             )
         );
 
+        // With the fix, OR filters no longer return duplicates
+        // doc1 = {firstName: "fn1", lastName: "ln1", birthDay: "2012-07-01"}
+        // doc2 = {firstName: "fn2", lastName: "ln2", birthDay: "2010-06-12"}
+        // doc3 = {firstName: "fn3", lastName: "ln2", birthDay: "2014-04-17"}
+        // Flattened OR conditions:
+        // 1. lastName=ln2 → doc2, doc3
+        // 2. firstName!=fn1 → doc2, doc3
+        // 3. birthDay=2012-07-01 → doc1
+        // 4. firstName!=fn1 → doc2, doc3 (duplicate)
+        // Union without duplicates: doc1, doc2, doc3 (3 total)
         FindPlan findPlan = cursor.getFindPlan();
         assertEquals(3, findPlan.getSubPlans().size());
-        assertEquals(5, cursor.size());
+        assertEquals(3, cursor.size());
 
-        // distinct
+        // distinct test - should still return the same results since we're already deduplicating
         cursor = collection.find(
             or(
                 or(

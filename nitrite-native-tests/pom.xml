@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite-java</artifactId>
-        <version>4.3.2-SNAPSHOT</version>
+        <version>4.3.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>nitrite-native-tests</artifactId>
@@ -20,9 +20,9 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <assertj.version>3.27.5</assertj.version>
-        <junit.version>5.12.2</junit.version>
-        <native-build-tools-plugin.version>0.10.6</native-build-tools-plugin.version>
+        <assertj.version>3.27.6</assertj.version>
+        <junit.version>6.0.0</junit.version>
+        <native-build-tools-plugin.version>0.11.3</native-build-tools-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -122,6 +122,15 @@
                         <extensions>true</extensions>
                         <configuration>
                             <classesDirectory>${project.build.outputDirectory}</classesDirectory>
+                            <buildArgs>
+                                <buildArg>--initialize-at-run-time=org.junit.jupiter.engine.discovery.MethodSegmentResolver</buildArg>
+
+                                <!-- tracing to see who triggers initialization -->
+                                <buildArg>--trace-class-initialization=org.junit.jupiter.engine.discovery.MethodSegmentResolver</buildArg>
+
+                                <!-- print underlying exception stacktraces -->
+                                <buildArg>-H:+ReportExceptionStackTraces</buildArg>
+                            </buildArgs>
                         </configuration>
                         <executions>
                             <execution>

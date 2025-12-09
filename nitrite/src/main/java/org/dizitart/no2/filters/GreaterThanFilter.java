@@ -18,6 +18,8 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Comparables;
 import org.dizitart.no2.exceptions.FilterException;
@@ -59,15 +61,16 @@ class GreaterThanFilter extends SortingAwareFilter {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public List<?> applyOnIndex(IndexMap indexMap) {
         Comparable comparable = getComparable();
-        List<NavigableMap<Comparable<?>, Object>> subMaps = new ArrayList<>();
+        DBValue dbValue = comparable == null ? DBNull.getInstance() : new DBValue(comparable);
+        List<NavigableMap<DBValue, Object>> subMaps = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
         if (isReverseScan()) {
-            Comparable lastKey = indexMap.lastKey();
-            while (lastKey != null && Comparables.compare(lastKey, comparable) > 0) {
+            DBValue lastKey = indexMap.lastKey();
+            while (lastKey != DBNull.getInstance() && Comparables.compare(lastKey, dbValue) > 0) {
                 // get the starting value, it can be a navigable-map (compound index)
                 // or list (single field index)
                 Object value = indexMap.get(lastKey);
@@ -75,8 +78,8 @@ class GreaterThanFilter extends SortingAwareFilter {
                 lastKey = indexMap.lowerKey(lastKey);
             }
         } else {
-            Comparable higherKey = indexMap.higherKey(comparable);
-            while (higherKey != null) {
+            DBValue higherKey = indexMap.higherKey(dbValue);
+            while (higherKey != DBNull.getInstance()) {
                 // get the starting value, it can be a navigable-map (compound index)
                 // or list (single field index)
                 Object value = indexMap.get(higherKey);

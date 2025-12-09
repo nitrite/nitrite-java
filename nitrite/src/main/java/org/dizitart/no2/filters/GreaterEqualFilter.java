@@ -18,6 +18,8 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.Comparables;
 import org.dizitart.no2.exceptions.FilterException;
@@ -58,18 +60,19 @@ class GreaterEqualFilter extends SortingAwareFilter {
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public List<?> applyOnIndex(IndexMap indexMap) {
         Comparable comparable = getComparable();
-        List<NavigableMap<Comparable<?>, Object>> subMaps = new ArrayList<>();
+        DBValue dbValue = comparable == null ? DBNull.getInstance() : new DBValue(comparable);
+        List<NavigableMap<DBValue, Object>> subMaps = new ArrayList<>();
 
         // maintain the find sorting order
         List<NitriteId> nitriteIds = new ArrayList<>();
 
         if (isReverseScan()) {
             // if reverse scan is required, then start from the last key
-            Comparable lastKey = indexMap.lastKey();
-            while(lastKey != null && Comparables.compare(lastKey, comparable) >= 0) {
+            DBValue lastKey = indexMap.lastKey();
+            while(lastKey != DBNull.getInstance() && Comparables.compare(lastKey, dbValue) >= 0) {
                 // get the starting value, it can be a navigable-map (compound index)
                 // or list (single field index)
                 Object value = indexMap.get(lastKey);
@@ -77,8 +80,8 @@ class GreaterEqualFilter extends SortingAwareFilter {
                 lastKey = indexMap.lowerKey(lastKey);
             }
         } else {
-            Comparable ceilingKey = indexMap.ceilingKey(comparable);
-            while (ceilingKey != null) {
+            DBValue ceilingKey = indexMap.ceilingKey(dbValue);
+            while (ceilingKey != DBNull.getInstance()) {
                 // get the starting value, it can be a navigable-map (compound index)
                 // or list (single field index)
                 Object value = indexMap.get(ceilingKey);

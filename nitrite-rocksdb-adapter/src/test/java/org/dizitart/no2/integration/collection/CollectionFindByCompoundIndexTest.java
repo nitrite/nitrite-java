@@ -200,7 +200,7 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
 
         FindPlan findPlan = cursor.getFindPlan();
         assertEquals(3, findPlan.getSubPlans().size());
-        assertEquals(5, cursor.size());
+        assertEquals(3, cursor.size());
 
         // distinct
         cursor = collection.find(
