@@ -1,3 +1,21 @@
+## Release 4.3.3 - (Unreleased)
+
+### New Changes
+
+- Support for interface entity types with EntityDecorator #1183
+- Fixed NearFilter to support geodesic distance for geographic coordinates #1185
+  - Added GeoPoint class for explicit geographic coordinate support
+  - Created GeoNearFilter for geodesic distance queries
+  - Implements two-pass query execution to eliminate false positives from bounding box approximation
+  - Added comprehensive test suite for geographic coordinate support
+
+### Issue Fixes
+
+- Fix OR filters returning duplicate documents when using multiple indexes #1184
+- Fix inconsistent numeric filtering across types with indexes #1175
+- Fix elemMatch queries to use array field indexes #1174
+- Fix native-image build: initialize JUnit MethodSegmentResolver at runtime #1189
+
 ## Release 4.3.2 - Sep 25, 2025
 
 ### Issue Fixes
