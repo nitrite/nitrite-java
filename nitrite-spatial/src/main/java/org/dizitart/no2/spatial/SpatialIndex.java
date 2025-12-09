@@ -140,7 +140,7 @@ public class SpatialIndex implements NitriteIndex {
         Geometry searchGeometry = spatialFilter.getValue();
         BoundingBox boundingBox = fromGeometry(searchGeometry);
 
-        if (filter instanceof WithinFilter || filter instanceof GeoNearFilter) {
+        if (filter instanceof WithinFilter) {
             // For Within/Near filters, we want points that intersect the search geometry
             // Note: We use intersecting here because we're searching for points WITHIN a circle
             // The R-tree stores point bounding boxes, and we want those that overlap with
@@ -188,7 +188,7 @@ public class SpatialIndex implements NitriteIndex {
             }
             
             // Apply the appropriate JTS geometric operation based on filter type
-            if (filter instanceof WithinFilter || filter instanceof GeoNearFilter) {
+            if (filter instanceof WithinFilter) {
                 // For Within and Near filters: the search geometry should contain the stored geometry
                 // OR the stored geometry should be within the search geometry
                 // For point-in-circle queries, we want to check if the point is within the circle

@@ -49,4 +49,41 @@ public class RepositoryCompoundIndexTest extends BaseObjectRepositoryTest {
         Book bookById = bookRepository.getById(bookId);
         assertEquals(bookById, book);
     }
+
+    @Test
+    public void testMultipleBooksWithSamePartialId() {
+        BookId bookId1 = new BookId();
+        bookId1.setAuthor("John Doe");
+        bookId1.setIsbn("123456");
+        bookId1.setName("Nitrite Database");
+
+        Book book1 = new Book();
+        book1.setBookId(bookId1);
+        book1.setDescription("Some random book description");
+        book1.setPrice(22.56);
+        book1.setPublisher("My Publisher House");
+        book1.setTags(Arrays.asList("database", "nosql"));
+
+        bookRepository.insert(book1);
+
+        BookId bookId2 = new BookId();
+        bookId2.setAuthor("Jane Doe");
+        bookId2.setIsbn("123456");
+        bookId2.setName("Another Nitrite Book");
+
+        Book book2 = new Book();
+        book2.setBookId(bookId2);
+        book2.setDescription("Another random book description");
+        book2.setPrice(30.00);
+        book2.setPublisher("Another Publisher House");
+        book2.setTags(Arrays.asList("database", "nosql", "java"));
+
+        bookRepository.insert(book2);
+
+        Book fetchedBook1 = bookRepository.getById(bookId1);
+        Book fetchedBook2 = bookRepository.getById(bookId2);
+
+        assertEquals(fetchedBook1, book1);
+        assertEquals(fetchedBook2, book2);
+    }
 }
