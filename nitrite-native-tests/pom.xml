@@ -20,9 +20,9 @@
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <assertj.version>3.27.6</assertj.version>
+        <assertj.version>3.27.7</assertj.version>
         <junit.version>6.0.0</junit.version>
-        <native-build-tools-plugin.version>0.11.3</native-build-tools-plugin.version>
+        <native-build-tools-plugin.version>0.11.4</native-build-tools-plugin.version>
     </properties>
 
     <dependencyManagement>
