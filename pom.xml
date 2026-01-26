@@ -62,12 +62,12 @@
         <commons-codec.version>1.20.0</commons-codec.version>
         <commons-io.version>2.21.0</commons-io.version>
         <kotlin.version>2.3.0</kotlin.version>
-        <kotlinx-serialization.version>1.9.0</kotlinx-serialization.version>
+        <kotlinx-serialization.version>1.10.0</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.7.1-0.6.x-compat</kotlinx-datetime.version>
         <lombok.version>1.18.42</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.20.0</mockito.version>
+        <mockito.version>5.21.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
         <log4j.version>2.25.3</log4j.version>
         <awaitility.version>4.3.0</awaitility.version>
@@ -89,7 +89,7 @@
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <dokka.version>2.1.0</dokka.version>
-        <animal-sniffer.version>1.26</animal-sniffer.version>
+        <animal-sniffer.version>1.27</animal-sniffer.version>
         <api-level-26.version>8.0.0_r2</api-level-26.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
     </properties>
