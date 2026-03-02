@@ -67,13 +67,13 @@
         <lombok.version>1.18.42</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.21.0</mockito.version>
+        <mockito.version>5.22.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
         <log4j.version>2.25.3</log4j.version>
         <awaitility.version>4.3.0</awaitility.version>
         <joda-time.version>2.14.0</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
-        <snakeyaml.version>2.5</snakeyaml.version>
+        <snakeyaml.version>2.6</snakeyaml.version>
         <jakarta.xml.bind-api.version>4.0.5</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.6</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
