@@ -16,14 +16,10 @@
 
 package org.dizitart.kno2
 
-import com.fasterxml.jackson.databind.Module
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.dizitart.no2.mapper.jackson.JacksonMapper
 import org.dizitart.no2.spatial.jackson.GeometryModule
+import tools.jackson.databind.JacksonModule
+import tools.jackson.module.kotlin.KotlinModule
 
 /**
  * A custom Jackson mapper for Potassium Nitrite (KNO2) library that extends [JacksonMapper] class.
@@ -33,21 +29,14 @@ import org.dizitart.no2.spatial.jackson.GeometryModule
  * @author Stefan Mandel
  * @since 2.1.0
  */
-open class KNO2JacksonMapper(private vararg val modules: Module) : JacksonMapper() {
+open class KNO2JacksonMapper(private vararg val modules: JacksonModule) : JacksonMapper() {
 
-    override fun getObjectMapper(): ObjectMapper {
-        val objectMapper = super.getObjectMapper()
-        objectMapper.registerModule(KotlinModule.Builder().build())
-        objectMapper.registerModule(Jdk8Module())
-        objectMapper.registerModule(JavaTimeModule())
-        objectMapper.registerModule(GeometryModule())
+    init {
+        registerJacksonModule(KotlinModule.Builder().build())
+        registerJacksonModule(GeometryModule())
         for (module in modules) {
-            objectMapper.registerModule(module)
+            registerJacksonModule(module)
         }
-
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-
-        return objectMapper
     }
 }
 

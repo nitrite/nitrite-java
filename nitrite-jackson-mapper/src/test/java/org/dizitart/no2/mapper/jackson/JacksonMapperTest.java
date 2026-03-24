@@ -17,18 +17,19 @@
 
 package org.dizitart.no2.mapper.jackson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.BinaryNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.junit.Test;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.BinaryNode;
+import tools.jackson.databind.node.JsonNodeFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-
-import static org.junit.Assert.*;
 
 public class JacksonMapperTest {
     @Test
@@ -41,8 +42,6 @@ public class JacksonMapperTest {
     public void testConvert() {
         JacksonMapper jacksonMapper = new JacksonMapper();
         assertEquals("Source", jacksonMapper.<Object, Object>tryConvert("Source", Object.class));
-        assertTrue(jacksonMapper.getObjectMapper()
-            .getSerializerProviderInstance() instanceof com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.Impl);
     }
 
     @Test
@@ -55,19 +54,17 @@ public class JacksonMapperTest {
     public void testConvert4() {
         JacksonMapper jacksonMapper = new JacksonMapper();
         assertEquals(0, ((Integer) jacksonMapper.<Object, Object>tryConvert(0, Object.class)).intValue());
-        assertTrue(jacksonMapper.getObjectMapper()
-            .getSerializerProviderInstance() instanceof com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.Impl);
     }
 
     @Test
     public void testConvert5() {
         JacksonMapper jacksonMapper = new JacksonMapper();
-        ArrayNode source = new ArrayNode(new JsonNodeFactory(true));
+        ArrayNode source = new ArrayNode(new JsonNodeFactory());
         assertThrows(ObjectMappingException.class, () -> jacksonMapper.<Object, Object>tryConvert(source, Object.class));
     }
 
     @Test
-    public void testConvert6() throws UnsupportedEncodingException {
+    public void testConvert6() {
         JacksonMapper jacksonMapper = new JacksonMapper();
         BinaryNode source = new BinaryNode("AAAAAAAAAAAAAAAAAAAAAAAA".getBytes(StandardCharsets.UTF_8));
         assertNull(jacksonMapper.<Object, Object>tryConvert(source, Object.class));
@@ -91,8 +88,6 @@ public class JacksonMapperTest {
     public void testConvertToDocument() {
         JacksonMapper jacksonMapper = new JacksonMapper();
         jacksonMapper.<Object>convertToDocument("Source");
-        assertTrue(jacksonMapper.getObjectMapper()
-            .getSerializerProviderInstance() instanceof com.fasterxml.jackson.databind.ser.DefaultSerializerProvider.Impl);
     }
 }
 

@@ -1,15 +1,14 @@
 package org.dizitart.no2.support.exchange;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-
 import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+import tools.jackson.databind.json.JsonMapper;
 
 public class ExporterTest {
     @Test
     public void testCreateObjectMapper() {
-        ObjectMapper actualCreateObjectMapperResult = Exporter.createObjectMapper();
-        assertNotNull(actualCreateObjectMapperResult);
+        JsonMapper actualCreateJsonMapperResult = Exporter.createJsonMapper();
+        assertNotNull(actualCreateJsonMapperResult);
     }
 }
 

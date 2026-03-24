@@ -16,12 +16,10 @@
 
 package org.dizitart.no2.mapper.jackson.modules;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import org.dizitart.no2.collection.NitriteId;
-
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdScalarDeserializer;
 
 /**
  * @since 4.0
@@ -34,7 +32,7 @@ class NitriteIdDeserializer extends StdScalarDeserializer<NitriteId> {
     }
 
     @Override
-    public NitriteId deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public NitriteId deserialize(JsonParser p, DeserializationContext ctxt) {
         return NitriteId.createId(p.getValueAsString());
     }
 }

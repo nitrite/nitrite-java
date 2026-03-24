@@ -16,11 +16,11 @@
 
 package org.dizitart.kno2
 
-import com.fasterxml.jackson.databind.Module
-import org.dizitart.no2.common.util.Iterables.setOf
 import org.dizitart.no2.common.module.NitriteModule
 import org.dizitart.no2.common.module.NitritePlugin
+import org.dizitart.no2.common.util.Iterables.setOf
 import org.dizitart.no2.spatial.SpatialIndexer
+import tools.jackson.databind.JacksonModule
 
 /**
  * A module for Nitrite database that allows registering additional extensions.
@@ -29,7 +29,7 @@ import org.dizitart.no2.spatial.SpatialIndexer
  * @since 4.0
  * @author Anindya Chatterjee
  */
-open class KNO2Module(private vararg val extensions: Module) : NitriteModule {
+open class KNO2Module(private vararg val extensions: JacksonModule) : NitriteModule {
 
     override fun plugins(): MutableSet<NitritePlugin> {
         return setOf(KNO2JacksonMapper(*extensions), SpatialIndexer())

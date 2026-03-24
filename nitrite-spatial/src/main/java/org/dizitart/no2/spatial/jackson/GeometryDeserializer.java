@@ -16,13 +16,11 @@
 
 package org.dizitart.no2.spatial.jackson;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdScalarDeserializer;
 import org.dizitart.no2.spatial.GeometryUtils;
 import org.locationtech.jts.geom.Geometry;
-
-import java.io.IOException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdScalarDeserializer;
 
 /**
  * @since 4.0
@@ -35,7 +33,7 @@ class GeometryDeserializer extends StdScalarDeserializer<Geometry> {
     }
 
     @Override
-    public Geometry deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public Geometry deserialize(JsonParser p, DeserializationContext ctxt) {
         String value = p.getValueAsString();
         return GeometryUtils.fromString(value);
     }

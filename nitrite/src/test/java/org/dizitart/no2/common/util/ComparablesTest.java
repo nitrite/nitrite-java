@@ -1,11 +1,10 @@
 package org.dizitart.no2.common.util;
 
-import com.fasterxml.jackson.databind.type.ClassKey;
+import static org.junit.Assert.assertEquals;
 import org.apache.commons.lang3.mutable.MutableByte;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import tools.jackson.databind.type.ClassKey;
 
 public class ComparablesTest {
     @Test
