@@ -1,12 +1,12 @@
 package org.dizitart.no2.support.exchange;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * The options for importing collections and data into a Nitrite database.
- * 
+ *
  * @author Anindya Chatterjee
  * @see Importer
  * @since 4.0
@@ -23,25 +23,19 @@ public class ImportOptions {
      * {@link org.dizitart.no2.Nitrite}, so the database must not be open elsewhere.
      * Upon completion of the import operation, the {@link org.dizitart.no2.Nitrite}
      * instance will be closed.
-     * 
+     *
      * <p>
      * NOTE: This is a mandatory field. If not specified, the import operation will
      * fail.
-     *
-     * @param nitriteFactory the nitriteFactory.
-     * @return the nitriteFactory.
      */
     private NitriteFactory nitriteFactory;
 
     /**
-     * Specifies a {@link JsonFactory} to create a
-     * {@link com.fasterxml.jackson.core.JsonParser} instance.
+     * Specifies a {@link JsonMapper} to create a
+     * {@link tools.jackson.core.JsonParser} instance.
      * This instance will be used to read the exported data from a file.
      * <p>
      * This is an optional field. If not specified, a default one will be created.
-     *
-     * @param jsonFactory the jsonFactory.
-     * @return the jsonFactory.
      */
-    private JsonFactory jsonFactory;
+    private JsonMapper jsonMapper;
 }

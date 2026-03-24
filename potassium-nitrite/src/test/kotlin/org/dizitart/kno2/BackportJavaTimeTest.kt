@@ -16,10 +16,10 @@
 
 package org.dizitart.kno2
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.*
-import com.fasterxml.jackson.databind.module.SimpleModule
+import tools.jackson.core.JsonGenerator
+import tools.jackson.core.JsonParser
+import tools.jackson.databind.*
+import tools.jackson.databind.module.SimpleModule
 import lombok.extern.slf4j.Slf4j
 import org.dizitart.no2.index.IndexType
 import org.dizitart.no2.repository.annotations.Id
@@ -29,6 +29,8 @@ import org.junit.Test
 import org.slf4j.LoggerFactory
 import org.threeten.bp.LocalDateTime
 import org.threeten.bp.ZoneOffset
+import tools.jackson.databind.deser.std.StdDeserializer
+import tools.jackson.databind.ser.std.StdSerializer
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -49,7 +51,7 @@ class BackportJavaTimeTest {
 
     class ThreeTenAbpModule : SimpleModule() {
         override fun setupModule(context: SetupContext?) {
-            addDeserializer(LocalDateTime::class.java, object : JsonDeserializer<LocalDateTime>() {
+            addDeserializer(LocalDateTime::class.java, object : StdDeserializer<LocalDateTime>(LocalDateTime::class.java) {
                 override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): LocalDateTime? {
                     val timeStamp = p?.longValue
                     return if (timeStamp == -1L || timeStamp == null) null else {
@@ -58,8 +60,8 @@ class BackportJavaTimeTest {
                 }
             })
 
-            addSerializer(LocalDateTime::class.java, object : JsonSerializer<LocalDateTime>() {
-                override fun serialize(value: LocalDateTime?, gen: JsonGenerator?, serializers: SerializerProvider?) {
+            addSerializer(LocalDateTime::class.java, object : StdSerializer<LocalDateTime>(LocalDateTime::class.java) {
+                override fun serialize(value: LocalDateTime?, gen: JsonGenerator?, ctxt: SerializationContext?) {
                     if (value == null) {
                         gen?.writeNull()
                     } else {

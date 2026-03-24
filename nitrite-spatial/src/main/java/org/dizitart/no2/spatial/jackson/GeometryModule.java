@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.spatial.jackson;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.module.SimpleModule;
 import org.locationtech.jts.geom.Geometry;
 
 /**

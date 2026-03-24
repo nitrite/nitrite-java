@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethodMap;
+import tools.jackson.databind.introspect.AnnotatedMethodMap;
 import junit.framework.JUnit4TestAdapterCache;
 import lombok.Data;
 import org.apache.commons.lang3.mutable.MutableByte;
