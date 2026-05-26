@@ -16,15 +16,17 @@
 
 package org.dizitart.no2.support.exchange;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import lombok.Getter;
 import lombok.Setter;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The options used for exporting Nitrite database collections and data.
- * 
+ *
  * @author Anindya Chatterjee
  * @see Exporter
  * @since 1.0
@@ -41,28 +43,22 @@ public class ExportOptions {
      * {@link org.dizitart.no2.Nitrite}, so the database must not be open elsewhere.
      * Upon completion of the export operation, the {@link org.dizitart.no2.Nitrite}
      * instance will be closed.
-     * 
+     *
      * <p>
      * NOTE: This is a mandatory field. If not specified, the export operation will
      * fail.
-     *
-     * @param nitriteFactory the nitriteFactory.
-     * @return the nitriteFactory.
      */
     private NitriteFactory nitriteFactory;
 
     /**
-     * Specifies a {@link JsonFactory} to create a
-     * {@link com.fasterxml.jackson.core.JsonGenerator} instance.
+     * Specifies a {@link JsonMapper} to create a
+     * {@link tools.jackson.core.JsonGenerator} instance.
      * This instance will be used to write the export data to a file.
      * <p>
      * NOTE: This is an optional field. If not specified, a default one will be
      * created.
-     *
-     * @param jsonFactory the jsonFactory.
-     * @return the jsonFactory.
      */
-    private JsonFactory jsonFactory;
+    private JsonMapper jsonMapper;
 
     /**
      * Indicates if the export operation exports indices information.
@@ -73,11 +69,6 @@ public class ExportOptions {
      * <p>
      * This is an optional field. If not specified, it will be set to
      * <code>true</code>.
-     *
-     * @param exportIndices a value indicating if indices information will be
-     *                      exported.
-     * @return <code>true</code> if indices information is exported; otherwise,
-     *         <code>false</code>.
      */
     private boolean exportIndices = true;
 
@@ -89,10 +80,6 @@ public class ExportOptions {
      * <p>
      * This is an optional field. If not specified, it will be set to
      * <code>true</code>.
-     *
-     * @param exportData a value indicating if collection data will be exported.
-     * @return <code>true</code> if collection data is exported; otherwise,
-     *         <code>false</code>.
      */
     private boolean exportData = true;
 
@@ -108,9 +95,6 @@ public class ExportOptions {
      * <li>If a non-empty list is specified, only the collections in the list will
      * be exported</li>
      * </ul>
-     *
-     * @param collections list of all collection names to be exported.
-     * @return list of collection names.
      */
     private List<String> collections;
 
@@ -125,9 +109,6 @@ public class ExportOptions {
      * <li>If a non-empty list is specified, only the repositories in the list will
      * be exported</li>
      * </ul>
-     *
-     * @param repositories list of all repositories names to be exported.
-     * @return list of repositories names.
      */
     private List<String> repositories;
 
@@ -143,9 +124,6 @@ public class ExportOptions {
      * <li>If a non-empty map is specified, only the keyed-repositories in the map
      * will be exported</li>
      * </ul>
-     *
-     * @param keyedRepositories list of all keyed repositories names to be exported.
-     * @return list of keyed repositories names.
      */
     private Map<String, Set<String>> keyedRepositories;
 }
