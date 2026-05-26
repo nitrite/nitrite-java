@@ -113,6 +113,10 @@ jobs:
       - name: Install nitrite
         run: mvn -B -ff -ntp clean install -DskipTests
 
+      - name: Set up MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Run native tests
         working-directory: ./nitrite-native-tests
         run: mvn -B -ff -ntp -PnativeTest verify
