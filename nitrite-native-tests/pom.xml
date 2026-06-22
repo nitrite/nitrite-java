@@ -22,7 +22,7 @@
 
         <assertj.version>3.27.7</assertj.version>
         <junit.version>6.0.0</junit.version>
-        <native-build-tools-plugin.version>1.1.1</native-build-tools-plugin.version>
+        <native-build-tools-plugin.version>1.1.2</native-build-tools-plugin.version>
     </properties>
 
     <dependencyManagement>
