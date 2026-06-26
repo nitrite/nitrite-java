@@ -6,6 +6,8 @@ on:
       - main
       - develop
       - release
+    tags:
+      - 'v*'
     paths-ignore:
       - "README.md"
   pull_request:
