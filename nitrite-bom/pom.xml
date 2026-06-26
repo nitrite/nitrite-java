@@ -15,8 +15,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Skip flattening for BOM module to preserve dependencyManagement section -->
-        <flatten.skip>true</flatten.skip>
+        <!-- Use "bom" flatten mode so the published pom keeps the dependencyManagement section
+             (oss mode strips it, which broke the BOM in 4.3.2 - see issue #1186) -->
+        <flatten.mode>bom</flatten.mode>
     </properties>
 
     <dependencyManagement>

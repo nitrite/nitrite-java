@@ -92,6 +92,9 @@
         <animal-sniffer.version>1.27</animal-sniffer.version>
         <api-level-26.version>8.0.0_r2</api-level-26.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+
+        <!-- flatten mode for published poms; overridden to "bom" in nitrite-bom to keep dependencyManagement -->
+        <flatten.mode>oss</flatten.mode>
     </properties>
 
     <dependencyManagement>
@@ -559,7 +562,7 @@
                         <version>1.7.3</version>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>oss</flattenMode>
+                            <flattenMode>${flatten.mode}</flattenMode>
                         </configuration>
                         <executions>
                             <execution>
@@ -635,7 +638,7 @@
                         <version>1.7.3</version>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>oss</flattenMode>
+                            <flattenMode>${flatten.mode}</flattenMode>
                         </configuration>
                         <executions>
                             <execution>
