@@ -29,6 +29,7 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.common.processors.ProcessorChain;
+import org.dizitart.no2.common.util.Iterables;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -44,10 +45,26 @@ public class DocumentStream implements DocumentCursor {
     @Getter @Setter
     private FindPlan findPlan;
 
+    /**
+     * The exact match count when the query is fully answered by an index scan or a plain
+     * full scan with no post-filter, skip, limit, or OR-union. When set, {@link #size()}
+     * returns it directly instead of fetching and deserializing every matching document.
+     */
+    @Setter
+    private Long coveredCount;
+
     public DocumentStream(RecordStream<Pair<NitriteId, Document>> recordStream,
                           ProcessorChain processorChain) {
         this.recordStream = recordStream;
         this.processorChain = processorChain;
+    }
+
+    @Override
+    public long size() {
+        if (coveredCount != null) {
+            return coveredCount;
+        }
+        return Iterables.size(this);
     }
 
     @Override

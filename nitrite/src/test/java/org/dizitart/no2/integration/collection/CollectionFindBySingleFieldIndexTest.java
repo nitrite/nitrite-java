@@ -238,6 +238,46 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
     }
 
     @Test
+    public void testCoveredCountSizeMatchesIteration() {
+        // size() may short-circuit to the index id-set size (or the map size) when the query is
+        // fully index-covered with no post-filter, skip, or limit. That fast count must always
+        // agree with actually draining the cursor - on both covered and non-covered paths.
+        NitriteCollection coll = db.getCollection("covered_count");
+        for (int age = 0; age < 100; age++) {
+            coll.insert(Document.createDocument("age", age).put("even", age % 2 == 0));
+        }
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "age");
+
+        // Plain find(): covered by the map size.
+        assertEquals(countByIteration(coll.find()), coll.find().size());
+        assertEquals(100, coll.find().size());
+
+        // Indexed equality and range: covered by the index id-set size.
+        assertEquals(countByIteration(coll.find(where("age").eq(42))),
+            coll.find(where("age").eq(42)).size());
+        DocumentCursor range = coll.find(where("age").gte(30).and(where("age").lte(50)));
+        assertEquals(countByIteration(range), range.size());
+
+        // Non-covered: a post-filter on an unindexed field must still count correctly (no
+        // short-circuit), as must skip/limit.
+        DocumentCursor postFiltered = coll.find(where("even").eq(true));
+        assertEquals(countByIteration(postFiltered), postFiltered.size());
+        assertEquals(50, postFiltered.size());
+        DocumentCursor limited = coll.find(where("age").gte(0),
+            org.dizitart.no2.collection.FindOptions.skipBy(10).limit(5));
+        assertEquals(countByIteration(limited), limited.size());
+        assertEquals(5, limited.size());
+    }
+
+    private static long countByIteration(DocumentCursor cursor) {
+        long count = 0;
+        for (Document ignored : cursor) {
+            count++;
+        }
+        return count;
+    }
+
+    @Test
     public void testFindByNonUniqueIndex() throws ParseException {
         insert();
         collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");

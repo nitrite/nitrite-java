@@ -107,20 +107,46 @@ class ReadOperations {
     }
 
     private DocumentCursor createCursor(FindPlan findPlan) {
-        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(findPlan);
+        // -1 means "not an index scan"; the index branch records the exact id-set size here.
+        long[] indexedIdCount = { -1 };
+        RecordStream<Pair<NitriteId, Document>> recordStream = findSuitableStream(findPlan, indexedIdCount);
         DocumentStream cursor = new DocumentStream(recordStream, processorChain);
         cursor.setFindPlan(findPlan);
+        cursor.setCoveredCount(computeCoveredCount(findPlan, indexedIdCount[0]));
         return cursor;
     }
 
-    private RecordStream<Pair<NitriteId, Document>> findSuitableStream(FindPlan findPlan) {
+    /**
+     * Returns the exact match count when the query is fully answered without fetching documents,
+     * or {@code null} when the cursor must be drained to count. The count is exact only when
+     * nothing downstream drops or changes cardinality (a post-filter, skip, or limit); sort does
+     * not change the count, and an OR-union needs de-duplication so its count cannot be derived.
+     */
+    private Long computeCoveredCount(FindPlan findPlan, long indexedIdCount) {
+        if (!findPlan.getSubPlans().isEmpty()
+            || findPlan.getCollectionScanFilter() != null
+            || findPlan.getSkip() != null
+            || findPlan.getLimit() != null
+            || findPlan.getByIdFilter() != null) {
+            return null;
+        }
+        if (findPlan.getIndexDescriptor() != null) {
+            // the index supplied the exact matching id set
+            return indexedIdCount >= 0 ? indexedIdCount : null;
+        }
+        // pure full scan over the whole collection
+        return nitriteMap.size();
+    }
+
+    private RecordStream<Pair<NitriteId, Document>> findSuitableStream(FindPlan findPlan, long[] indexedIdCount) {
         RecordStream<Pair<NitriteId, Document>> rawStream;
 
         if (!findPlan.getSubPlans().isEmpty()) {
             // or filters get all sub stream by finding suitable stream of all sub plans
             List<RecordStream<Pair<NitriteId, Document>>> subStreams = new ArrayList<>();
             for (FindPlan subPlan : findPlan.getSubPlans()) {
-                RecordStream<Pair<NitriteId, Document>> suitableStream = findSuitableStream(subPlan);
+                // a sub-plan's own id count cannot answer the union's count (dedup), so discard it
+                RecordStream<Pair<NitriteId, Document>> suitableStream = findSuitableStream(subPlan, new long[]{ -1 });
                 subStreams.add(suitableStream);
             }
 
@@ -147,6 +173,10 @@ class ReadOperations {
                     // get optimized filter
                     NitriteIndexer indexer = nitriteConfig.findIndexer(indexDescriptor.getIndexType());
                     LinkedHashSet<NitriteId> nitriteIds = indexer.findByFilter(findPlan, nitriteConfig);
+
+                    // the index supplied the exact matching id set; record its size so a size()
+                    // with no row-dropping step downstream can answer from it without fetching
+                    indexedIdCount[0] = nitriteIds.size();
 
                     // create indexed stream from optimized filter
                     rawStream = new IndexedStream(nitriteIds, nitriteMap);

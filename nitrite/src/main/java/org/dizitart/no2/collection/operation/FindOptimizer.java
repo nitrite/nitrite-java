@@ -275,6 +275,12 @@ class FindOptimizer {
     private void planForCollectionScanningFilters(FindPlan findPlan, Set<ComparableFilter> indexScanFilters,
                                                   Set<Filter> columnScanFilters, List<Filter> filters) {
         for (Filter filter : filters) {
+            // Filter.ALL matches every document, so it never needs to run as a post-filter.
+            // Skipping it keeps a plain find() free of a collection-scan filter, which lets the
+            // cursor answer size() from the map size instead of iterating every document.
+            if (filter == Filter.ALL) {
+                continue;
+            }
             // ignore the elected filters for index scan and
             // insert rest of the filters for column scan
             // NOTE: for byId filter, index scan filters will always be empty
