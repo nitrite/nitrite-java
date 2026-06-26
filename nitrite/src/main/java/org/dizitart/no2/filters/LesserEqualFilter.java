@@ -98,6 +98,11 @@ class LesserEqualFilter extends SortingAwareFilter {
     }
 
     @Override
+    public ComparisonMode getComparisonMode() {
+        return ComparisonMode.LesserEqual;
+    }
+
+    @Override
     public String toString() {
         return "(" + getField() + " <= " + getValue() + ")";
     }

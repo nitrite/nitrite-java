@@ -221,9 +221,19 @@ class FindOptimizer {
 
         for (IndexDescriptor indexDescriptor : indexDescriptors) {
             List<String> fieldNames = indexDescriptor.getFields().getFieldNames();
+            int lastFieldIdx = fieldNames.size() - 1;
 
             List<ComparableFilter> indexedFilters = new ArrayList<>();
-            for (String fieldName : fieldNames) {
+            for (int fieldIdx = 0; fieldIdx < fieldNames.size(); fieldIdx++) {
+                String fieldName = fieldNames.get(fieldIdx);
+                // The terminal (last) index field may carry several bounds on the same field -
+                // e.g. a BETWEEN / (gte AND lte) range - which the scanner combines into one
+                // bounded range scan. Earlier (prefix) fields of a compound index consume exactly
+                // one filter each, because the scan cascades into one sub-map per matched key, so
+                // collecting a second filter for a prefix field would mis-apply it at the wrong
+                // cascade level. This covers both the single-field index (its only field is
+                // terminal) and the terminal field of a compound index.
+                boolean isTerminal = fieldIdx == lastFieldIdx;
                 boolean matchFound = false;
                 for (Filter filter : filters) {
                     if (filter instanceof ComparableFilter) {
@@ -231,7 +241,11 @@ class FindOptimizer {
                         if (filterFieldName.equals(fieldName)) {
                             indexedFilters.add((ComparableFilter) filter);
                             matchFound = true;
-                            break;
+                            if (!isTerminal) {
+                                // prefix field of a compound index: one filter per level
+                                break;
+                            }
+                            // terminal field: keep collecting all bounds on this field
                         }
                     }
                 }
