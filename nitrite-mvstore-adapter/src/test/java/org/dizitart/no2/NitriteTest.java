@@ -66,6 +66,7 @@ import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.common.util.Iterables.listOf;
 import static org.dizitart.no2.filters.Filter.ALL;
 import static org.dizitart.no2.filters.Filter.and;
+import static org.dizitart.no2.filters.Filter.or;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.dizitart.no2.integration.TestUtil.deleteDb;
 import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
@@ -234,6 +235,43 @@ public class NitriteTest {
         assertNotNull(repository);
         repoSizeNow = repository.size();
         assertEquals(prevRepoSize + 1, repoSizeNow);
+    }
+
+    @Test
+    public void testLogicalIdSearchForLegacyStringIds() {
+        String stringBackedId = "1840817122658033664";
+        long longBackedId = 2041406700293308416L;
+
+        NitriteCollection testCollection = db.getCollection("legacy-id-test");
+        testCollection.insert(
+            createDocument("_id", stringBackedId).put("tag", "string-id"),
+            createDocument("_id", longBackedId).put("tag", "long-id"));
+        db.commit();
+        db.close();
+
+        db = TestUtil.createDb(fileName, "test-user", "test-password");
+        testCollection = db.getCollection("legacy-id-test");
+
+        Document directResult = testCollection.find(where("_id").eq(Long.parseLong(stringBackedId))).firstOrNull();
+        assertNotNull(directResult);
+        assertEquals(Long.parseLong(stringBackedId), directResult.getId().getIdValue());
+
+        Set<Long> orIds = new HashSet<>();
+        for (Document document : testCollection.find(or(
+            where("_id").eq(longBackedId),
+            where("_id").eq(Long.parseLong(stringBackedId)))).toList()) {
+            orIds.add(document.getId().getIdValue());
+        }
+
+        assertTrue(orIds.contains(longBackedId));
+        assertTrue(orIds.contains(Long.parseLong(stringBackedId)));
+
+        Document andResult = testCollection.find(and(
+            where("_id").eq(Long.parseLong(stringBackedId)),
+            where("tag").eq("string-id"))).firstOrNull();
+
+        assertNotNull(andResult);
+        assertEquals(Long.parseLong(stringBackedId), andResult.getId().getIdValue());
     }
 
     @Test

@@ -100,7 +100,7 @@ class FindOptimizer {
 
         // check if all sub plan have index support
         for (FindPlan plan : findPlan.getSubPlans()) {
-            if (plan.getIndexDescriptor() == null) {
+            if (plan.getIndexDescriptor() == null && plan.getByIdFilter() == null) {
                 // if one of the sub plan doesn't have any index support
                 // then it can not be optimized, instead the
                 // original filter should be set as coll-scan filter

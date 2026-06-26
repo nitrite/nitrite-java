@@ -16,13 +16,12 @@
 
 package org.dizitart.no2.mapper.jackson;
 
-import com.fasterxml.jackson.databind.Module;
+import static org.dizitart.no2.common.util.Iterables.setOf;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.common.module.NitritePlugin;
+import tools.jackson.databind.JacksonModule;
 
 import java.util.Set;
-
-import static org.dizitart.no2.common.util.Iterables.setOf;
 
 /**
  * A Nitrite module that provides a jackson based {@link org.dizitart.no2.common.mapper.NitriteMapper}
@@ -49,9 +48,9 @@ public class JacksonMapperModule implements NitriteModule {
      *
      * @param jacksonModules the jackson modules
      */
-    public JacksonMapperModule(Module... jacksonModules) {
+    public JacksonMapperModule(JacksonModule... jacksonModules) {
         jacksonMapper = new JacksonMapper();
-        for (Module jacksonModule : jacksonModules) {
+        for (JacksonModule jacksonModule : jacksonModules) {
             jacksonMapper.registerJacksonModule(jacksonModule);
         }
     }

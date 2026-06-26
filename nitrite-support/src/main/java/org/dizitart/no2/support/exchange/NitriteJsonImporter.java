@@ -16,8 +16,15 @@
 
 package org.dizitart.no2.support.exchange;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import static org.dizitart.no2.common.Constants.TAG_COLLECTIONS;
+import static org.dizitart.no2.common.Constants.TAG_DATA;
+import static org.dizitart.no2.common.Constants.TAG_INDEX;
+import static org.dizitart.no2.common.Constants.TAG_INDICES;
+import static org.dizitart.no2.common.Constants.TAG_KEY;
+import static org.dizitart.no2.common.Constants.TAG_KEYED_REPOSITORIES;
+import static org.dizitart.no2.common.Constants.TAG_NAME;
+import static org.dizitart.no2.common.Constants.TAG_REPOSITORIES;
+import static org.dizitart.no2.common.Constants.TAG_VALUE;
 import lombok.Setter;
 import org.apache.commons.codec.binary.Base64;
 import org.dizitart.no2.Nitrite;
@@ -28,14 +35,13 @@ import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.dizitart.no2.common.Constants.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -45,10 +51,10 @@ class NitriteJsonImporter {
     private JsonParser parser;
     private ImportOptions options;
 
-    public void importData() throws IOException, ClassNotFoundException {
+    public void importData() throws ClassNotFoundException {
         try (Nitrite db = options.getNitriteFactory().create()) {
             while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String fieldName = parser.getCurrentName();
+                String fieldName = parser.currentName();
 
                 if (TAG_COLLECTIONS.equals(fieldName)) {
                     readNitriteMap(db);
@@ -65,7 +71,7 @@ class NitriteJsonImporter {
         }
     }
 
-    private void readNitriteMap(Nitrite db) throws IOException {
+    private void readNitriteMap(Nitrite db) {
         // move to [
         parser.nextToken();
         NitriteStore<?> nitriteStore = db.getStore();
@@ -77,13 +83,13 @@ class NitriteJsonImporter {
             List<IndexDescriptor> indexDescriptors = new ArrayList<>();
 
             while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String fieldName = parser.getCurrentName();
+                String fieldName = parser.currentName();
 
                 if (TAG_NAME.equals(fieldName)) {
                     // move to next token
                     parser.nextToken();
 
-                    String mapName = parser.getText();
+                    String mapName = parser.getString();
                     nitriteMap = nitriteStore.openMap(mapName, NitriteId.class, Document.class);
                 }
 
@@ -104,7 +110,7 @@ class NitriteJsonImporter {
         }
     }
 
-    private List<IndexDescriptor> readIndices() throws IOException {
+    private List<IndexDescriptor> readIndices() {
         List<IndexDescriptor> indexDescriptors = new ArrayList<>();
         // move to [
         parser.nextToken();
@@ -113,7 +119,7 @@ class NitriteJsonImporter {
         while (parser.nextToken() != JsonToken.END_ARRAY) {
             // loop until end of collection object
             while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String fieldName = parser.getCurrentName();
+                String fieldName = parser.currentName();
 
                 if (TAG_INDEX.equals(fieldName)) {
                     parser.nextToken();
@@ -126,7 +132,7 @@ class NitriteJsonImporter {
         return indexDescriptors;
     }
 
-    private void readNitriteMapData(NitriteMap<NitriteId, Document> nitriteMap) throws IOException {
+    private void readNitriteMapData(NitriteMap<NitriteId, Document> nitriteMap) {
         // move to [
         parser.nextToken();
 
@@ -135,7 +141,7 @@ class NitriteJsonImporter {
             // loop until end of collection object
             NitriteId nitriteId = null;
             while (parser.nextToken() != JsonToken.END_OBJECT) {
-                String fieldName = parser.getCurrentName();
+                String fieldName = parser.currentName();
 
                 if (TAG_KEY.equals(fieldName)) {
                     parser.nextToken();

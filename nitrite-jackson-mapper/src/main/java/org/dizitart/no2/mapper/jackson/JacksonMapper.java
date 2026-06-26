@@ -16,31 +16,37 @@
 
 package org.dizitart.no2.mapper.jackson;
 
+import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.*;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.mapper.jackson.modules.NitriteIdModule;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.exceptions.ValidationException;
+import org.dizitart.no2.mapper.jackson.modules.NitriteIdModule;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.JacksonModule;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
-import java.io.IOException;
-import java.util.*;
-
-import static org.dizitart.no2.common.util.ValidationUtils.notNull;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * A {@link org.dizitart.no2.common.mapper.NitriteMapper} implementation that uses Jackson ObjectMapper to
  * convert objects to and from Nitrite document.
- * 
- * @since 4.0
- * @see org.dizitart.no2.common.mapper.NitriteMapper
+ *
  * @author Anindya Chatterjee
+ * @see org.dizitart.no2.common.mapper.NitriteMapper
+ * @since 4.0
  */
 public class JacksonMapper implements NitriteMapper {
+    private final List<JacksonModule> modules = new ArrayList<>();
     private ObjectMapper objectMapper;
 
     /**
@@ -50,30 +56,37 @@ public class JacksonMapper implements NitriteMapper {
      */
     protected ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-            objectMapper.setVisibility(
-                    objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
-                            .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                            .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                            .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
-            objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-            objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            objectMapper.registerModule(new NitriteIdModule());
+            objectMapper = JsonMapper.builder()
+                .changeDefaultVisibility(visibilityChecker -> visibilityChecker
+                    .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                    .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                    .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                )
+                .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
+                .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+                .configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, true)
+                .addModule(new NitriteIdModule())
+                .addModules(modules)
+                .build();
+            modules.clear();
         }
         return objectMapper;
     }
 
     /**
      * Registers a Jackson module with the object mapper.
+     * Can only register modules as long as the underlying ObjectMapper is still un-initialized.
      *
      * @param module the Jackson module to register
+     *
      * @throws ValidationException if the module is null
      */
-    public void registerJacksonModule(Module module) {
+    public void registerJacksonModule(JacksonModule module) {
+        if (objectMapper != null) {
+            throw new IllegalStateException("Can not register modules after object mapper initialization.");
+        }
         notNull(module, "module cannot be null");
-        getObjectMapper().registerModule(module);
+        modules.add(module);
     }
 
     /**
@@ -86,11 +99,13 @@ public class JacksonMapper implements NitriteMapper {
      * already a Document, converts it to the target type. If the conversion fails,
      * throws an ObjectMappingException.
      *
-     * @param source   the source object to convert
-     * @param type     the target type to convert to
+     * @param source the source object to convert
+     * @param type the target type to convert to
      * @param <Source> the type of the source object
      * @param <Target> the type of the target object
+     *
      * @return the converted object of the target type
+     *
      * @throws ObjectMappingException if the conversion fails
      */
     @Override
@@ -101,8 +116,9 @@ public class JacksonMapper implements NitriteMapper {
 
         try {
             JsonNode node = getObjectMapper().convertValue(source, JsonNode.class);
-            if (node == null)
+            if (node == null) {
                 return null;
+            }
 
             if (node.isValueNode()) {
                 return getNodeValue(node);
@@ -115,11 +131,11 @@ public class JacksonMapper implements NitriteMapper {
             }
         } catch (Exception e) {
             throw new ObjectMappingException("Failed to convert object of type "
-                    + source.getClass() + " to type " + type, e);
+                                             + source.getClass() + " to type " + type, e);
         }
 
         throw new ObjectMappingException("Can't convert object to type " + type
-                + ", try registering a jackson Module for it.");
+                                         + ", try registering a jackson Module for it.");
     }
 
     @Override
@@ -130,21 +146,23 @@ public class JacksonMapper implements NitriteMapper {
      * Converts a Nitrite Document to an object of the specified class type using
      * Jackson ObjectMapper.
      *
-     * @param source   the Nitrite Document to be converted
-     * @param type     the class type of the object to be converted to
+     * @param source the Nitrite Document to be converted
+     * @param type the class type of the object to be converted to
      * @param <Target> the type of the object to be converted to
+     *
      * @return the converted object of the specified class type
+     *
      * @throws ObjectMappingException if there is an error in the object mapping
-     *                                process
+     * process
      */
     protected <Target> Target convertFromDocument(Document source, Class<Target> type) {
         try {
             return getObjectMapper().convertValue(source, type);
         } catch (IllegalArgumentException iae) {
-            if (iae.getCause() instanceof JsonMappingException) {
-                JsonMappingException jme = (JsonMappingException) iae.getCause();
-                if (jme.getMessage().contains("Cannot construct instance")) {
-                    throw new ObjectMappingException(jme.getMessage());
+            if (iae.getCause() instanceof DatabindException) {
+                DatabindException cause = (DatabindException) iae.getCause();
+                if (cause.getMessage().contains("Cannot construct instance")) {
+                    throw new ObjectMappingException(cause.getMessage());
                 }
             }
             throw iae;
@@ -155,8 +173,9 @@ public class JacksonMapper implements NitriteMapper {
      * Converts the given source object to a Nitrite {@link Document} using
      * Jackson's {@link ObjectMapper}.
      *
-     * @param source   the source object to convert
+     * @param source the source object to convert
      * @param <Source> the type of the source object
+     *
      * @return the converted Nitrite {@link Document}
      */
     protected <Source> Document convertToDocument(Source source) {
@@ -170,7 +189,7 @@ public class JacksonMapper implements NitriteMapper {
             case NUMBER:
                 return (T) node.numberValue();
             case STRING:
-                return (T) node.textValue();
+                return (T) node.stringValue();
             case BOOLEAN:
                 return (T) Boolean.valueOf(node.booleanValue());
             default:
@@ -180,9 +199,7 @@ public class JacksonMapper implements NitriteMapper {
 
     private Document readDocument(JsonNode node) {
         Map<String, Object> objectMap = new LinkedHashMap<>();
-        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
-        while (fields.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fields.next();
+        for (Map.Entry<String, JsonNode> entry : node.properties()) {
             String name = entry.getKey();
             JsonNode value = entry.getValue();
             Object object = readObject(value);
@@ -193,47 +210,34 @@ public class JacksonMapper implements NitriteMapper {
     }
 
     private Object readObject(JsonNode node) {
-        if (node == null)
-            return null;
-        try {
-            switch (node.getNodeType()) {
-                case ARRAY:
-                    return readArray(node);
-                case BINARY:
-                    return node.binaryValue();
-                case BOOLEAN:
-                    return node.booleanValue();
-                case MISSING:
-                case NULL:
-                    return null;
-                case NUMBER:
-                    return node.numberValue();
-                case OBJECT:
-                case POJO:
-                    return readDocument(node);
-                case STRING:
-                    return node.textValue();
-            }
-        } catch (IOException e) {
+        if (node == null) {
             return null;
         }
-        return null;
+
+        switch (node.getNodeType()) {
+            case ARRAY:
+                return readArray(node);
+            case BINARY:
+                return node.binaryValue();
+            case BOOLEAN:
+                return node.booleanValue();
+            case NUMBER:
+                return node.numberValue();
+            case OBJECT:
+            case POJO:
+                return readDocument(node);
+            case STRING:
+                return node.stringValue();
+            default:
+                return null;
+        }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private List readArray(JsonNode array) {
+    private List<Object> readArray(JsonNode array) {
         if (array.isArray()) {
-            List list = new ArrayList();
-            Iterator iterator = array.elements();
-            while (iterator.hasNext()) {
-                Object element = iterator.next();
-                if (element instanceof JsonNode) {
-                    list.add(readObject((JsonNode) element));
-                } else {
-                    list.add(element);
-                }
-            }
-            return list;
+            return array.valueStream()
+                .map(this::readObject)
+                .collect(Collectors.toList());
         }
         return null;
     }
