@@ -17,24 +17,29 @@
 
 package org.dizitart.no2.support;
 
+import static org.junit.Assert.assertTrue;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.exceptions.ObjectMappingException;
 import org.dizitart.no2.mvstore.MVStoreModule;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
-
-import static org.junit.Assert.assertTrue;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author Anindya Chatterjee
@@ -130,7 +135,7 @@ public class TestUtil {
             ObjectMapper objectMapper = createObjectMapper();
             JsonNode node = objectMapper.readValue(json, JsonNode.class);
             return loadDocument(node);
-        } catch (IOException e) {
+        } catch (JacksonIOException e) {
             log.error("Error while parsing json", e);
             throw new ObjectMappingException("failed to parse json " + json);
         }
@@ -138,9 +143,7 @@ public class TestUtil {
 
     private static Document loadDocument(JsonNode node) {
         Map<String, Object> objectMap = new LinkedHashMap<>();
-        Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
-        while (fields.hasNext()) {
-            Map.Entry<String, JsonNode> entry = fields.next();
+        for (Map.Entry<String, JsonNode> entry : node.properties()) {
             String name = entry.getKey();
             JsonNode value = entry.getValue();
             Object object = loadObject(value);
@@ -151,64 +154,52 @@ public class TestUtil {
     }
 
     private static Object loadObject(JsonNode node) {
-        if (node == null)
-            return null;
-        try {
-            switch (node.getNodeType()) {
-                case ARRAY:
-                    return loadArray(node);
-                case BINARY:
-                    return node.binaryValue();
-                case BOOLEAN:
-                    return node.booleanValue();
-                case MISSING:
-                case NULL:
-                    return null;
-                case NUMBER:
-                    return node.numberValue();
-                case OBJECT:
-                case POJO:
-                    return loadDocument(node);
-                case STRING:
-                    return node.textValue();
-            }
-        } catch (IOException e) {
+        if (node == null) {
             return null;
         }
-        return null;
+
+        switch (node.getNodeType()) {
+            case ARRAY:
+                return loadArray(node);
+            case BINARY:
+                return node.binaryValue();
+            case BOOLEAN:
+                return node.booleanValue();
+            case MISSING:
+            case NUMBER:
+                return node.numberValue();
+            case OBJECT:
+            case POJO:
+                return loadDocument(node);
+            case STRING:
+                return node.stringValue();
+            default:
+                return null;
+        }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static List loadArray(JsonNode array) {
+    private static List<Object> loadArray(JsonNode array) {
         if (array.isArray()) {
-            List list = new ArrayList();
-            Iterator iterator = array.elements();
-            while (iterator.hasNext()) {
-                Object element = iterator.next();
-                if (element instanceof JsonNode) {
-                    list.add(loadObject((JsonNode) element));
-                } else {
-                    list.add(element);
-                }
-            }
-            return list;
+            return array.valueStream()
+                .map(TestUtil::loadObject)
+                .collect(Collectors.toList());
         }
         return null;
     }
 
     private static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(
-            objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
+        return JsonMapper.builder()
+            .changeDefaultVisibility(visibilityChecker -> visibilityChecker
                 .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
                 .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
-        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-        objectMapper.findAndRegisterModules();
-        return objectMapper;
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+            )
+            .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
+            .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+            .configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, true)
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(DeserializationFeature.FAIL_ON_TRAILING_TOKENS, false)
+            .findAndAddModules()
+            .build();
     }
 }

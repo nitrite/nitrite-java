@@ -132,6 +132,89 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
     }
 
     @Test
+    public void testIndexedMultiBoundRangeQueryMatchesFullScan() {
+        // Regression: a multi-bound range query on a single-field index (e.g. `age >= 30 AND
+        // age <= 50`) must use both bounds at the index level and return the exact same set as
+        // an unindexed full scan - not "everything above the lower bound, post-filtered".
+        NitriteCollection coll = db.getCollection("range");
+        for (int age = 0; age < 100; age++) {
+            coll.insert(Document.createDocument("age", age));
+        }
+
+        // Ground truth from an unindexed full scan: ages 30..=50 inclusive = 21 docs.
+        assertEquals(21, coll.find(where("age").gte(30).and(where("age").lte(50))).size());
+
+        // Index the field; the same query must return the identical, exact set.
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "age");
+
+        List<Integer> ages = new ArrayList<>();
+        for (Document doc : coll.find(where("age").gte(30).and(where("age").lte(50)))) {
+            ages.add(doc.get("age", Integer.class));
+        }
+        ages.sort(null);
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 30; i <= 50; i++) {
+            expected.add(i);
+        }
+        assertEquals("indexed range must equal exactly ages 30..=50 (both bounds applied)",
+            expected, ages);
+
+        // Exclusive bounds: 30 < age < 50 -> 31..=49 = 19 docs.
+        assertEquals(19, coll.find(where("age").gt(30).and(where("age").lt(50))).size());
+        // Contradictory range yields nothing.
+        assertEquals(0, coll.find(where("age").gte(50).and(where("age").lte(30))).size());
+        // Degenerate single-value range.
+        assertEquals(1, coll.find(where("age").gte(42).and(where("age").lte(42))).size());
+
+        // The `between` API must be index-accelerated identically to `gte().and(lte())`.
+        assertEquals(21, coll.find(where("age").between(30, 50, true)).size());
+        // And nested inside an AND with another predicate (exercises 3 same-field bounds via
+        // the intersection fallback).
+        assertEquals(10, coll.find(
+            where("age").between(30, 50, true).and(where("age").gt(40))).size()); // ages 41..=50
+    }
+
+    @Test
+    public void testCompoundIndexTerminalRangeMatchesFullScan() {
+        // A compound index `[folder, date]` queried with an equality prefix and a range on the
+        // terminal field (`folder == 3 AND date BETWEEN 20 AND 40`) must bound the range at the
+        // index level and return the exact same set as a full scan.
+        NitriteCollection coll = db.getCollection("compound_range");
+        for (int folder = 0; folder < 10; folder++) {
+            for (int date = 0; date < 100; date++) {
+                coll.insert(Document.createDocument("folder", folder)
+                    .put("date", date));
+            }
+        }
+
+        // Ground truth from an unindexed full scan: dates 20..=40 in folder 3 = 21 docs.
+        assertEquals(21, coll.find(
+            and(where("folder").eq(3), where("date").gte(20), where("date").lte(40))).size());
+
+        // With the compound index the result must be identical and exact.
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "folder", "date");
+
+        List<Integer> dates = new ArrayList<>();
+        for (Document doc : coll.find(
+            and(where("folder").eq(3), where("date").gte(20), where("date").lte(40)))) {
+            dates.add(doc.get("date", Integer.class));
+            // Every returned document must be in the queried folder.
+            assertEquals(Integer.valueOf(3), doc.get("folder", Integer.class));
+        }
+        dates.sort(null);
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 20; i <= 40; i++) {
+            expected.add(i);
+        }
+        assertEquals("compound terminal range must equal exactly dates 20..=40 in folder 3",
+            expected, dates);
+
+        // A different folder over a non-existent date range yields nothing.
+        assertEquals(0, coll.find(
+            and(where("folder").eq(7), where("date").gte(200), where("date").lte(400))).size());
+    }
+
+    @Test
     public void testFindByNonUniqueIndex() throws ParseException {
         insert();
         collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");

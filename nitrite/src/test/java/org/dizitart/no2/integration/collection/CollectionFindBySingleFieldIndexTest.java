@@ -133,6 +133,151 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
     }
 
     @Test
+    public void testInFilterUsesIndex() {
+        // reproduces issue #1258 - `in` / `notIn` filter must use the index
+        insert();
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "firstName");
+
+        DocumentCursor cursor = collection.find(where("lastName").in("ln1", "ln2", "ln10"));
+        assertEquals(cursor.size(), 3);
+        FindPlan plan = cursor.getFindPlan();
+        assertNotNull("in filter should use index scan", plan.getIndexScanFilter());
+        assertNotNull(plan.getIndexDescriptor());
+        assertNull("in filter should not fall back to collection scan", plan.getCollectionScanFilter());
+
+        cursor = collection.find(where("firstName").notIn("fn1", "fn2"));
+        assertEquals(cursor.size(), 1);
+        plan = cursor.getFindPlan();
+        assertNotNull("notIn filter should use index scan", plan.getIndexScanFilter());
+        assertNotNull(plan.getIndexDescriptor());
+        assertNull("notIn filter should not fall back to collection scan", plan.getCollectionScanFilter());
+    }
+
+    @Test
+    public void testIndexedMultiBoundRangeQueryMatchesFullScan() {
+        // Regression: a multi-bound range query on a single-field index (e.g. `age >= 30 AND
+        // age <= 50`) must use both bounds at the index level and return the exact same set as
+        // an unindexed full scan - not "everything above the lower bound, post-filtered".
+        NitriteCollection coll = db.getCollection("range");
+        for (int age = 0; age < 100; age++) {
+            coll.insert(Document.createDocument("age", age));
+        }
+
+        // Ground truth from an unindexed full scan: ages 30..=50 inclusive = 21 docs.
+        assertEquals(21, coll.find(where("age").gte(30).and(where("age").lte(50))).size());
+
+        // Index the field; the same query must return the identical, exact set.
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "age");
+
+        List<Integer> ages = new ArrayList<>();
+        for (Document doc : coll.find(where("age").gte(30).and(where("age").lte(50)))) {
+            ages.add(doc.get("age", Integer.class));
+        }
+        ages.sort(null);
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 30; i <= 50; i++) {
+            expected.add(i);
+        }
+        assertEquals("indexed range must equal exactly ages 30..=50 (both bounds applied)",
+            expected, ages);
+
+        // Exclusive bounds: 30 < age < 50 -> 31..=49 = 19 docs.
+        assertEquals(19, coll.find(where("age").gt(30).and(where("age").lt(50))).size());
+        // Contradictory range yields nothing.
+        assertEquals(0, coll.find(where("age").gte(50).and(where("age").lte(30))).size());
+        // Degenerate single-value range.
+        assertEquals(1, coll.find(where("age").gte(42).and(where("age").lte(42))).size());
+
+        // The `between` API must be index-accelerated identically to `gte().and(lte())`.
+        assertEquals(21, coll.find(where("age").between(30, 50, true)).size());
+        // And nested inside an AND with another predicate (exercises 3 same-field bounds via
+        // the intersection fallback).
+        assertEquals(10, coll.find(
+            where("age").between(30, 50, true).and(where("age").gt(40))).size()); // ages 41..=50
+    }
+
+    @Test
+    public void testCompoundIndexTerminalRangeMatchesFullScan() {
+        // A compound index `[folder, date]` queried with an equality prefix and a range on the
+        // terminal field (`folder == 3 AND date BETWEEN 20 AND 40`) must bound the range at the
+        // index level and return the exact same set as a full scan.
+        NitriteCollection coll = db.getCollection("compound_range");
+        for (int folder = 0; folder < 10; folder++) {
+            for (int date = 0; date < 100; date++) {
+                coll.insert(Document.createDocument("folder", folder)
+                    .put("date", date));
+            }
+        }
+
+        // Ground truth from an unindexed full scan: dates 20..=40 in folder 3 = 21 docs.
+        assertEquals(21, coll.find(
+            and(where("folder").eq(3), where("date").gte(20), where("date").lte(40))).size());
+
+        // With the compound index the result must be identical and exact.
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "folder", "date");
+
+        List<Integer> dates = new ArrayList<>();
+        for (Document doc : coll.find(
+            and(where("folder").eq(3), where("date").gte(20), where("date").lte(40)))) {
+            dates.add(doc.get("date", Integer.class));
+            // Every returned document must be in the queried folder.
+            assertEquals(Integer.valueOf(3), doc.get("folder", Integer.class));
+        }
+        dates.sort(null);
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 20; i <= 40; i++) {
+            expected.add(i);
+        }
+        assertEquals("compound terminal range must equal exactly dates 20..=40 in folder 3",
+            expected, dates);
+
+        // A different folder over a non-existent date range yields nothing.
+        assertEquals(0, coll.find(
+            and(where("folder").eq(7), where("date").gte(200), where("date").lte(400))).size());
+    }
+
+    @Test
+    public void testCoveredCountSizeMatchesIteration() {
+        // size() may short-circuit to the index id-set size (or the map size) when the query is
+        // fully index-covered with no post-filter, skip, or limit. That fast count must always
+        // agree with actually draining the cursor - on both covered and non-covered paths.
+        NitriteCollection coll = db.getCollection("covered_count");
+        for (int age = 0; age < 100; age++) {
+            coll.insert(Document.createDocument("age", age).put("even", age % 2 == 0));
+        }
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "age");
+
+        // Plain find(): covered by the map size.
+        assertEquals(countByIteration(coll.find()), coll.find().size());
+        assertEquals(100, coll.find().size());
+
+        // Indexed equality and range: covered by the index id-set size.
+        assertEquals(countByIteration(coll.find(where("age").eq(42))),
+            coll.find(where("age").eq(42)).size());
+        DocumentCursor range = coll.find(where("age").gte(30).and(where("age").lte(50)));
+        assertEquals(countByIteration(range), range.size());
+
+        // Non-covered: a post-filter on an unindexed field must still count correctly (no
+        // short-circuit), as must skip/limit.
+        DocumentCursor postFiltered = coll.find(where("even").eq(true));
+        assertEquals(countByIteration(postFiltered), postFiltered.size());
+        assertEquals(50, postFiltered.size());
+        DocumentCursor limited = coll.find(where("age").gte(0),
+            org.dizitart.no2.collection.FindOptions.skipBy(10).limit(5));
+        assertEquals(countByIteration(limited), limited.size());
+        assertEquals(5, limited.size());
+    }
+
+    private static long countByIteration(DocumentCursor cursor) {
+        long count = 0;
+        for (Document ignored : cursor) {
+            count++;
+        }
+        return count;
+    }
+
+    @Test
     public void testFindByNonUniqueIndex() throws ParseException {
         insert();
         collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");

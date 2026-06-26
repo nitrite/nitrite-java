@@ -28,7 +28,7 @@ jobs:
 
     name: Build with Java ${{ matrix.java }} in Ubuntu
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v5
         with:
@@ -43,7 +43,7 @@ jobs:
 
       - name: Publish Code Coverage
         if: github.ref == 'refs/heads/main' && matrix.java == '17'
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
@@ -59,7 +59,7 @@ jobs:
 
     name: Build with Java ${{ matrix.java }} in MacOS
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v5
         with:
@@ -82,7 +82,7 @@ jobs:
 
     name: Build with Java ${{ matrix.java }} in Windows
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up JDK ${{ matrix.java }}
         uses: actions/setup-java@v5
         with:
@@ -103,15 +103,19 @@ jobs:
         java: [ '17', '21' ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
-      - uses: graalvm/setup-graalvm@v1.4.4
+      - uses: graalvm/setup-graalvm@v1.5.6
         with:
           java-version: ${{ matrix.java }}
           distribution: 'graalvm-community'
 
       - name: Install nitrite
         run: mvn -B -ff -ntp clean install -DskipTests
+
+      - name: Set up MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: Run native tests
         working-directory: ./nitrite-native-tests

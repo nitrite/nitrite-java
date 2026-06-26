@@ -27,7 +27,7 @@ import static org.dizitart.no2.common.util.ValidationUtils.*;
  * @author Anindya Chatterjee
  * @since 4.0
  */
-public abstract class ComparableArrayFilter extends FieldBasedFilter {
+public abstract class ComparableArrayFilter extends ComparableFilter {
     
     public ComparableArrayFilter(String field, Object value) {
         super(field, value);

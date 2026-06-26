@@ -17,7 +17,7 @@
 
 package org.dizitart.no2.common.streams;
 
-import com.fasterxml.jackson.databind.util.ArrayIterator;
+import tools.jackson.databind.util.ArrayIterator;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;

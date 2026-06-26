@@ -150,7 +150,16 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         if (cleared) {
             return 0;
         }
-        return backingMap.size();
+        // Mirror entries(): the staged (backingMap) rows plus the committed primary rows that
+        // are not tombstoned. Returning backingMap.size() alone ignores the primary rows the
+        // cursor actually iterates, which makes a transactional find().size() under-count.
+        long count = backingMap.size();
+        for (K key : primary.keys()) {
+            if (!tombstones.contains(key)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     @Override

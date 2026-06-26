@@ -1,6 +1,6 @@
 package org.dizitart.no2.collection;
 
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethodMap;
+import tools.jackson.databind.introspect.AnnotatedMethodMap;
 import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;

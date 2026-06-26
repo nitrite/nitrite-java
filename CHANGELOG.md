@@ -1,4 +1,4 @@
-## Release 4.3.3 - (Unreleased)
+## Release 4.3.3 - Jun 26, 2026
 
 ### New Changes
 
@@ -8,13 +8,26 @@
   - Created GeoNearFilter for geodesic distance queries
   - Implements two-pass query execution to eliminate false positives from bounding box approximation
   - Added comprehensive test suite for geographic coordinate support
+- Upgraded Jackson to version 3 #1221
+- Build now targets JUnit 6 and requires Java 17 to build/test, while keeping Java 11 bytecode compatibility for the published artifacts #1179
+
+### Performance Improvements
+
+- Optimized index scans for multi-bound range queries (e.g. `gt` combined with `lt` on the same field)
+- Added covered-count optimization so `size()`/`count()` is answered directly from index scans and plain full scans without fetching and deserializing every matching document
 
 ### Issue Fixes
 
+- Fix `in`/`notIn` filters not using the index while querying a collection #1258
+- Fix record ID match for legacy string keys in OR clause #1246
 - Fix OR filters returning duplicate documents when using multiple indexes #1184
 - Fix inconsistent numeric filtering across types with indexes #1175
 - Fix elemMatch queries to use array field indexes #1174
 - Fix native-image build: initialize JUnit MethodSegmentResolver at runtime #1189
+
+### Maintenance
+
+- Bumped production and development dependencies across the project (grouped Dependabot updates)
 
 ## Release 4.3.2 - Sep 25, 2025
 

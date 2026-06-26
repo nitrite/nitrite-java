@@ -8,6 +8,18 @@ import lombok.Setter;
 public abstract class SortingAwareFilter extends ComparableFilter {
 
     /**
+     * The comparison operator (&gt;, &gt;=, &lt;, &lt;=) a {@link SortingAwareFilter}
+     * represents. Used by the index scanner to combine a lower and an upper bound into a
+     * single bounded range scan.
+     */
+    public enum ComparisonMode {
+        Greater,
+        GreaterEqual,
+        Lesser,
+        LesserEqual
+    }
+
+    /**
      * Indicates if the filter should scan the index in reverse order.
      */
     private boolean reverseScan;
@@ -21,4 +33,11 @@ public abstract class SortingAwareFilter extends ComparableFilter {
     public SortingAwareFilter(String field, Object value) {
         super(field, value);
     }
+
+    /**
+     * The comparison operator this filter represents.
+     *
+     * @return the comparison mode
+     */
+    public abstract ComparisonMode getComparisonMode();
 }

@@ -18,7 +18,9 @@
 package org.dizitart.no2.index;
 
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.common.util.Comparables;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.SortingAwareFilter;
@@ -43,6 +45,24 @@ public class IndexScanner {
     public LinkedHashSet<NitriteId> doScan(List<ComparableFilter> filters, Map<String, Boolean> indexScanOrder) {
         // linked-hash-set to return only unique ids preserving the order in index
         LinkedHashSet<NitriteId> nitriteIds = new LinkedHashSet<>();
+
+        // Multi-bound range query on a single field (e.g. `age >= 30 AND age <= 50`):
+        // evaluate the bounds against the index and return only the ids whose key falls inside
+        // the range - instead of every id above the lower bound, post-filtered downstream.
+        if (filters != null && filters.size() > 1 && allSameField(filters)) {
+            // Best case: a lower + upper bound form a contiguous range - scan only the keys
+            // inside it (reads in-range keys, not the whole index).
+            LinkedHashSet<NitriteId> bounded = scanBoundedRange(filters, indexScanOrder);
+            if (bounded != null) {
+                return bounded;
+            }
+            // Otherwise still correct, just reads more: evaluate each bound and intersect.
+            LinkedHashSet<NitriteId> intersected = scanIntersectSameField(filters, indexScanOrder);
+            if (intersected != null) {
+                return intersected;
+            }
+            // else fall through to the default (cascading) scan
+        }
 
         if (filters != null && !filters.isEmpty()) {
             // get the first filter to start scanning
@@ -100,6 +120,155 @@ public class IndexScanner {
         }
 
         return nitriteIds;
+    }
+
+    private boolean allSameField(List<ComparableFilter> filters) {
+        String first = filters.get(0).getField();
+        if (first == null) {
+            return false;
+        }
+        for (ComparableFilter filter : filters) {
+            if (!first.equals(filter.getField())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Combines a single lower bound ({@code >}/{@code >=}) and a single upper bound
+     * ({@code <}/{@code <=}) on the same field into one bounded scan that visits only the
+     * index keys inside the range.
+     * <p>
+     * Returns {@code null} (so the caller falls back to intersection) when the filters are not
+     * a clean lower+upper pair of comparison filters, or when a sub-map is encountered (a
+     * compound-index level rather than a single-field scan).
+     */
+    @SuppressWarnings("unchecked")
+    private LinkedHashSet<NitriteId> scanBoundedRange(List<ComparableFilter> filters,
+                                                      Map<String, Boolean> indexScanOrder) {
+        DBValue lowerVal = null, upperVal = null;
+        boolean lowerInclusive = false, upperInclusive = false;
+        boolean hasLower = false, hasUpper = false;
+
+        for (ComparableFilter filter : filters) {
+            if (!(filter instanceof SortingAwareFilter)) {
+                return null;
+            }
+            Object value = filter.getValue();
+            if (value == null || !(value instanceof Comparable)) {
+                return null;
+            }
+            DBValue dbValue = new DBValue((Comparable<?>) value);
+            switch (((SortingAwareFilter) filter).getComparisonMode()) {
+                case GreaterEqual:
+                    if (hasLower) return null;
+                    lowerVal = dbValue; lowerInclusive = true; hasLower = true; break;
+                case Greater:
+                    if (hasLower) return null;
+                    lowerVal = dbValue; lowerInclusive = false; hasLower = true; break;
+                case LesserEqual:
+                    if (hasUpper) return null;
+                    upperVal = dbValue; upperInclusive = true; hasUpper = true; break;
+                case Lesser:
+                    if (hasUpper) return null;
+                    upperVal = dbValue; upperInclusive = false; hasUpper = true; break;
+                default:
+                    return null;
+            }
+        }
+
+        // A bounded scan needs both ends; a one-sided range is already efficient on its own.
+        if (!hasLower || !hasUpper) {
+            return null;
+        }
+
+        // Honour the index scan order so an explicitly sorted range query keeps using the index.
+        String field = filters.get(0).getField();
+        boolean reverseScan = indexScanOrder != null
+            && Boolean.TRUE.equals(indexScanOrder.get(field));
+
+        LinkedHashSet<NitriteId> nitriteIds = new LinkedHashSet<>();
+        if (!reverseScan) {
+            DBValue key = lowerInclusive ? indexMap.ceilingKey(lowerVal) : indexMap.higherKey(lowerVal);
+            while (key != DBNull.getInstance() && key != null) {
+                int cmp = Comparables.compare(key, upperVal);
+                boolean withinUpper = upperInclusive ? cmp <= 0 : cmp < 0;
+                if (!withinUpper) {
+                    break;
+                }
+                Object value = indexMap.get(key);
+                if (value instanceof NavigableMap) {
+                    // a sub-map means this is a compound-index level, not a single-field scan
+                    return null;
+                } else if (value instanceof List) {
+                    nitriteIds.addAll((List<NitriteId>) value);
+                }
+                key = indexMap.higherKey(key);
+            }
+        } else {
+            DBValue key = upperInclusive ? indexMap.floorKey(upperVal) : indexMap.lowerKey(upperVal);
+            while (key != DBNull.getInstance() && key != null) {
+                int cmp = Comparables.compare(key, lowerVal);
+                boolean withinLower = lowerInclusive ? cmp >= 0 : cmp > 0;
+                if (!withinLower) {
+                    break;
+                }
+                Object value = indexMap.get(key);
+                if (value instanceof NavigableMap) {
+                    return null;
+                } else if (value instanceof List) {
+                    nitriteIds.addAll((List<NitriteId>) value);
+                }
+                key = indexMap.lowerKey(key);
+            }
+        }
+        return nitriteIds;
+    }
+
+    /**
+     * Evaluates several filters that all target the same single field and intersects their id
+     * sets (used for multi-bound range queries on a single-field index).
+     * <p>
+     * Returns {@code null} - so the caller falls back to the default scan - if any filter yields
+     * sub-maps instead of terminal ids, which means this is a compound-index level rather than a
+     * single-field scan.
+     */
+    @SuppressWarnings("unchecked")
+    private LinkedHashSet<NitriteId> scanIntersectSameField(List<ComparableFilter> filters,
+                                                            Map<String, Boolean> indexScanOrder) {
+        LinkedHashSet<NitriteId> acc = null;
+
+        for (ComparableFilter filter : filters) {
+            boolean reverseScan = indexScanOrder != null
+                && Boolean.TRUE.equals(indexScanOrder.get(filter.getField()));
+            indexMap.setReverseScan(reverseScan);
+            if (filter instanceof SortingAwareFilter) {
+                ((SortingAwareFilter) filter).setReverseScan(reverseScan);
+            }
+
+            List<?> result = filter.applyOnIndex(indexMap);
+            if (result == null || result.isEmpty()) {
+                // nothing can survive intersection with an empty set
+                return new LinkedHashSet<>();
+            }
+            if (!(result.get(0) instanceof NitriteId)) {
+                // a sub-map result means this is a compound-index level, not a single-field scan
+                return null;
+            }
+
+            LinkedHashSet<NitriteId> ids = new LinkedHashSet<>((List<NitriteId>) result);
+            if (acc == null) {
+                acc = ids;
+            } else {
+                acc.retainAll(ids);
+            }
+            if (acc.isEmpty()) {
+                break;
+            }
+        }
+
+        return acc == null ? new LinkedHashSet<>() : acc;
     }
 
     private boolean isEmptyList(List<?> list) {

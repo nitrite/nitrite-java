@@ -165,15 +165,17 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
         assertNotNull(findPlan.getIndexDescriptor());
         assertEquals(collection.listIndices().toArray()[0], findPlan.getIndexDescriptor());
 
+        // The terminal index field (firstName) collects all its bounds, so both firstName
+        // predicates drive the index scan and nothing falls back to a collection scan.
         assertNotNull(findPlan.getIndexScanFilter());
         assertEquals(findPlan.getIndexScanFilter().getFilters(),
             ((AndFilter) and(
                 where("lastName").eq("ln2"),
-                where("firstName").notEq("fn1")
+                where("firstName").notEq("fn1"),
+                where("firstName").eq("fn3")
             )).getFilters());
 
-        assertNotNull(findPlan.getCollectionScanFilter());
-        assertEquals(where("firstName").eq("fn3"), findPlan.getCollectionScanFilter());
+        assertNull(findPlan.getCollectionScanFilter());
 
         assertTrue(findPlan.getSubPlans().isEmpty());
 

@@ -17,11 +17,10 @@
 
 package org.dizitart.no2.mapper.jackson.modules;
 
-import org.dizitart.no2.collection.NitriteId;
-import org.junit.Test;
-
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import org.dizitart.no2.collection.NitriteId;
+import org.junit.Test;
 
 public class NitriteIdDeserializerTest {
     @Test
@@ -29,7 +28,7 @@ public class NitriteIdDeserializerTest {
         NitriteIdDeserializer actualNitriteIdDeserializer = new NitriteIdDeserializer();
         assertNull(actualNitriteIdDeserializer.getValueType());
         Class<?> expectedValueClass = NitriteId.class;
-        assertSame(expectedValueClass, actualNitriteIdDeserializer.getValueClass());
+        assertSame(expectedValueClass, actualNitriteIdDeserializer.handledType());
     }
 }
 
