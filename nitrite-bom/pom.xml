@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite-java</artifactId>
-        <version>4.3.2</version>
+        <version>4.3.3-SNAPSHOT</version>
     </parent>
 
     <artifactId>nitrite-bom</artifactId>
@@ -15,6 +15,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <!-- Use "bom" flatten mode so the published pom keeps the dependencyManagement section
+             (oss mode strips it, which broke the BOM in 4.3.2 - see issue #1186) -->
+        <flatten.mode>bom</flatten.mode>
     </properties>
 
     <dependencyManagement>

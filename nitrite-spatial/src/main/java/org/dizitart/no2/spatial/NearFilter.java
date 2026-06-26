@@ -22,6 +22,23 @@ import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.util.GeometricShapeFactory;
 
 /**
+ * A spatial filter that finds geometries near a point within a specified distance.
+ * 
+ * <p>This filter automatically detects whether the coordinates are geographic (latitude/longitude)
+ * or Cartesian, and applies the appropriate distance calculation:</p>
+ * <ul>
+ *   <li><strong>Geographic coordinates</strong> (within ±90° lat, ±180° lon): Uses geodesic distance
+ *       on Earth's WGS84 ellipsoid, with distance specified in meters.</li>
+ *   <li><strong>Cartesian coordinates</strong> (outside those bounds): Uses simple Euclidean distance,
+ *       with distance in the same units as the coordinates.</li>
+ * </ul>
+ * 
+ * <p><strong>Recommendation:</strong> For new code, use {@link GeoPoint} and {@link GeoNearFilter} 
+ * for explicit geographic coordinate handling with better type safety and no auto-detection ambiguity.</p>
+ * 
+ * <p><strong>Note:</strong> Combined with two-pass query execution in {@link SpatialIndex}, 
+ * this filter provides accurate results by eliminating false positives from bounding box approximation.</p>
+ * 
  * @since 4.0
  * @author Anindya Chatterjee
  */
@@ -34,11 +51,24 @@ class NearFilter extends WithinFilter {
         super(field, createCircle(point.getCoordinate(), distance));
     }
 
-    private static Geometry createCircle(Coordinate center, double radius) {
+    private static Geometry createCircle(Coordinate center, double radiusMeters) {
         GeometricShapeFactory shapeFactory = new GeometricShapeFactory();
         shapeFactory.setNumPoints(64);
         shapeFactory.setCentre(center);
-        shapeFactory.setSize(radius * 2);
+        
+        // Determine if we're dealing with geographic coordinates (lat/long)
+        // or simple Cartesian coordinates
+        double radiusInDegrees;
+        if (GeodesicUtils.isGeographic(center)) {
+            // Convert meters to degrees accounting for Earth's curvature
+            radiusInDegrees = GeodesicUtils.metersToDegreesRadius(center, radiusMeters);
+        } else {
+            // For non-geographic coordinates, use the radius as-is
+            // This maintains backward compatibility with existing tests
+            radiusInDegrees = radiusMeters;
+        }
+        
+        shapeFactory.setSize(radiusInDegrees * 2);
         return shapeFactory.createCircle();
     }
 

@@ -242,10 +242,10 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 1);
 
         cursor = collection.find(where("field1").eq(5));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
 
         cursor = collection.find(where("field1").eq(5.0));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
 
         collection.createIndex("field1", "field2");
         cursor = collection.find(and(where("field1").eq(0.03),
@@ -257,10 +257,10 @@ public class CollectionCompoundIndexTest extends BaseCollectionTest {
         assertEquals(cursor.size(), 1);
 
         cursor = collection.find(where("field1").eq(5));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
 
         cursor = collection.find(where("field1").eq(5.0));
-        assertEquals(cursor.size(), 1);
+        assertEquals(cursor.size(), 2);
     }
 
     @Test

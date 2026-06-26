@@ -16,24 +16,26 @@
 
 package org.dizitart.no2.support.exchange;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.dizitart.no2.exceptions.NitriteIOException;
-
-import java.io.*;
-
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
+import org.dizitart.no2.exceptions.NitriteIOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.json.JsonMapper;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 
 /**
  * The Exporter class provides methods to export Nitrite database data to a file
  * or an output stream in JSON format.
  * <p>
  * It uses the provided ExportOptions to configure the export process.
- * 
+ *
  * @author Anindya Chatterjee
  * @since 1.0
  */
@@ -47,7 +49,7 @@ public class Exporter {
      * Creates an Exporter instance with the specified export options.
      *
      * @param exportOptions the export options to be set
-     *                      (must not be null and must have a valid nitrite factory)
+     * (must not be null and must have a valid nitrite factory)
      *
      * @return the Exporter instance with the specified export options
      */
@@ -56,8 +58,8 @@ public class Exporter {
         notNull(exportOptions, "exportOptions cannot be null");
         notNull(exportOptions.getNitriteFactory(), "nitriteFactory cannot be null");
 
-        if (exportOptions.getJsonFactory() == null) {
-            exportOptions.setJsonFactory(createObjectMapper().getFactory());
+        if (exportOptions.getJsonMapper() == null) {
+            exportOptions.setJsonMapper(createJsonMapper());
         }
 
         exporter.options = exportOptions;
@@ -65,22 +67,16 @@ public class Exporter {
     }
 
     /**
-     * Creates and returns an instance of ObjectMapper with custom configurations.
+     * Creates and returns an instance of JsonMapper with custom configurations.
      *
-     * @return an instance of ObjectMapper with custom configurations.
+     * @return an instance of JsonMapper with custom configurations.
      */
-    public static ObjectMapper createObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        objectMapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        objectMapper.setVisibility(
-                objectMapper.getSerializationConfig().getDefaultVisibilityChecker()
-                        .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                        .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
-                        .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE));
-        return objectMapper;
+    public static JsonMapper createJsonMapper() {
+        return JsonMapper.builder()
+            .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
+            .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+            .configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, true)
+            .build();
     }
 
     /**
@@ -96,6 +92,7 @@ public class Exporter {
      * Exports the content to the specified file.
      *
      * @param file the file to export the content to
+     *
      * @throws NitriteIOException if there is an I/O error while writing content to the file
      */
     public void exportTo(File file) {
@@ -124,6 +121,7 @@ public class Exporter {
      * Exports the data to the specified output stream.
      *
      * @param stream the output stream to export the data to
+     *
      * @throws IOException if an I/O error occurs
      */
     public void exportTo(OutputStream stream) throws IOException {
@@ -136,15 +134,17 @@ public class Exporter {
      * Exports the data to the specified writer using JSON format.
      *
      * @param writer the writer to export the data to
+     *
      * @throws NitriteIOException if there is an I/O error while writing data with writer
      * @throws NitriteIOException if there is an error while exporting data
      */
     public void exportTo(Writer writer) {
         JsonGenerator generator;
         try {
-            generator = options.getJsonFactory().createGenerator(writer);
-            generator.setPrettyPrinter(new DefaultPrettyPrinter());
-        } catch (IOException ioe) {
+            generator = options.getJsonMapper()
+                .writerWithDefaultPrettyPrinter()
+                .createGenerator(writer);
+        } catch (JacksonIOException ioe) {
             throw new NitriteIOException("I/O error while writing data with writer", ioe);
         }
 

@@ -16,13 +16,11 @@
 
 package org.dizitart.no2.spatial.jackson;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 import org.dizitart.no2.spatial.GeometryUtils;
 import org.locationtech.jts.geom.Geometry;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ser.std.StdScalarSerializer;
 
 /**
  * @since 4.0
@@ -35,7 +33,7 @@ class GeometrySerializer extends StdScalarSerializer<Geometry> {
     }
 
     @Override
-    public void serialize(Geometry value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+    public void serialize(Geometry value, JsonGenerator gen, SerializationContext context) {
         if (value != null) {
             gen.writeString(GeometryUtils.toString(value));
         }

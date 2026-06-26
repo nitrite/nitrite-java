@@ -19,10 +19,13 @@ package org.dizitart.no2.filters;
 import lombok.Getter;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexMap;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author Anindya Chatterjee
@@ -50,11 +53,15 @@ class InFilter extends ComparableArrayFilter {
     }
 
     public List<?> applyOnIndex(IndexMap indexMap) {
-        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
+        // convert comparable set to DBValue set
+        Set<DBValue> dbValueSet = comparableSet.stream().map(value -> value == null ? DBNull.getInstance()
+            : new DBValue(value)).collect(Collectors.toSet());
+
+        List<NavigableMap<DBValue, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
-            if (comparableSet.contains(entry.getFirst())) {
+        for (Pair<DBValue, ?> entry : indexMap.entries()) {
+            if (dbValueSet.contains(entry.getFirst())) {
                 processIndexValue(entry.getSecond(), subMap, nitriteIds);
             }
         }

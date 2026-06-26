@@ -89,7 +89,10 @@ public class EntityDecoratorScanner {
                     Field field = reflector.getField(entityDecorator.getEntityType(), name);
                     if (field != null) {
                         entityFields.add(field);
-                        indexValidator.validate(field.getType(), field.getName(), nitriteMapper);
+                        // Use InterfacePropertyHolder to get correct name and type for interface properties
+                        String fieldName = InterfacePropertyHolder.getPropertyName(field);
+                        Class<?> fieldType = InterfacePropertyHolder.getPropertyType(field);
+                        indexValidator.validate(fieldType, fieldName, nitriteMapper);
                     }
                 }
 
@@ -108,7 +111,9 @@ public class EntityDecoratorScanner {
                 String idFieldName = entityId.getFieldName();
                 if (!StringUtils.isNullOrEmpty(idFieldName)) {
                     Field field = reflector.getField(entityDecorator.getEntityType(), idFieldName);
-                    indexValidator.validateId(entityId, field.getType(), idFieldName, nitriteMapper);
+                    // Use InterfacePropertyHolder to get correct type for interface properties
+                    Class<?> fieldType = InterfacePropertyHolder.getPropertyType(field);
+                    indexValidator.validateId(entityId, fieldType, idFieldName, nitriteMapper);
 
                     objectIdField = new ObjectIdField();
                     objectIdField.setField(field);

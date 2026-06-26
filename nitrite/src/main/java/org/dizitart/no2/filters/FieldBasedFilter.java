@@ -21,6 +21,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.mapper.NitriteMapper;
 import org.dizitart.no2.exceptions.ValidationException;
 
@@ -102,7 +103,7 @@ public abstract class FieldBasedFilter extends NitriteFilter {
      */
     @SuppressWarnings("unchecked")
     protected void processIndexValue(Object value,
-                                     List<NavigableMap<Comparable<?>, Object>> subMap,
+                                     List<NavigableMap<DBValue, Object>> subMap,
                                      List<NitriteId> nitriteIds) {
         if (value instanceof List) {
             // if it is list then add it directly to nitrite ids
@@ -111,7 +112,7 @@ public abstract class FieldBasedFilter extends NitriteFilter {
         }
 
         if (value instanceof NavigableMap) {
-            subMap.add((NavigableMap<Comparable<?>, Object>) value);
+            subMap.add((NavigableMap<DBValue, Object>) value);
         }
     }
 }

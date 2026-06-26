@@ -16,8 +16,8 @@
 
 package org.dizitart.no2.mapper.jackson.modules;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.dizitart.no2.collection.NitriteId;
+import tools.jackson.databind.module.SimpleModule;
 
 /**
  * Class that registers capability of serializing {@link NitriteId} with the Jackson core.

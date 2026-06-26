@@ -2,6 +2,8 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexMap;
 
@@ -27,11 +29,13 @@ class NotEqualsFilter extends ComparableFilter {
     }
 
     public List<?> applyOnIndex(IndexMap indexMap) {
-        List<NavigableMap<Comparable<?>, Object>> subMap = new ArrayList<>();
+        Object fieldValue = getValue();
+        DBValue dbValue = fieldValue == null ? DBNull.getInstance() : new DBValue((Comparable<?>) fieldValue);
+        List<NavigableMap<DBValue, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        for (Pair<Comparable<?>, ?> entry : indexMap.entries()) {
-            if (!deepEquals(getValue(), entry.getFirst())) {
+        for (Pair<DBValue, ?> entry : indexMap.entries()) {
+            if (!deepEquals(dbValue, entry.getFirst())) {
                 processIndexValue(entry.getSecond(), subMap, nitriteIds);
             }
         }

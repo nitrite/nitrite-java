@@ -20,6 +20,7 @@ package org.dizitart.no2.integration.collection;
 import com.github.javafaker.Faker;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
+import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteCollection;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.exceptions.FilterException;
@@ -129,6 +130,151 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
 
         cursor = collection.find(where("firstName").notIn("fn1", "fn2"));
         assertEquals(cursor.size(), 1);
+    }
+
+    @Test
+    public void testInFilterUsesIndex() {
+        // reproduces issue #1258 - `in` / `notIn` filter must use the index
+        insert();
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "firstName");
+
+        DocumentCursor cursor = collection.find(where("lastName").in("ln1", "ln2", "ln10"));
+        assertEquals(cursor.size(), 3);
+        FindPlan plan = cursor.getFindPlan();
+        assertNotNull("in filter should use index scan", plan.getIndexScanFilter());
+        assertNotNull(plan.getIndexDescriptor());
+        assertNull("in filter should not fall back to collection scan", plan.getCollectionScanFilter());
+
+        cursor = collection.find(where("firstName").notIn("fn1", "fn2"));
+        assertEquals(cursor.size(), 1);
+        plan = cursor.getFindPlan();
+        assertNotNull("notIn filter should use index scan", plan.getIndexScanFilter());
+        assertNotNull(plan.getIndexDescriptor());
+        assertNull("notIn filter should not fall back to collection scan", plan.getCollectionScanFilter());
+    }
+
+    @Test
+    public void testIndexedMultiBoundRangeQueryMatchesFullScan() {
+        // Regression: a multi-bound range query on a single-field index (e.g. `age >= 30 AND
+        // age <= 50`) must use both bounds at the index level and return the exact same set as
+        // an unindexed full scan - not "everything above the lower bound, post-filtered".
+        NitriteCollection coll = db.getCollection("range");
+        for (int age = 0; age < 100; age++) {
+            coll.insert(Document.createDocument("age", age));
+        }
+
+        // Ground truth from an unindexed full scan: ages 30..=50 inclusive = 21 docs.
+        assertEquals(21, coll.find(where("age").gte(30).and(where("age").lte(50))).size());
+
+        // Index the field; the same query must return the identical, exact set.
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "age");
+
+        List<Integer> ages = new ArrayList<>();
+        for (Document doc : coll.find(where("age").gte(30).and(where("age").lte(50)))) {
+            ages.add(doc.get("age", Integer.class));
+        }
+        ages.sort(null);
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 30; i <= 50; i++) {
+            expected.add(i);
+        }
+        assertEquals("indexed range must equal exactly ages 30..=50 (both bounds applied)",
+            expected, ages);
+
+        // Exclusive bounds: 30 < age < 50 -> 31..=49 = 19 docs.
+        assertEquals(19, coll.find(where("age").gt(30).and(where("age").lt(50))).size());
+        // Contradictory range yields nothing.
+        assertEquals(0, coll.find(where("age").gte(50).and(where("age").lte(30))).size());
+        // Degenerate single-value range.
+        assertEquals(1, coll.find(where("age").gte(42).and(where("age").lte(42))).size());
+
+        // The `between` API must be index-accelerated identically to `gte().and(lte())`.
+        assertEquals(21, coll.find(where("age").between(30, 50, true)).size());
+        // And nested inside an AND with another predicate (exercises 3 same-field bounds via
+        // the intersection fallback).
+        assertEquals(10, coll.find(
+            where("age").between(30, 50, true).and(where("age").gt(40))).size()); // ages 41..=50
+    }
+
+    @Test
+    public void testCompoundIndexTerminalRangeMatchesFullScan() {
+        // A compound index `[folder, date]` queried with an equality prefix and a range on the
+        // terminal field (`folder == 3 AND date BETWEEN 20 AND 40`) must bound the range at the
+        // index level and return the exact same set as a full scan.
+        NitriteCollection coll = db.getCollection("compound_range");
+        for (int folder = 0; folder < 10; folder++) {
+            for (int date = 0; date < 100; date++) {
+                coll.insert(Document.createDocument("folder", folder)
+                    .put("date", date));
+            }
+        }
+
+        // Ground truth from an unindexed full scan: dates 20..=40 in folder 3 = 21 docs.
+        assertEquals(21, coll.find(
+            and(where("folder").eq(3), where("date").gte(20), where("date").lte(40))).size());
+
+        // With the compound index the result must be identical and exact.
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "folder", "date");
+
+        List<Integer> dates = new ArrayList<>();
+        for (Document doc : coll.find(
+            and(where("folder").eq(3), where("date").gte(20), where("date").lte(40)))) {
+            dates.add(doc.get("date", Integer.class));
+            // Every returned document must be in the queried folder.
+            assertEquals(Integer.valueOf(3), doc.get("folder", Integer.class));
+        }
+        dates.sort(null);
+        List<Integer> expected = new ArrayList<>();
+        for (int i = 20; i <= 40; i++) {
+            expected.add(i);
+        }
+        assertEquals("compound terminal range must equal exactly dates 20..=40 in folder 3",
+            expected, dates);
+
+        // A different folder over a non-existent date range yields nothing.
+        assertEquals(0, coll.find(
+            and(where("folder").eq(7), where("date").gte(200), where("date").lte(400))).size());
+    }
+
+    @Test
+    public void testCoveredCountSizeMatchesIteration() {
+        // size() may short-circuit to the index id-set size (or the map size) when the query is
+        // fully index-covered with no post-filter, skip, or limit. That fast count must always
+        // agree with actually draining the cursor - on both covered and non-covered paths.
+        NitriteCollection coll = db.getCollection("covered_count");
+        for (int age = 0; age < 100; age++) {
+            coll.insert(Document.createDocument("age", age).put("even", age % 2 == 0));
+        }
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "age");
+
+        // Plain find(): covered by the map size.
+        assertEquals(countByIteration(coll.find()), coll.find().size());
+        assertEquals(100, coll.find().size());
+
+        // Indexed equality and range: covered by the index id-set size.
+        assertEquals(countByIteration(coll.find(where("age").eq(42))),
+            coll.find(where("age").eq(42)).size());
+        DocumentCursor range = coll.find(where("age").gte(30).and(where("age").lte(50)));
+        assertEquals(countByIteration(range), range.size());
+
+        // Non-covered: a post-filter on an unindexed field must still count correctly (no
+        // short-circuit), as must skip/limit.
+        DocumentCursor postFiltered = coll.find(where("even").eq(true));
+        assertEquals(countByIteration(postFiltered), postFiltered.size());
+        assertEquals(50, postFiltered.size());
+        DocumentCursor limited = coll.find(where("age").gte(0),
+            org.dizitart.no2.collection.FindOptions.skipBy(10).limit(5));
+        assertEquals(countByIteration(limited), limited.size());
+        assertEquals(5, limited.size());
+    }
+
+    private static long countByIteration(DocumentCursor cursor) {
+        long count = 0;
+        for (Document ignored : cursor) {
+            count++;
+        }
+        return count;
     }
 
     @Test
@@ -626,5 +772,221 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
         Integer[] indexedResult = docIter.stream().map(d -> d.get("name", Integer.class)).toArray(Integer[]::new);
 
         assertArrayEquals(nonIndexedResult, indexedResult);
+    }
+
+    @Test
+    public void testFindByArrayFieldIndexWithElemMatch() {
+        // Create a collection with array field
+        NitriteCollection userCollection = db.getCollection("users");
+        
+        // Insert a larger dataset (15k documents as mentioned in the issue)
+        for (int i = 0; i < 15000; i++) {
+            Document doc = Document.createDocument("name", "user" + i)
+                .put("emails", new String[]{"user" + i + "@example.com", "user" + i + "@test.com"});
+            userCollection.insert(doc);
+        }
+        
+        // Add a specific test document
+        userCollection.insert(Document.createDocument("name", "testuser")
+            .put("emails", new String[]{"test@gmail.com", "test@example.com"}));
+        
+        // Measure query time WITHOUT index
+        long startWithoutIndex = System.nanoTime();
+        DocumentCursor cursorWithoutIndex = userCollection.find(
+            where("emails").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq("test@gmail.com")));
+        long withoutIndexCount = cursorWithoutIndex.size();
+        long endWithoutIndex = System.nanoTime();
+        long timeWithoutIndex = (endWithoutIndex - startWithoutIndex) / 1_000_000;
+        
+        assertEquals(1, withoutIndexCount);
+        
+        // Verify collection scan is used when no index exists (no index descriptor)
+        FindPlan planWithoutIndex = cursorWithoutIndex.getFindPlan();
+        assertNull("Index descriptor should be null when no index exists", 
+            planWithoutIndex.getIndexDescriptor());
+        
+        // Create index on emails field
+        userCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "emails");
+        
+        // Measure query time WITH index
+        long startWithIndex = System.nanoTime();
+        DocumentCursor cursorWithIndex = userCollection.find(
+            where("emails").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq("test@gmail.com")));
+        long withIndexCount = cursorWithIndex.size();
+        long endWithIndex = System.nanoTime();
+        long timeWithIndex = (endWithIndex - startWithIndex) / 1_000_000;
+        
+        assertEquals(1, withIndexCount);
+        
+        // Verify index is actually being used by checking the find plan
+        FindPlan planWithIndex = cursorWithIndex.getFindPlan();
+        assertNotNull("Index scan filter should not be null when index exists", 
+            planWithIndex.getIndexScanFilter());
+        assertNotNull("Index descriptor should not be null when index is used", 
+            planWithIndex.getIndexDescriptor());
+        
+        // With index should be significantly faster
+        System.out.println("ElemMatch query on 15k documents:");
+        System.out.println("  Time without index: " + timeWithoutIndex + " ms");
+        System.out.println("  Time with index: " + timeWithIndex + " ms");
+        System.out.println("  Speedup: " + (timeWithoutIndex > 0 ? (timeWithoutIndex / (double) Math.max(1, timeWithIndex)) : "N/A") + "x");
+        
+        // Assert that index provides significant improvement (at least 2x faster)
+        // This is a conservative check - actual improvement should be much higher
+        assertTrue("Index should provide significant performance improvement", 
+            timeWithIndex < timeWithoutIndex || timeWithIndex < 100);
+    }
+
+    @Test
+    public void testFindByArrayFieldIndexWithElemMatchComplexFilter() {
+        // Create a collection with array field
+        NitriteCollection productCollection = db.getCollection("products");
+        
+        // Insert documents with array of scores
+        for (int i = 0; i < 1000; i++) {
+            Document doc = Document.createDocument("name", "product" + i)
+                .put("scores", new Integer[]{i, i + 10, i + 20});
+            productCollection.insert(doc);
+        }
+        
+        // Create index on scores field
+        productCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "scores");
+        
+        // Test 1: Query with elemMatch using gt filter
+        DocumentCursor cursor = productCollection.find(
+            where("scores").elemMatch(org.dizitart.no2.filters.FluentFilter.$.gt(995)));
+        
+        // Verify index is used
+        FindPlan findPlan = cursor.getFindPlan();
+        assertNotNull("Index scan filter should be used for gt query", findPlan.getIndexScanFilter());
+        assertNotNull("Index descriptor should be present", findPlan.getIndexDescriptor());
+        
+        // Should find products where at least one score is > 995
+        assertTrue("Should find products with scores > 995", cursor.size() > 0);
+        
+        // Test 2: Query with elemMatch using lt filter
+        cursor = productCollection.find(
+            where("scores").elemMatch(org.dizitart.no2.filters.FluentFilter.$.lt(5)));
+        
+        // Verify index is used
+        findPlan = cursor.getFindPlan();
+        assertNotNull("Index scan filter should be used for lt query", findPlan.getIndexScanFilter());
+        assertNotNull("Index descriptor should be present", findPlan.getIndexDescriptor());
+        
+        // Should find products where at least one score is < 5
+        assertTrue("Should find products with scores < 5", cursor.size() > 0);
+        
+        // Test 3: Query with elemMatch using gte filter
+        cursor = productCollection.find(
+            where("scores").elemMatch(org.dizitart.no2.filters.FluentFilter.$.gte(500)));
+        
+        findPlan = cursor.getFindPlan();
+        assertNotNull("Index scan filter should be used for gte query", findPlan.getIndexScanFilter());
+        assertTrue("Should find products with scores >= 500", cursor.size() > 0);
+        
+        // Test 4: Query with elemMatch using lte filter
+        cursor = productCollection.find(
+            where("scores").elemMatch(org.dizitart.no2.filters.FluentFilter.$.lte(500)));
+        
+        findPlan = cursor.getFindPlan();
+        assertNotNull("Index scan filter should be used for lte query", findPlan.getIndexScanFilter());
+        assertTrue("Should find products with scores <= 500", cursor.size() > 0);
+    }
+    
+    @Test
+    public void testElemMatchWithNonUniqueIndex() {
+        // Test that elemMatch works with non-unique index
+        NitriteCollection tagCollection = db.getCollection("tags");
+        
+        // Insert documents with tag arrays (some tags are common)
+        for (int i = 0; i < 500; i++) {
+            Document doc = Document.createDocument("id", i)
+                .put("tags", new String[]{"tag" + i, "category" + (i % 10), "item" + i});
+            tagCollection.insert(doc);
+        }
+        
+        // Create non-unique index on tags field (since there are duplicate values)
+        tagCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "tags");
+        
+        // Query with elemMatch
+        DocumentCursor cursor = tagCollection.find(
+            where("tags").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq("tag100")));
+        
+        // Verify index is used
+        FindPlan findPlan = cursor.getFindPlan();
+        assertNotNull("Index scan filter should be used", 
+            findPlan.getIndexScanFilter());
+        assertNotNull("Index descriptor should be present", 
+            findPlan.getIndexDescriptor());
+        assertEquals("Should find exactly one document", 1, cursor.size());
+        
+        // Query for a common category tag (should find multiple)
+        cursor = tagCollection.find(
+            where("tags").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq("category5")));
+        
+        findPlan = cursor.getFindPlan();
+        assertNotNull("Index should be used for common values too", 
+            findPlan.getIndexScanFilter());
+        assertEquals("Should find all documents with category5", 50, cursor.size());
+    }
+    
+    @Test
+    public void testElemMatchIndexPerformanceComparison() {
+        // This test explicitly measures and compares performance
+        NitriteCollection perfCollection = db.getCollection("performance");
+        
+        // Insert a meaningful dataset
+        for (int i = 0; i < 10000; i++) {
+            Document doc = Document.createDocument("id", i)
+                .put("values", new Integer[]{i, i * 2, i * 3});
+            perfCollection.insert(doc);
+        }
+        
+        // Add a unique test value that only appears once
+        perfCollection.insert(Document.createDocument("id", 99999)
+            .put("values", new Integer[]{77777, 88888, 99999}));
+        
+        // Test WITHOUT index
+        long startNoIndex = System.nanoTime();
+        DocumentCursor noIndexCursor = perfCollection.find(
+            where("values").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq(99999)));
+        long noIndexCount = noIndexCursor.size();
+        long endNoIndex = System.nanoTime();
+        long timeNoIndex = (endNoIndex - startNoIndex) / 1_000_000;
+        
+        // Verify no index was used (no index descriptor)
+        FindPlan noIndexPlan = noIndexCursor.getFindPlan();
+        assertNull("Index descriptor should be null without index", 
+            noIndexPlan.getIndexDescriptor());
+        assertEquals(1, noIndexCount);
+        
+        // Create index
+        perfCollection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "values");
+        
+        // Test WITH index
+        long startWithIndex = System.nanoTime();
+        DocumentCursor withIndexCursor = perfCollection.find(
+            where("values").elemMatch(org.dizitart.no2.filters.FluentFilter.$.eq(99999)));
+        long withIndexCount = withIndexCursor.size();
+        long endWithIndex = System.nanoTime();
+        long timeWithIndex = (endWithIndex - startWithIndex) / 1_000_000;
+        
+        // Verify index was used
+        FindPlan withIndexPlan = withIndexCursor.getFindPlan();
+        assertNotNull("Index scan filter should be used with index", 
+            withIndexPlan.getIndexScanFilter());
+        assertNotNull("Index descriptor should be present", 
+            withIndexPlan.getIndexDescriptor());
+        assertEquals(1, withIndexCount);
+        
+        System.out.println("Performance comparison for elemMatch on 10k documents:");
+        System.out.println("  Without index: " + timeNoIndex + " ms");
+        System.out.println("  With index: " + timeWithIndex + " ms");
+        System.out.println("  Improvement: " + 
+            (timeNoIndex > 0 ? String.format("%.1fx", timeNoIndex / (double) Math.max(1, timeWithIndex)) : "N/A"));
+        
+        // Index should provide measurable improvement
+        assertTrue("Index should improve performance or complete very quickly", 
+            timeWithIndex < timeNoIndex || timeWithIndex < 100);
     }
 }

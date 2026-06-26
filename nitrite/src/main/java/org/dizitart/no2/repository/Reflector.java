@@ -23,6 +23,7 @@ import org.dizitart.no2.repository.annotations.InheritIndices;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,7 +76,15 @@ class Reflector {
         try {
             field = startingClass.getDeclaredField(key);
         } catch (NoSuchFieldException e) {
-            throw new ValidationException("No such field '" + key + "' for type " + startingClass.getName(), e);
+            // If it's an interface, try to find the property from getter method
+            if (startingClass.isInterface()) {
+                field = getFieldFromInterfaceProperty(startingClass, key);
+                if (field == null) {
+                    throw new ValidationException("No such field '" + key + "' for type " + startingClass.getName(), e);
+                }
+            } else {
+                throw new ValidationException("No such field '" + key + "' for type " + startingClass.getName(), e);
+            }
         }
 
         if (!isNullOrEmpty(remaining) || remaining.contains(NitriteConfig.getFieldSeparator())) {
@@ -123,6 +132,12 @@ class Reflector {
                     }
                 }
             }
+            
+            // If still not found and type is an interface, try to find from getter methods
+            if (field == null && type.isInterface()) {
+                field = getFieldFromInterfaceProperty(type, name);
+            }
+            
             if (field == null) {
                 throw new ValidationException("No such field '" + name + "' for type " + type.getName());
             }
@@ -137,7 +152,126 @@ class Reflector {
         } else {
             fields = Arrays.asList(type.getDeclaredFields());
         }
+        
+        // If type is an interface and has no fields, try to get fields from interface properties
+        if (fields.isEmpty() && type.isInterface()) {
+            fields = getFieldsFromInterfaceProperties(type);
+        }
+        
         return fields;
+    }
+    
+    /**
+     * Extracts property information from interface getter methods and creates a synthetic Field.
+     * This is used to support interface entity types where properties are defined as getter methods.
+     * 
+     * The returned Field is from a template class and is used primarily for type information.
+     * Actual field access (get/set) on runtime objects works because those are concrete 
+     * implementations with real fields.
+     * 
+     * @param interfaceType the interface class
+     * @param propertyName the property name
+     * @return a Field object representing the property, or null if not found
+     */
+    private <T> Field getFieldFromInterfaceProperty(Class<T> interfaceType, String propertyName) {
+        if (!interfaceType.isInterface()) {
+            return null;
+        }
+        
+        // Look for getter methods matching the property name
+        Method[] methods = interfaceType.getMethods();
+        for (Method method : methods) {
+            String methodName = method.getName();
+            
+            // Check for standard getter patterns: getXxx() or isXxx()
+            String extractedPropertyName = null;
+            if (methodName.startsWith("get") && methodName.length() > 3 && method.getParameterTypes().length == 0) {
+                extractedPropertyName = decapitalize(methodName.substring(3));
+            } else if (methodName.startsWith("is") && methodName.length() > 2 && method.getParameterTypes().length == 0) {
+                extractedPropertyName = decapitalize(methodName.substring(2));
+            }
+            
+            if (propertyName.equals(extractedPropertyName)) {
+                // Found matching getter - create a wrapper field
+                return createSyntheticFieldForProperty(propertyName, method);
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Creates a synthetic field representation for an interface property.
+     * Uses a template field from InterfacePropertyHolder and wraps it to provide
+     * correct type information.
+     */
+    private Field createSyntheticFieldForProperty(String propertyName, Method getterMethod) {
+        try {
+            // Use a generic Object field as a template.
+            // The field name ("property") does not match the actual property name,
+            // but InterfacePropertyHolder.registerProperty stores the mapping between
+            // the template field, the actual property name, and the getter method.
+            // This allows the infrastructure to later retrieve the correct property
+            // information for interface-based repositories, even though the field name is generic.
+            Field templateField = InterfacePropertyHolder.class.getDeclaredField("property");
+            // Store metadata about this field for later use
+            InterfacePropertyHolder.registerProperty(templateField, propertyName, getterMethod);
+            return templateField;
+        } catch (NoSuchFieldException e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Extracts all property information from interface getter methods.
+     * 
+     * @param interfaceType the interface class
+     * @return list of Field objects representing interface properties
+     */
+    private <T> List<Field> getFieldsFromInterfaceProperties(Class<T> interfaceType) {
+        List<Field> fields = new ArrayList<>();
+        if (!interfaceType.isInterface()) {
+            return fields;
+        }
+        
+        Method[] methods = interfaceType.getMethods();
+        for (Method method : methods) {
+            String methodName = method.getName();
+            
+            // Check for standard getter patterns: getXxx() or isXxx()
+            String propertyName = null;
+            if (methodName.startsWith("get") && methodName.length() > 3 && method.getParameterTypes().length == 0) {
+                propertyName = decapitalize(methodName.substring(3));
+            } else if (methodName.startsWith("is") && methodName.length() > 2 && method.getParameterTypes().length == 0) {
+                propertyName = decapitalize(methodName.substring(2));
+            }
+            
+            if (propertyName != null) {
+                Field syntheticField = createSyntheticFieldForProperty(propertyName, method);
+                if (syntheticField != null) {
+                    fields.add(syntheticField);
+                }
+            }
+        }
+        
+        return fields;
+    }
+    
+    /**
+     * Decapitalizes a string (makes first character lowercase).
+     * Used to convert getter method names to property names.
+     */
+    private String decapitalize(String name) {
+        if (name == null || name.isEmpty()) {
+            return name;
+        }
+        // Follow JavaBeans convention: if first two chars are uppercase, don't decapitalize
+        if (name.length() > 1 && Character.isUpperCase(name.charAt(0)) && Character.isUpperCase(name.charAt(1))) {
+            return name;
+        }
+        char[] chars = name.toCharArray();
+        chars[0] = Character.toLowerCase(chars[0]);
+        return new String(chars);
     }
 
     private void filterSynthetics(List<Field> fields) {

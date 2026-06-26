@@ -38,8 +38,11 @@ public class DBValue implements Comparable<DBValue>, Serializable {
     @Setter(AccessLevel.PRIVATE)
     private Comparable<?> value;
 
+    private DBValue() {
+    }
+
     public DBValue(Comparable<?> value) {
-        this.value = value;
+        this.value = normalizeNumber(value);
     }
 
     @Override
@@ -53,6 +56,15 @@ public class DBValue implements Comparable<DBValue>, Serializable {
         }
 
         return Comparables.compare(value, o.value);
+    }
+
+    private static Comparable<?> normalizeNumber(Comparable<?> value) {
+        // Normalize all numeric types to Double for consistent serialization
+        // This ensures Integer(5) and Double(5.0) are treated the same in indexes
+        if (value instanceof Number && !(value instanceof Double)) {
+            return ((Number) value).doubleValue();
+        }
+        return value;
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {

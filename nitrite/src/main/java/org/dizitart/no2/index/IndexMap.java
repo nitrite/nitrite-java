@@ -59,118 +59,115 @@ public class IndexMap {
         this.navigableMap = navigableMap;
     }
 
-    public <T extends Comparable<T>> T firstKey() {
+    public DBValue firstKey() {
         DBValue dbKey;
         if (nitriteMap != null) {
             dbKey = nitriteMap.firstKey();
         } else if (navigableMap != null) {
             dbKey = navigableMap.firstKey();
         } else {
-            return null;
+            dbKey = null;
         }
-
-        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+        return dbKey == null ? DBNull.getInstance() : dbKey;
     }
 
-    public <T extends Comparable<T>> T lastKey() {
+    public DBValue lastKey() {
         DBValue dbKey;
         if (nitriteMap != null) {
             dbKey = nitriteMap.lastKey();
         } else if (navigableMap != null) {
             dbKey = navigableMap.lastKey();
         } else {
-            return null;
+            dbKey = null;
         }
-
-        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+        return dbKey == null ? DBNull.getInstance() : dbKey;
     }
 
     /**
      * Get the largest key that is smaller than the given key, or null if no
      * such key exists.
      *
-     * @param <T> the type parameter
      * @param key the key
      * @return the t
      */
-    public <T extends Comparable<T>> T lowerKey(T key) {
-        DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
+    public DBValue lowerKey(DBValue key) {
+        DBValue dbKey = key == null ? DBNull.getInstance() : key;
         if (nitriteMap != null) {
             dbKey = nitriteMap.lowerKey(dbKey);
         } else if (navigableMap != null) {
             dbKey = navigableMap.lowerKey(dbKey);
+        } else {
+            dbKey = null;
         }
-
-        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+        return dbKey == null ? DBNull.getInstance() : dbKey;
     }
 
     /**
      * Get the smallest key that is larger than the given key, or null if no
      * such key exists.
      *
-     * @param <T> the type parameter
      * @param key the key
      * @return the t
      */
-    public <T extends Comparable<T>> T higherKey(T key) {
-        DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
+    public DBValue higherKey(DBValue key) {
+        DBValue dbKey = key == null ? DBNull.getInstance() : key;
         if (nitriteMap != null) {
             dbKey = nitriteMap.higherKey(dbKey);
         } else if (navigableMap != null) {
             dbKey = navigableMap.higherKey(dbKey);
+        } else {
+            dbKey = null;
         }
-
-        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+        return dbKey == null ? DBNull.getInstance() : dbKey;
     }
 
     /**
      * Get the smallest key that is larger or equal to this key.
      *
-     * @param <T> the type parameter
      * @param key the key
      * @return the t
      */
-    public <T extends Comparable<T>> T ceilingKey(T key) {
-        DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
+    public DBValue ceilingKey(DBValue key) {
+        DBValue dbKey = key == null ? DBNull.getInstance() : key;
         if (nitriteMap != null) {
             dbKey = nitriteMap.ceilingKey(dbKey);
         } else if (navigableMap != null) {
             dbKey = navigableMap.ceilingKey(dbKey);
+        } else {
+            dbKey = null;
         }
-
-        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+        return dbKey == null ? DBNull.getInstance() : dbKey;
     }
 
     /**
      * Get the largest key that is smaller or equal to this key.
      *
-     * @param <T> the type parameter
      * @param key the key
      * @return the t
      */
-    public <T extends Comparable<T>> T floorKey(T key) {
-        DBValue dbKey = key == null ? DBNull.getInstance() : new DBValue(key);
+    public DBValue floorKey(DBValue key) {
+        DBValue dbKey = key == null ? DBNull.getInstance() : key;
         if (nitriteMap != null) {
             dbKey = nitriteMap.floorKey(dbKey);
         } else if (navigableMap != null) {
             dbKey = navigableMap.floorKey(dbKey);
+        } else {
+            dbKey = null;
         }
-
-        return dbKey == null || dbKey instanceof DBNull ? null : (T) dbKey.getValue();
+        return dbKey == null ? DBNull.getInstance() : dbKey;
     }
 
     /**
      * Gets the value mapped with the specified key or <code>null</code> otherwise.
      *
-     * @param comparable the comparable
+     * @param dbValue the db value
      * @return the object
      */
-    public Object get(Comparable<?> comparable) {
-        DBValue dbKey = comparable == null ? DBNull.getInstance() : new DBValue(comparable);
+    public Object get(DBValue dbValue) {
         if (nitriteMap != null) {
-            return nitriteMap.get(dbKey);
+            return nitriteMap.get(dbValue);
         } else if (navigableMap != null) {
-            return navigableMap.get(dbKey);
+            return navigableMap.get(dbValue);
         }
         return null;
     }
@@ -180,7 +177,7 @@ public class IndexMap {
      *
      * @return the iterable
      */
-    public Iterable<? extends Pair<Comparable<?>, ?>> entries() {
+    public Iterable<? extends Pair<DBValue, ?>> entries() {
         if (nitriteMap != null) {
             Iterator<? extends Pair<DBValue, ?>> entryIterator;
             if (!reverseScan) {
@@ -189,20 +186,20 @@ public class IndexMap {
                 entryIterator = nitriteMap.reversedEntries().iterator();
             }
 
-            return (Iterable<Pair<Comparable<?>, ?>>) () -> new Iterator<>() {
+            return (Iterable<Pair<DBValue, ?>>) () -> new Iterator<>() {
                 @Override
                 public boolean hasNext() {
                     return entryIterator.hasNext();
                 }
 
                 @Override
-                public Pair<Comparable<?>, ?> next() {
+                public Pair<DBValue, ?> next() {
                     Pair<DBValue, ?> next = entryIterator.next();
                     DBValue dbKey = next.getFirst();
                     if (dbKey instanceof DBNull) {
                         return new Pair<>(null, next.getSecond());
                     } else {
-                        return new Pair<>(dbKey.getValue(), next.getSecond());
+                        return new Pair<>(dbKey, next.getSecond());
                     }
                 }
             };
@@ -214,20 +211,20 @@ public class IndexMap {
                 entryIterator = navigableMap.entrySet().iterator();
             }
 
-            return (Iterable<Pair<Comparable<?>, ?>>) () -> new Iterator<Pair<Comparable<?>, ?>>() {
+            return (Iterable<Pair<DBValue, ?>>) () -> new Iterator<>() {
                 @Override
                 public boolean hasNext() {
                     return entryIterator.hasNext();
                 }
 
                 @Override
-                public Pair<Comparable<?>, ?> next() {
+                public Pair<DBValue, ?> next() {
                     Map.Entry<DBValue, ?> next = entryIterator.next();
                     DBValue dbKey = next.getKey();
                     if (dbKey instanceof DBNull) {
                         return new Pair<>(null, next.getValue());
                     } else {
-                        return new Pair<>(dbKey.getValue(), next.getValue());
+                        return new Pair<>(dbKey, next.getValue());
                     }
                 }
             };
@@ -244,7 +241,7 @@ public class IndexMap {
         List<NitriteId> terminalResult = new CopyOnWriteArrayList<>();
 
         // scan each entry of the navigable map and collect all terminal nitrite-ids
-        for (Pair<Comparable<?>, ?> entry : entries()) {
+        for (Pair<DBValue, ?> entry : entries()) {
             // if the value is terminal, collect all nitrite-ids
             if (entry.getSecond() instanceof List) {
                 List<NitriteId> nitriteIds = (List<NitriteId>) entry.getSecond();

@@ -4,7 +4,7 @@
 
     <groupId>org.dizitart</groupId>
     <artifactId>nitrite-java</artifactId>
-    <version>4.3.2</version>
+    <version>4.3.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Nitrite Database</name>
@@ -52,68 +52,61 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jackson.version>2.20.0</jackson.version>
-        <slf4j.version>2.0.17</slf4j.version>
+        <jackson.version>3.2.0</jackson.version>
+        <slf4j.version>2.0.18</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
-        <h2.version>2.3.232</h2.version>
+        <h2.version>2.4.240</h2.version>
         <rocksdb.version>10.2.1</rocksdb.version>
         <kryo5.version>5.6.2</kryo5.version>
         <jts.version>1.20.0</jts.version>
-        <commons-codec.version>1.18.0</commons-codec.version>
-        <commons-io.version>2.19.0</commons-io.version>
-        <kotlin.version>2.2.20</kotlin.version>
-        <kotlinx-serialization.version>1.9.0</kotlinx-serialization.version>
-        <kotlinx-datetime.version>0.7.0-0.6.x-compat</kotlinx-datetime.version>
-        <lombok.version>1.18.38</lombok.version>
+        <commons-codec.version>1.22.0</commons-codec.version>
+        <commons-io.version>2.22.0</commons-io.version>
+        <kotlin.version>2.4.0</kotlin.version>
+        <kotlinx-serialization.version>1.11.0</kotlinx-serialization.version>
+        <kotlinx-datetime.version>0.8.0-0.6.x-compat</kotlinx-datetime.version>
+        <lombok.version>1.18.46</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.18.0</mockito.version>
+        <mockito.version>5.23.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
-        <log4j.version>2.25.0</log4j.version>
+        <log4j.version>2.26.0</log4j.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <joda-time.version>2.14.0</joda-time.version>
+        <joda-time.version>2.14.2</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
-        <snakeyaml.version>2.4</snakeyaml.version>
-        <jakarta.xml.bind-api.version>4.0.2</jakarta.xml.bind-api.version>
-        <jaxb-impl.version>4.0.5</jaxb-impl.version>
+        <snakeyaml.version>2.6</snakeyaml.version>
+        <jakarta.xml.bind-api.version>4.0.5</jakarta.xml.bind-api.version>
+        <jaxb-impl.version>4.0.9</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>33.4.8-jre</guava.version>
-        <threetenbp.version>1.7.1</threetenbp.version>
+        <guava.version>33.6.0-jre</guava.version>
+        <threetenbp.version>1.7.3</threetenbp.version>
 
         <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
         <error-prone.version>2.31.0</error-prone.version>
 
-        <jacoco.version>0.8.13</jacoco.version>
-        <surefire.version>3.5.3</surefire.version>
-        <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
-        <maven-javadoc-plugin.version>3.11.2</maven-javadoc-plugin.version>
-        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <dokka.version>2.0.0</dokka.version>
-        <animal-sniffer.version>1.24</animal-sniffer.version>
-        <api-level-24.version>7.0_r2</api-level-24.version>
-        <maven-gpg-plugin.version>3.2.7</maven-gpg-plugin.version>
+        <jacoco.version>0.8.15</jacoco.version>
+        <surefire.version>3.5.6</surefire.version>
+        <maven-compiler-plugin.version>3.15.0</maven-compiler-plugin.version>
+        <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <dokka.version>2.2.0</dokka.version>
+        <animal-sniffer.version>1.27</animal-sniffer.version>
+        <api-level-26.version>8.0.0_r2</api-level-26.version>
+        <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
+
+        <!-- flatten mode for published poms; overridden to "bom" in nitrite-bom to keep dependencyManagement -->
+        <flatten.mode>oss</flatten.mode>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <!-- Jackson Dependencies -->
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
+                <groupId>tools.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jsr310</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.datatype</groupId>
-                <artifactId>jackson-datatype-jdk8</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
+                <groupId>tools.jackson.module</groupId>
                 <artifactId>jackson-module-kotlin</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
@@ -367,9 +360,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire.version}</version>
-                    <configuration>
-                        <argLine>@{argLine} -Duser.language=en -Duser.region=US</argLine>
-                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -393,7 +383,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -446,8 +436,8 @@
                             <configuration>
                                 <signature>
                                     <groupId>net.sf.androidscents.signature</groupId>
-                                    <artifactId>android-api-level-24</artifactId>
-                                    <version>${api-level-24.version}</version>
+                                    <artifactId>android-api-level-26</artifactId>
+                                    <version>${api-level-26.version}</version>
                                 </signature>
                             </configuration>
                         </execution>
@@ -569,10 +559,10 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>flatten-maven-plugin</artifactId>
-                        <version>1.7.2</version>
+                        <version>1.7.3</version>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>oss</flattenMode>
+                            <flattenMode>${flatten.mode}</flattenMode>
                         </configuration>
                         <executions>
                             <execution>
@@ -594,7 +584,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.0</version>
+                        <version>0.11.0</version>
                         <executions>
                             <execution>
                                 <id>deploy-artifacts</id>
@@ -645,10 +635,10 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>flatten-maven-plugin</artifactId>
-                        <version>1.7.2</version>
+                        <version>1.7.3</version>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>oss</flattenMode>
+                            <flattenMode>${flatten.mode}</flattenMode>
                         </configuration>
                         <executions>
                             <execution>
@@ -670,7 +660,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.13</version>
+                        <version>1.7.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
@@ -679,7 +669,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.0</version>
+                        <version>0.11.0</version>
                         <executions>
                             <execution>
                                 <id>deploy-artifacts</id>

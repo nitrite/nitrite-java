@@ -16,7 +16,7 @@
 
 package org.dizitart.no2.common.util;
 
-import com.fasterxml.jackson.databind.introspect.AnnotatedMethodMap;
+import tools.jackson.databind.introspect.AnnotatedMethodMap;
 import junit.framework.JUnit4TestAdapterCache;
 import lombok.Data;
 import org.apache.commons.lang3.mutable.MutableByte;
@@ -96,7 +96,8 @@ public class ObjectUtilsTest implements Serializable {
     @Test
     public void testDeepEquals3() {
         MutableByte o1 = new MutableByte();
-        assertFalse(ObjectUtils.deepEquals(o1, new MutableDouble()));
+        // Numbers with equal values but different types should be considered equal
+        assertTrue(ObjectUtils.deepEquals(o1, new MutableDouble()));
     }
 
     @Test
