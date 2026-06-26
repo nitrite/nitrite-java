@@ -213,7 +213,10 @@ public class RepositoryOperations {
         if (objectIdField != null && objectIdField.getIdFieldName().equals(fieldBasedFilter.getField())) {
             if (fieldBasedFilter instanceof EqualsFilter) {
                 return objectIdField.createUniqueFilter(fieldBasedFilter.getValue(), nitriteMapper);
-            } else if (fieldBasedFilter instanceof ComparableFilter) {
+            } else if (fieldBasedFilter instanceof ComparableFilter
+                && !(fieldBasedFilter instanceof ComparableArrayFilter)) {
+                // in / notIn filters carry an array of comparable id values, not a
+                // single value, so the convert-to-Document validation does not apply
                 Object fieldValue = fieldBasedFilter.getValue();
                 Object converted = nitriteMapper.tryConvert(fieldValue, Document.class);
                 if (converted instanceof Document) {

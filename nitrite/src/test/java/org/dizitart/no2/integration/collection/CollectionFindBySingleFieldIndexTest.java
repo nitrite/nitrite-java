@@ -133,6 +133,28 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
     }
 
     @Test
+    public void testInFilterUsesIndex() {
+        // reproduces issue #1258 - `in` / `notIn` filter must use the index
+        insert();
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "firstName");
+
+        DocumentCursor cursor = collection.find(where("lastName").in("ln1", "ln2", "ln10"));
+        assertEquals(cursor.size(), 3);
+        FindPlan plan = cursor.getFindPlan();
+        assertNotNull("in filter should use index scan", plan.getIndexScanFilter());
+        assertNotNull(plan.getIndexDescriptor());
+        assertNull("in filter should not fall back to collection scan", plan.getCollectionScanFilter());
+
+        cursor = collection.find(where("firstName").notIn("fn1", "fn2"));
+        assertEquals(cursor.size(), 1);
+        plan = cursor.getFindPlan();
+        assertNotNull("notIn filter should use index scan", plan.getIndexScanFilter());
+        assertNotNull(plan.getIndexDescriptor());
+        assertNull("notIn filter should not fall back to collection scan", plan.getCollectionScanFilter());
+    }
+
+    @Test
     public void testFindByNonUniqueIndex() throws ParseException {
         insert();
         collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");
