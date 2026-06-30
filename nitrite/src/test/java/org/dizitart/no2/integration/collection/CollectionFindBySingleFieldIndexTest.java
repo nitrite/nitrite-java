@@ -1003,7 +1003,96 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
             (timeNoIndex > 0 ? String.format("%.1fx", timeNoIndex / (double) Math.max(1, timeWithIndex)) : "N/A"));
         
         // Index should provide measurable improvement
-        assertTrue("Index should improve performance or complete very quickly", 
+        assertTrue("Index should improve performance or complete very quickly",
             timeWithIndex < timeNoIndex || timeWithIndex < 100);
+    }
+
+    @Test
+    public void testNonUniqueIndexManySameKey() {
+        // Issue #1260: a non-unique index on a low-cardinality field stores many ids under the
+        // same value. The composite-key layout must still return every matching id, reflect
+        // removals, and honour both insert-before-index and after-index ordering.
+        NitriteCollection coll = db.getCollection("non_unique_many");
+        int perKey = 2000;
+        for (int i = 0; i < perKey; i++) {
+            coll.insert(Document.createDocument("key", "k1").put("seq", i));
+            coll.insert(Document.createDocument("key", "k2").put("seq", i));
+        }
+
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "key");
+
+        assertEquals(perKey, coll.find(where("key").eq("k1")).size());
+        assertEquals(perKey, coll.find(where("key").eq("k2")).size());
+        assertEquals(0, coll.find(where("key").eq("missing")).size());
+
+        // The query must use the index, not fall back to a collection scan.
+        FindPlan plan = coll.find(where("key").eq("k1")).getFindPlan();
+        assertNotNull("eq filter should use index scan", plan.getIndexScanFilter());
+        assertNull("eq filter should not fall back to collection scan", plan.getCollectionScanFilter());
+
+        // notEquals must return exactly the complement.
+        assertEquals(perKey, coll.find(where("key").notEq("k1")).size());
+
+        // Removing all k1 documents must clear them from the index without touching k2.
+        coll.remove(where("key").eq("k1"));
+        assertEquals(0, coll.find(where("key").eq("k1")).size());
+        assertEquals(perKey, coll.find(where("key").eq("k2")).size());
+
+        // Inserting a new k1 after removal must reappear through the index.
+        coll.insert(Document.createDocument("key", "k1").put("seq", -1));
+        assertEquals(1, coll.find(where("key").eq("k1")).size());
+    }
+
+    @Test
+    public void testNonUniqueIndexOrderingAndRange() {
+        // The composite layout must present distinct values in natural (and reverse) order and
+        // support range scans, with several ids living under each value.
+        NitriteCollection coll = db.getCollection("non_unique_order");
+        for (int v = 0; v < 10; v++) {
+            for (int dup = 0; dup < 5; dup++) {
+                coll.insert(Document.createDocument("v", v).put("dup", dup));
+            }
+        }
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "v");
+
+        // Ascending distinct order over duplicated values.
+        List<Integer> asc = new ArrayList<>();
+        for (Document doc : coll.find(where("v").gte(0), orderBy("v", SortOrder.Ascending))) {
+            asc.add(doc.get("v", Integer.class));
+        }
+        assertTrue("values must be ascending", isSorted(asc, true));
+        assertEquals(50, asc.size());
+
+        // Descending.
+        List<Integer> desc = new ArrayList<>();
+        for (Document doc : coll.find(where("v").gte(0), orderBy("v", SortOrder.Descending))) {
+            desc.add(doc.get("v", Integer.class));
+        }
+        assertTrue("values must be descending", isSorted(desc, false));
+
+        // Range scan: 3 <= v <= 6 -> 4 values * 5 dups = 20 docs.
+        assertEquals(20, coll.find(where("v").gte(3).and(where("v").lte(6))).size());
+        // Greater-than.
+        assertEquals(15, coll.find(where("v").gt(6)).size()); // v in {7,8,9}
+        // in-filter across duplicated values.
+        assertEquals(10, coll.find(where("v").in(1, 2)).size());
+    }
+
+    @Test
+    public void testNonUniqueIndexNullAndMultiValue() {
+        // Null indexed values and multi-valued (array/iterable) fields must round-trip through
+        // the composite layout.
+        NitriteCollection coll = db.getCollection("non_unique_null");
+        coll.insert(Document.createDocument("tag", null).put("n", 1));
+        coll.insert(Document.createDocument("tag", null).put("n", 2));
+        coll.insert(Document.createDocument("tag", Arrays.asList("a", "b")).put("n", 3));
+        coll.insert(Document.createDocument("tag", Arrays.asList("b", "c")).put("n", 4));
+        coll.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "tag");
+
+        assertEquals(2, coll.find(where("tag").eq(null)).size());
+        // "b" appears in two documents through the iterable expansion.
+        assertEquals(2, coll.find(where("tag").eq("b")).size());
+        assertEquals(1, coll.find(where("tag").eq("a")).size());
+        assertEquals(1, coll.find(where("tag").eq("c")).size());
     }
 }

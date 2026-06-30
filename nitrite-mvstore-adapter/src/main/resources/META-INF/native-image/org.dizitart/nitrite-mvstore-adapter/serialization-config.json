@@ -60,6 +60,9 @@
         "name": "org.dizitart.no2.common.DBValue"
     },
     {
+        "name": "org.dizitart.no2.index.IndexEntryKey"
+    },
+    {
         "name": "org.dizitart.no2.common.Fields"
     },
     {
