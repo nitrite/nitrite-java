@@ -152,6 +152,23 @@ public class CollectionFindBySingleFieldIndexTest extends BaseCollectionTest {
         assertNotNull("notIn filter should use index scan", plan.getIndexScanFilter());
         assertNotNull(plan.getIndexDescriptor());
         assertNull("notIn filter should not fall back to collection scan", plan.getCollectionScanFilter());
+
+        // direct-lookup index scan must still honor the requested sort order
+        cursor = collection.find(where("firstName").in("fn3", "fn1", "fn2"),
+            orderBy("firstName", SortOrder.Ascending));
+        List<Object> ascending = new ArrayList<>();
+        for (Document doc : cursor) {
+            ascending.add(doc.get("firstName"));
+        }
+        assertEquals(Arrays.asList("fn1", "fn2", "fn3"), ascending);
+
+        cursor = collection.find(where("firstName").in("fn3", "fn1", "fn2"),
+            orderBy("firstName", SortOrder.Descending));
+        List<Object> descending = new ArrayList<>();
+        for (Document doc : cursor) {
+            descending.add(doc.get("firstName"));
+        }
+        assertEquals(Arrays.asList("fn3", "fn2", "fn1"), descending);
     }
 
     @Test

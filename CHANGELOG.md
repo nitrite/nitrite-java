@@ -1,3 +1,9 @@
+## Release 4.3.4 - Unreleased
+
+### Performance Improvements
+
+- Made `in` filter index scans look up each value directly instead of scanning every index entry, so `in` queries on large indexed collections are now as fast as `eq` instead of degrading to a full index walk #1258
+
 ## Release 4.3.3 - Jun 26, 2026
 
 ### New Changes

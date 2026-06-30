@@ -25,7 +25,6 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.index.IndexMap;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @author Anindya Chatterjee
@@ -53,16 +52,24 @@ class InFilter extends ComparableArrayFilter {
     }
 
     public List<?> applyOnIndex(IndexMap indexMap) {
-        // convert comparable set to DBValue set
-        Set<DBValue> dbValueSet = comparableSet.stream().map(value -> value == null ? DBNull.getInstance()
-            : new DBValue(value)).collect(Collectors.toSet());
+        // collect the values to look up in a sorted set, so the scan follows
+        // the natural (or reverse) order of the index
+        NavigableSet<DBValue> dbValueSet = new TreeSet<>();
+        for (Comparable<?> value : comparableSet) {
+            dbValueSet.add(value == null ? DBNull.getInstance() : new DBValue(value));
+        }
 
         List<NavigableMap<DBValue, Object>> subMap = new ArrayList<>();
         List<NitriteId> nitriteIds = new ArrayList<>();
 
-        for (Pair<DBValue, ?> entry : indexMap.entries()) {
-            if (dbValueSet.contains(entry.getFirst())) {
-                processIndexValue(entry.getSecond(), subMap, nitriteIds);
+        // look up each value directly in the index instead of scanning every
+        // entry, turning the scan from O(index size) into O(values * log size)
+        Iterable<DBValue> scanOrder = indexMap.isReverseScan()
+            ? dbValueSet.descendingSet() : dbValueSet;
+        for (DBValue dbValue : scanOrder) {
+            Object value = indexMap.get(dbValue);
+            if (value != null) {
+                processIndexValue(value, subMap, nitriteIds);
             }
         }
 
