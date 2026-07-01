@@ -23,9 +23,9 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.ValidationUtils.validateArrayIndexField;
 import static org.dizitart.no2.common.util.ValidationUtils.validateIterableIndexField;
@@ -109,7 +109,11 @@ public interface NitriteIndex {
      */
     default List<NitriteId> addNitriteIds(List<NitriteId> nitriteIds, FieldValues fieldValues) {
         if (nitriteIds == null) {
-            nitriteIds = new CopyOnWriteArrayList<>();
+            // a plain ArrayList gives amortized O(1) appends; index reads and
+            // writes are guarded by the collection's read-write lock, so the
+            // copy-on-write semantics previously used here were unnecessary and
+            // made every insert O(n) for keys with many values (issue #1260)
+            nitriteIds = new ArrayList<>();
         }
 
         if (isUnique() && nitriteIds.size() == 1) {

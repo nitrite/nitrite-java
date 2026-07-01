@@ -26,7 +26,6 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author Anindya Chatterjee
@@ -36,6 +35,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class IndexMap {
     private NitriteMap<DBValue, ?> nitriteMap;
     private NavigableMap<DBValue, ?> navigableMap;
+
+    // composite layout (non-unique single-field index): the backing map is keyed by
+    // (value, id) pairs (see IndexEntryKey). This IndexMap still presents the classic
+    // value -> List<NitriteId> view to the scanner and the filters.
+    private NitriteMap<IndexEntryKey, ?> compositeMap;
 
     @Getter
     @Setter
@@ -59,7 +63,27 @@ public class IndexMap {
         this.navigableMap = navigableMap;
     }
 
+    private IndexMap(NitriteMap<IndexEntryKey, ?> compositeMap, boolean composite) {
+        this.compositeMap = compositeMap;
+    }
+
+    /**
+     * Instantiates an {@link IndexMap} over a non-unique index stored in the composite-key
+     * layout (one row per {@code (value, id)} pair). The returned map translates between the
+     * caller's value-keyed view and the underlying {@link IndexEntryKey} rows.
+     *
+     * @param compositeMap the backing composite map
+     * @return the index map
+     */
+    public static IndexMap composite(NitriteMap<IndexEntryKey, ?> compositeMap) {
+        return new IndexMap(compositeMap, true);
+    }
+
     public DBValue firstKey() {
+        if (compositeMap != null) {
+            IndexEntryKey first = compositeMap.firstKey();
+            return first == null ? DBNull.getInstance() : first.getValue();
+        }
         DBValue dbKey;
         if (nitriteMap != null) {
             dbKey = nitriteMap.firstKey();
@@ -72,6 +96,10 @@ public class IndexMap {
     }
 
     public DBValue lastKey() {
+        if (compositeMap != null) {
+            IndexEntryKey last = compositeMap.lastKey();
+            return last == null ? DBNull.getInstance() : last.getValue();
+        }
         DBValue dbKey;
         if (nitriteMap != null) {
             dbKey = nitriteMap.lastKey();
@@ -92,6 +120,12 @@ public class IndexMap {
      */
     public DBValue lowerKey(DBValue key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : key;
+        if (compositeMap != null) {
+            // largest distinct value strictly less than `key`: the lower bracket sorts before
+            // every (key, id) row, so the largest underlying key below it belongs to a smaller value
+            IndexEntryKey k = compositeMap.lowerKey(IndexEntryKey.lowerBound(dbKey));
+            return k == null ? DBNull.getInstance() : k.getValue();
+        }
         if (nitriteMap != null) {
             dbKey = nitriteMap.lowerKey(dbKey);
         } else if (navigableMap != null) {
@@ -111,6 +145,12 @@ public class IndexMap {
      */
     public DBValue higherKey(DBValue key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : key;
+        if (compositeMap != null) {
+            // first distinct value strictly greater than `key`: every (key, id) row sorts at or
+            // below the upper bracket, so the first underlying key past it belongs to the next value
+            IndexEntryKey k = compositeMap.higherKey(IndexEntryKey.upperBound(dbKey));
+            return k == null ? DBNull.getInstance() : k.getValue();
+        }
         if (nitriteMap != null) {
             dbKey = nitriteMap.higherKey(dbKey);
         } else if (navigableMap != null) {
@@ -129,6 +169,11 @@ public class IndexMap {
      */
     public DBValue ceilingKey(DBValue key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : key;
+        if (compositeMap != null) {
+            // first distinct value >= `key`: the lower bracket sorts before every (key, id) row
+            IndexEntryKey k = compositeMap.ceilingKey(IndexEntryKey.lowerBound(dbKey));
+            return k == null ? DBNull.getInstance() : k.getValue();
+        }
         if (nitriteMap != null) {
             dbKey = nitriteMap.ceilingKey(dbKey);
         } else if (navigableMap != null) {
@@ -147,6 +192,11 @@ public class IndexMap {
      */
     public DBValue floorKey(DBValue key) {
         DBValue dbKey = key == null ? DBNull.getInstance() : key;
+        if (compositeMap != null) {
+            // largest distinct value <= `key`: every (key, id) row sorts at or below the upper bracket
+            IndexEntryKey k = compositeMap.floorKey(IndexEntryKey.upperBound(dbKey));
+            return k == null ? DBNull.getInstance() : k.getValue();
+        }
         if (nitriteMap != null) {
             dbKey = nitriteMap.floorKey(dbKey);
         } else if (navigableMap != null) {
@@ -164,6 +214,9 @@ public class IndexMap {
      * @return the object
      */
     public Object get(DBValue dbValue) {
+        if (compositeMap != null) {
+            return compositeGet(dbValue == null ? DBNull.getInstance() : dbValue);
+        }
         if (nitriteMap != null) {
             return nitriteMap.get(dbValue);
         } else if (navigableMap != null) {
@@ -173,11 +226,36 @@ public class IndexMap {
     }
 
     /**
+     * Equality lookup in the composite layout: range-scan the leading-value group and collect
+     * all the trailing ids, returning the same {@code List<NitriteId>} the classic layout would.
+     */
+    private List<NitriteId> compositeGet(DBValue value) {
+        List<NitriteId> nitriteIds = null;
+        IndexEntryKey key = compositeMap.ceilingKey(IndexEntryKey.lowerBound(value));
+        while (key != null && key.getValue().compareTo(value) == 0) {
+            // navigation over a transactional map can surface keys removed in the current
+            // transaction; the stored value is null for those, so skip them to keep the id set
+            // (and any covered-count short-circuit built from it) exact.
+            if (compositeMap.get(key) != null) {
+                if (nitriteIds == null) {
+                    nitriteIds = new ArrayList<>();
+                }
+                nitriteIds.add(key.getNitriteId());
+            }
+            key = compositeMap.higherKey(key);
+        }
+        return nitriteIds;
+    }
+
+    /**
      * Returns the iterable entries of the indexed items.
      *
      * @return the iterable
      */
     public Iterable<? extends Pair<DBValue, ?>> entries() {
+        if (compositeMap != null) {
+            return compositeEntries();
+        }
         if (nitriteMap != null) {
             Iterator<? extends Pair<DBValue, ?>> entryIterator;
             if (!reverseScan) {
@@ -233,12 +311,50 @@ public class IndexMap {
     }
 
     /**
+     * Groups the sorted flat {@code (value, id)} rows back into one {@code (value, List<ids>)}
+     * entry per distinct value, so callers (full scans, not-equals/not-in) see the same shape
+     * as the classic layout.
+     */
+    private Iterable<Pair<DBValue, ?>> compositeEntries() {
+        Iterator<? extends Pair<IndexEntryKey, ?>> rowIterator = reverseScan
+            ? compositeMap.reversedEntries().iterator()
+            : compositeMap.entries().iterator();
+
+        return () -> new Iterator<>() {
+            // one-row lookahead buffer used to detect the end of a leading-value group
+            private Pair<IndexEntryKey, ?> pending = rowIterator.hasNext() ? rowIterator.next() : null;
+
+            @Override
+            public boolean hasNext() {
+                return pending != null;
+            }
+
+            @Override
+            public Pair<DBValue, ?> next() {
+                if (pending == null) {
+                    throw new NoSuchElementException();
+                }
+                DBValue groupValue = pending.getFirst().getValue();
+                List<NitriteId> ids = new ArrayList<>();
+                ids.add(pending.getFirst().getNitriteId());
+                pending = rowIterator.hasNext() ? rowIterator.next() : null;
+                while (pending != null && pending.getFirst().getValue().compareTo(groupValue) == 0) {
+                    ids.add(pending.getFirst().getNitriteId());
+                    pending = rowIterator.hasNext() ? rowIterator.next() : null;
+                }
+                DBValue key = groupValue instanceof DBNull ? null : groupValue;
+                return new Pair<>(key, ids);
+            }
+        };
+    }
+
+    /**
      * Gets the terminal nitrite ids from this map.
      *
      * @return the terminal nitrite ids
      */
     public List<NitriteId> getTerminalNitriteIds() {
-        List<NitriteId> terminalResult = new CopyOnWriteArrayList<>();
+        List<NitriteId> terminalResult = new ArrayList<>();
 
         // scan each entry of the navigable map and collect all terminal nitrite-ids
         for (Pair<DBValue, ?> entry : entries()) {

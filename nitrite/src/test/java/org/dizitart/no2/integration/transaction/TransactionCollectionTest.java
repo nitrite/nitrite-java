@@ -768,4 +768,39 @@ public class TransactionCollectionTest extends BaseCollectionTest {
             fail();
         }
     }
+
+    @Test
+    public void testNonUniqueIndexRemoveWithinTransaction() {
+        // A non-unique index uses the composite-key layout. Removing an indexed document inside a
+        // transaction and then querying it again in the same transaction must return the exact
+        // remaining set - both when iterating and through the covered size() fast path.
+        collection.createIndex(indexOptions(IndexType.NON_UNIQUE), "tag");
+        for (int i = 0; i < 5; i++) {
+            collection.insert(createDocument("tag", "x").put("n", i));
+        }
+
+        try (Session session = db.createSession()) {
+            try (Transaction transaction = session.beginTransaction()) {
+                NitriteCollection txCol = transaction.getCollection("test");
+                assertEquals(5, txCol.find(where("tag").eq("x")).size());
+
+                txCol.remove(where("tag").eq("x").and(where("n").eq(2)));
+
+                // both the covered size() short-circuit and a full iteration must agree
+                assertEquals(4, txCol.find(where("tag").eq("x")).size());
+                int iterated = 0;
+                for (Document ignored : txCol.find(where("tag").eq("x"))) {
+                    iterated++;
+                }
+                assertEquals(4, iterated);
+
+                txCol.insert(createDocument("tag", "x").put("n", 99));
+                assertEquals(5, txCol.find(where("tag").eq("x")).size());
+
+                transaction.commit();
+            }
+        }
+
+        assertEquals(5, collection.find(where("tag").eq("x")).size());
+    }
 }
