@@ -1,4 +1,4 @@
-## Release 4.4.0 - Unreleased
+## Release 4.4.0 - Jul 1, 2026
 
 ### Upgrade Notes
 
