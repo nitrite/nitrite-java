@@ -45,6 +45,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     private MVStore mvStore;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
     private final Map<String, NitriteRTree<?, ?>> nitriteRTreeMapRegistry;
+    private volatile boolean autoCommitPending;
 
     public NitriteMVStore() {
         super();
@@ -54,9 +55,21 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     public void openOrCreate() {
+        // MVStoreUtils always opens with auto-commit disabled; it is enabled lazily
+        // right after the very first map is created (see enableAutoCommitIfPending()),
+        // so the background writer never races with bootstrapping a brand new store
+        this.autoCommitPending = getStoreConfig().autoCommit();
         this.mvStore = MVStoreUtils.openOrCreate(getStoreConfig());
         initEventBus();
         alert(StoreEvents.Opened);
+    }
+
+    private void enableAutoCommitIfPending() {
+        if (autoCommitPending) {
+            autoCommitPending = false;
+            mvStore.commit();
+            mvStore.setAutoCommitDelay(1000);
+        }
     }
 
     @Override
@@ -76,7 +89,20 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     public void commit() {
-        mvStore.commit();
+        // pause the background writer for the duration of this explicit commit;
+        // H2's autocommit thread and an explicit commit() racing on the same store
+        // can trip an internal MVStore assertion (concurrent chunk serialization)
+        int delay = mvStore.getAutoCommitDelay();
+        if (delay > 0) {
+            mvStore.setAutoCommitDelay(0);
+        }
+        try {
+            mvStore.commit();
+        } finally {
+            if (delay > 0) {
+                mvStore.setAutoCommitDelay(delay);
+            }
+        }
         alert(StoreEvents.Commit);
     }
 
@@ -187,7 +213,9 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
             while (version >= 0) {
                 try {
-                    return mvStore.openMap(mapName, mapBuilder);
+                    MVMap map = mvStore.openMap(mapName, mapBuilder);
+                    enableAutoCommitIfPending();
+                    return map;
                 } catch (MVStoreException me) {
                     if (version == 0) {
                         throw me;

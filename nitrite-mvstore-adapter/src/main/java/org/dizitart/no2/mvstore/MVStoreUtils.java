@@ -119,9 +119,10 @@ class MVStoreUtils {
             builder = builder.fileName(mvStoreConfig.filePath());
         }
 
-        if (!mvStoreConfig.autoCommit()) {
-            builder = builder.autoCommitDisabled();
-        }
+        // auto-commit is enabled after the store is fully bootstrapped (see openOrCreate),
+        // to avoid the background writer racing with creation of the very first map/chunk
+        // on a brand new store, which can corrupt the file (github issue: CI flakiness)
+        builder = builder.autoCommitDisabled();
 
         if (mvStoreConfig.autoCommitBufferSize() > 0) {
             builder = builder.autoCommitBufferSize(mvStoreConfig.autoCommitBufferSize());
