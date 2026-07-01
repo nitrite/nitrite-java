@@ -10,6 +10,7 @@ import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.index.IndexEntryKey;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.tuples.Pair;
@@ -232,6 +233,7 @@ public class NitriteSerializers {
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
         kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
         kryoObjectFormatter.registerSerializer(DBValue.class, new JavaSerializer());
+        kryoObjectFormatter.registerSerializer(IndexEntryKey.class, new IndexEntryKeySerializer());
         kryoObjectFormatter.registerSerializer(BoundingBox.class, new BoundingBoxSerializer());
         kryoObjectFormatter.registerSerializer(SpatialKey.class, new SpatialKeySerializer());
     }

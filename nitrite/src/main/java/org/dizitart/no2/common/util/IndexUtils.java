@@ -38,6 +38,16 @@ public class IndexUtils {
             descriptor.getIndexType();
     }
 
+    /**
+     * Derives the name of the backing map for a non-unique single-field index that uses the
+     * composite-key layout (one row per {@code (value, id)} pair, see issue #1260). It is kept
+     * distinct from {@link #deriveIndexMapName(IndexDescriptor)} so the legacy array-format map
+     * can be read and migrated before being dropped.
+     */
+    public static String deriveCompositeIndexMapName(IndexDescriptor descriptor) {
+        return deriveIndexMapName(descriptor) + INTERNAL_NAME_SEPARATOR + "composite";
+    }
+
     public static String deriveIndexMetaMapName(String collectionName) {
         return INDEX_META_PREFIX + INTERNAL_NAME_SEPARATOR + collectionName;
     }

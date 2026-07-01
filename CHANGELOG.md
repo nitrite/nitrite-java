@@ -1,3 +1,18 @@
+## Release 4.4.0 - Unreleased
+
+### Upgrade Notes
+
+- Non-unique single-field indexes now use a composite-key on-disk layout (one `(value, id)` row per entry) instead of a single growing id list per value #1260
+  - The public API is unchanged. Existing databases are upgraded automatically: a legacy array-format non-unique index is rebuilt into the new layout the first time it is opened, and the old index map is dropped.
+  - The storage format change is forward-only — once a database has been opened by this version, it can no longer be read by an earlier version of Nitrite. Back up before upgrading if you may need to roll back.
+
+### Performance Improvements
+
+- Fixed performance degradation when inserting thousands of documents that share the same non-unique index key #1260
+  - The old layout re-wrote (and, on persistent stores, re-serialized) an ever-growing id list on every insert, making bulk inserts O(n²). The composite-key layout makes each insert and removal an O(log n) point operation across all backends (in-memory, MVStore and RocksDB).
+  - RocksDB orders keys by their serialized bytes, so the composite key uses an order-preserving encoding (correct ranges over negative numbers, variable-length strings, dates and booleans).
+- Made `in` filter index scans look up each value directly instead of scanning every index entry, so `in` queries on large indexed collections are now as fast as `eq` instead of degrading to a full index walk #1258
+
 ## Release 4.3.3 - Jun 26, 2026
 
 ### New Changes

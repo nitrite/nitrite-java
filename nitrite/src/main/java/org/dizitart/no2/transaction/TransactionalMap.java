@@ -6,6 +6,7 @@ import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.dizitart.no2.store.memory.InMemoryMap;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -64,9 +65,11 @@ class TransactionalMap<K, V> implements NitriteMap<K, V> {
         V result = backingMap.get(k);
         if (result == null) {
             result = primary.get(k);
-            if (result instanceof CopyOnWriteArrayList) {
-                // create a deep copy of the list so that it does not affect the original one
-                List<?> list = deepCopy((CopyOnWriteArrayList<?>) result);
+            // index value lists (ArrayList, or CopyOnWriteArrayList in legacy
+            // databases) must be deep copied so mutations inside the transaction
+            // do not leak into the committed primary map
+            if (result instanceof ArrayList || result instanceof CopyOnWriteArrayList) {
+                List<?> list = (List<?>) deepCopy((Serializable) result);
                 backingMap.put(k, (V) list);
                 result = (V) list;
             }
