@@ -13,6 +13,15 @@
   - RocksDB orders keys by their serialized bytes, so the composite key uses an order-preserving encoding (correct ranges over negative numbers, variable-length strings, dates and booleans).
 - Made `in` filter index scans look up each value directly instead of scanning every index entry, so `in` queries on large indexed collections are now as fast as `eq` instead of degrading to a full index walk #1258
 
+### Issue Fixes
+
+- Fix `DocumentSorter` violating the `Comparator` contract when two documents both have a null sort key, which caused intermittent `IllegalArgumentException: Comparison method violates its general contract!` from `orderBy` on fields with multiple null values #1261
+- Fix indexed `lt`/`lte` filters returning an empty result when the indexed field contains any null value; the forward index scan now starts from the first non-null key #1262
+- Fix descending indexed `lt`/`lte` filters leaking null-valued documents into the result on reopened persistent stores (MVStore and RocksDB); stored null index keys are now normalized to the `DBNull` sentinel in every index navigation
+- Fix the RocksDB adapter failing to round-trip the null index key through Kryo, and decoding scanned keys with the wrong type when a range scan probe and the stored key have different classes
+- Fix `in`/`notIn` filters on the `_id` field not matching legacy String ids written by pre-4.4 databases, while `eq`/`getById` on the same rows matched #1263
+- Fix `eq`/`notEq` filters on the `_id` field for legacy String ids: `eq('_id', "3")` or `eq('_id', 3)` threw `ClassCastException` in the byId fast path, and `notEq`/negated `eq` failed to exclude legacy rows during collection scans
+
 ## Release 4.3.3 - Jun 26, 2026
 
 ### New Changes
