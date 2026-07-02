@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputFilter;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.util.HashMap;
@@ -30,8 +31,17 @@ import java.util.Map;
  * @author Anindya Chatterjee.
  */
 @Slf4j(topic = "nitrite-mvstore")
-class NitriteObjectInputStream extends ObjectInputStream {
+public class NitriteObjectInputStream extends ObjectInputStream {
     private static final Map<String, Class<?>> migrationMap = new HashMap<>();
+
+    /**
+     * Allowlist filter for the legacy v1 migration path (CWE-502). Only Nitrite's
+     * own (compat) types and standard JDK types may be deserialized; any other
+     * class - e.g. a third-party gadget on the classpath - is rejected. See
+     * GHSA-9297-g93h-86gg.
+     */
+    static final ObjectInputFilter SERIAL_FILTER = ObjectInputFilter.Config.createFilter(
+        "maxdepth=32;org.dizitart.no2.**;java.**;!*");
 
     static {
         migrationMap.put("org.dizitart.no2.Security$UserCredential", Compat.UserCredential.class);
@@ -51,6 +61,7 @@ class NitriteObjectInputStream extends ObjectInputStream {
      */
     public NitriteObjectInputStream(InputStream stream) throws IOException {
         super(stream);
+        setObjectInputFilter(SERIAL_FILTER);
     }
 
     @Override

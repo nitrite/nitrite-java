@@ -1,3 +1,11 @@
+## Release 4.4.1 - Jul 2, 2026
+
+### Security Fixes
+
+- Fix unfiltered Java deserialization in the legacy v1 database migration path (CWE-502, GHSA-9297-g93h-86gg, CVSS 9.8)
+  - Opening a file-based store runs `MVStoreUtils.testForMigration()`, which for a legacy v1-format file deserialized stored values through `ObjectInputStream.readObject()` with no class restriction. Any `Serializable` class on the embedding application's classpath could be instantiated, so a suitable gadget chain (e.g. from commons-collections) made a malicious `.db` file a remote-code-execution vector.
+  - The v1-compat deserializer now enforces a JEP 290 allowlist filter that only permits Nitrite's own types and standard JDK types; any other class is rejected before its `readObject`/`readResolve` callbacks can run. Applications that open Nitrite database files from untrusted sources (e.g. "import"/"restore backup" features) should upgrade.
+
 ## Release 4.4.0 - Jul 2, 2026
 
 ### Upgrade Notes

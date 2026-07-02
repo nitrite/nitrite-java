@@ -11,9 +11,10 @@ import org.h2.util.Utils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Array;
+import org.dizitart.no2.mvstore.compat.v1.NitriteObjectInputStream;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -371,7 +372,9 @@ public class ObjectDataType implements DataType {
     public static Object deserialize(byte[] data) {
         try {
             ByteArrayInputStream in = new ByteArrayInputStream(data);
-            ObjectInputStream is = new ObjectInputStream(in);
+            // route through the allowlist-filtered stream to prevent unsafe
+            // deserialization during legacy v1 migration (CWE-502, GHSA-9297-g93h-86gg)
+            NitriteObjectInputStream is = new NitriteObjectInputStream(in);
             return is.readObject();
         } catch (Throwable e) {
             throw DataUtils.newIllegalArgumentException(
