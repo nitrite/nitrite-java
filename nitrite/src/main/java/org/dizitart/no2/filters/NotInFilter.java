@@ -34,14 +34,24 @@ import java.util.stream.Collectors;
 class NotInFilter extends ComparableArrayFilter {
     private final Set<Comparable<?>> comparableSet;
 
+    // non-null only when filtering on the _id field (gh-1263)
+    private final Set<NitriteId> idSet;
+
     NotInFilter(String field, Comparable<?>... values) {
         super(field, values);
         this.comparableSet = new HashSet<>();
         Collections.addAll(this.comparableSet, values);
+        this.idSet = toNitriteIdSet(field, values);
     }
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
+        if (idSet != null) {
+            // match by NitriteId like eq/getById, so legacy String _id
+            // written by pre-4.4 databases keeps matching
+            return !idSet.contains(element.getFirst());
+        }
+
         Document document = element.getSecond();
         Object fieldValue = document.get(getField());
 

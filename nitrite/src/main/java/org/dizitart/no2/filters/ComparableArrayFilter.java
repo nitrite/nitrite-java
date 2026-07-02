@@ -17,8 +17,14 @@
 
 package org.dizitart.no2.filters;
 
+import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.NitriteMapper;
+import org.dizitart.no2.exceptions.InvalidIdException;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.ValidationUtils.*;
 
 /**
@@ -31,6 +37,29 @@ public abstract class ComparableArrayFilter extends ComparableFilter {
     
     public ComparableArrayFilter(String field, Object value) {
         super(field, value);
+    }
+
+    /**
+     * When filtering on the _id field, resolves the search terms to {@link NitriteId}s
+     * so matching happens by id like eq/getById do. Databases written before 4.4 store
+     * the _id field as a String, so comparing raw field values would silently miss
+     * those legacy ids. Returns {@code null} for any other field.
+     */
+    static Set<NitriteId> toNitriteIdSet(String field, Comparable<?>[] values) {
+        if (!DOC_ID.equals(field)) {
+            return null;
+        }
+        Set<NitriteId> idSet = new HashSet<>();
+        for (Comparable<?> value : values) {
+            if (value != null) {
+                try {
+                    idSet.add(NitriteId.createId(value.toString()));
+                } catch (InvalidIdException iie) {
+                    // the value can never be a document id, so it can never match
+                }
+            }
+        }
+        return idSet;
     }
 
     @Override
