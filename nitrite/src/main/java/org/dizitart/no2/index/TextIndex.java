@@ -30,11 +30,11 @@ import org.dizitart.no2.index.fulltext.TextTokenizer;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
 import static org.dizitart.no2.common.util.ObjectUtils.convertToObjectArray;
@@ -157,7 +157,7 @@ public class TextIndex implements NitriteIndex {
 
     private NitriteMap<String, List<?>> findIndexMap() {
         String mapName = deriveIndexMapName(indexDescriptor);
-        return nitriteStore.openMap(mapName, String.class, ArrayList.class);
+        return nitriteStore.openMap(mapName, String.class, CopyOnWriteArrayList.class);
     }
 
     @SuppressWarnings("unchecked")
@@ -168,7 +168,9 @@ public class TextIndex implements NitriteIndex {
             List<NitriteId> nitriteIds = (List<NitriteId>) indexMap.get(word);
 
             if (nitriteIds == null) {
-                nitriteIds = new ArrayList<>();
+                // CopyOnWriteArrayList so in-place mutation is safe against MVStore's
+                // background page serializer (see NitriteIndex.addNitriteIds)
+                nitriteIds = new CopyOnWriteArrayList<>();
             }
 
             nitriteIds = addNitriteIds(nitriteIds, fieldValues);

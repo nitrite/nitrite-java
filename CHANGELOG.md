@@ -6,6 +6,12 @@
   - Opening a file-based store runs `MVStoreUtils.testForMigration()`, which for a legacy v1-format file deserialized stored values through `ObjectInputStream.readObject()` with no class restriction. Any `Serializable` class on the embedding application's classpath could be instantiated, so a suitable gadget chain (e.g. from commons-collections) made a malicious `.db` file a remote-code-execution vector.
   - The v1-compat deserializer now enforces a JEP 290 allowlist filter that only permits Nitrite's own types and standard JDK types; any other class is rejected before its `readObject`/`readResolve` callbacks can run. Applications that open Nitrite database files from untrusted sources (e.g. "import"/"restore backup" features) should upgrade.
 
+### Issue Fixes
+
+- Fix intermittent `ConcurrentModificationException` and spurious `UniqueConstraintException` from unique and full-text indexes on the MVStore backend (regression introduced by the #1260 index rework in 4.4.0)
+  - Unique and full-text indexes still store a `List<NitriteId>` value per key. 4.4.0 switched that list from `CopyOnWriteArrayList` to a plain `ArrayList`, which is mutated in place after being written to the map. MVStore serializes dirty page values on a background thread, so that in-place mutation races with the serializer and threw `ConcurrentModificationException` (and could corrupt the id list, surfacing later as a false unique-key violation) — even under single-threaded use.
+  - These index value lists are `CopyOnWriteArrayList` again, so each mutation swaps the backing array atomically and the background serializer always sees a stable snapshot. The composite-key layout for non-unique indexes (the actual #1260 optimization) is unchanged.
+
 ## Release 4.4.0 - Jul 2, 2026
 
 ### Upgrade Notes

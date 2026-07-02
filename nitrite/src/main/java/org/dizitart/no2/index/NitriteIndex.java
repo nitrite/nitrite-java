@@ -23,9 +23,9 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
 
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import static org.dizitart.no2.common.util.ValidationUtils.validateArrayIndexField;
 import static org.dizitart.no2.common.util.ValidationUtils.validateIterableIndexField;
@@ -109,11 +109,15 @@ public interface NitriteIndex {
      */
     default List<NitriteId> addNitriteIds(List<NitriteId> nitriteIds, FieldValues fieldValues) {
         if (nitriteIds == null) {
-            // a plain ArrayList gives amortized O(1) appends; index reads and
-            // writes are guarded by the collection's read-write lock, so the
-            // copy-on-write semantics previously used here were unnecessary and
-            // made every insert O(n) for keys with many values (issue #1260)
-            nitriteIds = new ArrayList<>();
+            // this list is stored as a value in the backing NitriteMap. MVStore serializes
+            // dirty page values on a background thread, so a plain ArrayList mutated in place
+            // after being put races with that serialization and throws
+            // ConcurrentModificationException. CopyOnWriteArrayList swaps its backing array
+            // atomically on each mutation, so the background serializer always sees a stable
+            // snapshot. Non-unique indexes avoid list values entirely via the composite layout
+            // (issue #1260); only unique indexes and the text index reach this path, where the
+            // per-key list is small enough that copy-on-write cost is negligible.
+            nitriteIds = new CopyOnWriteArrayList<>();
         }
 
         if (isUnique() && nitriteIds.size() == 1) {
