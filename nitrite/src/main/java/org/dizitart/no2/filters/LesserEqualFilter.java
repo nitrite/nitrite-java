@@ -77,7 +77,9 @@ class LesserEqualFilter extends SortingAwareFilter {
                 floorKey = indexMap.lowerKey(floorKey);
             }
         } else {
-            DBValue firstKey = indexMap.firstKey();
+            // seed from the first non-null key; firstKey() would return the DBNull
+            // sentinel when the index contains nulls, terminating the scan immediately
+            DBValue firstKey = indexMap.higherKey(DBNull.getInstance());
             while (firstKey != DBNull.getInstance() && Comparables.compare(firstKey, dbValue) <= 0) {
                 // get the starting value, it can be a navigable-map (compound index)
                 // or list (single field index)
