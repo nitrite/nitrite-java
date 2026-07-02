@@ -79,10 +79,20 @@ public class IndexMap {
         return new IndexMap(compositeMap, true);
     }
 
+    /**
+     * Normalizes a key returned by the backing map to the {@link DBNull} singleton
+     * when it represents the null key. Persistent stores deserialize the stored null
+     * key into a fresh {@link DBNull} instance, and every scan loop guards against
+     * the singleton by identity - so a stored null key must never leak out as-is.
+     */
+    private static DBValue sentinelOrKey(DBValue dbKey) {
+        return dbKey == null || dbKey instanceof DBNull ? DBNull.getInstance() : dbKey;
+    }
+
     public DBValue firstKey() {
         if (compositeMap != null) {
             IndexEntryKey first = compositeMap.firstKey();
-            return first == null ? DBNull.getInstance() : first.getValue();
+            return sentinelOrKey(first == null ? null : first.getValue());
         }
         DBValue dbKey;
         if (nitriteMap != null) {
@@ -92,13 +102,13 @@ public class IndexMap {
         } else {
             dbKey = null;
         }
-        return dbKey == null ? DBNull.getInstance() : dbKey;
+        return sentinelOrKey(dbKey);
     }
 
     public DBValue lastKey() {
         if (compositeMap != null) {
             IndexEntryKey last = compositeMap.lastKey();
-            return last == null ? DBNull.getInstance() : last.getValue();
+            return sentinelOrKey(last == null ? null : last.getValue());
         }
         DBValue dbKey;
         if (nitriteMap != null) {
@@ -108,7 +118,7 @@ public class IndexMap {
         } else {
             dbKey = null;
         }
-        return dbKey == null ? DBNull.getInstance() : dbKey;
+        return sentinelOrKey(dbKey);
     }
 
     /**
@@ -124,7 +134,7 @@ public class IndexMap {
             // largest distinct value strictly less than `key`: the lower bracket sorts before
             // every (key, id) row, so the largest underlying key below it belongs to a smaller value
             IndexEntryKey k = compositeMap.lowerKey(IndexEntryKey.lowerBound(dbKey));
-            return k == null ? DBNull.getInstance() : k.getValue();
+            return sentinelOrKey(k == null ? null : k.getValue());
         }
         if (nitriteMap != null) {
             dbKey = nitriteMap.lowerKey(dbKey);
@@ -133,7 +143,7 @@ public class IndexMap {
         } else {
             dbKey = null;
         }
-        return dbKey == null ? DBNull.getInstance() : dbKey;
+        return sentinelOrKey(dbKey);
     }
 
     /**
@@ -149,7 +159,7 @@ public class IndexMap {
             // first distinct value strictly greater than `key`: every (key, id) row sorts at or
             // below the upper bracket, so the first underlying key past it belongs to the next value
             IndexEntryKey k = compositeMap.higherKey(IndexEntryKey.upperBound(dbKey));
-            return k == null ? DBNull.getInstance() : k.getValue();
+            return sentinelOrKey(k == null ? null : k.getValue());
         }
         if (nitriteMap != null) {
             dbKey = nitriteMap.higherKey(dbKey);
@@ -158,7 +168,7 @@ public class IndexMap {
         } else {
             dbKey = null;
         }
-        return dbKey == null ? DBNull.getInstance() : dbKey;
+        return sentinelOrKey(dbKey);
     }
 
     /**
@@ -172,7 +182,7 @@ public class IndexMap {
         if (compositeMap != null) {
             // first distinct value >= `key`: the lower bracket sorts before every (key, id) row
             IndexEntryKey k = compositeMap.ceilingKey(IndexEntryKey.lowerBound(dbKey));
-            return k == null ? DBNull.getInstance() : k.getValue();
+            return sentinelOrKey(k == null ? null : k.getValue());
         }
         if (nitriteMap != null) {
             dbKey = nitriteMap.ceilingKey(dbKey);
@@ -181,7 +191,7 @@ public class IndexMap {
         } else {
             dbKey = null;
         }
-        return dbKey == null ? DBNull.getInstance() : dbKey;
+        return sentinelOrKey(dbKey);
     }
 
     /**
@@ -195,7 +205,7 @@ public class IndexMap {
         if (compositeMap != null) {
             // largest distinct value <= `key`: every (key, id) row sorts at or below the upper bracket
             IndexEntryKey k = compositeMap.floorKey(IndexEntryKey.upperBound(dbKey));
-            return k == null ? DBNull.getInstance() : k.getValue();
+            return sentinelOrKey(k == null ? null : k.getValue());
         }
         if (nitriteMap != null) {
             dbKey = nitriteMap.floorKey(dbKey);
@@ -204,7 +214,7 @@ public class IndexMap {
         } else {
             dbKey = null;
         }
-        return dbKey == null ? DBNull.getInstance() : dbKey;
+        return sentinelOrKey(dbKey);
     }
 
     /**

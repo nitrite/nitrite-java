@@ -267,7 +267,9 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) > 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    // decode with the map's key type, not the probe's class - a range scan may be
+                    // seeded with a DBNull probe while the found key is a regular DBValue
+                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, getKeyType());
                     return (K) k2;
                 }
                 iterator.next();
@@ -293,7 +295,9 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) >= 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    // decode with the map's key type, not the probe's class - a range scan may be
+                    // seeded with a DBNull probe while the found key is a regular DBValue
+                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, getKeyType());
                     return (K) k2;
                 }
                 iterator.next();
@@ -319,7 +323,9 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) < 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    // decode with the map's key type, not the probe's class - a range scan may be
+                    // seeded with a DBNull probe while the found key is a regular DBValue
+                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, getKeyType());
                     return (K) k2;
                 }
 
@@ -347,7 +353,9 @@ public class RocksDBMap<K, V> implements NitriteMap<K, V> {
                 ByteBuffer nextKeyBuffer = ByteBuffer.wrap(nextKey);
 
                 if (bytewiseComparator.compare(nextKeyBuffer, keyBuffer) <= 0) {
-                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, k.getClass());
+                    // decode with the map's key type, not the probe's class - a range scan may be
+                    // seeded with a DBNull probe while the found key is a regular DBValue
+                    Comparable k2 = (Comparable) objectFormatter.decodeKey(nextKey, getKeyType());
                     return (K) k2;
                 }
 

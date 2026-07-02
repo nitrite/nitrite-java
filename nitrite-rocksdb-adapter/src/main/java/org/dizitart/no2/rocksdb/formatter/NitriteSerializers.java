@@ -9,6 +9,7 @@ import com.esotericsoftware.kryo.kryo5.serializers.JavaSerializer;
 import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.index.IndexEntryKey;
 import org.dizitart.no2.common.Fields;
@@ -233,6 +234,11 @@ public class NitriteSerializers {
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
         kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
         kryoObjectFormatter.registerSerializer(DBValue.class, new JavaSerializer());
+        // DBNull must use the same self-describing serializer as DBValue: it appears as an
+        // index key for null values and as the navigation probe for range scans. The java
+        // serialized class name also makes it sort before every DBValue key bytewise,
+        // preserving the null-first index order.
+        kryoObjectFormatter.registerSerializer(DBNull.class, new JavaSerializer());
         kryoObjectFormatter.registerSerializer(IndexEntryKey.class, new IndexEntryKeySerializer());
         kryoObjectFormatter.registerSerializer(BoundingBox.class, new BoundingBoxSerializer());
         kryoObjectFormatter.registerSerializer(SpatialKey.class, new SpatialKeySerializer());
