@@ -54,12 +54,16 @@ public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
 
                 // handle null values
                 int result;
-                if ((value1 == null || value1 instanceof DBNull) && value2 != null) {
+                boolean isNull1 = value1 == null || value1 instanceof DBNull;
+                boolean isNull2 = value2 == null || value2 instanceof DBNull;
+                if (isNull1 && isNull2) {
+                    // two null keys are equal, otherwise the comparator
+                    // violates antisymmetry and TimSort may throw
+                    result = 0;
+                } else if (isNull1) {
                     result = -1;
-                } else if (value1 != null && (value2 == null || value2 instanceof DBNull)) {
+                } else if (isNull2) {
                     result = 1;
-                } else if (value1 == null) {
-                    result = -1;
                 } else {
 
                     // validate comparable
