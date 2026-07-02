@@ -16,10 +16,14 @@
 
 package org.dizitart.no2.filters;
 
+import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.exceptions.FilterException;
+import org.dizitart.no2.exceptions.InvalidIdException;
 import org.dizitart.no2.index.IndexMap;
 
 import java.util.List;
+
+import static org.dizitart.no2.common.Constants.DOC_ID;
 
 /**
  * An abstract class representing a filter that compares fields.
@@ -58,4 +62,22 @@ public abstract class ComparableFilter extends FieldBasedFilter {
      * @return the object
      */
     public abstract List<?> applyOnIndex(IndexMap indexMap);
+
+    /**
+     * When filtering on the _id field, resolves the search term to a {@link NitriteId}
+     * so matching happens by id like getById does. Databases written before 4.4 store
+     * the _id field as a String, so comparing raw field values would silently miss
+     * those legacy ids. Returns {@code null} for any other field, and for a search
+     * term that can never form a valid id (which therefore can never match).
+     */
+    static NitriteId toNitriteId(String field, Object value) {
+        if (!DOC_ID.equals(field) || value == null) {
+            return null;
+        }
+        try {
+            return NitriteId.createId(value.toString());
+        } catch (InvalidIdException iie) {
+            return null;
+        }
+    }
 }

@@ -160,7 +160,12 @@ class ReadOperations {
             // and or single filter
             if (findPlan.getByIdFilter() != null) {
                 FieldBasedFilter byIdFilter = findPlan.getByIdFilter();
-                NitriteId nitriteId = NitriteId.createId((long) byIdFilter.getValue());
+                Object idValue = byIdFilter.getValue();
+                // the search term may be any numeric or String representation of an id,
+                // e.g. a String for databases written before 4.4 (gh-1263)
+                NitriteId nitriteId = idValue instanceof Long
+                    ? NitriteId.createId((long) idValue)
+                    : NitriteId.createId(String.valueOf(idValue));
                 if (nitriteMap.containsKey(nitriteId)) {
                     Document document = nitriteMap.get(nitriteId);
                     rawStream = RecordStream.single(pair(nitriteId, document));

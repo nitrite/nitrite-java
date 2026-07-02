@@ -19,7 +19,6 @@ package org.dizitart.no2.filters;
 
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.mapper.NitriteMapper;
-import org.dizitart.no2.exceptions.InvalidIdException;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -51,12 +50,9 @@ public abstract class ComparableArrayFilter extends ComparableFilter {
         }
         Set<NitriteId> idSet = new HashSet<>();
         for (Comparable<?> value : values) {
-            if (value != null) {
-                try {
-                    idSet.add(NitriteId.createId(value.toString()));
-                } catch (InvalidIdException iie) {
-                    // the value can never be a document id, so it can never match
-                }
+            NitriteId nitriteId = toNitriteId(field, value);
+            if (nitriteId != null) {
+                idSet.add(nitriteId);
             }
         }
         return idSet;

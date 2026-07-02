@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NavigableMap;
 
+import static org.dizitart.no2.common.Constants.DOC_ID;
 import static org.dizitart.no2.common.util.ObjectUtils.deepEquals;
 
 /**
@@ -23,6 +24,13 @@ class NotEqualsFilter extends ComparableFilter {
 
     @Override
     public boolean apply(Pair<NitriteId, Document> element) {
+        if (DOC_ID.equals(getField())) {
+            // match by NitriteId like the byId fast path, so legacy String _id
+            // written by pre-4.4 databases keeps matching (gh-1263)
+            NitriteId nitriteId = toNitriteId(getField(), getValue());
+            return nitriteId == null || !nitriteId.equals(element.getFirst());
+        }
+
         Document document = element.getSecond();
         Object fieldValue = document.get(getField());
         return !deepEquals(fieldValue, getValue());
