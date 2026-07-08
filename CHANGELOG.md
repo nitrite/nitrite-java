@@ -1,3 +1,11 @@
+## Release 4.4.2 - Jul 8, 2026
+
+### Issue Fixes
+
+- Fix `ClassCastException` when an AND filter combines an equality (or other comparable) filter on one indexed field with a bounded range on a second, differently-typed indexed field #1266
+  - The query planner picked the best-matching index per field independently while scanning candidate indexes, but accumulated filters from every candidate it visited into one shared set instead of keeping only the winning index's filters. The resulting index scan filter set could carry filters from two unrelated indexes (e.g. a `String`-valued `eq` filter alongside a `Long`-valued range pair), which were then all applied against whichever single index the planner picked, comparing a value of the wrong type against that index's keys.
+  - The planner now selects a single best-matching index descriptor and only keeps that index's own filters for the index scan; filters on any other field fall back to a post-filter (collection scan) step as before.
+
 ## Release 4.4.1 - Jul 2, 2026
 
 ### Security Fixes
