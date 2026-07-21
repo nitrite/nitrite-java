@@ -48,7 +48,24 @@ public class EqualsFilter extends ComparableFilter {
 
         Document document = element.getSecond();
         Object fieldValue = document.get(getField());
-        return deepEquals(fieldValue, getValue());
+        if (deepEquals(fieldValue, getValue())) {
+            return true;
+        }
+        // An array/collection field matches by element containment, mirroring
+        // applyOnIndex() (arrays are indexed element-wise). Without this,
+        // field.eq(x) on a list field returns different results depending on
+        // whether an index exists / is chosen by the planner: an indexed
+        // array-eq that the planner relegates to a collection scan (e.g. when
+        // a range filter on another field claims the index) would otherwise
+        // silently match nothing.
+        if (fieldValue instanceof Iterable) {
+            for (Object element0 : (Iterable<?>) fieldValue) {
+                if (deepEquals(element0, getValue())) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

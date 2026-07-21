@@ -58,6 +58,17 @@ class InFilter extends ComparableArrayFilter {
             Comparable<?> comparable = (Comparable<?>) fieldValue;
             return comparableSet.contains(comparable);
         }
+        // `in` is multi-value `eq`, so it matches an array/collection field by
+        // element containment for the same index-independence reason as
+        // EqualsFilter: the index path already treats arrays element-wise, so
+        // a collection scan must too.
+        if (fieldValue instanceof Iterable) {
+            for (Object element0 : (Iterable<?>) fieldValue) {
+                if (element0 instanceof Comparable && comparableSet.contains(element0)) {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
