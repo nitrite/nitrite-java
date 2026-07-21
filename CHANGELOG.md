@@ -1,3 +1,11 @@
+## Release 4.4.3 - Jul 20, 2026
+
+### Issue Fixes
+
+- Fix `field.eq(x)` / `field.in(..)` on an array (list) field silently matching nothing when the filter runs as a collection scan
+  - Array membership is matched element-wise on the index path (arrays are indexed per element) but was matched by whole-value equality (`deepEquals`) on the collection-scan path, so a query's results depended on whether an index existed or was chosen by the planner. Combined with the 4.4.2 planner change (#1266) — which correctly relegates the non-winning-index filter to a collection scan — an AND of an indexed array `eq` and a bounded range on a second indexed field left the array `eq` running as a collection scan, where it matched no documents.
+  - `EqualsFilter` and `InFilter` now match an array/`Iterable` field by element containment on the collection-scan path, mirroring `applyOnIndex`, so results are the same regardless of index presence.
+
 ## Release 4.4.2 - Jul 8, 2026
 
 ### Issue Fixes
