@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Standalone on purpose — no parent. This is what a developer's own application looks like
+        when it adds the bridge, and inheriting nitrite-java's build would make it look like part
+        of the library instead. Build it with the sibling artifacts installed:
+
+            mvn -f ../pom.xml install -DskipTests   # nitrite-bridge
+            mvn package                             # this, the dev build, carries the bridge
+            mvn -Prelease package                   # the shipped build, which must not
+    -->
+    <groupId>org.dizitart.example</groupId>
+    <artifactId>nitrite-bridge-example</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>Nitrite dbinspect example (java -jar)</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>11</maven.compiler.release>
+        <nitrite.version>4.4.3</nitrite.version>
+        <!--
+            The scope of the bridge, and the whole point of this example. The default is a
+            development build; -Prelease overrides it to `provided`, which keeps every class of it
+            out of the shaded jar. THREAT-MODEL §7 criterion 2 is a grep of the two.
+        -->
+        <dbinspect.scope>compile</dbinspect.scope>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite</artifactId>
+            <version>${nitrite.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-mvstore-adapter</artifactId>
+            <version>${nitrite.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-bridge</artifactId>
+            <version>${nitrite.version}</version>
+            <scope>${dbinspect.scope}</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.18</version>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <properties>
+                <dbinspect.scope>provided</dbinspect.scope>
+            </properties>
+        </profile>
+    </profiles>
+
+    <build>
+        <finalName>nitrite-bridge-example</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.dizitart.example.ExampleApp</mainClass>
+                                </transformer>
+                            </transformers>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
