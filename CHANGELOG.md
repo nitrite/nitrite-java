@@ -1,3 +1,11 @@
+## Unreleased
+
+### Issue Fixes
+
+- Fix JVM crash (SIGSEGV) in the RocksDB backend when a query pages past the end of a collection
+  - `EntrySet`, `KeySet` and `ValueSet` close the native `RocksIterator` the first time `hasNext()` answers `false`, but `hasNext()` is idempotent by contract and a second call reached `isValid()` on the freed handle. `BoundedStream`'s skip loop exhausts the iterator and then the caller asks once more, so any `find(..., skipBy(n))` whose skip exceeds the number of remaining records hit it — an ordinary paging request, not an edge case. The existing `catch (AssertionError)` only covered the case where assertions are enabled (`-ea`), which is how the tests ran but not how an application runs: without assertions the same call is a `SIGSEGV` in `Java_org_rocksdb_RocksIterator_isValid0Jni` that takes the whole process down.
+  - `hasNext()` now returns `false` when the iterator no longer owns its handle, so it never touches a closed iterator and stays idempotent.
+
 ## Release 4.4.3 - Jul 20, 2026
 
 ### Issue Fixes
