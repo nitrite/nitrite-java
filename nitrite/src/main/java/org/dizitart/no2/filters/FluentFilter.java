@@ -68,7 +68,21 @@ public final class FluentFilter {
     }
 
     /**
-     * Creates a filter that matches all documents where the value of 
+     * Creates a filter that matches all documents where the specified field is
+     * present, irrespective of its value. A field explicitly set to
+     * {@code null} is present and matches.
+     * <p>
+     * Use {@link Filter#not()} for the opposite - {@code where("a").exists().not()}
+     * matches the documents which do not have the field.
+     *
+     * @return a {@link NitriteFilter} instance.
+     */
+    public NitriteFilter exists() {
+        return new ExistsFilter(field);
+    }
+
+    /**
+     * Creates a filter that matches all documents where the value of
      * the specified field is greater than the given value.
      *
      * @param value the value to compare against.

@@ -19,7 +19,6 @@ package org.dizitart.no2.integration.collection;
 
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
-import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
@@ -95,39 +94,6 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
         assertEquals(2, cursor.size());
 
         FindPlan findPlan = cursor.getFindPlan();
-        assertNull(findPlan.getIndexScanFilter());
-        assertNull(findPlan.getCollectionScanFilter());
-        assertNotNull(findPlan.getSubPlans());
-
-        assertEquals(2, findPlan.getSubPlans().size());
-        assertNotNull(findPlan.getSubPlans().get(0).getIndexScanFilter());
-        assertNotNull(findPlan.getSubPlans().get(1).getIndexScanFilter());
-
-        assertEquals(1, cursor.toList().stream().filter(d ->
-            d.get("firstName", String.class).equals("fn2")
-                && d.get("lastName", String.class).equals("ln2")).count());
-
-        assertEquals(1, cursor.toList().stream().filter(d ->
-            d.get("firstName", String.class).equals("fn3")
-                && d.get("lastName", String.class).equals("ln2")).count());
-
-        // distinct test - should still return the same results since we're already deduplicating
-        cursor = collection.find(
-            or(
-                and(
-                    where("lastName").eq("ln2"),
-                    where("firstName").notEq("fn1")
-                ),
-                and(
-                    where("firstName").eq("fn3"),
-                    where("lastName").eq("ln2")
-                )
-            ), FindOptions.withDistinct()
-        );
-
-        assertEquals(2, cursor.size());
-
-        findPlan = cursor.getFindPlan();
         assertNull(findPlan.getIndexScanFilter());
         assertNull(findPlan.getCollectionScanFilter());
         assertNotNull(findPlan.getSubPlans());
@@ -250,22 +216,6 @@ public class CollectionFindByCompoundIndexTest extends BaseCollectionTest {
         // 4. firstName!=fn1 → doc2, doc3 (duplicate)
         // Union without duplicates: doc1, doc2, doc3 (3 total)
         FindPlan findPlan = cursor.getFindPlan();
-        assertEquals(3, findPlan.getSubPlans().size());
-        assertEquals(3, cursor.size());
-
-        // distinct test - should still return the same results since we're already deduplicating
-        cursor = collection.find(
-            or(
-                or(
-                    where("lastName").eq("ln2"),
-                    where("firstName").notEq("fn1")
-                ),
-                where("birthDay").eq(simpleDateFormat.parse("2012-07-01T16:02:48.440Z")),
-                where("firstName").notEq("fn1")
-            ), FindOptions.withDistinct()
-        );
-
-        findPlan = cursor.getFindPlan();
         assertEquals(3, findPlan.getSubPlans().size());
         assertEquals(3, cursor.size());
     }

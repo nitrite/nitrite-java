@@ -23,6 +23,9 @@ import org.rocksdb.ColumnFamilyHandle;
 import org.rocksdb.RocksDB;
 import org.rocksdb.RocksIterator;
 
+import java.util.Iterator;
+
+import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.*;
 
 public class KeySetTest {
@@ -34,5 +37,26 @@ public class KeySetTest {
         (new KeySet<>(rocksDB, null, objectFormatter, Object.class)).iterator();
         verify(rocksDB).newIterator((ColumnFamilyHandle) any());
     }
-}
 
+    @Test
+    public void hasNextStaysFalseWithoutTouchingTheClosedIterator() {
+        // hasNext() is idempotent by contract and this one closes the native iterator the first
+        // time it answers false, so a second call must not reach it again. On a real RocksIterator
+        // that second call is isValid() on a freed handle: an AssertionError under -ea, and a
+        // SIGSEGV without it. BoundedStream's skip loop provokes it on any find(skipBy(n)) past
+        // the end of a collection.
+        RocksIterator rawIterator = mock(RocksIterator.class);
+        RocksDB rocksDB = mock(RocksDB.class);
+        when(rocksDB.newIterator((ColumnFamilyHandle) any())).thenReturn(rawIterator);
+        when(rawIterator.isValid()).thenReturn(false);
+        when(rawIterator.isOwningHandle()).thenReturn(true, false);
+        KryoObjectFormatter objectFormatter = new KryoObjectFormatter();
+
+        Iterator<?> iterator = (new KeySet<>(rocksDB, null, objectFormatter, Object.class)).iterator();
+        assertFalse(iterator.hasNext());
+        assertFalse(iterator.hasNext());
+
+        verify(rawIterator, times(1)).isValid();
+        verify(rawIterator, times(1)).close();
+    }
+}

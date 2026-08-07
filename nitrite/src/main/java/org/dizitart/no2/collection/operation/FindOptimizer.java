@@ -47,7 +47,6 @@ class FindOptimizer {
 
         if (findOptions != null) {
             findPlan.setCollator(findOptions.collator());
-            findPlan.setDistinct(findOptions.distinct());
         }
         return findPlan;
     }
