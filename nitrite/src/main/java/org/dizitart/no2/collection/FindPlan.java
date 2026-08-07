@@ -79,11 +79,6 @@ public class FindPlan {
     private Long limit;
 
     /**
-     * Gets the distinct flag.
-     * */
-    private boolean distinct;
-
-    /**
      * Gets the {@link Collator}.
      * */
     private Collator collator;

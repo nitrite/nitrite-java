@@ -1,3 +1,9 @@
+## Release 5.0.0 - Aug 7, 2026
+
+### Breaking Changes
+
+- Removed the `distinct` find option - `FindOptions.withDistinct()` (both overloads), `FindOptions.distinct()` and `FindPlan.distinct`. It had no effect on the result set. A find never returns the same document twice, and the `or` sub-plan union has always deduplicated unconditionally, so the flag was written by the planner and never read. Callers passing `FindOptions.withDistinct()` can drop it with no change in results.
+
 ## Release 4.5.0 - Aug 7, 2026
 
 ### New Features

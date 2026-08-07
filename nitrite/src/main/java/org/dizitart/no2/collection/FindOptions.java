@@ -52,11 +52,6 @@ public class FindOptions {
     private Long limit;
 
     /**
-     * Indicates if the find operation should return distinct results.
-     * */
-    private boolean distinct = false;
-
-    /**
      * Specifies the {@link Collator}.
      */
     @Setter(AccessLevel.PUBLIC)
@@ -106,15 +101,6 @@ public class FindOptions {
     public static FindOptions limitBy(long limit) {
         FindOptions findOptions = new FindOptions();
         findOptions.limit(limit);
-        return findOptions;
-    }
-
-    /**
-     * Indicates if the find operation should return distinct results.
-     */
-    public static FindOptions withDistinct() {
-        FindOptions findOptions = new FindOptions();
-        findOptions.distinct(true);
         return findOptions;
     }
 
@@ -177,17 +163,6 @@ public class FindOptions {
             fields.addField(fieldName, sortOrder);
             orderBy = fields;
         }
-        return this;
-    }
-
-    /**
-     * Indicates if the find operation should return distinct and unique results.
-     *
-     * @param distinct the distinct
-     * @return the find options
-     */
-    public FindOptions withDistinct(boolean distinct) {
-        this.distinct = distinct;
         return this;
     }
 }
