@@ -44,15 +44,20 @@ class KeySet<K> implements Iterable<K> {
 
         @Override
         public boolean hasNext() {
-            try {
-                boolean result = rawEntryIterator.isValid();
-                if (!result) {
-                    rawEntryIterator.close();
-                }
-                return result;
-            } catch (AssertionError e) {
+            // hasNext() is idempotent by contract, and this one closes the native iterator the
+            // first time it answers false. Asking again then reaches isValid() on a freed handle:
+            // an AssertionError with -ea, and a SIGSEGV without it. BoundedStream's skip loop
+            // exhausts the iterator and the caller asks once more, so any find(skipBy(n)) past the
+            // end of a collection reaches it — with assertions off, which is how an application
+            // actually runs.
+            if (!rawEntryIterator.isOwningHandle()) {
                 return false;
             }
+            boolean result = rawEntryIterator.isValid();
+            if (!result) {
+                rawEntryIterator.close();
+            }
+            return result;
         }
 
         @Override

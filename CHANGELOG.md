@@ -1,3 +1,18 @@
+## Release 4.5.0 - Aug 7, 2026
+
+### New Features
+
+- Add an `exists` filter - `where("field").exists()` matches the documents which have the field, irrespective of its value; `where("field").exists().not()` matches those which do not.
+  - A field explicitly set to `null` is present and matches. This is the case no existing filter could express: `eq(null)` and `notEq(null)` cannot tell a missing field apart from one holding `null`, so "has this document been given a value for this field at all" was not answerable.
+  - The filter deliberately does not extend `ComparableFilter` and so always runs as a collection scan. A missing field and a field holding `null` are stored under the same null key in an index, so an index scan could not tell them apart and would disagree with a collection scan.
+  - Embedded fields are addressed by their dotted path (`where("address.city").exists()`), the same way `Document.containsField` resolves them.
+
+### Issue Fixes
+
+- Fix JVM crash (SIGSEGV) in the RocksDB backend when a query pages past the end of a collection
+  - `EntrySet`, `KeySet` and `ValueSet` close the native `RocksIterator` the first time `hasNext()` answers `false`, but `hasNext()` is idempotent by contract and a second call reached `isValid()` on the freed handle. `BoundedStream`'s skip loop exhausts the iterator and then the caller asks once more, so any `find(..., skipBy(n))` whose skip exceeds the number of remaining records hit it — an ordinary paging request, not an edge case. The existing `catch (AssertionError)` only covered the case where assertions are enabled (`-ea`), which is how the tests ran but not how an application runs: without assertions the same call is a `SIGSEGV` in `Java_org_rocksdb_RocksIterator_isValid0Jni` that takes the whole process down.
+  - `hasNext()` now returns `false` when the iterator no longer owns its handle, so it never touches a closed iterator and stays idempotent.
+
 ## Release 4.4.3 - Jul 20, 2026
 
 ### Issue Fixes
