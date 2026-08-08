@@ -22,7 +22,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.release>11</maven.compiler.release>
-        <nitrite.version>4.4.3</nitrite.version>
+        <nitrite.version>5.0.0</nitrite.version>
         <!--
             The scope of the bridge, and the whole point of this example. The default is a
             development build; -Prelease overrides it to `provided`, which keeps every class of it

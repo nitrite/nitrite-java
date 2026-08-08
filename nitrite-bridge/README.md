@@ -41,8 +41,9 @@ out rather than offering something that will fail.
 
 `capabilities.filterOps` reports what this implementation actually has. Two notes on it:
 
-- **`exists` is absent.** nitrite-java's `FluentFilter` has no filter that tests for a field's
-  presence, and mistranslating it into something else would show you rows you excluded.
+- **`exists` needs nitrite 5.0.0**, which is the floor this artifact sets. It tests presence only:
+  a field explicitly set to null is present and matches, and "does not have the field" is `not`
+  around it, never `exists` with `value: false`.
 - **`text` needs a full-text index on the field.** Nitrite's own query planner refuses a text
   filter it cannot serve from an index, and `filterOps` is a flat operator list that cannot say
   "text, but only on `bio`". The adapter refuses per field, with a message that names the fix.

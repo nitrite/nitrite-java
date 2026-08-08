@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite-java</artifactId>
-        <version>4.4.3</version>
+        <version>5.0.0</version>
     </parent>
 
     <artifactId>nitrite-bridge</artifactId>
@@ -33,6 +33,19 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <dbinspect.version>0.1.0-SNAPSHOT</dbinspect.version>
+
+        <!--
+            Pinned here rather than inherited, because this module is deliberately outside the
+            reactor and its POM has to stand on its own once installed or published. From 5.0.0
+            the released parent POM is flattened: it carries no <dependencyManagement>, so a
+            consumer reading this POM cannot resolve a version this module left to the parent, and
+            the whole artifact resolves as "invalid POM, transitive dependencies not available" —
+            which silently drops dbinspect-bridge off the example's classpath rather than failing
+            loudly. Test scope, so none of it reaches a consumer's own classpath.
+        -->
+        <junit.version>4.13.2</junit.version>
+        <log4j.version>2.26.1</log4j.version>
+        <commons-io.version>2.22.0</commons-io.version>
     </properties>
 
     <dependencyManagement>
@@ -68,6 +81,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -91,21 +105,25 @@
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

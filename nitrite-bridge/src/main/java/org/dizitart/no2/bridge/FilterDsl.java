@@ -27,20 +27,20 @@ final class FilterDsl {
     /**
      * The v1 filter operators this implementation actually supports.
      *
-     * <p><b>{@code exists} is deliberately absent.</b> {@code docs/PROTOCOL.md} §4.1 lists it among
-     * the v1 operators, and {@code capabilities.filterOps} is authoritative precisely because the
-     * three Nitrite implementations were never assumed to have identical filter support:
-     * nitrite-java 4.4.3's {@link FluentFilter} offers eq, notEq, gt, gte, lt, lte, between, text,
-     * regex, in, notIn and elemMatch, and nothing that tests for a field's presence. The client
-     * greys the operator out rather than the bridge mistranslating it. Same conclusion the Dart
-     * adapter reached against its own fluent API.
+     * <p><b>{@code exists} was absent until nitrite-java 5.0.0 and is now here.</b> It is listed
+     * among the v1 operators in {@code docs/PROTOCOL.md} §4.1 and was reported unsupported for as
+     * long as {@link FluentFilter} had nothing that tested for a field's presence; 4.5.0 added
+     * {@code where(f).exists()} and this adapter maps onto it. {@code capabilities.filterOps} stays
+     * authoritative either way — that is the mechanism that let the gap be honest instead of
+     * mistranslated, and it is what makes closing it a one-line change.
      *
      * <p>{@code between} and {@code elemMatch} are the other direction — Nitrite has them and v1
      * does not, so they stay out until the protocol gains them.
      */
     static final List<String> FILTER_OPS =
             Collections.unmodifiableList(
-                    Arrays.asList("eq", "ne", "gt", "gte", "lt", "lte", "in", "notIn", "text"));
+                    Arrays.asList(
+                            "eq", "ne", "gt", "gte", "lt", "lte", "in", "notIn", "exists", "text"));
 
     /** Reported in {@code filterOps} only when the developer set {@code allowRegex} (F10). */
     static final String REGEX_OP = "regex";
@@ -150,6 +150,11 @@ final class FilterDsl {
                 return on.in(orderedList(value, operator));
             case "notIn":
                 return on.notIn(orderedList(value, operator));
+            case "exists":
+                // Presence only, and `value` is deliberately ignored: `exists: false` is not "does
+                // not exist" in the protocol — that is `not`. Reading the value would select the
+                // opposite rows for a client that sent one out of habit.
+                return on.exists();
             case "text":
                 return on.text(text(value, (String) field, collection));
             case REGEX_OP:

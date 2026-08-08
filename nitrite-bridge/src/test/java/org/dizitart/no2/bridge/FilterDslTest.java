@@ -68,7 +68,8 @@ public class FilterDslTest {
         // The acceptance criterion is on filterOps, so every operator named there gets a row check
         // — an operator that is advertised and mistranslated is worse than one that is absent.
         assertEquals(
-                Arrays.asList("eq", "ne", "gt", "gte", "lt", "lte", "in", "notIn", "text"),
+                Arrays.asList(
+                        "eq", "ne", "gt", "gte", "lt", "lte", "in", "notIn", "exists", "text"),
                 adapter.capabilities().filterOps());
 
         assertEquals(ids(1), ids(leaf("name", "eq", "ada")));
@@ -81,6 +82,32 @@ public class FilterDslTest {
         assertEquals(ids(2, 4), ids(leaf("name", "notIn", Arrays.asList("ada", "alan"))));
         // "text" only where the field carries a full-text index; see below.
         assertEquals(ids(1), ids(leaf("bio", "text", "ada")));
+        // No fixture document carries "nick", so exists is the empty set here; the rows it does
+        // select are checked below.
+        assertEquals(ids(), ids(leaf("nick", "exists", null)));
+    }
+
+    @Test
+    public void existsSelectsTheDocumentsThatCarryTheFieldIncludingAnExplicitNull() {
+        // nitrite-java 5.0.0 added the filter, so the v1 operator this adapter used to refuse is
+        // now implemented. A field explicitly set to null is *present* — the case neither eq(null)
+        // nor ne(null) can express, and the reason this is not either of them.
+        db.getCollection("people")
+                .insert(Document.createDocument().put("id", 5).put("nick", "countess"));
+        db.getCollection("people")
+                .insert(Document.createDocument().put("id", 6).put("nick", null));
+
+        assertEquals(ids(5, 6), ids(leaf("nick", "exists", null)));
+        assertEquals(ids(1, 2, 3, 4), ids(node("not", leaf("nick", "exists", null))));
+    }
+
+    @Test
+    public void existsIgnoresAnyValueTheClientSentWithIt() {
+        // The operator is about presence, so `value: false` is not "does not exist" — that is
+        // `not`. Honouring the value would select exactly the opposite rows.
+        db.getCollection("people")
+                .insert(Document.createDocument().put("id", 5).put("nick", "countess"));
+        assertEquals(ids(5), ids(leaf("nick", "exists", Boolean.FALSE)));
     }
 
     @Test
@@ -119,9 +146,9 @@ public class FilterDslTest {
 
     @Test
     public void anOperatorThisAdapterDoesNotHaveIsRefusedRatherThanApproximated() {
-        // `exists` is a v1 operator nitrite-java has no filter for. Returning an unfiltered page
-        // would show the developer rows they explicitly excluded.
-        refuses(leaf("name", "exists", true));
+        // Returning an unfiltered page would show the developer rows they explicitly excluded.
+        // `between` is the other direction — Nitrite has it and the protocol does not.
+        refuses(leaf("name", "nearby", 1L));
         refuses(leaf("name", "between", Arrays.asList(1L, 2L)));
     }
 

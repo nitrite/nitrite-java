@@ -75,10 +75,10 @@ public class NitriteAdapterTest {
     }
 
     @Test
-    public void existsIsNotAdvertisedBecauseNitriteHasNoSuchFilter() {
-        // capabilities.filterOps is authoritative; the client greys the operator out rather than
-        // the bridge mistranslating it.
-        assertFalse(adapter.capabilities().filterOps().contains("exists"));
+    public void existsIsAdvertisedNowThatNitriteHasTheFilter() {
+        // capabilities.filterOps is authoritative, and it said "no" for as long as nitrite-java had
+        // no presence filter. 5.0.0 has one, so the client's operator is no longer greyed out.
+        assertTrue(adapter.capabilities().filterOps().contains("exists"));
     }
 
     // --- listStores ---------------------------------------------------------------------------

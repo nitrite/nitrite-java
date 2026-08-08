@@ -40,15 +40,15 @@ android {
 }
 
 dependencies {
-    implementation("org.dizitart:nitrite:4.4.3")
-    implementation("org.dizitart:nitrite-mvstore-adapter:4.4.3")
+    implementation("org.dizitart:nitrite:5.0.0")
+    implementation("org.dizitart:nitrite-mvstore-adapter:5.0.0")
 
     // THE release guard on Android. An application has no command line, so the system property
     // -Ddbinspect.bridge.enabled can never be set and a guard requiring it could never be
     // satisfied; the packaging is the guard instead, and it is a stronger property than a runtime
     // flag rather than a weaker one. src/release/ carries a no-op DebugTools so that nothing in
     // the release variant so much as names a bridge class.
-    debugImplementation("org.dizitart:nitrite-bridge:4.4.3")
+    debugImplementation("org.dizitart:nitrite-bridge:5.0.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
