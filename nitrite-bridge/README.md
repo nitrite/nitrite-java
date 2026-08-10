@@ -35,9 +35,17 @@ and both build twice so the check has a negative control.
 
 ## Capabilities, and what is off by default
 
-`edit`, `snapshot` and `regex` are off unless you asked for them on that adapter. What is off is
-*absent from the reported capabilities*, not merely refused at call time, so the client greys it
-out rather than offering something that will fail.
+`edit`, `snapshot` and `regex` are off unless you asked for them on that adapter — `allowWrite`,
+`allowSnapshot`, `allowRegex` on the builder. What is off is *absent from the reported
+capabilities*, not merely refused at call time, so the client greys it out rather than offering
+something that will fail.
+
+**A row is addressed by `_id`.** With `allowWrite(true)`, `updateRow` and `deleteRow` take the
+value the grid showed in that column — a `long` here, and the bracketed `[1755…]NO₂` rendering is
+accepted too, so an id pasted from another runtime's grid works. `_id` inside an update's `values`
+is refused: Nitrite merges an update document, so it would rewrite the identity of the row it just
+matched. An update is partial, and `changes: 0` means the row was not there, which is an answer
+rather than an error.
 
 `capabilities.filterOps` reports what this implementation actually has. Two notes on it:
 

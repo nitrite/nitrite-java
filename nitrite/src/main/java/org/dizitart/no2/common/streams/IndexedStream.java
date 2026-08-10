@@ -45,7 +45,8 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
         return new IndexedStreamIterator(nitriteIds.iterator(), nitriteMap);
     }
 
-    private static class IndexedStreamIterator implements Iterator<Pair<NitriteId, Document>> {
+    private static class IndexedStreamIterator implements Iterator<Pair<NitriteId, Document>>,
+            SkippableIterator {
         private final Iterator<NitriteId> iterator;
         private final NitriteMap<NitriteId, Document> nitriteMap;
 
@@ -58,6 +59,20 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
+        }
+
+        /**
+         * The index already gave the matching ids, so a skipped row costs one pointer here rather
+         * than the map lookup and the decode that {@link #next()} would have paid for it.
+         */
+        @Override
+        public long skip(long count) {
+            long skipped = 0;
+            while (skipped < count && iterator.hasNext()) {
+                iterator.next();
+                skipped++;
+            }
+            return skipped;
         }
 
         @Override

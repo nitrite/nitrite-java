@@ -5,7 +5,10 @@ import org.dizitart.dbinspect.BridgeException;
 import org.dizitart.dbinspect.PageRequest;
 import org.dizitart.dbinspect.QueryPage;
 import org.dizitart.dbinspect.StoreInfo;
+import org.dizitart.dbinspect.SnapshotRequest;
 import org.dizitart.dbinspect.StoreSchema;
+import org.dizitart.dbinspect.WriteRequest;
+import org.dizitart.dbinspect.WriteResult;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.repository.ObjectRepository;
@@ -286,6 +289,165 @@ public class NitriteAdapterTest {
             map.put(column.name(), column);
         }
         return map;
+    }
+
+    // --- writing ------------------------------------------------------------------------------
+
+    private NitriteAdapter writable() {
+        return NitriteAdapter.builder(db, "main", "app.db")
+                .repositories(notes)
+                .allowWrite(true)
+                .build();
+    }
+
+    /**
+     * Through the core's validator, because that is where an adapter is reached from: a test that
+     * built a {@link WriteRequest} by hand would be testing a path no client can take.
+     */
+    private static WriteResult write(
+            NitriteAdapter adapter, WriteRequest.Op op, Map<String, Object> params) {
+        return adapter.write(WriteRequest.fromParams(params, adapter.capabilities(), op));
+    }
+
+    private static Map<String, Object> writeParams(Object... pairs) {
+        Map<String, Object> params = new LinkedHashMap<>();
+        for (int i = 0; i < pairs.length; i += 2) {
+            params.put((String) pairs[i], pairs[i + 1]);
+        }
+        return params;
+    }
+
+    @Test
+    public void theThreeWritesRoundTripByDocumentId() {
+        NitriteAdapter writable = writable();
+
+        WriteResult inserted =
+                write(
+                        writable,
+                        WriteRequest.Op.INSERT,
+                        writeParams(
+                                "store", "users", "values", writeParams("name", "ada", "age", 36L)));
+        assertEquals(1, inserted.changes());
+        Object id = inserted.id();
+        assertNotNull("an insert reports the identity the client addresses it by", id);
+
+        WriteResult updated =
+                write(
+                        writable,
+                        WriteRequest.Op.UPDATE,
+                        writeParams(
+                                "store", "users", "rowId", id, "values", writeParams("age", 37L)));
+        assertEquals(1, updated.changes());
+
+        // A partial update leaves the fields it did not name alone.
+        QueryPage found =
+                writable.queryPage(filtered("users", leaf("age", "eq", 37L)));
+        assertEquals(1, found.rows().size());
+        assertEquals("ada", found.rows().get(0).get("name"));
+
+        WriteResult deleted =
+                write(writable, WriteRequest.Op.DELETE, writeParams("store", "users", "rowId", id));
+        assertEquals(1, deleted.changes());
+
+        // `changes: 0` is an answer, not an error: the row is gone, and a client must be able to
+        // tell that from a write that failed.
+        WriteResult again =
+                write(writable, WriteRequest.Op.DELETE, writeParams("store", "users", "rowId", id));
+        assertEquals(0, again.changes());
+    }
+
+    @Test
+    public void anIdIsAddressableAsRenderedAndAsItsBareNumber() {
+        NitriteAdapter writable = writable();
+        // nitrite-java keeps the id in the document as a long, so that is what a page carries and
+        // what a client echoes back. The bracketed `NitriteId.toString()` form is accepted too,
+        // because it is what the Rust adapter's pages carry and a person may paste one.
+        Object rendered = writable.queryPage(page("users", 0, 1)).rows().get(0).get("_id");
+        long bare = Long.parseLong(String.valueOf(rendered));
+
+        for (Object rowId :
+                new Object[] {rendered, String.valueOf(bare), "[" + bare + "]NO₂"}) {
+            WriteResult updated =
+                    write(
+                            writable,
+                            WriteRequest.Op.UPDATE,
+                            writeParams(
+                                    "store", "users", "rowId", rowId,
+                                    "values", writeParams("seen", true)));
+            assertEquals(String.valueOf(rowId), 1, updated.changes());
+        }
+    }
+
+    @Test
+    public void theWritesAnAdapterMustRefuse() {
+        NitriteAdapter writable = writable();
+
+        // The identity is `rowId` and the engine owns it: Nitrite merges the update document, so
+        // an `_id` in it would silently rewrite the row's identity.
+        try {
+            write(
+                    writable,
+                    WriteRequest.Op.UPDATE,
+                    writeParams(
+                            "store", "users", "rowId", 1L, "values", writeParams("_id", "2")));
+            fail("_id was accepted as an editable field");
+        } catch (BridgeException refused) {
+            assertEquals(BridgeErrorKind.BAD_REQUEST, refused.kind());
+        }
+
+        // Not an `_id` at all. A store that took this for one would address whatever it matched.
+        try {
+            write(
+                    writable,
+                    WriteRequest.Op.DELETE,
+                    writeParams("store", "users", "rowId", "not-an-id"));
+            fail("a non-id was accepted as a row identity");
+        } catch (BridgeException refused) {
+            assertEquals(BridgeErrorKind.BAD_REQUEST, refused.kind());
+        }
+
+        // The store allow-list is the same one every read goes through: an unchecked name would
+        // let a paired client create a collection by writing to it.
+        try {
+            write(
+                    writable,
+                    WriteRequest.Op.INSERT,
+                    writeParams("store", "__no_store__", "values", writeParams("name", "ada")));
+            fail("an unknown store was written to");
+        } catch (BridgeException refused) {
+            assertEquals(BridgeErrorKind.BAD_REQUEST, refused.kind());
+        }
+    }
+
+    @Test
+    public void writingIsRefusedUntilTheDeveloperOptsIn() {
+        // Criterion 10, at the adapter: the gate is the core's, and this is the proof that a
+        // default-constructed adapter never opens it.
+        assertFalse(adapter.capabilities().edit());
+        try {
+            write(
+                    adapter,
+                    WriteRequest.Op.INSERT,
+                    writeParams("store", "users", "values", writeParams("name", "ada")));
+            fail("a read-only adapter wrote");
+        } catch (BridgeException refused) {
+            assertEquals(BridgeErrorKind.FORBIDDEN, refused.kind());
+        }
+    }
+
+    @Test
+    public void aSnapshotPagesTheWholeStoreOnceTheDeveloperOptsIn() {
+        assertFalse(adapter.capabilities().snapshot());
+
+        NitriteAdapter snapshotting =
+                NitriteAdapter.builder(db, "main", "app.db").allowSnapshot(true).build();
+        SnapshotRequest request =
+                SnapshotRequest.fromParams(
+                        writeParams("store", "users"), snapshotting.capabilities());
+
+        int[] rows = {0};
+        snapshotting.snapshot(request, chunk -> rows[0] += chunk.size());
+        assertEquals(Fixtures.USER_COUNT, rows[0]);
     }
 
     static PageRequest page(String store, long page, int pageSize) {

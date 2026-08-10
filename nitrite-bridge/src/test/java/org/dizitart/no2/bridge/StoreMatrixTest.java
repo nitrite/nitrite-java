@@ -2,6 +2,8 @@ package org.dizitart.no2.bridge;
 
 import org.dizitart.dbinspect.QueryPage;
 import org.dizitart.dbinspect.StoreInfo;
+import org.dizitart.dbinspect.WriteRequest;
+import org.dizitart.dbinspect.WriteResult;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.mvstore.MVStoreModule;
@@ -17,6 +19,7 @@ import org.junit.runners.Parameterized;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -153,6 +156,41 @@ public class StoreMatrixTest {
         db.getCollection("users").insert(Document.createDocument().put("id", 9001));
         assertTrue(engine + " reported no change", inserted.await(5, TimeUnit.SECONDS));
         unwatch.run();
+    }
+
+    @Test
+    public void writesRoundTripByDocumentIdOnEveryEngine() throws Exception {
+        // The write path deserves the store matrix for the same reason browsing does: an id is a
+        // key in a persistent store, and MVStore and RocksDB order and serialise one differently.
+        db =
+                open == null
+                        ? Fixtures.memoryDb()
+                        : open.apply(new File(folder.newFolder(), "app.db"));
+        Fixtures.fill(db);
+        NitriteAdapter adapter =
+                NitriteAdapter.builder(db, "main", "app.db").allowWrite(true).build();
+
+        Map<String, Object> insert = new LinkedHashMap<>();
+        insert.put("store", "users");
+        Map<String, Object> values = new LinkedHashMap<>();
+        values.put("name", "ada");
+        insert.put("values", values);
+        WriteResult inserted =
+                adapter.write(
+                        WriteRequest.fromParams(
+                                insert, adapter.capabilities(), WriteRequest.Op.INSERT));
+        assertEquals(1, inserted.changes());
+
+        Map<String, Object> delete = new LinkedHashMap<>();
+        delete.put("store", "users");
+        delete.put("rowId", inserted.id());
+        assertEquals(
+                engine + " could not address the row it had just assigned an id to",
+                1,
+                adapter.write(
+                                WriteRequest.fromParams(
+                                        delete, adapter.capabilities(), WriteRequest.Op.DELETE))
+                        .changes());
     }
 
     @Test

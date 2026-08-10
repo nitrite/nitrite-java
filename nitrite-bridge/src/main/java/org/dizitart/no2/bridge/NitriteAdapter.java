@@ -6,13 +6,18 @@ import org.dizitart.dbinspect.BridgeErrorKind;
 import org.dizitart.dbinspect.BridgeException;
 import org.dizitart.dbinspect.PageRequest;
 import org.dizitart.dbinspect.QueryPage;
+import org.dizitart.dbinspect.BlobChunk;
+import org.dizitart.dbinspect.BlobRequest;
 import org.dizitart.dbinspect.StoreInfo;
 import org.dizitart.dbinspect.StoreSchema;
-import org.dizitart.dbinspect.Values;
+import org.dizitart.dbinspect.WriteRequest;
+import org.dizitart.dbinspect.WriteResult;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.FindOptions;
 import org.dizitart.no2.collection.NitriteCollection;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.collection.UpdateOptions;
 import org.dizitart.no2.common.Constants;
 import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
@@ -22,7 +27,7 @@ import org.dizitart.no2.repository.ObjectRepository;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -91,6 +96,10 @@ public final class NitriteAdapter implements BridgeAdapter {
                         // (threat model rule 5).
                         .edit(builder.allowWrite)
                         .snapshot(builder.allowSnapshot)
+                        // Not an opt-in: `queryPage` already showed the first 64 KB of this very
+                        // cell, and `docs/PROTOCOL.md` §2 has always promised the rest on request.
+                        // A document is addressed by `_id`, which every row has.
+                        .blob(true)
                         .filterOps(filterOps)
                         .build();
     }
@@ -161,7 +170,7 @@ public final class NitriteAdapter implements BridgeAdapter {
             for (Pair<String, Object> entry : document) {
                 String field = entry.getFirst();
                 seen.merge(field, 1, Integer::sum);
-                String type = typeOf(entry.getSecond());
+                String type = DocumentValues.typeOf(entry.getSecond());
                 if (type != null) {
                     types.putIfAbsent(field, type);
                 } else {
@@ -225,7 +234,7 @@ public final class NitriteAdapter implements BridgeAdapter {
         for (Document document : documents) {
             Map<String, Object> row = new LinkedHashMap<>();
             for (Pair<String, Object> cell : document) {
-                row.put(cell.getFirst(), encode(cell.getSecond()));
+                row.put(cell.getFirst(), DocumentValues.encode(cell.getSecond()));
             }
             rows.add(row);
         }
@@ -236,6 +245,110 @@ public final class NitriteAdapter implements BridgeAdapter {
                 request.offset() + rows.size() < total,
                 (System.nanoTime() - startedAt) / 1_000_000,
                 request.pageSizeClamped());
+    }
+
+    /**
+     * One row, addressed by {@code _id} — the identity {@code docs/PROTOCOL.md} §3 gives every
+     * Nitrite implementation.
+     */
+    @Override
+    public WriteResult write(WriteRequest request) {
+        NitriteCollection collection = resolve(request.store());
+
+        switch (request.op()) {
+            case INSERT:
+                org.dizitart.no2.common.WriteResult inserted =
+                        collection.insert(documentOf(request.values()));
+                Iterator<NitriteId> assigned = inserted.iterator();
+                return new WriteResult(
+                        inserted.getAffectedCount(),
+                        // The value the client addresses the row by afterwards, in the rendering
+                        // `_id` already has in a page — which here is the number itself, because
+                        // nitrite-java keeps the id in the document as a long.
+                        assigned.hasNext() ? assigned.next().getIdValue() : null);
+            case UPDATE:
+                if (request.values().containsKey(Constants.DOC_ID)) {
+                    // Nitrite merges the update document, so an `_id` in it would rewrite the
+                    // identity of the row it just matched. The identity is `rowId`, and it is not
+                    // editable.
+                    throw new BridgeException(
+                            BridgeErrorKind.BAD_REQUEST,
+                            "_id is not an editable field",
+                            "a row is addressed by rowId; the engine owns its identity");
+                }
+                return new WriteResult(
+                        collection
+                                .update(
+                                        Filter.byId(idOf(request.rowId())),
+                                        documentOf(request.values()),
+                                        UpdateOptions.updateOptions(false, true))
+                                .getAffectedCount());
+            default:
+                return new WriteResult(
+                        collection.remove(Filter.byId(idOf(request.rowId())), true)
+                                .getAffectedCount());
+        }
+    }
+
+    /**
+     * One binary cell, whole, rather than the 64 KB {@code queryPage} showed.
+     *
+     * <p>Read by id rather than by filter: this is the O(1) lookup the engine already has, and the
+     * row the client is looking at is one it has an {@code _id} for by definition.
+     */
+    @Override
+    public BlobChunk fetchBlob(BlobRequest request) {
+        Document document = resolve(request.store()).getById(idOf(request.rowId()));
+        if (document == null) {
+            return null;
+        }
+
+        Object value = document.get(request.column());
+        if (value == null) {
+            return null;
+        }
+        if (!(value instanceof byte[])) {
+            // A client asking for the bytes of a field that is not bytes has a stale schema, and a
+            // toString() handed back as a file is a fabricated download rather than a helpful one.
+            throw new BridgeException(
+                    BridgeErrorKind.BAD_REQUEST,
+                    "\"" + request.column() + "\" is not a binary field",
+                    "it is a " + value.getClass().getSimpleName());
+        }
+        return BlobChunk.slice((byte[]) value, request);
+    }
+
+    /** The document a write carries, with {@code _id} turned back into an identity. */
+    private static Document documentOf(Map<String, Object> values) {
+        Document document = Document.createDocument();
+        for (Map.Entry<String, Object> value : values.entrySet()) {
+            document.put(
+                    value.getKey(),
+                    Constants.DOC_ID.equals(value.getKey())
+                            ? idOf(value.getValue())
+                            : value.getValue());
+        }
+        return document;
+    }
+
+    /**
+     * Accepts an id in the rendering a page carried — {@code [1755…]NO₂}, which is what {@link
+     * NitriteId#toString()} produces and therefore what a client echoes back — and the bare number
+     * underneath it, which is what a person types.
+     */
+    private static NitriteId idOf(Object rowId) {
+        String text = String.valueOf(rowId);
+        int open = text.indexOf(Constants.ID_PREFIX);
+        int close = text.indexOf(Constants.ID_SUFFIX);
+        String digits = open == 0 && close > open ? text.substring(1, close) : text;
+        try {
+            return NitriteId.createId(Long.parseLong(digits));
+        } catch (NumberFormatException notAnId) {
+            throw new BridgeException(
+                    BridgeErrorKind.BAD_REQUEST,
+                    "rowId is not a Nitrite _id",
+                    "an _id is the value the store reported in that column");
+        }
     }
 
     @Override
@@ -288,77 +401,12 @@ public final class NitriteAdapter implements BridgeAdapter {
         return separator < 0 ? null : collectionName.substring(separator + 1);
     }
 
-    /**
-     * {@link Values#encode} is engine-neutral and so knows nothing of {@link Document}, which is
-     * neither a {@code Map} nor a {@code Collection} and would degrade to its {@code toString}. A
-     * repository row with a nested entity in it is the common case, not an exotic one, so the
-     * adapter unwraps its own type and hands the rest to the core.
-     */
-    private static Object encode(Object value) {
-        if (value instanceof Document) {
-            Map<String, Object> nested = new LinkedHashMap<>();
-            for (Pair<String, Object> field : (Document) value) {
-                nested.put(field.getFirst(), encode(field.getSecond()));
-            }
-            return nested;
-        }
-        if (value instanceof Iterable) {
-            List<Object> encoded = new ArrayList<>();
-            for (Object element : (Iterable<?>) value) {
-                encoded.add(encode(element));
-            }
-            return encoded;
-        }
-        return Values.encode(value);
-    }
-
     private static Set<String> columnNames(StoreSchema schema) {
         Set<String> names = new LinkedHashSet<>();
         for (StoreSchema.Column column : schema.columns()) {
             names.add(column.name());
         }
         return names;
-    }
-
-    /**
-     * A closed set, so the client has a known set of renderings rather than whatever
-     * {@code getClass().getSimpleName()} prints. Null means this document said nothing about the
-     * field's type.
-     */
-    private static String typeOf(Object value) {
-        if (value == null) {
-            return null;
-        }
-        if (value instanceof Boolean) {
-            return "bool";
-        }
-        if (value instanceof Integer
-                || value instanceof Long
-                || value instanceof Short
-                || value instanceof Byte) {
-            return "int";
-        }
-        if (value instanceof Number) {
-            return "real";
-        }
-        if (value instanceof CharSequence) {
-            return "text";
-        }
-        if (value instanceof Date || value instanceof java.time.temporal.Temporal) {
-            return "date";
-        }
-        if (value instanceof byte[]) {
-            return "blob";
-        }
-        // Before the Iterable branch on purpose: Document is itself an Iterable of its fields, and
-        // a nested document reported as a list is a wrong rendering rather than a vague one.
-        if (value instanceof Document || value instanceof Map) {
-            return "document";
-        }
-        if (value instanceof Iterable || value.getClass().isArray()) {
-            return "list";
-        }
-        return "text";
     }
 
     /** Everything dangerous is off unless the embedding developer opted in (threat model rule 5). */

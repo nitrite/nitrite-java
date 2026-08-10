@@ -1,3 +1,14 @@
+## Unreleased
+
+### Performance
+
+- Paging a collection no longer costs every row before the page - `find(filter, skipBy(n).limit(m))` now advances the storage iterator without decoding what it passes over.
+  - `BoundedStream` skipped by calling `next()` on the iterator beneath it, and that iterator is below the document layer: it deserialised **every skipped document** in order to throw it away. Page latency was therefore linear in the page number - about 9 µs per skipped row on both persistent stores - so a 50 000-row collection paged at 200 rows took 3 ms for the first page and 350 ms for the two-hundredth. It is an ordinary browse, not an edge case.
+  - New `SkippableIterator`, implemented by the storage-level iterators that can do better and by nothing else. `BoundedStream` uses it when it is there and falls back to the loop when it is not, so a stream that has to look at a document to know whether to skip it - a collection-scan filter, a blocking sort - is unaffected and still correct.
+  - **MVStore descends the tree by index.** An MVStore page records how many entries sit beneath it, so `MVMap.getKey(n)` is a O(log n) descent rather than a scan; the skip seeks with it and continues from a cursor. Measured over 50 000 rows, 200 to a page: p95 **583.9 ms → 5.8 ms**, and the first and last pages now cost the same 0.1 ms.
+  - **RocksDB steps the native iterator.** There is no seek-by-index to use, but the decode is what a skipped row actually cost; advancing past one is now a memcmp inside the block the iterator is already on. p95 **3.8 ms** over the same 50 000 rows.
+  - An index scan skips its own id set the same way, without the map lookup and decode `next()` would have paid for each row.
+
 ## Release 5.0.0 - Aug 7, 2026
 
 ### Breaking Changes
