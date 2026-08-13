@@ -19,7 +19,9 @@ package org.dizitart.no2.index;
 
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
 
@@ -71,6 +73,21 @@ public interface NitriteIndex {
      * @return the linked hash set
      */
     LinkedHashSet<NitriteId> findNitriteIds(FindPlan findPlan);
+
+    /**
+     * Reads every {@code (indexed value, id)} pair out of the index, so a sorted query can
+     * decide its order without deserializing a single document.
+     *
+     * @param collectionSize the number of documents in the collection being indexed.
+     * @return the pairs, in no particular order, or {@code null} when the index is not a
+     * faithful stand-in for the collection - a document that contributes several index
+     * entries (a multi-valued field is indexed once per element) or none at all makes the
+     * index unusable for ordering, and the caller must sort the documents instead.
+     * @since 4.4
+     */
+    default List<Pair<DBValue, NitriteId>> readSortKeys(long collectionSize) {
+        return null;
+    }
 
     /**
      * Checks if the index is unique.

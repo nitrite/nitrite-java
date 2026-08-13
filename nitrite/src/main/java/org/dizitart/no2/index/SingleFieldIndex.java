@@ -30,8 +30,10 @@ import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveCompositeIndexMapName;
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
@@ -129,6 +131,33 @@ public class SingleFieldIndex implements NitriteIndex {
             ? IndexMap.composite(findCompositeMap())
             : new IndexMap(findIndexMap());
         return scanIndex(findPlan, iMap);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<Pair<DBValue, NitriteId>> readSortKeys(long collectionSize) {
+        List<Pair<DBValue, NitriteId>> keys = new ArrayList<>();
+        Set<NitriteId> seen = new HashSet<>();
+
+        if (useCompositeLayout()) {
+            // the composite key carries both halves, so the values are never read
+            for (Pair<IndexEntryKey, Object> entry : findCompositeMap().entries()) {
+                IndexEntryKey key = entry.getFirst();
+                if (!seen.add(key.getNitriteId())) return null;
+                keys.add(new Pair<>(key.getValue(), key.getNitriteId()));
+            }
+        } else {
+            for (Pair<DBValue, List<?>> entry : (Iterable<Pair<DBValue, List<?>>>) (Iterable<?>) findIndexMap().entries()) {
+                for (NitriteId nitriteId : (List<NitriteId>) entry.getSecond()) {
+                    if (!seen.add(nitriteId)) return null;
+                    keys.add(new Pair<>(entry.getFirst(), nitriteId));
+                }
+            }
+        }
+
+        // one entry per document, no more and no fewer, or the index cannot stand in for
+        // the collection and the caller has to sort the documents themselves
+        return keys.size() == collectionSize ? keys : null;
     }
 
     /**

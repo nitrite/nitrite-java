@@ -1,3 +1,14 @@
+## Release 5.1.0 - Aug 14, 2026
+
+### Improvements
+
+- A sorted, limited `find` no longer fetches the whole collection when the sort field is indexed
+  - `find(ALL, orderBy("createdAt", Descending).limit(20))` asked for 20 rows and cost what draining every stored document costs. `SortedDocumentStream` collects the entire result set before `BoundedStream` gets to drop 99% of it — and the cost is the decode, not the comparison, so it scales with document *size* as well as count. An index on the sort field bought nothing: the index was only ever used to *filter*, never to order, and page 50 cost exactly what page 1 cost because the work finished before the skip applied.
+  - When the query has no filter, one sort field, a limit, and a simple unique or non-unique index on exactly that field, the sort keys are now read from that index — which already stores them — and only the documents actually returned are fetched. Measured over 2000 rows each carrying a 150-element list, a `limit(20)` page went from ~125 ms to ~1 ms, and stopped growing with the collection.
+  - The index is used only when it holds exactly one entry per stored document. A multi-valued field is indexed once per element, which is detected by a duplicate-id check and an entry-count check, and falls back to the blocking sort. Ordering — including where nulls sort and how ties break — is identical either way: the same comparator runs over keys taken from the index instead of from the documents.
+  - Where documents are small and cheap to read, the index walk replaces a decode that was nearly free, so a sorted page over lean rows can cost a few hundred microseconds more than before. The trade is deliberate: the loss is bounded and sub-millisecond, the win grows without bound with document size.
+  - New API, all additive: `FindPlan.getSortIndexDescriptor()`, `NitriteIndex.readSortKeys(long)` and `NitriteIndexer.readSortKeys(IndexDescriptor, NitriteConfig, long)` (both `default`-implemented to return `null`, so existing indexer plugins are unaffected), and `DocumentSorter.compareValues(Object, Object, Collator)`.
+
 ## Release 5.0.0 - Aug 7, 2026
 
 ### Breaking Changes

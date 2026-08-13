@@ -24,6 +24,7 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.FilterException;
 import org.dizitart.no2.filters.*;
 import org.dizitart.no2.index.IndexDescriptor;
+import org.dizitart.no2.index.IndexType;
 
 import java.util.*;
 
@@ -42,7 +43,7 @@ class FindOptimizer {
                              FindOptions findOptions,
                              Collection<IndexDescriptor> indexDescriptors) {
         FindPlan findPlan = createFilterPlan(indexDescriptors, filter);
-        readSortOption(findOptions, findPlan);
+        readSortOption(findOptions, findPlan, indexDescriptors);
         readLimitOption(findOptions, findPlan);
 
         if (findOptions != null) {
@@ -317,7 +318,8 @@ class FindOptimizer {
         }
     }
 
-    private void readSortOption(FindOptions findOptions, FindPlan findPlan) {
+    private void readSortOption(FindOptions findOptions, FindPlan findPlan,
+                                Collection<IndexDescriptor> indexDescriptors) {
         IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
         if (findOptions != null && findOptions.orderBy() != null) {
             // get sort spec for find
@@ -364,10 +366,44 @@ class FindOptimizer {
                     findPlan.setBlockingSortOrder(findSortSpec);
                 }
             } else {
-                // no find options, so consider the index sorting order
+                // No index drives the scan, so every stored document would be fetched and
+                // deserialized just to read one field - even for limit(20). An index on the
+                // sort field already holds that field's value for every document, so record
+                // it as a hint; ReadOperations validates it against the collection.
+                findPlan.setSortIndexDescriptor(sortIndex(findSortSpec, findOptions, findPlan, indexDescriptors));
                 findPlan.setBlockingSortOrder(findSortSpec);
             }
         }
+    }
+
+    /**
+     * Picks the index that could answer {@code sortSpec} from its keys alone, if any.
+     * <p>
+     * Deliberately narrow - it only fires for the shape that pays: no filter (so the index
+     * covers the whole result set), a limit (so there are rows to avoid fetching), and one
+     * sort field carried by a simple unique or non-unique index on exactly that field.
+     */
+    private IndexDescriptor sortIndex(List<Pair<String, SortOrder>> sortSpec,
+                                      FindOptions findOptions,
+                                      FindPlan findPlan,
+                                      Collection<IndexDescriptor> indexDescriptors) {
+        if (sortSpec.size() != 1 || findOptions.limit() == null) return null;
+        if (findPlan.getByIdFilter() != null
+            || findPlan.getIndexScanFilter() != null
+            || findPlan.getCollectionScanFilter() != null
+            || !findPlan.getSubPlans().isEmpty()) {
+            return null;
+        }
+
+        String sortField = sortSpec.get(0).getFirst();
+        for (IndexDescriptor descriptor : indexDescriptors) {
+            String type = descriptor.getIndexType();
+            boolean simple = IndexType.UNIQUE.equals(type) || IndexType.NON_UNIQUE.equals(type);
+            if (simple && descriptor.getFields().getFieldNames().equals(Collections.singletonList(sortField))) {
+                return descriptor;
+            }
+        }
+        return null;
     }
 
     private void readLimitOption(FindOptions findOptions, FindPlan findPlan) {

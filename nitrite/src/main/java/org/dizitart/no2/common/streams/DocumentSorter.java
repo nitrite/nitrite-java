@@ -42,46 +42,13 @@ public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
     }
 
     @Override
-    @SuppressWarnings({"rawtypes", "unchecked"})
     public int compare(Pair<NitriteId, Document> pair1, Pair<NitriteId, Document> pair2) {
         if (sortOrder != null && !sortOrder.isEmpty()) {
             for (Pair<String, SortOrder> pair : sortOrder) {
                 Document doc1 = pair1.getSecond();
                 Document doc2 = pair2.getSecond();
 
-                Object value1 = doc1.get(pair.getFirst());
-                Object value2 = doc2.get(pair.getFirst());
-
-                // handle null values
-                int result;
-                boolean isNull1 = value1 == null || value1 instanceof DBNull;
-                boolean isNull2 = value2 == null || value2 instanceof DBNull;
-                if (isNull1 && isNull2) {
-                    // two null keys are equal, otherwise the comparator
-                    // violates antisymmetry and TimSort may throw
-                    result = 0;
-                } else if (isNull1) {
-                    result = -1;
-                } else if (isNull2) {
-                    result = 1;
-                } else {
-
-                    // validate comparable
-                    if (!(value1 instanceof Comparable) || !(value2 instanceof Comparable)) {
-                        throw new InvalidOperationException("Cannot compare " + value1.getClass()
-                            + " and " + value2.getClass());
-                    }
-
-                    // compare values
-                    Comparable c1 = (Comparable) value1;
-                    Comparable c2 = (Comparable) value2;
-
-                    if (c1 instanceof String && c2 instanceof String && collator != null) {
-                        result = collator.compare(c1, c2);
-                    } else {
-                        result = c1.compareTo(c2);
-                    }
-                }
+                int result = compareValues(doc1.get(pair.getFirst()), doc2.get(pair.getFirst()), collator);
 
                 if (pair.getSecond() == SortOrder.Descending) {
                     result *= -1;
@@ -94,5 +61,43 @@ public class DocumentSorter implements Comparator<Pair<NitriteId, Document>> {
             }
         }
         return 0;
+    }
+
+    /**
+     * Orders two values of a sort field the way an {@code orderBy} does: null (or missing)
+     * before everything else, strings through the collator when one was given, everything
+     * else by its natural order.
+     *
+     * <p>Shared with the index-ordered sort path, which reads the same keys out of an index
+     * instead of out of the documents - the two orderings must not drift apart.
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static int compareValues(Object value1, Object value2, Collator collator) {
+        boolean isNull1 = value1 == null || value1 instanceof DBNull;
+        boolean isNull2 = value2 == null || value2 instanceof DBNull;
+        if (isNull1 && isNull2) {
+            // two null keys are equal, otherwise the comparator
+            // violates antisymmetry and TimSort may throw
+            return 0;
+        } else if (isNull1) {
+            return -1;
+        } else if (isNull2) {
+            return 1;
+        }
+
+        // validate comparable
+        if (!(value1 instanceof Comparable) || !(value2 instanceof Comparable)) {
+            throw new InvalidOperationException("Cannot compare " + value1.getClass()
+                + " and " + value2.getClass());
+        }
+
+        // compare values
+        Comparable c1 = (Comparable) value1;
+        Comparable c2 = (Comparable) value2;
+
+        if (c1 instanceof String && c2 instanceof String && collator != null) {
+            return collator.compare(c1, c2);
+        }
+        return c1.compareTo(c2);
     }
 }

@@ -19,11 +19,14 @@ package org.dizitart.no2.index;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.module.NitritePlugin;
+import org.dizitart.no2.common.tuples.Pair;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 
 /**
  * An abstract class representing a Nitrite indexer plugin.
@@ -84,4 +87,21 @@ public interface NitriteIndexer extends NitritePlugin {
      * @return a set of NitriteIds of the documents that match the given filter.
      */
     LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig);
+
+    /**
+     * Reads every {@code (indexed value, id)} pair out of the given index, so a sorted query
+     * can decide its order without deserializing a single document.
+     *
+     * @param indexDescriptor the index to read.
+     * @param nitriteConfig   the Nitrite configuration.
+     * @param collectionSize  the number of documents in the indexed collection.
+     * @return the pairs, in no particular order, or {@code null} when this indexer cannot
+     * supply them or the index is not a faithful stand-in for the collection.
+     * @since 4.4
+     */
+    default List<Pair<DBValue, NitriteId>> readSortKeys(IndexDescriptor indexDescriptor,
+                                                        NitriteConfig nitriteConfig,
+                                                        long collectionSize) {
+        return null;
+    }
 }

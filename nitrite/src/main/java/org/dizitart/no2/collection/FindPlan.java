@@ -69,6 +69,19 @@ public class FindPlan {
     private List<Pair<String, SortOrder>> blockingSortOrder;
 
     /**
+     * Gets the index whose keys can supply the {@link #blockingSortOrder} without reading
+     * any document.
+     * <p>
+     * This is a hint, not a decision: the reader still has to confirm that the index holds
+     * exactly one entry per stored document (a multi-valued field breaks that) and falls
+     * back to the blocking sort when it does not. When the hint holds, only the documents
+     * actually returned are fetched, instead of every document in the collection.
+     *
+     * @since 4.4
+     * */
+    private IndexDescriptor sortIndexDescriptor;
+
+    /**
      * Gets the skip count.
      * */
     private Long skip;

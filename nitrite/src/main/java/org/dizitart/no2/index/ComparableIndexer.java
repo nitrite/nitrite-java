@@ -19,11 +19,14 @@ package org.dizitart.no2.index;
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.IndexingException;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,6 +64,13 @@ public abstract class ComparableIndexer implements NitriteIndexer {
     public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
         NitriteIndex nitriteIndex = findNitriteIndex(findPlan.getIndexDescriptor(), nitriteConfig);
         return nitriteIndex.findNitriteIds(findPlan);
+    }
+
+    @Override
+    public List<Pair<DBValue, NitriteId>> readSortKeys(IndexDescriptor indexDescriptor,
+                                                       NitriteConfig nitriteConfig,
+                                                       long collectionSize) {
+        return findNitriteIndex(indexDescriptor, nitriteConfig).readSortKeys(collectionSize);
     }
 
     @Override

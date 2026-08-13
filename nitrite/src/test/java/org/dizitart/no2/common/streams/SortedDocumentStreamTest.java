@@ -40,7 +40,7 @@ public class SortedDocumentStreamTest {
         List<Pair<String, SortOrder>> blockingSortOrder = findPlan.getBlockingSortOrder();
         assertTrue(blockingSortOrder instanceof java.util.ArrayList);
         assertEquals("FindPlan(byIdFilter=null, indexScanFilter=null, collectionScanFilter=null, indexDescriptor=null,"
-            + " indexScanOrder=null, blockingSortOrder=[], skip=null, limit=null, collator=null, " +
+            + " indexScanOrder=null, blockingSortOrder=[], sortIndexDescriptor=null, skip=null, limit=null, collator=null, " +
             "subPlans=[])", findPlan.toString());
         assertTrue(blockingSortOrder.isEmpty());
         List<FindPlan> subPlans = findPlan.getSubPlans();

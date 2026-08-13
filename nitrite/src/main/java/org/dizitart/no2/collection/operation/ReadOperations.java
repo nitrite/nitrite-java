@@ -18,7 +18,10 @@ package org.dizitart.no2.collection.operation;
 
 import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.*;
+import org.dizitart.no2.common.DBNull;
+import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.streams.*;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.*;
@@ -27,6 +30,7 @@ import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.common.processors.ProcessorChain;
 import org.dizitart.no2.store.NitriteMap;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -138,8 +142,60 @@ class ReadOperations {
         return nitriteMap.size();
     }
 
+    /**
+     * Orders the collection from an index on the sort field, so only the documents actually
+     * returned are fetched.
+     * <p>
+     * A blocking sort has to deserialize every stored document just to read one field, which
+     * is why {@code orderBy(field).limit(20)} used to cost what draining the whole collection
+     * costs. An index on that field already holds the key for every document, so the ordering
+     * can be decided without touching a document.
+     *
+     * @return the ordered stream, or {@code null} when the sort cannot be answered this way -
+     * the index is not a faithful stand-in for the collection (a multi-valued field is indexed
+     * once per element) and the caller must fall back to the blocking sort.
+     */
+    // ponytail: reads the whole index (one small entry per document) rather than only the
+    // skip+limit entries the page needs, because the faithfulness check needs the total.
+    // That trades a document decode per row for an index-entry read per row: a large win
+    // when documents are big (37ms -> 0.9ms over 2000 rows carrying a 150-element array),
+    // a few hundred microseconds worse when they are tiny. Walking the index lazily in key
+    // order would make it O(limit) and remove the loss, but needs a way to know the index
+    // covers the collection without reading all of it.
+    private RecordStream<Pair<NitriteId, Document>> indexSortedStream(FindPlan findPlan) {
+        IndexDescriptor descriptor = findPlan.getSortIndexDescriptor();
+        if (descriptor == null) return null;
+
+        NitriteIndexer indexer = nitriteConfig.findIndexer(descriptor.getIndexType());
+        List<Pair<DBValue, NitriteId>> sortKeys = indexer.readSortKeys(descriptor, nitriteConfig, nitriteMap.size());
+        if (sortKeys == null) return null;
+
+        // the hint is only ever set for a single-field sort, so this is that field
+        SortOrder sortOrder = findPlan.getBlockingSortOrder().get(0).getSecond();
+        Collator collator = findPlan.getCollator();
+
+        // same comparator and same stability as the blocking sort, so an indexed and an
+        // unindexed collection return the same rows in the same order
+        sortKeys.sort((a, b) -> {
+            // unwrap, or the collator would never see a String and DBNull would not read as null
+            int result = DocumentSorter.compareValues(indexedValue(a.getFirst()), indexedValue(b.getFirst()), collator);
+            return sortOrder == SortOrder.Descending ? -result : result;
+        });
+
+        LinkedHashSet<NitriteId> nitriteIds = new LinkedHashSet<>(sortKeys.size());
+        for (Pair<DBValue, NitriteId> sortKey : sortKeys) {
+            nitriteIds.add(sortKey.getSecond());
+        }
+        return new IndexedStream(nitriteIds, nitriteMap);
+    }
+
+    private static Object indexedValue(DBValue dbValue) {
+        return dbValue == null || dbValue instanceof DBNull ? null : dbValue.getValue();
+    }
+
     private RecordStream<Pair<NitriteId, Document>> findSuitableStream(FindPlan findPlan, long[] indexedIdCount) {
         RecordStream<Pair<NitriteId, Document>> rawStream;
+        RecordStream<Pair<NitriteId, Document>> indexSortedStream = null;
 
         if (!findPlan.getSubPlans().isEmpty()) {
             // or filters get all sub stream by finding suitable stream of all sub plans
@@ -186,7 +242,8 @@ class ReadOperations {
                     // create indexed stream from optimized filter
                     rawStream = new IndexedStream(nitriteIds, nitriteMap);
                 } else {
-                    rawStream = nitriteMap.entries();
+                    indexSortedStream = indexSortedStream(findPlan);
+                    rawStream = indexSortedStream != null ? indexSortedStream : nitriteMap.entries();
                 }
             }
 
@@ -197,7 +254,11 @@ class ReadOperations {
 
         // sort and bound stage
         if (rawStream != null) {
-            if (findPlan.getBlockingSortOrder() != null && !findPlan.getBlockingSortOrder().isEmpty()) {
+            // the blocking sort still runs whenever the ordered ids were not used - either no
+            // index could answer the sort, or the one that could turned out not to cover the
+            // collection faithfully
+            if (indexSortedStream == null
+                && findPlan.getBlockingSortOrder() != null && !findPlan.getBlockingSortOrder().isEmpty()) {
                 rawStream = new SortedDocumentStream(findPlan, rawStream);
             }
 
