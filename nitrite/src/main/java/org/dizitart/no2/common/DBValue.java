@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * @author Anindya Chatterjee
@@ -59,12 +61,46 @@ public class DBValue implements Comparable<DBValue>, Serializable {
     }
 
     private static Comparable<?> normalizeNumber(Comparable<?> value) {
-        // Normalize all numeric types to Double for consistent serialization
+        // Normalize numeric types to Double for consistent serialization
         // This ensures Integer(5) and Double(5.0) are treated the same in indexes
         if (value instanceof Number && !(value instanceof Double)) {
-            return ((Number) value).doubleValue();
+            double normalized = ((Number) value).doubleValue();
+            // ...but only where a double can hold the value exactly. Beyond 2^53 it cannot,
+            // and folding there maps distinct numbers onto one index key: consecutive longs
+            // around 8.7e17 are 128 apart as doubles, so ids closer than that become the same
+            // key, which makes a unique index reject a new id and a non-unique one return rows
+            // belonging to a different id.
+            if (isExactAsDouble((Number) value, normalized)) {
+                return normalized;
+            }
         }
         return value;
+    }
+
+    private static boolean isExactAsDouble(Number value, double normalized) {
+        if (value instanceof Integer || value instanceof Short
+            || value instanceof Byte || value instanceof Float) {
+            // every value of these types survives the widening unchanged
+            return true;
+        }
+
+        if (Double.isNaN(normalized) || Double.isInfinite(normalized)) {
+            return false;
+        }
+
+        // new BigDecimal(double) is the exact value of the double, so this compares the
+        // number against what the conversion actually produced
+        BigDecimal converted = new BigDecimal(normalized);
+        if (value instanceof Long) {
+            return converted.compareTo(BigDecimal.valueOf(value.longValue())) == 0;
+        }
+        if (value instanceof BigInteger) {
+            return converted.compareTo(new BigDecimal((BigInteger) value)) == 0;
+        }
+        if (value instanceof BigDecimal) {
+            return converted.compareTo((BigDecimal) value) == 0;
+        }
+        return false;
     }
 
     private void writeObject(ObjectOutputStream stream) throws IOException {
