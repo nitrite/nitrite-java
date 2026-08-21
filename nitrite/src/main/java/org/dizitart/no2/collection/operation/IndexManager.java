@@ -213,6 +213,10 @@ public class IndexManager implements AutoCloseable {
         IndexMeta meta = indexMetaMap.get(fields);
         if (meta != null && meta.getIndexDescriptor() != null) {
             meta.getIsDirty().set(dirty);
+            // put the meta back, otherwise the flag is only changed on the instance get()
+            // returned and the store never learns the entry has to be written. The marker is
+            // crash-recovery state, so both directions of it have to reach the disk.
+            indexMetaMap.put(fields, meta);
         }
     }
 
