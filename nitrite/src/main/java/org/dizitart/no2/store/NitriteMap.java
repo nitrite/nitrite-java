@@ -19,7 +19,9 @@ package org.dizitart.no2.store;
 import org.dizitart.no2.common.meta.Attributes;
 import org.dizitart.no2.common.meta.AttributesAware;
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.streams.BoundedStream;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.ValidationException;
 
 import static org.dizitart.no2.common.Constants.META_MAP_NAME;
 import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
@@ -193,6 +195,28 @@ public interface NitriteMap<Key, Value> extends AttributesAware, AutoCloseable {
      * @return a set view of the mappings contained in this map.
      */
     RecordStream<Pair<Key, Value>> entries();
+
+    /**
+     * Gets a {@link RecordStream} view of the mappings contained in this map,
+     * skipping the first {@code skipCount} entries of {@link #entries()}.
+     *
+     * <p>The default implementation iterates over {@link #entries()} and discards the
+     * skipped entries. A store whose backing structure can locate an entry by position
+     * should override this and seek instead, so that a paged read does not pay for the
+     * entries it skips.
+     *
+     * @param skipCount the number of leading entries to skip; must not be negative.
+     * @return a view of the mappings after the first {@code skipCount} entries.
+     */
+    default RecordStream<Pair<Key, Value>> entries(long skipCount) {
+        if (skipCount < 0) {
+            throw new ValidationException("skip count cannot be negative");
+        }
+        if (skipCount == 0) {
+            return entries();
+        }
+        return new BoundedStream<>(skipCount, Long.MAX_VALUE, entries());
+    }
 
     /**
      * Gets a reversed {@link RecordStream} view of the mappings contained in this map.

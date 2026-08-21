@@ -18,11 +18,15 @@ package org.dizitart.no2.mvstore;
 
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.ValidationException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.h2.mvstore.Cursor;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
+import org.h2.mvstore.RootReference;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -147,6 +151,61 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
                 return new Pair<>(entry.getKey(), entry.getValue());
             }
         };
+    }
+
+    @Override
+    public RecordStream<Pair<Key, Value>> entries(long skipCount) {
+        if (skipCount < 0) {
+            throw new ValidationException("skip count cannot be negative");
+        }
+        if (skipCount == 0) {
+            return entries();
+        }
+        return () -> {
+            // pin one root, so the offset and the scan that follows it see the same map
+            RootReference<Key, Value> rootReference = mvMap.flushAndGetRoot();
+            if (skipCount >= rootReference.root.getTotalCount()) {
+                return Collections.emptyIterator();
+            }
+
+            // MVMap keeps an entry count per page, so the key at a position is found in
+            // O(log n) without reading what is skipped. getKey() resolves against whatever
+            // root the map holds while it runs, so its answer counts as an offset into the
+            // pinned snapshot only if no other thread committed meanwhile - a commit always
+            // installs a new RootReference, so an unchanged one proves it did not. If one
+            // did, walk the snapshot instead: slower, but never a window from another tree.
+            Key fromKey = mvMap.getKey(skipCount);
+            Cursor<Key, Value> cursor = fromKey != null && mvMap.getRoot() == rootReference
+                ? mvMap.cursor(rootReference, fromKey, null, false)
+                : scanTo(rootReference, skipCount);
+
+            return new Iterator<Pair<Key, Value>>() {
+                @Override
+                public boolean hasNext() {
+                    return cursor.hasNext();
+                }
+
+                @Override
+                public Pair<Key, Value> next() {
+                    Key key = cursor.next();
+                    return new Pair<>(key, cursor.getValue());
+                }
+            };
+        };
+    }
+
+    /**
+     * Positions a cursor on the given snapshot by walking to {@code skipCount}. Deliberately
+     * not {@link Cursor#skip(long)}: skipping past the end leaves that cursor at the first
+     * entry instead of exhausting it, which would answer a page beyond the end with the start
+     * of the map.
+     */
+    private Cursor<Key, Value> scanTo(RootReference<Key, Value> rootReference, long skipCount) {
+        Cursor<Key, Value> cursor = mvMap.cursor(rootReference, null, null, false);
+        for (long i = 0; i < skipCount && cursor.hasNext(); i++) {
+            cursor.next();
+        }
+        return cursor;
     }
 
     @Override

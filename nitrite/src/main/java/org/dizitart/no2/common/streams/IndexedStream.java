@@ -32,9 +32,14 @@ import java.util.Set;
  */
 public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
     private final NitriteMap<NitriteId, Document> nitriteMap;
-    private final Set<NitriteId> nitriteIds;
+    private final Iterable<NitriteId> nitriteIds;
 
     public IndexedStream(Set<NitriteId> nitriteIds,
+                  NitriteMap<NitriteId, Document> nitriteMap) {
+        this((Iterable<NitriteId>) nitriteIds, nitriteMap);
+    }
+
+    public IndexedStream(Iterable<NitriteId> nitriteIds,
                   NitriteMap<NitriteId, Document> nitriteMap) {
         this.nitriteIds = nitriteIds;
         this.nitriteMap = nitriteMap;

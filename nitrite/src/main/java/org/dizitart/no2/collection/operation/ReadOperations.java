@@ -33,6 +33,7 @@ import org.dizitart.no2.store.NitriteMap;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -197,6 +198,11 @@ class ReadOperations {
         RecordStream<Pair<NitriteId, Document>> rawStream;
         RecordStream<Pair<NitriteId, Document>> indexSortedStream = null;
 
+        // the offset can be taken at the source, before any document is fetched, as long as
+        // nothing between the source and the bound stage drops or reorders records
+        long skip = findPlan.getSkip() == null ? 0 : findPlan.getSkip();
+        boolean skipApplied = false;
+
         if (!findPlan.getSubPlans().isEmpty()) {
             // or filters get all sub stream by finding suitable stream of all sub plans
             List<RecordStream<Pair<NitriteId, Document>>> subStreams = new ArrayList<>();
@@ -240,10 +246,26 @@ class ReadOperations {
                     indexedIdCount[0] = nitriteIds.size();
 
                     // create indexed stream from optimized filter
-                    rawStream = new IndexedStream(nitriteIds, nitriteMap);
+                    if (skip > 0 && canPushDownSkip(findPlan)) {
+                        // walking the id set is cheap, fetching a document is not, so drop the
+                        // skipped ids before they reach the map
+                        rawStream = new IndexedStream(skippedIds(nitriteIds, skip), nitriteMap);
+                        skipApplied = true;
+                    } else {
+                        rawStream = new IndexedStream(nitriteIds, nitriteMap);
+                    }
                 } else {
                     indexSortedStream = indexSortedStream(findPlan);
-                    rawStream = indexSortedStream != null ? indexSortedStream : nitriteMap.entries();
+                    if (indexSortedStream != null) {
+                        rawStream = indexSortedStream;
+                    } else if (skip > 0 && canPushDownSkip(findPlan)) {
+                        // let the store seek to the offset instead of reading and
+                        // deserializing everything in front of it
+                        rawStream = nitriteMap.entries(skip);
+                        skipApplied = true;
+                    } else {
+                        rawStream = nitriteMap.entries();
+                    }
                 }
             }
 
@@ -262,13 +284,37 @@ class ReadOperations {
                 rawStream = new SortedDocumentStream(findPlan, rawStream);
             }
 
-            if (findPlan.getLimit() != null || findPlan.getSkip() != null) {
+            if (findPlan.getLimit() != null || (findPlan.getSkip() != null && !skipApplied)) {
                 long limit = findPlan.getLimit() == null ? Long.MAX_VALUE : findPlan.getLimit();
-                long skip = findPlan.getSkip() == null ? 0 : findPlan.getSkip();
-                rawStream = new BoundedStream<>(skip, limit, rawStream);
+                rawStream = new BoundedStream<>(skipApplied ? 0 : skip, limit, rawStream);
             }
         }
 
         return rawStream;
+    }
+
+    /**
+     * Indicates whether the offset can be taken at the record source. A post-filter or a
+     * blocking sort between the source and the bound stage changes which records the skip
+     * removes, and an OR plan de-duplicates its concatenated sub-streams, so in those cases
+     * the skip has to stay in the bound stage and count result rows.
+     */
+    private boolean canPushDownSkip(FindPlan findPlan) {
+        return findPlan.getSubPlans().isEmpty()
+            && findPlan.getCollectionScanFilter() == null
+            && (findPlan.getBlockingSortOrder() == null || findPlan.getBlockingSortOrder().isEmpty());
+    }
+
+    /**
+     * A lazy view of {@code nitriteIds} without its first {@code skipCount} elements.
+     */
+    private static Iterable<NitriteId> skippedIds(Collection<NitriteId> nitriteIds, long skipCount) {
+        return () -> {
+            Iterator<NitriteId> iterator = nitriteIds.iterator();
+            for (long i = 0; i < skipCount && iterator.hasNext(); i++) {
+                iterator.next();
+            }
+            return iterator;
+        };
     }
 }
