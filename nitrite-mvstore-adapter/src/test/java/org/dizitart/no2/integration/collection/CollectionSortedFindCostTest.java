@@ -45,12 +45,13 @@ import static org.junit.Assert.assertTrue;
  * {@code orderBy(indexed).limit(20)} cost what draining the whole collection cost - and the
  * gap grows with document size, not just document count. Taking the sort keys from the index
  * removes the decode: over 2000 rows carrying a 150-element array the sorted page went from
- * ~37 ms to ~1 ms.
+ * ~115 ms to ~2 ms.
  *
  * @author Anindya Chatterjee
  */
 public class CollectionSortedFindCostTest {
     private static final int ROWS = 2000;
+    private static final int PAYLOAD = 150;
 
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
@@ -72,22 +73,28 @@ public class CollectionSortedFindCostTest {
 
     /**
      * The same query, the same row count, the same index - only the size of the documents
-     * differs. A sorted page that decodes every row pays for the payload of every row, so
-     * the fat collection costs many times the lean one. A sorted page that decodes only the
-     * rows it returns costs the same either way.
+     * differs. A sorted page that decodes every row pays for the payload of every row, so the
+     * fat collection costs many times the lean one. A sorted page that decodes only the row it
+     * returns costs about the same either way.
      * <p>
-     * Deliberately not "sorted page vs. full drain": both halves here are measured back to
-     * back under whatever load the machine is under, and the only variable between them is
-     * the thing that was broken.
+     * Both halves walk an index of identical size and shape, so that cost cancels; what does
+     * not cancel is the payload of the rows each one decodes. The page is deliberately one row
+     * rather than twenty: returning a fat document legitimately costs more than returning a
+     * lean one, and that difference is the floor of this ratio, so the fewer rows the page
+     * returns the more of the ratio is the {@link #ROWS} rows it should never have touched.
+     * <p>
+     * Deliberately not "sorted page vs. unsorted page", whose halves do not share the index
+     * walk, nor "sorted page vs. full drain", whose halves share nothing at all. Both halves
+     * here are measured back to back, under whatever load the machine is under.
      */
     @Test
     public void testSortedPageCostDoesNotFollowDocumentSize() {
         double lean = sortedPageCost("lean", 0);
-        double fat = sortedPageCost("fat", 150);
+        double fat = sortedPageCost("fat", PAYLOAD);
 
         assertTrue("a sorted page over fat documents took " + fat + "ms against " + lean
                 + "ms over lean ones, same row count - it is still decoding rows it discards",
-            fat < lean * 4);
+            fat < lean * 3);
     }
 
     private double sortedPageCost(String name, int payloadSize) {
@@ -106,7 +113,7 @@ public class CollectionSortedFindCostTest {
             collection.insert(document);
         }
 
-        FindOptions page = FindOptions.orderBy("seq", SortOrder.Descending).limit(20);
+        FindOptions page = FindOptions.orderBy("seq", SortOrder.Descending).limit(1);
         return timeOf(() -> {
             for (Document ignored : collection.find(ALL, page)) {
                 // force the fetch
