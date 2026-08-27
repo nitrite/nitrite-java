@@ -17,7 +17,17 @@
 package org.dizitart.no2.mvstore;
 
 
-import lombok.extern.slf4j.Slf4j;
+import static org.h2.mvstore.DataUtils.ERROR_BLOCK_NOT_FOUND;
+import static org.h2.mvstore.DataUtils.ERROR_CHUNK_NOT_FOUND;
+import static org.h2.mvstore.DataUtils.ERROR_FILE_CORRUPT;
+import static org.h2.mvstore.DataUtils.ERROR_READING_FAILED;
+import static org.h2.mvstore.DataUtils.ERROR_SERIALIZATION;
+import static org.h2.mvstore.DataUtils.ERROR_WRITING_FAILED;
+
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.BoundingBox;
@@ -31,17 +41,15 @@ import org.h2.mvstore.MVStore;
 import org.h2.mvstore.MVStoreException;
 import org.h2.mvstore.rtree.MVRTreeMap;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static org.h2.mvstore.DataUtils.*;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * @since 1.0
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 @Slf4j
 public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
+
     private MVStore mvStore;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
     private final Map<String, NitriteRTree<?, ?>> nitriteRTreeMapRegistry;
@@ -121,7 +129,22 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         nitriteRTreeMapRegistry.clear();
 
         if (getStoreConfig().autoCompact()) {
-           mvStore.close(-1);
+            // FIXME: this a a hacky workaround for https://github.com/h2database/h2database/issues/4286
+            //  and should be removed once mvstore releases the upstream bugfix (probably in version 2.4.241)
+            final Properties systemProperties = System.getProperties();
+            synchronized (systemProperties) {
+                final String originalCompactThreads = systemProperties.getProperty("h2.compactThreads");
+                try {
+                    systemProperties.setProperty("h2.compactThreads", "1");
+                    mvStore.close(-1);
+                } finally {
+                    if (originalCompactThreads == null) {
+                        systemProperties.remove("h2.compactThreads");
+                    } else {
+                        systemProperties.setProperty("h2.compactThreads", originalCompactThreads);
+                    }
+                }
+            }
         } else {
             mvStore.close();
         }

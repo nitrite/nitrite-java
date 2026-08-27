@@ -16,45 +16,56 @@
 
 package org.dizitart.no2.mvstore;
 
+import static org.dizitart.no2.common.util.ValidationUtils.notNull;
+
+import java.lang.ref.Cleaner;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
+
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.dizitart.no2.common.util.ValidationUtils.notNull;
-
 /**
- * @since 1.0
  * @author Anindya Chatterjee
+ * @since 1.0
  */
 class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
+
+    private static final Cleaner CLEANER = Cleaner.create();
+
     private final MVMap<Key, Value> mvMap;
     private final NitriteStore<?> nitriteStore;
     private final MVStore mvStore;
     private final AtomicBoolean droppedFlag;
     private final AtomicBoolean closedFlag;
+    private final Set<VersionUsage> versionUsages;
 
-    NitriteMVMap(MVMap<Key, Value> mvMap, NitriteStore<?> nitriteStore) {
+    NitriteMVMap(final MVMap<Key, Value> mvMap, final NitriteStore<?> nitriteStore) {
         this.mvMap = mvMap;
         this.nitriteStore = nitriteStore;
         this.mvStore = mvMap.getStore();
         this.closedFlag = new AtomicBoolean(false);
         this.droppedFlag = new AtomicBoolean(false);
+        this.versionUsages = ConcurrentHashMap.newKeySet();
     }
 
     @Override
-    public boolean containsKey(Key key) {
+    public boolean containsKey(final Key key) {
         return mvMap.containsKey(key);
     }
 
     @Override
-    public Value get(Key key) {
+    public Value get(final Key key) {
         return mvMap.get(key);
     }
 
@@ -65,7 +76,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void clear() {
-        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
         try {
             mvMap.clear();
             updateLastModifiedTime();
@@ -81,14 +92,14 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Value> values() {
-        return RecordStream.fromIterable(mvMap.values());
+        return () -> versionedIterator(() -> mvMap.values().iterator());
     }
 
     @Override
-    public Value remove(Key key) {
-        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+    public Value remove(final Key key) {
+        final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
         try {
-            Value value = mvMap.remove(key);
+            final Value value = mvMap.remove(key);
             updateLastModifiedTime();
             return value;
         } finally {
@@ -98,13 +109,13 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Key> keys() {
-        return RecordStream.fromIterable(mvMap.keySet());
+        return () -> versionedIterator(() -> mvMap.keySet().iterator());
     }
 
     @Override
-    public void put(Key key, Value value) {
+    public void put(final Key key, final Value value) {
         notNull(value, "value cannot be null");
-        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
         try {
             mvMap.put(key, value);
             updateLastModifiedTime();
@@ -119,11 +130,11 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public Value putIfAbsent(Key key, Value value) {
+    public Value putIfAbsent(final Key key, final Value value) {
         notNull(value, "value cannot be null");
-        MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+        final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
         try {
-            Value v = mvMap.putIfAbsent(key, value);
+            final Value v = mvMap.putIfAbsent(key, value);
             updateLastModifiedTime();
             return v;
         } finally {
@@ -133,8 +144,8 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Pair<Key, Value>> entries() {
-        return () -> new Iterator<>() {
-            final Iterator<Map.Entry<Key, Value>> entryIterator = mvMap.entrySet().iterator();
+        return () -> versionedIterator(() -> new Iterator<>() {
+            private final Iterator<Map.Entry<Key, Value>> entryIterator = mvMap.entrySet().iterator();
 
             @Override
             public boolean hasNext() {
@@ -143,15 +154,19 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
             @Override
             public Pair<Key, Value> next() {
-                Map.Entry<Key, Value> entry = entryIterator.next();
+                final Map.Entry<Key, Value> entry = entryIterator.next();
                 return new Pair<>(entry.getKey(), entry.getValue());
             }
-        };
+        });
     }
 
     @Override
     public RecordStream<Pair<Key, Value>> reversedEntries() {
-        return () -> new ReverseIterator<>(mvMap);
+        return () -> versionedIterator(() -> new ReverseIterator<>(mvMap));
+    }
+
+    private <Element> Iterator<Element> versionedIterator(final Supplier<Iterator<Element>> iteratorSupplier) {
+        return new VersionedIterator<>(mvStore, iteratorSupplier, versionUsages);
     }
 
     @Override
@@ -165,22 +180,22 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     }
 
     @Override
-    public Key higherKey(Key key) {
+    public Key higherKey(final Key key) {
         return mvMap.higherKey(key);
     }
 
     @Override
-    public Key ceilingKey(Key key) {
+    public Key ceilingKey(final Key key) {
         return mvMap.ceilingKey(key);
     }
 
     @Override
-    public Key lowerKey(Key key) {
+    public Key lowerKey(final Key key) {
         return mvMap.lowerKey(key);
     }
 
     @Override
-    public Key floorKey(Key key) {
+    public Key floorKey(final Key key) {
         return mvMap.floorKey(key);
     }
 
@@ -194,11 +209,12 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
         if (!droppedFlag.get()) {
             droppedFlag.compareAndSet(false, true);
             closedFlag.compareAndSet(false, true);
+            releaseVersionUsages();
 
-            MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
+            final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
-                nitriteStore.closeMap(getName());
-                nitriteStore.removeMap(getName());
+                nitriteStore.closeMap(mvMap.getName());
+                nitriteStore.removeMap(mvMap.getName());
             } finally {
                 mvStore.deregisterVersionUsage(txCounter);
             }
@@ -214,12 +230,82 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
     public void close() {
         if (!closedFlag.get() && !droppedFlag.get()) {
             closedFlag.compareAndSet(false, true);
-            nitriteStore.closeMap(getName());
+            releaseVersionUsages();
+            nitriteStore.closeMap(mvMap.getName());
         }
     }
 
     @Override
     public boolean isClosed() {
         return closedFlag.get();
+    }
+
+    private void releaseVersionUsages() {
+        for (final VersionUsage versionUsage : versionUsages) {
+            versionUsage.release();
+        }
+    }
+
+    private static class VersionedIterator<Element> implements Iterator<Element> {
+
+        private final Iterator<Element> iterator;
+        private final Cleaner.Cleanable cleanable;
+        private final VersionUsage versionUsage;
+        private boolean exhausted;
+
+        private VersionedIterator(final MVStore mvStore,
+                                  final Supplier<Iterator<Element>> iteratorSupplier,
+                                  final Set<VersionUsage> versionUsages) {
+
+            versionUsage = new VersionUsage(mvStore, mvStore.registerVersionUsage(), versionUsages);
+            versionUsages.add(versionUsage);
+
+            try {
+                this.iterator = iteratorSupplier.get();
+                this.cleanable = CLEANER.register(this, versionUsage::release);
+            } catch (final RuntimeException | Error e) {
+                versionUsage.release();
+                throw e;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (exhausted) {
+                return false;
+            }
+            ensureOpen();
+            try {
+                final boolean hasNext = iterator.hasNext();
+                if (!hasNext) {
+                    exhausted = true;
+                    cleanable.clean();
+                }
+                return hasNext;
+            } catch (final RuntimeException | Error e) {
+                cleanable.clean();
+                throw e;
+            }
+        }
+
+        @Override
+        public Element next() {
+            if (exhausted) {
+                throw new NoSuchElementException();
+            }
+            ensureOpen();
+            try {
+                return iterator.next();
+            } catch (final RuntimeException | Error e) {
+                cleanable.clean();
+                throw e;
+            }
+        }
+
+        private void ensureOpen() {
+            if (versionUsage.isReleased()) {
+                throw new NitriteIOException("MVStore is closed");
+            }
+        }
     }
 }

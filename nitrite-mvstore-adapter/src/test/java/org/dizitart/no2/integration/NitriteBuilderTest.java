@@ -17,6 +17,26 @@
 
 package org.dizitart.no2.integration;
 
+import static org.dizitart.no2.collection.Document.createDocument;
+import static org.dizitart.no2.common.module.NitriteModule.module;
+import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
+import static org.dizitart.no2.integration.TestUtil.createDb;
+import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.LinkedHashSet;
+import java.util.Random;
+
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.NitriteBuilder;
 import org.dizitart.no2.NitriteConfig;
@@ -44,22 +64,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.LinkedHashSet;
-import java.util.Random;
-
-import static org.dizitart.no2.collection.Document.createDocument;
-import static org.dizitart.no2.common.module.NitriteModule.module;
-import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
-import static org.dizitart.no2.integration.TestUtil.createDb;
-import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
-import static org.junit.Assert.*;
 
 /**
  * @author Anindya Chatterjee.
@@ -91,7 +95,7 @@ public class NitriteBuilderTest {
             TestUtil.deleteDb(filePath);
         }
 
-        if (fakeDb != null && !fakeDb.isClosed()){
+        if (fakeDb != null && !fakeDb.isClosed()) {
             fakeDb.close();
         }
 
@@ -119,7 +123,7 @@ public class NitriteBuilderTest {
         assertEquals(storeConfig.autoCommitBufferSize(), 1);
         assertEquals(config.findIndexer("Custom").getClass(), CustomIndexer.class);
         assertFalse(storeConfig.autoCommit());
-        assertFalse(storeConfig.autoCompact());
+        assertTrue(storeConfig.autoCompact());
         assertTrue(storeConfig.compress());
         assertFalse(storeConfig.isReadOnly());
         assertFalse(storeConfig.isInMemory());
@@ -169,8 +173,8 @@ public class NitriteBuilderTest {
     public void testConfigWithFileNull() {
         File file = null;
         MVStoreModule module = MVStoreModule.withConfig()
-                .filePath(file)
-                .build();
+            .filePath(file)
+            .build();
 
         db = Nitrite.builder().loadModule(module).openOrCreate();
         StoreConfig storeConfig = db.getStore().getStoreConfig();
