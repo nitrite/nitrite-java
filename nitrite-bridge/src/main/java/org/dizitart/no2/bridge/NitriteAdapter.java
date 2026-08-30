@@ -1,6 +1,7 @@
 package org.dizitart.no2.bridge;
 
 import org.dizitart.dbinspect.AdapterCapabilities;
+import org.dizitart.dbinspect.AdapterTransaction;
 import org.dizitart.dbinspect.BridgeAdapter;
 import org.dizitart.dbinspect.BridgeErrorKind;
 import org.dizitart.dbinspect.BridgeException;
@@ -23,6 +24,8 @@ import org.dizitart.no2.common.SortOrder;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.Filter;
 import org.dizitart.no2.repository.ObjectRepository;
+import org.dizitart.no2.transaction.Session;
+import org.dizitart.no2.transaction.Transaction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,6 +78,15 @@ public final class NitriteAdapter implements BridgeAdapter {
     private final boolean allowRegex;
     private final AdapterCapabilities capabilities;
 
+    /**
+     * The open transaction this adapter is scoped to, or null on the one that is not.
+     *
+     * <p>See {@link #beginTransaction()}: a transaction is a second adapter over the same database
+     * rather than a mode on this one, so that one connection's uncommitted documents can never
+     * reach another connection's reads.
+     */
+    private final Transaction transaction;
+
     private NitriteAdapter(Builder builder) {
         this.db = builder.db;
         this.id = builder.id;
@@ -82,6 +94,7 @@ public final class NitriteAdapter implements BridgeAdapter {
         this.repositories = Collections.unmodifiableList(new ArrayList<>(builder.repositories));
         this.sampleSize = builder.sampleSize;
         this.allowRegex = builder.allowRegex;
+        this.transaction = null;
 
         List<String> filterOps = new ArrayList<>(FilterDsl.FILTER_OPS);
         if (builder.allowRegex) {
@@ -95,12 +108,45 @@ public final class NitriteAdapter implements BridgeAdapter {
                         // Off unless the embedding developer turned it on for this adapter
                         // (threat model rule 5).
                         .edit(builder.allowWrite)
+                        // Not an opt-in ({@code docs/PROTOCOL.md} §3.1): Nitrite's transaction is
+                        // implemented above the store, so it is available on every engine this
+                        // adapter can be pointed at — MVStore, RocksDB and in-memory alike.
+                        // `allowWrite` is the permission; this reports what the engine can undo.
+                        .transactions(builder.allowWrite)
                         .snapshot(builder.allowSnapshot)
                         // Not an opt-in: `queryPage` already showed the first 64 KB of this very
                         // cell, and `docs/PROTOCOL.md` §2 has always promised the rest on request.
                         // A document is addressed by `_id`, which every row has.
                         .blob(true)
                         .filterOps(filterOps)
+                        .build();
+    }
+
+    /**
+     * The transactional twin of {@code parent}, resolving stores through {@code transaction}.
+     *
+     * <p>Every capability but {@code transactions} is carried over: a gate that changed inside a
+     * transaction would be a second, invisible permission model. That one drops, because Nitrite
+     * does not nest one.
+     */
+    private NitriteAdapter(NitriteAdapter parent, Transaction transaction) {
+        this.db = parent.db;
+        this.id = parent.id;
+        this.displayName = parent.displayName;
+        this.repositories = parent.repositories;
+        this.sampleSize = parent.sampleSize;
+        this.allowRegex = parent.allowRegex;
+        this.transaction = transaction;
+
+        AdapterCapabilities from = parent.capabilities;
+        this.capabilities =
+                AdapterCapabilities.builder(from.query())
+                        .watch(from.watch(), from.watchScope())
+                        .edit(from.edit())
+                        .transactions(false)
+                        .snapshot(from.snapshot())
+                        .blob(from.blob())
+                        .filterOps(from.filterOps())
                         .build();
     }
 
@@ -139,20 +185,22 @@ public final class NitriteAdapter implements BridgeAdapter {
         return capabilities;
     }
 
+    /**
+     * The stores, counted through {@link #resolve} rather than off {@code db} directly.
+     *
+     * <p>Which matters inside a transaction: a count taken from the primary collection would show
+     * the person a total that does not include the rows they just staged, and §3.1's
+     * read-your-own-writes covers {@code listStores} as much as it covers a page.
+     */
     @Override
     public List<StoreInfo> listStores() {
         List<StoreInfo> stores = new ArrayList<>();
         for (String name : db.listCollectionNames()) {
-            stores.add(new StoreInfo(name, "collection", db.getCollection(name).size()));
+            stores.add(new StoreInfo(name, "collection", resolve(name).size()));
         }
         for (ObjectRepository<?> repository : repositories) {
-            NitriteCollection collection = repository.getDocumentCollection();
-            stores.add(
-                    new StoreInfo(
-                            collection.getName(),
-                            "repository",
-                            collection.size(),
-                            keyOf(collection.getName())));
+            String name = repository.getDocumentCollection().getName();
+            stores.add(new StoreInfo(name, "repository", resolve(name).size(), keyOf(name)));
         }
         return stores;
     }
@@ -251,6 +299,68 @@ public final class NitriteAdapter implements BridgeAdapter {
      * One row, addressed by {@code _id} — the identity {@code docs/PROTOCOL.md} §3 gives every
      * Nitrite implementation.
      */
+    /**
+     * Opens one Nitrite transaction ({@code docs/PROTOCOL.md} §3.1).
+     *
+     * <p>Nitrite's transaction lives above the storage engine — a {@code TransactionStore} buffers
+     * the writes and a journal replays them on commit — so this works identically on MVStore,
+     * RocksDB and in memory. Nothing here re-implements either half; the session and the
+     * transaction are the engine's own.
+     *
+     * <p><b>Not everything Nitrite does is transactional</b>, and the {@link Transaction}
+     * javadoc is the list: creating or dropping an index, clearing a collection and dropping one
+     * are auto-committed. The protocol's writes are insert, update and delete, none of which is on
+     * that list, so nothing this bridge can be asked to do falls through — but an adapter that grows
+     * a sixth method must check that list before it does.
+     */
+    @Override
+    public AdapterTransaction beginTransaction() {
+        Session session = db.createSession();
+        Transaction started;
+        try {
+            started = session.beginTransaction();
+        } catch (RuntimeException failure) {
+            session.close();
+            throw new BridgeException(
+                    BridgeErrorKind.ADAPTER,
+                    "the database would not begin a transaction",
+                    failure.toString());
+        }
+
+        NitriteAdapter scoped = new NitriteAdapter(this, started);
+        return new AdapterTransaction() {
+            @Override
+            public BridgeAdapter adapter() {
+                return scoped;
+            }
+
+            @Override
+            public void commit() {
+                try {
+                    started.commit();
+                } catch (RuntimeException failure) {
+                    throw new BridgeException(
+                            BridgeErrorKind.ADAPTER,
+                            "the database refused the commit",
+                            failure.toString());
+                } finally {
+                    // Closing a session rolls back anything still open in it, so this is safe on
+                    // both paths and is the only thing that releases the transactional store.
+                    session.close();
+                }
+            }
+
+            @Override
+            public void rollback() {
+                try {
+                    started.rollback();
+                } finally {
+                    session.close();
+                }
+            }
+        };
+    }
+
     @Override
     public WriteResult write(WriteRequest request) {
         NitriteCollection collection = resolve(request.store());
@@ -382,11 +492,28 @@ public final class NitriteAdapter implements BridgeAdapter {
         for (ObjectRepository<?> repository : repositories) {
             NitriteCollection collection = repository.getDocumentCollection();
             if (collection.getName().equals(store)) {
-                return collection;
+                if (transaction == null) {
+                    return collection;
+                }
+                // By type, because that is the only handle Nitrite opens a repository by — and it
+                // has to be the transaction's own, or a read would miss the writes staged beside
+                // it and a write would land outside the transaction entirely.
+                //
+                // The keyed overload is not the same call with a null key: it looks the repository
+                // up under `entityName+key` and refuses when that name does not exist, so an
+                // unkeyed repository has to go through the one-argument form.
+                String key = keyOf(collection.getName());
+                ObjectRepository<?> scoped =
+                        key == null
+                                ? transaction.getRepository(repository.getType())
+                                : transaction.getRepository(repository.getType(), key);
+                return scoped.getDocumentCollection();
             }
         }
         if (db.listCollectionNames().contains(store)) {
-            return db.getCollection(store);
+            return transaction == null
+                    ? db.getCollection(store)
+                    : transaction.getCollection(store);
         }
         throw new BridgeException(BridgeErrorKind.BAD_REQUEST, "unknown store");
     }
