@@ -20,19 +20,22 @@
 
     <!--
         NOT listed in the parent's <modules> on purpose, and it is a sequencing fact rather than
-        an oversight: dbinspect-bridge is not on Maven Central until Fanlight M11, so a clean
+        an oversight: dbinspect-bridge 0.1.0 is released but not yet on Maven Central, so a clean
         checkout of nitrite-java cannot resolve this module and the whole reactor would fail with
         it. Build it on its own:
 
             mvn -f nitrite-bridge/pom.xml test
 
         with dbinspect-bridge installed locally (mvn install in dbinspect/jvm/dbinspect-bridge).
-        Exactly the situation nitrite-flutter's packages/nitrite_bridge is in, for the same reason.
+
+        Put this module back in <modules> the day 0.1.0 appears on Central — nitrite-flutter's
+        packages/nitrite_bridge and nitrite-rust's nitrite-bridge were in exactly this situation
+        and both rejoined their builds when pub.dev and crates.io got the core.
     -->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dbinspect.version>0.1.0-SNAPSHOT</dbinspect.version>
+        <dbinspect.version>0.1.0</dbinspect.version>
 
         <!--
             Pinned here rather than inherited, because this module is deliberately outside the
