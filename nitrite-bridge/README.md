@@ -8,6 +8,26 @@ release guard are in `org.dizitart:dbinspect-bridge`, which knows about no datab
 JVM developer inspecting an H2, MapDB or JDBC database takes that artifact and writes their own
 adapter, and nothing about that path routes through a Nitrite repository.
 
+## Install
+
+Keep it out of the artifact you ship — see the next section for why.
+
+```xml
+<dependency>
+    <groupId>org.dizitart</groupId>
+    <artifactId>nitrite-bridge</artifactId>
+    <version>5.2.0</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+```kotlin
+// Android
+debugImplementation("org.dizitart:nitrite-bridge:5.2.0")
+```
+
+It pulls `org.dizitart:dbinspect-bridge` in with it.
+
 ```java
 BridgeServer bridge = DbInspect.start(
     DbInspect.options("my_app", List.of(
@@ -69,14 +89,14 @@ listed and unopenable.
 
 ## Building it
 
-`dbinspect-bridge` is not on Maven Central yet, so this module is deliberately **not** in
-`nitrite-java`'s `<modules>` — a clean checkout could not resolve it and the whole reactor would
-fail. Install the core, then build this on its own:
+An ordinary reactor module since `org.dizitart:dbinspect-bridge 0.1.0` reached Maven Central:
 
 ```bash
-mvn -f <dbinspect>/jvm/dbinspect-bridge/pom.xml install
 mvn -f nitrite-bridge/pom.xml test
 ```
+
+It was held out of `nitrite-java`'s `<modules>` until then, because a clean checkout could not
+resolve the core and the whole reactor failed with it.
 
 ## Examples
 
