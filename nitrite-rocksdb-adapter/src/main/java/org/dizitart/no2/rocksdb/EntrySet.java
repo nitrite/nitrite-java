@@ -1,5 +1,6 @@
 package org.dizitart.no2.rocksdb;
 
+import org.dizitart.no2.common.streams.SkippableIterator;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.rocksdb.formatter.ObjectFormatter;
 import org.rocksdb.*;
@@ -34,7 +35,7 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
         return new EntryIterator();
     }
 
-    private class EntryIterator implements Iterator<Pair<K, V>> {
+    private class EntryIterator implements Iterator<Pair<K, V>>, SkippableIterator {
         private final RocksIterator rawEntryIterator;
 
         public EntryIterator() {
@@ -62,6 +63,26 @@ class EntrySet<K, V> implements Iterable<Pair<K, V>> {
                 rawEntryIterator.close();
             }
             return result;
+        }
+
+        /**
+         * RocksDB has no seek-by-index, so this still steps the iterator once per skipped record -
+         * but it steps it natively and never calls {@code value()} or the formatter. The decode of
+         * a document is what a skipped row actually costs; advancing past one is a memcmp inside
+         * the SST block the iterator is already positioned on.
+         */
+        @Override
+        public long skip(long count) {
+            long skipped = 0;
+            while (skipped < count && rawEntryIterator.isOwningHandle() && rawEntryIterator.isValid()) {
+                if (reverse) {
+                    rawEntryIterator.prev();
+                } else {
+                    rawEntryIterator.next();
+                }
+                skipped++;
+            }
+            return skipped;
         }
 
         @Override

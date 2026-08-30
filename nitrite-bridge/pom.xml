@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.dizitart</groupId>
+        <artifactId>nitrite-java</artifactId>
+        <version>5.2.0</version>
+    </parent>
+
+    <artifactId>nitrite-bridge</artifactId>
+    <packaging>jar</packaging>
+
+    <name>Nitrite dbinspect Adapter</name>
+    <description>
+        Inspect a running Nitrite database from a desktop client. This artifact is the Nitrite
+        adapter only; the wire protocol, pairing and transport are in the engine-neutral
+        org.dizitart:dbinspect-bridge, which knows about no database at all.
+    </description>
+
+    <!--
+        NOT listed in the parent's <modules> on purpose, and it is a sequencing fact rather than
+        an oversight: dbinspect-bridge is not on Maven Central until Fanlight M11, so a clean
+        checkout of nitrite-java cannot resolve this module and the whole reactor would fail with
+        it. Build it on its own:
+
+            mvn -f nitrite-bridge/pom.xml test
+
+        with dbinspect-bridge installed locally (mvn install in dbinspect/jvm/dbinspect-bridge).
+        Exactly the situation nitrite-flutter's packages/nitrite_bridge is in, for the same reason.
+    -->
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <dbinspect.version>0.1.0-SNAPSHOT</dbinspect.version>
+
+        <!--
+            Pinned here rather than inherited, because this module is deliberately outside the
+            reactor and its POM has to stand on its own once installed or published. From 5.0.0
+            the released parent POM is flattened: it carries no <dependencyManagement>, so a
+            consumer reading this POM cannot resolve a version this module left to the parent, and
+            the whole artifact resolves as "invalid POM, transitive dependencies not available" —
+            which silently drops dbinspect-bridge off the example's classpath rather than failing
+            loudly. Test scope, so none of it reaches a consumer's own classpath.
+        -->
+        <junit.version>4.13.2</junit.version>
+        <log4j.version>2.26.1</log4j.version>
+        <commons-io.version>2.22.0</commons-io.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.dizitart</groupId>
+                <artifactId>nitrite-bom</artifactId>
+                <version>${project.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>dbinspect-bridge</artifactId>
+            <version>${dbinspect.version}</version>
+        </dependency>
+
+        <!--
+            provided, not compile: an application that wants to inspect its Nitrite database
+            already has Nitrite, and this artifact must not pin which version that is.
+        -->
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!--
+            Both storage adapters, because "MVStore- and RocksDB-backed databases browse
+            correctly" is an acceptance criterion and neither is exercised by the in-memory store.
+        -->
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-mvstore-adapter</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.dizitart</groupId>
+            <artifactId>nitrite-rocksdb-adapter</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>${commons-io.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!--
+                        Surefire turns assertions on by default; an application embedding this
+                        bridge does not. That difference is not academic — it is exactly what hid
+                        a native crash in the RocksDB iterator, which under -ea surfaced as a
+                        caught AssertionError and without it as a SIGSEGV. These tests run the way
+                        the artifact ships.
+                    -->
+                    <enableAssertions>false</enableAssertions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <!-- No lombok here, so there is nothing delomboked to point javadoc at. -->
+                    <sourcepath>${project.basedir}/src/main/java</sourcepath>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+            </plugin>
+            <!--
+                Native Android is a first-class target of this artifact, so the same API-level
+                check the other pure-Java modules run applies here too.
+            -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>animal-sniffer-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive combine.children="append">
+                        <manifestEntries>
+                            <Automatic-Module-Name>org.dizitart.no2.bridge</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

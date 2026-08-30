@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        mDNS only, and only in the debug variant. NsdManager needs a held multicast lock to see
+        anything on most handsets, and the lock needs these two. adb forward is the primary path
+        on Android and needs none of it, so a developer who never turns mDNS on loses nothing.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+</manifest>
