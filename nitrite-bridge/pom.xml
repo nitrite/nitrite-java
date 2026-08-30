@@ -19,18 +19,11 @@
     </description>
 
     <!--
-        NOT listed in the parent's <modules> on purpose, and it is a sequencing fact rather than
-        an oversight: dbinspect-bridge 0.1.0 is released but not yet on Maven Central, so a clean
-        checkout of nitrite-java cannot resolve this module and the whole reactor would fail with
-        it. Build it on its own:
-
-            mvn -f nitrite-bridge/pom.xml test
-
-        with dbinspect-bridge installed locally (mvn install in dbinspect/jvm/dbinspect-bridge).
-
-        Put this module back in <modules> the day 0.1.0 appears on Central — nitrite-flutter's
-        packages/nitrite_bridge and nitrite-rust's nitrite-bridge were in exactly this situation
-        and both rejoined their builds when pub.dev and crates.io got the core.
+        A reactor module since org.dizitart:dbinspect-bridge 0.1.0 reached Maven Central. It was
+        held out of the parent's <modules> until then because a clean checkout could not resolve
+        that dependency and the whole reactor would have failed with it — the same sequencing
+        nitrite-flutter's packages/nitrite_bridge and nitrite-rust's nitrite-bridge were in, and
+        both rejoined their builds when pub.dev and crates.io got the core.
     -->
 
     <properties>

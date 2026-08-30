@@ -30,6 +30,11 @@
             </dependency>
             <dependency>
                 <groupId>org.dizitart</groupId>
+                <artifactId>nitrite-bridge</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.dizitart</groupId>
                 <artifactId>nitrite-jackson-mapper</artifactId>
                 <version>${project.version}</version>
             </dependency>
