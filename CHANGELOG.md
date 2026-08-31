@@ -1,3 +1,27 @@
+## Release 5.3.0 - Aug 31, 2026
+
+### Issue Fixes
+
+- **MVStore no longer grows without bound under repeated updates** ([#1284](https://github.com/nitrite/nitrite-java/issues/1284))
+  - Updating a document leaves its old page obsolete, so a store written to far more often than it grows accumulates chunks that are mostly dead. `autoCompactFillRate(0)` had disabled reclamation since [#41](https://github.com/nitrite/nitrite-java/issues/41), and the file climbed while the live data stayed small - a reported ~800MB around 100 live documents.
+  - [#41](https://github.com/nitrite/nitrite-java/issues/41) was a cursor reading a chunk that compaction had already reclaimed (`Chunk 162 no longer exists`), which is why compaction was turned off rather than fixed. Every iterator and cursor now registers an MVStore version for its lifetime, so chunks it is reading cannot be collected underneath it, and compaction is safe to enable again. Abandoned iterators are released by a `Cleaner` and by `close()`/`drop()` on the map.
+  - New `MVStoreModuleBuilder.autoCompact`, **defaulting to `true`**. Set it `false` for the previous behaviour.
+  - **Reclamation on close is guaranteed; reclamation while running is not.** `close()` compacts synchronously and always shrinks the file. MVStore's background compaction runs on a one-second tick and attempts its work under a *try*-lock, so a writer holding the store lock makes it skip that round: how much a long-running application gets depends on its idle time and on how many cores are available to schedule the thread on. An application that holds the database open for months should not rely on the background half alone.
+  - Measured over 25 live documents and 100k updates: the file held at ~213KB against 299KB and climbing, and `close()` left 57KB against 299KB.
+  - `close(-1)` is pinned to a single compaction thread for now, working around [h2database/h2database#4286](https://github.com/h2database/h2database/issues/4286), where parallel compaction races on page references in 2.4.240. It is guarded by a private lock rather than the `System.getProperties()` monitor, which would have stalled every `System.getProperty` call in the JVM for the length of a compaction.
+
+- **Index keys normalize to double only where the conversion is exact** ([#1282](https://github.com/nitrite/nitrite-java/pull/1282))
+  - `DBValue` folded every number to a double before using it as an index key. That is what makes `Integer(5)` and `Double(5.0)` the same key ([#178](https://github.com/nitrite/nitrite-java/issues/178)), which matters on stores that compare the encoded key rather than calling `compareTo` - the RocksDB adapter is one.
+  - A double stops stepping by one above 2^53. Around 8.7e17 the nearest doubles are 128 apart, so ids closer than that folded onto one key: a unique index rejected an id it had never seen, and a non-unique lookup returned rows belonging to a different id. Snowflake ids, TSIDs and ULID-style identifiers all live there.
+  - The fold now applies only where the value survives it. `Integer`, `Short`, `Byte` and `Float` always do; `Long` is checked by casting the double back, guarded by a range test, because `Long.MAX_VALUE`'s double rounds up to 2^63 and the cast back saturates onto `MAX_VALUE` again. `BigInteger` and `BigDecimal` are compared against the exact value of the double they produce.
+  - Cross-type equality is unchanged for every value a double holds, which is the range [#178](https://github.com/nitrite/nitrite-java/issues/178) is about.
+  - **Behaviour change:** a `Long` and a `BigInteger` holding the same value above 2^53 are no longer the same key on a byte-comparing store. They only matched before because both had been rounded onto the same double - the same rounding that would equally have matched a *different* id. An index built by an earlier version over such values holds the folded keys, those entries were already colliding, and it should be rebuilt.
+
+### Improvements
+
+- Paging coverage for the plan shapes a source-level skip has to decline - an `or` plan, a collection with removals, and an indexed filter ordered by that same index. From [#1283](https://github.com/nitrite/nitrite-java/pull/1283), which proposed pushing the offset down per plan; the skip had already landed by capability in 5.1.0/5.2.0, but those shapes are worth holding because getting them wrong returns the wrong rows rather than merely slowly.
+
+
 ## Release 5.2.0 - Aug 30, 2026
 
 ### New Features
