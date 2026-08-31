@@ -38,8 +38,6 @@ import org.h2.mvstore.rtree.MVRTreeMap;
  */
 class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<Key, Value> {
 
-    private static final Cleaner CLEANER = Cleaner.create();
-
     private final MVRTreeMap<Key> mvMap;
     private final NitriteStore<?> nitriteStore;
     private final MVStore mvStore;
@@ -148,7 +146,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
 
             try {
                 treeCursor = cursorSupplier.get();
-                cleanable = CLEANER.register(this, versionUsage::release);
+                cleanable = VersionUsage.CLEANER.register(this, versionUsage::release);
             } catch (final RuntimeException | Error e) {
                 versionUsage.release();
                 throw e;

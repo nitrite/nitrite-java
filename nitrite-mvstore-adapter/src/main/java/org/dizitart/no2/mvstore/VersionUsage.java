@@ -16,6 +16,7 @@
 
 package org.dizitart.no2.mvstore;
 
+import java.lang.ref.Cleaner;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -25,6 +26,12 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 class VersionUsage {
+
+    /**
+     * Shared by every iterator and cursor in the adapter - one daemon thread is enough to release
+     * the versions of iterators that were abandoned rather than drained.
+     */
+    static final Cleaner CLEANER = Cleaner.create();
 
     private final AtomicBoolean released = new AtomicBoolean(false);
 

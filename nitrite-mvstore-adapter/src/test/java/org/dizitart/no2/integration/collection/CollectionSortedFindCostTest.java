@@ -39,7 +39,6 @@ import static org.dizitart.no2.integration.TestUtil.deleteDb;
 import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * The cost half of {@link CollectionSortedFindTest}, which needs a store that actually
@@ -51,28 +50,19 @@ import static org.junit.Assert.assertTrue;
  * removes the decode: over 2000 rows carrying a 150-element array the sorted page went from
  * ~115 ms to ~2 ms.
  * <p>
- * <b>Both halves of every comparison here are the same collection shape sorted two different
- * ways</b>, never a fat collection against a lean one. That earlier framing assumed the index
- * walk cancelled between the halves, and it does not: the fat collection's index lives in a
- * file two orders of magnitude larger, so walking it costs more I/O for reasons that have
- * nothing to do with decoding. Measured cold on macOS, a fat sorted page cost 4.6x a lean one
- * <i>with the optimisation present and working</i> - through a 3x threshold, which is why this
- * guard failed on that runner and nowhere else.
+ * <b>The guard here has no clock in it.</b> Two wall-clock versions of it were tried and both
+ * failed on CI while the optimisation was present and working - the first comparing fat rows
+ * against lean ones on macOS, the second comparing an indexed sort against an unindexed one on
+ * Ubuntu, where the indexed half measured <i>slower</i> than its control. A shared runner does
+ * not hold a millisecond ratio still, and no threshold rescues a measurement that inverts. The
+ * decision the optimisation actually makes is recorded in the {@link FindPlan}, so that is what
+ * is asserted.
  *
  * @author Anindya Chatterjee
  */
 public class CollectionSortedFindCostTest {
     private static final int ROWS = 2000;
     private static final int PAYLOAD = 150;
-
-    /**
-     * Fresh collections per sample, because the cost under test is only visible on a cold one.
-     * Re-querying a collection that was just written measures a cache: over these same 2000 fat
-     * rows a blocking sort cost 353 ms, then 83 ms, then 0.8 ms. The old guard warmed once and
-     * timed the three runs after it, so it was comparing two numbers from which the decode -
-     * the whole subject of the test - had already been cached away.
-     */
-    private static final int SAMPLES = 3;
 
     private final String fileName = getRandomTempDbFile();
     private Nitrite db;
@@ -119,65 +109,6 @@ public class CollectionSortedFindCostTest {
             FindOptions.orderBy("unindexed", SortOrder.Descending).limit(1));
         assertNull("a sort on an unindexed field claims an index to read its order from",
             blocking.getFindPlan().getSortIndexDescriptor());
-    }
-
-    /**
-     * The same query, over the same rows, ordered by an indexed field and by an unindexed one.
-     * Only the second can be answered from an index; the first is what this optimisation
-     * exists to make cheap. Everything else - row count, document size, the file, the single
-     * row returned - is identical between the halves, so what is left is the decode of the
-     * {@link #ROWS} rows neither query should have returned.
-     * <p>
-     * <b>Cold, and the best of {@link #SAMPLES}.</b> Each half is measured once on a collection
-     * no query has touched, because a second look at the same collection measures a cache
-     * rather than a decode. That makes any single sample noisy, so each half is sampled on
-     * several fresh collections and the quickest is kept: contention can only ever add time, so
-     * the quickest run is the one least contaminated by the machine.
-     * <p>
-     * The threshold is 2x against a measured 4.5x on the worst run of a laptop under load and
-     * 45x on the best. A regression does not narrow this ratio - it removes it, because the two
-     * halves become the same code path and the ratio becomes 1.
-     */
-    @Test
-    public void testSortedPageDoesNotDecodeTheRowsItDiscards() {
-        warmTheQueryPath();
-
-        double indexed = Double.MAX_VALUE;
-        double blocking = Double.MAX_VALUE;
-        for (int sample = 0; sample < SAMPLES; sample++) {
-            // Alternated so that any drift over the run lands on both halves alike.
-            blocking = Math.min(blocking, coldSortedPageCost("unindexed"));
-            indexed = Math.min(indexed, coldSortedPageCost("seq"));
-        }
-
-        assertTrue("a sorted page over an indexed field took " + indexed + "ms against "
-                + blocking + "ms over an unindexed one, same rows and same documents - it is "
-                + "still decoding the rows it discards", blocking > indexed * 2);
-    }
-
-    /**
-     * JIT only. Run on its own collection so the measured ones stay cache-cold.
-     */
-    private void warmTheQueryPath() {
-        NitriteCollection collection = fatCollection("warm");
-        for (int i = 0; i < 3; i++) {
-            drain(collection, "seq");
-            drain(collection, "unindexed");
-        }
-    }
-
-    private double coldSortedPageCost(String sortField) {
-        NitriteCollection collection = fatCollection("cost");
-        long start = System.nanoTime();
-        drain(collection, sortField);
-        return (System.nanoTime() - start) / 1e6;
-    }
-
-    private static void drain(NitriteCollection collection, String sortField) {
-        FindOptions page = FindOptions.orderBy(sortField, SortOrder.Descending).limit(1);
-        for (Document ignored : collection.find(ALL, page)) {
-            // force the fetch
-        }
     }
 
     /**

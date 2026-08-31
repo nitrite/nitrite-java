@@ -45,8 +45,6 @@ import org.h2.mvstore.MVStore;
  */
 class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
-    private static final Cleaner CLEANER = Cleaner.create();
-
     private final MVMap<Key, Value> mvMap;
     private final NitriteStore<?> nitriteStore;
     private final MVStore mvStore;
@@ -312,7 +310,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
             try {
                 this.iterator = iteratorSupplier.get();
-                this.cleanable = CLEANER.register(this, versionUsage::release);
+                this.cleanable = VersionUsage.CLEANER.register(this, versionUsage::release);
             } catch (final RuntimeException | Error e) {
                 versionUsage.release();
                 throw e;
