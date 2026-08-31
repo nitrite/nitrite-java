@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.dizitart</groupId>
         <artifactId>nitrite-java</artifactId>
-        <version>5.1.0</version>
+        <version>5.2.0</version>
     </parent>
 
     <artifactId>nitrite-native-tests</artifactId>
@@ -22,7 +22,7 @@
 
         <assertj.version>3.27.7</assertj.version>
         <junit.version>6.0.0</junit.version>
-        <native-build-tools-plugin.version>1.1.9</native-build-tools-plugin.version>
+        <native-build-tools-plugin.version>1.1.10</native-build-tools-plugin.version>
     </properties>
 
     <dependencyManagement>

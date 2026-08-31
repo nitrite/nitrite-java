@@ -19,6 +19,8 @@ package org.dizitart.no2.mvstore;
 import static org.dizitart.no2.common.util.ValidationUtils.notNull;
 
 import java.lang.ref.Cleaner;
+import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -28,10 +30,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.common.streams.SkippableIterator;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
+import org.h2.mvstore.Cursor;
 import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 
@@ -144,20 +148,66 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public RecordStream<Pair<Key, Value>> entries() {
-        return () -> versionedIterator(() -> new Iterator<>() {
-            private final Iterator<Map.Entry<Key, Value>> entryIterator = mvMap.entrySet().iterator();
+        return () -> versionedIterator(EntryIterator::new);
+    }
 
-            @Override
-            public boolean hasNext() {
-                return entryIterator.hasNext();
+    /**
+     * The map's entries, with a skip that descends the tree by index instead of walking it.
+     *
+     * <p>An MVStore page records how many entries sit beneath it, so {@link MVMap#getKey(long)} is
+     * a O(log n) descent rather than a scan - the same property that makes {@code keyList()} a
+     * random-access list. Paging a collection therefore costs its own page rather than every page
+     * before it, which is the difference between a linear and a flat page latency.
+     */
+    private class EntryIterator implements Iterator<Pair<Key, Value>>, SkippableIterator {
+        private Iterator<Map.Entry<Key, Value>> delegate = mvMap.entrySet().iterator();
+
+        @Override
+        public boolean hasNext() {
+            return delegate.hasNext();
+        }
+
+        @Override
+        public Pair<Key, Value> next() {
+            Map.Entry<Key, Value> entry = delegate.next();
+            return new Pair<>(entry.getKey(), entry.getValue());
+        }
+
+        @Override
+        public long skip(long count) {
+            long size = mvMap.sizeAsLong();
+            // Read once, and re-checked below: the map is live, so a concurrent removal between
+            // the size and the seek would otherwise be a null key rather than a short skip.
+            if (count >= size) {
+                delegate = Collections.emptyIterator();
+                return size;
             }
 
-            @Override
-            public Pair<Key, Value> next() {
-                final Map.Entry<Key, Value> entry = entryIterator.next();
-                return new Pair<>(entry.getKey(), entry.getValue());
+            Key from = mvMap.getKey(count);
+            if (from == null) {
+                delegate = Collections.emptyIterator();
+                return size;
             }
-        });
+
+            // cursor(from) positions at the first key >= from, which is the key at index `count`
+            // - the first one the caller actually wants.
+            Cursor<Key, Value> cursor = mvMap.cursor(from);
+            delegate = new Iterator<>() {
+                @Override
+                public boolean hasNext() {
+                    return cursor.hasNext();
+                }
+
+                @Override
+                public Map.Entry<Key, Value> next() {
+                    Key key = cursor.next();
+                    // getValue() belongs to the entry next() just returned; it is read from the
+                    // page the cursor is already sitting on.
+                    return new AbstractMap.SimpleImmutableEntry<>(key, cursor.getValue());
+                }
+            };
+            return count;
+        }
     }
 
     @Override
@@ -246,7 +296,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
         }
     }
 
-    private static class VersionedIterator<Element> implements Iterator<Element> {
+    private static class VersionedIterator<Element> implements Iterator<Element>, SkippableIterator {
 
         private final Iterator<Element> iterator;
         private final Cleaner.Cleanable cleanable;
@@ -300,6 +350,22 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
                 cleanable.clean();
                 throw e;
             }
+        }
+
+        @Override
+        public long skip(final long count) {
+            ensureOpen();
+            if (iterator instanceof SkippableIterator) {
+                return ((SkippableIterator) iterator).skip(count);
+            }
+            // The wrapper is uniformly skippable so BoundedStream never has to unwrap it; a
+            // delegate that cannot seek pays the same loop BoundedStream would have run itself.
+            long skipped = 0;
+            while (skipped < count && hasNext()) {
+                next();
+                skipped++;
+            }
+            return skipped;
         }
 
         private void ensureOpen() {

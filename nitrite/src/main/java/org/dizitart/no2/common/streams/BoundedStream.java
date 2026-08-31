@@ -80,6 +80,13 @@ public class BoundedStream<Key, Value> implements RecordStream<Pair<Key, Value>>
         }
 
         private void initialize() {
+            // A storage-level iterator can advance without decoding what it passes over, which is
+            // the difference between a page costing its own 200 rows and costing every row before
+            // it. Anything that has to look at a document to know whether to skip it - a filter, a
+            // blocking sort - does not implement SkippableIterator, and falls through to the loop.
+            if (pos < skip && iterator instanceof SkippableIterator) {
+                pos += ((SkippableIterator) iterator).skip(skip - pos);
+            }
             while (pos < skip && iterator.hasNext()) {
                 iterator.next();
                 pos++;
