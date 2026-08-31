@@ -16,25 +16,26 @@
 
 package org.dizitart.no2.mvstore;
 
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.dizitart.no2.store.events.StoreEventListener;
+import org.h2.mvstore.FileStore;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import org.dizitart.no2.store.events.StoreEventListener;
-import org.h2.mvstore.FileStore;
-
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The MVStoreModuleBuilder class is responsible for building an instance of
  * {@link MVStoreModule}. It provides methods to set various configuration
  * options for the MVStore database.
- * 
- * @since 4.0
- * @see MVStoreModule
+ *
  * @author Anindya Chatterjee
+ * @see MVStoreModule
+ * @since 4.0
  */
 @Getter
 @Setter
@@ -80,6 +81,13 @@ public class MVStoreModuleBuilder {
      * and committed when {@link org.dizitart.no2.Nitrite#commit()} is called.
      */
     private boolean autoCommit = true;
+
+    /**
+     * Flag to enable/disable auto-compact mode. If set to true, fragmented
+     * chunks or chunks that are sufficiently below the target fill rate of 90%
+     * are reclaimed. This will typically shrink the file.
+     */
+    private boolean autoCompact = true;
 
     /**
      * Indicates whether the MVStore should be opened in recovery mode or not.
@@ -174,6 +182,7 @@ public class MVStoreModuleBuilder {
         dbConfig.compress(compress());
         dbConfig.compressHigh(compressHigh());
         dbConfig.autoCommit(autoCommit());
+        dbConfig.autoCompact(autoCompact());
         dbConfig.recoveryMode(recoveryMode());
         dbConfig.cacheSize(cacheSize());
         dbConfig.cacheConcurrency(cacheConcurrency());

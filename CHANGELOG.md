@@ -1,4 +1,33 @@
-## Release 5.1.0 - Aug 14, 2026
+## Release 5.2.0 - Aug 30, 2026
+
+### New Features
+
+- **`nitrite-bridge` — inspect a running Nitrite database from a desktop client.** The Nitrite adapter for the `dbinspect` wire protocol: collections and handed-in repositories as browsable stores, schema inferred by sampling documents and always flagged as inferred, paging over `FindOptions` skip/limit/orderBy, the JSON filter DSL, and watch over Nitrite's collection subscription. The engine-neutral core it plugs into is `org.dizitart:dbinspect-bridge`, which has no database in its dependency tree at all.
+  - **Row editing is behind `allowWrite`, and whole-store `snapshot` behind `allowSnapshot`** — both `false` unless the embedding application asks, and absent from the reported capabilities while they are. A row is addressed by `_id`; an update is partial; `changes: 0` means the row was not there. `_id` inside an update's `values` is refused, because Nitrite merges an update document and it would rewrite the identity of the row it just matched.
+  - **`regex` is off unless `allowRegex` is set**, and length-capped with a nested-quantifier check when it is on. `java.util.regex` backtracks and a match cannot be interrupted, so the default is the mitigation that matters.
+  - Every client-supplied store name is resolved against the set the adapter reported. `Nitrite.getCollection` creates a collection that does not exist, so an unchecked name would let a paired client make one; writes go through the same allow-list.
+  - The module is deliberately **absent from the reactor `<modules>`**: `dbinspect-bridge` is not on Maven Central until the dbinspect release, so a build of a clean checkout would fail on it. Build it on its own, with `dbinspect-bridge` installed locally.
+
+- **The bridge can open a transaction** (`docs/PROTOCOL.md` §3.1). A transaction is a second adapter over the same database rather than a mode on the first, so one connection's uncommitted documents can never reach another connection's reads. Nitrite's transaction lives above the storage engine — a `TransactionStore` buffers the writes and a journal replays them on commit — so this works identically on MVStore, RocksDB and in memory.
+  - `capabilities.transactions` follows `allowWrite`: that flag is the permission, this reports what the engine can undo. The transactional twin reports it `false`, because Nitrite does not nest one.
+  - `listStores` counts through the transaction, since a total that left out the rows the person just staged is not read-your-own-writes.
+
+### Performance
+
+- Paging a collection no longer costs every row before the page - `find(filter, skipBy(n).limit(m))` now advances the storage iterator without decoding what it passes over.
+  - `BoundedStream` skipped by calling `next()` on the iterator beneath it, and that iterator is below the document layer: it deserialised **every skipped document** in order to throw it away. Page latency was therefore linear in the page number - about 9 µs per skipped row on both persistent stores - so a 50 000-row collection paged at 200 rows took 3 ms for the first page and 350 ms for the two-hundredth. It is an ordinary browse, not an edge case.
+  - New `SkippableIterator`, implemented by the storage-level iterators that can do better and by nothing else. `BoundedStream` uses it when it is there and falls back to the loop when it is not, so a stream that has to look at a document to know whether to skip it - a collection-scan filter, a blocking sort - is unaffected and still correct.
+  - **MVStore descends the tree by index.** An MVStore page records how many entries sit beneath it, so `MVMap.getKey(n)` is a O(log n) descent rather than a scan; the skip seeks with it and continues from a cursor. Measured over 50 000 rows, 200 to a page: p95 **583.9 ms → 5.8 ms**, and the first and last pages now cost the same 0.1 ms.
+  - **RocksDB steps the native iterator.** There is no seek-by-index to use, but the decode is what a skipped row actually cost; advancing past one is now a memcmp inside the block the iterator is already on. p95 **3.8 ms** over the same 50 000 rows.
+  - An index scan skips its own id set the same way, without the map lookup and decode `next()` would have paid for each row.
+
+### Issue Fixes
+
+- Fix the index dirty marker not being persisted ([#1281](https://github.com/nitrite/nitrite-java/pull/1281))
+  - `markDirty()` flipped `isDirty` on the `IndexMeta` that `get()` returned and never put it back, so nothing told the store the entry had changed and the new value was not guaranteed to be written. Both `beginIndexing()` and `endIndexing()` go through it, so the marker was unreliable in both directions: an index left half-built by a crash could come back reading as clean, and a completed one could stay marked dirty and be rebuilt on the first write after every open.
+
+
+## Release 5.1.0 - Aug 22, 2026
 
 ### Improvements
 

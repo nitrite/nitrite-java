@@ -14,6 +14,9 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Release
     runs-on: ubuntu-latest
+    # A deploy that stalls on a credential prompt should cost minutes, not the
+    # six-hour default: dbinspect's pub job hung for 2h40m on exactly that.
+    timeout-minutes: 60
     env:
       JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
       MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
