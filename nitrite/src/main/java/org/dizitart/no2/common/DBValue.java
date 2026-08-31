@@ -84,6 +84,15 @@ public class DBValue implements Comparable<DBValue>, Serializable {
             return true;
         }
 
+        if (value instanceof Long) {
+            // Casting the double back is exact for every double inside long range, so a value
+            // that survives the round trip is one the double holds exactly. The range check is
+            // what keeps Long.MAX_VALUE honest: its double rounds up to 2^63, and the cast back
+            // saturates onto MAX_VALUE again, which would otherwise read as exact.
+            long exact = value.longValue();
+            return normalized >= -0x1p63 && normalized < 0x1p63 && (long) normalized == exact;
+        }
+
         if (Double.isNaN(normalized) || Double.isInfinite(normalized)) {
             return false;
         }
@@ -91,9 +100,6 @@ public class DBValue implements Comparable<DBValue>, Serializable {
         // new BigDecimal(double) is the exact value of the double, so this compares the
         // number against what the conversion actually produced
         BigDecimal converted = new BigDecimal(normalized);
-        if (value instanceof Long) {
-            return converted.compareTo(BigDecimal.valueOf(value.longValue())) == 0;
-        }
         if (value instanceof BigInteger) {
             return converted.compareTo(new BigDecimal((BigInteger) value)) == 0;
         }
