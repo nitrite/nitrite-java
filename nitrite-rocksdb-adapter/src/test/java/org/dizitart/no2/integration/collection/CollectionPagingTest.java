@@ -187,4 +187,62 @@ public class CollectionPagingTest extends BaseCollectionTest {
         assertEquals(PAGE, rows);
         return elapsed;
     }
+
+    /**
+     * The plan shapes the seek must decline, and one it must not get wrong.
+     *
+     * <p>A storage-level skip is only the same thing as the pipeline's skip when nothing between
+     * the source and the page drops or reorders rows. An OR plan unions its sub-plans and a
+     * removal leaves the natural order with holes in it, so both are places where an offset taken
+     * at the source would answer with the wrong rows rather than merely slowly. From
+     * <a href="https://github.com/nitrite/nitrite-java/pull/1283">gh-1283</a>, which proposed
+     * pushing the offset down per plan and named these as the cases to exclude.
+     */
+    @Test
+    public void anOrFilterPagesTheSameWay() {
+        seed();
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "index");
+        assertPagingMatchesFullScan(
+                org.dizitart.no2.filters.Filter.or(where("index").lt(50), where("index").gte(450)),
+                null, 17);
+    }
+
+    @Test
+    public void pagingAfterRemovalsPagesTheSameWay() {
+        seed();
+        collection.remove(where("index").lt(100));
+        assertPagingMatchesFullScan(ALL, null, 23);
+    }
+
+    /** A filter and an order both answered from the same index - the seek must not double up. */
+    @Test
+    public void anIndexedFilterOrderedByThatIndexPagesTheSameWay() {
+        seed();
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "index");
+        assertPagingMatchesFullScan(where("index").gte(100),
+                org.dizitart.no2.common.SortOrder.Ascending, 19);
+    }
+
+    private void assertPagingMatchesFullScan(org.dizitart.no2.filters.Filter filter,
+                                             org.dizitart.no2.common.SortOrder order,
+                                             int pageSize) {
+        FindOptions whole = order == null ? null : FindOptions.orderBy("index", order);
+        List<Object> expected = new ArrayList<>();
+        for (Document document : whole == null
+                ? collection.find(filter) : collection.find(filter, whole)) {
+            expected.add(document.get("index"));
+        }
+        assertTrue("the fixture must return rows for this to prove anything", !expected.isEmpty());
+
+        List<Object> paged = new ArrayList<>();
+        for (int offset = 0; offset < expected.size(); offset += pageSize) {
+            FindOptions page = order == null
+                    ? FindOptions.skipBy(offset).limit(pageSize)
+                    : FindOptions.orderBy("index", order).skip((long) offset).limit((long) pageSize);
+            for (Document document : collection.find(filter, page)) {
+                paged.add(document.get("index"));
+            }
+        }
+        assertEquals(expected, paged);
+    }
 }
