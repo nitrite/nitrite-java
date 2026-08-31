@@ -51,15 +51,25 @@ public class MVStoreFileGrowthTest {
      * is reclaimed in the first case and not in the second.
      *
      * <p><b>Only the close is asserted, deliberately.</b> {@code close(-1)} compacts
-     * synchronously, so it owes nothing to a background thread being scheduled. The background
-     * half of the fix - dropping {@code autoCompactFillRate(0)}, which is what keeps the file
-     * bounded <i>while</i> a long-running application is writing - is not asserted here, because
-     * its effect is not observable on a CI runner. Locally the chunk fill rate settles at 37%
-     * against 18-21% with compaction off; on the GitHub macOS and Windows runners the two
-     * configurations come out within noise of each other and in either order (16 against 18, 31
-     * against 34), so both a fixed floor and a ratio between the halves failed there while the
-     * fix was present and working. Guarding it would mean guarding something the runner cannot
-     * see, which is how this test turned {@code main} red twice.
+     * synchronously under a blocking lock, so it owes nothing to scheduling. The background half
+     * of the fix - dropping {@code autoCompactFillRate(0)}, which is what keeps the file bounded
+     * <i>while</i> a long-running application writes - is not asserted here, and cannot be.
+     *
+     * <p>MVStore only compacts automatically in {@code RandomAccessStore.doHousekeeping}, which
+     * runs on the background writer thread on a one-second tick, and every compaction it starts
+     * goes through {@code MVStore.tryExecuteUnderStoreLock} - a <i>try</i>-lock that returns
+     * null and does nothing when a writer holds the store lock. It is best-effort by
+     * construction: a thread that is not scheduled, or that loses the lock race, simply skips
+     * that round silently.
+     *
+     * <p>That is why it is measurable here and not on CI. This machine has 10 cores and reports
+     * a chunk fill rate of 37% with compaction on against 18-21% with it off. GitHub's runners
+     * have 4 (ubuntu, windows) and 3 (macos arm64), and there the two configurations come out
+     * within noise of each other <i>and in either order</i> - 31 against 34 on Windows, 16
+     * against 18 on macOS - with the fix present and working. Loading this machine with 24 spin
+     * threads reproduces exactly that inversion. A fixed floor and a ratio between the two
+     * halves were both tried and both turned {@code main} red, because what they were sampling
+     * is a lock race rather than a property of the fix.
      */
     @Test(timeout = 180_000)
     public void testRepeatedUpdatesDoNotStrandObsoleteChunks() {
