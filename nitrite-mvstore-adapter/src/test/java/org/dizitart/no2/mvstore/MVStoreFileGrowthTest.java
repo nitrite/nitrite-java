@@ -47,40 +47,38 @@ public class MVStoreFileGrowthTest {
     private static final int UPDATES_PER_ROUND = 2_000;
 
     /**
-     * How much of a reclaimed store's chunks must be live against an unreclaimed one's, running
-     * the same workload on the same machine.
+     * Runs the same update workload with compaction on and with it off, and holds that the file
+     * is reclaimed in the first case and not in the second.
      *
-     * <p>Deliberately a ratio and not a floor. The absolute rate is a function of how much CPU
-     * the housekeeping thread gets - measured at 37% against 18% on a quiet machine, but 23% on
-     * a loaded macOS runner, which walked straight through a fixed 25% floor while the fix was
-     * present and working. Both halves of a ratio are squeezed by the same contention, so what
-     * is asserted is the thing the fix actually changes.
+     * <p><b>Only the close is asserted, deliberately.</b> {@code close(-1)} compacts
+     * synchronously, so it owes nothing to a background thread being scheduled. The background
+     * half of the fix - dropping {@code autoCompactFillRate(0)}, which is what keeps the file
+     * bounded <i>while</i> a long-running application is writing - is not asserted here, because
+     * its effect is not observable on a CI runner. Locally the chunk fill rate settles at 37%
+     * against 18-21% with compaction off; on the GitHub macOS and Windows runners the two
+     * configurations come out within noise of each other and in either order (16 against 18, 31
+     * against 34), so both a fixed floor and a ratio between the halves failed there while the
+     * fix was present and working. Guarding it would mean guarding something the runner cannot
+     * see, which is how this test turned {@code main} red twice.
      */
-    private static final double MIN_FILL_RATE_RATIO = 1.5;
-
     @Test(timeout = 180_000)
     public void testRepeatedUpdatesDoNotStrandObsoleteChunks() {
         final Outcome reclaimed = runUpdates(true);
         final Outcome unreclaimed = runUpdates(false);
 
         assertTrue(String.format(
-                "chunks are %d%% live with compaction on against %d%% with it off, after %d "
-                    + "updates each - obsolete chunks are not being reclaimed",
-                reclaimed.chunkFillRate, unreclaimed.chunkFillRate,
+                "file is %d bytes after close against %d bytes of the same live data, after %d "
+                    + "updates - it was not compacted",
+                reclaimed.finalFileSize, reclaimed.initialFileSize,
                 2 * UPDATES_PER_ROUND * LIVE_DOCUMENTS),
-            reclaimed.chunkFillRate >= unreclaimed.chunkFillRate * MIN_FILL_RATE_RATIO);
-
-        // close(-1) compacts synchronously, so this one owes nothing to the housekeeping thread
-        // getting scheduled - the file is back to its live size by the time close() returns.
-        assertTrue(String.format(
-                "file is %d bytes after close against %d bytes of the same live data - it was "
-                    + "not compacted", reclaimed.finalFileSize, reclaimed.initialFileSize),
             reclaimed.finalFileSize <= reclaimed.initialFileSize);
 
-        // and the control: with compaction off it stays as large as the updates left it
+        // The control, and it has to earn the name: with compaction off the same workload must
+        // leave the file larger than its live data. If it does not, something reclaimed it
+        // anyway and the assertion above is comparing a thing against itself.
         assertTrue(String.format(
                 "file is %d bytes after close with compaction off, against %d bytes of live "
-                    + "data - something compacted it anyway, so the halves are not a comparison",
+                    + "data - nothing was left to reclaim, so this proves nothing",
                 unreclaimed.finalFileSize, unreclaimed.initialFileSize),
             unreclaimed.finalFileSize > unreclaimed.initialFileSize);
     }
@@ -89,7 +87,6 @@ public class MVStoreFileGrowthTest {
         final String dbPath = getRandomTempDbFile();
         final File dbFile = new File(dbPath);
         final long initialFileSize;
-        final int chunkFillRate;
 
         final MVStoreModule storeModule = MVStoreModule.withConfig()
             .filePath(dbPath)
@@ -120,26 +117,20 @@ public class MVStoreFileGrowthTest {
             db.commit();
             updateEveryDocument(collection);
             db.commit();
-
-            chunkFillRate = ((NitriteMVStore) db.getStore()).getMvStore()
-                .getFileStore().getChunksFillRate();
         }
 
         final long finalFileSize = dbFile.length();
         deleteDb(dbPath);
-        return new Outcome(initialFileSize, finalFileSize, chunkFillRate);
+        return new Outcome(initialFileSize, finalFileSize);
     }
 
     private static final class Outcome {
         private final long initialFileSize;
         private final long finalFileSize;
-        private final int chunkFillRate;
 
-        private Outcome(final long initialFileSize, final long finalFileSize,
-                        final int chunkFillRate) {
+        private Outcome(final long initialFileSize, final long finalFileSize) {
             this.initialFileSize = initialFileSize;
             this.finalFileSize = finalFileSize;
-            this.chunkFillRate = chunkFillRate;
         }
     }
 

@@ -237,16 +237,6 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         }
     }
 
-    /**
-     * The underlying MVStore, for tests that need to assert on store internals such as the
-     * chunk fill rate.
-     *
-     * @return the backing {@link MVStore}, or {@code null} before {@link #openOrCreate()}
-     */
-    MVStore getMvStore() {
-        return mvStore;
-    }
-
     private void initEventBus() {
         if (getStoreConfig().eventListeners() != null) {
             for (StoreEventListener eventListener : getStoreConfig().eventListeners()) {
