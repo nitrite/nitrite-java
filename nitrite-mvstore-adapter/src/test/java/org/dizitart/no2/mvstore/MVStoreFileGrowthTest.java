@@ -19,7 +19,6 @@ package org.dizitart.no2.mvstore;
 import static org.dizitart.no2.collection.Document.createDocument;
 import static org.dizitart.no2.index.IndexOptions.indexOptions;
 import static org.dizitart.no2.index.IndexType.NON_UNIQUE;
-import static org.dizitart.no2.integration.TestUtil.createDb;
 import static org.dizitart.no2.integration.TestUtil.deleteDb;
 import static org.dizitart.no2.integration.TestUtil.getRandomTempDbFile;
 import static org.junit.Assert.assertTrue;
@@ -48,20 +47,61 @@ public class MVStoreFileGrowthTest {
     private static final int UPDATES_PER_ROUND = 2_000;
 
     /**
-     * The fill rate the reclaimed store settles at, against the ~14-18% an unreclaimed one decays
-     * to over the same rounds. It is an equilibrium rather than a target: compaction runs on the
-     * back of write activity, so the rate stops falling but does not climb back once idle.
+     * How much of a reclaimed store's chunks must be live against an unreclaimed one's, running
+     * the same workload on the same machine.
+     *
+     * <p>Deliberately a ratio and not a floor. The absolute rate is a function of how much CPU
+     * the housekeeping thread gets - measured at 37% against 18% on a quiet machine, but 23% on
+     * a loaded macOS runner, which walked straight through a fixed 25% floor while the fix was
+     * present and working. Both halves of a ratio are squeezed by the same contention, so what
+     * is asserted is the thing the fix actually changes.
      */
-    private static final int MIN_CHUNK_FILL_RATE = 25;
+    private static final double MIN_FILL_RATE_RATIO = 1.5;
 
-    @Test(timeout = 120_000)
+    @Test(timeout = 180_000)
     public void testRepeatedUpdatesDoNotStrandObsoleteChunks() {
+        final Outcome reclaimed = runUpdates(true);
+        final Outcome unreclaimed = runUpdates(false);
+
+        assertTrue(String.format(
+                "chunks are %d%% live with compaction on against %d%% with it off, after %d "
+                    + "updates each - obsolete chunks are not being reclaimed",
+                reclaimed.chunkFillRate, unreclaimed.chunkFillRate,
+                2 * UPDATES_PER_ROUND * LIVE_DOCUMENTS),
+            reclaimed.chunkFillRate >= unreclaimed.chunkFillRate * MIN_FILL_RATE_RATIO);
+
+        // close(-1) compacts synchronously, so this one owes nothing to the housekeeping thread
+        // getting scheduled - the file is back to its live size by the time close() returns.
+        assertTrue(String.format(
+                "file is %d bytes after close against %d bytes of the same live data - it was "
+                    + "not compacted", reclaimed.finalFileSize, reclaimed.initialFileSize),
+            reclaimed.finalFileSize <= reclaimed.initialFileSize);
+
+        // and the control: with compaction off it stays as large as the updates left it
+        assertTrue(String.format(
+                "file is %d bytes after close with compaction off, against %d bytes of live "
+                    + "data - something compacted it anyway, so the halves are not a comparison",
+                unreclaimed.finalFileSize, unreclaimed.initialFileSize),
+            unreclaimed.finalFileSize > unreclaimed.initialFileSize);
+    }
+
+    private Outcome runUpdates(final boolean autoCompact) {
         final String dbPath = getRandomTempDbFile();
         final File dbFile = new File(dbPath);
         final long initialFileSize;
         final int chunkFillRate;
 
-        try (final Nitrite db = createDb(dbPath)) {
+        final MVStoreModule storeModule = MVStoreModule.withConfig()
+            .filePath(dbPath)
+            .compress(true)
+            .autoCompact(autoCompact)
+            .build();
+
+        try (final Nitrite db = Nitrite.builder()
+                .loadModule(storeModule)
+                .fieldSeparator(".")
+                .openOrCreate()) {
+
             final NitriteCollection collection = db.getCollection("file-growth");
             collection.createIndex("key");
             collection.createIndex(indexOptions(NON_UNIQUE), "revision");
@@ -74,8 +114,8 @@ public class MVStoreFileGrowthTest {
             db.commit();
             initialFileSize = dbFile.length();
 
-            // Two rounds, because the first is what fills the chunks and the second is what shows
-            // whether anything is reclaiming them.
+            // Two rounds, because the first is what fills the chunks and the second is what
+            // shows whether anything is reclaiming them.
             updateEveryDocument(collection);
             db.commit();
             updateEveryDocument(collection);
@@ -85,22 +125,21 @@ public class MVStoreFileGrowthTest {
                 .getFileStore().getChunksFillRate();
         }
 
-        // close(-1) compacts synchronously, so this one is not subject to the housekeeping thread
-        // getting scheduled - the file is back to its live size by the time close() returns.
         final long finalFileSize = dbFile.length();
+        deleteDb(dbPath);
+        return new Outcome(initialFileSize, finalFileSize, chunkFillRate);
+    }
 
-        try {
-            assertTrue(String.format(
-                    "chunks are only %d%% live after %d updates - obsolete chunks are not being reclaimed",
-                    chunkFillRate, 2 * UPDATES_PER_ROUND * LIVE_DOCUMENTS),
-                chunkFillRate >= MIN_CHUNK_FILL_RATE);
+    private static final class Outcome {
+        private final long initialFileSize;
+        private final long finalFileSize;
+        private final int chunkFillRate;
 
-            assertTrue(String.format(
-                    "file is %d bytes after close against %d bytes of the same live data - it was not compacted",
-                    finalFileSize, initialFileSize),
-                finalFileSize <= initialFileSize);
-        } finally {
-            deleteDb(dbPath);
+        private Outcome(final long initialFileSize, final long finalFileSize,
+                        final int chunkFillRate) {
+            this.initialFileSize = initialFileSize;
+            this.finalFileSize = finalFileSize;
+            this.chunkFillRate = chunkFillRate;
         }
     }
 
