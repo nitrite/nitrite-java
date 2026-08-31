@@ -16,17 +16,18 @@
 
 package org.dizitart.no2.mvstore;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
+
+import java.io.File;
+import java.util.Map;
+
 import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.mvstore.compat.v1.UpgradeUtil;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.MVStoreException;
 
-import java.io.File;
-import java.util.Map;
-
-import static org.dizitart.no2.common.util.StringUtils.isNullOrEmpty;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author Anindya Chatterjee.
@@ -55,7 +56,7 @@ class MVStoreUtils {
             }
         } catch (MVStoreException me) {
             if (me.getMessage().contains("file is locked")) {
-                throw new NitriteIOException("Database is already opened in other process");
+                throw new NitriteIOException("Database is already opened in other process", me);
             }
 
             if (dbFile != null) {
@@ -128,8 +129,10 @@ class MVStoreUtils {
             builder = builder.autoCommitBufferSize(mvStoreConfig.autoCommitBufferSize());
         }
 
-        // auto compact disabled github issue #41
-        builder.autoCompactFillRate(0);
+        if (!mvStoreConfig.autoCompact()) {
+            // disables background compaction
+            builder.autoCompactFillRate(0);
+        }
 
         if (mvStoreConfig.encryptionKey() != null) {
             builder = builder.encryptionKey(mvStoreConfig.encryptionKey());
