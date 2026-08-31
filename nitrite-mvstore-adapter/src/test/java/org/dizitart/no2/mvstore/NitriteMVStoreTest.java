@@ -36,7 +36,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.store.NitriteMap;
@@ -121,8 +120,7 @@ public class NitriteMVStoreTest {
         final CountDownLatch releaseFirstClose = new CountDownLatch(1);
         final CountDownLatch secondCloseAttempted = new CountDownLatch(1);
         final CountDownLatch secondCloseStarted = new CountDownLatch(1);
-        final CountDownLatch propertyChangeAttempted = new CountDownLatch(1);
-        final ExecutorService executorService = Executors.newFixedThreadPool(3);
+        final ExecutorService executorService = Executors.newFixedThreadPool(2);
 
         try {
             System.setProperty("h2.compactThreads", "4");
@@ -153,18 +151,11 @@ public class NitriteMVStoreTest {
             assertTrue(secondCloseAttempted.await(5, TimeUnit.SECONDS));
             assertFalse(secondCloseStarted.await(200, TimeUnit.MILLISECONDS));
 
-            final Future<?> propertyChange = executorService.submit(() -> {
-                propertyChangeAttempted.countDown();
-                System.setProperty("h2.compactThreads", "8");
-            });
-            assertTrue(propertyChangeAttempted.await(5, TimeUnit.SECONDS));
-            assertThrows(TimeoutException.class, () -> propertyChange.get(200, TimeUnit.MILLISECONDS));
-
             releaseFirstClose.countDown();
             firstClose.get(5, TimeUnit.SECONDS);
             secondClose.get(5, TimeUnit.SECONDS);
-            propertyChange.get(5, TimeUnit.SECONDS);
-            assertEquals("8", System.getProperty("h2.compactThreads"));
+            // the second close restores what the first one saved, not the "1" it saw in flight
+            assertEquals("4", System.getProperty("h2.compactThreads"));
         } finally {
             releaseFirstClose.countDown();
             executorService.shutdownNow();

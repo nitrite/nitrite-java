@@ -25,7 +25,6 @@ import static org.h2.mvstore.DataUtils.ERROR_SERIALIZATION;
 import static org.h2.mvstore.DataUtils.ERROR_WRITING_FAILED;
 
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.dizitart.no2.common.util.StringUtils;
@@ -49,6 +48,9 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
+
+    private static final String COMPACT_THREADS_PROPERTY = "h2.compactThreads";
+    private static final Object COMPACT_THREADS_LOCK = new Object();
 
     private MVStore mvStore;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
@@ -129,22 +131,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         nitriteRTreeMapRegistry.clear();
 
         if (getStoreConfig().autoCompact()) {
-            // FIXME: this a a hacky workaround for https://github.com/h2database/h2database/issues/4286
-            //  and should be removed once mvstore releases the upstream bugfix (probably in version 2.4.241)
-            final Properties systemProperties = System.getProperties();
-            synchronized (systemProperties) {
-                final String originalCompactThreads = systemProperties.getProperty("h2.compactThreads");
-                try {
-                    systemProperties.setProperty("h2.compactThreads", "1");
-                    mvStore.close(-1);
-                } finally {
-                    if (originalCompactThreads == null) {
-                        systemProperties.remove("h2.compactThreads");
-                    } else {
-                        systemProperties.setProperty("h2.compactThreads", originalCompactThreads);
-                    }
-                }
-            }
+            compactAndClose();
         } else {
             mvStore.close();
         }
@@ -217,6 +204,47 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     @Override
     public String getStoreVersion() {
         return "MVStore/" + org.h2.engine.Constants.VERSION;
+    }
+
+    /**
+     * Closes the store with a full compaction, single-threaded.
+     *
+     * <p>MVStore reads <code>h2.compactThreads</code> on each compacting close, defaulting to a
+     * quarter of the available processors, and parallel compaction races on page references in
+     * 2.4.240 - see <a href="https://github.com/h2database/h2database/issues/4286">h2#4286</a>.
+     * Pinning the property to 1 for the duration of the close is the upstream workaround; the
+     * lock is what keeps two concurrent closes from restoring each other's value. Both can go
+     * once the fix ships.
+     *
+     * <p>The lock is deliberately private rather than the <code>Properties</code> instance
+     * itself: <code>Properties</code> is a <code>Hashtable</code>, so holding its monitor across
+     * a compaction would stall every <code>System.getProperty</code> call in the JVM for as long
+     * as the compaction runs.
+     */
+    private void compactAndClose() {
+        synchronized (COMPACT_THREADS_LOCK) {
+            final String originalCompactThreads = System.getProperty(COMPACT_THREADS_PROPERTY);
+            try {
+                System.setProperty(COMPACT_THREADS_PROPERTY, "1");
+                mvStore.close(-1);
+            } finally {
+                if (originalCompactThreads == null) {
+                    System.clearProperty(COMPACT_THREADS_PROPERTY);
+                } else {
+                    System.setProperty(COMPACT_THREADS_PROPERTY, originalCompactThreads);
+                }
+            }
+        }
+    }
+
+    /**
+     * The underlying MVStore, for tests that need to assert on store internals such as the
+     * chunk fill rate.
+     *
+     * @return the backing {@link MVStore}, or {@code null} before {@link #openOrCreate()}
+     */
+    MVStore getMvStore() {
+        return mvStore;
     }
 
     private void initEventBus() {
