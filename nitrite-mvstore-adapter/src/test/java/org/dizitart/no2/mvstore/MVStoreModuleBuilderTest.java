@@ -33,7 +33,7 @@ public class MVStoreModuleBuilderTest {
         assertTrue(actualMvStoreModuleBuilder.autoCommit());
         assertFalse(actualMvStoreModuleBuilder.recoveryMode());
         assertFalse(actualMvStoreModuleBuilder.readOnly());
-        assertEquals(Short.SIZE, actualMvStoreModuleBuilder.pageSplitSize());
+        assertEquals(16 * 1024, actualMvStoreModuleBuilder.pageSplitSize());
         assertNull(actualMvStoreModuleBuilder.fileStore());
         assertEquals("Path", actualMvStoreModuleBuilder.filePath());
         assertTrue(actualMvStoreModuleBuilder.eventListeners().isEmpty());
@@ -66,7 +66,7 @@ public class MVStoreModuleBuilderTest {
         MVStoreModuleBuilder actualMvStoreModuleBuilder = new MVStoreModuleBuilder();
         assertTrue(actualMvStoreModuleBuilder.autoCommit());
         assertFalse(actualMvStoreModuleBuilder.recoveryMode());
-        assertEquals(Short.SIZE, actualMvStoreModuleBuilder.pageSplitSize());
+        assertEquals(16 * 1024, actualMvStoreModuleBuilder.pageSplitSize());
         assertTrue(actualMvStoreModuleBuilder.eventListeners().isEmpty());
         assertEquals(1024, actualMvStoreModuleBuilder.autoCommitBufferSize());
         assertEquals(Short.SIZE, actualMvStoreModuleBuilder.cacheSize());

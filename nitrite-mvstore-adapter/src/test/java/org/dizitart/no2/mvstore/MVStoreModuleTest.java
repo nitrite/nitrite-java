@@ -33,7 +33,7 @@ public class MVStoreModuleTest {
         MVStoreModuleBuilder actualWithConfigResult = MVStoreModule.withConfig();
         assertTrue(actualWithConfigResult.autoCommit());
         assertFalse(actualWithConfigResult.recoveryMode());
-        assertEquals(Short.SIZE, actualWithConfigResult.pageSplitSize());
+        assertEquals(16 * 1024, actualWithConfigResult.pageSplitSize());
         assertTrue(actualWithConfigResult.eventListeners().isEmpty());
         assertEquals(1024, actualWithConfigResult.autoCommitBufferSize());
         assertEquals(Short.SIZE, actualWithConfigResult.cacheSize());
