@@ -52,6 +52,14 @@ public class CollectionFactory {
 
     /**
      * Gets or creates a collection.
+     * <p>
+     * The factory-wide lock is held only while the registry is read or changed. Whether an
+     * already registered collection is still usable is decided outside it, because
+     * {@link NitriteCollection#isDropped()} and {@link NitriteCollection#isOpen()} take that
+     * collection's own read lock: while a long write (an index rebuild, a large
+     * {@code remove(filter)}) holds the collection's write lock, a caller asking for that
+     * collection has to wait for it, but with the factory lock held across the wait every
+     * caller asking for <em>any</em> collection was queued behind it as well.
      *
      * @param name           the name
      * @param nitriteConfig  the nitrite config
@@ -62,22 +70,41 @@ public class CollectionFactory {
         notNull(nitriteConfig, "Configuration is null while creating collection");
         notEmpty(name, "Collection name is null or empty");
 
+        NitriteCollection registered = getRegistered(name);
+        if (registered != null && isUsable(registered)) {
+            return registered;
+        }
+
         Lock lock = lockService.getWriteLock(this.getClass().getName());
         try {
             lock.lock();
-            if (collectionMap.containsKey(name)) {
-                NitriteCollection collection = collectionMap.get(name);
-                if (collection.isDropped() || !collection.isOpen()) {
-                    collectionMap.remove(name);
-                    return createCollection(name, nitriteConfig, writeCatalogue);
-                }
-                return collectionMap.get(name);
-            } else {
-                return createCollection(name, nitriteConfig, writeCatalogue);
+            NitriteCollection current = collectionMap.get(name);
+            if (current != null && current != registered && isUsable(current)) {
+                // another caller replaced it while this one was checking the old instance
+                return current;
             }
+
+            if (current != null) {
+                collectionMap.remove(name);
+            }
+            return createCollection(name, nitriteConfig, writeCatalogue);
         } finally {
             lock.unlock();
         }
+    }
+
+    private NitriteCollection getRegistered(String name) {
+        Lock lock = lockService.getReadLock(this.getClass().getName());
+        try {
+            lock.lock();
+            return collectionMap.get(name);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    private static boolean isUsable(NitriteCollection collection) {
+        return !collection.isDropped() && collection.isOpen();
     }
 
     private NitriteCollection createCollection(String name, NitriteConfig nitriteConfig, boolean writeCatalog) {
