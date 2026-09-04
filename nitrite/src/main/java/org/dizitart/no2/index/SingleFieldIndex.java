@@ -30,15 +30,17 @@ import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.filters.EqualsFilter;
 import org.dizitart.no2.filters.SortingAwareFilter;
+import org.dizitart.no2.filters.SortingAwareFilter.ComparisonMode;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Iterator;
 import java.util.Set;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveCompositeIndexMapName;
@@ -208,8 +210,10 @@ public class SingleFieldIndex implements NitriteIndex {
 
             // a two-sided range on one field, the same shape IndexScanner.scanBoundedRange takes
             String field = filters.get(0).getField();
-            DBValue lower = null, upper = null;
-            boolean lowerInclusive = false, upperInclusive = false;
+            DBValue lower = null;
+            DBValue upper = null;
+            boolean lowerInclusive = false;
+            boolean upperInclusive = false;
             for (ComparableFilter filter : filters) {
                 if (!(filter instanceof SortingAwareFilter) || field == null || !field.equals(filter.getField())) {
                     return null;
@@ -219,19 +223,24 @@ public class SingleFieldIndex implements NitriteIndex {
                     return null;
                 }
                 DBValue key = new DBValue((Comparable<?>) value);
-                switch (((SortingAwareFilter) filter).getComparisonMode()) {
+                ComparisonMode mode = ((SortingAwareFilter) filter).getComparisonMode();
+                switch (mode) {
                     case GreaterEqual:
-                        if (lower != null) return null;
-                        lower = key; lowerInclusive = true; break;
                     case Greater:
-                        if (lower != null) return null;
-                        lower = key; lowerInclusive = false; break;
+                        if (lower != null) {
+                            return null;
+                        }
+                        lower = key;
+                        lowerInclusive = mode == ComparisonMode.GreaterEqual;
+                        break;
                     case LesserEqual:
-                        if (upper != null) return null;
-                        upper = key; upperInclusive = true; break;
                     case Lesser:
-                        if (upper != null) return null;
-                        upper = key; upperInclusive = false; break;
+                        if (upper != null) {
+                            return null;
+                        }
+                        upper = key;
+                        upperInclusive = mode == ComparisonMode.LesserEqual;
+                        break;
                     default:
                         return null;
                 }
@@ -252,7 +261,7 @@ public class SingleFieldIndex implements NitriteIndex {
         private final Range range;
         private final boolean reverse;
         private final Set<NitriteId> seen = new HashSet<>();
-        private final java.util.ArrayDeque<NitriteId> group = new java.util.ArrayDeque<>();
+        private final ArrayDeque<NitriteId> group = new ArrayDeque<>();
         private IndexEntryKey key;
         private NitriteId next;
         private boolean started;

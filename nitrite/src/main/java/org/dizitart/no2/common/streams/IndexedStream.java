@@ -24,11 +24,7 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Iterator;
-<<<<<<< HEAD
 import java.util.NoSuchElementException;
-import java.util.Set;
-=======
->>>>>>> a09dd45e (perf: stream equality and range index scans instead of materializing every id)
 
 /**
  * @author Anindya Chatterjee

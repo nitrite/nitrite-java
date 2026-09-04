@@ -201,6 +201,9 @@ public class SingleFieldIndexTest {
         assertEquals(Arrays.asList(NitriteId.createId(1L), NitriteId.createId(2L), NitriteId.createId(3L)),
             keys.stream().map(Pair::getSecond).collect(java.util.stream.Collectors.toList()));
         assertNull("an index that does not cover every document cannot stand in for it", index.readSortKeys(4));
+    }
+
+    @Test
     public void testLazyStreamMatchesMaterializedScanForEqualityAndRange() {
         InMemoryStore store = new InMemoryStore();
         IndexDescriptor desc = new IndexDescriptor(IndexType.NON_UNIQUE, Fields.withNames("k"), "c");
