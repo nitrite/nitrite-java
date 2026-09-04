@@ -21,6 +21,7 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.index.NitriteIndexer;
 import org.dizitart.no2.index.UniqueIndexer;
 import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 import static org.dizitart.no2.collection.Document.createDocument;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class DocumentIndexWriterTest {
@@ -72,5 +74,67 @@ public class DocumentIndexWriterTest {
         (new DocumentIndexWriter(nitriteConfig, indexOperations)).updateIndexEntry(createDocument("a", 1), createDocument("a", 2), createDocument("a", 3));
         verify(indexOperations).listIndexes();
     }
-}
 
+    @Test
+    public void testUpdateSkipsIndexWhenIndexedValueIsUnchanged() {
+        NitriteIndexer indexer = mock(NitriteIndexer.class);
+        DocumentIndexWriter writer = writerWithIndexOn("a", indexer, false);
+
+        writer.updateIndexEntry(createDocument("a", 1).put("b", "old"),
+            createDocument("a", 1).put("b", "new"),
+            createDocument("a", 1).put("b", "new"));
+
+        verify(indexer, never()).removeIndexEntry(any(), any(), any());
+        verify(indexer, never()).writeIndexEntry(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateSkipsIndexWhenArrayValueHasSameContents() {
+        NitriteIndexer indexer = mock(NitriteIndexer.class);
+        DocumentIndexWriter writer = writerWithIndexOn("a", indexer, false);
+
+        writer.updateIndexEntry(createDocument("a", new int[]{1, 2}),
+            createDocument("a", new int[]{1, 2}),
+            createDocument("a", new int[]{1, 2}));
+
+        verify(indexer, never()).removeIndexEntry(any(), any(), any());
+        verify(indexer, never()).writeIndexEntry(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateRewritesIndexWhenIndexedValueChanges() {
+        NitriteIndexer indexer = mock(NitriteIndexer.class);
+        DocumentIndexWriter writer = writerWithIndexOn("a", indexer, false);
+
+        writer.updateIndexEntry(createDocument("a", 1), createDocument("a", 2), createDocument("a", 2));
+
+        verify(indexer).removeIndexEntry(any(), any(), any());
+        verify(indexer).writeIndexEntry(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateStillRebuildsDirtyIndexWhenValueIsUnchanged() {
+        NitriteIndexer indexer = mock(NitriteIndexer.class);
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        IndexDescriptor descriptor = new IndexDescriptor(IndexType.NON_UNIQUE, Fields.withNames("a"), "c");
+        when(indexOperations.listIndexes()).thenReturn(new ArrayList<>(java.util.List.of(descriptor)));
+        when(indexOperations.shouldRebuildIndex(any())).thenReturn(true);
+        NitriteConfig nitriteConfig = mock(NitriteConfig.class);
+        doReturn(indexer).when(nitriteConfig).findIndexer(IndexType.NON_UNIQUE);
+
+        new DocumentIndexWriter(nitriteConfig, indexOperations)
+            .updateIndexEntry(createDocument("a", 1), createDocument("a", 1), createDocument("a", 1));
+
+        verify(indexOperations, atLeastOnce()).buildIndex(descriptor, true);
+    }
+
+    private static DocumentIndexWriter writerWithIndexOn(String field, NitriteIndexer indexer, boolean dirty) {
+        IndexOperations indexOperations = mock(IndexOperations.class);
+        IndexDescriptor descriptor = new IndexDescriptor(IndexType.NON_UNIQUE, Fields.withNames(field), "c");
+        when(indexOperations.listIndexes()).thenReturn(new ArrayList<>(java.util.List.of(descriptor)));
+        when(indexOperations.shouldRebuildIndex(any())).thenReturn(dirty);
+        NitriteConfig nitriteConfig = mock(NitriteConfig.class);
+        doReturn(indexer).when(nitriteConfig).findIndexer(IndexType.NON_UNIQUE);
+        return new DocumentIndexWriter(nitriteConfig, indexOperations);
+    }
+}

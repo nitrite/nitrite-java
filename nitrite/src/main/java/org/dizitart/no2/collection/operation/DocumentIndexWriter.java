@@ -20,11 +20,14 @@ import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
+import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.common.util.DocumentUtils;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.NitriteIndexer;
 
 import java.util.Collection;
+import java.util.Objects;
+import java.util.List;
 
 /**
  * @since 4.0
@@ -73,6 +76,15 @@ class DocumentIndexWriter {
 
                 // if the index is affected by the update
                 if (DocumentUtils.isAffectedByUpdate(fields, updatedFields)) {
+                    // "affected" only means the update carries the field. An update that
+                    // writes the whole document back, the common upsert shape, carries every
+                    // indexed field with its old value, and rewriting those entries is pure
+                    // cost. A dirty index still has to be rebuilt, so that case is not skipped.
+                    if (!indexOperations.shouldRebuildIndex(fields)
+                        && sameIndexedValues(oldDocument, newDocument, fields)) {
+                        continue;
+                    }
+
                     String indexType = indexDescriptor.getIndexType();
                     NitriteIndexer nitriteIndexer = nitriteConfig.findIndexer(indexType);
 
@@ -81,6 +93,25 @@ class DocumentIndexWriter {
                 }
             }
         }
+    }
+
+    /**
+     * Whether the two documents hold the same values for every field of the index, compared
+     * deeply so that arrays and embedded values count as equal when their contents are.
+     */
+    private static boolean sameIndexedValues(Document oldDocument, Document newDocument, Fields fields) {
+        List<Pair<String, Object>> before = DocumentUtils.getValues(oldDocument, fields).getValues();
+        List<Pair<String, Object>> after = DocumentUtils.getValues(newDocument, fields).getValues();
+        if (before.size() != after.size()) {
+            return false;
+        }
+        for (int i = 0; i < before.size(); i++) {
+            if (!Objects.equals(before.get(i).getFirst(), after.get(i).getFirst())
+                || !Objects.deepEquals(before.get(i).getSecond(), after.get(i).getSecond())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void writeIndexEntryInternal(IndexDescriptor indexDescriptor, Document document,
