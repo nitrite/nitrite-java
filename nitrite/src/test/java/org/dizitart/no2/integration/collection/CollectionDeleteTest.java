@@ -17,6 +17,7 @@
 
 package org.dizitart.no2.integration.collection;
 
+import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.DocumentCursor;
 import org.dizitart.no2.common.WriteResult;
 import org.dizitart.no2.filters.Filter;
@@ -124,5 +125,25 @@ public class CollectionDeleteTest extends BaseCollectionTest {
         assertEquals(collection.find(where("firstName").eq("fn1")).size(), 0);
         assertEquals(collection.find(where("firstName").eq("fn2")).size(), 0);
         assertEquals(collection.find(where("firstName").eq("fn3")).size(), 1);
+    }
+
+    @Test
+    public void testClearEmptiesEveryIndexLayout() {
+        collection.createIndex(IndexOptions.indexOptions(IndexType.NON_UNIQUE), "lastName");
+        collection.createIndex(IndexOptions.indexOptions(IndexType.UNIQUE), "firstName");
+        collection.insert(Document.createDocument("firstName", "fn").put("lastName", "ln"),
+            Document.createDocument("firstName", "fn2").put("lastName", "ln"));
+        assertEquals(2, collection.find(where("lastName").eq("ln")).toList().size());
+
+        collection.clear();
+        assertEquals(0, collection.find(where("lastName").eq("ln")).size());
+        assertEquals(0, collection.find(where("firstName").eq("fn")).size());
+
+        // fresh documents with the same keys: no stale rows in the composite layout, no stale id in the unique one
+        collection.insert(Document.createDocument("firstName", "fn").put("lastName", "ln"),
+            Document.createDocument("firstName", "fn2").put("lastName", "ln"));
+        assertEquals(2, collection.find(where("lastName").eq("ln")).size());
+        assertEquals(2, collection.find(where("lastName").eq("ln")).toList().size());
+        assertEquals(1, collection.find(where("firstName").eq("fn")).toList().size());
     }
 }

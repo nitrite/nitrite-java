@@ -40,6 +40,8 @@ public class IndexMap {
     // (value, id) pairs (see IndexEntryKey). This IndexMap still presents the classic
     // value -> List<NitriteId> view to the scanner and the filters.
     private NitriteMap<IndexEntryKey, ?> compositeMap;
+    // single-id layout (unique index): values are NitriteIds, exposed as one-element lists
+    private boolean singleValued;
 
     @Getter
     @Setter
@@ -77,6 +79,24 @@ public class IndexMap {
      */
     public static IndexMap composite(NitriteMap<IndexEntryKey, ?> compositeMap) {
         return new IndexMap(compositeMap, true);
+    }
+
+    /**
+     * Instantiates an {@link IndexMap} over a unique index stored in the single-id layout
+     * ({@code value -> id}). The scanner and the filters expect a list of ids under every key,
+     * so each stored id is handed out as a one-element list.
+     *
+     * @param uniqueMap the backing map
+     * @return the index map
+     */
+    public static IndexMap unique(NitriteMap<DBValue, NitriteId> uniqueMap) {
+        IndexMap indexMap = new IndexMap(uniqueMap);
+        indexMap.singleValued = true;
+        return indexMap;
+    }
+
+    private static Object exposeValue(Object value, boolean singleValued) {
+        return singleValued && value instanceof NitriteId ? Collections.singletonList(value) : value;
     }
 
     /**
@@ -228,7 +248,7 @@ public class IndexMap {
             return compositeGet(dbValue == null ? DBNull.getInstance() : dbValue);
         }
         if (nitriteMap != null) {
-            return nitriteMap.get(dbValue);
+            return exposeValue(nitriteMap.get(dbValue), singleValued);
         } else if (navigableMap != null) {
             return navigableMap.get(dbValue);
         }
@@ -284,10 +304,11 @@ public class IndexMap {
                 public Pair<DBValue, ?> next() {
                     Pair<DBValue, ?> next = entryIterator.next();
                     DBValue dbKey = next.getFirst();
+                    Object value = exposeValue(next.getSecond(), singleValued);
                     if (dbKey instanceof DBNull) {
-                        return new Pair<>(null, next.getSecond());
+                        return new Pair<>(null, value);
                     } else {
-                        return new Pair<>(dbKey, next.getSecond());
+                        return new Pair<>(dbKey, value);
                     }
                 }
             };

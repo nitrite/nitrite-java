@@ -48,6 +48,17 @@ public class IndexUtils {
         return deriveIndexMapName(descriptor) + INTERNAL_NAME_SEPARATOR + "composite";
     }
 
+    /**
+     * Derives the name of the map holding a unique index in its single-id layout, one
+     * {@code value -> id} entry per key.
+     *
+     * @param descriptor the index descriptor
+     * @return the map name
+     */
+    public static String deriveUniqueIndexMapName(IndexDescriptor descriptor) {
+        return deriveIndexMapName(descriptor) + INTERNAL_NAME_SEPARATOR + "unique";
+    }
+
     public static String deriveIndexMetaMapName(String collectionName) {
         return INDEX_META_PREFIX + INTERNAL_NAME_SEPARATOR + collectionName;
     }

@@ -28,7 +28,9 @@ import org.dizitart.no2.store.NitriteStore;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.dizitart.no2.common.util.IndexUtils.deriveCompositeIndexMapName;
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
+import static org.dizitart.no2.common.util.IndexUtils.deriveUniqueIndexMapName;
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMetaMapName;
 
 /**
@@ -93,30 +95,55 @@ public class IndexManager implements AutoCloseable {
             Iterable<IndexMeta> indexMetas = indexMetaMap.values();
             for (IndexMeta indexMeta : indexMetas) {
                 if (indexMeta != null && indexMeta.getIndexDescriptor() != null) {
-                    String indexMapName = indexMeta.getIndexMap();
-                    NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
-                    indexMap.close();
+                    for (NitriteMap<?, ?> indexMap : existingLayoutMaps(indexMeta)) {
+                        indexMap.close();
+                    }
                 }
             }
-
             // close index meta
             indexMetaMap.close();
         }
     }
 
     public void clearAll() {
-        // close all index maps
+        // clear and close all index maps
         if (!indexMetaMap.isClosed() && !indexMetaMap.isDropped()) {
             Iterable<IndexMeta> indexMetas = indexMetaMap.values();
             for (IndexMeta indexMeta : indexMetas) {
                 if (indexMeta != null && indexMeta.getIndexDescriptor() != null) {
-                    String indexMapName = indexMeta.getIndexMap();
-                    NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
-                    indexMap.clear();
-                    indexMap.close();
+                    for (NitriteMap<?, ?> indexMap : existingLayoutMaps(indexMeta)) {
+                        indexMap.clear();
+                        indexMap.close();
+                    }
                 }
             }
         }
+    }
+
+    /**
+     * The maps an index actually occupies in the store. {@link IndexMeta#getIndexMap()} records
+     * the classic map name, but a single-field index may instead live in the composite layout
+     * (non-unique) or the single-id layout (unique), each under a derived name of its own, and
+     * an index in mid-migration can briefly have two. Closing, clearing or dropping only the
+     * recorded map leaves the real one behind: after {@code clear()} its stale entries resolve
+     * to deleted documents, and a unique index rejects the very keys the collection no longer
+     * holds.
+     */
+    private List<NitriteMap<?, ?>> existingLayoutMaps(IndexMeta indexMeta) {
+        List<String> names = new ArrayList<>();
+        names.add(indexMeta.getIndexMap());
+        IndexDescriptor descriptor = indexMeta.getIndexDescriptor();
+        if (!descriptor.isCompoundIndex()) {
+            names.add(deriveCompositeIndexMapName(descriptor));
+            names.add(deriveUniqueIndexMapName(descriptor));
+        }
+        List<NitriteMap<?, ?>> maps = new ArrayList<>();
+        for (String name : names) {
+            if (nitriteStore.hasMap(name)) {
+                maps.add(nitriteStore.openMap(name, Object.class, Object.class));
+            }
+        }
+        return maps;
     }
 
     /**
@@ -174,11 +201,10 @@ public class IndexManager implements AutoCloseable {
     void dropIndexDescriptor(Fields fields) {
         IndexMeta meta = indexMetaMap.get(fields);
         if (meta != null && meta.getIndexDescriptor() != null) {
-            String indexMapName = meta.getIndexMap();
-            NitriteMap<?, ?> indexMap = nitriteStore.openMap(indexMapName, Object.class, Object.class);
-            indexMap.drop();
+            for (NitriteMap<?, ?> indexMap : existingLayoutMaps(meta)) {
+                indexMap.drop();
+            }
         }
-
         indexMetaMap.remove(fields);
         updateIndexDescriptorCache();
     }
