@@ -51,9 +51,11 @@ public class MapMetaData implements MetaData {
 
     @SuppressWarnings("unchecked")
     private void populateInfo(Document metadata) {
-        mapNames = (Set<String>) metadata.get(TAG_MAP_METADATA, Set.class);
-        if (mapNames == null) {
-            mapNames = new HashSet<>();
-        }
+        // copy, never adopt: the set handed back here is the instance stored in the catalog
+        // page, and MVStore serializes pages on a background thread that any write may start.
+        // Adding to it in place raced that thread (ConcurrentModificationException inside
+        // HashSet.writeObject, then a store panic) whenever collections were created in a burst.
+        Set<String> stored = (Set<String>) metadata.get(TAG_MAP_METADATA, Set.class);
+        mapNames = stored == null ? new HashSet<>() : new HashSet<>(stored);
     }
 }
