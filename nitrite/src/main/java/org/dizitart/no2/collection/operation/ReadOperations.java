@@ -290,21 +290,22 @@ class ReadOperations {
         if (rawStream == null) {
             return null;
         }
+        RecordStream<Pair<NitriteId, Document>> stream = rawStream;
 
         // the blocking sort still runs whenever the ordered ids were not used - either no
         // index could answer the sort, or the one that could turned out not to cover the
         // collection faithfully
         if (!sortedByIndex && findPlan.getBlockingSortOrder() != null
             && !findPlan.getBlockingSortOrder().isEmpty()) {
-            rawStream = new SortedDocumentStream(findPlan, rawStream);
+            stream = new SortedDocumentStream(findPlan, stream);
         }
 
         if (findPlan.getLimit() != null || findPlan.getSkip() != null) {
             long limit = findPlan.getLimit() == null ? Long.MAX_VALUE : findPlan.getLimit();
             long skip = findPlan.getSkip() == null ? 0 : findPlan.getSkip();
-            rawStream = new BoundedStream<>(skip, limit, rawStream);
+            stream = new BoundedStream<>(skip, limit, stream);
         }
 
-        return rawStream;
+        return stream;
     }
 }
