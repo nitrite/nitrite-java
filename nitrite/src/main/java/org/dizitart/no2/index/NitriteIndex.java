@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
 import org.dizitart.no2.exceptions.ValidationException;
@@ -73,6 +74,19 @@ public interface NitriteIndex {
      * @return the linked hash set
      */
     LinkedHashSet<NitriteId> findNitriteIds(FindPlan findPlan);
+
+    /**
+     * Streams the ids matching the plan lazily, in index order and without duplicates, or
+     * returns {@code null} when this index cannot do so for the given plan, in which case the
+     * caller falls back to {@link #findNitriteIds(FindPlan)}. A stream lets a query that only
+     * needs the first rows, or a bounded page, stop reading the index as soon as it has them.
+     *
+     * @param findPlan the find plan
+     * @return a re-iterable stream of ids, or {@code null}
+     */
+    default RecordStream<NitriteId> findNitriteIdStream(FindPlan findPlan) {
+        return null;
+    }
 
     /**
      * Reads every {@code (indexed value, id)} pair out of the index, so a sorted query can

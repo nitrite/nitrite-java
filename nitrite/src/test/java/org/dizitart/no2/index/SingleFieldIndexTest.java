@@ -24,6 +24,10 @@ import org.dizitart.no2.common.FieldValues;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.filters.IndexScanFilter;
+import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.store.NitriteStore;
+import org.dizitart.no2.store.memory.InMemoryMap;
+import org.dizitart.no2.filters.SortingAwareFilter;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.memory.InMemoryStore;
 import org.junit.Test;
@@ -33,12 +37,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 import static org.dizitart.no2.common.tuples.Pair.pair;
 import static org.dizitart.no2.common.util.IndexUtils.deriveCompositeIndexMapName;
 import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
 import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 public class SingleFieldIndexTest {
     @Test
@@ -107,5 +117,89 @@ public class SingleFieldIndexTest {
         assertFalse(store.hasMap(legacyName));
         assertTrue(store.hasMap(deriveCompositeIndexMapName(desc)));
     }
-}
 
+    @Test
+    public void testLazyStreamMatchesMaterializedScanForEqualityAndRange() {
+        InMemoryStore store = new InMemoryStore();
+        IndexDescriptor desc = new IndexDescriptor(IndexType.NON_UNIQUE, Fields.withNames("k"), "c");
+        SingleFieldIndex index = new SingleFieldIndex(desc, store);
+        for (long id = 1; id <= 30; id++) {
+            index.write(values(id, "k", (int) (id % 5)));           // five keys, six ids each
+        }
+        index.write(values(31L, "k", new int[]{1, 2, 3}));          // one document under three keys
+
+        FindPlan eq = plan(desc, Collections.singletonList((ComparableFilter) where("k").eq(2)), null);
+        assertEquals(new ArrayList<>(index.findNitriteIds(eq)), index.findNitriteIdStream(eq).toList());
+
+        List<ComparableFilter> between = Arrays.asList((ComparableFilter) where("k").gte(1), (ComparableFilter) where("k").lt(3));
+        FindPlan range = plan(desc, between, null);
+        assertEquals(new ArrayList<>(index.findNitriteIds(range)), index.findNitriteIdStream(range).toList());
+        assertEquals("id 31 is under two keys of the range but returned once", 13, index.findNitriteIdStream(range).toList().size());
+
+        Map<String, Boolean> descending = new HashMap<>();
+        descending.put("k", true);
+        FindPlan reversed = plan(desc, between, descending);
+        assertEquals(new ArrayList<>(index.findNitriteIds(reversed)), index.findNitriteIdStream(reversed).toList());
+        // key groups are visited backwards, ids inside a group keep their stored order
+        List<NitriteId> forward = index.findNitriteIdStream(range).toList();
+        List<NitriteId> backward = index.findNitriteIdStream(reversed).toList();
+        assertEquals(NitriteId.createId(1L), forward.get(0));
+        assertEquals(NitriteId.createId(2L), backward.get(0));
+        assertEquals(forward.size(), backward.size());
+    }
+
+    @Test
+    public void testLazyStreamDeclinesShapesItDoesNotServe() {
+        InMemoryStore store = new InMemoryStore();
+        IndexDescriptor desc = new IndexDescriptor(IndexType.NON_UNIQUE, Fields.withNames("k"), "c");
+        SingleFieldIndex index = new SingleFieldIndex(desc, store);
+        index.write(values(1L, "k", 1));
+
+        assertNull("one-sided range", index.findNitriteIdStream(plan(desc, Collections.singletonList((ComparableFilter) where("k").gt(0)), null)));
+        assertNull("in filter", index.findNitriteIdStream(plan(desc, Collections.singletonList((ComparableFilter) where("k").in(1, 2)), null)));
+        assertNull("no scan filter", index.findNitriteIdStream(new FindPlan()));
+
+        IndexDescriptor unique = new IndexDescriptor(IndexType.UNIQUE, Fields.withNames("k"), "c");
+        SingleFieldIndex uniqueIndex = new SingleFieldIndex(unique, store);
+        uniqueIndex.write(values(1L, "k", 1));
+        assertNull("unique layout", uniqueIndex.findNitriteIdStream(plan(unique, Collections.singletonList((ComparableFilter) where("k").eq(1)), null)));
+    }
+
+    @Test
+    public void testLazyStreamReadsOnlyAsFarAsConsumed() {
+        IndexDescriptor desc = new IndexDescriptor(IndexType.NON_UNIQUE, Fields.withNames("k"), "c");
+        InMemoryMap<IndexEntryKey, Object> composite = spy(new InMemoryMap<>(deriveCompositeIndexMapName(desc), new InMemoryStore()));
+        for (long id = 1; id <= 500; id++) {
+            composite.put(new IndexEntryKey(new DBValue("same"), NitriteId.createId(id)), Boolean.TRUE);
+        }
+        NitriteStore<?> store = mock(NitriteStore.class);
+        when(store.hasMap(anyString())).thenReturn(false);
+        doReturn(composite).when(store).openMap(eq(deriveCompositeIndexMapName(desc)), any(), any());
+        clearInvocations(composite);
+
+        SingleFieldIndex index = new SingleFieldIndex(desc, store);
+        FindPlan eq = plan(desc, Collections.singletonList((ComparableFilter) where("k").eq("same")), null);
+        RecordStream<NitriteId> stream = index.findNitriteIdStream(eq);
+        assertNotNull(stream);
+
+        assertEquals(NitriteId.createId(1L), stream.iterator().next());
+        verify(composite, atMost(2)).higherKey(any());
+        verify(composite, never()).entries();
+        assertEquals(500, stream.toList().size());
+    }
+
+    private static FindPlan plan(IndexDescriptor desc, List<ComparableFilter> filters, Map<String, Boolean> scanOrder) {
+        FindPlan plan = new FindPlan();
+        plan.setIndexDescriptor(desc);
+        plan.setIndexScanFilter(new IndexScanFilter(filters));
+        plan.setIndexScanOrder(scanOrder);
+        return plan;
+    }
+
+    private static FieldValues values(long id, String field, Object value) {
+        FieldValues fieldValues = new FieldValues();
+        fieldValues.setNitriteId(NitriteId.createId(id));
+        fieldValues.getValues().add(pair(field, value));
+        return fieldValues;
+    }
+}

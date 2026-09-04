@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.module.NitritePlugin;
 import org.dizitart.no2.common.tuples.Pair;
@@ -87,6 +88,19 @@ public interface NitriteIndexer extends NitritePlugin {
      * @return a set of NitriteIds of the documents that match the given filter.
      */
     LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig);
+
+    /**
+     * Streams the ids matching the plan lazily, or returns {@code null} when the indexer has no
+     * lazy path for it and {@link #findByFilter(FindPlan, NitriteConfig)} must be used. The
+     * default is {@code null}, so existing indexer plugins are unaffected.
+     *
+     * @param findPlan      the find plan
+     * @param nitriteConfig the nitrite config
+     * @return a re-iterable stream of ids, or {@code null}
+     */
+    default RecordStream<NitriteId> findByFilterStream(FindPlan findPlan, NitriteConfig nitriteConfig) {
+        return null;
+    }
 
     /**
      * Reads every {@code (indexed value, id)} pair out of the given index, so a sorted query
