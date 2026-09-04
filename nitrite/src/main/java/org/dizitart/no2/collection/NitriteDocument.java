@@ -27,6 +27,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -155,23 +157,122 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
         }
     }
 
+    /**
+     * Returns a deep copy of this document.
+     * <p>
+     * Every value that can be modified in place is copied: embedded documents, collections,
+     * maps, arrays (including {@code byte[]}), {@link Date}s and {@link Calendar}s, recursively
+     * at any depth. Immutable values (strings, boxed primitives, enums, {@code java.time}
+     * types and the like) are shared. A value of a type this method does not know how to copy
+     * is shared as well, so store immutable values or copy them yourself.
+     * <p>
+     * This is what makes copy-on-read safe: the cursor hands out clones, and nothing reachable
+     * from a clone is the instance kept by the store.
+     */
     @Override
     @SuppressWarnings("unchecked")
     public Document clone() {
         Map<String, Object> cloned = (Map<String, Object>) super.clone();
-
-        // create the clone of any embedded documents as well
         for (Map.Entry<String, Object> entry : cloned.entrySet()) {
-            if (entry.getValue() instanceof Document) {
-                Document value = (Document) entry.getValue();
-
-                // this will recursively take care any embedded document
-                // of the clone as well
-                Document clonedValue = value.clone();
-                cloned.put(entry.getKey(), clonedValue);
-            }
+            entry.setValue(deepCopy(entry.getValue()));
         }
         return new NitriteDocument(cloned);
+    }
+
+    private static Object deepCopy(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof Document) {
+            return ((Document) value).clone();
+        }
+        if (value instanceof Collection) {
+            return deepCopyCollection((Collection<Object>) value);
+        }
+        if (value instanceof Map) {
+            return deepCopyMap((Map<Object, Object>) value);
+        }
+        if (value.getClass().isArray()) {
+            return deepCopyArray(value);
+        }
+        if (value instanceof Date) {
+            return ((Date) value).clone();
+        }
+        if (value instanceof Calendar) {
+            return ((Calendar) value).clone();
+        }
+        // immutable scalars, and opaque objects that cannot be copied generically
+        return value;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Collection<Object> deepCopyCollection(Collection<Object> source) {
+        Collection<Object> copy;
+        if (source instanceof SortedSet) {
+            // a fresh instance of the same class would lose the comparator
+            copy = new TreeSet<>(((SortedSet<Object>) source).comparator());
+        } else {
+            copy = newInstanceOrNull(source);
+            if (copy == null) {
+                copy = source instanceof Set ? new LinkedHashSet<>() : new ArrayList<>(source.size());
+            }
+        }
+        for (Object element : source) {
+            copy.add(deepCopy(element));
+        }
+        return copy;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<Object, Object> deepCopyMap(Map<Object, Object> source) {
+        Map<Object, Object> copy;
+        if (source instanceof SortedMap) {
+            copy = new TreeMap<>(((SortedMap<Object, Object>) source).comparator());
+        } else {
+            copy = newInstanceOrNull(source);
+            if (copy == null) {
+                copy = new LinkedHashMap<>();
+            }
+        }
+        // keys are expected to be immutable; only the values are copied
+        for (Map.Entry<Object, Object> entry : source.entrySet()) {
+            copy.put(entry.getKey(), deepCopy(entry.getValue()));
+        }
+        return copy;
+    }
+
+    private static Object deepCopyArray(Object source) {
+        Class<?> componentType = source.getClass().getComponentType();
+        int length = Array.getLength(source);
+        Object copy = Array.newInstance(componentType, length);
+        if (componentType.isPrimitive()) {
+            System.arraycopy(source, 0, copy, 0, length);
+        } else {
+            Object[] from = (Object[]) source;
+            Object[] to = (Object[]) copy;
+            for (int i = 0; i < length; i++) {
+                to[i] = deepCopy(from[i]);
+            }
+        }
+        return copy;
+    }
+
+    /**
+     * A new, empty instance of the same class as {@code source} when it has a public no-arg
+     * constructor (ArrayList, LinkedList, HashSet, ...), otherwise {@code null}. Unmodifiable
+     * and JDK-internal collections fall through to the caller's default.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> T newInstanceOrNull(T source) {
+        Class<?> type = source.getClass();
+        if (!Modifier.isPublic(type.getModifiers())) {
+            return null;
+        }
+        try {
+            return (T) type.getConstructor().newInstance();
+        } catch (ReflectiveOperationException | RuntimeException e) {
+            return null;
+        }
     }
 
     @Override
