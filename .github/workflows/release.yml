@@ -18,7 +18,6 @@ jobs:
     # six-hour default: dbinspect's pub job hung for 2h40m on exactly that.
     timeout-minutes: 60
     env:
-      JAVA_OPTS: "-XX:+TieredCompilation -XX:TieredStopAtLevel=1"
       MAVEN_USERNAME: ${{ secrets.OSSRH_USER }}
       MAVEN_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
       PGP_KEY_ID: ${{ secrets.PGP_KEY_ID }}
