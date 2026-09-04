@@ -222,12 +222,11 @@ class ReadOperations {
                 NitriteId nitriteId = idValue instanceof Long
                     ? NitriteId.createId((long) idValue)
                     : NitriteId.createId(String.valueOf(idValue));
-                if (nitriteMap.containsKey(nitriteId)) {
-                    Document document = nitriteMap.get(nitriteId);
-                    rawStream = RecordStream.single(pair(nitriteId, document));
-                } else {
-                    rawStream = RecordStream.empty();
-                }
+                // one lookup: a document removed between containsKey and get would be a null row
+                Document document = nitriteMap.get(nitriteId);
+                rawStream = document == null
+                    ? RecordStream.empty()
+                    : RecordStream.single(pair(nitriteId, document));
             } else {
                 IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
                 if (indexDescriptor != null) {

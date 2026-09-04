@@ -89,7 +89,8 @@ public class FilteredStream implements RecordStream<Pair<NitriteId, Document>> {
         private boolean setNextId() {
             while (iterator.hasNext()) {
                 final Pair<NitriteId, Document> pair = iterator.next();
-                if (filter.apply(pair)) {
+                // a row whose document is gone is not a match for anything
+                if (pair.getSecond() != null && filter.apply(pair)) {
                     nextPair = pair;
                     nextPairSet = true;
                     return true;

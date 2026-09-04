@@ -24,6 +24,7 @@ import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -49,6 +50,7 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
             SkippableIterator {
         private final Iterator<NitriteId> iterator;
         private final NitriteMap<NitriteId, Document> nitriteMap;
+        private Pair<NitriteId, Document> next;
 
         IndexedStreamIterator(Iterator<NitriteId> iterator,
                               NitriteMap<NitriteId, Document> nitriteMap) {
@@ -58,7 +60,7 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
 
         @Override
         public boolean hasNext() {
-            return iterator.hasNext();
+            return next != null || advance();
         }
 
         /**
@@ -68,6 +70,10 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
         @Override
         public long skip(long count) {
             long skipped = 0;
+            if (next != null && count > 0) {
+                next = null;
+                skipped++;
+            }
             while (skipped < count && iterator.hasNext()) {
                 iterator.next();
                 skipped++;
@@ -77,9 +83,28 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
 
         @Override
         public Pair<NitriteId, Document> next() {
-            NitriteId id = iterator.next();
-            Document document = nitriteMap.get(id);
-            return new Pair<>(id, document);
+            if (next == null && !advance()) {
+                throw new NoSuchElementException();
+            }
+            Pair<NitriteId, Document> current = next;
+            next = null;
+            return current;
+        }
+
+        /**
+         * A document removed between the index lookup and the fetch is no longer a row: it is
+         * skipped rather than handed downstream as a null for a residual filter to dereference.
+         */
+        private boolean advance() {
+            while (iterator.hasNext()) {
+                NitriteId id = iterator.next();
+                Document document = nitriteMap.get(id);
+                if (document != null) {
+                    next = new Pair<>(id, document);
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
