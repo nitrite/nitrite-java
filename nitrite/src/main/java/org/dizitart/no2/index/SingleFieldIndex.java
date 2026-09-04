@@ -27,13 +27,20 @@ import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.filters.ComparableFilter;
 import org.dizitart.no2.exceptions.UniqueConstraintException;
+import org.dizitart.no2.common.RecordStream;
+import org.dizitart.no2.filters.EqualsFilter;
+import org.dizitart.no2.filters.SortingAwareFilter;
+import org.dizitart.no2.filters.SortingAwareFilter.ComparisonMode;
 import org.dizitart.no2.store.NitriteMap;
 import org.dizitart.no2.store.NitriteStore;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.dizitart.no2.common.util.IndexUtils.deriveCompositeIndexMapName;
@@ -145,6 +152,219 @@ public class SingleFieldIndex implements NitriteIndex {
             ? IndexMap.composite(findCompositeMap())
             : IndexMap.unique(findUniqueMap());
         return scanIndex(findPlan, iMap);
+    }
+
+    /**
+     * A lazy id stream for the two plan shapes the composite layout answers with one bounded
+     * walk of the map: an equality on the indexed field, and a two-sided range on it. The walk
+     * starts at the first key inside the bounds and stops at the first key outside them, so a
+     * caller that wants the first row, or a page, reads only that far. Every other shape, and
+     * the unique layout, returns {@code null} and is served by {@link #findNitriteIds(FindPlan)}.
+     */
+    @Override
+    public RecordStream<NitriteId> findNitriteIdStream(FindPlan findPlan) {
+        if (!useCompositeLayout() || findPlan.getIndexScanFilter() == null) {
+            return null;
+        }
+        List<ComparableFilter> filters = findPlan.getIndexScanFilter().getFilters();
+        Range range = Range.of(filters);
+        if (range == null) {
+            return null;
+        }
+        String field = filters.get(0).getField();
+        boolean reverse = findPlan.getIndexScanOrder() != null
+            && Boolean.TRUE.equals(findPlan.getIndexScanOrder().get(field));
+        NitriteMap<IndexEntryKey, Object> compositeMap = findCompositeMap();
+        return RecordStream.fromIterable(() -> new CompositeRangeIterator(compositeMap, range, reverse));
+    }
+
+    /** Inclusive-or-exclusive bounds on the indexed value; {@code null} when a plan has another shape. */
+    private static final class Range {
+        private final DBValue lower;
+        private final boolean lowerInclusive;
+        private final DBValue upper;
+        private final boolean upperInclusive;
+
+        private Range(DBValue lower, boolean lowerInclusive, DBValue upper, boolean upperInclusive) {
+            this.lower = lower;
+            this.lowerInclusive = lowerInclusive;
+            this.upper = upper;
+            this.upperInclusive = upperInclusive;
+        }
+
+        static Range of(List<ComparableFilter> filters) {
+            if (filters == null || filters.isEmpty()) {
+                return null;
+            }
+            if (filters.size() == 1 && filters.get(0).getClass() == EqualsFilter.class) {
+                return ofEquality(filters.get(0));
+            }
+            return ofBoundedRange(filters);
+        }
+
+        /** {@code field = value}, which is the degenerate range with both bounds on that value. */
+        private static Range ofEquality(ComparableFilter filter) {
+            Object value = filter.getValue();
+            if (value == null) {
+                return new Range(DBNull.getInstance(), true, DBNull.getInstance(), true);
+            }
+            if (!(value instanceof Comparable)) {
+                return null;
+            }
+            DBValue key = new DBValue((Comparable<?>) value);
+            return new Range(key, true, key, true);
+        }
+
+        private static boolean isLowerBound(ComparisonMode mode) {
+            return mode == ComparisonMode.GreaterEqual || mode == ComparisonMode.Greater;
+        }
+
+        private static boolean isUpperBound(ComparisonMode mode) {
+            return mode == ComparisonMode.LesserEqual || mode == ComparisonMode.Lesser;
+        }
+
+        /** A two-sided range on one field, the same shape {@code IndexScanner.scanBoundedRange} takes. */
+        private static Range ofBoundedRange(List<ComparableFilter> filters) {
+            String field = filters.get(0).getField();
+            DBValue lower = null;
+            DBValue upper = null;
+            boolean lowerInclusive = false;
+            boolean upperInclusive = false;
+            for (ComparableFilter filter : filters) {
+                if (!(filter instanceof SortingAwareFilter) || field == null || !field.equals(filter.getField())) {
+                    return null;
+                }
+                Object value = filter.getValue();
+                if (!(value instanceof Comparable)) {
+                    return null;
+                }
+                DBValue key = new DBValue((Comparable<?>) value);
+                ComparisonMode mode = ((SortingAwareFilter) filter).getComparisonMode();
+                if (isLowerBound(mode)) {
+                    if (lower != null) {
+                        return null;
+                    }
+                    lower = key;
+                    lowerInclusive = mode == ComparisonMode.GreaterEqual;
+                } else if (isUpperBound(mode)) {
+                    if (upper != null) {
+                        return null;
+                    }
+                    upper = key;
+                    upperInclusive = mode == ComparisonMode.LesserEqual;
+                } else {
+                    return null;
+                }
+            }
+            return lower == null || upper == null ? null : new Range(lower, lowerInclusive, upper, upperInclusive);
+        }
+    }
+
+    /**
+     * Walks the composite map between the bounds, in index order or in reverse, skipping
+     * entries removed in an open transaction and ids already returned (a multi-valued field
+     * indexes one document under several keys). Ids sharing a key are always returned in their
+     * stored order, so a reverse walk visits the key groups backwards but reads each group
+     * forwards, exactly as the materialized scan orders them.
+     */
+    private static final class CompositeRangeIterator implements Iterator<NitriteId> {
+        private final NitriteMap<IndexEntryKey, Object> map;
+        private final Range range;
+        private final boolean reverse;
+        private final Set<NitriteId> seen = new HashSet<>();
+        private final ArrayDeque<NitriteId> group = new ArrayDeque<>();
+        private IndexEntryKey key;
+        private NitriteId next;
+        private boolean started;
+
+        CompositeRangeIterator(NitriteMap<IndexEntryKey, Object> map, Range range, boolean reverse) {
+            this.map = map;
+            this.range = range;
+            this.reverse = reverse;
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (next == null) {
+                advance();
+            }
+            return next != null;
+        }
+
+        @Override
+        public NitriteId next() {
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }
+            NitriteId id = next;
+            next = null;
+            return id;
+        }
+
+        private void advance() {
+            if (!started) {
+                started = true;
+                key = seek();
+            }
+            while (true) {
+                while (!group.isEmpty()) {
+                    NitriteId id = group.pollFirst();
+                    if (seen.add(id)) {
+                        next = id;
+                        return;
+                    }
+                }
+                if (key == null || !within(key)) {
+                    key = null;
+                    return;
+                }
+                if (reverse) {
+                    // read this key's group forwards, then continue below it
+                    DBValue value = key.getValue();
+                    for (IndexEntryKey k = map.ceilingKey(IndexEntryKey.lowerBound(value));
+                         k != null && k.getValue().compareTo(value) == 0;
+                         k = map.higherKey(k)) {
+                        if (map.get(k) != null) {
+                            group.addLast(k.getNitriteId());
+                        }
+                    }
+                    key = map.lowerKey(IndexEntryKey.lowerBound(value));
+                } else {
+                    IndexEntryKey current = key;
+                    key = map.higherKey(current);
+                    if (map.get(current) != null) {
+                        // removed in the current transaction otherwise; navigation still surfaces the key
+                        group.addLast(current.getNitriteId());
+                    }
+                }
+            }
+        }
+
+        /**
+         * The first key of the walk: the entry nearest the bound the walk starts from, on the
+         * inside of it. A bound's own sentinel key sorts before ({@code lowerBound}) or after
+         * ({@code upperBound}) every real entry holding that value, which is what turns each
+         * of the four cases into one navigation call.
+         */
+        private IndexEntryKey seek() {
+            if (reverse) {
+                return range.upperInclusive
+                    ? map.floorKey(IndexEntryKey.upperBound(range.upper))
+                    : map.lowerKey(IndexEntryKey.lowerBound(range.upper));
+            }
+            return range.lowerInclusive
+                ? map.ceilingKey(IndexEntryKey.lowerBound(range.lower))
+                : map.higherKey(IndexEntryKey.upperBound(range.lower));
+        }
+
+        private boolean within(IndexEntryKey candidate) {
+            if (reverse) {
+                int cmp = candidate.getValue().compareTo(range.lower);
+                return range.lowerInclusive ? cmp >= 0 : cmp > 0;
+            }
+            int cmp = candidate.getValue().compareTo(range.upper);
+            return range.upperInclusive ? cmp <= 0 : cmp < 0;
+        }
     }
 
     @Override

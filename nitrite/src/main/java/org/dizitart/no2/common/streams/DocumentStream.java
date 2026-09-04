@@ -33,6 +33,7 @@ import org.dizitart.no2.common.util.Iterables;
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.function.LongSupplier;
 
 /**
  * @since 4.0
@@ -53,6 +54,13 @@ public class DocumentStream implements DocumentCursor {
     @Setter
     private Long coveredCount;
 
+    /**
+     * Answers {@link #size()} from the index on demand when the match count is known to be
+     * covered but the ids are streamed lazily rather than materialized; evaluated once.
+     */
+    @Setter
+    private LongSupplier coveredCountSupplier;
+
     public DocumentStream(RecordStream<Pair<NitriteId, Document>> recordStream,
                           ProcessorChain processorChain) {
         this.recordStream = recordStream;
@@ -62,6 +70,10 @@ public class DocumentStream implements DocumentCursor {
     @Override
     public long size() {
         if (coveredCount != null) {
+            return coveredCount;
+        }
+        if (coveredCountSupplier != null) {
+            coveredCount = coveredCountSupplier.getAsLong();
             return coveredCount;
         }
         return Iterables.size(this);

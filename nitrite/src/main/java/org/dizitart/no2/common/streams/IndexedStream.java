@@ -25,7 +25,6 @@ import org.dizitart.no2.store.NitriteMap;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 /**
  * @author Anindya Chatterjee
@@ -33,9 +32,9 @@ import java.util.Set;
  */
 public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
     private final NitriteMap<NitriteId, Document> nitriteMap;
-    private final Set<NitriteId> nitriteIds;
+    private final Iterable<NitriteId> nitriteIds;
 
-    public IndexedStream(Set<NitriteId> nitriteIds,
+    public IndexedStream(Iterable<NitriteId> nitriteIds,
                   NitriteMap<NitriteId, Document> nitriteMap) {
         this.nitriteIds = nitriteIds;
         this.nitriteMap = nitriteMap;
@@ -44,6 +43,20 @@ public class IndexedStream implements RecordStream<Pair<NitriteId, Document>> {
     @Override
     public Iterator<Pair<NitriteId, Document>> iterator() {
         return new IndexedStreamIterator(nitriteIds.iterator(), nitriteMap);
+    }
+
+    /**
+     * Counts the ids the index supplied, walking the id source only, without fetching a
+     * single document.
+     *
+     * @return the number of ids
+     */
+    public long countIds() {
+        long count = 0;
+        for (NitriteId ignored : nitriteIds) {
+            count++;
+        }
+        return count;
     }
 
     private static class IndexedStreamIterator implements Iterator<Pair<NitriteId, Document>>,

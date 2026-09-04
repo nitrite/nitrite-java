@@ -21,6 +21,7 @@ import org.dizitart.no2.collection.FindPlan;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBValue;
 import org.dizitart.no2.common.FieldValues;
+import org.dizitart.no2.common.RecordStream;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.tuples.Pair;
 import org.dizitart.no2.exceptions.IndexingException;
@@ -64,6 +65,12 @@ public abstract class ComparableIndexer implements NitriteIndexer {
     public LinkedHashSet<NitriteId> findByFilter(FindPlan findPlan, NitriteConfig nitriteConfig) {
         NitriteIndex nitriteIndex = findNitriteIndex(findPlan.getIndexDescriptor(), nitriteConfig);
         return nitriteIndex.findNitriteIds(findPlan);
+    }
+
+    @Override
+    public RecordStream<NitriteId> findByFilterStream(FindPlan findPlan, NitriteConfig nitriteConfig) {
+        NitriteIndex nitriteIndex = findNitriteIndex(findPlan.getIndexDescriptor(), nitriteConfig);
+        return nitriteIndex.findNitriteIdStream(findPlan);
     }
 
     @Override
