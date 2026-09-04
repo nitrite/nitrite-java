@@ -48,7 +48,9 @@ public class LazyIndexScanTest {
         collection.createIndex(indexOptions(NON_UNIQUE), "k");
         collection.createIndex(indexOptions(NON_UNIQUE), "tags");
         for (int i = 0; i < 200; i++) {
-            collection.insert(Document.createDocument("n", i).put("k", i % 10).put("tags", new String[]{"t" + (i % 3), "x"}));
+            collection.insert(Document.createDocument("n", i)
+                .put("k", i % 10)
+                .put("tags", new String[]{"t" + (i % 3), "x"}));
         }
     }
 
@@ -74,7 +76,9 @@ public class LazyIndexScanTest {
         assertEquals(2, ascending.get(0).get("k", Integer.class).intValue());
         assertEquals(4, ascending.get(ascending.size() - 1).get("k", Integer.class).intValue());
 
-        List<Document> descending = collection.find(where("k").between(2, 4), orderBy("k", SortOrder.Descending)).toList();
+        List<Document> descending = collection
+            .find(where("k").between(2, 4), orderBy("k", SortOrder.Descending))
+            .toList();
         assertEquals(60, descending.size());
         assertEquals(4, descending.get(0).get("k", Integer.class).intValue());
         assertEquals(2, descending.get(descending.size() - 1).get("k", Integer.class).intValue());

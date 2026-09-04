@@ -293,9 +293,7 @@ public class SingleFieldIndex implements NitriteIndex {
         private void advance() {
             if (!started) {
                 started = true;
-                key = reverse
-                    ? (range.upperInclusive ? map.floorKey(IndexEntryKey.upperBound(range.upper)) : map.lowerKey(IndexEntryKey.lowerBound(range.upper)))
-                    : (range.lowerInclusive ? map.ceilingKey(IndexEntryKey.lowerBound(range.lower)) : map.higherKey(IndexEntryKey.upperBound(range.lower)));
+                key = seek();
             }
             while (true) {
                 while (!group.isEmpty()) {
@@ -329,6 +327,23 @@ public class SingleFieldIndex implements NitriteIndex {
                     }
                 }
             }
+        }
+
+        /**
+         * The first key of the walk: the entry nearest the bound the walk starts from, on the
+         * inside of it. A bound's own sentinel key sorts before ({@code lowerBound}) or after
+         * ({@code upperBound}) every real entry holding that value, which is what turns each
+         * of the four cases into one navigation call.
+         */
+        private IndexEntryKey seek() {
+            if (reverse) {
+                return range.upperInclusive
+                    ? map.floorKey(IndexEntryKey.upperBound(range.upper))
+                    : map.lowerKey(IndexEntryKey.lowerBound(range.upper));
+            }
+            return range.lowerInclusive
+                ? map.ceilingKey(IndexEntryKey.lowerBound(range.lower))
+                : map.higherKey(IndexEntryKey.upperBound(range.lower));
         }
 
         private boolean within(IndexEntryKey candidate) {

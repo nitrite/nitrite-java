@@ -216,10 +216,12 @@ public class SingleFieldIndexTest {
         FindPlan eq = plan(desc, Collections.singletonList((ComparableFilter) where("k").eq(2)), null);
         assertEquals(new ArrayList<>(index.findNitriteIds(eq)), index.findNitriteIdStream(eq).toList());
 
-        List<ComparableFilter> between = Arrays.asList((ComparableFilter) where("k").gte(1), (ComparableFilter) where("k").lt(3));
+        List<ComparableFilter> between = Arrays.asList(
+            (ComparableFilter) where("k").gte(1), (ComparableFilter) where("k").lt(3));
         FindPlan range = plan(desc, between, null);
         assertEquals(new ArrayList<>(index.findNitriteIds(range)), index.findNitriteIdStream(range).toList());
-        assertEquals("id 31 is under two keys of the range but returned once", 13, index.findNitriteIdStream(range).toList().size());
+        assertEquals("id 31 is under two keys of the range but returned once",
+            13, index.findNitriteIdStream(range).toList().size());
 
         Map<String, Boolean> descending = new HashMap<>();
         descending.put("k", true);
@@ -240,20 +242,24 @@ public class SingleFieldIndexTest {
         SingleFieldIndex index = new SingleFieldIndex(desc, store);
         index.write(values(1L, "k", 1));
 
-        assertNull("one-sided range", index.findNitriteIdStream(plan(desc, Collections.singletonList((ComparableFilter) where("k").gt(0)), null)));
-        assertNull("in filter", index.findNitriteIdStream(plan(desc, Collections.singletonList((ComparableFilter) where("k").in(1, 2)), null)));
+        assertNull("one-sided range", index.findNitriteIdStream(
+            plan(desc, Collections.singletonList((ComparableFilter) where("k").gt(0)), null)));
+        assertNull("in filter", index.findNitriteIdStream(
+            plan(desc, Collections.singletonList((ComparableFilter) where("k").in(1, 2)), null)));
         assertNull("no scan filter", index.findNitriteIdStream(new FindPlan()));
 
         IndexDescriptor unique = new IndexDescriptor(IndexType.UNIQUE, Fields.withNames("k"), "c");
         SingleFieldIndex uniqueIndex = new SingleFieldIndex(unique, store);
         uniqueIndex.write(values(1L, "k", 1));
-        assertNull("unique layout", uniqueIndex.findNitriteIdStream(plan(unique, Collections.singletonList((ComparableFilter) where("k").eq(1)), null)));
+        assertNull("unique layout", uniqueIndex.findNitriteIdStream(
+            plan(unique, Collections.singletonList((ComparableFilter) where("k").eq(1)), null)));
     }
 
     @Test
     public void testLazyStreamReadsOnlyAsFarAsConsumed() {
         IndexDescriptor desc = new IndexDescriptor(IndexType.NON_UNIQUE, Fields.withNames("k"), "c");
-        InMemoryMap<IndexEntryKey, Object> composite = spy(new InMemoryMap<>(deriveCompositeIndexMapName(desc), new InMemoryStore()));
+        InMemoryMap<IndexEntryKey, Object> composite = spy(
+            new InMemoryMap<>(deriveCompositeIndexMapName(desc), new InMemoryStore()));
         for (long id = 1; id <= 500; id++) {
             composite.put(new IndexEntryKey(new DBValue("same"), NitriteId.createId(id)), Boolean.TRUE);
         }
