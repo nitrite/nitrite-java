@@ -76,10 +76,15 @@ class ReadOperations {
 
     Document getById(NitriteId nitriteId) {
         Document document = nitriteMap.get(nitriteId);
-        if (processorChain != null) {
-            document = processorChain.processAfterRead(document);
+        if (document == null) {
+            return null;
         }
-        return document;
+        // hand out a copy, as the cursor does: the caller must never reach the stored instance
+        Document copy = document.clone();
+        if (processorChain != null) {
+            copy = processorChain.processAfterRead(copy);
+        }
+        return copy;
     }
 
     private void prepareFilter(Filter filter) {

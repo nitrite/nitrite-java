@@ -6,8 +6,7 @@ import org.dizitart.no2.exceptions.InvalidOperationException;
 import org.dizitart.no2.exceptions.ValidationException;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -144,6 +143,70 @@ public class NitriteDocumentTest {
         NitriteDocument nitriteDocument = new NitriteDocument();
         nitriteDocument.put("Field", new NitriteDocument());
         assertEquals(1, nitriteDocument.clone().size());
+    }
+
+    @Test
+    public void testCloneCopiesNestedContainers() {
+        List<Object> tags = new LinkedList<>(Arrays.asList("a", "b"));
+        NitriteDocument embedded = new NitriteDocument();
+        embedded.put("n", 1);
+        List<Document> embeddedList = new ArrayList<>(Collections.singletonList(embedded));
+        Map<String, Object> map = new HashMap<>();
+        map.put("k", new ArrayList<>(Collections.singletonList("v")));
+        byte[] bytes = {1, 2, 3};
+        int[] ints = {1, 2, 3};
+        Date date = new Date(1000L);
+        SortedSet<String> sorted = new TreeSet<>(Comparator.reverseOrder());
+        sorted.addAll(Arrays.asList("x", "y"));
+
+        NitriteDocument original = new NitriteDocument();
+        original.put("tags", tags);
+        original.put("docs", embeddedList);
+        original.put("map", map);
+        original.put("bytes", bytes);
+        original.put("ints", ints);
+        original.put("date", date);
+        original.put("sorted", sorted);
+        original.put("fixed", Collections.unmodifiableList(Arrays.asList("p", "q")));
+        original.put("name", "immutable");
+
+        Document clone = original.clone();
+        assertEquals(original, clone);
+
+        // nothing mutable is shared
+        assertNotSame(tags, clone.get("tags"));
+        assertNotSame(embeddedList, clone.get("docs"));
+        assertNotSame(embedded, ((List<?>) clone.get("docs")).get(0));
+        assertNotSame(map, clone.get("map"));
+        assertNotSame(map.get("k"), ((Map<?, ?>) clone.get("map")).get("k"));
+        assertNotSame(bytes, clone.get("bytes"));
+        assertNotSame(ints, clone.get("ints"));
+        assertNotSame(date, clone.get("date"));
+        assertNotSame(sorted, clone.get("sorted"));
+        assertSame("immutable values are shared", original.get("name"), clone.get("name"));
+
+        // mutating the clone leaves the original untouched
+        ((List<Object>) clone.get("tags")).add("c");
+        ((Document) ((List<?>) clone.get("docs")).get(0)).put("n", 2);
+        ((List<Object>) ((Map<?, ?>) clone.get("map")).get("k")).clear();
+        ((byte[]) clone.get("bytes"))[0] = 9;
+        ((int[]) clone.get("ints"))[0] = 9;
+        ((Date) clone.get("date")).setTime(2000L);
+        ((List<Object>) clone.get("fixed")).add("r");
+        assertEquals(Arrays.asList("a", "b"), tags);
+        assertEquals(1, embedded.get("n"));
+        assertEquals(Collections.singletonList("v"), map.get("k"));
+        assertEquals(1, bytes[0]);
+        assertEquals(1, ints[0]);
+        assertEquals(1000L, date.getTime());
+        assertEquals(2, ((List<?>) original.get("fixed")).size());
+
+        // container types and comparators survive the copy
+        assertTrue(clone.get("tags") instanceof LinkedList);
+        assertTrue(clone.get("map") instanceof HashMap);
+        SortedSet<?> sortedCopy = (SortedSet<?>) clone.get("sorted");
+        assertEquals("y", sortedCopy.first());
+        assertNotNull(sortedCopy.comparator());
     }
 
     @Test
