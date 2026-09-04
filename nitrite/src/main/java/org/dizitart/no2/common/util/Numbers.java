@@ -32,9 +32,39 @@ public class Numbers {
     public static int compare(Number x, Number y) {
         if (isSpecial(x) || isSpecial(y)) {
             return Double.compare(x.doubleValue(), y.doubleValue());
-        } else {
-            return toBigDecimal(x).compareTo(toBigDecimal(y));
         }
+
+        // Every index key comparison lands here, and going through BigDecimal allocates two
+        // objects per call. The common cases can be answered exactly without it: any two
+        // integral primitives fit a long, two doubles or two floats compare as themselves
+        // once NaN and the infinities are out of the way (with -0.0 and 0.0 equal, as
+        // BigDecimal treats them), and two BigDecimals or two BigIntegers already have a
+        // compareTo. Everything else, and every mixed pairing, keeps the exact conversion.
+        if (isIntegral(x) && isIntegral(y)) {
+            return Long.compare(x.longValue(), y.longValue());
+        }
+        if (x instanceof Double && y instanceof Double) {
+            return compareFinite(x.doubleValue(), y.doubleValue());
+        }
+        if (x instanceof Float && y instanceof Float) {
+            return compareFinite(x.floatValue(), y.floatValue());
+        }
+        if (x instanceof BigDecimal && y instanceof BigDecimal) {
+            return ((BigDecimal) x).compareTo((BigDecimal) y);
+        }
+        if (x instanceof BigInteger && y instanceof BigInteger) {
+            return ((BigInteger) x).compareTo((BigInteger) y);
+        }
+        return toBigDecimal(x).compareTo(toBigDecimal(y));
+    }
+
+    private static boolean isIntegral(Number number) {
+        return number instanceof Long || number instanceof Integer
+            || number instanceof Short || number instanceof Byte;
+    }
+
+    private static int compareFinite(double a, double b) {
+        return a < b ? -1 : (a > b ? 1 : 0);
     }
 
     private static boolean isSpecial(Number number) {
