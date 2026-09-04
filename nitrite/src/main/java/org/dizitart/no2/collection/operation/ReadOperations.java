@@ -206,6 +206,42 @@ class ReadOperations {
         return dbValue == null || dbValue instanceof DBNull ? null : dbValue.getValue();
     }
 
+    /** The single row a by-id plan can match, or nothing when that id is not there. */
+    private RecordStream<Pair<NitriteId, Document>> byIdStream(FindPlan findPlan) {
+        Object idValue = findPlan.getByIdFilter().getValue();
+        // the search term may be any numeric or String representation of an id,
+        // e.g. a String for databases written before 4.4 (gh-1263)
+        NitriteId nitriteId = idValue instanceof Long
+            ? NitriteId.createId((long) idValue)
+            : NitriteId.createId(String.valueOf(idValue));
+        // one lookup: a document removed between containsKey and get would be a null row
+        Document document = nitriteMap.get(nitriteId);
+        return document == null
+            ? RecordStream.empty()
+            : RecordStream.single(pair(nitriteId, document));
+    }
+
+    /**
+     * The rows an index plan matches, lazily where the indexer offers a stream for this plan
+     * shape, otherwise from the materialized id set, whose size is recorded so a {@code size()}
+     * with no row-dropping step downstream can answer without fetching a document.
+     */
+    private RecordStream<Pair<NitriteId, Document>> indexedStream(FindPlan findPlan, IndexScan scan) {
+        IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
+        NitriteIndexer indexer = nitriteConfig.findIndexer(indexDescriptor.getIndexType());
+
+        RecordStream<NitriteId> idStream = indexer.findByFilterStream(findPlan, nitriteConfig);
+        if (idStream != null) {
+            // the index walks its matches lazily; a size() is counted from it on demand
+            scan.lazyStream = new IndexedStream(idStream, nitriteMap);
+            return scan.lazyStream;
+        }
+
+        LinkedHashSet<NitriteId> nitriteIds = indexer.findByFilter(findPlan, nitriteConfig);
+        scan.idCount = nitriteIds.size();
+        return new IndexedStream(nitriteIds, nitriteMap);
+    }
+
     private RecordStream<Pair<NitriteId, Document>> findSuitableStream(FindPlan findPlan, IndexScan scan) {
         RecordStream<Pair<NitriteId, Document>> rawStream;
         RecordStream<Pair<NitriteId, Document>> indexSortedStream = null;
@@ -225,50 +261,18 @@ class ReadOperations {
             // Always apply distinct stream for OR filters to avoid duplicates
             // when the same document matches multiple sub-plans (different indexes)
             rawStream = new DistinctStream(rawStream);
+        } else if (findPlan.getByIdFilter() != null) {
+            rawStream = byIdStream(findPlan);
+        } else if (findPlan.getIndexDescriptor() != null) {
+            rawStream = indexedStream(findPlan, scan);
         } else {
-            // and or single filter
-            if (findPlan.getByIdFilter() != null) {
-                FieldBasedFilter byIdFilter = findPlan.getByIdFilter();
-                Object idValue = byIdFilter.getValue();
-                // the search term may be any numeric or String representation of an id,
-                // e.g. a String for databases written before 4.4 (gh-1263)
-                NitriteId nitriteId = idValue instanceof Long
-                    ? NitriteId.createId((long) idValue)
-                    : NitriteId.createId(String.valueOf(idValue));
-                // one lookup: a document removed between containsKey and get would be a null row
-                Document document = nitriteMap.get(nitriteId);
-                rawStream = document == null
-                    ? RecordStream.empty()
-                    : RecordStream.single(pair(nitriteId, document));
-            } else {
-                IndexDescriptor indexDescriptor = findPlan.getIndexDescriptor();
-                if (indexDescriptor != null) {
-                    // get optimized filter
-                    NitriteIndexer indexer = nitriteConfig.findIndexer(indexDescriptor.getIndexType());
-                    RecordStream<NitriteId> idStream = indexer.findByFilterStream(findPlan, nitriteConfig);
-                    if (idStream != null) {
-                        // the index walks its matches lazily; a size() is counted from it on demand
-                        scan.lazyStream = new IndexedStream(idStream, nitriteMap);
-                        rawStream = scan.lazyStream;
-                    } else {
-                        LinkedHashSet<NitriteId> nitriteIds = indexer.findByFilter(findPlan, nitriteConfig);
+            indexSortedStream = indexSortedStream(findPlan);
+            rawStream = indexSortedStream != null ? indexSortedStream : nitriteMap.entries();
+        }
 
-                        // the index supplied the exact matching id set; record its size so a size()
-                        // with no row-dropping step downstream can answer from it without fetching
-                        scan.idCount = nitriteIds.size();
-
-                        // create indexed stream from optimized filter
-                        rawStream = new IndexedStream(nitriteIds, nitriteMap);
-                    }
-                } else {
-                    indexSortedStream = indexSortedStream(findPlan);
-                    rawStream = indexSortedStream != null ? indexSortedStream : nitriteMap.entries();
-                }
-            }
-
-            if (findPlan.getCollectionScanFilter() != null) {
-                rawStream = new FilteredStream(rawStream, findPlan.getCollectionScanFilter());
-            }
+        // an or-plan's branches carry their own filters; only a single plan has a residual one
+        if (findPlan.getSubPlans().isEmpty() && findPlan.getCollectionScanFilter() != null) {
+            rawStream = new FilteredStream(rawStream, findPlan.getCollectionScanFilter());
         }
 
         // sort and bound stage

@@ -215,6 +215,14 @@ public class SingleFieldIndex implements NitriteIndex {
             return new Range(key, true, key, true);
         }
 
+        private static boolean isLowerBound(ComparisonMode mode) {
+            return mode == ComparisonMode.GreaterEqual || mode == ComparisonMode.Greater;
+        }
+
+        private static boolean isUpperBound(ComparisonMode mode) {
+            return mode == ComparisonMode.LesserEqual || mode == ComparisonMode.Lesser;
+        }
+
         /** A two-sided range on one field, the same shape {@code IndexScanner.scanBoundedRange} takes. */
         private static Range ofBoundedRange(List<ComparableFilter> filters) {
             String field = filters.get(0).getField();
@@ -232,25 +240,20 @@ public class SingleFieldIndex implements NitriteIndex {
                 }
                 DBValue key = new DBValue((Comparable<?>) value);
                 ComparisonMode mode = ((SortingAwareFilter) filter).getComparisonMode();
-                switch (mode) {
-                    case GreaterEqual:
-                    case Greater:
-                        if (lower != null) {
-                            return null;
-                        }
-                        lower = key;
-                        lowerInclusive = mode == ComparisonMode.GreaterEqual;
-                        break;
-                    case LesserEqual:
-                    case Lesser:
-                        if (upper != null) {
-                            return null;
-                        }
-                        upper = key;
-                        upperInclusive = mode == ComparisonMode.LesserEqual;
-                        break;
-                    default:
+                if (isLowerBound(mode)) {
+                    if (lower != null) {
                         return null;
+                    }
+                    lower = key;
+                    lowerInclusive = mode == ComparisonMode.GreaterEqual;
+                } else if (isUpperBound(mode)) {
+                    if (upper != null) {
+                        return null;
+                    }
+                    upper = key;
+                    upperInclusive = mode == ComparisonMode.LesserEqual;
+                } else {
+                    return null;
                 }
             }
             return lower == null || upper == null ? null : new Range(lower, lowerInclusive, upper, upperInclusive);
