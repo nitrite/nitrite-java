@@ -132,8 +132,8 @@ public interface NitriteIndex {
             // ConcurrentModificationException. CopyOnWriteArrayList swaps its backing array
             // atomically on each mutation, so the background serializer always sees a stable
             // snapshot. Non-unique indexes avoid list values entirely via the composite layout
-            // (issue #1260); only unique indexes and the text index reach this path, where the
-            // per-key list is small enough that copy-on-write cost is negligible.
+            // (issue #1260) and unique indexes store their single id directly; only the text
+            // index still reaches this path.
             nitriteIds = new CopyOnWriteArrayList<>();
         }
 
