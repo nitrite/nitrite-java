@@ -107,9 +107,15 @@ public class MVStoreModuleBuilder {
 
     /**
      * The amount of memory a MVStore page should contain at most, in bytes,
-     * before it is split. The default is 16 KB.
+     * before it is split. The default is 16 KB, which is also MVStore's own
+     * default for a persistent store.
+     * <p>
+     * MVStore reads this value in bytes. It used to default to {@code 16}, so
+     * every leaf page split as soon as it held more than one entry: a store
+     * carried roughly one entry per page, and every lookup descended a tree
+     * about twice as deep as it needed to be.
      */
-    private int pageSplitSize = 16;
+    private int pageSplitSize = 16 * 1024;
 
     /**
      * The file store used by the MVStore.
