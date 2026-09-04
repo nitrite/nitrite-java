@@ -68,6 +68,24 @@ public class NumbersTest {
                 {Double.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, 0},
                 {Double.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, -1},
                 {Double.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY, 0},
+                // same-type fast paths must agree with the BigDecimal conversion
+                {Long.MAX_VALUE, Long.MIN_VALUE, 1},
+                {Long.MIN_VALUE, Long.MAX_VALUE, -1},
+                {Long.MAX_VALUE, Long.MAX_VALUE - 1, 1},
+                {(byte) 3, 3L, 0},
+                {(short) -2, -1, -1},
+                {Integer.MIN_VALUE, Long.MIN_VALUE, 1},
+                {0.0, -0.0, 0},
+                {-0.0, 0.0, 0},
+                {1.5, 1.25, 1},
+                {1.5f, 1.75f, -1},
+                {Double.NaN, 1.0, 1},
+                {1.0, Double.NaN, -1},
+                {0.1f, 0.1, 1}, // 0.1f widens to 0.10000000149, above 0.1: mixed types keep the exact path
+                {BigInteger.TEN, BigInteger.ONE, 1},
+                {new BigDecimal("2.50"), new BigDecimal("2.5"), 0},
+                {Long.MAX_VALUE, Double.MAX_VALUE, -1},
+                {Long.MAX_VALUE, new BigInteger("9223372036854775808"), -1},
         });
     }
 
