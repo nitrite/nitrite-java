@@ -1,3 +1,65 @@
+## Unreleased
+
+Ten changes from [@brettwooldridge](https://github.com/brettwooldridge), most of them found on a production system. Four are data-integrity fixes, three of which can end with a store that will not reopen or a query that quietly returns the wrong rows.
+
+### Issue Fixes
+
+- **MVStore's chunk retention and versions-to-keep are left at H2's defaults** ([#1301](https://github.com/nitrite/nitrite-java/pull/1301), [#1303](https://github.com/nitrite/nitrite-java/pull/1303))
+  - `MVStoreUtils.openOrCreate` forced `setRetentionTime(0)` and `setVersionsToKeep(0)` on every store since 2020. With both at 0, H2 may reuse a chunk's blocks while the chunk map it writes at close still lists that chunk, and the file then refuses to open at all - read-only or not - with `MVStoreException: Double mark: 394/5 ... at FreeSpaceBitSet.markUsed`. Only H2's recovery mode gets past it. ([h2database/h2database#2752](https://github.com/h2database/h2database/issues/2752), [#4083](https://github.com/h2database/h2database/issues/4083), both open.)
+  - A 24-thread soak of a document workload with a close every 20 seconds reproduced it on **every** run at 0/0, with and without close-time compaction, on h2-mvstore 2.4.240 and on current H2 master - and on **none** of the runs with either setting at its H2 default (45 s / 5), including a 1 s retention window. H2's own javadoc notes the retention window is what lets readers finish traversing a map.
+  - New `MVStoreModuleBuilder.retentionTime(ms)` and `versionsToKeep(n)`. Both are `null` by default, which leaves H2's values in place. Passing `0` restores the old behaviour, at the cost described above.
+  - **The file no longer shrinks the instant a chunk goes dead.** Reclamation now waits out the retention window, as H2 intends. `close()` still compacts synchronously.
+
+- **A read no longer hands out anything the store holds** ([#1294](https://github.com/nitrite/nitrite-java/pull/1294))
+  - A stored document on MVStore *is* the live object in the page, and MVStore serializes pages on a background thread that any write can start through `tryCommit`. Whatever a read hands back must therefore share no mutable state with it, or a caller's in-place edit is written straight into the store, bypasses the indexes, and can race the serialization into a `ConcurrentModificationException` and a store panic.
+  - The cursor has cloned each document it yields since 4.x, but two gaps remained. `Document.clone()` copied the top-level map and embedded documents only, so a `List`, `Set`, `Map`, array, `byte[]`, `Date` or `Calendar` inside the copy was still the instance in the store and `found.get("tags").add(x)` reached the page. And `NitriteCollection.getById()` returned the stored instance itself.
+  - `clone()` is now a deep copy: containers and arrays are copied recursively, preserving the concrete collection class where it has a public no-arg constructor and the comparator of sorted sets and maps; `Date`s and `Calendar`s are cloned; immutable values are shared, and so are values of a type the copy does not know, which the javadoc now states. `getById()` hands out a clone as `find()` does, and returns `null` for a missing id instead of passing `null` through the processor chain.
+  - **The cost is a structural copy per result and per write**, since the write path clones too. That buys the guarantee that no caller can reach into the store by accident.
+
+- **The store catalog copies its stored name set instead of mutating it in place** ([#1296](https://github.com/nitrite/nitrite-java/pull/1296))
+  - `StoreCatalog.writeCollectionEntry` wrapped the catalog document in `MapMetaData`, which took the `Set` straight out of it and added the new name to that instance. On MVStore that instance is the one held in the catalog page. Creating collections in a burst interleaved with writes - which is what a data migration does - put the serializer's `HashSet.writeObject` and the catalog's `HashSet.add` on the same set at the same time, ending in `MVStoreException: Could not serialize {mapNames=[...]}` and `MVStore.panic`, after which the store is closed and every later operation throws.
+  - Observed on the first start after a Xodus-to-Nitrite migration that created eleven collections in forty milliseconds. `MapMetaData` now copies, so a write always puts a *new* set and the instance a serializer may be reading is never touched - the rule `WriteOperations.update` already followed by cloning a document before merging into it.
+
+- **An index scan skips documents removed between the lookup and the fetch** ([#1302](https://github.com/nitrite/nitrite-java/pull/1302))
+  - An index scan is two steps that are not atomic under concurrent writes: the index yields the matching ids, then each document is fetched. A document removed in between came back as an `(id, null)` row. With a residual filter that row reached `Filter.apply` and threw `NullPointerException` from the filter's `document.get()`; without one the cursor handed the caller a `null` element. The by-id fast path had the same window between `containsKey` and `get`.
+  - `IndexedStream` now prefetches and drops ids whose document is gone, `FilteredStream` treats a row without a document as a non-match, and the by-id path does one `get`. `skip()` still walks ids without fetching them, so under a concurrent remove a page boundary can still count an id whose document is gone - which is the same indeterminacy the removal itself introduces.
+
+- **`clear()` and `dropIndex()` reach every layout map an index occupies** ([#1295](https://github.com/nitrite/nitrite-java/pull/1295))
+  - `IndexManager.close()`, `clearAll()` and `dropIndexDescriptor()` acted only on the map name recorded in `IndexMeta`, which is the classic one. That already missed the composite map of a non-unique index: after `collection.clear()` its rows survived, and a query on that index returned the ids of the cleared documents alongside the new ones - two live documents, four results. It also broke `ChangeIdField`, whose `createIndex` found the previous index map still populated and rebuilt over it.
+
+- **A unique index no longer rejects a document over a key that document already holds** ([#1295](https://github.com/nitrite/nitrite-java/pull/1295))
+  - `addNitriteIds` treated any existing id under the key as a violation, so it counted the writer's own id against it. Another document under the key is a violation; the same document again is not - which is what a unique index over an array field with a repeated element does, and what an index rebuild or a replayed write does.
+
+- **One collection's long write no longer stalls `getCollection` for every other collection** ([#1292](https://github.com/nitrite/nitrite-java/pull/1292))
+  - `CollectionFactory.getCollection` held one lock for the whole factory and, while holding it, called `isDropped()` and `isOpen()` on the registered collection. Both take that collection's read lock. While a long write held a collection's write lock - an index rebuild, a large `remove(filter)`, an update on a big document - the one caller asking for that collection blocked *inside the factory lock*, and from then on every `getCollection` call for every other collection queued behind it.
+  - Observed on a production system: one thread rebuilding an index inside `update()` for over three hours, and 349 other threads parked in `CollectionFactory.getCollection`, most of them wanting unrelated collections.
+  - The registry is now read under the factory read lock, the usability check runs with no factory lock held, and the factory write lock is taken only to create or replace an entry. Callers of the busy collection still wait on it, as they should; callers of other collections no longer wait at all.
+
+- **`MVStoreModuleBuilder.pageSplitSize` defaults to 16 KB, not 16 bytes** ([#1293](https://github.com/nitrite/nitrite-java/pull/1293))
+  - It is documented as "16 KB" and is passed straight to `MVStore.Builder.pageSplitSize`, which takes **bytes**. Its value was `16`, the same literal used for `cacheSize` (megabytes) and `cacheConcurrency` (a count), so every leaf page split as soon as it held more than one entry.
+  - Measured by rebuilding a 146 MB store of 46,926 entries at each setting: **93,781 pages at depth 13** with `16`; **36,096 pages at depth 12** with MVStore's own persistent-store default of 16 KB; **13,327 pages at depth 6** with 64 KB, the largest value that survives H2's `(cacheSize / cacheConcurrency) >> 4` clamp.
+  - Existing files are unaffected until their pages are rewritten; there is nothing to migrate.
+
+### Performance
+
+- **An update that leaves an indexed value unchanged no longer rewrites the index** ([#1297](https://github.com/nitrite/nitrite-java/pull/1297))
+  - `DocumentIndexWriter.updateIndexEntry` treated an index as affected whenever the update document *carried* the indexed field, and then removed and rewrote the entry. An update that writes the whole document back - the common upsert shape - carries every indexed field with its old value, so every index was rewritten on every update for nothing. On the pre-4.4.0 list layout that was a copy of the whole per-key id list twice per index per write.
+  - The old and new values of each affected index are now compared, deeply so that arrays and embedded values count as equal when their contents are, and the index is skipped when they match. A dirty index is not skipped: its rebuild still has to happen on the first write.
+
+- **A unique index stores one id per key instead of a one-element list** ([#1295](https://github.com/nitrite/nitrite-java/pull/1295))
+  - A unique index kept the classic `value -> [id]` layout: a `CopyOnWriteArrayList` per key that never held more than one element, allocated and copied on every write, plus a size check standing in for the uniqueness test. It now stores the id itself (`value -> id`) in a map of its own, named with a `|unique` suffix, and enforces uniqueness by comparing the stored id with the writer's.
+  - **An index still in the list layout is migrated the first time it is accessed** and the legacy map dropped, the way the composite layout already migrates a non-unique index. `IndexMap` exposes the single-id map to the scanner and the filters as one-element lists, so the read path is unchanged. The map has its own name because the RocksDB adapter decodes values by the declared type of the map they live in.
+
+- **Equality and range index scans stream instead of materializing every id** ([#1298](https://github.com/nitrite/nitrite-java/pull/1298))
+  - `NitriteIndexer.findByFilter` returns a `LinkedHashSet` of every matching id, so `find(k = v).firstOrNull()` built the whole match set before handing back one row, and a bounded page paid for the entire result. On a non-unique index over a low-cardinality field that set is a large fraction of the collection on every lookup.
+  - The composite layout already keeps its rows in key order, so the two plan shapes that map onto one bounded walk of it - an equality on the indexed field, and a two-sided range on it - are now served by a lazy iterator that starts at the first key inside the bounds and stops at the first key outside them. It honours the plan's reverse scan order, skips entries removed in an open transaction, and returns a document indexed under several keys once.
+  - New default methods `NitriteIndex.findNitriteIdStream` and `NitriteIndexer.findByFilterStream` return `null`, so every other index type, plugin indexer and plan shape keeps the materialized path unchanged. The covered-count shortcut that lets `size()` answer without fetching documents is kept by counting the streamed ids on demand.
+
+- **Same-type numbers compare without going through `BigDecimal`** ([#1299](https://github.com/nitrite/nitrite-java/pull/1299))
+  - `Numbers.compare` converted both operands to `BigDecimal` on every call, two allocations per comparison, and every index key comparison lands there. On a production store with numeric index keys the conversion was the hottest frame in a multi-hour index rebuild.
+  - Any two integral primitives now compare as `long`s; two doubles or two floats compare as themselves once NaN and the infinities have taken the existing special-case path, with `-0.0` and `0.0` equal as `BigDecimal` treats them; two `BigDecimal`s or two `BigInteger`s use their own `compareTo`. **Every mixed pairing keeps the exact `BigDecimal` conversion**, so cross-type equality such as `Integer 1` against `Float 1.0f` is unchanged.
+
+
 ## Release 5.3.0 - Aug 31, 2026
 
 ### Issue Fixes
