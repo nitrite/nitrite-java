@@ -275,21 +275,34 @@ class ReadOperations {
             rawStream = new FilteredStream(rawStream, findPlan.getCollectionScanFilter());
         }
 
-        // sort and bound stage
-        if (rawStream != null) {
-            // the blocking sort still runs whenever the ordered ids were not used - either no
-            // index could answer the sort, or the one that could turned out not to cover the
-            // collection faithfully
-            if (indexSortedStream == null
-                && findPlan.getBlockingSortOrder() != null && !findPlan.getBlockingSortOrder().isEmpty()) {
-                rawStream = new SortedDocumentStream(findPlan, rawStream);
-            }
+        return sortAndBound(findPlan, rawStream, indexSortedStream != null);
+    }
 
-            if (findPlan.getLimit() != null || findPlan.getSkip() != null) {
-                long limit = findPlan.getLimit() == null ? Long.MAX_VALUE : findPlan.getLimit();
-                long skip = findPlan.getSkip() == null ? 0 : findPlan.getSkip();
-                rawStream = new BoundedStream<>(skip, limit, rawStream);
-            }
+    /**
+     * The stage every source shares: order the rows the index could not order, then cut the
+     * page out of them.
+     *
+     * @param sortedByIndex whether the source already came out in the requested order
+     */
+    private RecordStream<Pair<NitriteId, Document>> sortAndBound(
+        FindPlan findPlan, RecordStream<Pair<NitriteId, Document>> rawStream, boolean sortedByIndex) {
+
+        if (rawStream == null) {
+            return null;
+        }
+
+        // the blocking sort still runs whenever the ordered ids were not used - either no
+        // index could answer the sort, or the one that could turned out not to cover the
+        // collection faithfully
+        if (!sortedByIndex && findPlan.getBlockingSortOrder() != null
+            && !findPlan.getBlockingSortOrder().isEmpty()) {
+            rawStream = new SortedDocumentStream(findPlan, rawStream);
+        }
+
+        if (findPlan.getLimit() != null || findPlan.getSkip() != null) {
+            long limit = findPlan.getLimit() == null ? Long.MAX_VALUE : findPlan.getLimit();
+            long skip = findPlan.getSkip() == null ? 0 : findPlan.getSkip();
+            rawStream = new BoundedStream<>(skip, limit, rawStream);
         }
 
         return rawStream;
