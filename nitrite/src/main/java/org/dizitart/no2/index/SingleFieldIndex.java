@@ -197,18 +197,26 @@ public class SingleFieldIndex implements NitriteIndex {
                 return null;
             }
             if (filters.size() == 1 && filters.get(0).getClass() == EqualsFilter.class) {
-                Object value = filters.get(0).getValue();
-                if (value == null) {
-                    return new Range(DBNull.getInstance(), true, DBNull.getInstance(), true);
-                }
-                if (!(value instanceof Comparable)) {
-                    return null;
-                }
-                DBValue key = new DBValue((Comparable<?>) value);
-                return new Range(key, true, key, true);
+                return ofEquality(filters.get(0));
             }
+            return ofBoundedRange(filters);
+        }
 
-            // a two-sided range on one field, the same shape IndexScanner.scanBoundedRange takes
+        /** {@code field = value}, which is the degenerate range with both bounds on that value. */
+        private static Range ofEquality(ComparableFilter filter) {
+            Object value = filter.getValue();
+            if (value == null) {
+                return new Range(DBNull.getInstance(), true, DBNull.getInstance(), true);
+            }
+            if (!(value instanceof Comparable)) {
+                return null;
+            }
+            DBValue key = new DBValue((Comparable<?>) value);
+            return new Range(key, true, key, true);
+        }
+
+        /** A two-sided range on one field, the same shape {@code IndexScanner.scanBoundedRange} takes. */
+        private static Range ofBoundedRange(List<ComparableFilter> filters) {
             String field = filters.get(0).getField();
             DBValue lower = null;
             DBValue upper = null;
