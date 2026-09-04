@@ -121,6 +121,18 @@ public class MVStoreConfig implements StoreConfig {
      */
     private FileStore<?> fileStore;
 
+    /**
+     * Chunk retention time in milliseconds; {@code null} leaves H2's default.
+     */
+    @Setter(AccessLevel.PACKAGE)
+    private Integer retentionTime;
+
+    /**
+     * Old versions to keep; {@code null} leaves H2's default.
+     */
+    @Setter(AccessLevel.PACKAGE)
+    private Integer versionsToKeep;
+
     MVStoreConfig() {
         eventListeners = new HashSet<>();
     }
@@ -150,6 +162,8 @@ public class MVStoreConfig implements StoreConfig {
         config.cacheSize(cacheSize);
         config.cacheConcurrency(cacheConcurrency);
         config.pageSplitSize(pageSplitSize);
+        config.retentionTime(retentionTime);
+        config.versionsToKeep(versionsToKeep);
         config.fileStore(fileStore);
         return config;
     }

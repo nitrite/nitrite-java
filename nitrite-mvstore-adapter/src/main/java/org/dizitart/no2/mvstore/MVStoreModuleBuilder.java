@@ -123,6 +123,23 @@ public class MVStoreModuleBuilder {
     private FileStore<?> fileStore;
 
     /**
+     * How long MVStore keeps a chunk after its last live page is gone, in milliseconds, before
+     * its blocks may be reused. {@code null} (the default) leaves H2's own default of 45 seconds.
+     * <p>
+     * Earlier releases forced this to 0 together with {@link #versionsToKeep}. With both at 0 a
+     * chunk's blocks can be reused while the chunk map written at close still lists that chunk,
+     * and the file then fails to open with "Double mark". Setting 0 restores that behaviour and
+     * is not recommended.
+     */
+    private Integer retentionTime;
+
+    /**
+     * How many old versions MVStore keeps. {@code null} (the default) leaves H2's own default
+     * of 5. See {@link #retentionTime}.
+     */
+    private Integer versionsToKeep;
+
+    /**
      * The configuration for the MVStore.
      */
     private MVStoreConfig dbConfig;
@@ -193,6 +210,8 @@ public class MVStoreModuleBuilder {
         dbConfig.cacheSize(cacheSize());
         dbConfig.cacheConcurrency(cacheConcurrency());
         dbConfig.pageSplitSize(pageSplitSize());
+        dbConfig.retentionTime(retentionTime());
+        dbConfig.versionsToKeep(versionsToKeep());
         dbConfig.fileStore(fileStore());
         dbConfig.eventListeners(eventListeners());
 

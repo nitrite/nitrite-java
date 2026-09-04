@@ -29,9 +29,11 @@ public class MVStoreUtilsTest {
     public void testOpenOrCreate() {
         MVStore actualOpenOrCreateResult = MVStoreUtils.openOrCreate(new MVStoreConfig());
         assertFalse(actualOpenOrCreateResult.isReadOnly());
-        assertEquals(0L, actualOpenOrCreateResult.getVersionsToKeep());
+        // H2's own default, no longer forced to 0
+        assertEquals(5L, actualOpenOrCreateResult.getVersionsToKeep());
         assertEquals(0, actualOpenOrCreateResult.getUnsavedMemory());
         assertEquals(0, actualOpenOrCreateResult.getStoreVersion());
+        // an in-memory store has no chunks to retain, so H2 keeps this at 0 by itself
         assertEquals(0, actualOpenOrCreateResult.getRetentionTime());
         assertEquals(0, actualOpenOrCreateResult.getMetaMap().size());
         assertEquals(Long.MAX_VALUE, actualOpenOrCreateResult.getMaxPageSize());
@@ -46,9 +48,11 @@ public class MVStoreUtilsTest {
         mvStoreConfig.addStoreEventListener(mock(StoreEventListener.class));
         MVStore actualOpenOrCreateResult = MVStoreUtils.openOrCreate(mvStoreConfig);
         assertFalse(actualOpenOrCreateResult.isReadOnly());
-        assertEquals(0L, actualOpenOrCreateResult.getVersionsToKeep());
+        // H2's own default, no longer forced to 0
+        assertEquals(5L, actualOpenOrCreateResult.getVersionsToKeep());
         assertEquals(0, actualOpenOrCreateResult.getUnsavedMemory());
         assertEquals(0, actualOpenOrCreateResult.getStoreVersion());
+        // an in-memory store has no chunks to retain, so H2 keeps this at 0 by itself
         assertEquals(0, actualOpenOrCreateResult.getRetentionTime());
         assertEquals(0, actualOpenOrCreateResult.getMetaMap().size());
         assertEquals(Long.MAX_VALUE, actualOpenOrCreateResult.getMaxPageSize());

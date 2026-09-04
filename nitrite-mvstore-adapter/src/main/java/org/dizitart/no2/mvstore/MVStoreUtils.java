@@ -101,8 +101,17 @@ class MVStoreUtils {
             throw new NitriteIOException("Unable to create database file", iae);
         } finally {
             if (store != null) {
-                store.setRetentionTime(0);
-                store.setVersionsToKeep(0);
+                // H2's defaults (45 s retention, 5 versions) stay unless configured. Forcing both to 0,
+                // as earlier releases did, let a chunk's blocks be reused while the chunk map written
+                // at close still listed the chunk; the file then failed to open with "Double mark".
+                Integer retentionTime = storeConfig.retentionTime();
+                if (retentionTime != null) {
+                    store.setRetentionTime(retentionTime);
+                }
+                Integer versionsToKeep = storeConfig.versionsToKeep();
+                if (versionsToKeep != null) {
+                    store.setVersionsToKeep(versionsToKeep);
+                }
             }
         }
 
