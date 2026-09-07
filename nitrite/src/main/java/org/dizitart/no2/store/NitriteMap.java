@@ -243,15 +243,16 @@ public interface NitriteMap<Key, Value> extends AttributesAware, AutoCloseable {
      */
     default void updateLastModifiedTime() {
         if (!isDropped()) {
-            if (isNullOrEmpty(getName())
-                || META_MAP_NAME.equals(getName())) return;
+            // read once: an adapter may answer null as soon as the map is removed from the store
+            String name = getName();
+            if (isNullOrEmpty(name) || META_MAP_NAME.equals(name)) return;
 
             NitriteMap<String, Attributes> metaMap = getStore().openMap(META_MAP_NAME, String.class, Attributes.class);
             if (metaMap != null) {
-                Attributes attributes = metaMap.get(getName());
+                Attributes attributes = metaMap.get(name);
                 if (attributes == null) {
-                    attributes = new Attributes(getName());
-                    metaMap.put(getName(), attributes);
+                    attributes = new Attributes(name);
+                    metaMap.put(name, attributes);
                 }
                 attributes.set(Attributes.LAST_MODIFIED_TIME, Long.toString(System.currentTimeMillis()));
             }

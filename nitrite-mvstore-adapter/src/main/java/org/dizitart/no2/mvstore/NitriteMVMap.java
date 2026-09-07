@@ -46,6 +46,9 @@ import org.h2.mvstore.MVStore;
 class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     private final MVMap<Key, Value> mvMap;
+    // captured at open: MVMap.getName() answers null once the map is removed from the store,
+    // which is exactly when the registry and the catalog still have to be told the name
+    private final String name;
     private final NitriteStore<?> nitriteStore;
     private final MVStore mvStore;
     private final AtomicBoolean droppedFlag;
@@ -54,6 +57,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     NitriteMVMap(final MVMap<Key, Value> mvMap, final NitriteStore<?> nitriteStore) {
         this.mvMap = mvMap;
+        this.name = mvMap.getName();
         this.nitriteStore = nitriteStore;
         this.mvStore = mvMap.getStore();
         this.closedFlag = new AtomicBoolean(false);
@@ -89,7 +93,7 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public String getName() {
-        return mvMap.getName();
+        return name;
     }
 
     @Override
@@ -254,15 +258,16 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void drop() {
-        if (!droppedFlag.get()) {
-            droppedFlag.compareAndSet(false, true);
-            closedFlag.compareAndSet(false, true);
+        // the compare-and-set is the guard: two threads that both saw the flag clear must not
+        // both remove the map
+        if (droppedFlag.compareAndSet(false, true)) {
+            closedFlag.set(true);
             releaseVersionUsages();
 
             final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
-                nitriteStore.closeMap(mvMap.getName());
-                nitriteStore.removeMap(mvMap.getName());
+                nitriteStore.closeMap(name);
+                nitriteStore.removeMap(name);
             } finally {
                 mvStore.deregisterVersionUsage(txCounter);
             }
@@ -276,10 +281,9 @@ class NitriteMVMap<Key, Value> implements NitriteMap<Key, Value> {
 
     @Override
     public void close() {
-        if (!closedFlag.get() && !droppedFlag.get()) {
-            closedFlag.compareAndSet(false, true);
+        if (!droppedFlag.get() && closedFlag.compareAndSet(false, true)) {
             releaseVersionUsages();
-            nitriteStore.closeMap(mvMap.getName());
+            nitriteStore.closeMap(name);
         }
     }
 

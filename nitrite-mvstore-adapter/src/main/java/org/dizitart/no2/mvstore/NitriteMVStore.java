@@ -147,14 +147,12 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     @Override
     @SuppressWarnings("unchecked")
     public <Key, Value> NitriteMap<Key, Value> openMap(String mapName, Class<?> keyType, Class<?> valueType) {
-        if (nitriteMapRegistry.containsKey(mapName)) {
-            return (NitriteMVMap<Key, Value>) nitriteMapRegistry.get(mapName);
-        }
-
-        MVMap<Key, Value> mvMap = openMVMap(mapName, null);
-        NitriteMVMap<Key, Value> nitriteMVMap = new NitriteMVMap<>(mvMap, this);
-        nitriteMapRegistry.put(mapName, nitriteMVMap);
-        return nitriteMVMap;
+        // one wrapper per map, however many threads open it at once, so a drop() or close()
+        // through any holder is the drop or close every holder sees
+        return (NitriteMVMap<Key, Value>) nitriteMapRegistry.computeIfAbsent(mapName, name -> {
+            MVMap<Key, Value> mvMap = openMVMap(name, null);
+            return new NitriteMVMap<>(mvMap, this);
+        });
     }
 
     @Override
@@ -173,8 +171,15 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     @Override
     public void removeMap(String name) {
-        MVMap<?, ?> mvMap = openMVMap(name, null);
-        mvStore.removeMap(mvMap);
+        if (StringUtils.isNullOrEmpty(name)) {
+            return;
+        }
+        // a map another thread has already removed is simply gone; openMVMap would create an
+        // empty map of that name only to remove it again
+        if (mvStore.hasMap(name)) {
+            MVMap<?, ?> mvMap = openMVMap(name, null);
+            mvStore.removeMap(mvMap);
+        }
         getCatalog().remove(name);
         nitriteMapRegistry.remove(name);
     }
@@ -191,14 +196,10 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String mapName, Class<?> keyType, Class<?> valueType) {
-        if (nitriteRTreeMapRegistry.containsKey(mapName)) {
-            return (NitriteMVRTreeMap) nitriteRTreeMapRegistry.get(mapName);
-        }
-
-        MVRTreeMap<Value> map = (MVRTreeMap<Value>) openMVMap(mapName, new MVRTreeMap.Builder<>());
-        NitriteMVRTreeMap<Key, Value> nitriteMVRTreeMap = new NitriteMVRTreeMap(map, this);
-        nitriteRTreeMapRegistry.put(mapName, nitriteMVRTreeMap);
-        return nitriteMVRTreeMap;
+        return (NitriteMVRTreeMap) nitriteRTreeMapRegistry.computeIfAbsent(mapName, name -> {
+            MVRTreeMap<Value> map = (MVRTreeMap<Value>) openMVMap(name, new MVRTreeMap.Builder<>());
+            return new NitriteMVRTreeMap(map, this);
+        });
     }
 
     @Override
