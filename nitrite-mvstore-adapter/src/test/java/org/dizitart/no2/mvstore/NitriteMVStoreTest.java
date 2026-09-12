@@ -23,21 +23,38 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.dizitart.no2.common.util.IndexUtils.deriveIndexMapName;
+import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import org.dizitart.no2.NitriteConfig;
+import org.dizitart.no2.collection.FindPlan;
+import org.dizitart.no2.collection.NitriteId;
+import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.filters.ComparableFilter;
+import org.dizitart.no2.filters.IndexScanFilter;
+import org.dizitart.no2.index.IndexDescriptor;
+import org.dizitart.no2.index.IndexType;
+import org.dizitart.no2.index.NonUniqueIndexer;
 import org.dizitart.no2.store.NitriteMap;
 import org.h2.mvstore.MVStore;
 import org.junit.Test;
@@ -165,6 +182,78 @@ public class NitriteMVStoreTest {
                 System.setProperty("h2.compactThreads", originalCompactThreads);
             }
         }
+    }
+
+    @Test
+    public void testDropThroughAWrapperWhoseMapIsAlreadyGone() {
+        // MVMap.getName() answers null once the map is removed, so a second holder's drop()
+        // used to hand removeMap a null name and fail
+        final NitriteMVStore store = openInMemoryStore();
+        try {
+            NitriteMap<String, String> stale = store.openMap("m", String.class, String.class);
+            stale.close();
+            NitriteMap<String, String> current = store.openMap("m", String.class, String.class);
+            current.drop();
+
+            stale.drop();
+            assertEquals("m", stale.getName());
+            assertFalse(store.hasMap("m"));
+        } finally {
+            store.close();
+        }
+    }
+
+    @Test
+    public void testConcurrentFirstReadOfALegacyIndexMigratesOnce() throws Exception {
+        // the first multi-threaded read after a reopen used to build one index instance per
+        // thread, each migrating and dropping the legacy map; the second drop failed
+        final int threads = 16;
+        final ExecutorService executorService = Executors.newFixedThreadPool(threads);
+        try {
+            for (int round = 0; round < 50; round++) {
+                final NitriteMVStore store = openInMemoryStore();
+                try {
+                    final IndexDescriptor desc = new IndexDescriptor(IndexType.NON_UNIQUE,
+                        Fields.withNames("a"), "c");
+                    final NitriteId id = NitriteId.createId(1L);
+                    store.openMap(deriveIndexMapName(desc), DBValue.class, ArrayList.class)
+                        .put(new DBValue("k"), new ArrayList<>(Collections.singletonList(id)));
+
+                    final NitriteConfig config = mock(NitriteConfig.class);
+                    doReturn(store).when(config).getNitriteStore();
+                    final FindPlan plan = new FindPlan();
+                    plan.setIndexDescriptor(desc);
+                    plan.setIndexScanFilter(new IndexScanFilter(Collections.singletonList(
+                        (ComparableFilter) where("a").eq("k"))));
+
+                    final NonUniqueIndexer indexer = new NonUniqueIndexer();
+                    final CountDownLatch start = new CountDownLatch(1);
+                    final List<Future<Set<NitriteId>>> reads = new ArrayList<>();
+                    for (int t = 0; t < threads; t++) {
+                        reads.add(executorService.submit(() -> {
+                            start.await();
+                            return indexer.findByFilter(plan, config);
+                        }));
+                    }
+                    start.countDown();
+                    for (Future<Set<NitriteId>> read : reads) {
+                        assertEquals(Collections.singleton(id), read.get(5, TimeUnit.SECONDS));
+                    }
+                    assertFalse(store.hasMap(deriveIndexMapName(desc)));
+                } finally {
+                    store.close();
+                }
+            }
+        } finally {
+            executorService.shutdownNow();
+        }
+    }
+
+    private NitriteMVStore openInMemoryStore() {
+        final NitriteMVStore store = new NitriteMVStore();
+        store.setStoreConfig(new MVStoreConfig());
+        store.openOrCreate();
+        return store;
     }
 
     private NitriteMVStore createCompactingStore(final MVStore mvStore) throws Exception {
