@@ -39,6 +39,8 @@ import org.h2.mvstore.MVMap;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.MVStoreException;
 import org.h2.mvstore.rtree.MVRTreeMap;
+import org.h2.mvstore.type.DataType;
+import org.h2.mvstore.type.ObjectDataType;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,6 +53,8 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
     private static final String COMPACT_THREADS_PROPERTY = "h2.compactThreads";
     private static final Object COMPACT_THREADS_LOCK = new Object();
+    // any object H2 has no dedicated type for; see settleKeyType
+    private static final Object SERIALIZED_KEY_SAMPLE = new Object();
 
     private MVStore mvStore;
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
@@ -246,6 +250,26 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         }
     }
 
+    /**
+     * Settles an {@link ObjectDataType} key type on its serialized-object delegate while one
+     * thread holds the map ({@code openMap} runs inside {@code computeIfAbsent}).
+     *
+     * <p>H2 picks that delegate on first use through an unsynchronized field, and
+     * {@code SerializedObjectType.compare} checks delegates by identity, so threads making a
+     * map's first key comparison at once can each install their own and fail with
+     * {@code UnsupportedOperationException: Can not compare}. A file-backed map is settled
+     * already, by reading its root page at open or estimating the memory of a write; an
+     * in-memory store does neither. Every Nitrite map with {@code ObjectDataType} keys holds
+     * serialized objects or strings, and a string map switches back on its first key through
+     * a singleton delegate that compares without the identity check. Nothing is serialized.
+     * The same code is in h2 2.4.240 and 2.5.250; drop this once H2 fixes it.
+     */
+    private static void settleKeyType(DataType<?> keyType) {
+        if (keyType instanceof ObjectDataType) {
+            ((ObjectDataType) keyType).getMemory(SERIALIZED_KEY_SAMPLE);
+        }
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     private MVMap openMVMap(String mapName, MVMap.MapBuilder builder) {
         Exception exception = null;
@@ -256,6 +280,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
             while (version >= 0) {
                 try {
                     MVMap map = mvStore.openMap(mapName, mapBuilder);
+                    settleKeyType(map.getKeyType());
                     enableAutoCommitIfPending();
                     return map;
                 } catch (MVStoreException me) {
