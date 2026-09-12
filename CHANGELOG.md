@@ -1,6 +1,6 @@
 ## Unreleased
 
-Ten changes from [@brettwooldridge](https://github.com/brettwooldridge), most of them found on a production system. Four are data-integrity fixes, three of which can end with a store that will not reopen or a query that quietly returns the wrong rows.
+Eleven changes from [@brettwooldridge](https://github.com/brettwooldridge), most of them found on a production system. Four are data-integrity fixes, three of which can end with a store that will not reopen or a query that quietly returns the wrong rows.
 
 ### Issue Fixes
 
@@ -26,6 +26,11 @@ Ten changes from [@brettwooldridge](https://github.com/brettwooldridge), most of
 
 - **`clear()` and `dropIndex()` reach every layout map an index occupies** ([#1295](https://github.com/nitrite/nitrite-java/pull/1295))
   - `IndexManager.close()`, `clearAll()` and `dropIndexDescriptor()` acted only on the map name recorded in `IndexMeta`, which is the classic one. That already missed the composite map of a non-unique index: after `collection.clear()` its rows survived, and a query on that index returned the ids of the cleared documents alongside the new ones - two live documents, four results. It also broke `ChangeIdField`, whose `createIndex` found the previous index map still populated and rebuilt over it.
+
+- **The first concurrent read of an index after a restart no longer fails dropping its legacy map** ([#1309](https://github.com/nitrite/nitrite-java/pull/1309))
+  - The first read of an index still in a legacy layout migrates it and drops the legacy map, once per index instance. `ComparableIndexer` created those instances with an unsynchronized check-then-act, so threads arriving together could each get an instance of their own and each run the migration. On MVStore the second drop asked `MVMap.getName()` for a map that was already gone, got `null`, and failed with `NullPointerException` in `NitriteMVStore.removeMap`; the same race also threw from `Attributes.set` through `NitriteMap.updateLastModifiedTime`.
+  - Observed on a production system on the first multi-threaded lookup after every restart, because every close before [#1295](https://github.com/nitrite/nitrite-java/pull/1295) left an empty map under the legacy name for the next start to drop.
+  - The indexer and the MVStore map and R-tree registries now create their entries with `computeIfAbsent`, so there is one index instance and one map wrapper per name. `NitriteMVMap` keeps the name it was opened with and acts only when its compare-and-set wins, so `drop()` and `close()` run once; `removeMap` ignores a null name and no longer creates an empty map only to remove it.
 
 - **A unique index no longer rejects a document over a key that document already holds** ([#1295](https://github.com/nitrite/nitrite-java/pull/1295))
   - `addNitriteIds` treated any existing id under the key as a violation, so it counted the writer's own id against it. Another document under the key is a violation; the same document again is not - which is what a unique index over an array field with a repeated element does, and what an index rebuild or a replayed write does.
