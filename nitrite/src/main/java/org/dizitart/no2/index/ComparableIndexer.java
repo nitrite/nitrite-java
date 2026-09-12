@@ -105,17 +105,11 @@ public abstract class ComparableIndexer implements NitriteIndexer {
             throw new IndexingException("Index descriptor cannot be null");
         }
 
-        if (indexRegistry.containsKey(indexDescriptor)) {
-            return indexRegistry.get(indexDescriptor);
-        }
-
-        NitriteIndex nitriteIndex;
-        if (indexDescriptor.isCompoundIndex()) {
-            nitriteIndex = new CompoundIndex(indexDescriptor, nitriteConfig.getNitriteStore());
-        } else {
-            nitriteIndex = new SingleFieldIndex(indexDescriptor, nitriteConfig.getNitriteStore());
-        }
-        indexRegistry.put(indexDescriptor, nitriteIndex);
-        return nitriteIndex;
+        // One instance per descriptor, however many threads ask for it at once. The lazy layout
+        // migration in SingleFieldIndex is guarded per instance, so two instances for the same
+        // index would each migrate and drop the legacy map, and the second drop fails.
+        return indexRegistry.computeIfAbsent(indexDescriptor, descriptor -> descriptor.isCompoundIndex()
+            ? new CompoundIndex(descriptor, nitriteConfig.getNitriteStore())
+            : new SingleFieldIndex(descriptor, nitriteConfig.getNitriteStore()));
     }
 }
