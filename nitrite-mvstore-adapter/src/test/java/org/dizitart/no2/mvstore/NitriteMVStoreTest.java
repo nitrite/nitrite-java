@@ -34,8 +34,10 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -215,9 +217,14 @@ public class NitriteMVStoreTest {
                 try {
                     final IndexDescriptor desc = new IndexDescriptor(IndexType.NON_UNIQUE,
                         Fields.withNames("a"), "c");
-                    final NitriteId id = NitriteId.createId(1L);
+                    // two ids, so the migration's second put is the composite map's first key
+                    // comparison: H2's ObjectDataType settles its key type on first use without
+                    // any synchronization, and sixteen readers making that first comparison at
+                    // once can fail inside H2 with "Can not compare" (h2 2.4.240 and 2.5.250)
+                    final Set<NitriteId> ids = new LinkedHashSet<>(Arrays.asList(
+                        NitriteId.createId(1L), NitriteId.createId(2L)));
                     store.openMap(deriveIndexMapName(desc), DBValue.class, ArrayList.class)
-                        .put(new DBValue("k"), new ArrayList<>(Collections.singletonList(id)));
+                        .put(new DBValue("k"), new ArrayList<>(ids));
 
                     final NitriteConfig config = mock(NitriteConfig.class);
                     doReturn(store).when(config).getNitriteStore();
@@ -237,7 +244,7 @@ public class NitriteMVStoreTest {
                     }
                     start.countDown();
                     for (Future<Set<NitriteId>> read : reads) {
-                        assertEquals(Collections.singleton(id), read.get(5, TimeUnit.SECONDS));
+                        assertEquals(ids, read.get(5, TimeUnit.SECONDS));
                     }
                     assertFalse(store.hasMap(deriveIndexMapName(desc)));
                 } finally {
