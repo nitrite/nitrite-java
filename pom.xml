@@ -90,7 +90,7 @@
         <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
         <dokka.version>2.2.0</dokka.version>
-        <animal-sniffer.version>1.27</animal-sniffer.version>
+        <animal-sniffer.version>1.28</animal-sniffer.version>
         <api-level-26.version>8.0.0_r2</api-level-26.version>
         <maven-gpg-plugin.version>3.2.8</maven-gpg-plugin.version>
 
