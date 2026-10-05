@@ -54,11 +54,11 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jackson.version>3.2.3</jackson.version>
-        <slf4j.version>2.0.19</slf4j.version>
+        <slf4j.version>2.0.20</slf4j.version>
         <jasypt.version>1.9.3</jasypt.version>
-        <h2.version>2.5.250</h2.version>
+        <h2.version>2.5.252</h2.version>
         <rocksdb.version>10.2.1</rocksdb.version>
-        <kryo5.version>5.6.2</kryo5.version>
+        <kryo5.version>5.7.0</kryo5.version>
         <jts.version>1.20.0</jts.version>
         <commons-codec.version>1.22.1</commons-codec.version>
         <commons-io.version>2.22.0</commons-io.version>
@@ -68,17 +68,17 @@
         <lombok.version>1.18.48</lombok.version>
         <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.23.0</mockito.version>
+        <mockito.version>5.24.0</mockito.version>
         <podam.version>8.0.2.RELEASE</podam.version>
         <log4j.version>2.26.1</log4j.version>
         <awaitility.version>4.3.0</awaitility.version>
-        <joda-time.version>2.14.3</joda-time.version>
+        <joda-time.version>2.15.0</joda-time.version>
         <meanbean.version>2.0.3</meanbean.version>
         <snakeyaml.version>2.7</snakeyaml.version>
         <jakarta.xml.bind-api.version>4.0.5</jakarta.xml.bind-api.version>
         <jaxb-impl.version>4.0.9</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
-        <guava.version>33.7.1-jre</guava.version>
+        <guava.version>33.7.2-jre</guava.version>
         <threetenbp.version>1.7.4</threetenbp.version>
 
         <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
