@@ -1,8 +1,10 @@
 package org.dizitart.no2.filters;
 
+import org.dizitart.no2.NitriteConfig;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.tuples.Pair;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.dizitart.no2.collection.Document.createDocument;
@@ -10,6 +12,12 @@ import static org.dizitart.no2.filters.FluentFilter.where;
 import static org.junit.Assert.*;
 
 public class ExistsFilterTest {
+    @Before
+    public void setUp() {
+        // the separator is static; other tests may leave it changed
+        new NitriteConfig().fieldSeparator(".");
+    }
+
     private static boolean apply(Filter filter, Document document) {
         return filter.apply(new Pair<>(NitriteId.newId(), document));
     }
