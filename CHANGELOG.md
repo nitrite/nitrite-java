@@ -1,4 +1,4 @@
-## Unreleased
+## Release 5.4.0 - Oct 5, 2026
 
 Eleven changes from [@brettwooldridge](https://github.com/brettwooldridge), most of them found on a production system, and one H2 workaround found while testing them. Four are data-integrity fixes, three of which can end with a store that will not reopen or a query that quietly returns the wrong rows.
 
