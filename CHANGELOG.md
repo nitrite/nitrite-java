@@ -2,6 +2,13 @@
 
 Eleven changes from [@brettwooldridge](https://github.com/brettwooldridge), most of them found on a production system, and one H2 workaround found while testing them. Four are data-integrity fixes, three of which can end with a store that will not reopen or a query that quietly returns the wrong rows.
 
+### Security Fixes
+
+- **Reading an MVStore file no longer deserializes arbitrary classes** (CWE-502, [GHSA-7w7v-2j76-mqwp](https://github.com/nitrite/nitrite-java/security/advisories/GHSA-7w7v-2j76-mqwp))
+  - Every MVStore map was opened with H2's default `ObjectDataType`, which reads stored documents, index entries and metadata back through a plain `ObjectInputStream`. A database file from an untrusted source - an uploaded backup, an imported or synced `.db` - could make an ordinary `find()` instantiate any `Serializable` class on the classpath and run its `readObject()`, so a gadget class there meant remote code execution. The allowlist added for GHSA-9297-g93h-86gg covered only the legacy v1 migration path.
+  - Maps are now opened with an `ObjectDataType` that deserializes through a JEP 290 allowlist: Nitrite's own types and JDK types (`org.dizitart.no2.**;java.**`). A process-wide `jdk.serialFilter` still applies on top. Top-level object arrays, whose elements H2 reads with its own unfiltered type, are refused; Nitrite never stores one. The on-disk format is unchanged.
+  - **Documents holding values of other `Serializable` classes now fail to read** unless those classes are allowed with the new `MVStoreModuleBuilder.allowedClasses(...)`, which takes JEP 290 patterns, e.g. `allowedClasses("com.example.model.**")`.
+
 ### Issue Fixes
 
 - **MVStore's chunk retention and versions-to-keep are left at H2's defaults** ([#1301](https://github.com/nitrite/nitrite-java/pull/1301), [#1303](https://github.com/nitrite/nitrite-java/pull/1303))

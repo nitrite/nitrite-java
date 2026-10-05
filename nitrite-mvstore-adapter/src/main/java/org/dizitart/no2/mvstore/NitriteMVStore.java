@@ -24,6 +24,7 @@ import static org.h2.mvstore.DataUtils.ERROR_READING_FAILED;
 import static org.h2.mvstore.DataUtils.ERROR_SERIALIZATION;
 import static org.h2.mvstore.DataUtils.ERROR_WRITING_FAILED;
 
+import java.io.ObjectInputFilter;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,6 +61,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     private final Map<String, NitriteMap<?, ?>> nitriteMapRegistry;
     private final Map<String, NitriteRTree<?, ?>> nitriteRTreeMapRegistry;
     private volatile boolean autoCommitPending;
+    private ObjectInputFilter serialFilter;
 
     public NitriteMVStore() {
         super();
@@ -73,6 +75,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         // right after the very first map is created (see enableAutoCommitIfPending()),
         // so the background writer never races with bootstrapping a brand new store
         this.autoCommitPending = getStoreConfig().autoCommit();
+        this.serialFilter = FilteredObjectDataType.createFilter(getStoreConfig().allowedClasses());
         this.mvStore = MVStoreUtils.openOrCreate(getStoreConfig());
         initEventBus();
         alert(StoreEvents.Opened);
@@ -191,7 +194,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     @Override
     @SuppressWarnings({"rawtypes"})
     public void removeRTree(String rTreeName) {
-        MVMap mvMap = openMVMap(rTreeName, new MVRTreeMap.Builder<>());
+        MVMap mvMap = openMVMap(rTreeName, rTreeBuilder());
         mvStore.removeMap(mvMap);
         getCatalog().remove(rTreeName);
         nitriteRTreeMapRegistry.remove(rTreeName);
@@ -201,7 +204,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <Key extends BoundingBox, Value> NitriteRTree<Key, Value> openRTree(String mapName, Class<?> keyType, Class<?> valueType) {
         return (NitriteMVRTreeMap) nitriteRTreeMapRegistry.computeIfAbsent(mapName, name -> {
-            MVRTreeMap<Value> map = (MVRTreeMap<Value>) openMVMap(name, new MVRTreeMap.Builder<>());
+            MVRTreeMap<Value> map = (MVRTreeMap<Value>) openMVMap(name, rTreeBuilder());
             return new NitriteMVRTreeMap(map, this);
         });
     }
@@ -270,11 +273,41 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
         }
     }
 
+    // Types are filled in only when h2 creates the map: h2 asserts a builder's types
+    // against those of a map already open, which may be an R-tree. h2 keeps per-map
+    // state in an ObjectDataType, so every map gets its own.
+    private MVMap.Builder<Object, Object> mapBuilder() {
+        return new MVMap.Builder<Object, Object>() {
+            @Override
+            public MVMap<Object, Object> create(MVStore store, Map<String, Object> config) {
+                if (getKeyType() == null) {
+                    setKeyType(new FilteredObjectDataType(serialFilter));
+                }
+                if (getValueType() == null) {
+                    setValueType(new FilteredObjectDataType(serialFilter));
+                }
+                return super.create(store, config);
+            }
+        };
+    }
+
+    private MVRTreeMap.Builder<Object> rTreeBuilder() {
+        return new MVRTreeMap.Builder<Object>() {
+            @Override
+            public MVRTreeMap<Object> create(MVStore store, Map<String, Object> config) {
+                if (getValueType() == null) {
+                    setValueType(new FilteredObjectDataType(serialFilter));
+                }
+                return super.create(store, config);
+            }
+        };
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     private MVMap openMVMap(String mapName, MVMap.MapBuilder builder) {
         Exception exception = null;
         try {
-            MVMap.MapBuilder mapBuilder = builder == null ? new MVMap.Builder<>() : builder;
+            MVMap.MapBuilder mapBuilder = builder == null ? mapBuilder() : builder;
             long version = mvStore.getCurrentVersion();
 
             while (version >= 0) {

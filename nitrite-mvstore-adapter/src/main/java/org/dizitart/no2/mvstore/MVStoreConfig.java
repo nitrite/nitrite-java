@@ -133,6 +133,12 @@ public class MVStoreConfig implements StoreConfig {
     @Setter(AccessLevel.PACKAGE)
     private Integer versionsToKeep;
 
+    /**
+     * Extra JEP 290 patterns of classes allowed to be deserialized from the store.
+     */
+    @Setter(AccessLevel.PACKAGE)
+    private String allowedClasses;
+
     MVStoreConfig() {
         eventListeners = new HashSet<>();
     }
@@ -165,6 +171,7 @@ public class MVStoreConfig implements StoreConfig {
         config.retentionTime(retentionTime);
         config.versionsToKeep(versionsToKeep);
         config.fileStore(fileStore);
+        config.allowedClasses(allowedClasses);
         return config;
     }
 }

@@ -123,6 +123,14 @@ public class MVStoreModuleBuilder {
     private FileStore<?> fileStore;
 
     /**
+     * Extra JEP 290 patterns (for example {@code com.example.model.**}) of
+     * classes allowed to be deserialized from the store, besides nitrite's own
+     * and JDK types. Needed only when documents hold values of other
+     * {@link java.io.Serializable} classes.
+     */
+    private String allowedClasses;
+
+    /**
      * How long MVStore keeps a chunk after its last live page is gone, in milliseconds, before
      * its blocks may be reused. {@code null} (the default) leaves H2's own default of 45 seconds.
      * <p>
@@ -213,6 +221,7 @@ public class MVStoreModuleBuilder {
         dbConfig.retentionTime(retentionTime());
         dbConfig.versionsToKeep(versionsToKeep());
         dbConfig.fileStore(fileStore());
+        dbConfig.allowedClasses(allowedClasses());
         dbConfig.eventListeners(eventListeners());
 
         module.setStoreConfig(dbConfig);
