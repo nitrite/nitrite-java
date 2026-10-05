@@ -136,6 +136,7 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
         nitriteMapRegistry.clear();
         nitriteRTreeMapRegistry.clear();
+        VersionUsage.releaseAll(mvStore);
 
         if (getStoreConfig().autoCompact()) {
             compactAndClose();

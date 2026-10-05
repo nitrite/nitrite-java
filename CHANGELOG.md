@@ -58,6 +58,10 @@ Eleven changes from [@brettwooldridge](https://github.com/brettwooldridge), most
   - Measured by rebuilding a 146 MB store of 46,926 entries at each setting: **93,781 pages at depth 13** with `16`; **36,096 pages at depth 12** with MVStore's own persistent-store default of 16 KB; **13,327 pages at depth 6** with 64 KB, the largest value that survives H2's `(cacheSize / cacheConcurrency) >> 4` clamp.
   - Existing files are unaffected until their pages are rewritten; there is nothing to migrate.
 
+- **Closing an MVStore no longer trips H2's version assertion over an iterator opened on a dropped map**
+  - Since 5.3.0 every iterator registers an MVStore version for its lifetime, and a map's `close()` or `drop()` releases the versions of its iterators. An iterator opened through a wrapper that was *already* closed or dropped - which a transaction rolling back a dropped collection, and a migration renaming one, both do - was out of reach of every map the store still knew, so only the garbage collector released it. A store closed before that happened failed under `-ea` with `AssertionError: 0 != 1` from `MVStore.closeStore`, and without assertions closed with an older version still pinned.
+  - The store now releases every version still outstanding before it closes. The reproduction is `DroppedMapIteratorOnCloseTest`.
+
 ### Performance
 
 - **An update that leaves an indexed value unchanged no longer rewrites the index** ([#1297](https://github.com/nitrite/nitrite-java/pull/1297))
