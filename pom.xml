@@ -58,11 +58,11 @@
         <jasypt.version>1.9.3</jasypt.version>
         <h2.version>2.5.252</h2.version>
         <rocksdb.version>10.2.1</rocksdb.version>
-        <kryo5.version>5.7.0</kryo5.version>
+        <kryo5.version>5.7.1</kryo5.version>
         <jts.version>1.20.0</jts.version>
-        <commons-codec.version>1.22.1</commons-codec.version>
+        <commons-codec.version>1.23.0</commons-codec.version>
         <commons-io.version>2.22.0</commons-io.version>
-        <kotlin.version>2.4.20</kotlin.version>
+        <kotlin.version>2.4.21</kotlin.version>
         <kotlinx-serialization.version>1.11.0</kotlinx-serialization.version>
         <kotlinx-datetime.version>0.8.0-0.6.x-compat</kotlinx-datetime.version>
         <lombok.version>1.18.48</lombok.version>
@@ -79,7 +79,7 @@
         <jaxb-impl.version>4.0.9</jaxb-impl.version>
         <javafaker.version>1.0.2</javafaker.version>
         <guava.version>33.7.2-jre</guava.version>
-        <threetenbp.version>1.7.4</threetenbp.version>
+        <threetenbp.version>1.7.5</threetenbp.version>
 
         <!-- Error Prone version > 2.31.0 can't run on JDK 11. see https://errorprone.info/docs/installation -->
         <error-prone.version>2.31.0</error-prone.version>
