@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.dizitart.no2.common.util.StringUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 import org.dizitart.no2.index.BoundingBox;
 import org.dizitart.no2.store.AbstractNitriteStore;
 import org.dizitart.no2.store.NitriteMap;
@@ -318,6 +319,13 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
                     enableAutoCommitIfPending();
                     return map;
                 } catch (MVStoreException me) {
+                    SerialFilterRejectedException rejection = findRejection(me);
+                    if (rejection != null) {
+                        // the data is intact, only not allowed to be read; rolling back to
+                        // an earlier version would discard committed data and hide the cause
+                        throw new NitriteSecurityException("Unable to open map " + mapName + ": "
+                            + rejection.getMessage(), rejection);
+                    }
                     if (version == 0) {
                         throw me;
                     }
@@ -335,10 +343,21 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
                     exception = me;
                 }
             }
+        } catch (NitriteSecurityException e) {
+            throw e;
         } catch (Exception e) {
             exception = e;
         }
 
         throw new NitriteIOException("Unable to open map " + mapName, exception);
+    }
+
+    private static SerialFilterRejectedException findRejection(Throwable error) {
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            if (t instanceof SerialFilterRejectedException) {
+                return (SerialFilterRejectedException) t;
+            }
+        }
+        return null;
     }
 }

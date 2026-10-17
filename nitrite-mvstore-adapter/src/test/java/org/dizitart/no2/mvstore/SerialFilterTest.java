@@ -65,6 +65,37 @@ public class SerialFilterTest {
     }
 
     @Test
+    public void rejectionNamesClassAndKeepsData() {
+        try (Nitrite db = open(null)) {
+            db.getCollection("notes").insert(Document.createDocument("payload", new EvilGadget()));
+        }
+
+        try (Nitrite db = open(null)) {
+            db.getCollection("notes").find().toList();
+            fail("expected the gadget to be rejected");
+        } catch (Exception expected) {
+            String message = messages(expected);
+            assertTrue(message, message.contains(EvilGadget.class.getName()));
+            assertTrue(message, message.contains("allowedClasses"));
+        }
+
+        // a rejected class is not corruption: the store must not have been rolled back
+        try (Nitrite db = open("com.evil.*")) {
+            NitriteCollection notes = db.getCollection("notes");
+            assertEquals(1, notes.size());
+            assertTrue(notes.find().firstOrNull().get("payload") instanceof EvilGadget);
+        }
+    }
+
+    private static String messages(Throwable error) {
+        StringBuilder builder = new StringBuilder();
+        for (Throwable t = error; t != null; t = t.getCause()) {
+            builder.append(t.getMessage()).append('\n');
+        }
+        return builder.toString();
+    }
+
+    @Test
     public void allowsConfiguredClasses() {
         try (Nitrite db = open(null)) {
             db.getCollection("notes").insert(Document.createDocument("payload", new EvilGadget()));

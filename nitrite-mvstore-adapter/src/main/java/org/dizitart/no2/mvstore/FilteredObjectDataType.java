@@ -40,7 +40,9 @@ class FilteredObjectDataType extends ObjectDataType {
     private static final int TYPE_SERIALIZED_OBJECT = 19;
     private static final int LAST_PRIMITIVE_CLASS_ID = 7;
 
-    private static final String DEFAULT_ALLOWED = "org.dizitart.no2.**;java.**";
+    // kotlin.collections covers the serializable kotlin stdlib collections (EmptyList,
+    // EmptySet, EmptyMap, builders) stored by kotlin apps through emptyList() and friends
+    private static final String DEFAULT_ALLOWED = "org.dizitart.no2.**;java.**;kotlin.collections.**";
 
     private final ObjectInputFilter filter;
 
@@ -49,7 +51,7 @@ class FilteredObjectDataType extends ObjectDataType {
     }
 
     /**
-     * Builds the filter allowing nitrite's own and JDK types, plus the given
+     * Builds the filter allowing nitrite's own, JDK and kotlin collection types, plus the given
      * JEP 290 patterns; a process-wide filter, if set, can still reject.
      */
     static ObjectInputFilter createFilter(String allowedClasses) {
@@ -78,19 +80,61 @@ class FilteredObjectDataType extends ObjectDataType {
             // ObjectDataType; nitrite never stores one, so refuse it
             int classId = buff.get(buff.position() + 1);
             if (classId < 0 || classId > LAST_PRIMITIVE_CLASS_ID) {
-                throw DataUtils.newMVStoreException(ERROR_SERIALIZATION,
-                    "Object arrays are not allowed in a nitrite map");
+                throw new SerialFilterRejectedException("Object arrays are not allowed in a nitrite map");
             }
         }
         return super.read(buff);
     }
 
     private Object readFiltered(byte[] data) {
+        RejectionRecorder recorder = new RejectionRecorder(filter);
         try (ObjectInputStream in = new ObjectInputStream(new ByteArrayInputStream(data))) {
-            in.setObjectInputFilter(filter);
+            in.setObjectInputFilter(recorder);
             return in.readObject();
         } catch (Exception e) {
+            if (recorder.rejected) {
+                throw new SerialFilterRejectedException(rejectionMessage(recorder.rejectedClass), e);
+            }
             throw DataUtils.newMVStoreException(ERROR_SERIALIZATION, "Could not deserialize {0}", e, e);
+        }
+    }
+
+    private static String rejectionMessage(Class<?> rejectedClass) {
+        if (rejectedClass == null) {
+            return "A stored object exceeds the limits of the deserialization filter";
+        }
+        while (rejectedClass.isArray()) {
+            rejectedClass = rejectedClass.getComponentType();
+        }
+        String className = rejectedClass.getName();
+        String packageName = rejectedClass.getPackage() == null ? "" : rejectedClass.getPackage().getName();
+        String example = packageName.isEmpty() ? className : packageName + ".**";
+        return "Class " + className + " is not allowed to be deserialized from the database. "
+            + "If it is trusted, allow it with MVStoreModuleBuilder.allowedClasses(...), "
+            + "e.g. allowedClasses(\"" + example + "\")";
+    }
+
+    /**
+     * Delegates to the configured filter and remembers what it rejected, so the
+     * resulting error can name the class instead of a bare "filter status: REJECTED".
+     */
+    private static class RejectionRecorder implements ObjectInputFilter {
+        private final ObjectInputFilter delegate;
+        private boolean rejected;
+        private Class<?> rejectedClass;
+
+        RejectionRecorder(ObjectInputFilter delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public Status checkInput(FilterInfo info) {
+            Status status = delegate.checkInput(info);
+            if (status == Status.REJECTED && !rejected) {
+                rejected = true;
+                rejectedClass = info.serialClass();
+            }
+            return status;
         }
     }
 }
