@@ -1,10 +1,14 @@
-## Unreleased
+## Release 5.4.1 - Oct 17, 2026
 
 ### Issue Fixes
 
 - **Kotlin stdlib collections are readable again after upgrading to 5.4.0** ([#1330](https://github.com/nitrite/nitrite-java/issues/1330))
   - The MVStore deserialization allowlist added in 5.4.0 covered only `org.dizitart.no2.**;java.**`, so a document written by a Kotlin app holding `emptyList()`, `emptySet()` or `emptyMap()` - stored as `kotlin.collections.EmptyList`, `EmptySet` and `EmptyMap` - could no longer be read. `kotlin.collections.**` is now allowed by default, in the store filter and in the v1 migration filter.
   - **A class refused by the filter is no longer treated as file corruption.** `NitriteMVStore.openMVMap` used to roll the store back one version per failed attempt, discarding committed data and ending in `Chunk N not found`, which hid the real cause. It now fails at once with a `NitriteSecurityException` that names the rejected class and points to `MVStoreModuleBuilder.allowedClasses(...)`, and leaves the file untouched.
+  - Thanks to [@DarkAtra](https://github.com/DarkAtra) for the report and the fix ([#1331](https://github.com/nitrite/nitrite-java/pull/1331)).
+- **Closing an MVStore database no longer fails intermittently with `AssertionError: 0 != 1`** (Windows CI, `TransactionTest.testRollbackDropCollection`)
+  - H2 drops a released version only if `deregisterVersionUsage()` gets the store lock with `tryLock()`. When the background writer held the lock, the drop was skipped, `oldestVersionToKeep` stayed behind, and H2's close-time assertion `oldestVersionToKeep == currentVersion` failed. The 5.4.0 fix released every outstanding version but could still lose that race.
+  - `NitriteMVStore.close()` now stops the background writer before it releases the outstanding versions, then forces one uncontended drop.
 
 ## Release 5.4.0 - Oct 5, 2026
 
