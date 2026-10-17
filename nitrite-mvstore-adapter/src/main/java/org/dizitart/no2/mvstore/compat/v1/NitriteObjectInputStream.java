@@ -36,12 +36,12 @@ public class NitriteObjectInputStream extends ObjectInputStream {
 
     /**
      * Allowlist filter for the legacy v1 migration path (CWE-502). Only Nitrite's
-     * own (compat) types and standard JDK types may be deserialized; any other
-     * class - e.g. a third-party gadget on the classpath - is rejected. See
-     * GHSA-9297-g93h-86gg.
+     * own (compat) types, standard JDK types and kotlin stdlib collections may be
+     * deserialized; any other class - e.g. a third-party gadget on the classpath -
+     * is rejected. See GHSA-9297-g93h-86gg.
      */
     static final ObjectInputFilter SERIAL_FILTER = ObjectInputFilter.Config.createFilter(
-        "maxdepth=32;org.dizitart.no2.**;java.**;!*");
+        "maxdepth=32;org.dizitart.no2.**;java.**;kotlin.collections.**;!*");
 
     static {
         migrationMap.put("org.dizitart.no2.Security$UserCredential", Compat.UserCredential.class);

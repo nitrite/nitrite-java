@@ -1,3 +1,11 @@
+## Unreleased
+
+### Issue Fixes
+
+- **Kotlin stdlib collections are readable again after upgrading to 5.4.0** ([#1330](https://github.com/nitrite/nitrite-java/issues/1330))
+  - The MVStore deserialization allowlist added in 5.4.0 covered only `org.dizitart.no2.**;java.**`, so a document written by a Kotlin app holding `emptyList()`, `emptySet()` or `emptyMap()` - stored as `kotlin.collections.EmptyList`, `EmptySet` and `EmptyMap` - could no longer be read. `kotlin.collections.**` is now allowed by default, in the store filter and in the v1 migration filter.
+  - **A class refused by the filter is no longer treated as file corruption.** `NitriteMVStore.openMVMap` used to roll the store back one version per failed attempt, discarding committed data and ending in `Chunk N not found`, which hid the real cause. It now fails at once with a `NitriteSecurityException` that names the rejected class and points to `MVStoreModuleBuilder.allowedClasses(...)`, and leaves the file untouched.
+
 ## Release 5.4.0 - Oct 5, 2026
 
 Eleven changes from [@brettwooldridge](https://github.com/brettwooldridge), most of them found on a production system, and one H2 workaround found while testing them. Four are data-integrity fixes, three of which can end with a store that will not reopen or a query that quietly returns the wrong rows.

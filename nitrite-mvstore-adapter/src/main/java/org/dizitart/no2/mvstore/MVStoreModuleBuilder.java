@@ -124,8 +124,9 @@ public class MVStoreModuleBuilder {
 
     /**
      * Extra JEP 290 patterns (for example {@code com.example.model.**}) of
-     * classes allowed to be deserialized from the store, besides nitrite's own
-     * and JDK types. Needed only when documents hold values of other
+     * classes allowed to be deserialized from the store, besides nitrite's own,
+     * JDK and kotlin collection ({@code kotlin.collections.**}) types. Needed
+     * only when documents hold values of other
      * {@link java.io.Serializable} classes.
      */
     private String allowedClasses;
