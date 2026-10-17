@@ -3,6 +3,7 @@ package org.dizitart.nitrite.test;
 import org.dizitart.nitrite.test.repository.PersonEntityConverter;
 import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.mvstore.MVStoreModule;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,7 @@ public class DatabaseTestUtils {
         return setupDatabase(null);
     }
 
-    public static Nitrite setupDatabase(final URL template) throws IOException {
+    public static Nitrite setupDatabase(@Nullable final URL template) throws IOException {
 
         final Path databasePath = getRandomDatabasePath();
 
@@ -37,8 +38,14 @@ public class DatabaseTestUtils {
             }
         }
 
+        return openDatabase(databasePath, null);
+    }
+
+    public static Nitrite openDatabase(final Path databasePath, @Nullable final String allowedClasses) {
+
         final MVStoreModule mvStoreModule = MVStoreModule.withConfig()
             .filePath(databasePath.toFile())
+            .allowedClasses(allowedClasses)
             .build();
 
         return Nitrite.builder()
