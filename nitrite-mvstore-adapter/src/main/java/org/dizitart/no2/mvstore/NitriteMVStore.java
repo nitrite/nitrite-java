@@ -137,6 +137,9 @@ public class NitriteMVStore extends AbstractNitriteStore<MVStoreConfig> {
 
         nitriteMapRegistry.clear();
         nitriteRTreeMapRegistry.clear();
+        // stop the background writer first: while it holds the store lock, a released
+        // version is not dropped and H2 then refuses to close (oldestVersionToKeep assertion)
+        mvStore.setAutoCommitDelay(0);
         VersionUsage.releaseAll(mvStore);
 
         if (getStoreConfig().autoCompact()) {

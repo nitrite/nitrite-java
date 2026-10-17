@@ -63,6 +63,10 @@ class VersionUsage {
                 usage.release();
             }
         }
+        // H2 drops released versions only when deregisterVersionUsage() wins the store lock; one
+        // that lost it to another thread left oldestVersionToKeep behind. Register and release a
+        // usage of the current version so the drop runs once more, now uncontended.
+        mvStore.deregisterVersionUsage(mvStore.registerVersionUsage());
     }
 
     boolean isReleased() {

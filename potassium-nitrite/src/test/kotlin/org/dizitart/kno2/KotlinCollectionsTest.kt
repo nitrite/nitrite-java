@@ -59,6 +59,5 @@ class KotlinCollectionsTest : BaseTest() {
             assertEquals(emptyMap<String, Any>(), doc["emptyMap"])
             assertEquals(listOf<Collection<Any>>(emptyList(), emptySet()), doc["nested"])
         }
-        db!!.close()
     }
 }
