@@ -22,6 +22,7 @@ import com.esotericsoftware.kryo.kryo5.io.Output;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.IndexEntryKey;
 
@@ -243,7 +244,7 @@ public class IndexEntryKeySerializer extends KryoKeySerializer<IndexEntryKey> {
     }
 
     private Object javaDeserialize(byte[] bytes) {
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes))) {
+        try (ObjectInputStream ois = ObjectUtils.createFilteredInputStream(new ByteArrayInputStream(bytes), null)) {
             return ois.readObject();
         } catch (Exception e) {
             throw new NitriteIOException("Failed to decode index key value", e);

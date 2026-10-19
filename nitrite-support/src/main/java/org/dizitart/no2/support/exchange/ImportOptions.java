@@ -38,4 +38,15 @@ public class ImportOptions {
      * This is an optional field. If not specified, a default one will be created.
      */
     private JsonMapper jsonMapper;
+
+    /**
+     * Extra ';'-separated patterns ({@code com.example.**}, {@code com.example.*} or a class name) of classes allowed to be deserialized from the
+     * imported file, e.g. {@code "com.example.model.**"}. Nitrite, JDK and kotlin
+     * collection types are always allowed; everything else is refused (CWE-502).
+     * <p>
+     * This is an optional field.
+     *
+     * @since 5.4.2
+     */
+    private String allowedClasses;
 }

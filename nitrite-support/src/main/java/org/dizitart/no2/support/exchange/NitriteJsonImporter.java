@@ -31,6 +31,7 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.collection.operation.IndexManager;
+import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.store.NitriteMap;
@@ -165,7 +166,7 @@ class NitriteJsonImporter {
         try {
             byte[] data = Base64.decodeBase64(encodedString);
             try (ByteArrayInputStream is = new ByteArrayInputStream(data)) {
-                try (ObjectInputStream ois = new ObjectInputStream(is)) {
+                try (ObjectInputStream ois = ObjectUtils.createFilteredInputStream(is, options.getAllowedClasses())) {
                     return type.cast(ois.readObject());
                 }
             }
