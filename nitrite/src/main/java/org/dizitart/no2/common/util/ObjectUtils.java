@@ -303,16 +303,11 @@ public class ObjectUtils {
      * @since 5.4.2
      */
     public static ObjectInputStream createFilteredInputStream(InputStream in, String allowedClasses) throws IOException {
-        String patterns = "org.dizitart.no2.**;java.**;kotlin.collections.**"
-            + (allowedClasses == null || allowedClasses.isEmpty() ? "" : ";" + allowedClasses);
         return new ObjectInputStream(in) {
             @Override
             protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                String name = desc.getName();
-                // "[[Lcom.foo.Bar;" -> "com.foo.Bar"; primitive arrays ("[B") are always fine
-                String element = name.replaceFirst("^\\[+L(.*);$", "$1");
-                if (!element.startsWith("[") && !isAllowed(element, patterns)) {
-                    throw new InvalidClassException(name, "Class is not allowed to be deserialized");
+                if (!isClassAllowed(desc.getName(), allowedClasses)) {
+                    throw new InvalidClassException(desc.getName(), "Class is not allowed to be deserialized");
                 }
                 return super.resolveClass(desc);
             }
@@ -324,15 +319,33 @@ public class ObjectUtils {
         };
     }
 
-    private static boolean isAllowed(String className, String patterns) {
+    /**
+     * Checks a class name against the deserialization allowlist: nitrite, JDK and
+     * kotlin collection classes, plus the given patterns (CWE-502). Arrays are
+     * checked by their element type; primitive arrays are always allowed.
+     *
+     * @param className      the class name, as {@link Class#getName()} returns it
+     * @param allowedClasses extra ';'-separated patterns: {@code com.example.**} (package
+     *                       and sub-packages), {@code com.example.*} (package) or a class name;
+     *                       may be null
+     * @return {@code true} if the class may be deserialized
+     * @since 5.4.2
+     */
+    public static boolean isClassAllowed(String className, String allowedClasses) {
+        // "[[Lcom.foo.Bar;" -> "com.foo.Bar"; primitive arrays ("[B") stay as they are
+        String element = className.replaceFirst("^\\[+L(.*);$", "$1");
+        if (element.startsWith("[")) return true;
+
+        String patterns = "org.dizitart.no2.**;java.**;kotlin.collections.**"
+            + (allowedClasses == null || allowedClasses.isEmpty() ? "" : ";" + allowedClasses);
         for (String pattern : patterns.split(";")) {
             pattern = pattern.trim();
             if (pattern.endsWith(".**")) {
-                if (className.startsWith(pattern.substring(0, pattern.length() - 2))) return true;
+                if (element.startsWith(pattern.substring(0, pattern.length() - 2))) return true;
             } else if (pattern.endsWith(".*")) {
                 String pkg = pattern.substring(0, pattern.length() - 1);
-                if (className.startsWith(pkg) && className.indexOf('.', pkg.length()) < 0) return true;
-            } else if (className.equals(pattern)) {
+                if (element.startsWith(pkg) && element.indexOf('.', pkg.length()) < 0) return true;
+            } else if (element.equals(pattern)) {
                 return true;
             }
         }

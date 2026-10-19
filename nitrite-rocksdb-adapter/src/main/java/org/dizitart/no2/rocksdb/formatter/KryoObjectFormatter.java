@@ -21,8 +21,11 @@ import com.esotericsoftware.kryo.kryo5.Kryo;
 import com.esotericsoftware.kryo.kryo5.Serializer;
 import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
+import com.esotericsoftware.kryo.kryo5.util.DefaultClassResolver;
 import lombok.extern.slf4j.Slf4j;
+import org.dizitart.no2.common.util.ObjectUtils;
 import org.dizitart.no2.exceptions.NitriteIOException;
+import org.dizitart.no2.exceptions.NitriteSecurityException;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,10 +42,40 @@ import static org.dizitart.no2.rocksdb.Constants.DB_NULL;
  */
 @Slf4j(topic = "nitrite-rocksdb")
 public class KryoObjectFormatter implements ObjectFormatter {
-    private static final Kryo kryo = new Kryo();
+    private final Kryo kryo;
     private final Map<Class<?>, KryoKeySerializer<?>> keySerializerRegistry;
 
+    /**
+     * Creates a formatter that reads only registered classes and, by name,
+     * nitrite, JDK and kotlin collection classes (CWE-502).
+     */
     public KryoObjectFormatter() {
+        this(null);
+    }
+
+    /**
+     * Creates a formatter that also reads the given unregistered classes by name.
+     * Classes registered with {@link #registerSerializer(Class, Serializer)} are always readable.
+     *
+     * @param allowedClasses extra ';'-separated patterns: {@code com.example.**} (package
+     *                       and sub-packages), {@code com.example.*} (package) or a class name;
+     *                       may be null
+     * @since 5.4.2
+     */
+    public KryoObjectFormatter(String allowedClasses) {
+        // a class stored by name in the file is checked before it is loaded, so a crafted
+        // database cannot make kryo instantiate an arbitrary class on the classpath
+        this.kryo = new Kryo(new DefaultClassResolver() {
+            @Override
+            protected Class<?> getTypeByName(String className) {
+                if (!ObjectUtils.isClassAllowed(className, allowedClasses)) {
+                    throw new NitriteSecurityException("Class " + className + " is not allowed to be "
+                        + "deserialized from the database. If it is trusted, allow it with "
+                        + "new KryoObjectFormatter(\"" + className + "\") or register a serializer for it");
+                }
+                return super.getTypeByName(className);
+            }
+        }, null);
         this.keySerializerRegistry = new HashMap<>();
         kryo.setRegistrationRequired(false);
         registerInternalSerializers();

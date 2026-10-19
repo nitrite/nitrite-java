@@ -6,6 +6,10 @@
   - `NitriteJsonImporter` Base64-decoded the keys, documents and index descriptors of an exchange JSON file and read them through a plain `ObjectInputStream`. An attacker-supplied file could make `Importer.importFrom(...)` run the `readObject()` of any `Serializable` gadget class on the classpath. The filters added for GHSA-9297-g93h-86gg and GHSA-7w7v-2j76-mqwp covered only the MVStore adapter.
   - The importer, and the RocksDB adapter's index-key decoder (its last `ObjectInputStream`), now read through `ObjectUtils.createFilteredInputStream`, which resolves only Nitrite's own, JDK and `kotlin.collections` types. It checks classes in `resolveClass`, so it works on Android too.
   - **Exchange files holding values of other `Serializable` classes now fail to import** unless those classes are allowed with the new `ImportOptions.setAllowedClasses(...)`, e.g. `setAllowedClasses("com.example.model.**")`.
+- **Reading a RocksDB file no longer instantiates arbitrary classes** (CWE-502, [GHSA-q86x-r2q3-vf4p](https://github.com/nitrite/nitrite-java/security/advisories/GHSA-q86x-r2q3-vf4p))
+  - `KryoObjectFormatter` ran Kryo with `setRegistrationRequired(false)`, so a crafted database file could name any class on the classpath and Kryo would load it, instantiate it and set its fields, a known route to gadget chains.
+  - Classes registered with `registerSerializer(...)` are read as before. A class stored by name must now be a Nitrite, JDK or `kotlin.collections` type, or match the patterns given to the new `KryoObjectFormatter(String allowedClasses)`, e.g. `new KryoObjectFormatter("com.example.model.**")`, passed to `RocksDBModuleBuilder.objectFormatter(...)`. Anything else fails with a `NitriteSecurityException` naming the class, before the class is loaded.
+  - The Kryo instance is no longer shared by every `KryoObjectFormatter` in the JVM; serializers registered on one formatter no longer leak into others. The on-disk format is unchanged.
 
 ## Release 5.4.1 - Oct 17, 2026
 
