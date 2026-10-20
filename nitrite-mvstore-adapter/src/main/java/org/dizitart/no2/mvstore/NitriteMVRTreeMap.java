@@ -31,6 +31,7 @@ import org.dizitart.no2.store.NitriteRTree;
 import org.dizitart.no2.store.NitriteStore;
 import org.h2.mvstore.MVStore;
 import org.h2.mvstore.rtree.MVRTreeMap;
+import org.h2.mvstore.rtree.Spatial;
 
 /**
  * @author Anindya Chatterjee
@@ -53,7 +54,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
     @Override
     public void add(final Key key, final NitriteId nitriteId) {
         if (nitriteId != null) {
-            final MVSpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
+            final Spatial spatialKey = getKey(key, nitriteId.getIdValue());
             final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
                 mvMap.add(spatialKey, key);
@@ -66,7 +67,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
     @Override
     public void remove(final Key key, final NitriteId nitriteId) {
         if (nitriteId != null) {
-            final MVSpatialKey spatialKey = getKey(key, nitriteId.getIdValue());
+            final Spatial spatialKey = getKey(key, nitriteId.getIdValue());
             final MVStore.TxCounter txCounter = mvStore.registerVersionUsage();
             try {
                 mvMap.remove(spatialKey);
@@ -78,13 +79,13 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
 
     @Override
     public RecordStream<NitriteId> findIntersectingKeys(final Key key) {
-        final MVSpatialKey spatialKey = getKey(key, 0L);
+        final Spatial spatialKey = getKey(key, 0L);
         return getRecordStream(() -> mvMap.findIntersectingKeys(spatialKey));
     }
 
     @Override
     public RecordStream<NitriteId> findContainedKeys(final Key key) {
-        final MVSpatialKey spatialKey = getKey(key, 0L);
+        final Spatial spatialKey = getKey(key, 0L);
         return getRecordStream(() -> mvMap.findContainedKeys(spatialKey));
     }
 
@@ -179,7 +180,7 @@ class NitriteMVRTreeMap<Key extends BoundingBox, Value> implements NitriteRTree<
             }
             ensureOpen();
             try {
-                final MVSpatialKey next = (MVSpatialKey) treeCursor.next();
+                final Spatial next = treeCursor.next();
                 if (next == null) {
                     exhausted = true;
                     cleanable.clean();

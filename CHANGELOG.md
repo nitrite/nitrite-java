@@ -1,3 +1,12 @@
+## Unreleased
+
+### Issue Fixes
+
+- Fix MVStore spatial-index queries, updates and removals after reopening a file. H2 reconstructs
+  persisted R-tree keys as its own `Spatial` implementation. Cursors and bounds comparisons now
+  accept that implementation instead of casting every key to `MVSpatialKey`. The on-disk format
+  and public method signatures are unchanged.
+
 ## Release 5.4.2 - Oct 19, 2026
 
 ### Security Fixes

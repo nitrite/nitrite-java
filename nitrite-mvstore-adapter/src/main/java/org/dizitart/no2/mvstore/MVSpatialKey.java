@@ -40,6 +40,19 @@ public class MVSpatialKey extends SpatialKey implements Spatial {
 
     @Override
     public boolean equalsIgnoringId(Spatial o) {
-        return Arrays.equals(minMax, ((MVSpatialKey)o).minMax);
+        if (o instanceof MVSpatialKey) {
+            return Arrays.equals(minMax, ((MVSpatialKey) o).minMax);
+        }
+        // Persisted keys are reconstructed by H2 as its own Spatial implementation.
+        if (isNull() || o.isNull()) {
+            return isNull() && o.isNull();
+        }
+        for (int dimension = 0; dimension < minMax.length / 2; dimension++) {
+            if (Float.compare(min(dimension), o.min(dimension)) != 0
+                || Float.compare(max(dimension), o.max(dimension)) != 0) {
+                return false;
+            }
+        }
+        return true;
     }
 }
