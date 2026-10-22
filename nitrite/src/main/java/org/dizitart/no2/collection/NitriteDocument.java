@@ -561,6 +561,17 @@ class NitriteDocument extends LinkedHashMap<String, Object> implements Document 
                 Arrays.copyOfRange(remainingPath, 1, remainingPath.length));
         }
 
+        if (object instanceof Map) {
+            // a plain map (e.g. a document created from a deserialized map) is scanned like a document
+            String key = remainingPath[0];
+            if (isNullOrEmpty(key)) {
+                throw new ValidationException("Invalid key provided");
+            }
+
+            return recursiveGet(((Map<?, ?>) object).get(key),
+                Arrays.copyOfRange(remainingPath, 1, remainingPath.length));
+        }
+
         if (object.getClass().isArray()) {
             // if the current level value is an array
 

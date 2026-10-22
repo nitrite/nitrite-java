@@ -16,6 +16,8 @@
 - **Spatial indexes now work after reopening an MVStore file** ([#1334](https://github.com/nitrite/nitrite-java/pull/1334))
   - H2 reads persisted R-tree keys back as its own `Spatial` implementation, so queries, updates and removals on a reopened spatial index failed with a `ClassCastException` from `DefaultSpatial` to `MVSpatialKey`. Cursors and bounds comparisons now accept any `Spatial`. The on-disk format and public method signatures are unchanged.
   - Thanks to [@sfkamath](https://github.com/sfkamath) for the report and the fix.
+- **Filters on nested fields now match documents built from plain maps** ([#1335](https://github.com/nitrite/nitrite-java/issues/1335))
+  - `Document.createDocument(Map)` keeps nested objects as plain `Map`s (as deserialized JSON does), but embedded-field lookup only descended into `Document` values. So `get("address.city")` returned `null` and `where("address.city").eq(...)` never matched. Lookup now descends into any `Map` value.
 
 ## Release 5.4.1 - Oct 17, 2026
 
