@@ -1,4 +1,4 @@
-## Release 5.4.2 - Oct 19, 2026
+## Release 5.4.2 - Unreleased
 
 ### Security Fixes
 
