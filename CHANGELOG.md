@@ -1,12 +1,3 @@
-## Unreleased
-
-### Issue Fixes
-
-- Fix MVStore spatial-index queries, updates and removals after reopening a file. H2 reconstructs
-  persisted R-tree keys as its own `Spatial` implementation. Cursors and bounds comparisons now
-  accept that implementation instead of casting every key to `MVSpatialKey`. The on-disk format
-  and public method signatures are unchanged.
-
 ## Release 5.4.2 - Oct 19, 2026
 
 ### Security Fixes
@@ -19,6 +10,12 @@
   - `KryoObjectFormatter` ran Kryo with `setRegistrationRequired(false)`, so a crafted database file could name any class on the classpath and Kryo would load it, instantiate it and set its fields, a known route to gadget chains.
   - Classes registered with `registerSerializer(...)` are read as before. A class stored by name must now be a Nitrite, JDK or `kotlin.collections` type, or match the patterns given to the new `KryoObjectFormatter(String allowedClasses)`, e.g. `new KryoObjectFormatter("com.example.model.**")`, passed to `RocksDBModuleBuilder.objectFormatter(...)`. Anything else fails with a `NitriteSecurityException` naming the class, before the class is loaded.
   - The Kryo instance is no longer shared by every `KryoObjectFormatter` in the JVM; serializers registered on one formatter no longer leak into others. The on-disk format is unchanged.
+
+### Issue Fixes
+
+- **Spatial indexes now work after reopening an MVStore file** ([#1334](https://github.com/nitrite/nitrite-java/pull/1334))
+  - H2 reads persisted R-tree keys back as its own `Spatial` implementation, so queries, updates and removals on a reopened spatial index failed with a `ClassCastException` from `DefaultSpatial` to `MVSpatialKey`. Cursors and bounds comparisons now accept any `Spatial`. The on-disk format and public method signatures are unchanged.
+  - Thanks to [@sfkamath](https://github.com/sfkamath) for the report and the fix.
 
 ## Release 5.4.1 - Oct 17, 2026
 
