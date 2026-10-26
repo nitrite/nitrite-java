@@ -53,7 +53,7 @@ jobs:
           PGP_KEY_PASSWORD: ${{ secrets.PGP_KEY_PASSWORD }}
 
       - name: maven-settings-action
-        uses: s4u/maven-settings-action@v4.0.0
+        uses: s4u/maven-settings-action@v4.1.0
         with:
           servers: |
             [
