@@ -4,7 +4,7 @@
 [![CodeQL](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml/badge.svg?branch=main)](https://github.com/nitrite/nitrite-java/actions/workflows/codeql-analysis.yml)
 [![codecov](https://codecov.io/gh/nitrite/nitrite-java/branch/main/graph/badge.svg)](https://codecov.io/gh/nitrite/nitrite-java)
 [![javadoc](https://javadoc.io/badge2/org.dizitart/nitrite/javadoc.svg)](https://javadoc.io/doc/org.dizitart/nitrite) 
-[![Discussion](https://img.shields.io/badge/chat-Discussion-blueviolet)](https://github.com/orgs/nitrite/discussions)
+[![Discord](https://img.shields.io/discord/1565965879177519118?logo=discord&logoColor=white&label=Discord&color=5865F2)](https://discord.dizitart.com)
 
 <p align="center">
     <img src="assets/nitrite-logo.svg" width="256" alt="nitrite logo">
