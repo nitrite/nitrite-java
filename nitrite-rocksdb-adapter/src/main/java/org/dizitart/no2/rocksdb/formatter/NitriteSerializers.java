@@ -7,10 +7,13 @@ import com.esotericsoftware.kryo.kryo5.io.Input;
 import com.esotericsoftware.kryo.kryo5.io.Output;
 import com.esotericsoftware.kryo.kryo5.serializers.JavaSerializer;
 import com.esotericsoftware.kryo.kryo5.serializers.MapSerializer;
+import com.esotericsoftware.kryo.kryo5.util.ObjectMap;
 import org.dizitart.no2.collection.Document;
 import org.dizitart.no2.collection.NitriteId;
 import org.dizitart.no2.common.DBNull;
 import org.dizitart.no2.common.DBValue;
+import org.dizitart.no2.common.util.ObjectUtils;
+import org.dizitart.no2.exceptions.NitriteIOException;
 import org.dizitart.no2.index.IndexEntryKey;
 import org.dizitart.no2.common.Fields;
 import org.dizitart.no2.common.meta.Attributes;
@@ -21,6 +24,7 @@ import org.dizitart.no2.index.IndexDescriptor;
 import org.dizitart.no2.index.IndexMeta;
 import org.dizitart.no2.store.UserCredential;
 
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -224,6 +228,28 @@ public class NitriteSerializers {
         }
     }
 
+    /**
+     * {@link JavaSerializer} whose read side only resolves allowlisted classes (CWE-502,
+     * GHSA-463g-rx95-c9fp). The wire format is unchanged.
+     */
+    static class FilteredJavaSerializer extends JavaSerializer {
+        @Override
+        public Object read(Kryo kryo, Input input, Class type) {
+            try {
+                // like JavaSerializer: one stream per kryo graph, since write shares one too
+                ObjectMap graphContext = kryo.getGraphContext();
+                ObjectInputStream ois = (ObjectInputStream) graphContext.get(this);
+                if (ois == null) {
+                    ois = ObjectUtils.createFilteredInputStream(input, null);
+                    graphContext.put(this, ois);
+                }
+                return ois.readObject();
+            } catch (Exception e) {
+                throw new NitriteIOException("Failed to deserialize " + type.getName(), e);
+            }
+        }
+    }
+
     public static void registerAll(KryoObjectFormatter kryoObjectFormatter) {
         kryoObjectFormatter.registerSerializer(NitriteId.class, new NitriteIdSerializer());
         kryoObjectFormatter.registerSerializer(Pair.class, new PairSerializer());
@@ -233,12 +259,12 @@ public class NitriteSerializers {
         kryoObjectFormatter.registerSerializer(UserCredential.class, new UserCredentialSerializer());
         kryoObjectFormatter.registerSerializer(Attributes.class, new AttributesSerializer());
         kryoObjectFormatter.registerSerializer(Fields.class, new FieldsSerializer());
-        kryoObjectFormatter.registerSerializer(DBValue.class, new JavaSerializer());
+        kryoObjectFormatter.registerSerializer(DBValue.class, new FilteredJavaSerializer());
         // DBNull must use the same self-describing serializer as DBValue: it appears as an
         // index key for null values and as the navigation probe for range scans. The java
         // serialized class name also makes it sort before every DBValue key bytewise,
         // preserving the null-first index order.
-        kryoObjectFormatter.registerSerializer(DBNull.class, new JavaSerializer());
+        kryoObjectFormatter.registerSerializer(DBNull.class, new FilteredJavaSerializer());
         kryoObjectFormatter.registerSerializer(IndexEntryKey.class, new IndexEntryKeySerializer());
         kryoObjectFormatter.registerSerializer(BoundingBox.class, new BoundingBoxSerializer());
         kryoObjectFormatter.registerSerializer(SpatialKey.class, new SpatialKeySerializer());
